@@ -92,6 +92,12 @@ docs_test_matrix: List[IntegrationTestFixture] = []
 
 local_tests = [
     IntegrationTestFixture(
+        name="how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
         name="how_to_validate_multiple_batches_within_single_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -177,19 +183,6 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="auto_initializing_expect_column_mean_to_be_between",
-        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="is_expectation_auto_initializing",
-        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(

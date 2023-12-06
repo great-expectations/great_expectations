@@ -101,11 +101,6 @@ config = {
     "packages": find_packages(
         exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
     ),
-    "entry_points": {
-        "console_scripts": [
-            "great_expectations=great_expectations.cli:main",
-        ]
-    },
     "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,

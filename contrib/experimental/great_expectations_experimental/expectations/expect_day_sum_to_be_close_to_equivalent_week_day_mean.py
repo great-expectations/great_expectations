@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
@@ -57,7 +57,6 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
     # Default values
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "threshold": 0.25,
@@ -181,12 +180,6 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
     )
 
     library_metadata = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        # Setting up a configuration
-        super().validate_configuration(configuration)
 
     def _validate(
         self,

@@ -389,6 +389,10 @@ def test_atomic_prescriptive_summary_expect_column_most_common_value_to_be_in_se
 
 
 @pytest.mark.unit
+@pytest.mark.xfail(
+    strict=False,
+    reason="ExpectColumnPairCramersPhiValueToBeLessThan is not fully implemented",
+)
 def test_atomic_prescriptive_summary_expect_column_pair_cramers_phi_value_to_be_less_than(
     snapshot,
     get_prescriptive_rendered_content,

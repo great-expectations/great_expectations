@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union
 from ruamel.yaml import YAML
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
-from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
@@ -84,7 +84,6 @@ class _YamlConfigValidator:
     ]
     TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
         "Checkpoint",
-        "SimpleCheckpoint",
     ]
     TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
         "RuleBasedProfiler",
@@ -454,10 +453,6 @@ class _YamlConfigValidator:
 
         if class_name == "Checkpoint":
             instantiated_class = Checkpoint(
-                data_context=self._data_context, **checkpoint_class_args
-            )
-        elif class_name == "SimpleCheckpoint":
-            instantiated_class = SimpleCheckpoint(
                 data_context=self._data_context, **checkpoint_class_args
             )
         else:

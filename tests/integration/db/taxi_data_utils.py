@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, List
 import sqlalchemy as sa
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -109,7 +108,7 @@ def _execute_taxi_splitting_test_cases(
 
         # 1. Setup
 
-        context: DataContext = gx.get_context()
+        context = gx.get_context()
 
         datasource_name: str = "test_datasource"
         data_connector_name: str = "test_data_connector"

@@ -12,48 +12,49 @@ from great_expectations.datasource.data_connector.util import normalize_director
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
-    from great_expectations.core import ExpectationSuite
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
         BatchRequest,
+        DataAsset,
         SparkFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
+    from great_expectations.validator.validator import Validator
 
 
-@pytest.fixture
-def base_dir(tmpdir) -> Iterator[pathlib.Path]:
-    dir_path = tmpdir / "data"
+@pytest.fixture(scope="module")
+def base_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+    dir_path = tmp_path / "data"
     dir_path.mkdir()
     df = pd.DataFrame(
         {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
     )
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
-    yield dir_path
+    return dir_path
 
 
-@pytest.fixture
-def updated_base_dir(tmpdir) -> Iterator[pathlib.Path]:
-    dir_path = tmpdir / "other_data"
+@pytest.fixture(scope="module")
+def updated_base_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+    dir_path = tmp_path / "other_data"
     dir_path.mkdir()
-    df = pd.DataFrame(
-        {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
-    )
-    csv_path = dir_path / "data.csv"
-    df.to_csv(csv_path)
-    yield dir_path
+    return dir_path
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
+    datasource_name: str,
     base_dir: pathlib.Path,
     updated_base_dir: pathlib.Path,
-) -> Iterator[SparkFilesystemDatasource]:
-    datasource_name = f"i{uuid.uuid4().hex}"
+) -> SparkFilesystemDatasource:
+    """Test Adding and Updating the Datasource associated with this module.
+    Note: There is no need to test Get or Delete Datasource.
+    Those assertions can be found in the datasource_name fixture."""
     original_base_dir = base_dir
 
     datasource = context.sources.add_spark_filesystem(
@@ -75,50 +76,47 @@ def datasource(
     assert (
         datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
-
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
-    assert (
-        datasource.base_directory == original_base_dir
-    ), "The datasource was not updated in the previous method call."
-
-    yield datasource
-    # PP-692: this doesn't work due to a bug
-    # calling delete_datasource() will fail with:
-    # Datasource is used by Checkpoint <LONG HASH>
-    # This is confirmed to be the default Checkpoint,
-    # but error message is not specific enough to know without additional inspection
-    # context.delete_datasource(datasource_name=datasource_name)
+    return datasource
 
 
-@pytest.fixture
-def data_asset(datasource: SparkFilesystemDatasource) -> Iterator[CSVAsset]:
-    asset_name = f"i{uuid.uuid4().hex}"
-
-    _ = datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
-    csv_asset = datasource.get_asset(asset_name=asset_name)
-
-    yield csv_asset
-    # PP-692: this doesn't work due to a bug
-    # calling delete_asset() will fail with:
-    # Cannot perform action because Asset is used by Checkpoint:
-    # end-to-end_pandas_filesystem_asset <SHORT HASH> - Default Checkpoint
-    # datasource.delete_asset(asset_name=asset_name)
+def csv_asset(
+    datasource: SparkFilesystemDatasource,
+    asset_name: str,
+) -> CSVAsset:
+    return datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
 
 
-@pytest.fixture
-def batch_request(data_asset: CSVAsset) -> BatchRequest:
+@pytest.fixture(scope="module", params=[csv_asset])
+def data_asset(
+    datasource: SparkFilesystemDatasource,
+    get_missing_data_asset_error_type: type[Exception],
+    request,
+) -> Iterator[DataAsset]:
+    """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
+    asset_name = f"da_{uuid.uuid4().hex}"
+    yield request.param(
+        datasource=datasource,
+        asset_name=asset_name,
+    )
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(get_missing_data_asset_error_type):
+        datasource.get_asset(asset_name=asset_name)
+
+
+@pytest.fixture(scope="module")
+def batch_request(data_asset: DataAsset) -> BatchRequest:
+    """Build a BatchRequest depending on the types of Data Assets tested in the module."""
     return data_asset.build_batch_request()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
-    data_asset: CSVAsset,
-) -> Iterator[ExpectationSuite]:
-    expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
-    expectation_suite = context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-    )
+    expectation_suite: ExpectationSuite,
+) -> ExpectationSuite:
+    """Add Expectations for the Data Assets defined in this module.
+    Note: There is no need to test Expectation Suite CRUD.
+    Those assertions can be found in the expectation_suite fixture."""
     expectation_suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
@@ -128,77 +126,30 @@ def expectation_suite(
             },
         )
     )
-    _ = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
-    expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    yield expectation_suite
-    context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
-
-
-@pytest.fixture
-def checkpoint(
-    context: CloudDataContext,
-    data_asset: CSVAsset,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
-) -> Iterator[Checkpoint]:
-    checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
-    _ = context.add_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
-                "batch_request": batch_request,
-            },
-            {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
-                "batch_request": batch_request,
-            },
-        ],
-    )
-    _ = context.add_or_update_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
-                "batch_request": batch_request,
-            }
-        ],
-    )
-    checkpoint = context.get_checkpoint(name=checkpoint_name)
-    yield checkpoint
-    # PP-691: this is a bug
-    # you should only have to pass name
-    context.delete_checkpoint(
-        # name=checkpoint_name,
-        id=checkpoint.ge_cloud_id,
-    )
+    return expectation_suite
 
 
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
+    validator: Validator,
 ):
-    expectation_count = len(expectation_suite.expectations)
-    expectation_suite_name = expectation_suite.expectation_suite_name
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
+    """Test interactive evaluation of the Data Assets in this module using an existing Validator.
+    Note: There is no need to test getting a Validator or using Validator.head(). That is already
+    tested in the validator fixture.
+    """
+    expectation_validation_result: ExpectationValidationResult = (
+        validator.expect_column_mean_to_be_between(
+            column="name",
+            min_value=0,
+            max_value=4,
+        )
     )
-
-    print(validator.head())
-    validator.expect_column_mean_to_be_between(column="name", min_value=0, max_value=4)
-    validator.save_expectation_suite()
-    expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    assert len(expectation_suite.expectations) == expectation_count + 1
+    assert expectation_validation_result.success
 
 
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
-    checkpoint_result = checkpoint.run()
-    assert checkpoint_result.success is True
+    """Test running a Checkpoint that was created using the entities defined in this module."""
+    checkpoint_result: CheckpointResult = checkpoint.run()
+    assert checkpoint_result.success

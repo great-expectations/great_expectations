@@ -6,6 +6,7 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations import project_manager
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -13,7 +14,7 @@ from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store import ExpectationsStore, ProfilerStore
+from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.store.datasource_store import DatasourceStore
 from great_expectations.data_context.types.base import (
@@ -27,7 +28,6 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
 class DatasourceStoreSpy(DatasourceStore):
@@ -45,29 +45,6 @@ class ExpectationsStoreSpy(ExpectationsStore):
     def __init__(self) -> None:
         self.save_count = 0
         super().__init__()
-
-    def add(self, key, value, **kwargs):
-        ret = super().add(key=key, value=value, **kwargs)
-        self.save_count += 1
-        return ret
-
-    def update(self, key, value, **kwargs):
-        ret = super().update(key=key, value=value, **kwargs)
-        self.save_count += 1
-        return ret
-
-    def add_or_update(self, key, value, **kwargs):
-        ret = super().add_or_update(key=key, value=value, **kwargs)
-        self.save_count += 1
-        return ret
-
-
-class ProfilerStoreSpy(ProfilerStore):
-    STORE_NAME = "profiler_store"
-
-    def __init__(self) -> None:
-        self.save_count = 0
-        super().__init__(ProfilerStoreSpy.STORE_NAME)
 
     def add(self, key, value, **kwargs):
         ret = super().add(key=key, value=value, **kwargs)
@@ -121,7 +98,6 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         self.save_count = 0
         self._datasource_store = DatasourceStoreSpy()
         self._expectations_store = ExpectationsStoreSpy()
-        self._profiler_store = ProfilerStoreSpy()
         self._checkpoint_store = CheckpointStoreSpy()
 
     @property
@@ -131,10 +107,6 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     @property
     def expectations_store(self):
         return self._expectations_store
-
-    @property
-    def profiler_store(self):
-        return self._profiler_store
 
     @property
     def checkpoint_store(self):
@@ -499,70 +471,31 @@ def test_add_or_update_datasource_conflicting_args_failure(
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "kwargs,expected_suite",
-    [
-        pytest.param(
-            {"expectation_suite_name": "my_new_suite"},
-            ExpectationSuite(expectation_suite_name="my_new_suite"),
-            id="only name",
-        ),
-        pytest.param(
-            {
-                "expectations": [
-                    ExpectationConfiguration(
-                        expectation_type="expect_column_values_to_be_in_set",
-                        kwargs={"column": "x", "value_set": [1, 2, 4]},
-                    ),
-                ],
-                "expectation_suite_name": "default",
-                "meta": {"great_expectations_version": "0.15.44"},
-            },
-            ExpectationSuite(
-                expectations=[
-                    ExpectationConfiguration(
-                        expectation_type="expect_column_values_to_be_in_set",
-                        kwargs={"column": "x", "value_set": [1, 2, 4]},
-                    ),
-                ],
-                expectation_suite_name="default",
-                meta={"great_expectations_version": "0.15.44"},
-            ),
-            id="misc args",
-        ),
-        pytest.param(
-            {
-                "expectation_suite": ExpectationSuite(
-                    expectations=[
-                        ExpectationConfiguration(
-                            expectation_type="expect_column_values_to_be_in_set",
-                            kwargs={"column": "x", "value_set": [1, 2, 4]},
-                        ),
-                    ],
-                    expectation_suite_name="default",
-                    meta={"great_expectations_version": "0.15.44"},
-                ),
-            },
-            ExpectationSuite(
-                expectations=[
-                    ExpectationConfiguration(
-                        expectation_type="expect_column_values_to_be_in_set",
-                        kwargs={"column": "x", "value_set": [1, 2, 4]},
-                    ),
-                ],
-                expectation_suite_name="default",
-                meta={"great_expectations_version": "0.15.44"},
-            ),
-            id="existing suite",
-        ),
-    ],
-)
 def test_add_expectation_suite_success(
     in_memory_data_context: EphemeralDataContextSpy,
-    kwargs: dict,
-    expected_suite: ExpectationSuite,
 ):
     context = in_memory_data_context
+    project_manager.set_project(context)
+    kwargs = {
+        "expectations": [
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={"column": "x", "value_set": [1, 2, 4]},
+            ),
+        ],
+        "expectation_suite_name": "default",
+        "meta": {"great_expectations_version": "0.15.44"},
+    }
+    expected_suite = ExpectationSuite(
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={"column": "x", "value_set": [1, 2, 4]},
+            ),
+        ],
+        expectation_suite_name="default",
+        meta={"great_expectations_version": "0.15.44"},
+    )
 
     suite = context.add_expectation_suite(**kwargs)
 
@@ -588,22 +521,27 @@ def test_add_expectation_suite_namespace_collision_failure(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "suite,suite_name",
+    "use_suite,suite_name",
     [
         pytest.param(
-            ExpectationSuite(expectation_suite_name="default"),
+            True,
             "default",
             id="both suite and suite_name",
         ),
-        pytest.param(None, None, id="neither suite nor suite_name"),
+        pytest.param(False, None, id="neither suite nor suite_name"),
     ],
 )
 def test_add_expectation_suite_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
-    suite: ExpectationSuite | None,
+    use_suite: bool,
     suite_name: str | None,
 ):
     context = in_memory_data_context
+    project_manager.set_project(context)
+    if use_suite:
+        suite = ExpectationSuite(expectation_suite_name="default")
+    else:
+        suite = None
 
     with pytest.raises(TypeError):
         context.add_expectation_suite(
@@ -624,7 +562,7 @@ def test_update_expectation_suite_success(
 
     assert context.expectations_store.save_count == 1
 
-    suite.expectations = [
+    suite.expectation_configurations = [
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
             kwargs={"column": "x", "value_set": [1, 2, 4]},
@@ -632,7 +570,7 @@ def test_update_expectation_suite_success(
     ]
     updated_suite = context.update_expectation_suite(suite)
 
-    assert updated_suite.expectations == suite.expectations
+    assert updated_suite.expectation_configurations == suite.expectation_configurations
     assert context.expectations_store.save_count == 2
 
 
@@ -655,42 +593,50 @@ def test_update_expectation_suite_failure(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "kwargs",
+    "kwargs_index",
     [
         pytest.param(
-            {
-                "expectation_suite_name": "default",
-                "expectations": [
-                    ExpectationConfiguration(
-                        expectation_type="expect_column_values_to_be_in_set",
-                        kwargs={"column": "x", "value_set": [1, 2, 4]},
-                    ),
-                ],
-                "meta": {"great_expectations_version": "0.15.44"},
-            },
+            0,
             id="individual args",
         ),
         pytest.param(
-            {
-                "expectation_suite": ExpectationSuite(
-                    expectations=[
-                        ExpectationConfiguration(
-                            expectation_type="expect_column_values_to_be_in_set",
-                            kwargs={"column": "x", "value_set": [1, 2, 4]},
-                        ),
-                    ],
-                    expectation_suite_name="default",
-                    meta={"great_expectations_version": "0.15.44"},
-                ),
-            },
+            1,
             id="existing suite",
         ),
     ],
 )
 def test_add_or_update_expectation_suite_adds_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    kwargs: dict,
+    kwargs_index: int,
 ):
+    project_manager.set_project(in_memory_data_context)
+
+    kwargs_lookup = [
+        # can't instantiate Suite in parameters since it requires a data context
+        {
+            "expectation_suite_name": "default",
+            "expectations": [
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_set",
+                    kwargs={"column": "x", "value_set": [1, 2, 4]},
+                ),
+            ],
+            "meta": {"great_expectations_version": "0.15.44"},
+        },
+        {
+            "expectation_suite": ExpectationSuite(
+                expectations=[
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_in_set",
+                        kwargs={"column": "x", "value_set": [1, 2, 4]},
+                    ),
+                ],
+                expectation_suite_name="default",
+                meta={"great_expectations_version": "0.15.44"},
+            ),
+        },
+    ]
+    kwargs = kwargs_lookup[kwargs_index]
     context = in_memory_data_context
 
     expectation_suite_name = "default"
@@ -705,7 +651,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
     suite = context.add_or_update_expectation_suite(**kwargs)
 
     assert suite.expectation_suite_name == expectation_suite_name
-    assert suite.expectations == expectations
+    assert suite.expectation_configurations == expectations
     assert suite.meta == meta
     assert context.expectations_store.save_count == 1
 
@@ -734,6 +680,7 @@ def test_add_or_update_expectation_suite_updates_successfully(
     new_expectations: list[ExpectationConfiguration],
 ):
     context = in_memory_data_context
+    project_manager.set_project(context)
 
     suite_name = "default"
     suite = context.add_expectation_suite(
@@ -752,27 +699,33 @@ def test_add_or_update_expectation_suite_updates_successfully(
         expectation_suite_name=suite_name, expectations=new_expectations
     )
 
-    assert suite.expectations == new_expectations
+    assert suite.expectation_configurations == new_expectations
     assert context.expectations_store.save_count == 2
 
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "suite,suite_name",
+    "use_suite,suite_name",
     [
         pytest.param(
-            ExpectationSuite(expectation_suite_name="default"),
+            True,
             "default",
             id="both suite and suite_name",
         ),
-        pytest.param(None, None, id="neither suite nor suite_name"),
+        pytest.param(False, None, id="neither suite nor suite_name"),
     ],
 )
 def test_add_or_update_expectation_suite_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
-    suite: ExpectationSuite | None,
+    use_suite: ExpectationSuite | None,
     suite_name: str | None,
 ):
+    project_manager.set_project(in_memory_data_context)
+
+    if use_suite:
+        suite = ExpectationSuite(expectation_suite_name="default")
+    else:
+        suite = None
     context = in_memory_data_context
 
     with pytest.raises((TypeError, AssertionError)):
@@ -781,247 +734,6 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
         )
 
     assert context.expectations_store.save_count == 0
-
-
-@pytest.mark.unit
-def test_add_profiler_with_existing_profiler(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler_rules: dict,
-):
-    context = in_memory_data_context
-
-    name = "my_rbp"
-    profiler = RuleBasedProfiler(
-        name=name,
-        config_version=1.0,
-        rules=profiler_rules,
-        data_context=context,
-    )
-
-    persisted_profiler = context.add_profiler(profiler=profiler)
-
-    assert profiler.name == persisted_profiler.name
-    assert profiler.config_version == persisted_profiler.config_version
-    assert len(profiler.rules) == len(persisted_profiler.rules)
-    assert context.profiler_store.save_count == 1
-
-
-@pytest.mark.unit
-def test_add_profiler_namespace_collision(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler_rules: dict,
-):
-    context = in_memory_data_context
-
-    name = "my_rbp"
-    profiler = RuleBasedProfiler(
-        name=name,
-        config_version=1.0,
-        rules=profiler_rules,
-        data_context=context,
-    )
-
-    _ = context.add_profiler(profiler=profiler)
-    assert context.profiler_store.save_count == 1
-
-    with pytest.raises(gx_exceptions.ProfilerError):
-        _ = context.add_profiler(profiler=profiler)
-
-    assert context.profiler_store.save_count == 1
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "profiler, profiler_name, error_message",
-    [
-        pytest.param(
-            mock.MagicMock(),
-            "my_rbp",
-            "an existing 'profiler' or individual constructor arguments (but not both)",
-            id="both profiler and profiler_name",
-        ),
-        pytest.param(
-            None,
-            None,
-            "an existing 'profiler' or individual constructor arguments",
-            id="neither profiler nor profiler_name",
-        ),
-    ],
-)
-def test_add_profiler_conflicting_args_failure(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler: mock.MagicMock | None,
-    profiler_name: str | None,
-    error_message: str,
-):
-    context = in_memory_data_context
-
-    with pytest.raises(TypeError) as e:
-        context.add_profiler(profiler=profiler, name=profiler_name)
-
-    assert error_message in str(e.value)
-    assert context.profiler_store.save_count == 0
-
-
-@pytest.mark.unit
-def test_update_profiler_success(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler_rules: dict,
-):
-    context = in_memory_data_context
-
-    name = "my_rbp"
-    config_version = 1.0
-    rules = profiler_rules
-
-    profiler = context.add_profiler(
-        name=name, config_version=config_version, rules=rules
-    )
-
-    assert context.profiler_store.save_count == 1
-
-    profiler.rules = []
-    updated_profiler = context.update_profiler(profiler)
-
-    assert updated_profiler.rules == profiler.rules
-    assert context.profiler_store.save_count == 2
-
-
-@pytest.mark.unit
-def test_update_profiler_failure(
-    in_memory_data_context: EphemeralDataContextSpy, profiler_rules: dict
-):
-    context = in_memory_data_context
-
-    name = "my_rbp"
-    profiler = RuleBasedProfiler(
-        name=name,
-        config_version=1.0,
-        rules=profiler_rules,
-        data_context=context,
-    )
-
-    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
-        _ = context.update_profiler(profiler)
-
-    assert f"Could not find an existing Profiler named {name}" in str(e.value)
-
-
-@pytest.mark.unit
-def test_add_or_update_profiler_adds_successfully(
-    in_memory_data_context: EphemeralDataContextSpy, profiler_rules: dict
-):
-    context = in_memory_data_context
-
-    name = "my_rbp"
-    config_version = 1.0
-    rules = profiler_rules
-
-    profiler = context.add_or_update_profiler(
-        name=name, config_version=config_version, rules=rules
-    )
-
-    config = profiler.config
-
-    assert config.name == name
-    assert config.config_version == config_version
-    assert len(config.rules) == len(rules) and config.rules.keys() == rules.keys()
-    assert context.profiler_store.save_count == 1
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "new_rules",
-    [
-        pytest.param(
-            {},
-            id="empty rules",
-        ),
-        pytest.param(
-            {
-                "my_new_rule": {
-                    "variables": {},
-                    "domain_builder": {
-                        "class_name": "TableDomainBuilder",
-                    },
-                    "parameter_builders": [
-                        {
-                            "class_name": "MetricMultiBatchParameterBuilder",
-                            "name": "my_parameter",
-                            "metric_name": "my_metric",
-                        },
-                    ],
-                    "expectation_configuration_builders": [
-                        {
-                            "class_name": "DefaultExpectationConfigurationBuilder",
-                            "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                            "column_A": "$domain.domain_kwargs.column_A",
-                            "column_B": "$domain.domain_kwargs.column_B",
-                        },
-                    ],
-                },
-            },
-            id="new rule",
-        ),
-    ],
-)
-def test_add_or_update_profiler_updates_successfully(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler_rules: dict,
-    new_rules: dict,
-):
-    context = in_memory_data_context
-
-    name = "my_rbp"
-    config_version = 1.0
-    rules = profiler_rules
-
-    profiler = context.add_profiler(
-        name=name, config_version=config_version, rules=rules
-    )
-
-    assert context.profiler_store.save_count == 1
-
-    profiler = context.add_or_update_profiler(
-        name=name, rules=new_rules, config_version=config_version
-    )
-
-    # Rules get converted to a list within the RBP constructor
-    assert sorted(rule.name for rule in profiler.rules) == sorted(new_rules.keys())
-    assert context.profiler_store.save_count == 2
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "profiler, profiler_name, error_message",
-    [
-        pytest.param(
-            mock.MagicMock(),  # Only care about the presence of the value (no need to construct a full RBP obj)
-            "my_rbp",
-            "an existing 'profiler' or individual constructor arguments (but not both)",
-            id="both profiler and profiler_name",
-        ),
-        pytest.param(
-            None,
-            None,
-            "an existing 'profiler' or individual constructor arguments",
-            id="neither profiler nor profiler_name",
-        ),
-    ],
-)
-def test_add_or_update_profiler_conflicting_args_failure(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler: mock.MagicMock | None,
-    profiler_name: str | None,
-    error_message: str,
-):
-    context = in_memory_data_context
-
-    with pytest.raises(TypeError) as e:
-        context.add_or_update_profiler(profiler=profiler, name=profiler_name)
-
-    assert error_message in str(e.value)
-    assert context.profiler_store.save_count == 0
 
 
 @pytest.mark.unit

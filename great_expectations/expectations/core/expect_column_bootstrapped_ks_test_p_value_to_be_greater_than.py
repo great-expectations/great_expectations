@@ -3,10 +3,12 @@ from great_expectations.expectations.expectation import (
 )
 
 
+# NOTE: This Expectation is incomplete and not ready for use.
+#       It should remain unexported until it meets the requirements set by our V1 API.
 class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(BatchExpectation):
-    # This expectation is a stub - it needs migration to the modular expectation API
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",
@@ -21,7 +23,6 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(BatchExpectation):
 
     metric_dependencies = tuple()
     success_keys = ()
-    default_kwarg_values = {}
     args_keys = (
         "column",
         "distribution",

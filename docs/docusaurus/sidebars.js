@@ -73,6 +73,11 @@ module.exports = {
               label: 'Set the environment variables and start the GX Cloud agent',
               href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
+            {
+              type: 'link',
+              label: 'Secure your GX API Data Source connection strings',
+              href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
+            },
           ]
         },
         {
@@ -101,6 +106,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Add an Expectation to a Data Asset column',
+              href: '/docs/cloud/data_assets/manage_data_assets#add-an-expectation-to-a-data-asset-column',
+            },
+            {
+              type: 'link',
               label: 'Add a Data Asset to an Existing Data Source',
               href: '/docs/cloud/data_assets/manage_data_assets#add-a-data-asset-to-an-existing-data-source',
             },
@@ -121,6 +131,11 @@ module.exports = {
           label: 'Manage Expectations',
           link: { type: 'doc', id: 'cloud/expectations/manage_expectations' },
           items: [
+            {
+              type: 'link',
+              label: 'Available Expectations',
+              href: '/docs/cloud/expectations/manage_expectations#available-expectations',
+            },
             {
               type: 'link',
               label: 'Add an Expectation',
@@ -152,6 +167,11 @@ module.exports = {
               type: 'link',
               label: 'Create an empty Expectation Suite ',
               href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Edit an Expectation Suite name',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#edit-an-expectation-suite-name',
             },
             {
               type: 'link',
@@ -196,6 +216,11 @@ module.exports = {
               type: 'link',
               label: 'Run a Checkpoint',
               href: '/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Checkpoint name',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-name',
             },
             {
               type: 'link',
@@ -318,7 +343,6 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             'guides/expectations/how_to_edit_an_existing_expectationsuite',
-            'guides/expectations/how_to_use_auto_initializing_expectations',
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
             'guides/expectations/advanced/identify_failed_rows_expectations',
@@ -395,7 +419,6 @@ module.exports = {
             'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action',
             'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
           ]
         },
@@ -480,7 +503,6 @@ module.exports = {
             'terms/batch_request',
             'terms/custom_expectation',
             'terms/checkpoint',
-            'terms/cli',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
@@ -525,6 +547,7 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
+    { type: 'doc', id: 'troubleshooting' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
     'get_support',
     'contributing/contributing',

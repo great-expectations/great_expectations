@@ -17,7 +17,6 @@ from typing import (
     Callable,
     Dict,
     List,
-    NamedTuple,
     Optional,
     Sequence,
     Set,
@@ -81,6 +80,9 @@ from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
     ValidationGraph,
+)
+from great_expectations.validator.validation_statistics import (
+    calc_validation_statistics,
 )
 
 logger = logging.getLogger(__name__)
@@ -155,14 +157,6 @@ class ValidationDependencies:
         return list(self.metric_configurations.values())
 
 
-class ValidationStatistics(NamedTuple):
-    evaluated_expectations: int
-    successful_expectations: int
-    unsuccessful_expectations: int
-    success_percent: float | None
-    success: bool
-
-
 @public_api
 class Validator:
     """Validator is the key object used to create Expectations, validate Expectations, and get Metrics for Expectations.
@@ -180,7 +174,6 @@ class Validator:
     """
 
     DEFAULT_RUNTIME_CONFIGURATION = {
-        "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
@@ -549,7 +542,9 @@ class Validator:
                 )
 
             try:
-                expectation = expectation_impl(configuration)
+                expectation = expectation_impl(
+                    meta=configuration.meta, **configuration.kwargs
+                )
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
@@ -557,7 +552,7 @@ class Validator:
                         expectation_config=copy.deepcopy(expectation.configuration)
                     )
                 else:
-                    validation_result = expectation.validate(
+                    validation_result = expectation.validate_(
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
@@ -1126,15 +1121,17 @@ class Validator:
                 raise InvalidExpectationConfigurationError(str(e))
 
             evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            if self.active_batch_id:
+                evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies: ValidationDependencies = (
-                expectation_impl().get_validation_dependencies(
-                    configuration=evaluated_config,
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
+            validation_dependencies: ValidationDependencies = expectation_impl(
+                **evaluated_config.kwargs
+            ).get_validation_dependencies(
+                configuration=evaluated_config,
+                execution_engine=self._execution_engine,
+                runtime_configuration=runtime_configuration,
             )
 
             try:
@@ -1331,7 +1328,6 @@ class Validator:
             Ex::
 
                 {
-                    "include_config" : True,
                     "catch_exceptions" : False,
                     "result_format" : 'BASIC'
                 }
@@ -1404,7 +1400,7 @@ class Validator:
         """
 
         expectation_suite = copy.deepcopy(self.expectation_suite)
-        expectations = expectation_suite.expectations
+        expectations = expectation_suite.expectation_configurations
 
         discards: defaultdict[str, int] = defaultdict(int)
 
@@ -1467,7 +1463,7 @@ class Validator:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.expectations = expectations
+        expectation_suite.expectation_configurations = expectations
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -1526,7 +1522,6 @@ class Validator:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
     @public_api
     @deprecated_argument(
         argument_name="run_id",
@@ -1658,7 +1653,7 @@ class Validator:
             # Group expectations by column
             columns: dict[Any, list[ExpectationConfiguration]] = {}
 
-            for expectation in expectation_suite.expectations:
+            for expectation in expectation_suite.expectation_configurations:
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,
@@ -1691,7 +1686,7 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
-            statistics = self._calc_validation_statistics(results)
+            statistics = calc_validation_statistics(results)
 
             if only_return_failures:
                 abbrev_results = []
@@ -1942,34 +1937,6 @@ class Validator:
                 runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration
-
-    @staticmethod
-    def _calc_validation_statistics(
-        validation_results: List[ExpectationValidationResult],
-    ) -> ValidationStatistics:
-        """
-        Calculate summary statistics for the validation results and
-        return ``ExpectationStatistics``.
-        """
-        # calc stats
-        evaluated_expectations = len(validation_results)
-        successful_expectations = len(
-            [exp for exp in validation_results if exp.success]
-        )
-        unsuccessful_expectations = evaluated_expectations - successful_expectations
-        success = successful_expectations == evaluated_expectations
-        try:
-            success_percent = successful_expectations / evaluated_expectations * 100
-        except ZeroDivisionError:
-            success_percent = None
-
-        return ValidationStatistics(
-            successful_expectations=successful_expectations,
-            evaluated_expectations=evaluated_expectations,
-            unsuccessful_expectations=unsuccessful_expectations,
-            success=success,
-            success_percent=success_percent,
-        )
 
     def convert_to_checkpoint_validations_list(
         self,

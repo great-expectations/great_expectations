@@ -1,11 +1,12 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -18,18 +19,6 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -67,6 +56,9 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
+    column_set: Union[list, set, EvaluationParameterDict, None]
+    exact_match: Union[bool, None]
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
@@ -82,109 +74,18 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     success_keys = (
         "column_set",
         "exact_match",
-        "auto",
-        "profiler_config",
-    )
-
-    mean_table_columns_set_match_multi_batch_parameter_builder_config = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
-            name="column_names_set_estimator",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
-        )
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        mean_table_columns_set_match_multi_batch_parameter_builder_config,
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_table_columns_to_match_set",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "expect_table_columns_to_match_set": {
-                "variables": {
-                    "exact_match": None,
-                    "success_ratio": 1.0,
-                },
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_table_columns_to_match_set",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "condition": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
-                        "column_set": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        "exact_match": f"{VARIABLES_KEY}exact_match",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
     )
 
     default_kwarg_values = {
         "column_set": None,
         "exact_match": True,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
-        "auto": False,
-        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column_set",
         "exact_match",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For this expectation it is required that:
-
-        - `column_set` has been provided.
-        - `column_set` is one of the following types: `list`, `set`, or `None`
-        - If `column_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
-        # Ensuring that a proper value has been provided
-        try:
-            assert "column_set" in configuration.kwargs, "column_set is required"
-            assert (
-                isinstance(configuration.kwargs["column_set"], (list, set, dict))
-                or configuration.kwargs["column_set"] is None
-            ), "column_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["column_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["column_set"]
-                ), 'Evaluation Parameter dict for column_set kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(

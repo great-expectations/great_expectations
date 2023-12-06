@@ -235,6 +235,23 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
+    def get_key(
+        self, suite: ExpectationSuite
+    ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
+        """Given an ExpectationSuite, build the correct key for use in the ExpectationsStore."""
+        key: GXCloudIdentifier | ExpectationSuiteIdentifier
+        if self.cloud_mode:
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                id=suite.ge_cloud_id,
+                resource_name=suite.expectation_suite_name,
+            )
+        else:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=suite.expectation_suite_name
+            )
+        return key
+
     def self_check(self, pretty_print):  # noqa: PLR0912
         return_obj = {}
 

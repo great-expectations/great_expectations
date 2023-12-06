@@ -1397,128 +1397,6 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
-class NotebookTemplateConfig(DictDot):
-    def __init__(self, file_name, template_kwargs=None) -> None:
-        self.file_name = file_name
-        if template_kwargs:
-            self.template_kwargs = template_kwargs
-        else:
-            self.template_kwargs = {}
-
-
-class NotebookTemplateConfigSchema(Schema):
-    file_name = fields.String()
-    template_kwargs = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), allow_none=True
-    )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_notebook_template_config(self, data, **kwargs):
-        return NotebookTemplateConfig(**data)
-
-
-class NotebookConfig(DictDot):
-    def __init__(  # noqa: PLR0913
-        self,
-        class_name,
-        module_name,
-        custom_templates_module=None,
-        header_markdown=None,
-        footer_markdown=None,
-        table_expectations_header_markdown=None,
-        column_expectations_header_markdown=None,
-        table_expectations_not_found_markdown=None,
-        column_expectations_not_found_markdown=None,
-        authoring_intro_markdown=None,
-        column_expectations_markdown=None,
-        header_code=None,
-        footer_code=None,
-        table_expectation_code=None,
-        column_expectation_code=None,
-    ) -> None:
-        self.class_name = class_name
-        self.module_name = module_name
-        self.custom_templates_module = custom_templates_module
-
-        self.header_markdown = header_markdown
-        self.footer_markdown = footer_markdown
-        self.table_expectations_header_markdown = table_expectations_header_markdown
-        self.column_expectations_header_markdown = column_expectations_header_markdown
-        self.table_expectations_not_found_markdown = (
-            table_expectations_not_found_markdown
-        )
-        self.column_expectations_not_found_markdown = (
-            column_expectations_not_found_markdown
-        )
-        self.authoring_intro_markdown = authoring_intro_markdown
-        self.column_expectations_markdown = column_expectations_markdown
-
-        self.header_code = header_code
-        self.footer_code = footer_code
-        self.table_expectation_code = table_expectation_code
-        self.column_expectation_code = column_expectation_code
-
-
-class NotebookConfigSchema(Schema):
-    class_name = fields.String(missing="SuiteEditNotebookRenderer")
-    module_name = fields.String(
-        missing="great_expectations.render.renderer.v3.suite_edit_notebook_renderer"
-    )
-    custom_templates_module = fields.String(allow_none=True)
-
-    header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    table_expectations_header_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectations_header_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    table_expectations_not_found_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectations_not_found_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    authoring_intro_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectations_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-
-    header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    table_expectation_code = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectation_code = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_notebook_config(self, data, **kwargs):
-        return NotebookConfig(**data)
-
-
-class NotebooksConfig(DictDot):
-    def __init__(self, suite_edit) -> None:
-        self.suite_edit = suite_edit
-
-
-class NotebooksConfigSchema(Schema):
-    # for now only suite_edit, could have other customization options for
-    # notebooks in the future
-    suite_edit = fields.Nested(NotebookConfigSchema)
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_notebooks_config(self, data, **kwargs):
-        return NotebooksConfig(**data)
-
-
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
@@ -1639,6 +1517,12 @@ class GXCloudConfig(DictDot):
 
 
 class DataContextConfigSchema(Schema):
+    batch_configs = fields.Dict(
+        keys=fields.Str(),
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
@@ -1665,7 +1549,6 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
     )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
-    notebooks = fields.Nested(NotebooksConfigSchema, allow_none=True)
     data_docs_sites = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), allow_none=True
     )
@@ -2396,6 +2279,7 @@ class DataContextConfig(BaseYamlConfig):
         - https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/
 
     Args:
+        batch_configs: (Optional[Dict]): a dictionary of batch_config dicts.
         config_version (Optional[float]): config version of this DataContext.
         datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
             DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
@@ -2427,11 +2311,9 @@ class DataContextConfig(BaseYamlConfig):
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    # TODO: <Alex>ALEX (does not work yet)</Alex>
-    # _config_schema_class = DataContextConfigSchema
-
     def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
+        batch_configs: Optional[Dict] = None,
         config_version: Optional[float] = None,
         datasources: Optional[
             Union[
@@ -2448,8 +2330,8 @@ class DataContextConfig(BaseYamlConfig):
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
+        notebooks: Optional[Any] = None,
         data_docs_sites: Optional[Dict] = None,
-        notebooks: Optional[NotebookConfig] = None,
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
@@ -2458,6 +2340,9 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
+        if notebooks:
+            warnings.warn("The `notebooks` parameter no longer supported.", UserWarning)
+
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
@@ -2484,7 +2369,8 @@ class DataContextConfig(BaseYamlConfig):
 
         self._config_version = config_version
         if datasources is None:
-            datasources = {}  # type: ignore[assignment]
+            datasources = {}
+        self.batch_configs = batch_configs or {}
         self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
@@ -2498,7 +2384,6 @@ class DataContextConfig(BaseYamlConfig):
         if validation_operators is not None:
             self.validation_operators = validation_operators
         self.stores = stores or {}
-        self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
@@ -2681,9 +2566,6 @@ class CheckpointConfigSchema(Schema):
             "profilers",
             # Next fields are used by configurators
             "site_names",
-            "slack_webhook",
-            "notify_on",
-            "notify_with",
             "ge_cloud_id",
             "expectation_suite_ge_cloud_id",
         )
@@ -2691,10 +2573,6 @@ class CheckpointConfigSchema(Schema):
 
     # if keys have None value, remove in post_dump
     REMOVE_KEYS_IF_NONE = [
-        "site_names",
-        "slack_webhook",
-        "notify_on",
-        "notify_with",
         "default_validation_id",
     ]
 
@@ -2735,11 +2613,6 @@ class CheckpointConfigSchema(Schema):
     profilers = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
     )
-    # Next fields are used by configurators
-    site_names = fields.Raw(required=False, allow_none=True)
-    slack_webhook = fields.String(required=False, allow_none=True)
-    notify_on = fields.String(required=False, allow_none=True)
-    notify_with = fields.String(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @validates_schema
@@ -2806,10 +2679,6 @@ class CheckpointConfig(BaseYamlConfig):
         batches: An optional list of batches
         commented_map: The commented map
         ge_cloud_id: Your GE Cloud ID
-        site_names: The site names
-        slack_webhook: The slack webhook
-        notify_on: The notify on
-        notify_with: The notify with
         expectation_suite_ge_cloud_id: Your expectation suite
     """
 
@@ -2831,11 +2700,6 @@ class CheckpointConfig(BaseYamlConfig):
         profilers: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
-        # the following four args are used by SimpleCheckpoint
-        site_names: Optional[Union[list, str]] = None,
-        slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = None,
-        notify_with: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> None:
         self._name = name
@@ -2852,11 +2716,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._default_validation_id = default_validation_id
         self._profilers = profilers or []
         self._ge_cloud_id = ge_cloud_id
-        # the following attributes are used by SimpleCheckpoint
-        self._site_names = site_names
-        self._slack_webhook = slack_webhook
-        self._notify_on = notify_on
-        self._notify_with = notify_with
 
         self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name or "Checkpoint"
@@ -2983,38 +2842,6 @@ class CheckpointConfig(BaseYamlConfig):
     @action_list.setter
     def action_list(self, value: Sequence[ActionDict]) -> None:
         self._action_list = value
-
-    @property
-    def site_names(self) -> List[str]:
-        return self._site_names  # type: ignore[return-value]
-
-    @site_names.setter
-    def site_names(self, value: List[str]) -> None:
-        self._site_names = value
-
-    @property
-    def slack_webhook(self) -> str:
-        return self._slack_webhook  # type: ignore[return-value]
-
-    @slack_webhook.setter
-    def slack_webhook(self, value: str) -> None:
-        self._slack_webhook = value
-
-    @property
-    def notify_on(self) -> str:
-        return self._notify_on  # type: ignore[return-value]
-
-    @notify_on.setter
-    def notify_on(self, value: str) -> None:
-        self._notify_on = value
-
-    @property
-    def notify_with(self) -> str:
-        return self._notify_with  # type: ignore[return-value]
-
-    @notify_with.setter
-    def notify_with(self, value: str) -> None:
-        self._notify_with = value
 
     @property
     def evaluation_parameters(self) -> dict:
@@ -3223,7 +3050,6 @@ assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
-notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

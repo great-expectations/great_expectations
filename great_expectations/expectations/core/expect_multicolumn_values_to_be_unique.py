@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Optional, Union
+
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -21,6 +19,10 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -66,6 +68,9 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
          Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
+
+    column_list: Union[tuple, list]
+    ignore_row_if: str = "all_values_are_missing"
 
     library_metadata = {
         "maturity": "production",

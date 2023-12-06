@@ -25,7 +25,9 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
-2. Complete the following mandatory fields:
+2. Click the **New Data Source** tab and then select **Snowflake**.
+
+3. Complete the following mandatory fields:
 
     - **Data Source name**: Enter a meaningful name for the Data Asset.
 
@@ -35,7 +37,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Account or locator**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-3. Optional. Complete the following fields:
+4. Optional. Complete the following fields:
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
  
@@ -47,13 +49,13 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Authenticator**: Enter the Snowflake database authenticator that you want to use to verify your Snowflake connection. 
 
-4. Optional. Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
+5. Optional. Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
 
-5. Optional. Clear **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+6. Optional. Clear **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
-6. Click **Continue**.
+7. Click **Continue**.
 
-7. Select **Table Asset** or **Query Asset** and complete the following fields:
+8. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
@@ -101,6 +103,34 @@ The following table lists the available Data Asset metrics.
 | **Mean**                                 | For numeric columns, the average value with the column.<br/> This is determined by dividing the sum of all values in the Data Asset by the number of values.  |
 | **Median**                                 | For numeric columns, the value in the middle of a data set.<br/> 50% of the data within the Data Asset has a value smaller or equal to the median, and 50% of the data within the Data Asset has a value that is higher or equal to the median.  |
 | **Null %**                                | The percentage of missing values in a column.             |
+
+## Add an Expectation to a Data Asset column
+
+When you create an Expectation after fetching metrics for a Data Asset, the column names and some values are autopopulated for you and this can simplify the creation of new Expectations. Data Asset Metrics can also help you determine what Expectations might be useful and how they should be configured. When you create new Expectations after fetching Data Asset Metrics, you can add them to an existing Expectation Suite, or you can create a new Expectation Suite and add the Expectations to it. 
+
+1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
+
+2. Click the **Overview** tab.
+
+3. Select one of the following options: 
+
+    - If you have not previously generated Data Asset metrics, click **Fetch Metrics**. 
+
+    - If you previously generated Data Asset metrics, click **Refresh** to refresh the metrics.
+
+4. Scroll to the end of the Data Asset Metrics list and click **Create Expectation**.
+
+5. Select one of the following options:
+
+    - To add an Expectation to a new Expectation Suite, click the **Create new Expectation Suite** tab and then enter a name for the new Expectation Suite.
+
+    - To add an Expectation to an existing Expectation Suite, click the **Add to existing Expectation Suite** tab and then select an existing Expectation Suite.
+
+6. Select an Expectation type. See [Available Expectation types](/docs/cloud/expectations/manage_expectations#available-expectation-types).
+
+7. Complete the fields in the **Create Expectation** pane.
+
+8. Click **Save** to add the Expectation, or click **Save & Add More** to add additional Expectations.
 
 
 ## Add a Data Asset to an Existing Data Source

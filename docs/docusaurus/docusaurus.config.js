@@ -25,6 +25,13 @@ module.exports = {
     ],
   ],
 
+  scripts: [
+    {
+      src: "/scripts/set-tab.js",
+      async: true,
+      defer: true,
+    },
+  ],
 
   themeConfig: {
     algolia: {
@@ -243,7 +250,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '0.18.1',
+              label: '0.18.3',
               path: ''
             }
           }

@@ -4,11 +4,12 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import DataContext
+from great_expectations import project_manager
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
@@ -20,7 +21,7 @@ from tests.core.usage_statistics.util import (
 
 @pytest.mark.filesystem
 def test_expectations_store(empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     my_store = ExpectationsStore()
 
     with pytest.raises(TypeError):
@@ -57,7 +58,7 @@ def test_expectations_store(empty_data_context):
 
 @pytest.mark.filesystem
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
 
@@ -295,3 +296,22 @@ def test_gx_cloud_response_json_to_object_dict(
     else:
         actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
         assert actual == expected
+
+
+@pytest.mark.unit
+def test_get_key_in_non_cloud_mode(empty_data_context):
+    project_manager.set_project(empty_data_context)
+    name = "test-name"
+    suite = ExpectationSuite(expectation_suite_name=name)
+    key = empty_data_context.expectations_store.get_key(suite)
+    assert isinstance(key, ExpectationSuiteIdentifier)
+
+
+@pytest.mark.unit
+def test_get_key_in_cloud_mode(empty_data_context_in_cloud_mode):
+    cloud_data_context = empty_data_context_in_cloud_mode
+    project_manager.set_project(cloud_data_context)
+    name = "test-name"
+    suite = ExpectationSuite(expectation_suite_name=name)
+    key = cloud_data_context.expectations_store.get_key(suite)
+    assert isinstance(key, GXCloudIdentifier)

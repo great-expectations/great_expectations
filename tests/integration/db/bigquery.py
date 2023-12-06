@@ -4,7 +4,6 @@ import os
 from google.cloud import bigquery
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
@@ -37,7 +36,7 @@ CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 yaml = YAMLHandler()
 
-context: DataContext = gx.get_context()
+context = gx.get_context()
 
 datasource_yaml: str = """
 name: my_bigquery_datasource
