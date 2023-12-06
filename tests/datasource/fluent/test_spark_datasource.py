@@ -172,6 +172,8 @@ def test_databricks_app_name_warning(
     )
     dataframe_asset = spark_datasource.add_dataframe_asset("my_dataframe_asset")
     batch_request = dataframe_asset.build_batch_request(dataframe=spark_df)
-    with mock.patch("great_expectations.core.util.in_databricks", return_value=True):
-        with pytest.warns(RuntimeWarning):
+    with pytest.warns(RuntimeWarning):
+        with mock.patch(
+            "great_expectations.core.util.in_databricks", return_value=True
+        ):
             _ = empty_data_context.get_validator(batch_request=batch_request)
