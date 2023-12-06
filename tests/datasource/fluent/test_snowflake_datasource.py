@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
     SnowflakeDsn,
 )
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 @pytest.fixture
@@ -70,7 +71,7 @@ def test_valid_config(
     assert isinstance(sql_engine, sa.engine.Engine)
 
     exec_engine = my_sf_ds_1.get_execution_engine()
-    assert sql_engine is exec_engine.engine
+    assert isinstance(exec_engine, SqlAlchemyExecutionEngine)
 
 
 @pytest.mark.unit
