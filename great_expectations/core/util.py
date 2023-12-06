@@ -801,7 +801,8 @@ def get_or_create_spark_session(
                 builder.config(k, v)
 
         app_name: str | None = spark_config.get("spark.app.name")
-        builder.appName(app_name)
+        if app_name:
+            builder.appName(app_name)
 
         spark_session: pyspark.SparkSession = builder.getOrCreate()
 
