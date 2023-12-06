@@ -60,7 +60,6 @@ from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    DEFAULT_RECONCILATION_DIRECTIVES,
     ReconciliationDirectives,
     ReconciliationStrategy,
 )
@@ -101,8 +100,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.expectations.expectation import Expectation
-    from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.rule_based_profiler.expectation_configuration_builder import (
         ExpectationConfigurationBuilder,
     )
@@ -422,7 +419,8 @@ class Validator:
         # )
 
         combined_dir = (
-            validator_attrs | class_expectation_impls
+            validator_attrs
+            | class_expectation_impls
             # | execution_engine_expectation_impls
         )
 
