@@ -1,9 +1,6 @@
-from __future__ import annotations
-
 import datetime
 import logging
 import uuid
-from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import Batch, BatchMarkers
@@ -11,9 +8,8 @@ from great_expectations.core.util import get_or_create_spark_session
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource.datasource import LegacyDatasource
 from great_expectations.exceptions import BatchKwargsError
-
-if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+from great_expectations.types import ClassConfig
+from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 
@@ -53,17 +49,24 @@ class SparkDFDatasource(LegacyDatasource):
         "dataset_options",
     }
 
-    @staticmethod
-    def build_configuration(
-        spark_config: Optional[dict] = None,
-        persist: bool = True,
+    @classmethod
+    def build_configuration(  # noqa: PLR0913
+        cls,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        spark_config=None,
+        force_reuse_spark_context=True,
+        persist=True,
         **kwargs,
-    ) -> dict:
+    ):
         """
-        Build a full configuration object for a datasource.
+        Build a full configuration object for a datasource, potentially including generators with defaults.
 
         Args:
+            data_asset_type: A ClassConfig dictionary
+            batch_kwargs_generators: Generator configuration dictionary
             spark_config: dictionary of key-value pairs to pass to the spark builder
+            force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
             persist: Whether to persist the Spark Dataframe or not.
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
@@ -71,21 +74,42 @@ class SparkDFDatasource(LegacyDatasource):
             A complete datasource configuration.
 
         """
-        configuration = kwargs or {}
+
+        if data_asset_type is None:
+            data_asset_type = {
+                "class_name": "SparkDFDataset",
+                "module_name": "great_expectations.dataset",
+            }
+        else:
+            data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
+
+        if spark_config is None:
+            spark_config = {}
+
+        configuration = kwargs
         configuration.update(
             {
-                "spark_config": spark_config or {},
+                "data_asset_type": data_asset_type,
+                "spark_config": spark_config,
+                "force_reuse_spark_context": force_reuse_spark_context,
                 "persist": persist,
             }
         )
+
+        if batch_kwargs_generators:
+            configuration["batch_kwargs_generators"] = batch_kwargs_generators
+
         return configuration
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
-        data_context: Optional[DataContext] = None,
-        spark_config: Optional[dict] = None,
-        persist: bool = True,
+        data_context=None,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        spark_config=None,
+        force_reuse_spark_context=True,
+        persist=True,
         **kwargs,
     ) -> None:
         """Build a new SparkDFDatasource instance.
@@ -93,24 +117,39 @@ class SparkDFDatasource(LegacyDatasource):
         Args:
             name: the name of this datasource
             data_context: the DataContext to which this datasource is connected
+            data_asset_type: ClassConfig describing the data_asset type to be constructed by this datasource
+            batch_kwargs_generators: generator configuration
             spark_config: dictionary of key-value pairs to be set on the spark session builder
+            force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
             persist: Whether to persist the Spark Dataframe or not.
             **kwargs: Additional
         """
-        configuration: dict = SparkDFDatasource.build_configuration(
+        configuration_with_defaults = SparkDFDatasource.build_configuration(
+            data_asset_type,
+            batch_kwargs_generators,
             spark_config,
+            force_reuse_spark_context,
             persist,
             **kwargs,
+        )
+        data_asset_type = configuration_with_defaults.pop("data_asset_type")
+        batch_kwargs_generators = configuration_with_defaults.pop(
+            "batch_kwargs_generators", None
         )
         super().__init__(
             name,
             data_context=data_context,
-            **configuration,
+            data_asset_type=data_asset_type,
+            batch_kwargs_generators=batch_kwargs_generators,
+            **configuration_with_defaults,
         )
 
-        self.spark: pyspark.SparkSession = get_or_create_spark_session(
+        spark = get_or_create_spark_session(
             spark_config=spark_config or {},
         )
+        self.spark = spark
+
+        self._build_generators()
 
     def process_batch_parameters(
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None

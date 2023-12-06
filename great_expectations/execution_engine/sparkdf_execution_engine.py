@@ -194,7 +194,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     ) -> None:
         self._persist = persist
 
-        self.spark = pyspark.SparkSession = get_or_create_spark_session(
+        self.spark: pyspark.SparkSession = get_or_create_spark_session(
             spark_config=spark_config,
         )
 
