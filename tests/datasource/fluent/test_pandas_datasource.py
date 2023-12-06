@@ -444,7 +444,7 @@ def test_read_dataframe(
 ):
     # validates that a dataframe object is passed
     with pytest.raises(ValueError) as exc_info:
-        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
+        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})  # type: ignore[arg-type]
 
     assert (
         'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'

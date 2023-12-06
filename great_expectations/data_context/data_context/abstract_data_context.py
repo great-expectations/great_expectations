@@ -1357,7 +1357,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
+        for datasource_name, datasource_config in self.config.datasources.items():
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(  # noqa: PLW2901
                     **datasource_config
@@ -1402,7 +1402,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             self.datasources.pop(datasource_name, None)
 
-        self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+        self.config.datasources.pop(datasource_name, None)
 
         self._save_project_config()
 
@@ -4225,7 +4225,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update
         # caches or config, but keeping existing behavior for now
         self.datasources[name] = datasource
-        self.config.datasources[name] = config  # type: ignore[index,assignment]
+        self.config.datasources[name] = config  # type: ignore[assignment]
 
         return datasource
 
