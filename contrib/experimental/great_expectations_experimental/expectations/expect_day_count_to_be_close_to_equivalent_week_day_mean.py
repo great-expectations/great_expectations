@@ -222,7 +222,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         run_date_str = self.get_success_kwargs(configuration).get("run_date")

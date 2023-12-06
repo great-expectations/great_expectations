@@ -101,7 +101,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         batch_row_count = metrics["table.row_count"]

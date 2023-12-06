@@ -44,7 +44,7 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)

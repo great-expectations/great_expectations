@@ -117,7 +117,7 @@ class ExpectColumnToHaveNoDaysMissing(ColumnAggregateExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         from datetime import datetime, timedelta

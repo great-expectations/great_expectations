@@ -502,7 +502,7 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         checksum_self, checksum_other = metrics.get("table.checksum.values")

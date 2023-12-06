@@ -98,7 +98,7 @@ class ExpectColumnValuesGeometryToOverlap(ColumnAggregateExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine=None,
     ):
         success = metrics.get("column_values.geometry_overlap").get("success")

@@ -43,7 +43,7 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         query_result = metrics.get("query.multiple_columns")

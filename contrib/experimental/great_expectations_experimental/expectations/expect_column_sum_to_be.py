@@ -53,7 +53,7 @@ class ExpectColumnSumToBe(ColumnAggregateExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         actual_value = metrics["column.sum"]

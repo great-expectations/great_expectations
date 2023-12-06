@@ -185,7 +185,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         success_kwargs = self.get_success_kwargs(configuration)

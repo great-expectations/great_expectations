@@ -442,7 +442,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         **kwargs,
     ) -> List[
         Union[

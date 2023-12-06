@@ -322,7 +322,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnAggregateExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(

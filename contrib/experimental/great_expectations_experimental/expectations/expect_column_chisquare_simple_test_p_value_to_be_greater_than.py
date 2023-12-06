@@ -115,7 +115,7 @@ class ExpectColumnChisquareSimpleTestPValueToBeGreaterThan(BatchExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ):
         threshold = configuration["kwargs"].get("p_value_threshold")
