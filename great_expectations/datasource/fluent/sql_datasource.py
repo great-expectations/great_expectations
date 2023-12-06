@@ -1094,8 +1094,15 @@ class SQLDatasource(Datasource):
         gx_execution_engin_type: Type[
             SqlAlchemyExecutionEngine
         ] = self.execution_engine_type
+
+        # connection_string could be a ConfigStr or dict in some subclasses
+        connection_string: str | None = (
+            self.connection_string if isinstance(self.connection_string, str) else None
+        )
+
         gx_exec_engine = gx_execution_engin_type(
             self.name,
+            connection_string=connection_string,
             engine=self.get_engine(),
             create_temp_table=self.create_temp_table,
             data_context=self._data_context,
