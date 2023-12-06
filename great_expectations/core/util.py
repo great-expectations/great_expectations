@@ -813,6 +813,10 @@ def get_or_create_spark_session(
             if k != "spark.app.name":
                 builder.config(k, v)
 
+        # whitelist py4j in Databricks
+        if in_databricks():
+            builder.config("spark.security.auth.whitelist.includes", "py4j")
+
         spark_session: pyspark.SparkSession = builder.getOrCreate()
 
         # in a local pyspark-shell the context config cannot be updated
