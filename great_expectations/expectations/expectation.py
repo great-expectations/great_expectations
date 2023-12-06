@@ -2107,7 +2107,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             return []
 
         validation_dependencies: ValidationDependencies = (
-            self.get_validation_dependencies(configuration=expectation_config)
+            self.get_validation_dependencies()
         )
 
         metric_name: str
