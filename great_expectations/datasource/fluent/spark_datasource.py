@@ -71,7 +71,7 @@ class _SparkDatasource(Datasource):
     force_reuse_spark_context: bool = True
     persist: bool = True
 
-    @pydantic.field_validator("force_reuse_spark_context")
+    @pydantic.validator("force_reuse_spark_context")
     @classmethod
     def _force_reuse_spark_context_deprecation_warning(cls, v: bool):
         if v is not None:
