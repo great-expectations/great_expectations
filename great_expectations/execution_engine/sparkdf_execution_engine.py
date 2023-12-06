@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
+import warnings
 from functools import reduce
 from typing import (
     Any,
@@ -203,6 +204,11 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         if "force_reuse_spark_context" in kwargs:
             kwargs.pop("force_reuse_spark_context")
+            warnings.warn(
+                "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+                "The existing Spark context will be reused as long as a new spark_config is not passed.",
+                category=RuntimeWarning,
+            )
         super().__init__(*args, **kwargs)
 
         self._config.update(
