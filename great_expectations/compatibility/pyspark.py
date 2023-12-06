@@ -80,13 +80,3 @@ try:
     from pyspark.sql.utils import AnalysisException
 except (ImportError, AttributeError):
     AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-try:
-    import py4j
-except ImportError:
-    py4j = SPARK_NOT_IMPORTED
-
-try:
-    from py4j.protocol import Py4JError
-except (ImportError, AttributeError):
-    Py4JError = SPARK_NOT_IMPORTED
