@@ -811,26 +811,22 @@ def get_or_create_spark_session(
             if k != "spark.app.name":
                 builder.config(k, v)
 
-        # spark_session: pyspark.SparkSession
-        # try:
-        #     spark_session = builder.getOrCreate()
-        # except pyspark.Py4JError:
-        #     builder.config("spark.databricks.pyspark.enablePy4JSecurity", "false")
-        #     spark_session = builder.getOrCreate()
-
-        spark_session = builder.getOrCreate()
+        spark_session: pyspark.SparkSession = builder.getOrCreate()
 
         # in a local pyspark-shell the context config cannot be updated
         # unless you stop the Spark context and re-recreate it
-        # retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
-        # stopped = False
-        # for key, value in spark_config.items():
-        #     if retrieved_spark_config.get(key) != value:
-        #         spark_session.stop()
-        #         stopped = True
-        #         break
-        # if stopped:
-        #     spark_session = builder.getOrCreate()
+        if not in_databricks():
+            retrieved_spark_config: pyspark.SparkConf = (
+                spark_session.sparkContext.getConf()
+            )
+            stopped = False
+            for key, value in spark_config.items():
+                if retrieved_spark_config.get(key) != value:
+                    spark_session.stop()
+                    stopped = True
+                    break
+            if stopped:
+                spark_session = builder.getOrCreate()
 
     except AttributeError as e:
         logger.error(
