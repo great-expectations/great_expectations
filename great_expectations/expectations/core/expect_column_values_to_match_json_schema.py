@@ -85,14 +85,6 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         "json_schema",
         "mostly",
     )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": True,
-    }
     args_keys = (
         "column",
         "json_schema",

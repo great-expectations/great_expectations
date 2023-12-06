@@ -1,7 +1,9 @@
-from typing import Dict, Optional
+from datetime import datetime
+from typing import Dict, Optional, Union
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions.exceptions import (
@@ -37,6 +39,7 @@ from great_expectations.render.util import (
 class ColumnCustomMax(ColumnAggregateMetricProvider):
     # </snippet>
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
+
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py metric_name">
     metric_name = "column.custom_max"
 
@@ -134,22 +137,16 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     ]
     # </snippet>
 
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    strict_min: bool = False
+    strict_max: bool = False
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py metric_dependencies">
     metric_dependencies = ("column.custom_max",)
     # </snippet>
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
-
-    # Default values
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "min_value": None,
-        "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "mostly": 1,
-    }
 
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config">
     def validate_configuration(

@@ -81,14 +81,6 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         "strictly",
         "mostly",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "strictly": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = ("column",)
 
     @classmethod

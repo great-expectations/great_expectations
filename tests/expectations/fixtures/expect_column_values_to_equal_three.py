@@ -24,8 +24,6 @@ from great_expectations.render.util import (
 
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     condition_metric_name = "column_values.equal_three"
-    # condition_value_keys = {}
-    # default_kwarg_values = {}
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -35,7 +33,6 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     map_metric = "column_values.equal_three"
     success_keys = ("mostly",)
-    # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
 
     def validate_configuration(self, configuration) -> None:
         pass  # no-op to make test setup easier

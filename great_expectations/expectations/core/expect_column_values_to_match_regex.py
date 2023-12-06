@@ -72,7 +72,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
 
-    regex: Union[str, EvaluationParameterDict]
+    regex: Union[str, EvaluationParameterDict] = "(?s).*"
 
     library_metadata = {
         "maturity": "production",
@@ -90,15 +90,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "regex",
         "mostly",
     )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": True,
-        "regex": "(?s).*",
-    }
     args_keys = (
         "column",
         "regex",

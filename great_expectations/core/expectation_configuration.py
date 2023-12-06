@@ -20,7 +20,6 @@ import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from typing_extensions import TypedDict
 
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
@@ -50,6 +49,7 @@ from great_expectations.types import SerializableDictDot
 if TYPE_CHECKING:
     from pyparsing import ParseResults
 
+    from great_expectations.alias_types import JSONValues
     from great_expectations.core import ExpectationValidationResult
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
@@ -1124,7 +1124,9 @@ class ExpectationConfiguration(SerializableDictDot):
                 domain_keys = expectation_kwargs_dict["domain_kwargs"]
             else:
                 domain_keys = impl.domain_keys
-                default_kwarg_values = impl.default_kwarg_values
+                default_kwarg_values = self._get_expectation_class_defaults(
+                    self.expectation_type
+                )
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", {}
@@ -1170,7 +1172,9 @@ class ExpectationConfiguration(SerializableDictDot):
                 success_keys = expectation_kwargs_dict["success_kwargs"]
             else:
                 success_keys = impl.success_keys
-                default_kwarg_values = impl.default_kwarg_values
+                default_kwarg_values = self._get_expectation_class_defaults(
+                    self.expectation_type
+                )
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", {}
@@ -1205,7 +1209,9 @@ class ExpectationConfiguration(SerializableDictDot):
                 runtime_keys = self.runtime_kwargs
             else:
                 runtime_keys = impl.runtime_keys
-                default_kwarg_values = impl.default_kwarg_values
+                default_kwarg_values = self._get_expectation_class_defaults(
+                    self.expectation_type
+                )
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", {}
@@ -1476,6 +1482,13 @@ class ExpectationConfiguration(SerializableDictDot):
 
         self.rendered_content = inline_renderer.get_rendered_content()
 
+    def _get_expectation_class_defaults(self, expectation_type: str) -> dict[str, Any]:
+        cls = get_expectation_impl(expectation_type)
+        return {
+            name: field.default if not field.required else None
+            for name, field in cls.__fields__.items()
+        }
+
 
 class ExpectationConfigurationSchema(Schema):
     expectation_type = fields.Str(
@@ -1494,11 +1507,15 @@ class ExpectationConfigurationSchema(Schema):
     )
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
-        lambda: ExpectationContextSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
+        lambda: ExpectationContextSchema,  # type: ignore[arg-type,return-value]
+        required=False,
+        allow_none=True,
     )
     rendered_content = fields.List(
         fields.Nested(
-            lambda: RenderedAtomicContentSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
+            lambda: RenderedAtomicContentSchema,  # type: ignore[arg-type,return-value]
+            required=False,
+            allow_none=True,
         )
     )
 

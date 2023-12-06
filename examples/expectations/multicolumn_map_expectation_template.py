@@ -70,9 +70,6 @@ class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
         "mostly",
     )
 
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:

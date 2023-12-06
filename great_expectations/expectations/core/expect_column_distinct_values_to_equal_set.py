@@ -75,16 +75,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
-
-    # Default values
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "value_set": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",
