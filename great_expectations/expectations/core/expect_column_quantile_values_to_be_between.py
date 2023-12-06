@@ -600,11 +600,12 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
+
         quantile_vals = metrics.get("column.quantile_values")
         quantile_ranges = configuration.kwargs.get("quantile_ranges")
         quantiles = quantile_ranges["quantiles"]

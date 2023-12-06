@@ -281,11 +281,11 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         return self._validate_metric_value_between(
             metric_name="column.distinct_values.count",
             configuration=configuration,

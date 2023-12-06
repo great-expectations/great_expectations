@@ -114,7 +114,6 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,

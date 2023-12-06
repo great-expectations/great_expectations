@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -68,7 +67,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # <snippet name="expect_queried_table_row_count_to_be.py _validate function signature">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
@@ -76,7 +74,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         # </snippet>
         metrics = convert_to_json_serializable(data=metrics)
         query_result = list(metrics.get("query.table")[0].values())[0]
-        value = configuration["kwargs"].get("value")
+        value = self.configuration["kwargs"].get("value")
 
         success = query_result == value
 

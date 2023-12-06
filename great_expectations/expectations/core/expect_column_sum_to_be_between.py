@@ -232,11 +232,11 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         return self._validate_metric_value_between(
             metric_name="column.sum",
             configuration=configuration,

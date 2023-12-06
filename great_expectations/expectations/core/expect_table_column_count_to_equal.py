@@ -118,11 +118,12 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
+
         expected_column_count = configuration.kwargs.get("value")
         actual_column_count = metrics.get("table.column_count")
 

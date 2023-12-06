@@ -322,14 +322,13 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
-        value_set = self.get_success_kwargs(configuration).get("value_set") or []
+        value_set = self.get_success_kwargs().get("value_set") or []
 
         parsed_value_set = value_set
 

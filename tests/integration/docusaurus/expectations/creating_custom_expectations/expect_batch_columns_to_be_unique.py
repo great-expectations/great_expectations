@@ -177,14 +177,13 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
     ):
         unique_columns = metrics.get("table.columns.unique")
         batch_columns = metrics.get("table.columns")
-        strict = configuration.kwargs.get("strict")
+        strict = self.configuration.kwargs.get("strict")
 
         duplicate_columns = unique_columns.symmetric_difference(batch_columns)
 

@@ -6,7 +6,6 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -75,7 +74,6 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnAggregateExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/examples/column_aggregate_expectation_template.py validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,

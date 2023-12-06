@@ -260,11 +260,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
+
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )

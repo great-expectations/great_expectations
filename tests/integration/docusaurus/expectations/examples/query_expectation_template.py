@@ -6,7 +6,6 @@ For detailed instructions on how to use it, please see:
 
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -53,7 +52,6 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py _validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,
