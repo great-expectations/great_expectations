@@ -203,6 +203,7 @@ class SqliteDatasource(SQLDatasource):
 
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [SqliteTableAsset, SqliteQueryAsset]
+    _poolclass: ClassVar[Type[sa.pool.Pool]] = sa.pool.StaticPool
 
     # Subclass instance var overrides
     # right side of the operator determines the type name
@@ -213,11 +214,12 @@ class SqliteDatasource(SQLDatasource):
     _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
-    _poolclass: ClassVar[Type[sa.pool.Pool]] = pydantic.PrivateAttr(
-        default=sa.pool.StaticPool
-    )
-
+    @override
     def _create_engine(self) -> sa.engine.Engine:
+        """
+        Create the engine from the connection string, applying config substitutions.
+        Also set the poolclass to StaticPool to avoid issues with multithreading.
+        """
         model_dict = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
@@ -228,6 +230,7 @@ class SqliteDatasource(SQLDatasource):
         # the connection_string has had config substitutions applied
         connection_string = model_dict.pop("connection_string")
         kwargs = model_dict.pop("kwargs", {})
+        # if needed a user could set a different `_poolclass` on the datasource.
         return sa.create_engine(connection_string, poolclass=self._poolclass, **kwargs)
 
     @public_api
