@@ -1082,9 +1082,15 @@ class SQLDatasource(Datasource):
 
     @override
     def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
-        # Overrides get_execution_engine in Datasource
-        # because we need to pass the kwargs as keyvalue args to the execution engine
-        # when then passes them to the engine.
+        """
+        Overrides get_execution_engine in Datasource
+
+        Standard behavior is to assume all top-level Datasource config (unless part of `cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS`)
+        should be passed to the GX ExecutionEngine constructor.
+        For SQLAlchemy this would lead to creating 2 different `sqlalchemy.engine.Engine` objects
+        one for the Datasource and one for the ExecutionEngine. This is wasteful and causes multiple connections to
+        the database to be created
+        """
         gx_execution_engin_type: Type[
             SqlAlchemyExecutionEngine
         ] = self.execution_engine_type
