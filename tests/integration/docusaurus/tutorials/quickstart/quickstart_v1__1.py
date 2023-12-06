@@ -24,30 +24,33 @@ import great_expectations.expectations as gxe
 context = gx.set_context()
 # </snippet>
 
+
 class QuickstartDatasourceTabs(Enum):
     PANDAS_DEFAULT = "pandas_default"
     SQL_QUERY = "sql_query"
 
+
 # TODO: Where in the GX namespace does Batch live?
 def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
-    if datasource_type == QuickstartDatasourceTabs.PANDAS_DEFAULT:      
+    if datasource_type == QuickstartDatasourceTabs.PANDAS_DEFAULT:
         # <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas_csv">
         batch = context.sources.pandas_default.read_csv(
             "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
         )
         # </snippet>
         return batch
-    
+
     elif datasource_type == QuickstartDatasourceTabs.SQL_QUERY:
         # TODO: add local postgresql db to quickstart? or add public snowflake?
         # <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas_csv">
         datasource = context.sources.add_postgresql_datasource(
-            name = "quickstart_db",
-            connection_string = "postgresql://localhost/quickstart",
+            name="quickstart_db",
+            connection_string="postgresql://localhost/quickstart",
         )
         batch = datasource.read_query("SELECT * FROM yellow_tripdata_sample_2019_01")
         # </snippet>
         return batch
+
 
 for tab_name in QuickstartDatasourceTabs:
     batch = get_quickstart_batch(datasource_type=tab_name)
