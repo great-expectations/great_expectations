@@ -1308,7 +1308,6 @@ def build_spark_engine(
         batch_data_dict={
             batch_id: df,
         },
-        force_reuse_spark_context=True,
     )
     return execution_engine
 

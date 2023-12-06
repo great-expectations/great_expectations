@@ -95,7 +95,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
         *args: Positional arguments for configuring SparkDFExecutionEngine
         persist: If True (default), then creation of the Spark DataFrame is done outside this class
         spark_config: Dictionary of Spark configuration options
-        force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
         **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
 
     For example:

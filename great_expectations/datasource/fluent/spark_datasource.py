@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -69,6 +70,16 @@ class _SparkDatasource(Datasource):
     spark_config: Union[SparkConfig, None] = None
     force_reuse_spark_context: bool = True
     persist: bool = True
+
+    @pydantic.field_validator("force_reuse_spark_context")
+    @classmethod
+    def _force_reuse_spark_context_deprecation_warning(cls, v: bool):
+        if v is not None:
+            warnings.warn(
+                "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+                "The existing Spark context will be reused as long as a new spark_config is not passed.",
+                category=RuntimeWarning,
+            )
 
     @staticmethod
     @override
