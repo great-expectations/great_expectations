@@ -365,11 +365,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             meta=meta,
             ge_cloud_id=id,
         )
-        self.validate_configuration(configuration)
 
         # Currently only used in Validator.validate_expectation
         # Once the V1 Validator is live, we can remove this and its related property
         self._configuration = configuration
+
+        self.validate_configuration()
 
     @classmethod
     def is_abstract(cls) -> bool:
@@ -390,7 +391,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @abstractmethod
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
@@ -1059,7 +1059,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         validation_dependencies: ValidationDependencies = (
             self.get_validation_dependencies(
-                configuration=configuration,
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
@@ -1086,7 +1085,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         expectation_validation_result: Union[
             ExpectationValidationResult, dict
         ] = self._validate(
-            configuration=configuration,
             metrics=provided_metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
@@ -1131,13 +1129,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         runtime_configuration = self.get_runtime_kwargs(
-            configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         result_format: dict = runtime_configuration["result_format"]
@@ -1157,9 +1153,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
             return None
 
-    def get_domain_kwargs(
-        self, configuration: ExpectationConfiguration
-    ) -> Dict[str, Optional[str]]:
+    def get_domain_kwargs(self) -> Dict[str, Optional[str]]:
+        configuration = self.configuration
         domain_kwargs: Dict[str, Optional[str]] = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.domain_keys
@@ -1175,17 +1170,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @public_api
     def get_success_kwargs(self) -> Dict[str, Any]:
-        """Retrieve the success kwargs.
-
-        Args:
-            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
-                the success kwargs from the configuration attribute of the Expectation instance will be returned.
-        """
+        """Retrieve the success kwargs."""
         configuration = self.configuration
 
-        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs(
-            configuration=configuration
-        )
+        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs()
         success_kwargs: Dict[str, Any] = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.success_keys
@@ -1204,7 +1192,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
 
-        success_kwargs = self.get_success_kwargs(configuration=configuration)
+        success_kwargs = self.get_success_kwargs()
         runtime_kwargs = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.runtime_keys
@@ -1219,9 +1207,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def get_result_format(
         self,
-        configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
+        configuration = self.configuration
         default_result_format: Optional[Any] = self._get_default_value("result_format")
         configuration_result_format: Union[
             Dict[str, Union[str, int, bool, List[str], None]], str
@@ -1255,7 +1243,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Args:
             validator: A Validator object that can be used to create Expectations, validate Expectations,
                 and get Metrics for Expectations.
-            configuration: Defines the parameters and name of a specific expectation.
             evaluation_parameters: Dictionary of dynamic values used during Validation of an Expectation.
             interactive_evaluation: Setting the interactive_evaluation flag on a DataAsset
                 make it possible to declare expectations and store expectations without
