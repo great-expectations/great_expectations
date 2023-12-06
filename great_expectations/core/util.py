@@ -8,6 +8,7 @@ import pathlib
 import re
 import sys
 import uuid
+import warnings
 from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
@@ -142,17 +143,14 @@ def in_jupyter_notebook():
         return False  # Probably standard Python interpreter
 
 
-def in_databricks() -> bool:
+def in_databricks(spark_session: pyspark.SparkSession) -> bool:
     """
     Tests whether we are in a Databricks environment.
 
     Returns:
         bool
     """
-    return True
-
-
-#    return "DATABRICKS_RUNTIME_VERSION" in os.environ
+    return spark_session.sparkContext.appName == "Databricks Shell"
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
@@ -798,24 +796,25 @@ def get_or_create_spark_session(
     try:
         builder = pyspark.SparkSession.builder
 
-        app_name: str | None = spark_config.get("spark.app.name")
-        if app_name:
-            if in_databricks():
-                # warn
-                pass
-            else:
-                builder.appName(app_name)
-
         # user could get in trouble here if they try to set config options that are not allowed in their runtime
         for k, v in spark_config.items():
             if k != "spark.app.name":
                 builder.config(k, v)
 
+        app_name: str | None = spark_config.get("spark.app.name")
+        builder.appName(app_name)
+
         spark_session: pyspark.SparkSession = builder.getOrCreate()
 
-        # in a local pyspark-shell the context config cannot be updated
-        # unless you stop the Spark context and re-recreate it
-        if not in_databricks():
+        if in_databricks(spark_session=spark_session):
+            if app_name:
+                warnings.warn(
+                    "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
+                    category=RuntimeWarning,
+                )
+        else:
+            # in a local pyspark-shell the context config cannot be updated
+            # unless you stop the Spark context and re-recreate it
             retrieved_spark_config: pyspark.SparkConf = (
                 spark_session.sparkContext.getConf()
             )
