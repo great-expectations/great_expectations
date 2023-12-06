@@ -102,6 +102,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         *args: Positional arguments for configuring SparkDFExecutionEngine
         persist: If True (default), then creation of the Spark DataFrame is done outside this class
         spark_config: Dictionary of Spark configuration options
+        force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
         **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
 
     For example:
@@ -196,6 +197,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self,
         *args,
         persist: bool = True,
+        force_reuse_spark_context: Optional[bool] = None,
         spark_config: Optional[dict] = None,
         **kwargs,
     ) -> None:
@@ -208,7 +210,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         azure_options: dict = kwargs.pop("azure_options", {})
         self._azure_options = azure_options
 
-        if "force_reuse_spark_context" in kwargs:
+        if force_reuse_spark_context is not None:
             kwargs.pop("force_reuse_spark_context")
             warnings.warn(
                 "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
