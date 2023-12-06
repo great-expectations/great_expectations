@@ -128,7 +128,6 @@ def test_spark_config_passed_to_execution_engine(
     datasource = empty_data_context.sources.add_spark(
         name="my_spark_datasource",
         spark_config=spark_config,
-        force_reuse_spark_context=False,
         persist=persist,
     )
     execution_engine_spark_config = datasource.get_execution_engine().config[
