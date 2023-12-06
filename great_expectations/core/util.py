@@ -822,15 +822,15 @@ def get_or_create_spark_session(
 
         # in a local pyspark-shell the context config cannot be updated
         # unless you stop the Spark context and re-recreate it
-        retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
-        stopped = False
-        for key, value in spark_config.items():
-            if retrieved_spark_config.get(key) != value:
-                spark_session.stop()
-                stopped = True
-                break
-        if stopped:
-            spark_session = builder.getOrCreate()
+        # retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
+        # stopped = False
+        # for key, value in spark_config.items():
+        #     if retrieved_spark_config.get(key) != value:
+        #         spark_session.stop()
+        #         stopped = True
+        #         break
+        # if stopped:
+        #     spark_session = builder.getOrCreate()
 
     except AttributeError as e:
         logger.error(
