@@ -1051,7 +1051,7 @@ def test_test_connection_failures(
         bad_configuration_datasource.test_connection()
 
 
-@pytest.mark.filesystem
+@pytest.mark.postgresql
 def test_query_data_asset(empty_data_context, create_source):
     query = "SELECT * FROM my_table"
 
