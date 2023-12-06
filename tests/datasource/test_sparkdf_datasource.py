@@ -126,9 +126,11 @@ def test_spark_kwargs_are_passed_through(
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+    datasource = data_context_parameterized_expectation_suite.get_datasource(
         dataset_name
-    ).config
+    )
+    old_app_id = datasource.spark.sparkContext.applicationId
+    datasource_config = datasource.config
 
     actual_spark_config = datasource_config["spark_config"]
     expected_spark_config = dict(spark_session.sparkContext.getConf().getAll())
@@ -140,7 +142,6 @@ def test_spark_kwargs_are_passed_through(
         config.pop("spark.sql.warehouse.dir", None)
 
     assert datasource_config["spark_config"] == expected_spark_config
-    assert datasource_config["force_reuse_spark_context"] is False
     assert datasource_config["persist"] is False
 
     dataset_name = "test_spark_dataset_2"
@@ -148,17 +149,18 @@ def test_spark_kwargs_are_passed_through(
         dataset_name,
         class_name="SparkDFDatasource",
         spark_config={},
-        force_reuse_spark_context=True,
         persist=True,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+    datasource = data_context_parameterized_expectation_suite.get_datasource(
         dataset_name
-    ).config
+    )
+    new_app_id = datasource.spark.sparkContext.applicationId
+    datasource_config = datasource.config
     assert datasource_config["spark_config"] == {}
-    assert datasource_config["force_reuse_spark_context"] == True  # noqa: E712
     assert datasource_config["persist"] is True
+    assert old_app_id == new_app_id
 
 
 @pytest.mark.spark
