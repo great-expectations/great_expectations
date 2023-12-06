@@ -216,7 +216,7 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
 
 
 @pytest.mark.unit
-def test_expectation_configuration_stays_up_to_date():
+def test_expectation_configuration_property():
     expectation = ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     assert expectation.configuration == ExpectationConfiguration(
@@ -227,6 +227,11 @@ def test_expectation_configuration_stays_up_to_date():
             "max_value": 10,
         },
     )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_property_recognizes_state_changes():
+    expectation = ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     expectation.column = "bar"
     expectation.min_value = 5
