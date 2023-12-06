@@ -49,11 +49,6 @@
                 ]
             }
         },
-        "force_reuse_spark_context": {
-            "title": "Force Reuse Spark Context",
-            "default": true,
-            "type": "boolean"
-        },
         "persist": {
             "title": "Persist",
             "default": true,
