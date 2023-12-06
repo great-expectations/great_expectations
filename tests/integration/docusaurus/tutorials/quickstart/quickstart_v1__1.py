@@ -10,6 +10,8 @@ ephemeral assets.
 iterative process for trying and refining expectations.
 """
 
+from enum import Enum
+
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
@@ -22,20 +24,33 @@ import great_expectations.expectations as gxe
 context = gx.set_context()
 # </snippet>
 
-# Connect to data
-# <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas">
-batch = context.sources.pandas_default.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-)
-# </snippet>
+class QuickstartDatasourceTabs(Enum):
+    PANDAS_DEFAULT = "pandas_default"
+    SQL_QUERY = "sql_query"
 
+# TODO: Where in the GX namespace does Batch live?
+def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
+    if datasource_type == QuickstartDatasourceTabs.PANDAS_DEFAULT:      
+        # <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas_csv">
+        batch = context.sources.pandas_default.read_csv(
+            "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+        )
+        # </snippet>
+        return batch
+    
+    elif datasource_type == QuickstartDatasourceTabs.SQL_QUERY:
+        # TODO: add local postgresql db to quickstart? or add public snowflake?
+        # <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas_csv">
+        datasource = context.sources.add_postgresql_datasource(
+            name = "quickstart_db",
+            connection_string = "postgresql://localhost/quickstart",
+        )
+        batch = datasource.read_query("SELECT * FROM yellow_tripdata_sample_2019_01")
+        # </snippet>
+        return batch
 
-# TODO: ticket We can also use a SQL query as a data source
-context.sources.add_postgresql(
-    name="postgresql", connection_string="postgresql://localhost"
-)
-batch = context.sources.postgresql.query_batch("SELECT * FROM taxi LIMIT 1000")
-# </snippet>
+for tab_name in QuickstartDatasourceTabs:
+    batch = get_quickstart_batch(datasource_type=tab_name)
 
 # Create Expectations
 # <snippet name="tutorials/quickstart/quickstart.py create_expectation">
