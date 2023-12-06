@@ -24,9 +24,9 @@ main parameters - `expectation_configuration` and `match_type`.
 To add an Expectation to a Suite, you can use
 
 ```python
-suite.add_expectation(
-    expectation_configuration, 
-    match_type, 
+suite._legacy_add_expectation(
+    expectation_configuration,
+    match_type,
     overwrite_existing
 )
 ```

@@ -375,7 +375,7 @@ def _add_checkpoint(
 
 def _add_expectation_configuration(context: AbstractDataContext, suite_name: str):
     suite = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
-    suite.add_expectation(
+    suite._legacy_add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_table_columns_to_match_set",
             kwargs={
@@ -402,25 +402,25 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
             },
         )
     )
-    suite.add_expectation(
+    suite._legacy_add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={"column": "vendor_id"},
         )
     )
-    suite.add_expectation(
+    suite._legacy_add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={"column": "vendor_id", "type_": "INTEGER"},
         )
     )
-    suite.add_expectation(
+    suite._legacy_add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={"column": "pickup_datetime", "type_": "STRING"},
         )
     )
-    suite.add_expectation(
+    suite._legacy_add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
             # rate_code_id refers to the final rate code in effect at the end of the trip
@@ -435,7 +435,7 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
             kwargs={"column": "rate_code_id", "value_set": [1, 2, 3, 4, 5, 6, 99]},
         )
     )
-    suite.add_expectation(
+    suite._legacy_add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_between",
             kwargs={

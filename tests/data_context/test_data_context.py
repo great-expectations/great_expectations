@@ -1726,7 +1726,7 @@ def test_add_expectation_to_expectation_suite(
     expectation_suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
     )
-    expectation_suite.add_expectation(
+    expectation_suite._legacy_add_expectation(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )

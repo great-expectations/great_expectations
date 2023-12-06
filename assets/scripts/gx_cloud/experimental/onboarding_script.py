@@ -81,7 +81,9 @@ expectation_configuration = gx.core.ExpectationConfiguration(
     }
 )
 
-expectation_suite.add_expectation(expectation_configuration=expectation_configuration)
+expectation_suite._legacy_add_expectation(
+    expectation_configuration=expectation_configuration
+)
 
 # Save the Expectation Suite
 context.update_expectation_suite(expectation_suite=expectation_suite)

@@ -509,7 +509,7 @@ def test_add_expectation_configurations(
     expectation_configurations = [exp1, exp2, exp3, exp4, exp5]
     assert len(single_expectation_suite.expectations) == 1
     assert not single_expectation_suite.isEquivalentTo(different_suite)
-    result = single_expectation_suite.add_expectation_configurations(
+    result = single_expectation_suite._legacy_add_expectation_configurations(
         expectation_configurations=expectation_configurations,
         send_usage_event=False,
         match_type="domain",
@@ -523,7 +523,7 @@ def test_add_expectation_configurations(
     # Should raise if overwrite_existing=False and a matching expectation is found
     with pytest.raises(DataContextError):
         # noinspection PyUnusedLocal
-        result = single_expectation_suite.add_expectation_configurations(
+        result = single_expectation_suite._legacy_add_expectation_configurations(
             expectation_configurations=expectation_configurations,
             send_usage_event=False,
             match_type="domain",
@@ -548,7 +548,7 @@ def test_add_expectation(
 ):
     assert len(single_expectation_suite.expectations) == 1
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
-    single_expectation_suite.add_expectation(
+    single_expectation_suite._legacy_add_expectation(
         exp2, match_type="runtime", overwrite_existing=False
     )
     assert single_expectation_suite.isEquivalentTo(baseline_suite)
@@ -556,12 +556,12 @@ def test_add_expectation(
 
     # Should raise if overwrite_existing=False and a matching expectation is found
     with pytest.raises(DataContextError):
-        single_expectation_suite.add_expectation(
+        single_expectation_suite._legacy_add_expectation(
             exp4, match_type="domain", overwrite_existing=False
         )
 
     assert not single_expectation_suite.isEquivalentTo(different_suite)
-    single_expectation_suite.add_expectation(
+    single_expectation_suite._legacy_add_expectation(
         exp4, match_type="domain", overwrite_existing=True
     )
     assert single_expectation_suite.isEquivalentTo(different_suite)
@@ -569,13 +569,13 @@ def test_add_expectation(
 
     # Should raise if more than one matching expectation is found
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.add_expectation(
+        domain_success_runtime_suite._legacy_add_expectation(
             exp2, match_type="success", overwrite_existing=False
         )
 
     config = ExpectationConfiguration(expectation_type="not an expectation", kwargs={})
     with pytest.raises(InvalidExpectationConfigurationError):
-        single_expectation_suite.add_expectation(config)
+        single_expectation_suite._legacy_add_expectation(config)
 
     # Turn this on once we're ready to enforce strict typing.
     # with pytest.raises(TypeError):
@@ -637,7 +637,7 @@ def test_add_expectation_with_ge_cloud_id(
         },
         meta={"notes": "This is an expectation."},
     )
-    single_expectation_suite_with_expectation_ge_cloud_id.add_expectation(
+    single_expectation_suite_with_expectation_ge_cloud_id._legacy_add_expectation(
         updated_expectation, overwrite_existing=True
     )
     assert (

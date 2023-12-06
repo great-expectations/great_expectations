@@ -571,7 +571,7 @@ class TestTableIdentifiers:
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
         )
-        suite.add_expectation(
+        suite._legacy_add_expectation(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type="expect_column_values_to_not_be_null",
                 kwargs={
@@ -871,7 +871,7 @@ class TestColumnIdentifiers:
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
         )
-        suite.add_expectation(
+        suite._legacy_add_expectation(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type=expectation_type,
                 kwargs={

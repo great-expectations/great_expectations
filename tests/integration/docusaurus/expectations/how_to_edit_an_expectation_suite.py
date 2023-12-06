@@ -83,7 +83,7 @@ updated_config = ExpectationConfiguration(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_configuration">
-my_suite.add_expectation(updated_config)
+my_suite._legacy_add_expectation(updated_config)
 # </snippet>
 
 assert len(my_suite.expectations) == 2

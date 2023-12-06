@@ -362,7 +362,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    suite.add_expectation_configurations(
+    suite._legacy_add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.save_expectation_suite(expectation_suite=suite)
@@ -486,7 +486,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    suite.add_expectation_configurations(
+    suite._legacy_add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.save_expectation_suite(expectation_suite=suite)
@@ -603,7 +603,7 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    suite.add_expectation_configurations(
+    suite._legacy_add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.save_expectation_suite(expectation_suite=suite)

@@ -101,7 +101,7 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite._legacy_add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -138,7 +138,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite._legacy_add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -169,7 +169,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite._legacy_add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -401,7 +401,7 @@ def context_with_single_csv_spark_and_suite(
         expectation_type="expect_column_to_exist",
         kwargs={"column": "pickup_datetime"},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite._legacy_add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
