@@ -1091,7 +1091,7 @@ class SQLDatasource(Datasource):
         one for the Datasource and one for the ExecutionEngine. This is wasteful and causes multiple connections to
         the database to be created
         """
-        gx_execution_engin_type: Type[
+        gx_execution_engine_type: Type[
             SqlAlchemyExecutionEngine
         ] = self.execution_engine_type
 
@@ -1100,7 +1100,7 @@ class SQLDatasource(Datasource):
             self.connection_string if isinstance(self.connection_string, str) else None
         )
 
-        gx_exec_engine = gx_execution_engin_type(
+        gx_exec_engine = gx_execution_engine_type(
             self.name,
             connection_string=connection_string,
             engine=self.get_engine(),
