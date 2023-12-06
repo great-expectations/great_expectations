@@ -154,11 +154,12 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def add(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
+        expectation_configuration = expectation.configuration
         if not any(
-            expectation.configuration == existing_config
+            expectation_configuration == existing_config
             for existing_config in self.expectation_configurations
         ):
-            self.expectation_configurations.append(expectation.configuration)
+            self.expectation_configurations.append(expectation_configuration)
         else:
             pass  # suite is a set-like collection
 
@@ -170,7 +171,9 @@ class ExpectationSuite(SerializableDictDot):
                 # rollback this change
                 self.expectation_configurations.pop()
                 raise exc
-
+        expectation = self._add_save_callback_to_expectation(
+            expectation=expectation, expectation_configuration=expectation_configuration
+        )
         return expectation
 
     @public_api
@@ -221,13 +224,32 @@ class ExpectationSuite(SerializableDictDot):
         self, identity: int, expectation: Expectation
     ) -> Expectation:
         """Update an Expectation in the collection."""
+        # find the expectation we're updating
+        found_expectation = False
+        i, expectation_configuration = None, None  # guard type against an empty list
         for i, expectation_configuration in enumerate(self.expectation_configurations):
             if id(expectation_configuration) == identity:
-                self.expectation_configurations[i] = expectation.configuration
-                if self._has_been_saved():
-                    self.save()
-                return expectation
-        raise KeyError("Cannot update Expectation because it was not found.")
+                found_expectation = True
+                break  # we've found our expectation
+        if not found_expectation or i is None or expectation_configuration is None:
+            raise KeyError("Cannot update Expectation because it was not found.")
+
+        # make the update
+        # expectations are building their configs just in time, so we need a single reference:
+        new_expectation_configuration = expectation.configuration
+        self.expectation_configurations[i] = new_expectation_configuration
+        if self._has_been_saved():
+            try:
+                self.save()
+            except Exception as exc:
+                # revert change
+                self.expectation_configurations[i] = expectation_configuration
+                raise exc
+        expectation = self._add_save_callback_to_expectation(
+            expectation=expectation,
+            expectation_configuration=new_expectation_configuration,
+        )
+        return expectation
 
     def add_citation(  # noqa: PLR0913
         self,
@@ -871,10 +893,10 @@ class ExpectationSuite(SerializableDictDot):
             expectation: Expectation = class_(
                 meta=expectation_configuration.meta, **expectation_configuration.kwargs
             )  # Implicitly validates in constructor
-            save_callback = partial(
-                self.update_by_identity, identity=id(expectation_configuration)
+            expectation = self._add_save_callback_to_expectation(
+                expectation=expectation,
+                expectation_configuration=expectation_configuration,
             )
-            expectation.register_save_callback(callback=save_callback)
             return expectation
         except (
             gx_exceptions.ExpectationNotFoundError,
@@ -883,6 +905,15 @@ class ExpectationSuite(SerializableDictDot):
             raise gx_exceptions.InvalidExpectationConfigurationError(
                 f"Could not add expectation; provided configuration is not valid: {e.message}"
             ) from e
+
+    def _add_save_callback_to_expectation(
+        self,
+        expectation: Expectation,
+        expectation_configuration: ExpectationConfiguration,
+    ) -> Expectation:
+        save_callback = partial(self.update_by_identity, id(expectation_configuration))
+        expectation.register_save_callback(callback=save_callback)
+        return expectation
 
     @public_api
     def show_expectations_by_domain_type(self) -> None:

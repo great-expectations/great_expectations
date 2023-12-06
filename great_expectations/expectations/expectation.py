@@ -2287,9 +2287,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         self, callback: Callable[[Expectation], Expectation]
     ) -> None:
         """Provide the Expectation with a callback used to save the Expectation configuration."""
-        if self._save_callback:
-            raise RuntimeError("Expectation already has a `save_callback` registered.")
         self._save_callback = callback
+
+    def transfer_save_callback(self, expectation: Expectation) -> Expectation:
+        """Pass the save callback from this Expectation to another."""
+        expectation.register_save_callback(callback=self._save_callback)
+        return expectation
 
     @public_api
     def save(self):
@@ -2298,7 +2301,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             raise RuntimeError(
                 "Expectation must be added to an ExpectationSuite before it can be saved."
             )
-        self._save_callback(self)
+        expectation = self._save_callback(self)
+        expectation.transfer_save_callback(expectation=self)
 
 
 @public_api

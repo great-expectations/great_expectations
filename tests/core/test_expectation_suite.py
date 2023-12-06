@@ -323,7 +323,7 @@ class TestCRUDMethods:
         with pytest.raises(KeyError, match="No matching expectation was found."):
             suite.delete(expectation=expectation)
 
-        context.expectations_store.set.assert_not_called()
+        context.expectations_store.add_or_update.assert_not_called()
 
     @pytest.mark.unit
     def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation):
@@ -361,6 +361,210 @@ class TestCRUDMethods:
         context.expectations_store.add_or_update.assert_called_once_with(
             key=store_key, value=suite
         )
+
+    @pytest.mark.unit
+    def test_update_by_identity_success(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = True
+        old_expectation_configuration = expectation.configuration
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[old_expectation_configuration],
+        )
+        store_key = context.expectations_store.get_key.return_value
+
+        # todo: this is the correct pattern, but depends on PR 9040
+        # expectation = suite.expectations[0]
+        # expectation.column = "b"
+        expectation = ExpectColumnValuesToBeInSet(
+            column="b",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+
+        expectation = suite.update_by_identity(
+            identity=id(old_expectation_configuration), expectation=expectation
+        )
+
+        assert len(suite.expectations) == 1, "Method must replace expectation"
+        assert suite.expectations[0].column == expectation.column
+        # expect that the data context is kept in sync
+        context.expectations_store.add_or_update.assert_called_once_with(
+            key=store_key, value=suite
+        )
+
+    @pytest.mark.unit
+    def test_update_by_identity_persists_saved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = True
+        old_expectation_configuration = expectation.configuration
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[old_expectation_configuration],
+        )
+        store_key = context.expectations_store.get_key.return_value
+
+        # todo: this is the correct pattern, but depends on PR 9040
+        # expectation = suite.expectations[0]
+        # expectation.column = "b"
+        expectation = ExpectColumnValuesToBeInSet(
+            column="b",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+
+        suite.update_by_identity(
+            identity=id(old_expectation_configuration), expectation=expectation
+        )
+
+        # expect that the data context is kept in sync
+        context.expectations_store.add_or_update.assert_called_once_with(
+            key=store_key, value=suite
+        )
+
+    @pytest.mark.unit
+    def test_update_by_identity_doesnt_persist_unsaved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = False
+        old_expectation_configuration = expectation.configuration
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[old_expectation_configuration],
+        )
+
+        # todo: this is the correct pattern, but depends on PR 9040
+        # expectation = suite.expectations[0]
+        # expectation.column = "b"
+        expectation = ExpectColumnValuesToBeInSet(
+            column="b",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+
+        suite.update_by_identity(
+            identity=id(old_expectation_configuration), expectation=expectation
+        )
+        context.expectations_store.add_or_update.assert_not_called()
+
+    @pytest.mark.unit
+    def test_update_by_identity_fails_on_missing_expectation(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = True
+        old_expectation_configuration = expectation.configuration
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[],
+        )
+
+        # todo: this is the correct pattern, but depends on PR 9040
+        # expectation = suite.expectations[0]
+        # expectation.column = "b"
+        expectation = ExpectColumnValuesToBeInSet(
+            column="b",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+
+        with pytest.raises(
+            KeyError, match="Cannot update Expectation because it was not found."
+        ):
+            suite.update_by_identity(
+                identity=id(old_expectation_configuration), expectation=expectation
+            )
+
+    @pytest.mark.unit
+    def test_update_by_identity_fails_on_deleted_expectation(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = True
+        old_expectation_configuration = expectation.configuration
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[old_expectation_configuration],
+        )
+
+        expectation = suite.expectations[0]
+        suite.delete(expectation)
+        with pytest.raises(
+            KeyError, match="Cannot update Expectation because it was not found."
+        ):
+            suite.update_by_identity(
+                identity=id(old_expectation_configuration), expectation=expectation
+            )
+
+    @pytest.mark.unit
+    def test_update_by_identity_doesnt_mutate_when_save_fails(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = True
+        old_expectation_configuration = expectation.configuration
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[old_expectation_configuration],
+        )
+        context.expectations_store.add_or_update.side_effect = (
+            ConnectionError()
+        )  # arbitrary exception
+
+        # todo: this is the correct pattern, but depends on PR 9040
+        # expectation = suite.expectations[0]
+        # expectation.column = "b"
+        expectation = ExpectColumnValuesToBeInSet(
+            column="b",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+
+        with pytest.raises(ConnectionError):
+            suite.update_by_identity(
+                identity=id(old_expectation_configuration), expectation=expectation
+            )
+
+        assert suite.expectations[0].column == "a", "Expectation must not be updated."
+
+    @pytest.mark.unit
+    def test_consecutive_update_calls(self, expectation):
+        # this is actually more of an integration test, since it depends on
+        # some logic implemented in the Expectation base class, but it doesnt
+        # require standing up external resources, so is considered a unit test.
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+        context.expectations_store.has_key.return_value = True
+
+        expectation_a = suite.add(expectation=expectation)
+
+        # todo: this is the correct pattern, but depends on PR 9040
+        # expectation = suite.expectations[0]
+        # expectation.column = "b"
+        expectation_b = ExpectColumnValuesToBeInSet(
+            column="b",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+        expectation_b = expectation_a.transfer_save_callback(expectation_b)
+
+        assert suite.expectations[0].column == "a"
+        expectation_b.save()
+        assert suite.expectations[0].column == "b"
+
+        # todo: this is the correct pattern, but depends on PR 9040
+        # expectation = suite.expectations[0]
+        # expectation.column = "b"
+        expectation_c = ExpectColumnValuesToBeInSet(
+            column="c",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+        expectation_c = expectation_b.transfer_save_callback(expectation_c)
+
+        assert suite.expectations[0].column == "b"
+        expectation_c.save()
+        assert suite.expectations[0].column == "c"
 
 
 class TestAddCitation:
