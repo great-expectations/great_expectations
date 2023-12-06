@@ -87,8 +87,8 @@ def apply_dateutil_parse(column):
     argument_name="force_reuse_spark_context",
     version="1.0",
     message="The force_reuse_spark_context attribute is no longer part of any Spark Datasource classes. "
-    "The existing Spark context will be reused as long as a new spark_config is not passed, "
-    "or the spark config that is passed requires no change to the existing Spark context.",
+    "The existing Spark context will be reused if possible. If a spark_config is passed that doesn't match "
+    "the existing config, the context will be stopped and restarted in local environments only.",
 )
 @public_api
 class SparkDFExecutionEngine(ExecutionEngine):
@@ -101,7 +101,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
     Args:
         *args: Positional arguments for configuring SparkDFExecutionEngine
         persist: If True (default), then creation of the Spark DataFrame is done outside this class
-        spark_config: Dictionary of Spark configuration options
+        spark_config: Dictionary of Spark configuration options. If there is an existing Spark context,
+          the spark_config will be used to update that context in environments that allow it. In local
+          environments the Spark context will be stopped and restarted with the new spark_config.
         force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
         **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
 
@@ -213,7 +215,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if force_reuse_spark_context is not None:
             warnings.warn(
                 "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
-                "The existing Spark context will be reused as long as a new spark_config is not passed.",
+                "In environments that allow it, the existing Spark context will be reused, adding the "
+                "spark_config options that have been passed. If the Spark context cannot be updated with "
+                "the spark_config, the context will be stopped and restarted with the new spark_config.",
                 category=RuntimeWarning,
             )
         super().__init__(*args, **kwargs)
