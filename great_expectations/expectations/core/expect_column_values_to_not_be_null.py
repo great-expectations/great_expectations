@@ -265,9 +265,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
+        mostly = self.get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
