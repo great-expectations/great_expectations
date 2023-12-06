@@ -146,7 +146,7 @@ class ExpectationSuite(SerializableDictDot):
     @property
     def expectations(self) -> list[Expectation]:
         return [
-            self._build_expectation(expectation_configuration=expectation_configuration)
+            self.build_expectation(expectation_configuration=expectation_configuration)
             for expectation_configuration in self.expectation_configurations
         ]
 
@@ -842,11 +842,11 @@ class ExpectationSuite(SerializableDictDot):
 
         # noqa: DAR402
         """
-        expectation = self._build_expectation(expectation_configuration)
+        expectation = self.build_expectation(expectation_configuration)
         self.add(expectation)
         return expectation_configuration
 
-    def _build_expectation(
+    def build_expectation(
         self, expectation_configuration: ExpectationConfiguration
     ) -> Expectation:
         try:
