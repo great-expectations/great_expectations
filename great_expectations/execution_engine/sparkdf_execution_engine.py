@@ -197,8 +197,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self,
         *args,
         persist: bool = True,
-        force_reuse_spark_context: Optional[bool] = None,
         spark_config: Optional[dict] = None,
+        force_reuse_spark_context: Optional[bool] = None,
         **kwargs,
     ) -> None:
         self._persist = persist
