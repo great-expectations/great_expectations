@@ -18,7 +18,6 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     overload,
@@ -834,38 +833,6 @@ def get_or_create_spark_session(
         raise e
 
     return spark_session
-
-
-def spark_restart_required(
-    current_spark_config: List[Tuple[str, Any]], desired_spark_config: dict
-) -> bool:
-    """Determines whether or not Spark session should be restarted, based on supplied current and desired configuration.
-
-    Either new "App" name or configuration change necessitates Spark session restart.
-
-    Args:
-        current_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
-        desired_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
-
-    Returns: Boolean flag indicating (if True) that Spark session restart is required.
-    """
-
-    # we can't change spark context config values within databricks runtimes
-    if in_databricks():
-        return False
-
-    current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
-    if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
-        "spark.app.name"
-    ):
-        return True
-
-    if not {(k, v) for k, v in desired_spark_config.items()}.issubset(
-        current_spark_config
-    ):
-        return True
-
-    return False
 
 
 def get_sql_dialect_floating_point_infinity_value(
