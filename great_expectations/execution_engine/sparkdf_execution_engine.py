@@ -25,7 +25,7 @@ from great_expectations.compatibility.pyspark import (
     functions as F,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -83,6 +83,13 @@ def apply_dateutil_parse(column):
     return column.withColumn(col_name, _udf(col_name))
 
 
+@deprecated_argument(
+    argument_name="force_reuse_spark_context",
+    version="1.0",
+    message="The force_reuse_spark_context attribute is no longer part of any Spark Datasource classes. "
+    "The existing Spark context will be reused as long as a new spark_config is not passed, "
+    "or the spark config that is passed requires no change to the existing Spark context.",
+)
 @public_api
 class SparkDFExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
