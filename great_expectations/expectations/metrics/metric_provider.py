@@ -125,8 +125,6 @@ class MetricProvider(metaclass=MetaMetricProvider):
     In some cases, subclasses of Expectation, such as TableMetricProvider will already
     have correct values that may simply be inherited.
 
-    They *may* optionally override the `default_kwarg_values` attribute.
-
     MetricProvider classes *must* implement the following:
         1. `_get_evaluation_dependencies`. Note that often, _get_evaluation_dependencies should
         augment dependencies provided by a parent class; consider calling super()._get_evaluation_dependencies

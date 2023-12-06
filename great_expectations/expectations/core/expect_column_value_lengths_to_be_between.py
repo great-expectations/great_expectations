@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from great_expectations.core import (
@@ -5,6 +6,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -86,6 +88,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
     """
 
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    strict_min: bool = False
+    strict_max: bool = False
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -105,17 +112,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "mostly",
     )
 
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "min_value": None,
-        "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "min_value",

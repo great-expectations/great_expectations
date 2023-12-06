@@ -86,14 +86,6 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "value_set",
         "ties_okay",
     )
-
-    # Default values
-    default_kwarg_values = {
-        "value_set": None,
-        "ties_okay": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",

@@ -93,6 +93,8 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     """Expect batch to contain columns with unique contents."""
     # </snippet>
 
+    strict: bool = True
+
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py examples">
@@ -147,9 +149,6 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
 
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ("strict",)
-
-    # This dictionary contains default values for any parameters that should have default values.
-    default_kwarg_values = {"strict": True}
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None

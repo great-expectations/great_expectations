@@ -70,16 +70,6 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         "row_condition",
         "condition_parser",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "column_list": None,
-        "result_format": "BASIC",
-        "column": None,
-        "column_index": None,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = ("column_list",)
 
     @classmethod

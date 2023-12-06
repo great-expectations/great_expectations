@@ -102,15 +102,6 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         "strict_max",
     )
 
-    # Default values
-    default_kwarg_values = {
-        "min_value": None,
-        "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "min_value",

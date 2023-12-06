@@ -85,13 +85,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     }
 
     map_metric = "select_column_values.unique.within_record"
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "ignore_row_if": "all_values_are_missing",
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = ("column_list",)
 
     @classmethod
