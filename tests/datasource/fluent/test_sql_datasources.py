@@ -9,7 +9,11 @@ import pytest
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
+from great_expectations.datasource.fluent import (
+    GxDatasourceWarning,
+    SQLDatasource,
+    SqliteDatasource,
+)
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 
 if TYPE_CHECKING:
@@ -248,6 +252,20 @@ def test_specific_datasource_warnings(
             context.sources.add_sql(
                 name="my_datasource", connection_string=connection_string
             ).test_connection()
+
+
+@pytest.mark.filterwarnings("ignore:You are using a generic SQLDatasource")
+@pytest.mark.unit
+@pytest.mark.parametrize("datasource_type", [SQLDatasource, SqliteDatasource])
+def test_get_engine_is_used_for_sqlalchemy_execution_engine(
+    datasource_type: type[SQLDatasource],
+):
+    """
+    This test ensures that the engine returned by get_engine() is used for the gx `SQLAlchemyExecutionEngine`.
+    """
+    datasource = datasource_type(name="my_datasource", connection_string="sqlite:///")
+
+    assert datasource.get_engine() is datasource.get_execution_engine().engine
 
 
 if __name__ == "__main__":
