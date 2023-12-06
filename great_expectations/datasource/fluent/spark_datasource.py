@@ -73,13 +73,14 @@ class _SparkDatasource(Datasource):
 
     @pydantic.validator("force_reuse_spark_context")
     @classmethod
-    def _force_reuse_spark_context_deprecation_warning(cls, v: bool):
+    def _force_reuse_spark_context_deprecation_warning(cls, v: bool) -> bool:
         if v is not None:
             warnings.warn(
                 "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
                 "The existing Spark context will be reused as long as a new spark_config is not passed.",
                 category=RuntimeWarning,
             )
+        return v
 
     @staticmethod
     @override
