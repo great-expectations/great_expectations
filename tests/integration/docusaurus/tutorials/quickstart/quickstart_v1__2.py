@@ -28,14 +28,11 @@ expectation.mostly = 0.9
 expectation.save()
 # </snippet>
 
- # Note we allow both list and set here, thanks to pydantic validation and coercion
-expectation = gxe.ExpectColumnValuesToBeInSet(
-    column="id", value_set={1, 2, 3}
-)
+# Note we allow both list and set here, thanks to pydantic validation and coercion
+expectation = gxe.ExpectColumnValuesToBeInSet(column="id", value_set={1, 2, 3})
 
 # <snippet name="tutorials/quickstart/quickstart.py update_expectation_using_typed_parameters">
 expectation = gxe.ExpectColumnValuesToBeInSet(column="id", value_set=[1, 2, 3])
 expectation.value_set.add(4)
 expectation.save()
 # </snippet>
-
