@@ -1094,12 +1094,13 @@ class SQLDatasource(Datasource):
         gx_execution_engin_type: Type[
             SqlAlchemyExecutionEngine
         ] = self.execution_engine_type
-
-        return gx_execution_engin_type(
+        gx_exec_engine = gx_execution_engin_type(
             self.name,
             engine=self.get_engine(),
             create_temp_table=self.create_temp_table,
         )
+        self._execution_engine = gx_exec_engine
+        return gx_exec_engine
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:
