@@ -1357,15 +1357,15 @@ def quentin_expected_expectation_suite(
         expectation_suite_name: str = "my_suite"
 
         expected_expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name,
+            name=expectation_suite_name,
         )
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expected_expectation_configurations:
-            expected_expectation_suite._add_expectation(
-                expectation_configuration=expectation_configuration,
-                send_usage_event=False,
+            expectation = expected_expectation_suite.build_expectation(
+                expectation_configuration=expectation_configuration
             )
+            expected_expectation_suite.add(expectation)
 
         expected_expectation_suite_meta: Dict[str, Any] = {
             "citations": [

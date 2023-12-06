@@ -264,10 +264,11 @@ class DataAsset:
                     stored_config = expectation_config
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite._add_expectation(
-                        expectation_configuration=expectation_config,
-                        send_usage_event=False,
+                    expectation = self._expectation_suite.build_expectation(
+                        expectation_configuration=expectation_config
                     )
+                    expectation = self._expectation_suite.add(expectation)
+                    stored_config = expectation.configuration
 
                 if include_config:
                     return_obj.expectation_config = copy.deepcopy(stored_config)
