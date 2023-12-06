@@ -842,13 +842,9 @@ class ExpectationSuite(SerializableDictDot):
 
         # noqa: DAR402
         """
-        self._build_expectation(expectation_configuration)
-        return self._add_expectation(
-            expectation_configuration=expectation_configuration,
-            send_usage_event=send_usage_event,
-            match_type=match_type,
-            overwrite_existing=overwrite_existing,
-        )
+        expectation = self._build_expectation(expectation_configuration)
+        self.add(expectation)
+        return expectation_configuration
 
     def _build_expectation(
         self, expectation_configuration: ExpectationConfiguration
