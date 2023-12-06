@@ -422,8 +422,7 @@ class Validator:
         # )
 
         combined_dir = (
-            validator_attrs
-            | class_expectation_impls
+            validator_attrs | class_expectation_impls
             # | execution_engine_expectation_impls
         )
 
@@ -522,14 +521,10 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            configuration: ExpectationConfiguration = (
-                self._build_expectation_configuration(
-                    expectation_type=name,
-                    expectation_kwargs=expectation_kwargs,
-                    meta=meta,
-                    expectation_impl=expectation_impl,
-                    runtime_configuration=basic_runtime_configuration,
-                )
+            configuration = ExpectationConfiguration(
+                expectation_type=name,
+                kwargs=expectation_kwargs,
+                meta=meta,
             )
 
             exception_info: ExceptionInfo
@@ -600,193 +595,6 @@ class Validator:
         inst_expectation.__doc__ = expectation_impl.__doc__
 
         return inst_expectation
-
-    def _build_expectation_configuration(  # noqa: PLR0913
-        self,
-        expectation_type: str,
-        expectation_kwargs: dict,
-        meta: Optional[dict],
-        expectation_impl: type[Expectation],
-        runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
-        auto: bool = expectation_kwargs.get("auto", False)
-        profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
-            "profiler_config"
-        )
-        default_profiler_config = expectation_impl.__fields__.get("profiler_config")
-        if default_profiler_config and not isinstance(
-            default_profiler_config, RuleBasedProfilerConfig
-        ):
-            raise TypeError("profiler_config must be None or RuleBasedProfilerConfig")
-
-        if auto and profiler_config is None and default_profiler_config is None:
-            raise ValueError(
-                "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
-            )
-
-        configuration: ExpectationConfiguration
-
-        profiler: Optional[
-            BaseRuleBasedProfiler
-        ] = self.build_rule_based_profiler_for_expectation(
-            expectation_type=expectation_type
-        )(
-            *(), **expectation_kwargs
-        )
-        if profiler is not None:
-            profiler_result: RuleBasedProfilerResult = profiler.run(
-                variables=None,
-                rules=None,
-                batch_list=list(self.batch_cache.values()),
-                batch_request=None,
-                runtime_configuration=runtime_configuration,
-                reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
-            )
-            expectation_configurations: List[
-                ExpectationConfiguration
-            ] = profiler_result.expectation_configurations
-            configuration = expectation_configurations[0]
-
-            # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.
-            success_keys: Tuple[str, ...] = (
-                expectation_impl.success_keys
-                if hasattr(expectation_impl, "success_keys")
-                else tuple()
-            )
-            arg_keys: Tuple[str, ...] = (
-                expectation_impl.arg_keys
-                if hasattr(expectation_impl, "arg_keys")
-                else tuple()
-            )
-            runtime_keys: Tuple[str, ...] = (
-                expectation_impl.runtime_keys
-                if hasattr(expectation_impl, "runtime_keys")
-                else None
-            ) or tuple()
-            # noinspection PyTypeChecker
-            override_keys: Tuple[str, ...] = success_keys + arg_keys + runtime_keys
-
-            key: str
-            value: Any
-            expectation_kwargs_overrides: dict = {
-                key: value
-                for key, value in expectation_kwargs.items()
-                if key in override_keys
-            }
-            expectation_kwargs_overrides = convert_to_json_serializable(
-                data=expectation_kwargs_overrides
-            )
-
-            expectation_kwargs = configuration.kwargs
-            expectation_kwargs.update(expectation_kwargs_overrides)
-
-            if meta is None:
-                meta = {}
-
-            meta["profiler_config"] = profiler.to_json_dict()
-
-        configuration = ExpectationConfiguration(
-            expectation_type=expectation_type,
-            kwargs=expectation_kwargs,
-            meta=meta,
-        )
-
-        return configuration
-
-    def build_rule_based_profiler_for_expectation(
-        self, expectation_type: str
-    ) -> Callable:
-        """
-        Given name of Expectation ("expectation_type"), builds effective RuleBasedProfiler object from configuration.
-        Args:
-            expectation_type (str): Name of Expectation for which Rule-Based Profiler may be configured.
-
-        Returns:
-            Function that builds effective RuleBasedProfiler object (for specified "expectation_type").
-        """
-        expectation_impl = get_expectation_impl(expectation_type)
-
-        def inst_rule_based_profiler(
-            *args, **kwargs
-        ) -> Optional[BaseRuleBasedProfiler]:
-            if args is None:
-                args = tuple()
-
-            if kwargs is None:
-                kwargs = {}
-
-            expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
-
-            allowed_config_keys: Tuple[
-                str, ...
-            ] = expectation_impl.get_allowed_config_keys()
-
-            args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
-
-            arg_name: str
-
-            idx: int
-            arg: Any
-            for idx, arg in enumerate(args):
-                try:
-                    arg_name = args_keys[idx]
-                    if arg_name in allowed_config_keys:
-                        expectation_kwargs[arg_name] = arg
-                    if arg_name == "meta":
-                        logger.warning(
-                            "Setting meta via args could be ambiguous; please use a kwarg instead."
-                        )
-                except IndexError:
-                    raise InvalidExpectationConfigurationError(
-                        f"Invalid positional argument: {arg}"
-                    )
-
-            success_keys: Tuple[str, ...] = (
-                expectation_impl.success_keys
-                if hasattr(expectation_impl, "success_keys")
-                else tuple()
-            )
-
-            auto: Optional[bool] = expectation_kwargs.get("auto")
-            profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
-                "profiler_config"
-            )
-
-            if auto and profiler_config is None:
-                raise ValueError(
-                    "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
-                )
-
-            profiler: Optional[BaseRuleBasedProfiler]
-
-            if auto:
-                # Save custom Rule-Based Profiler configuration for reconciling it with optionally-specified default
-                # Rule-Based Profiler configuration as an override argument to "BaseRuleBasedProfiler.run()" method.
-                override_profiler_config: Optional[RuleBasedProfilerConfig]
-
-                """
-                If default Rule-Based Profiler configuration exists, use it as base with custom Rule-Based Profiler
-                configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.
-                """
-                profiler_config_to_use = profiler_config
-                if not isinstance(profiler_config_to_use, RuleBasedProfilerConfig):
-                    raise TypeError(
-                        "profiler_config must be None or RuleBasedProfilerConfig"
-                    )
-
-                profiler = self._build_rule_based_profiler_from_config_and_runtime_args(
-                    expectation_type=expectation_type,
-                    expectation_kwargs=expectation_kwargs,
-                    success_keys=success_keys,
-                    profiler_config=profiler_config_to_use,
-                    override_profiler_config=None,
-                )
-            else:
-                profiler = None
-
-            return profiler
-
-        return inst_rule_based_profiler
 
     def _build_rule_based_profiler_from_config_and_runtime_args(  # noqa: PLR0913
         self,
