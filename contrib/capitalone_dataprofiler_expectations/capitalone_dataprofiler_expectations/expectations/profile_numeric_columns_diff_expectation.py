@@ -58,7 +58,7 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
     ):
         delta_between_thresholds = metrics.get(f"{self.profile_metric}")
         mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
+            "mostly", self._get_default_value("mostly")
         )
 
         unexpected_values = {}
