@@ -30,7 +30,37 @@ To learn more about Validations, see [Validator](../../terms/validator.md).
 
 5. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Run History** pane.
 
-6. Optional. Click **Share** to copy the URL for the Validation Results that you can share with another GX Cloud user.
+6. Optional. Click **Share** to copy the URL for the Validation Results and share them with another GX Cloud user.
+
+## Run a Validation on a Data Asset containing a splitter
+
+When you connect to a Data Asset, you can add a splitter to create Expectations and run validations on subsets of Data Asset records. If you've added a splitter, you can run a Validation on the latest Batch of data, or you can select a specific year, year and month, or year, month, and day period for the Validation. 
+
+To make the identification of Data Assets containing splitters easier, a label with splitter information appears next to the Data Asset name on the **Data Assets** page.
+
+1. In GX Cloud, click **Data Assets**.
+
+2. Click a Data Asset in the **Data Assets** list.
+
+3. Click the **Expectations** tab and then select an Expectation Suite in the **Expectation Suites** list.
+
+4. Select one of the following options:
+
+    - To run a Validation on a specific column, click the column name in the **Columns** pane, and then click **Validate**.
+
+    - To run a Validation on all columns, click **Validate**.
+
+5. Select one of the following options:
+
+    - **Latest Batch** - Run the Validation on the latest Batch of data.
+
+    - **Year/Year - Month/Year - Month - Day** - Select or enter a value to run the Validation on a Batch of data from a specific period.
+
+6. Click **Validate**.
+
+7. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Run History** pane.
+
+8. Optional. Click **Share** to copy the URL for the Validation Results and share them with another GX Cloud user.
 
 ## View Validation run history
 

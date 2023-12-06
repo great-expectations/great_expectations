@@ -55,17 +55,23 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 7. Select **Table Asset** or **Query Asset** and complete the following fields:
 
-    - **Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-8. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat step 7.
+8. Select the **Complete Asset** tab to create Expectations and run validations on the entire Data Asset, or select the **Batches** tab to create Expectations and run validations on subsets of Data Asset records and then complete the following fields:
 
-9. Click **Finish**.
+    - **Split Data Asset by** - Select **Year** to split Data Asset records by year, select **Year - Month** to split Data Asset records by year and month, or select **Year - Month - Day** to split Data Asset records by year, month, and day.
 
-10. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+    - **Column of datetime type** - Enter the name of the column that contains the date and time data.
+
+9. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat steps 7 and 8.
+
+10. Click **Finish**.
+
+11. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
 
 ## View Data Asset metrics
 

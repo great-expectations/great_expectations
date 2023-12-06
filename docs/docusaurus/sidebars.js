@@ -172,6 +172,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Run a Validation on a Data Asset containing a splitter',
+              href: '/docs/cloud/validations/manage_validations#run-a-validation-on-a-data-asset-containing-a-splitter',
+            },
+            {
+              type: 'link',
               label: 'View Validation run history',
               href: '/docs/cloud/validations/manage_validations#view-validation-run-history',
             },
