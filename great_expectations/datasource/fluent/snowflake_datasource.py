@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Final, Literal, Optional, Type, Union
+from typing import TYPE_CHECKING, Final, Literal, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
@@ -22,7 +22,6 @@ from great_expectations.datasource.fluent.sql_datasource import (
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
     from great_expectations.compatibility.pydantic.networks import Parts
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -170,37 +169,6 @@ class SnowflakeDatasource(SQLDatasource):
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
         # dump as json dict to force serialization of things like AnyUrl
         return self._json_dict(exclude=excluded_fields, exclude_none=True)
-
-    @override
-    def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
-        """
-        Overrides get_execution_engine in Datasource
-        Standard behavior is to assume all top-level Datasource config (unless part of `cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS`)
-        should be passed to the GX ExecutionEngine constructor.
-
-        for SQLAlchemy this would lead to creating 2 different `sqlalchemy.engine.Engine` objects
-        one for the Datasource and one for the ExecutionEngine. This is wasteful and causes multiple connections to
-        the database to be created.
-
-        For Snowflake specifically we may represent the connection_string as a dict, which is not supported by SQLAlchemy.
-        """
-        gx_execution_engine_type: Type[
-            SqlAlchemyExecutionEngine
-        ] = self.execution_engine_type
-
-        connection_string: str | None = (
-            self.connection_string if isinstance(self.connection_string, str) else None
-        )
-
-        gx_exec_engine = gx_execution_engine_type(
-            self.name,
-            connection_string=connection_string,
-            engine=self.get_engine(),
-            create_temp_table=self.create_temp_table,
-            data_context=self._data_context,
-        )
-        self._execution_engine = gx_exec_engine
-        return gx_exec_engine
 
     @override
     def get_engine(self) -> sqlalchemy.Engine:
