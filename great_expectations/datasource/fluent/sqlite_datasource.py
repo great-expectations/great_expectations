@@ -203,7 +203,11 @@ class SqliteDatasource(SQLDatasource):
 
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [SqliteTableAsset, SqliteQueryAsset]
-    _poolclass: ClassVar[Type[sa.pool.Pool]] = sa.pool.StaticPool
+
+    if sa:  # sqlalchemy might not be installed
+        _poolclass: ClassVar[Optional[Type[sa.pool.Pool]]] = sa.pool.StaticPool
+    else:
+        _poolclass = None
 
     # Subclass instance var overrides
     # right side of the operator determines the type name
