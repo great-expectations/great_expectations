@@ -150,7 +150,7 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    return False
+    return True
 
 
 #    return "DATABRICKS_RUNTIME_VERSION" in os.environ
