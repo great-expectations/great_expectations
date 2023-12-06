@@ -1098,6 +1098,7 @@ class SQLDatasource(Datasource):
             self.name,
             engine=self.get_engine(),
             create_temp_table=self.create_temp_table,
+            data_context=self._data_context,
         )
         self._execution_engine = gx_exec_engine
         return gx_exec_engine
