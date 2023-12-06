@@ -75,6 +75,7 @@ class _SparkDatasource(Datasource):
     @classmethod
     def _force_reuse_spark_context_deprecation_warning(cls, v: bool) -> bool:
         if v is not None:
+            # deprecated-v1.0.0
             warnings.warn(
                 "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
                 "In environments that allow it, the existing Spark context will be reused, adding the "
