@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import datetime
 import decimal
 import json
@@ -798,7 +797,6 @@ def get_or_create_spark_session(
 
     try:
         builder = pyspark.SparkSession.builder
-        spark_config = copy.deepcopy(spark_config)
 
         app_name: str | None = spark_config.get("spark.app.name")
         if app_name:
@@ -813,7 +811,12 @@ def get_or_create_spark_session(
             if k != "spark.app.name":
                 builder.config(k, v)
 
-        spark_session: pyspark.SparkSession = builder.getOrCreate()
+        spark_session: pyspark.SparkSession
+        try:
+            spark_session = builder.getOrCreate()
+        except pyspark.Py4JError:
+            builder.config("spark.databricks.pyspark.enablePy4JSecurity", "false")
+            spark_session = builder.getOrCreate()
 
         # in a local pyspark-shell the context config cannot be updated
         # unless you stop the Spark context and re-recreate it

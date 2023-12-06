@@ -80,3 +80,16 @@ try:
     from pyspark.sql.utils import AnalysisException
 except (ImportError, AttributeError):
     AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+with warnings.catch_warnings():
+    # DeprecationWarning: typing.io is deprecated, import directly from typing instead. typing.io will be removed in Python 3.12.
+    warnings.simplefilter(action="ignore", category=DeprecationWarning)
+    try:
+        import py4j
+    except ImportError:
+        py4j = SPARK_NOT_IMPORTED  # type: ignore[assignment]
+
+try:
+    from py4j.protocol import Py4JError
+except (ImportError, AttributeError):
+    Py4JError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
