@@ -67,6 +67,7 @@ class SparkDatasourceError(Exception):
 class _SparkDatasource(Datasource):
     # instance attributes
     spark_config: Union[SparkConfig, None] = None
+    force_reuse_spark_context: bool = True
     persist: bool = True
 
     @staticmethod
