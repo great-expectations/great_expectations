@@ -1512,6 +1512,7 @@ class ExpectationConfigurationSchema(Schema):
         for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
+        data["kwargs"] = convert_to_json_serializable(data["kwargs"])
         return data
 
     def _convert_uuids_to_str(self, data):
