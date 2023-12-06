@@ -6,6 +6,7 @@ import logging
 import pprint
 import uuid
 from copy import deepcopy
+from functools import partial
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -215,6 +216,18 @@ class ExpectationSuite(SerializableDictDot):
         """Has this ExpectationSuite been persisted to a DataContext?"""
         key = self._store.get_key(suite=self)
         return self._store.has_key(key=key)
+
+    def update_by_identity(
+        self, identity: int, expectation: Expectation
+    ) -> Expectation:
+        """Update an Expectation in the collection."""
+        for i, expectation_configuration in enumerate(self.expectation_configurations):
+            if id(expectation_configuration) == identity:
+                self.expectation_configurations[i] = expectation.configuration
+                if self._has_been_saved():
+                    self.save()
+                return expectation
+        raise KeyError("Cannot update Expectation because it was not found.")
 
     def add_citation(  # noqa: PLR0913
         self,
@@ -855,9 +868,13 @@ class ExpectationSuite(SerializableDictDot):
     ) -> Expectation:
         try:
             class_ = get_expectation_impl(expectation_configuration.expectation_type)
-            expectation = class_(
+            expectation: Expectation = class_(
                 meta=expectation_configuration.meta, **expectation_configuration.kwargs
             )  # Implicitly validates in constructor
+            save_callback = partial(
+                self.update_by_identity, identity=id(expectation_configuration)
+            )
+            expectation.register_save_callback(callback=save_callback)
             return expectation
         except (
             gx_exceptions.ExpectationNotFoundError,
