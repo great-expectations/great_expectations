@@ -100,14 +100,6 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
         "strict_max",
     )
 
-    default_kwarg_values = {
-        "min_value": None,
-        "strict_min": False,
-        "max_value": None,
-        "strict_max": False,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "min_value",

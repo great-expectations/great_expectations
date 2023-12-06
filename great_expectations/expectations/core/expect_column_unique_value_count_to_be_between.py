@@ -97,15 +97,6 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
         "max_value",
     )
 
-    # Default values
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "min_value": None,
-        "max_value": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "min_value",

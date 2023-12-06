@@ -147,12 +147,6 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "type_",
         "mostly",
     )
-    default_kwarg_values = {
-        "type_": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "type_",

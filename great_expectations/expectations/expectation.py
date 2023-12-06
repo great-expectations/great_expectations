@@ -270,8 +270,6 @@ class MetaExpectation(ModelMetaclass):
     attribute, or, if that is not set, by snake-casing the name of the class.
     """
 
-    default_kwarg_values: Dict[str, object] = {}
-
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
         # noinspection PyUnresolvedReferences

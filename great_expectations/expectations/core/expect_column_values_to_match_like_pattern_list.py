@@ -100,15 +100,6 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
     map_metric = "column_values.match_like_pattern_list"
     success_keys = ("mostly", "like_pattern_list", "match_on")
-    default_kwarg_values = {
-        "like_pattern_list": None,
-        "match_on": "any",
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": True,
-    }
     args_keys = (
         "column",
         "like_pattern_list",

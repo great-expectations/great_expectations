@@ -106,13 +106,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         "value_set",
         "mostly",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",
