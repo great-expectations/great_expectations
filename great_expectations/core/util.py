@@ -806,6 +806,7 @@ def get_or_create_spark_session(
         spark_session: pyspark.SparkSession = builder.getOrCreate()
 
         if in_databricks(spark_session=spark_session):
+            print("in databricks")
             if app_name:
                 warnings.warn(
                     "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
