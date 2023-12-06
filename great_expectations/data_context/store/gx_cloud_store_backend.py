@@ -454,7 +454,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     @override
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, str]]:  # type: ignore[override]
+    def list_keys(
+        self, prefix: Tuple = ()
+    ) -> List[Tuple[GXCloudRESTResource, str, str]]:
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
