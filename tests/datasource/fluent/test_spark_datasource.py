@@ -4,6 +4,7 @@ import copy
 import logging
 import pathlib
 from typing import TYPE_CHECKING
+from unittest import mock
 
 import pytest
 
@@ -154,3 +155,23 @@ def test_build_batch_request_raises_if_missing_dataframe(
     assert "Cannot build batch request for dataframe asset without a dataframe" in str(
         e.value
     )
+
+
+@pytest.mark.spark
+def test_databricks_app_name_warning(
+    empty_data_context: AbstractDataContext,
+    test_df_pandas: pd.DataFrame,
+    spark_session,
+    spark_df_from_pandas_df,
+):
+    spark_config = {"spark.app.name": "Name other than `Databricks Shell`"}
+    spark_df = spark_df_from_pandas_df(spark_session, test_df_pandas)
+    spark_datasource = empty_data_context.sources.add_spark(
+        name="my_spark_datasource",
+        spark_config=spark_config,
+    )
+    dataframe_asset = spark_datasource.add_dataframe_asset("my_dataframe_asset")
+    batch_request = dataframe_asset.build_batch_request(dataframe=spark_df)
+    with mock.patch("great_expectations.core.util.in_databricks", return_value=True):
+        with pytest.warns(RuntimeWarning):
+            _ = empty_data_context.get_validator(batch_request=batch_request)
