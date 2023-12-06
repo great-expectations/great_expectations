@@ -50,6 +50,9 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.data_context.context_factory import (
     get_context as context_factory,
 )
+from great_expectations.data_context.data_context.context_factory import (
+    project_manager,
+)
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
@@ -370,7 +373,7 @@ def build_in_memory_runtime_context(
     )
 
     context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
-
+    project_manager.set_project(project=context)
     return context
 
 
