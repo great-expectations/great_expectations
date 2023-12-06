@@ -19,8 +19,8 @@ import great_expectations.expectations as gxe
 # </snippet>
 
 # Set up
-# <snippet name="tutorials/quickstart/quickstart.py get_context">
 # NOTE: Context is a singleton now. Once the context has been set instantiated in a session
+# <snippet name="tutorials/quickstart/quickstart.py get_context">
 context = gx.set_context()
 # </snippet>
 
@@ -80,4 +80,4 @@ suite.add(
 validation_result = batch.validate(suite)
 
 # TODO: ticket for cloud UI needs to support ephemeral assets for this to make sense
-validation_result.build_docs()
+validation_result.open_docs()

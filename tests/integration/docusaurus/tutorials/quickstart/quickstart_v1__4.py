@@ -64,5 +64,5 @@ results = context.get_checkpoint("taxi").run()
 
 # View results
 # <snippet name="tutorials/quickstart/quickstart.py view_results">
-results.open()
+results.open_docs()
 # </snippet>
