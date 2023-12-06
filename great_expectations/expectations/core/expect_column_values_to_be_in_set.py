@@ -100,9 +100,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field(
-        default_factory=list
-    )
+    value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field([])
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
