@@ -218,7 +218,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 "In environments that allow it, the existing Spark context will be reused, adding the "
                 "spark_config options that have been passed. If the Spark context cannot be updated with "
                 "the spark_config, the context will be stopped and restarted with the new spark_config.",
-                category=DeprectationWarning,
+                category=DeprecationWarning,
             )
         super().__init__(*args, **kwargs)
 
