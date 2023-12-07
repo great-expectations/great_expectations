@@ -938,7 +938,7 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     try:
         # noinspection PyUnresolvedReferences
         if hasattr(dialect, "ClickHouseDialect") or isinstance(
-                dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
+            dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
         ):
             dialect_supported = True
     except (AttributeError, TypeError):
