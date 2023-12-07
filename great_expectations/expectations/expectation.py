@@ -1174,17 +1174,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return domain_kwargs
 
     @public_api
-    def get_success_kwargs(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> Dict[str, Any]:
-        """Retrieve the success kwargs.
-
-        Args:
-            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
-                the success kwargs from the configuration attribute of the Expectation instance will be returned.
-        """
-        if not configuration:
-            configuration = self.configuration
+    def get_success_kwargs(self) -> Dict[str, Any]:
+        """Retrieve the success kwargs."""
+        configuration = self.configuration
 
         domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs(
             configuration=configuration
