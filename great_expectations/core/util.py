@@ -867,8 +867,8 @@ def _config_updatable(spark_session: _ConcreteSparkSession) -> bool:
     updatable = False
     try:
         updatable = spark_session.sparkContext.appName == DATABRICKS_SHELL_APP_NAME
-    except pyspark.PySparkNotImplementedError:
-        pass
+    except pyspark.PySparkNotImplementedError as e:
+        raise e
     return updatable
 
 
