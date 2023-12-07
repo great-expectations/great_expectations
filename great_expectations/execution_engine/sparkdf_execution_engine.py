@@ -6,6 +6,7 @@ import logging
 import warnings
 from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -71,6 +72,9 @@ from great_expectations.validator.computed_metric import MetricValue  # noqa: TC
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.util import SparkSession
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +209,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     ) -> None:
         self._persist = persist
 
-        self.spark: pyspark.SparkSession = get_or_create_spark_session(
+        self.spark: SparkSession = get_or_create_spark_session(
             spark_config=spark_config,
         )
 

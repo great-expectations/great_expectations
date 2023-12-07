@@ -16,6 +16,7 @@ from great_expectations.util import get_sqlalchemy_subquery_type
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.core.util import SparkSession
 
 
 class QueryColumn(QueryMetricProvider):
@@ -88,7 +89,7 @@ class QueryColumn(QueryMetricProvider):
         column: Optional[str] = metric_value_kwargs.get("column")
         query = query.format(col=column, active_batch="tmp_view")  # type: ignore[union-attr] # could be none
 
-        engine: pyspark.SparkSession = execution_engine.spark
+        engine: SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).collect()
 
         return [element.asDict() for element in result]

@@ -96,6 +96,7 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.supporting_types import (
         ExpectationExecutionEngineDiagnostics,
     )
+    from great_expectations.core.util import SparkSession
     from great_expectations.data_context import AbstractDataContext
 
 P = ParamSpec("P")
@@ -1178,7 +1179,7 @@ def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
 
 def build_spark_validator_with_data(
     df: Union[pd.DataFrame, pyspark.DataFrame],
-    spark: pyspark.SparkSession,
+    spark: SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
