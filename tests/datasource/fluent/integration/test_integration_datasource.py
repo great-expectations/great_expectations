@@ -63,6 +63,10 @@ def test_run_checkpoint_and_data_doc(
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.slow  # sql: 7s  # pandas: 4s
+@pytest.mark.xfail(
+    strict=False,
+    reason="DataAssistants are to be removed from OSS in advance of the V1 release",
+)
 def test_run_data_assistant_and_checkpoint(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
@@ -73,6 +77,10 @@ def test_run_data_assistant_and_checkpoint(
 
 # This is marked by the various backend used in testing in the multibatch_datasource_test_data fixture.
 @pytest.mark.slow  # sql: 33s  # pandas: 9s
+@pytest.mark.xfail(
+    strict=False,
+    reason="DataAssistants are to be removed from OSS in advance of the V1 release",
+)
 def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test_data):
     """Test using data assistants to create expectation suite using multiple batches and to run checkpoint"""
     run_multibatch_data_assistant_and_checkpoint(
