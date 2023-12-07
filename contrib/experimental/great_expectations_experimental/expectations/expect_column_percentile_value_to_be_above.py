@@ -100,7 +100,7 @@ class ExpectColumnPercentileToBeAbove(ColumnAggregateExpectation):
         """Validates the given data above the set value for the column given percentile"""
 
         column_percentile = metrics["column.percentile"]
-        given_value = self.get_success_kwargs(configuration).get("value")
+        given_value = self.get_success_kwargs().get("value")
 
         # Checking if the given percentile lies above the threshold
 

@@ -132,7 +132,7 @@ class ExpectColumnToHaveNoDaysMissing(ColumnAggregateExpectation):
         date_set = {distinct_dates_sorted[0] + timedelta(x) for x in range(days_diff)}
         missing_days = sorted(date_set - set(distinct_dates_sorted))
 
-        threshold = self.get_success_kwargs(configuration).get("threshold")
+        threshold = self.get_success_kwargs().get("threshold")
         success: bool = len(missing_days) <= threshold
         return {
             "success": success,
