@@ -18,7 +18,8 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 if TYPE_CHECKING:
     import py
 
-    from great_expectations.core.util import SparkSession
+    from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import engine
 
 LOGGER: Final = logging.getLogger("tests")
 
@@ -163,10 +164,15 @@ def spark_df_from_pandas_df():
 
 
 @pytest.fixture(scope="module")
-def spark_session() -> SparkSession:
-    return get_or_create_spark_session(
-        spark_config={
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "450m",
-        }
-    )
+def spark_session() -> pyspark.SparkSession:
+    from great_expectations.compatibility import pyspark
+
+    if pyspark.SparkSession:  # type: ignore[truthy-function]
+        return get_or_create_spark_session(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+            }
+        )
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
