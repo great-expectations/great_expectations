@@ -792,7 +792,7 @@ def get_or_create_spark_session(
     try:
         spark_session_cls: type[_SparkSession]
         # if databricks-connect is installed
-        if databricks:
+        if databricks.connect:
             spark_session_cls = databricks.connect.DatabricksSession
         else:
             spark_session_cls = pyspark._SparkSession
