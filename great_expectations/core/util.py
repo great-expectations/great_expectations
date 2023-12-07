@@ -773,16 +773,16 @@ DATABRICKS_SHELL_APP_NAME = "Databricks Shell"
 
 
 if TYPE_CHECKING:
-    _ConcreteSparkSessionT = Union[pyspark.SparkSession, pyspark.SparkConnectSession]
-    _SparkSessionT = Union[pyspark.SparkSession, databricks.connect.DatabricksSession]
-    _SparkSessionBuilderT = Union[
+    _ConcreteSparkSession = Union[pyspark.SparkSession, pyspark.SparkConnectSession]
+    _SparkSession = Union[pyspark.SparkSession, databricks.connect.DatabricksSession]
+    _SparkSessionBuilder = Union[
         pyspark.SparkSession.Builder, databricks.connect.DatabricksSession.Builder
     ]
 
 
 def get_or_create_spark_session(
     spark_config: Optional[dict[str, str]] = None,
-) -> _ConcreteSparkSessionT:
+) -> _ConcreteSparkSession:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Args:
@@ -794,18 +794,18 @@ def get_or_create_spark_session(
     spark_config = spark_config or {}
 
     try:
+        spark_session_cls: type[_SparkSession]
         # if databricks-connect is installed
-        spark_session_cls: type[_SparkSessionT]
         if databricks:
             spark_session_cls = databricks.connect.DatabricksSession
         else:
             spark_session_cls = pyspark.SparkSession
 
-        builder: _SparkSessionBuilderT = _get_builder_from_spark_config(
+        builder: _SparkSessionBuilder = _get_builder_from_spark_config(
             spark_session_cls=spark_session_cls,
             spark_config=spark_config,
         )
-        spark_session: _ConcreteSparkSessionT
+        spark_session: _ConcreteSparkSession
         try:
             spark_session = builder.getOrCreate()
         except ValueError as e:
@@ -832,10 +832,10 @@ def get_or_create_spark_session(
 
 
 def _validate_spark_session_config(
-    spark_session: _ConcreteSparkSessionT,
-    builder: _SparkSessionBuilderT,
+    spark_session: _ConcreteSparkSession,
+    builder: _SparkSessionBuilder,
     spark_config: dict,
-) -> _ConcreteSparkSessionT:
+) -> _ConcreteSparkSession:
     if _config_updatable(spark_session=spark_session):
         if spark_config.get("spark.app.name"):
             warnings.warn(
@@ -857,7 +857,7 @@ def _validate_spark_session_config(
     return spark_session
 
 
-def _config_updatable(spark_session: _ConcreteSparkSessionT) -> bool:
+def _config_updatable(spark_session: _ConcreteSparkSession) -> bool:
     """
     Tests whether we are able to update an existing Spark Session config.
 
@@ -873,9 +873,9 @@ def _config_updatable(spark_session: _ConcreteSparkSessionT) -> bool:
 
 
 def _get_builder_from_spark_config(
-    spark_session_cls: type[_SparkSessionT], spark_config: dict
-) -> _SparkSessionBuilderT:
-    builder: _SparkSessionBuilderT = spark_session_cls.builder
+    spark_session_cls: type[_SparkSession], spark_config: dict
+) -> _SparkSessionBuilder:
+    builder: _SparkSessionBuilder = spark_session_cls.builder
 
     # unable to access builder config with connect session
     if isinstance(builder, pyspark.SparkSession.Builder):
