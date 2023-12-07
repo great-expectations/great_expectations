@@ -1,6 +1,6 @@
 import inspect
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -143,6 +143,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     }
 
     map_metric = "column_values.of_type"
+    domain_kwargs: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
     success_keys = (
         "type_",
         "mostly",

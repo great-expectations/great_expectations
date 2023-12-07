@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -105,6 +105,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
     """
 
+    condition_parser: Union[str, None] = "pandas"
     type_list: Union[List[str], EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
@@ -118,6 +119,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     }
 
     map_metric = "column_values.in_type_list"
+    domain_kwargs: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
 
     success_keys = (
         "type_list",
