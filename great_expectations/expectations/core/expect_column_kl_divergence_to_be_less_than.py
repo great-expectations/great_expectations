@@ -164,8 +164,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
     tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
     bucketize_data: bool = True
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -205,7 +205,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 configuration, execution_engine, runtime_configuration
             )
         )
-        partition_object = configuration.kwargs["partition_object"]
+        partition_object = configuration.kwargs.get("partition_object")
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
         bins = None

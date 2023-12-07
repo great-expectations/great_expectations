@@ -269,13 +269,6 @@ fluent_datasources = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="how_to_create_and_edit_expectations_with_a_profiler",
-        data_context_dir=None,
-        data_dir=None,
-        user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
