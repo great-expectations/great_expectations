@@ -30,7 +30,7 @@ import pandas as pd
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
+from great_expectations.compatibility import databricks, pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
@@ -140,16 +140,6 @@ def in_jupyter_notebook():
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
-
-
-def in_databricks(spark_session: pyspark.SparkSession) -> bool:
-    """
-    Tests whether we are in a Databricks environment.
-
-    Returns:
-        bool
-    """
-    return spark_session.sparkContext.appName == "Databricks Shell"
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
@@ -779,9 +769,20 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
+DATABRICKS_SHELL_APP_NAME = "Databricks Shell"
+
+
+if TYPE_CHECKING:
+    _ConcreteSparkSessionT = Union[pyspark.SparkSession, pyspark.SparkConnectSession]
+    _SparkSessionT = Union[pyspark.SparkSession, databricks.connect.DatabricksSession]
+    _SparkSessionBuilderT = Union[
+        pyspark.SparkSession.Builder, databricks.connect.DatabricksSession.Builder
+    ]
+
+
 def get_or_create_spark_session(
     spark_config: Optional[dict[str, str]] = None,
-) -> pyspark.SparkSession:
+) -> _ConcreteSparkSessionT:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Args:
@@ -793,8 +794,91 @@ def get_or_create_spark_session(
     spark_config = spark_config or {}
 
     try:
-        builder = pyspark.SparkSession.builder
+        # if databricks-connect is installed
+        spark_session_cls: type[_SparkSessionT]
+        if databricks:
+            spark_session_cls = databricks.connect.DatabricksSession
+        else:
+            spark_session_cls = pyspark.SparkSession
 
+        builder: _SparkSessionBuilderT = _get_builder_from_spark_config(
+            spark_session_cls=spark_session_cls,
+            spark_config=spark_config,
+        )
+        spark_session: _ConcreteSparkSessionT
+        try:
+            spark_session = builder.getOrCreate()
+        except ValueError as e:
+            if "auth" in str(e):
+                raise ConnectionError(
+                    f"If using Spark/Databricks Connect, environment variables must be set -> {e!r}"
+                ) from e
+            else:
+                raise e
+
+        spark_session = _validate_spark_session_config(
+            spark_session=spark_session,
+            builder=builder,
+            spark_config=spark_config,
+        )
+
+    except AttributeError as e:
+        logger.error(
+            "Unable to load spark context; install optional spark dependency for support."
+        )
+        raise e
+
+    return spark_session
+
+
+def _validate_spark_session_config(
+    spark_session: _ConcreteSparkSessionT,
+    builder: _SparkSessionBuilderT,
+    spark_config: dict,
+) -> _ConcreteSparkSessionT:
+    if _config_updatable(spark_session=spark_session):
+        if spark_config.get("spark.app.name"):
+            warnings.warn(
+                "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
+                category=RuntimeWarning,
+            )
+    else:
+        # in a local pyspark-shell the context config cannot be updated
+        # unless you stop the Spark context and re-recreate it
+        retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
+        stopped = False
+        for key, value in spark_config.items():
+            if retrieved_spark_config.get(key) != value:
+                spark_session.stop()
+                stopped = True
+                break
+        if stopped:
+            spark_session = builder.getOrCreate()
+    return spark_session
+
+
+def _config_updatable(spark_session: _ConcreteSparkSessionT) -> bool:
+    """
+    Tests whether we are able to update an existing Spark Session config.
+
+    Returns:
+        bool
+    """
+    updatable = False
+    try:
+        updatable = spark_session.sparkContext.appName == DATABRICKS_SHELL_APP_NAME
+    except pyspark.PySparkNotImplementedError:
+        pass
+    return updatable
+
+
+def _get_builder_from_spark_config(
+    spark_session_cls: type[_SparkSessionT], spark_config: dict
+) -> _SparkSessionBuilderT:
+    builder: _SparkSessionBuilderT = spark_session_cls.builder
+
+    # unable to access builder config with connect session
+    if isinstance(builder, pyspark.SparkSession.Builder):
         # user could get in trouble here if they try to set config options that are not allowed in their runtime
         for k, v in spark_config.items():
             if k != "spark.app.name":
@@ -804,36 +888,7 @@ def get_or_create_spark_session(
         if app_name:
             builder.appName(app_name)
 
-        spark_session: pyspark.SparkSession = builder.getOrCreate()
-
-        if in_databricks(spark_session=spark_session):
-            if app_name:
-                warnings.warn(
-                    "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
-                    category=RuntimeWarning,
-                )
-        else:
-            # in a local pyspark-shell the context config cannot be updated
-            # unless you stop the Spark context and re-recreate it
-            retrieved_spark_config: pyspark.SparkConf = (
-                spark_session.sparkContext.getConf()
-            )
-            stopped = False
-            for key, value in spark_config.items():
-                if retrieved_spark_config.get(key) != value:
-                    spark_session.stop()
-                    stopped = True
-                    break
-            if stopped:
-                spark_session = builder.getOrCreate()
-
-    except AttributeError as e:
-        logger.error(
-            "Unable to load spark context; install optional spark dependency for support."
-        )
-        raise e
-
-    return spark_session
+    return builder
 
 
 def get_sql_dialect_floating_point_infinity_value(

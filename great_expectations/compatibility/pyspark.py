@@ -80,3 +80,13 @@ try:
     from pyspark.sql.utils import AnalysisException
 except (ImportError, AttributeError):
     AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
+    from pyspark.errors import PySparkNotImplementedError
+except (ImportError, AttributeError):
+    PySparkNotImplementedError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
+    from pyspark.sql.connect.session import SparkSession as SparkConnectSession
+except (ImportError, AttributeError):
+    SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
