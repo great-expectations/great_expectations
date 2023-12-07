@@ -816,7 +816,7 @@ def get_or_create_spark_session(
         else:
             spark_session_cls = pyspark._SparkSession
 
-        builder: pyspark.SparkSession.Builder = _get_builder_from_spark_config(
+        builder: pyspark._SparkSession.Builder = _get_builder_from_spark_config(
             spark_session_cls=spark_session_cls,
             spark_config=spark_config,
         )
@@ -848,7 +848,7 @@ def get_or_create_spark_session(
 
 def _validate_spark_session_config(
     spark_session: pyspark.SparkSession,
-    builder: pyspark.SparkSession.Builder,
+    builder: pyspark._SparkSession.Builder,
     spark_config: dict,
 ) -> pyspark.SparkSession:
     if _spark_config_updatable(spark_session=spark_session):
@@ -857,12 +857,8 @@ def _validate_spark_session_config(
                 "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
                 category=RuntimeWarning,
             )
-    elif isinstance(spark_session, pyspark._SparkConnectSession):
-        warnings.warn(
-            "Unable to update spark_config for remote sessions. Passing spark_config had no effect.",
-            category=RuntimeWarning,
-        )
-    else:
+    # for connect sessions, the config is not updatable nor can we stop it
+    elif isinstance(spark_session, pyspark._SparkSession):
         # in a local pyspark-shell the context config cannot be updated
         # unless you stop the Spark context and re-recreate it
         retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
@@ -898,8 +894,8 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
 
 def _get_builder_from_spark_config(
     spark_session_cls: type[_SparkSession], spark_config: dict
-) -> pyspark.SparkSession.Builder:
-    builder: pyspark.SparkSession.Builder = spark_session_cls.builder
+) -> pyspark._SparkSession.Builder:
+    builder: pyspark._SparkSession.Builder = spark_session_cls.builder
 
     # unable to access builder config with connect sessions
     if spark_session_cls == pyspark._SparkSession:
@@ -911,6 +907,11 @@ def _get_builder_from_spark_config(
         app_name: str | None = spark_config.get("spark.app.name")
         if app_name:
             builder.appName(app_name)
+    elif spark_session_cls == pyspark._SparkConnectSession:
+        warnings.warn(
+            "Unable to update spark_config for remote sessions. Passing spark_config had no effect.",
+            category=RuntimeWarning,
+        )
 
     return builder
 
