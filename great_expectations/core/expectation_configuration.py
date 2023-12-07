@@ -17,7 +17,7 @@ from typing import (
 )
 
 import jsonpatch
-from marshmallow import Schema, ValidationError, fields, post_dump, post_load
+from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
 from great_expectations.compatibility.typing_extensions import override
@@ -1520,6 +1520,12 @@ class ExpectationConfigurationSchema(Schema):
     )
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
+
+    @pre_dump
+    def convert_result_to_serializable(self, data, **kwargs):
+        data = copy.deepcopy(data)
+        data["kwargs"] = convert_to_json_serializable(data.get("kwargs", {}))
+        return data
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:

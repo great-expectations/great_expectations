@@ -50,7 +50,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
-    threshold: Union[float, EvaluationParameterDict]
+    threshold: Union[int, float, EvaluationParameterDict]
     double_sided: Union[bool, EvaluationParameterDict]
 
     # This dictionary contains metadata for display in the public gallery
