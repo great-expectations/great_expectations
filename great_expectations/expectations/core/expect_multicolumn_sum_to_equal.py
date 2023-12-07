@@ -31,7 +31,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
     Args:
         column_list (tuple or list): Set of columns to be checked
-        sum_total (float): expected sum of columns
+        sum_total (int or float): expected sum of columns
 
     Keyword Args:
         ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
