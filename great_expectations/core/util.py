@@ -862,7 +862,7 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
     """
     app_name: str
     try:
-        app_name = spark_session.sparkContext.appName
+        app_name = spark_session.sparkContext.appName  # type: ignore[assignment]  # handled by try/except
     except pyspark.PySparkNotImplementedError:
         app_name = ""
 

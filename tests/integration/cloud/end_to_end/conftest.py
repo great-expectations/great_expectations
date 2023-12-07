@@ -167,7 +167,7 @@ def spark_df_from_pandas_df():
 def spark_session() -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
-    if pyspark.SparkSession:  # type: ignore[truthy-function]
+    if pyspark.SparkSession:
         return get_or_create_spark_session(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
