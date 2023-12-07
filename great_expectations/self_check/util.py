@@ -1264,7 +1264,7 @@ def build_sa_execution_engine(  # noqa: PLR0913
 
 # Builds a Spark Execution Engine
 def build_spark_engine(
-    spark: pyspark.SparkSession,
+    spark: SparkSession,
     df: Union[pd.DataFrame, pyspark.DataFrame],
     schema: Optional[pyspark.types.StructType] = None,
     batch_id: Optional[str] = None,

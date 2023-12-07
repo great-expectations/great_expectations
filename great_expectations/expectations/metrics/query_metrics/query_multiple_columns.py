@@ -16,6 +16,7 @@ from great_expectations.util import get_sqlalchemy_subquery_type
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.core.util import SparkSession
 
 
 class QueryMultipleColumns(QueryMetricProvider):
@@ -114,7 +115,7 @@ class QueryMultipleColumns(QueryMetricProvider):
             active_batch="tmp_view",
         )
 
-        engine: pyspark.SparkSession = execution_engine.spark
+        engine: SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).collect()
 
         return [element.asDict() for element in result]
