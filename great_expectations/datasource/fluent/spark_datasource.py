@@ -40,6 +40,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    TestConnectionError,
     _DataAssetT,
 )
 
@@ -114,7 +115,10 @@ class _SparkDatasource(Datasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        self.get_execution_engine()
+        try:
+            self.get_execution_engine()
+        except ConnectionError as e:
+            raise TestConnectionError(e) from e
 
     # End Abstract Methods
 
@@ -279,10 +283,6 @@ class SparkDatasource(_SparkDatasource):
     type: Literal["spark"] = "spark"
 
     assets: List[DataFrameAsset] = []
-
-    @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        ...
 
     @public_api
     @deprecated_argument(

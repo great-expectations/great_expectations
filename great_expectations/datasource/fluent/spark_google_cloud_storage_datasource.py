@@ -114,6 +114,11 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             TestConnectionError: If the connection test fails.
         """
         try:
+            super().test_connection()
+        except TestConnectionError as e:
+            raise TestConnectionError(e) from e
+
+        try:
             _ = self._get_gcs_client()
         except Exception as e:
             raise TestConnectionError(
