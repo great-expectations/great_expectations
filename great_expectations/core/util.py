@@ -771,9 +771,6 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 
 if TYPE_CHECKING:
     _SparkSession = Union[pyspark._SparkSession, databricks.connect.DatabricksSession]
-    _SparkSessionBuilder = Union[
-        pyspark._SparkSession.Builder, databricks.connect.DatabricksSession.Builder
-    ]
 
 
 def get_or_create_spark_session(
@@ -797,7 +794,7 @@ def get_or_create_spark_session(
         else:
             spark_session_cls = pyspark._SparkSession
 
-        builder: _SparkSessionBuilder = _get_builder_from_spark_config(
+        builder: pyspark.SparkSession.Builder = _get_builder_from_spark_config(
             spark_session_cls=spark_session_cls,
             spark_config=spark_config,
         )
@@ -829,7 +826,7 @@ def get_or_create_spark_session(
 
 def _validate_spark_session_config(
     spark_session: pyspark.SparkSession,
-    builder: _SparkSessionBuilder,
+    builder: pyspark.SparkSession.Builder,
     spark_config: dict,
 ) -> pyspark.SparkSession:
     if _spark_config_updatable(spark_session=spark_session):
@@ -838,6 +835,11 @@ def _validate_spark_session_config(
                 "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
                 category=RuntimeWarning,
             )
+    elif isinstance(spark_session, pyspark._SparkConnectSession):
+        warnings.warn(
+            "Unable to update spark_config for remote sessions. Passing spark_config had no effect.",
+            category=RuntimeWarning,
+        )
     else:
         # in a local pyspark-shell the context config cannot be updated
         # unless you stop the Spark context and re-recreate it
@@ -864,6 +866,8 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
     try:
         app_name = spark_session.sparkContext.appName  # type: ignore[assignment]  # handled by try/except
     except pyspark.PySparkNotImplementedError:
+        # if the session is a Spark/Databricks Connect session,
+        # this error is raised and the config is not updatable
         app_name = ""
 
     updatable = "databricks" in app_name.lower()
@@ -872,11 +876,11 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
 
 def _get_builder_from_spark_config(
     spark_session_cls: type[_SparkSession], spark_config: dict
-) -> _SparkSessionBuilder:
-    builder: _SparkSessionBuilder = spark_session_cls.builder
+) -> pyspark.SparkSession.Builder:
+    builder: pyspark.SparkSession.Builder = spark_session_cls.builder
 
-    # unable to access builder config with connect session
-    if isinstance(builder, pyspark._SparkSession.Builder):
+    # unable to access builder config with connect sessions
+    if spark_session_cls == pyspark._SparkSession:
         # user could get in trouble here if they try to set config options that are not allowed in their runtime
         for k, v in spark_config.items():
             if k != "spark.app.name":

@@ -164,7 +164,7 @@ def test_databricks_app_name_warning(
     spark_session,
     spark_df_from_pandas_df,
 ):
-    spark_config = {"spark.app.name": "Name other than `Databricks Shell`"}
+    spark_config = {"spark.app.name": "Name not containing `databricks`"}
     spark_df = spark_df_from_pandas_df(spark_session, test_df_pandas)
     spark_datasource = empty_data_context.sources.add_spark(
         name="my_spark_datasource",
@@ -174,6 +174,6 @@ def test_databricks_app_name_warning(
     batch_request = dataframe_asset.build_batch_request(dataframe=spark_df)
     with pytest.warns(RuntimeWarning):
         with mock.patch(
-            "great_expectations.core.util.in_databricks", return_value=True
+            "great_expectations.core.util._spark_config_updatable", return_value=True
         ):
             _ = empty_data_context.get_validator(batch_request=batch_request)
