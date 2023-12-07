@@ -63,7 +63,7 @@ except (ImportError, AttributeError):
     _SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql.connect.session import SparkSession as _SparkConnectSession
+    from pyspark.sql.connect import SparkSession as _SparkConnectSession
 except (ImportError, AttributeError):
     _SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
