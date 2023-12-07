@@ -58,7 +58,7 @@ except (ImportError, AttributeError):
     Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import _SparkSession
+    from pyspark.sql import SparkSession as _SparkSession
 except (ImportError, AttributeError):
     _SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
