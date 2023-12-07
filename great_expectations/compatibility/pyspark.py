@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from typing import Union
 
 from great_expectations.compatibility.not_imported import NotImported
 
@@ -57,9 +58,16 @@ except (ImportError, AttributeError):
     Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import SparkSession
+    from pyspark.sql import _SparkSession
 except (ImportError, AttributeError):
-    SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    _SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
+    from pyspark.sql.connect.session import SparkSession as _SparkConnectSession
+except (ImportError, AttributeError):
+    _SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+SparkSession = Union[_SparkSession, _SparkConnectSession]
 
 try:
     from pyspark.sql import SQLContext
@@ -72,9 +80,18 @@ except (ImportError, AttributeError):
     Window = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql.readwriter import DataFrameReader
+    from pyspark.sql.readwriter import DataFrameReader as _DataFrameReader
 except (ImportError, AttributeError):
-    DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    _DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
+    from pyspark.sql.connect.readwriter import (
+        DataFrameReader as _ConnectDataFrameReader,
+    )
+except (ImportError, AttributeError):
+    _ConnectDataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+DataFrameReader = Union[_DataFrameReader, _ConnectDataFrameReader]
 
 try:
     from pyspark.sql.utils import AnalysisException
@@ -85,8 +102,3 @@ try:
     from pyspark.errors import PySparkNotImplementedError
 except (ImportError, AttributeError):
     PySparkNotImplementedError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-try:
-    from pyspark.sql.connect.session import SparkSession as SparkConnectSession
-except (ImportError, AttributeError):
-    SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
