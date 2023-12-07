@@ -82,9 +82,10 @@ expected_validation_result = {
 }
 # </snippet>
 
+actual_validation_result = downstream_validator_validation_result.to_json_dict()
 assert (
-    expected_validation_result == downstream_validator_validation_result.to_json_dict()
-)
+    actual_validation_result == expected_validation_result
+), f"Validation result does not match expected result: {actual_validation_result}"
 
 # <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py save downstream_expectation_suite">
 downstream_validator.save_expectation_suite(discard_failed_expectations=False)
