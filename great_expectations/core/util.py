@@ -773,6 +773,28 @@ if TYPE_CHECKING:
     _SparkSession = Union[pyspark._SparkSession, databricks.connect.DatabricksSession]
 
 
+def get_or_create_spark_application(
+    spark_config: Optional[dict[str, str]] = None,
+    force_reuse_spark_context: Optional[bool] = None,
+) -> pyspark.SparkSession:
+    # deprecated-v1.0.0
+    warnings.warn(
+        "Utility method get_or_create_spark_application() is deprecated and will be removed in v1.0.0. "
+        "Please use the method great_expectations.core.get_or_create_spark_session() instead.",
+        category=DeprecationWarning,
+    )
+    if force_reuse_spark_context is not None:
+        # deprecated-v1.0.0
+        warnings.warn(
+            "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+            "In environments that allow it, the existing Spark context will be reused, adding the "
+            "spark_config options that have been passed. If the Spark context cannot be updated with "
+            "the spark_config, the context will be stopped and restarted with the new spark_config.",
+            category=DeprecationWarning,
+        )
+    return get_or_create_spark_session(spark_config=spark_config)
+
+
 def get_or_create_spark_session(
     spark_config: Optional[dict[str, str]] = None,
 ) -> pyspark.SparkSession:
