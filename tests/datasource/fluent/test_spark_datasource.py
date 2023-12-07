@@ -160,20 +160,14 @@ def test_build_batch_request_raises_if_missing_dataframe(
 @pytest.mark.spark
 def test_databricks_app_name_warning(
     empty_data_context: AbstractDataContext,
-    test_df_pandas: pd.DataFrame,
     spark_session,
-    spark_df_from_pandas_df,
 ):
     spark_config = {"spark.app.name": "Name not containing `databricks`"}
-    spark_df = spark_df_from_pandas_df(spark_session, test_df_pandas)
-    spark_datasource = empty_data_context.sources.add_spark(
-        name="my_spark_datasource",
-        spark_config=spark_config,  # type: ignore[arg-type]
-    )
-    dataframe_asset = spark_datasource.add_dataframe_asset("my_dataframe_asset")
-    batch_request = dataframe_asset.build_batch_request(dataframe=spark_df)
     with pytest.warns(RuntimeWarning):
         with mock.patch(
             "great_expectations.core.util._spark_config_updatable", return_value=True
         ):
-            _ = empty_data_context.get_validator(batch_request=batch_request)
+            _ = empty_data_context.sources.add_spark(
+                name="my_spark_datasource",
+                spark_config=spark_config,  # type: ignore[arg-type]
+            )

@@ -114,9 +114,7 @@ class _SparkDatasource(Datasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a _SparkDatasource subclass."""
-        )
+        self.get_execution_engine()
 
     # End Abstract Methods
 
