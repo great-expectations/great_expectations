@@ -213,6 +213,15 @@ class DataAsset:
                         self._data_context,
                     )
 
+                # update evaluation_args with defaults from expectation signature
+                default_kwarg_values = {
+                    k: v.default
+                    for k, v in inspect.signature(func).parameters.items()
+                    if v.default is not inspect.Parameter.empty
+                }
+                default_kwarg_values.update(evaluation_args)
+                evaluation_args = default_kwarg_values
+
                 # Construct the expectation_config object
                 expectation_config = ExpectationConfiguration(
                     expectation_type=method_name, kwargs=expectation_args, meta=meta
