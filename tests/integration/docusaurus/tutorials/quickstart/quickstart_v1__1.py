@@ -55,12 +55,7 @@ def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
 for tab_name in QuickstartDatasourceTabs:
     batch = get_quickstart_batch(datasource_type=tab_name)
 
-# Create Expectations
 # <snippet name="tutorials/quickstart/quickstart.py create_expectation">
-# Note that we're using the gx namespace here for all expectations; will require dynamic import at top of package
-# Demo beats:
-# 1. TODO: Check with champions on positional args -- proposal is to allow positional args only for domain
-# 2. Notice that the "notes" option is now a top-level concern!
 expectation = gxe.ExpectColumnValuesToNotBeNull(
     "pu_datetime",
     notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
