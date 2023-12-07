@@ -770,8 +770,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 
 
 if TYPE_CHECKING:
-    SparkSession = Union[pyspark.SparkSession, pyspark.SparkConnectSession]
-    _SparkSession = Union[pyspark.SparkSession, databricks.connect.DatabricksSession]
+    _SparkSession = Union[pyspark._SparkSession, databricks.connect.DatabricksSession]
     _SparkSessionBuilder = Union[
         pyspark.SparkSession.Builder, databricks.connect.DatabricksSession.Builder
     ]
@@ -779,7 +778,7 @@ if TYPE_CHECKING:
 
 def get_or_create_spark_session(
     spark_config: Optional[dict[str, str]] = None,
-) -> SparkSession:
+) -> pyspark.SparkSession:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Args:
@@ -796,13 +795,13 @@ def get_or_create_spark_session(
         if databricks:
             spark_session_cls = databricks.connect.DatabricksSession
         else:
-            spark_session_cls = pyspark.SparkSession
+            spark_session_cls = pyspark._SparkSession
 
         builder: _SparkSessionBuilder = _get_builder_from_spark_config(
             spark_session_cls=spark_session_cls,
             spark_config=spark_config,
         )
-        spark_session: SparkSession
+        spark_session: pyspark.SparkSession
         try:
             spark_session = builder.getOrCreate()
         except ValueError as e:
@@ -829,10 +828,10 @@ def get_or_create_spark_session(
 
 
 def _validate_spark_session_config(
-    spark_session: SparkSession,
+    spark_session: pyspark.SparkSession,
     builder: _SparkSessionBuilder,
     spark_config: dict,
-) -> SparkSession:
+) -> pyspark.SparkSession:
     if _spark_config_updatable(spark_session=spark_session):
         if spark_config.get("spark.app.name"):
             warnings.warn(
@@ -854,7 +853,7 @@ def _validate_spark_session_config(
     return spark_session
 
 
-def _spark_config_updatable(spark_session: SparkSession) -> bool:
+def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
     """
     Tests whether we are able to update an existing Spark Session config.
 
