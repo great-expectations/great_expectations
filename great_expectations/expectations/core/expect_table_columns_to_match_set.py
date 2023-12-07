@@ -176,13 +176,13 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
-        expected_column_set = self.get_success_kwargs.get("column_set")
+        expected_column_set = self.get_success_kwargs(configuration).get("column_set")
         expected_column_set = (
             set(expected_column_set) if expected_column_set is not None else set()
         )
         actual_column_list = metrics.get("table.columns")
         actual_column_set = set(actual_column_list)
-        exact_match = self.get_success_kwargs.get("exact_match")
+        exact_match = self.get_success_kwargs(configuration).get("exact_match")
 
         if (
             (expected_column_set is None) and (exact_match is not True)

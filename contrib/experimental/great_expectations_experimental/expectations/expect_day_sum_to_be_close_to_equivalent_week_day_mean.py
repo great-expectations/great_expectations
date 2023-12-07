@@ -188,7 +188,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        success_kwargs = self.get_success_kwargs
+        success_kwargs = self.get_success_kwargs(configuration)
         run_date: str = success_kwargs.get("run_date")
         threshold: float = float(success_kwargs.get("threshold"))
         weeks_back = success_kwargs.get("weeks_back")

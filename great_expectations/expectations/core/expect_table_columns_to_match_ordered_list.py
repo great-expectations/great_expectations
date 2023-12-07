@@ -152,7 +152,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
-        expected_column_list = self.get_success_kwargs.get("column_list")
+        expected_column_list = self.get_success_kwargs(configuration).get("column_list")
         actual_column_list = metrics.get("table.columns")
 
         if expected_column_list is None or list(actual_column_list) == list(
