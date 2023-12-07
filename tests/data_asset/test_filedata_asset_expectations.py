@@ -6,6 +6,7 @@ import pytest
 import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 
+
 @pytest.mark.unit
 def test_expect_file_hash_to_equal():
     # Test for non-existent file
