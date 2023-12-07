@@ -143,7 +143,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     }
 
     map_metric = "column_values.of_type"
-    domain_kwargs: ClassVar[Tuple[str, ...]] = (
+    domain_keys: ClassVar[Tuple[str, ...]] = (
         "column",
         "row_condition",
         "condition_parser",
