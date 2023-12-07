@@ -275,6 +275,10 @@ def test_spark_happy_path_onboarding_data_assistant(
     assert results.success is False
 
 
+@pytest.mark.xfail(
+    strict=False,
+    reason="DataAssistants are to be removed in advance of V1",
+)
 @pytest.mark.postgresql
 @pytest.mark.slow  # 104 seconds
 def test_sql_happy_path_onboarding_data_assistant(
