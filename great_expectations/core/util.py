@@ -769,9 +769,6 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
-DATABRICKS_SHELL_APP_NAME = "Databricks Shell"
-
-
 if TYPE_CHECKING:
     _ConcreteSparkSession = Union[pyspark.SparkSession, pyspark.SparkConnectSession]
     _SparkSession = Union[pyspark.SparkSession, databricks.connect.DatabricksSession]
@@ -866,7 +863,7 @@ def _config_updatable(spark_session: _ConcreteSparkSession) -> bool:
     """
     updatable = False
     try:
-        updatable = spark_session.sparkContext.appName == DATABRICKS_SHELL_APP_NAME
+        updatable = "databricks" in spark_session.sparkContext.appName.lower()
     except pyspark.PySparkNotImplementedError:
         pass
     return updatable
