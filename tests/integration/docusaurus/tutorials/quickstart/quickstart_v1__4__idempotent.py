@@ -11,12 +11,13 @@ Key beats:
 2. when to use name vs. id
 """
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
-from great_expectations import get_context, ExpectationSuite
+from great_expectations import ExpectationSuite, get_context
+from great_expectations.datasources import YearMonthDaySplitter
 from great_expectations.expectations import (
     ExpectColumnValuesToBeBetween,
     ExpectColumnValuesToNotBeNull,
 )
-from great_expectations.datasources import YearMonthDaySplitter
+
 # </snippet>
 
 # Set up
