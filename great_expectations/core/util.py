@@ -772,7 +772,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 if TYPE_CHECKING:
     _SparkSession = Union[pyspark._SparkSession, databricks.connect.DatabricksSession]
     _SparkSessionBuilder = Union[
-        pyspark.SparkSession.Builder, databricks.connect.DatabricksSession.Builder
+        pyspark._SparkSession.Builder, databricks.connect.DatabricksSession.Builder
     ]
 
 
@@ -876,7 +876,7 @@ def _get_builder_from_spark_config(
     builder: _SparkSessionBuilder = spark_session_cls.builder
 
     # unable to access builder config with connect session
-    if isinstance(builder, pyspark.SparkSession.Builder):
+    if isinstance(builder, pyspark._SparkSession.Builder):
         # user could get in trouble here if they try to set config options that are not allowed in their runtime
         for k, v in spark_config.items():
             if k != "spark.app.name":
