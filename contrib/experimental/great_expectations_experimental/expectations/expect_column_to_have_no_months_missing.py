@@ -167,7 +167,7 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
         }
         n_missing_months = len(month_set - set(distinct_months_sorted))
 
-        threshold = self.get_success_kwargs(configuration).get("threshold")
+        threshold = self.get_success_kwargs.get("threshold")
         success: bool = n_missing_months <= threshold
         return {
             "success": success,
