@@ -25,6 +25,7 @@ from typing import (
     Optional,
     Tuple,
     Type,
+    TypeVar,
     Union,
     cast,
 )
@@ -32,6 +33,7 @@ from typing import (
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import ParamSpec
 
 import great_expectations.compatibility.bigquery as BigQueryDialect
 from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy, trino
@@ -95,6 +97,9 @@ if TYPE_CHECKING:
         ExpectationExecutionEngineDiagnostics,
     )
     from great_expectations.data_context import AbstractDataContext
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -598,7 +603,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
+        warnings.warn(f"Unknown dataset_type {dataset_type!s}")
 
 
 def get_test_validator_with_data(  # noqa: PLR0913
@@ -650,7 +655,7 @@ def get_test_validator_with_data(  # noqa: PLR0913
             pk_column=pk_column,
         )
     else:
-        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
+        raise ValueError(f"Unknown dataset_type {execution_engine!s}")
 
 
 def _get_test_validator_with_data_pandas(
@@ -876,7 +881,7 @@ def build_pandas_validator_with_data(
     batch_definition: Optional[BatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
-    batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type]
 
     if context is None:
         context = build_in_memory_runtime_context(include_spark=False)
@@ -905,7 +910,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(build_sa_validator_with_data) {x}"
+        )
 
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
@@ -1117,7 +1124,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    context.datasources["my_test_datasource"]._execution_engine = execution_engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
@@ -1153,9 +1160,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     )
 
 
-def modify_locale(func):
+def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
     @wraps(func)
-    def locale_wrapper(*args, **kwargs) -> None:
+    def locale_wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
         old_locale = locale.setlocale(locale.LC_TIME, None)
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
@@ -1211,7 +1218,7 @@ def build_spark_validator_with_data(
 def build_pandas_engine(
     df: pd.DataFrame,
 ) -> PandasExecutionEngine:
-    batch = Batch(data=df)
+    batch = Batch(data=df)  # type: ignore[arg-type]
     execution_engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     return execution_engine
 
@@ -1290,11 +1297,11 @@ def build_spark_engine(
                 )
                 for record in df.to_records(index=False)
             ]
-            schema = df.columns.tolist()
+            schema = df.columns.tolist()  # type: ignore[assignment]
         else:
             data = df
 
-        df = spark.createDataFrame(data=data, schema=schema)
+        df = spark.createDataFrame(data=data, schema=schema)  # type: ignore[type-var,arg-type]
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, Any] = dict(conf)
@@ -1664,7 +1671,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"bigquery tests are requested, but unable to connect; {repr(e)}"
+                        f"bigquery tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["bigquery"]
@@ -1707,7 +1714,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"clickhouse tests are requested, but unable to connect; {repr(e)}"
+                        f"clickhouse tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["clickhouse"]
@@ -1725,15 +1732,22 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"trino tests are requested, but unable to connect; {repr(e)}"
+                        f"trino tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["trino"]
 
         if include_azure:
+            azure_connection_string: Optional[str] = os.getenv(
+                "AZURE_CONNECTION_STRING"
+            )
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
-            if not azure_access_key and not azure_credential:
+            if (
+                not azure_access_key
+                and not azure_connection_string
+                and not azure_credential
+            ):
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
                         "Azure tests are requested, but credentials were not set up"
@@ -1757,7 +1771,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"redshift tests are requested, but unable to connect; {repr(e)}"
+                        f"redshift tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["redshift"]
@@ -1775,7 +1789,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"athena tests are requested, but unable to connect; {repr(e)}"
+                        f"athena tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["athena"]
@@ -1793,7 +1807,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"snowflake tests are requested, but unable to connect; {repr(e)}"
+                        f"snowflake tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["snowflake"]
@@ -1828,8 +1842,12 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     _debug = lambda x: x  # noqa: E731
     _error = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
-        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(generate_expectation_tests) {x}"
+        )
+        _error = lambda x: debug_logger.error(  # noqa: E731
+            f"(generate_expectation_tests) {x}"
+        )
 
     dialects_to_include = {}
     engines_to_include = {}
@@ -2091,17 +2109,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 ):
                     continue
 
-                # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                if (
-                    "allow_cross_type_comparisons" in test["input"]
-                    and validator_with_data
-                    and isinstance(
-                        validator_with_data.execution_engine.batch_manager.active_batch_data,
-                        SqlAlchemyBatchData,
-                    )
-                ):
-                    continue
-
                 parametrized_tests.append(
                     {
                         "expectation_type": expectation_type,
@@ -2124,7 +2131,9 @@ def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(should_we_generate_this_test) {x}"
+        )
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
@@ -2217,67 +2226,6 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
-    """
-    This method will evaluate the result of a test build using the Great Expectations json test format.
-
-    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
-        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
-
-    :param data_asset: (DataAsset) A great expectations DataAsset
-    :param expectation_type: (string) the name of the expectation to be run using the test input
-    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
-        - title: (string) the name of the test
-        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
-        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
-        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
-            come from the following list:
-              - success
-              - observed_value
-              - unexpected_index_list
-              - unexpected_list
-              - details
-              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return: None. asserts correctness of results.
-    """
-
-    data_asset.set_default_expectation_argument("result_format", "COMPLETE")
-    data_asset.set_default_expectation_argument("include_config", False)
-
-    if "title" not in test:
-        raise ValueError("Invalid test configuration detected: 'title' is required.")
-
-    if "exact_match_out" not in test:
-        raise ValueError(
-            "Invalid test configuration detected: 'exact_match_out' is required."
-        )
-
-    if "input" not in test:
-        if "in" in test:
-            test["input"] = test["in"]
-        else:
-            raise ValueError(
-                "Invalid test configuration detected: 'input' is required."
-            )
-
-    if "output" not in test:
-        if "out" in test:
-            test["output"] = test["out"]
-        else:
-            raise ValueError(
-                "Invalid test configuration detected: 'output' is required."
-            )
-
-    # Support tests with positional arguments
-    if isinstance(test["input"], list):
-        result = getattr(data_asset, expectation_type)(*test["input"])
-    # As well as keyword arguments
-    else:
-        result = getattr(data_asset, expectation_type)(**test["input"])
-
-    check_json_test_result(test=test, result=result, data_asset=data_asset)
-
-
 def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
@@ -2324,7 +2272,6 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
-    # validator.set_default_expectation_argument("include_config", False)
 
     if "title" not in test:
         raise ValueError("Invalid test configuration detected: 'title' is required.")
@@ -2365,14 +2312,12 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
                         "result_format": "COMPLETE",
                         "unexpected_index_column_names": ["pk_index"],
                     },
-                    "include_config": False,
                 }
             else:
                 runtime_kwargs = {
                     "result_format": {
                         "result_format": "COMPLETE",
                     },
-                    "include_config": False,
                 }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
@@ -2539,7 +2484,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     elif try_allclose:
                         assert np.allclose(
                             result["result"]["observed_value"],
-                            value,  # type: ignore[arg-type]
+                            value,
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"
@@ -2571,7 +2516,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
                 except AssertionError:
                     if result["result"]["unexpected_list"]:
-                        if type(result["result"]["unexpected_list"][0]) == list:
+                        if isinstance(result["result"]["unexpected_list"][0], list):
                             unexpected_list_tup = [
                                 tuple(x) for x in result["result"]["unexpected_list"]
                             ]
@@ -2792,7 +2737,7 @@ def _create_clickhouse_engine(
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                text(f"show schemas from memory like {repr(schema_name)}")
+                text(f"show schemas from memory like {schema_name!r}")
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(text(f"create schema {schema_name}"))
@@ -2812,7 +2757,7 @@ def _create_trino_engine(
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                sa.text(f"show schemas from memory like {repr(schema_name)}")
+                sa.text(f"show schemas from memory like {schema_name!r}")
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(sa.text(f"create schema {schema_name}"))
@@ -2863,12 +2808,12 @@ def _get_redshift_connection_string() -> str:
     """
     Copied get_redshift_connection_url func from tests/test_utils.py
     """
-    host = os.environ.get("REDSHIFT_HOST")
-    port = os.environ.get("REDSHIFT_PORT")
-    user = os.environ.get("REDSHIFT_USERNAME")
-    pswd = os.environ.get("REDSHIFT_PASSWORD")
-    db = os.environ.get("REDSHIFT_DATABASE")
-    ssl = os.environ.get("REDSHIFT_SSLMODE")
+    host = os.environ.get("REDSHIFT_HOST")  # noqa: TID251
+    port = os.environ.get("REDSHIFT_PORT")  # noqa: TID251
+    user = os.environ.get("REDSHIFT_USERNAME")  # noqa: TID251
+    pswd = os.environ.get("REDSHIFT_PASSWORD")  # noqa: TID251
+    db = os.environ.get("REDSHIFT_DATABASE")  # noqa: TID251
+    ssl = os.environ.get("REDSHIFT_SSLMODE")  # noqa: TID251
 
     if not host:
         raise ValueError(
@@ -2939,13 +2884,13 @@ def _get_snowflake_connection_string() -> str:
     """
     Copied get_snowflake_connection_url func from tests/test_utils.py
     """
-    sfUser = os.environ.get("SNOWFLAKE_USER")
-    sfPswd = os.environ.get("SNOWFLAKE_PW")
-    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
-    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
-    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
-    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
-    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
+    sfUser = os.environ.get("SNOWFLAKE_USER")  # noqa: TID251
+    sfPswd = os.environ.get("SNOWFLAKE_PW")  # noqa: TID251
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")  # noqa: TID251
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")  # noqa: TID251
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA", "")  # noqa: TID251
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")  # noqa: TID251
+    sfRole = os.environ.get("SNOWFLAKE_ROLE", "PUBLIC")  # noqa: TID251
 
     url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
 

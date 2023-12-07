@@ -5,18 +5,13 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 
-from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationSuiteValidationResult,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context.data_context import (
-    AbstractDataContext,
-    DataContext,
-    FileDataContext,
-)
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
 from great_expectations.util import filter_properties_dict
@@ -25,6 +20,15 @@ if TYPE_CHECKING:
     import pandas as pd
 
     from great_expectations.compatibility import pyspark
+    from great_expectations.core import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
 
 yaml = YAMLHandler()
 
@@ -308,11 +312,11 @@ def expected_spark_query_output() -> str:
 
 
 def _add_expectations_and_checkpoint(
-    data_context: DataContext | FileDataContext,
+    data_context: FileDataContext,
     checkpoint_config: dict,
     expectations_list: List[ExpectationConfiguration],
     dict_to_update_checkpoint: dict | None = None,
-) -> DataContext | FileDataContext:
+) -> FileDataContext:
     """
     Helper method for adding Checkpoint and Expectations to DataContext.
 
@@ -327,7 +331,7 @@ def _add_expectations_and_checkpoint(
     if dict_to_update_checkpoint:
         checkpoint_config["runtime_configuration"] = dict_to_update_checkpoint
 
-    context: DataContext = data_context
+    context = data_context
     context.add_expectation_suite(expectation_suite_name="metrics_exp")
     animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
     for expectation in expectations_list:
@@ -370,7 +374,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         }
     }
 
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -426,7 +430,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         }
     }
 
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -471,7 +475,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
         }
     }
 
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_column_pairs_table,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -525,7 +529,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
         }
     }
 
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_column_pairs_table,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -581,7 +585,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
         }
     }
 
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_multi_column_sum_table,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -641,7 +645,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
         }
     }
 
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_multi_column_sum_table,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -701,7 +705,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         }
     }
 
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -746,7 +750,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
     """
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -793,7 +797,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
     """
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -837,7 +841,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - unexpected_index_column is passed in an incorrect column
     """
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -876,7 +880,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 2 Expectations added to suite
     """
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[
@@ -943,7 +947,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -988,7 +992,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1028,7 +1032,7 @@ def test_sql_complete_output_no_id_pk_fallback(
             "result_format": "COMPLETE",
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1079,7 +1083,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1129,7 +1133,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
             "return_unexpected_index_query": True,
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1179,7 +1183,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
             "return_unexpected_index_query": False,
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1226,7 +1230,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
             "partial_unexpected_count": 1,
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1269,7 +1273,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
     expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1313,7 +1317,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     reference_checkpoint_config_for_unexpected_column_names: dict,
     expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1357,7 +1361,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
             "unexpected_index_column_names": ["i_dont_exist"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1392,7 +1396,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[
@@ -1455,7 +1459,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1498,7 +1502,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
     expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1534,7 +1538,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     reference_checkpoint_config_for_unexpected_column_names: dict,
     expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1572,7 +1576,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
             "unexpected_index_column_names": ["i_dont_exist"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1607,7 +1611,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[
@@ -1662,7 +1666,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1700,7 +1704,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1748,7 +1752,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1791,7 +1795,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     """
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1846,7 +1850,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     """
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1902,7 +1906,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     """
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1949,7 +1953,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
        - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
        - unexpected_index_column is passed in an incorrect column
     """
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -1991,7 +1995,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_o
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 2 Expectations added to suite
     """
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[
@@ -2063,7 +2067,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2115,7 +2119,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2169,7 +2173,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2212,7 +2216,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -2267,7 +2271,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -2315,7 +2319,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_out
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -2361,7 +2365,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_compl
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -2422,7 +2426,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summa
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -2469,7 +2473,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -2513,7 +2517,7 @@ def test_spark_complete_output_no_id_pk_fallback(
             "result_format": "COMPLETE",
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2564,7 +2568,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
             "partial_unexpected_count": 1,
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2629,7 +2633,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2700,7 +2704,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2755,7 +2759,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2827,7 +2831,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2889,7 +2893,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -2962,7 +2966,7 @@ def test_pandas_result_format_in_checkpoint_named_index_different_column_specifi
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -3017,7 +3021,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -3068,7 +3072,7 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
             "result_format": "COMPLETE",
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
@@ -3106,7 +3110,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -3177,7 +3181,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -3250,7 +3254,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
@@ -3305,7 +3309,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
             "unexpected_index_column_names": ["pk_1"],
         }
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -3383,7 +3387,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -3460,7 +3464,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
             "id_key_0": 1234567890,
         },
     }
-    context: DataContext = _add_expectations_and_checkpoint(
+    context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
         expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
@@ -3633,7 +3637,7 @@ def test_rendered_content_bool_only_respected(
     )
     validator.save_expectation_suite(discard_failed_expectations=False)
 
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
         validations=[
@@ -3645,6 +3649,12 @@ def test_rendered_content_bool_only_respected(
         runtime_configuration={
             "result_format": result_format,
         },
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
 
     checkpoint_result = checkpoint.run()

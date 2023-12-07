@@ -13,7 +13,7 @@ title: <!-- Add the topic title here -->
 <!-- List the existing knowledge a user should have before they start the tutorial. Link to relevant information if it's available. What follows is an example provided for your reference. If existing knowledge isn't required, remove this section.-->
 
 - [An understanding of Great Expectations functionality](../guides/setup/setup_overview.md)
-- [How to connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md)
+- [How to connect to a Data Source](../guides/connecting_to_your_data/connect_to_data_lp.md)
 - [How to create an Expectation Suite](../guides/expectations/create_expectations_overview.md)
 
 ## First task 
@@ -49,7 +49,7 @@ title: <!-- Add the topic title here -->
 
 <!-- If necessary, add a secondary task here. Use the same format that you used in the first task. What follows is an example provided for your reference. -->
 
-1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column. 
+1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses explicit kwargs with the `passenger_count` column. 
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
@@ -79,19 +79,12 @@ title: <!-- Add the topic title here -->
 
 <!-- List the secondary resources that can help a user get a better understanding of the subject matter discussed in this tutorial. Don't add an introductory statement for the list. If a user needs to complete additional tasks to complete this process, use a Next steps section instead. What follows is an example provided for your reference. If there aren't any related documents, remove this section.-->
 
-- [How to install Great Expectations locally](../guides/setup/installation/install_gx.md)
-- [How to set up GX to work with data on AWS S3](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
-- [How to set up GX to work with data in Azure Blob Storage](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
-- [How to set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
-- [How to set up GX to work with SQL databases](../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
-- [How to instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
+- [Install Great Expectations with Data Source dependencies](../guides/setup/installation/install_gx.md)
+- [Instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
+- [Use Great Expectations with Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
 ## Next steps
 
 <!-- If this tutorial is the first step in a process and there are other tasks the user must complete to finish the process, list the topics here with links to the relevant information. If you want to link to related information, use a Related topics section instead. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't next steps, remove this section.-->
 
-- [Install Great Expectations locally](../guides/setup/installation/install_gx.md)
-- [Set up GX to work with data on AWS S3](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
-- [Set up GX to work with data in Azure Blob Storage](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
-- [Set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
+- [Install Great Expectations with Data Source dependencies](../guides/setup/installation/install_gx.md)

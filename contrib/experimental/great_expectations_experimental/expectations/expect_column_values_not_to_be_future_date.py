@@ -4,12 +4,14 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 from datetime import date
-from typing import Optional
 
 from dateutil.parser import parse
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -45,9 +47,14 @@ class ColumnValuesNotToBeFutureDate(ColumnMapMetricProvider):
         return column.apply(lambda x: is_not_a_future_date(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-    # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(cls, column, _dialect, **kwargs):
-    #     raise NotImplementedError
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column, _execution_engine, **kwargs):
+        query = sa.select(column).select_from(kwargs["_table"])
+        results = _execution_engine.execute_query(query).fetchall()
+        date_strings = [date_tuple[0] for date_tuple in results]
+        answer = [is_not_a_future_date(date_str) for date_str in date_strings]
+        result = all(answer)
+        return result
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     # @column_condition_partial(engine=SparkDFExecutionEngine)
@@ -74,8 +81,15 @@ class ExpectColumnValuesNotToBeFutureDate(ColumnMapExpectation):
                 "some_other": [
                     "2022-02-30",
                     "2022-11-31",
-                    "2022/03/03",
+                    "2022/03/30",
                     "2222/01/02",
+                    "2322.01.01",
+                ],
+                "another_test": [
+                    "2022-02-28",
+                    "2022-11-11",
+                    "2022/03/30",
+                    "2002/01/02",
                     "2322.01.01",
                 ],
             },
@@ -84,6 +98,7 @@ class ExpectColumnValuesNotToBeFutureDate(ColumnMapExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    # this is being called in sqlite
                     "in": {"column": "all_valid"},
                     "out": {
                         "success": True,
@@ -94,6 +109,15 @@ class ExpectColumnValuesNotToBeFutureDate(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "some_other", "mostly": 1},
+                    "out": {
+                        "success": False,
+                    },
+                },
+                {
+                    "title": "basic_negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "another_test", "mostly": 1},
                     "out": {
                         "success": False,
                     },
@@ -112,37 +136,6 @@ class ExpectColumnValuesNotToBeFutureDate(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
-
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",
@@ -152,6 +145,7 @@ class ExpectColumnValuesNotToBeFutureDate(ColumnMapExpectation):
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@prachijain136",  # Don't forget to add your github handle here!
+            "@mcornew",
             "@m-Chetan",
             "@Pritampyaare",
         ],

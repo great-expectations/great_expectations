@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 from unittest import mock
 
 import pytest
@@ -102,7 +103,7 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
 def test_data_context(tmp_path: pathlib.Path, clear_env_vars):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
+    FileDataContext.create(project_path)
     with working_directory(project_path):
         assert isinstance(gx.get_context(), FileDataContext)
 
@@ -248,6 +249,36 @@ def test_get_context_with_no_arguments_returns_ephemeral_with_sensible_defaults(
     assert context.config.stores == defaults.stores
 
 
+@pytest.mark.unit
+def test_get_context_with_mode_equals_ephemeral_returns_ephemeral_data_context():
+    context = gx.get_context(mode="ephemeral")
+    assert isinstance(context, EphemeralDataContext)
+
+
+@pytest.mark.unit
+def test_get_context_with_mode_equals_file_returns_file_data_context(
+    tmp_path: pathlib.Path,
+):
+    with working_directory(tmp_path):
+        context = gx.get_context(mode="file")
+    assert isinstance(context, FileDataContext)
+
+
+@pytest.mark.cloud
+def test_get_context_with_mode_equals_cloud_returns_cloud_data_context(
+    empty_ge_cloud_data_context_config: DataContextConfig, set_up_cloud_envs
+):
+    with mock.patch.object(
+        CloudDataContext,
+        "retrieve_data_context_config_from_cloud",
+        return_value=empty_ge_cloud_data_context_config,
+    ) as mock_retrieve_config:
+        context = gx.get_context(mode="cloud")
+
+    mock_retrieve_config.assert_called_once()
+    assert isinstance(context, CloudDataContext)
+
+
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
 @pytest.mark.cloud
 def test_cloud_context_include_rendered_content(
@@ -276,40 +307,46 @@ def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathli
 
     assert isinstance(context, FileDataContext)
     assert context_root_dir.exists()
-    assert (context_root_dir / ".gitignore").read_text() == "\nuncommitted/"
+    assert (
+        context_root_dir / FileDataContext.GITIGNORE
+    ).read_text() == "\nuncommitted/"
 
 
 @pytest.mark.filesystem
 def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(
     clear_env_vars, tmp_path
 ):
-    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
-    with open(context_root_dir / ".gitignore", "w") as f:
+    with open(context_root_dir / FileDataContext.GITIGNORE, "w") as f:
         f.write("asdf")
 
     context = gx.get_context(context_root_dir=context_root_dir)
 
     assert isinstance(context, FileDataContext)
-    assert (context_root_dir / ".gitignore").read_text() == "asdf\nuncommitted/"
+    assert (
+        context_root_dir / FileDataContext.GITIGNORE
+    ).read_text() == "asdf\nuncommitted/"
 
 
 @pytest.mark.filesystem
 def test_get_context_with_context_root_dir_scaffolds_new_gitignore(
     clear_env_vars, tmp_path
 ):
-    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
 
     context = gx.get_context(context_root_dir=context_root_dir)
 
     assert isinstance(context, FileDataContext)
-    assert (context_root_dir / ".gitignore").read_text() == "\nuncommitted/"
+    assert (
+        context_root_dir / FileDataContext.GITIGNORE
+    ).read_text() == "\nuncommitted/"
 
 
 @pytest.mark.filesystem
 def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_path):
-    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
 
     with mock.patch(
@@ -318,3 +355,41 @@ def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_p
     ):
         with pytest.raises(GitIgnoreScaffoldingError):
             gx.get_context(context_root_dir=context_root_dir)
+
+
+@pytest.mark.filesystem
+def test_get_context_scaffolds_gx_dir(tmp_path: pathlib.Path):
+    with working_directory(tmp_path):
+        context = gx.get_context(mode="file")
+    assert isinstance(context, FileDataContext)
+
+    project_root_dir = pathlib.Path(context.root_directory)
+    assert project_root_dir.stem == FileDataContext.GX_DIR
+
+
+@pytest.mark.filesystem
+def test_get_context_finds_legacy_great_expectations_dir(
+    tmp_path: pathlib.Path,
+):
+    working_dir = tmp_path / "a" / "b" / "c" / "d" / "working_dir"
+
+    # Scaffold great_expectations
+    context_root_dir = working_dir / FileDataContext._LEGACY_GX_DIR
+    context_root_dir.mkdir(parents=True)
+
+    # Scaffold great_expectations.yml
+    gx_yml = context_root_dir / FileDataContext.GX_YML
+    yml_fixture = (
+        pathlib.Path(__file__)
+        .joinpath("../../test_fixtures/great_expectations_basic.yml")
+        .resolve()
+    )
+    assert yml_fixture.exists()
+    shutil.copy(yml_fixture, gx_yml)
+
+    with working_directory(working_dir):
+        context = gx.get_context()
+    assert isinstance(context, FileDataContext)
+
+    project_root_dir = pathlib.Path(context.root_directory)
+    assert project_root_dir.stem == FileDataContext._LEGACY_GX_DIR

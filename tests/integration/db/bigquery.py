@@ -1,11 +1,9 @@
 import datetime
 import os
 
-import pytest
 from google.cloud import bigquery
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
@@ -38,7 +36,7 @@ CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 yaml = YAMLHandler()
 
-context: DataContext = gx.get_context()
+context = gx.get_context()
 
 datasource_yaml: str = """
 name: my_bigquery_datasource
@@ -107,10 +105,9 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
 )
 
 context.add_expectation_suite(expectation_suite_name="test_suite_2")
-with pytest.warns(DeprecationWarning):
-    validator: Validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="test_suite_2"
-    )
+validator: Validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite_2"
+)
 
 # Testing `validator.head()` when using BigQuery without temp tables
 batch_request_without_temp_table: RuntimeBatchRequest = RuntimeBatchRequest(

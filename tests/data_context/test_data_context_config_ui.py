@@ -4,6 +4,7 @@ from typing import Dict, Final, Optional
 
 import pytest
 
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -19,7 +20,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
     S3StoreBackendDefaults,
 )
-from great_expectations.util import filter_properties_dict, get_context
+from great_expectations.util import filter_properties_dict
 
 """
 What does this test and why?
@@ -73,7 +74,6 @@ def construct_data_context_config():
             "validation_operators": validation_operators,
             "stores": stores,
             "data_docs_sites": data_docs_sites,
-            "notebooks": None,
             "config_variables_file_path": None,
             "anonymous_usage_statistics": {
                 "data_context_id": data_context_id,

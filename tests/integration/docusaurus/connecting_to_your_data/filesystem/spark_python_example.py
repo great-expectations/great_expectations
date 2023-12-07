@@ -1,12 +1,13 @@
+import pathlib
+
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.util import get_context
-import pathlib
 
 folder_path = str(
     pathlib.Path(

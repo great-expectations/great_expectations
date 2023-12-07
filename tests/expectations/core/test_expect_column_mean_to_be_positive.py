@@ -1,8 +1,11 @@
+from datetime import datetime
+from typing import Union
+
 import pandas as pd
 import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import DataContext
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.core.expect_column_mean_to_be_between import (
     ExpectColumnMeanToBeBetween,
 )
@@ -12,10 +15,8 @@ from great_expectations.expectations.core.expect_column_mean_to_be_between impor
 class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
     """Expect the mean of values in this column to be positive."""
 
-    default_kwarg_values = {
-        "min_value": 0,
-        "strict_min": True,
-    }
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = 0
+    strict_min = True
 
     # </snippet>
     # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py validate_config">
@@ -36,7 +37,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
 
 @pytest.mark.filesystem
 def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_engine):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context = data_context_with_datasource_pandas_engine
 
     df = pd.DataFrame({"a": [0, 1, 3, 4, 5]})
 

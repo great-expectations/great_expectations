@@ -4,11 +4,11 @@ from typing import List
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.util import get_context
 
 yaml = YAMLHandler()
 # </snippet>
@@ -24,7 +24,7 @@ data_context_config = DataContextConfig(
 context = get_context(project_config=data_context_config)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py datasource_yaml">
-datasource_yaml = rf"""
+datasource_yaml = r"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:

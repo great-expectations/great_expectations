@@ -1,14 +1,12 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
+
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
@@ -32,6 +30,11 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -57,8 +60,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -69,13 +70,13 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
     """
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
@@ -86,30 +87,11 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         "manually_reviewed_code": True,
     }
 
-    map_metric = "column_values.nonnull"
-    args_keys = ("column",)
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                                                           Expectation."
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
+    map_metric: ClassVar[str] = "column_values.nonnull"
+    args_keys: ClassVar[Tuple[str, ...]] = ("column",)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -141,6 +123,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -149,20 +132,20 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> list[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr] # FIXME: could be None
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if include_column_name:
@@ -187,18 +170,17 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
@@ -207,7 +189,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        result_dict = result.result
+        result_dict = result.result  # type: ignore[union-attr] # FIXME: could be None
 
         try:
             null_percent = result_dict["unexpected_percent"]
@@ -235,13 +217,11 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         assert result, "Must pass in result."
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Missing (n)",
-                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "Missing (n)",
+                    "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                },
             ),
             result.result["unexpected_count"]
             if "unexpected_count" in result.result
@@ -263,13 +243,11 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         assert result, "Must pass in result."
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Missing (%)",
-                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "Missing (%)",
+                    "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                },
             ),
             f"{result.result['unexpected_percent']:.1f}%"
             if "unexpected_percent" in result.result
@@ -277,6 +255,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             else "--",
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -287,9 +266,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
+        mostly = self.get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"

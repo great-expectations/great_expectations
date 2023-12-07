@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_asset import DataAsset
@@ -56,7 +55,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
 
 @pytest.mark.filesystem
 def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     asset = DataAsset()
     default_suite = ExpectationSuite(
         expectation_suite_name="default",
@@ -85,7 +84,7 @@ def test_custom_expectation_default_arg_values_set(
         "datasource": "mycustomdatasource",
         "dataset": df,
     }
-    batch = context.get_batch(batch_kwargs, expectation_suite_name="default")
+    batch = context._get_batch_v2(batch_kwargs, expectation_suite_name="default")
     # this expectation has a declared default arg value `ignore_row_if="any_value_is_missing"`
     # which overrides an internal default of "all_values_are_missing"
     # can only pass if the declared default is set properly

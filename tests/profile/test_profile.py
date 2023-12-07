@@ -36,9 +36,10 @@ def test_ColumnsExistProfiler():
 
     assert len(expectations_config.expectations) == 1
     assert (
-        expectations_config.expectations[0].expectation_type == "expect_column_to_exist"
+        expectations_config.expectation_configurations[0].expectation_type
+        == "expect_column_to_exist"
     )
-    assert expectations_config.expectations[0].kwargs["column"] == "x"
+    assert expectations_config.expectation_configurations[0].kwargs["column"] == "x"
 
 
 @mock.patch(
@@ -50,7 +51,12 @@ def test_BasicDatasetProfiler(mock_emit):
         {"x": [1, 2, 3]},
     )
     assert (
-        len(toy_dataset.get_expectation_suite(suppress_warnings=True).expectations) == 0
+        len(
+            toy_dataset.get_expectation_suite(
+                suppress_warnings=True
+            ).expectation_configurations
+        )
+        == 0
     )
 
     expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
@@ -72,7 +78,7 @@ def test_BasicDatasetProfiler(mock_emit):
     assert "To add additional notes" in expectations_config.meta["notes"]["content"][0]
 
     added_expectations = set()
-    for exp in expectations_config.expectations:
+    for exp in expectations_config.expectation_configurations:
         added_expectations.add(exp.expectation_type)
         assert "BasicDatasetProfiler" in exp.meta
         assert "confidence" in exp.meta["BasicDatasetProfiler"]
@@ -156,7 +162,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "datasource": "rad_datasource",
         "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
     }
-    batch = context.get_batch(batch_kwargs, "default")
+    batch = context._get_batch_v2(batch_kwargs, "default")
     expectation_suite, validation_results = BasicDatasetProfiler.profile(batch)
 
     assert expectation_suite.expectation_suite_name == "default"
@@ -169,7 +175,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
     assert (
         expectation_suite.meta["BasicDatasetProfiler"]["batch_kwargs"] == batch_kwargs
     )
-    for exp in expectation_suite.expectations:
+    for exp in expectation_suite.expectation_configurations:
         assert "BasicDatasetProfiler" in exp.meta
         assert "confidence" in exp.meta["BasicDatasetProfiler"]
 
@@ -202,7 +208,7 @@ def test_context_profiler(filesystem_csv_data_context):
     expected_suite_name = "rad_datasource.subdir_reader.f1.BasicDatasetProfiler"
     profiled_expectations = context.get_expectation_suite(expected_suite_name)
 
-    for exp in profiled_expectations.expectations:
+    for exp in profiled_expectations.expectation_configurations:
         assert "BasicDatasetProfiler" in exp.meta
         assert "confidence" in exp.meta["BasicDatasetProfiler"]
 
@@ -277,34 +283,6 @@ def test_context_profiler_with_non_existing_generator(filesystem_csv_data_contex
             profiler=BasicDatasetProfiler,
             batch_kwargs_generator_name="this_gen_does_not_exist",
         )
-
-
-@pytest.mark.filesystem
-def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(
-    filesystem_csv_data_context, filesystem_csv_2
-):
-    """
-    If a no generator_name is passed to the profiling method and the datasource has more than one
-    generators configured, the profiling method must return an error code in the result
-    """
-    context = filesystem_csv_data_context
-    context.add_batch_kwargs_generator(
-        "rad_datasource",
-        "second_generator",
-        "SubdirReaderBatchKwargsGenerator",
-        **{
-            "base_directory": str(filesystem_csv_2),
-        },
-    )
-
-    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    profiling_result = context.profile_datasource(
-        "rad_datasource",
-        data_assets=["this_asset_doesnot_exist"],
-        profiler=BasicDatasetProfiler,
-    )
-
-    assert profiling_result == {"success": False, "error": {"code": 5}}
 
 
 @pytest.mark.filesystem

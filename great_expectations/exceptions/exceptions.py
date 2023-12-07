@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
+from great_expectations.compatibility.typing_extensions import override
+
 if TYPE_CHECKING:
     import requests
 
@@ -25,6 +27,7 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
         if validation_error is not None:
             self.messages = validation_error.messages
 
+    @override
     def __str__(self) -> str:
         if self.message is None:
             return str(self.messages)
@@ -246,7 +249,7 @@ class ConfigNotFoundError(DataContextError):
     """The great_expectations dir could not be found."""
 
     def __init__(self) -> None:
-        self.message = """Error: No great_expectations directory was found here!
+        self.message = """Error: No gx directory was found here!
     - Please check that you are in the correct directory or have specified the correct directory.
     - If you have never run Great Expectations in this project, please run `great_expectations init` to get started.
 """
@@ -281,12 +284,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
             "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
-            "DatabricksTableGenerator": "DatabricksTableBatchKwargsGenerator",
-            "GlobReaderGenerator": "GlobReaderBatchKwargsGenerator",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
-            "QueryGenerator": "QueryBatchKwargsGenerator",
-            "TableGenerator": "TableBatchKwargsGenerator",
-            "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",

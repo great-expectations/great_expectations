@@ -39,7 +39,7 @@ The classes that implement Checkpoints are in the `great_expectations.checkpoint
 
 Creating a Checkpoint is part of the initial setup for data validation.  Checkpoints are reusable and only need to be created once, although you can create multiple Checkpoints to cover multiple Validation use cases. For more information about creating Checkpoints, see [How to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
-After you create a Checkpoint, you can use it to Validate data by running it against a Batch or Batches of data.  The Batch Requests used by a Checkpoint during this process may be pre-defined and saved as part of the Checkpoint's configuration, or the Checkpoint can be configured to accept one or more Batch Request at run time. For more information about data validation, see [How to validate data by running a Checkpoint](../guides/validation/how_to_validate_data_by_running_a_checkpoint.md).
+After you create a Checkpoint, you can use it to Validate data by running it against a Batch or Batches of data.  The Batch Requests used by a Checkpoint during this process may be pre-defined and saved as part of the Checkpoint's configuration, or the Checkpoint can be configured to accept one or more Batch Request at run time. For more information about data validation, see [How to validate data by running a Checkpoint](../guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md).
 
 In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfying the test suite to run, and a `batch_request` identifying the data to test. Checkpoint can be directly directly in Python as follows:
 
@@ -113,7 +113,6 @@ Checkpoint configurations follow a nested pattern, where more general keys provi
   {label: 'Nesting with defaults', value: 'tab1'},
   {label: 'Keys passed at runtime', value: 'tab2'},
   {label: 'Using template', value: 'tab3'},
-  {label: 'Using SimpleCheckpoint', value: 'tab4'}
 ]}>
 
 <TabItem value="tab0">
@@ -187,42 +186,7 @@ This configuration references the Checkpoint detailed in the previous example ("
 ```
 
 </TabItem>
-<TabItem value="tab4">
-This configuration specifies the SimpleCheckpoint class under the "class_name" key, allowing for a much slimmer configuration.
-
-**YAML, using SimpleCheckpoint**:
-
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint just the yaml"
-```
-
-**Equivalent YAML, using Checkpoint**:
-
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint just the yaml"
-```
-
-**Runtime**:
-
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_6"
-```
-
-**Results**:
-
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2"
-```
-
-</TabItem>
 </Tabs>
-
-## SimpleCheckpoint class
-
-For many use cases, the SimpleCheckpoint class can be used to simplify the process of specifying a Checkpoint configuration. SimpleCheckpoint provides a basic set of actions - store Validation Result, store <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" />, update <TechnicalTag relative="../" tag="data_docs" text="Data Docs" />, and optionally, send a Slack notification - allowing you to omit an `action_list` from your configuration and at runtime.
-
-Configurations using the SimpleCheckpoint class can optionally specify four additional top-level keys that customize and extend the basic set of default actions:
-
-* `site_names`: a list of Data Docs site names to update as part of the update Data Docs action - defaults to "all"
-* `slack_webhook`: if provided, an action will be added that sends a Slack notification to the provided webhook
-* `notify_on`: used to define when a notification is fired, according to Validation Result outcome - `all`, `failure`, or `success`. Defaults to `all`.
-* `notify_with`: a list of Data Docs site names for which to include a URL in any notifications - defaults to `all`
 
 ## CheckpointResult
 

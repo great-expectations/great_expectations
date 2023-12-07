@@ -1,7 +1,6 @@
 """These tests exercise ConfigurationBundle including Serialization."""
 import pytest
 
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundle,
     ConfigurationBundleJsonSerializer,
@@ -21,7 +20,7 @@ class TestConfigurationBundleCreate:
         Make sure the configuration bundle is created successfully from a data context.
         """
 
-        context: BaseDataContext = stub_base_data_context
+        context = stub_base_data_context
 
         config_bundle = ConfigurationBundle(context)
 
@@ -29,7 +28,6 @@ class TestConfigurationBundleCreate:
         assert config_bundle._data_context_variables is not None
         assert len(config_bundle.expectation_suites) == 1
         assert len(config_bundle.checkpoints) == 1
-        assert len(config_bundle.profilers) == 1
         assert len(config_bundle.validation_results) == 1
         assert len(config_bundle.datasources) == 1
 
@@ -41,7 +39,7 @@ class TestConfigurationBundleCreate:
         The ConfigurationBundle should handle a context that has not set the config for
          anonymous_usage_statistics.
         """
-        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+        context = stub_base_data_context_no_anonymous_usage_stats
 
         config_bundle = ConfigurationBundle(context)
 
@@ -58,9 +56,7 @@ class TestConfigurationBundleCreate:
         Make sure the configuration bundle successfully parses the usage stats settings.
         """
 
-        context: BaseDataContext = (
-            stub_base_data_context_anonymous_usage_stats_present_but_disabled
-        )
+        context = stub_base_data_context_anonymous_usage_stats_present_but_disabled
 
         config_bundle = ConfigurationBundle(context)
 
@@ -79,7 +75,7 @@ class TestConfigurationBundleSerialization:
         Ensure configuration bundle is serialized correctly.
         """
 
-        context: BaseDataContext = stub_base_data_context
+        context = stub_base_data_context
 
         config_bundle = ConfigurationBundle(context)
 
@@ -109,7 +105,6 @@ class TestConfigurationBundleSerialization:
         context = StubBaseDataContext(
             checkpoint_names=tuple(),
             expectation_suite_names=tuple(),
-            profiler_names=tuple(),
             validation_results_keys=tuple(),
             datasource_names=tuple(),
         )

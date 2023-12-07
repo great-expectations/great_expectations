@@ -113,18 +113,16 @@ def _read_sql_table_as_df(  # noqa: PLR0913
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
     """
-    schema = schema
-    columns = columns
     if dialect == GXSqlDialect.TRINO:
         return pd.read_sql_table(
             table_name=table_name,
             con=con,
             schema=schema,
-            index_col=index_col,
+            index_col=index_col,  # type: ignore[arg-type]
             coerce_float=coerce_float,
             parse_dates=parse_dates,
             columns=columns,
-            chunksize=chunksize,
+            chunksize=chunksize,  # type: ignore[arg-type]
         )
     else:
         sql_str: str
@@ -135,10 +133,10 @@ def _read_sql_table_as_df(  # noqa: PLR0913
         return pd.read_sql_query(
             sql=sql_str,
             con=con,
-            index_col=index_col,
+            index_col=index_col,  # type: ignore[arg-type]
             coerce_float=coerce_float,
             parse_dates=parse_dates,
-            chunksize=chunksize,
+            chunksize=chunksize,  # type: ignore[arg-type]
         )
 
 
@@ -202,22 +200,22 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 name=name,
                 con=con,
                 schema=schema,
-                if_exists=if_exists,
+                if_exists=if_exists,  # type: ignore[arg-type]
                 index=index,
                 index_label=index_label,
                 chunksize=chunksize,
                 dtype=dtype,
-                method=method,
+                method=method,  # type: ignore[arg-type]
             )
     else:
         df.to_sql(
             name=name,
             con=con,
             schema=schema,
-            if_exists=if_exists,
+            if_exists=if_exists,  # type: ignore[arg-type]
             index=index,
             index_label=index_label,
             chunksize=chunksize,
             dtype=dtype,
-            method=method,
+            method=method,  # type: ignore[arg-type]
         )

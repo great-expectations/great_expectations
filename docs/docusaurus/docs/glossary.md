@@ -9,8 +9,6 @@ title: "Glossary"
 
 [**Batch Request:**](./terms/batch_request.md) Provided to a Data Source in order to create a Batch.
 
-[**CLI:**](./terms/cli.md) Command Line Interface
-
 [**Checkpoint:**](./terms/checkpoint.md) The primary means for validating data in a production deployment of Great Expectations.
 
 [**Checkpoint Store:**](./terms/checkpoint_store.md) A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
@@ -48,10 +46,6 @@ title: "Glossary"
 [**Metric Store:**](./terms/metric_store.md) A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 
 [**Plugin:**](./terms/plugin.md) Extends Great Expectations' components and/or functionality.
-
-[**Profiler:**](./terms/profiler.md) Generates Metrics and candidate Expectations from data.
-
-[**Profiling:**](./terms/profiler.md) The act of generating Metrics and candidate Expectations from data.
 
 [**Renderer:**](./terms/renderer.md) A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.
 

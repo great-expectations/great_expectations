@@ -85,7 +85,7 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
 
         if regex_expression is None:
             logger.warning(
-                f"Regex is not supported for dialect {str(_dialect.dialect.name)}"
+                f"Regex is not supported for dialect {_dialect.dialect.name!s}"
             )
             raise NotImplementedError
 
@@ -295,7 +295,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."

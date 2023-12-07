@@ -15,7 +15,6 @@ import pytest
 import requests
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -39,6 +38,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.fluent import PandasDatasource
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -756,23 +756,10 @@ def mocked_datasource_post_response(
 
 @pytest.fixture
 def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode: DataContext,
-    db_file,
+    empty_data_context_in_cloud_mode,
     mocked_datasource_get_response,
 ):
-    context: DataContext = empty_data_context_in_cloud_mode
-    config = yaml.load(
-        """
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
+    context = empty_data_context_in_cloud_mode
     with patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), patch(
@@ -781,9 +768,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_datasource_get_response,
-    ), pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
+    ):
+        fds = PandasDatasource(name="my_datasource")
+        context.add_datasource(datasource=fds)
     return context

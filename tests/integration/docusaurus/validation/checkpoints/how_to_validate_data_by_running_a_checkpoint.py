@@ -11,7 +11,6 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py setup">
 # setup
 import sys
 
@@ -44,12 +43,10 @@ checkpoint = context.add_or_update_checkpoint(
 )
 
 # add (save) the checkpoint to the data context
-context.add_checkpoint(checkpoint=checkpoint)
+context.add_or_update_checkpoint(checkpoint=checkpoint)
 cp = context.get_checkpoint(name="my_checkpoint")
 assert cp.name == "my_checkpoint"
-# </snippet>
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py checkpoint script">
 # context = gx.get_context()
 result = context.run_checkpoint(
     checkpoint_name="my_checkpoint",
@@ -65,4 +62,3 @@ if not result["success"]:
     sys.exit(1)
 
 print("Validation succeeded!")
-# </snippet>

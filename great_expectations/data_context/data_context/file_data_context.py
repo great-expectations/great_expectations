@@ -8,6 +8,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
@@ -44,6 +45,7 @@ class FileDataContext(SerializableDataContext):
         self,
         project_config: Optional[DataContextConfig] = None,
         context_root_dir: Optional[PathStr] = None,
+        project_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
@@ -56,7 +58,8 @@ class FileDataContext(SerializableDataContext):
                 config_variables.yml and the environment
         """
         self._context_root_directory = self._init_context_root_directory(
-            context_root_dir
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
         )
         self._scaffold_project()
 
@@ -66,16 +69,18 @@ class FileDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
         )
 
-    def _init_context_root_directory(self, context_root_dir: Optional[PathStr]) -> str:
+    def _init_context_root_directory(
+        self, context_root_dir: Optional[PathStr], project_root_dir: Optional[PathStr]
+    ) -> str:
+        context_root_dir = self._resolve_context_root_dir_and_project_root_dir(
+            context_root_dir=context_root_dir, project_root_dir=project_root_dir
+        )
+
         if isinstance(context_root_dir, pathlib.Path):
             context_root_dir = str(context_root_dir)
 
         if not context_root_dir:
-            context_root_dir = FileDataContext.find_context_root_dir()
-            if not context_root_dir:
-                raise ValueError(
-                    "A FileDataContext relies on the presence of a local great_expectations.yml project config"
-                )
+            context_root_dir = self.find_context_root_dir()
 
         return context_root_dir
 
@@ -94,6 +99,7 @@ class FileDataContext(SerializableDataContext):
             project_root_dir=project_root_dir,
         )
 
+    @override
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
@@ -107,6 +113,7 @@ class FileDataContext(SerializableDataContext):
             )
         return self._apply_global_config_overrides(config=project_config)
 
+    @override
     def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
@@ -135,6 +142,7 @@ class FileDataContext(SerializableDataContext):
         )
         return datasource_store
 
+    @override
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(
             config=self._project_config,
@@ -143,7 +151,8 @@ class FileDataContext(SerializableDataContext):
         )
         return variables
 
-    def _save_project_config(self, _fds_datasource=None) -> None:
+    @override
+    def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
@@ -195,9 +204,7 @@ class FileDataContext(SerializableDataContext):
             )
         except YAMLError as err:
             raise gx_exceptions.InvalidConfigurationYamlError(
-                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
-                    err
-                )
+                f"Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{err}"
             )
         except OSError:
             raise gx_exceptions.ConfigNotFoundError()
@@ -210,6 +217,7 @@ class FileDataContext(SerializableDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
+    @override
     def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
         logger.info(f"{type(self).__name__} loading fluent config")
         if not self.root_directory:

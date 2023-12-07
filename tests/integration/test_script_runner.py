@@ -92,6 +92,12 @@ docs_test_matrix: List[IntegrationTestFixture] = []
 
 local_tests = [
     IntegrationTestFixture(
+        name="how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
         name="how_to_validate_multiple_batches_within_single_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -177,19 +183,6 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="auto_initializing_expect_column_mean_to_be_between",
-        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="is_expectation_auto_initializing",
-        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -325,13 +318,6 @@ fluent_datasources = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="how_to_configure_a_new_checkpoint_using_test_yaml_config",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
         name="validate_data_by_running_a_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
         data_context_dir=None,
@@ -440,6 +426,30 @@ fluent_datasources = [
     ),
 ]
 
+failed_rows_tests = [
+    IntegrationTestFixture(
+        name="failed_rows_pandas",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
+        name="failed_rows_sqlalchemy",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py",
+        backend_dependencies=[BackendDependencies.SQLALCHEMY],
+    ),
+    IntegrationTestFixture(
+        name="failed_rows_spark",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+]
+
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
@@ -460,6 +470,7 @@ docs_test_matrix += s3_integration_tests
 docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
+docs_test_matrix += failed_rows_tests
 
 pandas_integration_tests = [
     IntegrationTestFixture(

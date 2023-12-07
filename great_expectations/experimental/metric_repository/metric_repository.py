@@ -1,13 +1,18 @@
+import uuid
+
 from great_expectations.experimental.metric_repository.data_store import DataStore
 from great_expectations.experimental.metric_repository.metrics import MetricRun
 
 
 class MetricRepository:
-    pass
-    # TODO: Add docstrings
+    """A repository for storing and retrieving MetricRuns.
+
+    Args:
+        data_store: The DataStore to use for storing and retrieving MetricRuns.
+    """
 
     def __init__(self, data_store: DataStore):
         self._data_store = data_store
 
-    def add(self, metric_run: MetricRun) -> MetricRun:
+    def add_metric_run(self, metric_run: MetricRun) -> uuid.UUID:
         return self._data_store.add(value=metric_run)

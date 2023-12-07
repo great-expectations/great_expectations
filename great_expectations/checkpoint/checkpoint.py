@@ -18,7 +18,6 @@ from typing import (
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import (
     ActionDicts,
-    SimpleCheckpointConfigurator,
 )
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
@@ -30,6 +29,7 @@ from great_expectations.checkpoint.util import (
     substitute_template_config,
     validate_validation_dict,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import RunIdentifier
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -108,7 +108,7 @@ class BaseCheckpoint(ConfigPeer):
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
 
     While not technically categorized as abstract class, "BaseCheckpoint" serves as parent class; it must never be
-    instantiated directly (only its descendants, such as "Checkpoint" and "SimpleCheckpoint", should be instantiated).
+    instantiated directly (only its descendants, such as "Checkpoint", should be instantiated).
     """
 
     DEFAULT_ACTION_LIST: ClassVar[
@@ -626,6 +626,7 @@ is run), with each validation having its own defined "action_list" attribute.
         return report_object
 
     @property
+    @override
     def config(self) -> CheckpointConfig:
         return self._checkpoint_config
 
@@ -677,6 +678,7 @@ is run), with each validation having its own defined "action_list" attribute.
 
         return isinstance(self.data_context, CloudDataContext)
 
+    @override
     def __repr__(self) -> str:
         return str(self.get_config())
 
@@ -752,7 +754,7 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: int | float = 1.0,
+        config_version: int | float = 1.0,  # noqa: PYI041
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
@@ -845,7 +847,7 @@ constructor arguments.
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,
+        run_id: str | int | float | None = None,  # noqa: PYI041
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | dict | None = None,  # TODO: type-dict?
@@ -919,7 +921,7 @@ constructor arguments.
         config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
-        class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
+        class_name: Literal["Checkpoint"] = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
@@ -930,11 +932,6 @@ constructor arguments.
             Union[list[dict], list[CheckpointValidationConfig]]
         ] = None,
         profilers: Optional[list[dict]] = None,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, list[str]]] = None,
-        slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, list[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -990,19 +987,9 @@ constructor arguments.
             class_name=class_name,
             module_name=module_name or default_checkpoints_module_name,
         )
-        if issubclass(klass, SimpleCheckpoint):
-            checkpoint_config.update(
-                {
-                    # the following four keys are used by SimpleCheckpoint
-                    "site_names": site_names,
-                    "slack_webhook": slack_webhook,
-                    "notify_on": notify_on,
-                    "notify_with": notify_with,
-                }
-            )
-        elif not issubclass(klass, Checkpoint):
+        if not issubclass(klass, Checkpoint):
             raise gx_exceptions.InvalidCheckpointConfigError(
-                f'Custom class "{klass.__name__}" must extend either "Checkpoint" or "SimpleCheckpoint" (exclusively).'
+                f'Custom class "{klass.__name__}" must extend "Checkpoint" (exclusively).'
             )
 
         checkpoint_config = deep_filter_properties_iterable(
@@ -1070,209 +1057,3 @@ constructor arguments.
         )
 
         return checkpoint
-
-
-@public_api
-@deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
-@deprecated_argument(argument_name="batches", version="0.14.0")
-@new_argument(
-    argument_name="ge_cloud_id", version="0.13.33", message="Used in cloud deployments."
-)
-@new_argument(
-    argument_name="expectation_suite_ge_cloud_id",
-    version="0.13.33",
-    message="Used in cloud deployments.",
-)
-class SimpleCheckpoint(Checkpoint):
-    """A SimpleCheckpoint provides a means to simplify the process of specifying a Checkpoint configuration.
-
-    It provides a basic set of actions - store Validation Result, store Evaluation Parameters, update Data Docs,
-    and optionally, send a Slack notification - allowing you to omit an action_list from your configuration and at runtime.
-
-    Args:
-        name: user-selected Checkpoint name (e.g. `staging_tables`).
-        data_context: Data context that is associated with the current checkpoint.
-        config_version: version number of the checkpoint configuration.
-        template_name: the name of another checkpoint to use as a base template.
-        run_name_template: a template to create run names, using environment variables and datetime-template syntax (e.g. `%Y-%M-staging-$MY_ENV_VAR`).
-        expectation_suite_name: expectation suite associated with checkpoint.
-        batch_request: batch request describing the batch of data to validate.
-        action_list: a list of actions to perform after each batch is validated.
-        evaluation_parameters: evaluation parameters to use in generating this checkpoint.
-        runtime_configuration: runtime configuration to pass into the validator's runtime configuration (e.g. `result_format`).
-        validations: validations to be executed as part of checkpoint.
-        profilers: profilers to use in generating this checkpoint.
-        validation_operator_name: list of validation operators configured by the checkpoint.
-        batches: list of batches for validation by checkpoint.
-        ge_cloud_id: Great Expectations Cloud id for this checkpoint.
-        site_names: a list of Data Docs site names to update as part of the update Data Docs action - defaults to `all`.
-        slack_webhook:  if provided, an action will be added that sends a Slack notification to the provided webhook.
-        notify_on: used to define when a notification is fired, according to validation result outcome - `all`, `failure`, or `success`. Defaults to `all`.
-        notify_with: a list of Data Docs site names for which to include a URL in any notifications - defaults to `all`.
-        expectation_suite_ge_cloud_id: Great Expectations Cloud id associated with expectation suite.
-        kwargs: additional keyword arguments.
-    """
-
-    _configurator_class = SimpleCheckpointConfigurator
-    name: str
-
-    # noinspection PyUnusedLocal
-    def __init__(  # noqa: PLR0913
-        self,
-        name: str,
-        data_context,
-        config_version: int | float | None = 1.0,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
-        validator: Validator | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
-        ge_cloud_id: str | None = None,
-        # the following four arguments are used by SimpleCheckpointConfigurator
-        site_names: str | list[str] = "all",
-        slack_webhook: str | None = None,
-        notify_on: str = "all",
-        notify_with: str | list[str] = "all",
-        expectation_suite_ge_cloud_id: str | None = None,
-        **kwargs,
-    ) -> None:
-        checkpoint_config: CheckpointConfig = self._configurator_class(
-            name=name,
-            data_context=data_context,
-            config_version=config_version,
-            template_name=template_name,
-            run_name_template=run_name_template,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            profilers=profilers,
-            site_names=site_names,
-            slack_webhook=slack_webhook,
-            notify_on=notify_on,
-            notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-        ).build()
-
-        super().__init__(
-            name=checkpoint_config.name,
-            data_context=data_context,
-            config_version=checkpoint_config.config_version,
-            template_name=checkpoint_config.template_name,
-            run_name_template=checkpoint_config.run_name_template,
-            expectation_suite_name=checkpoint_config.expectation_suite_name,
-            batch_request=batch_request,
-            validator=validator,
-            action_list=checkpoint_config.action_list,
-            evaluation_parameters=checkpoint_config.evaluation_parameters,
-            runtime_configuration=checkpoint_config.runtime_configuration,
-            validations=checkpoint_config.validations,
-            profilers=checkpoint_config.profilers,
-            ge_cloud_id=checkpoint_config.ge_cloud_id,
-            expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id,
-        )
-
-    @public_api
-    @new_argument(
-        argument_name="expectation_suite_ge_cloud_id",
-        version="0.13.33",
-        message="Used in cloud deployments.",
-    )
-    def run(  # noqa: PLR0913
-        self,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[
-            Union[BatchRequestBase, FluentBatchRequest, dict]
-        ] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[list[dict]] = None,
-        profilers: Optional[list[dict]] = None,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[str] = None,
-        # the following four arguments are specific to SimpleCheckpoint
-        site_names: Union[str, list[str]] = "all",
-        slack_webhook: Optional[str] = None,
-        notify_on: str = "all",
-        notify_with: Union[str, list[str]] = "all",
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-    ) -> CheckpointResult:
-        """Validate against the current SimpleCheckpoint.
-
-        Arguments allow for override of the current SimpleCheckpoint configuration.
-
-        Args:
-            template_name: The name of another checkpoint to use as a base template.
-            run_name_template: A template to create run names, using environment
-                variables and datetime-template syntax (e.g. "%Y-%M-staging-$MY_ENV_VAR").
-            expectation_suite_name: Expectation suite associated with checkpoint.
-            batch_request: Batch request describing the batch of data to validate.
-            validator: Validator objects, loaded with Batch data samples, can be supplied (in lieu of  "batch_request")
-            action_list: A list of actions to perform after each batch is validated.
-            evaluation_parameters: Evaluation parameters to use in generating this checkpoint.
-            runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
-                (e.g. `result_format`).
-            validations: Validations to be executed as part of checkpoint.
-            profilers: Profilers to use in generating this checkpoint.
-            run_id: The run_id for the validation; if None, a default value will be used.
-            run_name: The run_name for the validation; if None, a default value will be used.
-            run_time: The date/time of the run.
-            result_format: One of several supported formatting directives for expectation validation results
-            site_names: a list of Data Docs site names to update as part of the update Data Docs action - defaults to `all`.
-            slack_webhook:  if provided, an action will be added that sends a Slack notification to the provided webhook.
-            notify_on: used to define when a notification is fired, according to validation result outcome - `all`, `failure`, or `success`. Defaults to `all`.
-            notify_with: a list of Data Docs site names for which to include a URL in any notifications - defaults to `all`.
-            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
-
-        Returns:
-            CheckpointResult
-        """
-        new_baseline_config = None
-
-        # if any SimpleCheckpoint-specific kwargs are passed, generate a new baseline config using configurator,
-        # passing only action_list, since this is the only config key that would be affected by the
-        # SimpleCheckpoint-specific kwargs
-        if any((site_names, slack_webhook, notify_on, notify_with)):
-            new_baseline_config = self._configurator_class(
-                name=self.name,
-                data_context=self.data_context,
-                action_list=action_list,
-                site_names=site_names,
-                slack_webhook=slack_webhook,
-                notify_on=notify_on,
-                notify_with=notify_with,
-            ).build()
-
-        return super().run(
-            template_name=template_name,
-            run_name_template=run_name_template,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            validator=validator,
-            action_list=new_baseline_config.action_list
-            if new_baseline_config
-            else action_list,
-            evaluation_parameters=evaluation_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            profilers=profilers,
-            run_id=run_id,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-        )

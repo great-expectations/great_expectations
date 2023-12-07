@@ -12,6 +12,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -391,7 +392,7 @@ Notes:
     # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
-    _internal_names = pd.DataFrame._internal_names + [
+    _internal_names = pd.DataFrame._internal_names + [  # type: ignore[attr-defined]
         "_batch_kwargs",
         "_batch_markers",
         "_batch_parameters",
@@ -448,6 +449,7 @@ Notes:
     def get_column_count(self):
         return self.shape[1]
 
+    @override
     def get_table_columns(self) -> List[str]:
         return list(self.columns)
 
@@ -734,7 +736,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configurations.pop(
+                    existing_expectations[0]
+                )
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -744,14 +748,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_of_type",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ] = new_config
         else:
             res = self._expect_column_values_to_be_of_type__map(column, type_, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
@@ -770,7 +778,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configurations.pop(
+                    existing_expectations[0]
+                )
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -780,14 +790,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_of_type",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ] = new_config
 
         return res
 
@@ -957,7 +971,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configurations.pop(
+                    existing_expectations[0]
+                )
 
             new_expectations = self._expectation_suite.find_expectation_indexes(
                 ExpectationConfiguration(
@@ -966,14 +982,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ] = new_config
         else:
             res = self._expect_column_values_to_be_in_type_list__map(
                 column, type_list, **kwargs
@@ -994,7 +1014,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configurations.pop(
+                    existing_expectations[0]
+                )
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -1004,14 +1026,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configurations[
+                new_expectations[0]
+            ] = new_config
 
         return res
 
@@ -1469,7 +1495,7 @@ Notes:
                 strftime_format,
             )
         except ValueError as e:
-            raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
+            raise ValueError(f"Unable to use provided strftime_format. {e!s}")
 
         def is_parseable_by_format(val):
             try:
@@ -1499,7 +1525,7 @@ Notes:
     ):
         def is_parseable(val):
             try:
-                if type(val) != str:
+                if type(val) != str:  # noqa: E721
                     raise TypeError(
                         "Values passed to expect_column_values_to_be_dateutil_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
                     )

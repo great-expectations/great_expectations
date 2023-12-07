@@ -1,17 +1,29 @@
-from typing import Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
+
+from great_expectations.compatibility import pydantic
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render.components import (
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import substitute_none_for_missing
+from great_expectations.render.util import num_to_str, substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
 
 
 class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
@@ -39,8 +51,6 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -51,7 +61,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_match_regex](https://greatexpectations.io/expectations/expect_column_values_to_match_regex)
@@ -62,6 +72,20 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
+
+    like_pattern_list: Union[List[str], EvaluationParameterDict]
+    match_on: Literal["any", "all"] = "any"
+
+    @pydantic.validator("like_pattern_list")
+    def validate_like_pattern_list(
+        cls, like_pattern_list: list[str] | EvaluationParameterDict
+    ) -> list[str] | EvaluationParameterDict:
+        if len(like_pattern_list) < 1:
+            raise ValueError(
+                "At least one like_pattern must be supplied in the like_pattern_list."
+            )
+
+        return like_pattern_list
 
     library_metadata = {
         "maturity": "production",
@@ -76,16 +100,6 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
     map_metric = "column_values.match_like_pattern_list"
     success_keys = ("mostly", "like_pattern_list", "match_on")
-    default_kwarg_values = {
-        "like_pattern_list": None,
-        "match_on": "any",
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
-    }
     args_keys = (
         "column",
         "like_pattern_list",
@@ -127,18 +141,57 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ) -> None:
+    ) -> List[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
-        _ = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(  # noqa: F841 # unused
+        styling = runtime_configuration.get("styling")
+
+        params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
+            ["column", "like_pattern_list", "mostly"],
         )
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, no_scientific=True
+            )
+
+        if (
+            not params.get("like_pattern_list")
+            or len(params.get("like_pattern_list")) == 0
+        ):
+            values_string = "[ ]"
+        else:
+            for i, v in enumerate(params["like_pattern_list"]):
+                params[f"v__{i!s}"] = v
+            values_string = " ".join(
+                [f"$v__{i!s}" for i, v in enumerate(params["like_pattern_list"])]
+            )
+
+        template_str = "Values must match the following like patterns: " + values_string
+
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, no_scientific=True
+            )
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]

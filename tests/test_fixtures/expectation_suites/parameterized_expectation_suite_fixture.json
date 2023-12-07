@@ -16,6 +16,7 @@
         {
             "expectation_type": "expect_column_unique_value_count_to_be_between",
             "kwargs": {
+                "column": "default",
                 "min_value": {
                     "$PARAMETER": "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result.observed_value"
                 }

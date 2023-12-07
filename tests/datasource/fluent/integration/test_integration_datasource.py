@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import datetime
 import pathlib
 from typing import TYPE_CHECKING
+from unittest import mock
 
 import pandas as pd
-import pydantic
 import pytest
 
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
+from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext,
     CloudDataContext,
@@ -35,6 +38,13 @@ from tests.datasource.fluent.integration.integration_test_utils import (
 
 if TYPE_CHECKING:
     from responses import RequestsMock
+
+    from great_expectations.datasource.fluent.pandas_datasource import (
+        DataFrameAsset as PandasDataFrameAsset,
+    )
+    from great_expectations.datasource.fluent.spark_datasource import (
+        DataFrameAsset as SparkDataFrameAsset,
+    )
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
@@ -99,7 +109,7 @@ def test_batch_head(
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
     fetch_all: bool | str,
-    n_rows: int | float | str | None,
+    n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
 ) -> None:
     run_batch_head(
@@ -284,6 +294,18 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
+            "add_splitter_column_value",
+            {"column_name": "pickup_datetime"},
+            ["pickup_datetime"],
+            9977,
+            {"pickup_datetime": "2019-02-07 15:48:06"},
+            1,
+            {"pickup_datetime": "2019-02-07 15:48:06"},
+            id="column_value_datetime",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
             "add_splitter_divided_integer",
             {"column_name": "passenger_count", "divisor": 3},
             ["quotient"],
@@ -374,6 +396,48 @@ def test_splitter(
     assert specified_batches[-1].metadata == last_specified_batch_metadata
 
 
+@pytest.mark.sqlite
+def test_splitter_build_batch_request_allows_selecting_by_date_and_datetime_as_string(
+    empty_data_context,
+):
+    context = empty_data_context
+    datasource = sqlite_datasource(context, "yellow_tripdata.db")
+
+    asset = datasource.add_query_asset(
+        "query_asset",
+        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
+    )
+    asset.add_splitter_column_value(column_name="pickup_date")
+    asset.add_sorters(["pickup_date"])
+    # Test getting all batches
+    all_batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    assert len(all_batches) == 28
+
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource._splitter_and_sql_asset_to_batch_identifier_data"
+    ) as mock_batch_identifiers:
+        mock_batch_identifiers.return_value = [
+            {"pickup_date": datetime.date(2019, 2, 1)},
+            {"pickup_date": datetime.date(2019, 2, 2)},
+        ]
+        specified_batches = asset.get_batch_list_from_batch_request(
+            asset.build_batch_request({"pickup_date": "2019-02-01"})
+        )
+        assert len(specified_batches) == 1
+
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource._splitter_and_sql_asset_to_batch_identifier_data"
+    ) as mock_batch_identifiers:
+        mock_batch_identifiers.return_value = [
+            {"pickup_date": datetime.datetime(2019, 2, 1)},
+            {"pickup_date": datetime.datetime(2019, 2, 2)},
+        ]
+        specified_batches = asset.get_batch_list_from_batch_request(
+            asset.build_batch_request({"pickup_date": "2019-02-01 00:00:00"})
+        )
+        assert len(specified_batches) == 1
+
+
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
 def test_simple_checkpoint_run(
     datasource_test_data: tuple[
@@ -384,17 +448,23 @@ def test_simple_checkpoint_run(
     expectation_suite_name = "my_expectation_suite"
     context.add_expectation_suite(expectation_suite_name)
 
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         "my_checkpoint",
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         "my_checkpoint",
         data_context=context,
         validations=[
@@ -403,10 +473,16 @@ def test_simple_checkpoint_run(
                 "batch_request": batch_request,
             }
         ],
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.filesystem
@@ -428,15 +504,21 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     )
     expectation_suite_name = "my_expectation_suite"
     context.add_expectation_suite(expectation_suite_name)
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         "my_checkpoint",
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.parametrize(
@@ -524,11 +606,11 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset = context.sources.add_or_update_pandas(
+    dataframe_asset: PandasDataFrameAsset = context.sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)
+    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
 
 @pytest.mark.filesystem
@@ -540,16 +622,18 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     context = empty_file_context
 
     datasource = context.sources.add_or_update_pandas(name="fluent_pandas_datasource")
-    dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
+    dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(
+        name="my_df_asset"
+    )
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)
+    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
     ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)
+    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
 
 @pytest.mark.spark
@@ -564,11 +648,11 @@ def test_spark_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
 
 @pytest.mark.spark
@@ -582,20 +666,20 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
 
     context = empty_file_context
 
-    dataframe_asset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
     datasource = context.sources.add_or_update_spark(name="fluent_pandas_datasource")
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
     ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]

@@ -4,15 +4,11 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -73,9 +69,6 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None

@@ -3,6 +3,7 @@ This is a template for creating custom BatchExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations
 """
+from __future__ import annotations
 
 from typing import Dict, Optional
 
@@ -92,6 +93,8 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     """Expect batch to contain columns with unique contents."""
     # </snippet>
 
+    strict: bool = True
+
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py examples">
@@ -147,9 +150,6 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ("strict",)
 
-    # This dictionary contains default values for any parameters that should have default values.
-    default_kwarg_values = {"strict": True}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -183,8 +183,8 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: dict | None = None,
+        execution_engine: ExecutionEngine | None = None,
     ):
         unique_columns = metrics.get("table.columns.unique")
         batch_columns = metrics.get("table.columns")

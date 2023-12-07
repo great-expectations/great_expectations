@@ -7,8 +7,8 @@ import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.util import get_context
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -144,14 +144,23 @@ def test_common_usage_stats_are_sent_no_mocking(
     checkpoint_yaml = """
     name: my_checkpoint
     config_version: 1
-    class_name: SimpleCheckpoint
+    class_name: Checkpoint
     validations:
       - batch_request:
             datasource_name: example_datasource
             data_connector_name: default_runtime_data_connector_name
             data_asset_name: my_data_asset
         expectation_suite_name: test_suite
-
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
     """
     context.test_yaml_config(yaml_config=checkpoint_yaml)
     expected_events.append("data_context.test_yaml_config")

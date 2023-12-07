@@ -7,6 +7,7 @@ from great_expectations.compatibility.pyspark import (
     functions as F,
 )
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -27,7 +28,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class ColumnDistinctValues(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values"
 
-    @column_aggregate_value(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _pandas(cls, column: pd.Series, **kwargs) -> Set[Any]:
         return set(column.unique())
 
@@ -108,11 +109,11 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
 class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
-    @column_aggregate_value(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _pandas(cls, column: pd.Series, **kwargs) -> int:
         return column.nunique()
 
-    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
+    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _sqlalchemy(
         cls,
         column: sqlalchemy.ColumnClause,
@@ -125,7 +126,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         """
         return sa.func.count(sa.distinct(column))
 
-    @column_aggregate_partial(engine=SparkDFExecutionEngine)
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _spark(
         cls,
         column: pyspark.Column,
@@ -143,7 +144,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count.under_threshold"
     condition_keys = ("threshold",)
 
-    @column_aggregate_value(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _pandas(cls, column: pd.Series, threshold: int, **kwargs) -> bool:
         return column.nunique() < threshold
 
@@ -170,6 +171,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         )
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

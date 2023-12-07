@@ -1,9 +1,6 @@
-from typing import Optional, cast
-
 import pandas as pd
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -50,9 +47,8 @@ def test_pandas_expect_column_value_z_scores_to_be_less_than_impl(
 ):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_spark=False)
-    )
+    context = build_in_memory_runtime_context(include_spark=False)
+
     validator = get_test_validator_with_data(
         execution_engine="pandas",
         data=df,
@@ -75,9 +71,8 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
 
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_spark=False)
-    )
+    context = build_in_memory_runtime_context(include_spark=False)
+
     validator = get_test_validator_with_data(
         execution_engine="postgresql",
         table_name="expect_column_value_z_scores_to_be_less_than_impl_1",
@@ -99,9 +94,8 @@ def test_spark_expect_column_value_z_scores_to_be_less_than_impl(
 ):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_pandas=False)
-    )
+    context = build_in_memory_runtime_context(include_pandas=False)
+
     validator = get_test_validator_with_data(
         execution_engine="spark",
         data=df,

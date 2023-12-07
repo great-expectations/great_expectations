@@ -7,6 +7,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationConfiguration,
     ExpectationSuite,
 )
+from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -18,7 +19,6 @@ from great_expectations.data_context.types.base import DataContextConfig, GXClou
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
-from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
 
@@ -393,8 +393,7 @@ def test_delete_expectation_suite_by_name_deletes_suite_in_cloud(
 
     assert (
         mock_delete.call_args[0][1]
-        == "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392"
-        "-bcd1-f1e87ad5a79c/expectation-suites"
+        == "https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/expectation-suites"
     )
     assert mock_delete.call_args[1]["params"] == {"name": suite_name}
 
@@ -445,15 +444,15 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
-    suite_id = "abc123"
+    suite_name = "suite123"
 
     with pytest.raises(DataContextError) as e:
         with mock.patch(
             "requests.Session.get", autospec=True, side_effect=mocked_404_response
         ):
-            context.get_expectation_suite(ge_cloud_id=suite_id)
+            context.get_expectation_suite(suite_name)
 
-    assert "abc123" in str(e.value)
+    assert suite_name in str(e.value)
 
 
 @pytest.mark.cloud
@@ -677,7 +676,9 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     )
     assert (
-        expectation_suite_exclude_rendered_content.expectations[0].rendered_content
+        expectation_suite_exclude_rendered_content.expectation_configurations[
+            0
+        ].rendered_content
         is None
     )
 
@@ -713,6 +714,8 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     )
     assert (
-        expectation_suite_include_rendered_content.expectations[0].rendered_content
+        expectation_suite_include_rendered_content.expectation_configurations[
+            0
+        ].rendered_content
         == expected_expectation_configuration_prescriptive_rendered_content
     )

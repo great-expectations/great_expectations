@@ -11,7 +11,7 @@ The full script used in the following code examples, is available in GitHub here
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
 </Prerequisites>
 

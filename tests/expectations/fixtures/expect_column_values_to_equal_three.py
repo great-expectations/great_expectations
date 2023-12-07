@@ -24,8 +24,6 @@ from great_expectations.render.util import (
 
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     condition_metric_name = "column_values.equal_three"
-    # condition_value_keys = {}
-    # default_kwarg_values = {}
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -35,7 +33,9 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     map_metric = "column_values.equal_three"
     success_keys = ("mostly",)
-    # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
+
+    def validate_configuration(self, configuration) -> None:
+        pass  # no-op to make test setup easier
 
 
 class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
@@ -156,7 +156,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
         template_str = "values must be equal to 3"
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."

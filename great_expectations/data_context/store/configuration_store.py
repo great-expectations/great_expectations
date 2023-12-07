@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional, Union
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
@@ -119,9 +120,11 @@ class ConfigurationStore(Store):
         self._overwrite_existing = overwrite_existing
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
+    @override
     def self_check(self, pretty_print: bool = True) -> dict:  # type: ignore[override]
         # Provide visibility into parameters that ConfigurationStore was instantiated with.
         report_object: dict = {"config": self.config}
@@ -140,7 +143,7 @@ class ConfigurationStore(Store):
             print(f"\t{len_keys} keys found")
             if report_object["len_keys"] > 0:
                 for key in report_object["keys"][:10]:
-                    print(f"		{str(key)}")
+                    print(f"		{key!s}")
             if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
@@ -158,7 +161,7 @@ class ConfigurationStore(Store):
         assert bool(name) ^ bool(id), "Must provide either name or id."
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if id or self.ge_cloud_mode:
+        if id or self.cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 id=id,

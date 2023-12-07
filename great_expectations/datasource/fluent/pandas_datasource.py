@@ -24,13 +24,11 @@ from typing import (
 )
 
 import pandas as pd
-import pydantic
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility import pydantic, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -52,9 +50,7 @@ from great_expectations.datasource.fluent.interfaces import (
     _DataAssetT,
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
-from great_expectations.datasource.fluent.sources import (
-    DEFAULT_PANDAS_DATA_ASSET_NAME,
-)
+from great_expectations.datasource.fluent.sources import DEFAULT_PANDAS_DATA_ASSET_NAME
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
 
@@ -70,9 +66,7 @@ if TYPE_CHECKING:
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchMetadata,
-    )
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
 
@@ -112,13 +106,16 @@ class _PandasDataAsset(DataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
+    @override
     def test_connection(self) -> None:
         ...
 
     @property
+    @override
     def batch_request_options(self) -> tuple[str, ...]:
         return tuple()
 
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
@@ -177,6 +174,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         return batch_list
 
     @public_api
+    @override
     def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -190,6 +188,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             options={},
         )
 
+    @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -213,6 +212,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -358,6 +358,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             raise ValueError("dataframe must be of type pandas.DataFrame")
         return dataframe
 
+    @override
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
@@ -375,7 +376,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
         version="0.16.15",
     )
-    def build_batch_request(
+    @override
+    def build_batch_request(  # type: ignore[override]
         self, dataframe: Optional[pd.DataFrame] = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
@@ -390,7 +392,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         if dataframe is None:
             df = self.dataframe
         else:
-            df = dataframe
+            df = dataframe  # type: ignore[assignment]
 
         if df is None:
             raise ValueError(
@@ -401,6 +403,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
 
         return super().build_batch_request()
 
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
@@ -459,6 +462,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
     # Abstract Methods
     @property
+    @override
     def execution_engine_type(self) -> Type[PandasExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.pandas_execution_engine import (
@@ -467,6 +471,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         return PandasExecutionEngine
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the _PandasDatasource.
 
@@ -483,6 +488,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
     # End Abstract Methods
 
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -540,6 +546,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             **dumps_kwargs,
         )
 
+    @override
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
     ) -> _DataAssetT:
@@ -594,6 +601,7 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"] = "pandas"
     assets: List[_PandasDataAsset] = []
 
+    @override
     def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
         """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
         # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,
@@ -609,6 +617,7 @@ class PandasDatasource(_PandasDatasource):
                     ds_dict["assets"] = assets
         return ds_dict
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
@@ -759,7 +768,7 @@ class PandasDatasource(_PandasDatasource):
         """
         asset = CSVAsset(
             name=name,
-            filepath_or_buffer=filepath_or_buffer,
+            filepath_or_buffer=filepath_or_buffer,  # type: ignore[call-arg]
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -808,7 +817,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The ExcelAsset that has been added to this datasource.
         """
-        asset = ExcelAsset(
+        asset = ExcelAsset(  # type: ignore[call-arg]
             name=name,
             io=io,
             **kwargs,
@@ -859,7 +868,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The FeatherAsset that has been added to this datasource.
         """
-        asset = FeatherAsset(
+        asset = FeatherAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -910,7 +919,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The FWFAsset that has been added to this datasource.
         """
-        asset = FWFAsset(
+        asset = FWFAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -961,7 +970,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The GBQAsset that has been added to this datasource.
         """
-        asset = GBQAsset(
+        asset = GBQAsset(  # type: ignore[call-arg]
             name=name,
             query=query,
             **kwargs,
@@ -1012,7 +1021,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The HDFAsset that has been added to this datasource.
         """
-        asset = HDFAsset(
+        asset = HDFAsset(  # type: ignore[call-arg]
             name=name,
             path_or_buf=path_or_buf,
             **kwargs,
@@ -1063,7 +1072,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The HTMLAsset that has been added to this datasource.
         """
-        asset = HTMLAsset(
+        asset = HTMLAsset(  # type: ignore[call-arg]
             name=name,
             io=io,
             **kwargs,
@@ -1114,7 +1123,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The JSONAsset that has been added to this datasource.
         """
-        asset = JSONAsset(
+        asset = JSONAsset(  # type: ignore[call-arg]
             name=name,
             path_or_buf=path_or_buf,
             **kwargs,
@@ -1165,7 +1174,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The ORCAsset that has been added to this datasource.
         """
-        asset = ORCAsset(
+        asset = ORCAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -1216,7 +1225,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The ParquetAsset that has been added to this datasource.
         """
-        asset = ParquetAsset(
+        asset = ParquetAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -1267,7 +1276,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The PickleAsset that has been added to this datasource.
         """
-        asset = PickleAsset(
+        asset = PickleAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1318,7 +1327,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SASAsset that has been added to this datasource.
         """
-        asset = SASAsset(
+        asset = SASAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1369,7 +1378,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SPSSAsset that has been added to this datasource.
         """
-        asset = SPSSAsset(
+        asset = SPSSAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -1422,7 +1431,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SQLAsset that has been added to this datasource.
         """
-        asset = SQLAsset(
+        asset = SQLAsset(  # type: ignore[call-arg]
             name=name,
             sql=sql,
             con=con,
@@ -1479,7 +1488,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SQLQueryAsset that has been added to this datasource.
         """
-        asset = SQLQueryAsset(
+        asset = SQLQueryAsset(  # type: ignore[call-arg]
             name=name,
             sql=sql,
             con=con,
@@ -1536,7 +1545,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SQLTableAsset that has been added to this datasource.
         """
-        asset = SQLTableAsset(
+        asset = SQLTableAsset(  # type: ignore[call-arg]
             name=name,
             table_name=table_name,
             con=con,
@@ -1591,7 +1600,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The StataAsset that has been added to this datasource.
         """
-        asset = StataAsset(
+        asset = StataAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1642,7 +1651,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The TableAsset that has been added to this datasource.
         """
-        asset = TableAsset(
+        asset = TableAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1693,7 +1702,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The XMLAsset that has been added to this datasource.
         """
-        asset = XMLAsset(
+        asset = XMLAsset(  # type: ignore[call-arg]
             name=name,
             path_or_buffer=path_or_buffer,
             **kwargs,

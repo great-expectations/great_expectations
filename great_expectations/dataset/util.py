@@ -1,7 +1,6 @@
 # Utility methods for dealing with Dataset objects
 
 import logging
-import warnings
 from typing import Any, List, Optional, Union
 
 import numpy as np
@@ -143,16 +142,6 @@ def kde_partition_data(data, estimate_tails=True):
     return {"bins": bins, "weights": weights}
 
 
-def partition_data(data, bins="auto", n_bins=10):
-    # deprecated-v0.10.10
-    warnings.warn(
-        "partition_data is deprecated as of v0.10.10 and will be removed is a future release. Use either continuous_partition_data or \
-                    categorical_partition_data instead.",
-        DeprecationWarning,
-    )
-    return continuous_partition_data(data, bins, n_bins)
-
-
 def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
     """Convenience method for building a partition object on continuous data
 
@@ -188,7 +177,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
         )
     except TypeError as e:
         raise TypeError(
-            f"Unable to compute histogram. numpy histogram raised error: {str(e)}"
+            f"Unable to compute histogram. numpy histogram raised error: {e!s}"
         )
 
     return {"bins": bin_edges, "weights": hist / len(data)}

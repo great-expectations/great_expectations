@@ -709,7 +709,7 @@ class ExpectationSuitePageRenderer(Renderer):
         return RenderedDocumentContent(
             **{
                 "renderer_type": "ExpectationSuitePageRenderer",
-                "page_title": f"Expectations / {str(expectation_suite_name)}",
+                "page_title": f"Expectations / {expectation_suite_name!s}",
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "expectation-suite-page",
                 "sections": sections,
@@ -803,7 +803,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
         total_expectations = len(expectations.expectations)
         columns = []
-        for exp in expectations.expectations:
+        for exp in expectations.expectation_configurations:
             if "column" in exp.kwargs:
                 columns.append(exp.kwargs["column"])
         total_columns = len(set(columns))
@@ -991,12 +991,12 @@ class ProfilingResultsPageRenderer(Renderer):
         ):
             include_run_name = True
 
-        page_title = f"Profiling Results / {str(expectation_suite_name)}"
+        page_title = f"Profiling Results / {expectation_suite_name!s}"
         if data_asset_name:
-            page_title += f" / {str(data_asset_name)}"
+            page_title += f" / {data_asset_name!s}"
         if include_run_name:
-            page_title += f" / {str(run_name)}"
-        page_title += f" / {str(run_time)}"
+            page_title += f" / {run_name!s}"
+        page_title += f" / {run_time!s}"
 
         return RenderedDocumentContent(
             **{

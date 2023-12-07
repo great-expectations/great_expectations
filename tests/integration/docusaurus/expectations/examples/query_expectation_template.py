@@ -4,12 +4,9 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -32,7 +29,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
 
     # This is the default, baked-in SQL Query for this QueryExpectation
     # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py sql_query">
-    query = """
+    query: str = """
             SQL QUERY GOES HERE
             """
     # </snippet>
@@ -43,15 +40,6 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-        "query": query,  # Passing the above `query` attribute here as a default kwarg allows for the Expectation to be run with the defaul query, or have that query overridden by passing a `query` kwarg into the expectation
-    }
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -86,7 +74,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         raise NotImplementedError

@@ -14,9 +14,11 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.domain import Domain
+from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -25,12 +27,17 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
 )
+from great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter import (
+    SimpleSemanticTypeFilter,
+)
+from great_expectations.rule_based_profiler.helpers.util import get_batch_ids
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.render.util import load_notebook_from_path
-from tests.test_utils import find_strings_in_nested_obj
+from tests.test_utils import find_strings_in_nested_obj, load_data_into_test_database
 
 if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
@@ -396,6 +403,44 @@ def test_onboarding_data_assistant_should_fail_forward(
             result["rule_exception_tracebacks"]["table_rule"]["exception_message"]
             == "This rule failed."
         )
+
+
+@pytest.mark.spark
+def test_onboarding_data_assistant_numeric_column_containing_dot_spark(
+    spark_session,
+    ephemeral_context_with_defaults,
+):
+    """What does this test and why?
+
+    Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
+    compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html, specifically the dot case e.g. `a.b`.
+    """
+
+    columns = ["snake_case", "kebab-case", "dot.case"]
+    values = [(1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5)]
+
+    df = spark_session.createDataFrame(data=values, schema=columns)
+
+    context = ephemeral_context_with_defaults
+    datasource = context.sources.add_or_update_spark("my_datasource")
+    asset = datasource.add_dataframe_asset("my_asset")
+    batch_request = asset.build_batch_request(dataframe=df)
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request, exclude_column_names=["snake_case", "kebab-case"]
+    )
+
+    # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.
+    # Other metrics should pass.
+    assert list(data_assistant_result.rule_exception_tracebacks.keys()) == [
+        "numeric_columns_rule"
+    ]
+    assert (
+        data_assistant_result.rule_exception_tracebacks["numeric_columns_rule"][
+            "exception_message"
+        ]
+        == "Column names cannot contain '.' when computing the histogram metric."
+    )
 
 
 @pytest.mark.big
@@ -1003,4 +1048,118 @@ def test_onboarding_data_assistant_plot_metrics_stdout(
         f"""{metrics_calculated} Metrics calculated, {metrics_plots_implemented} Metric plots implemented
 Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         in stdout
+    )
+
+
+@pytest.mark.trino
+@pytest.mark.parametrize("use_fds", [True, False])
+def test_onboarding_data_assistant__trino_with_string_fields(
+    empty_data_context, use_fds
+):
+    CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
+
+    # This utility is not for general use. It is only to support testing.
+    load_data_into_test_database(
+        table_name="taxi_data",
+        csv_path=file_relative_path(
+            __file__,
+            "../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+        ),
+        connection_string=CONNECTION_STRING,
+        convert_colnames_to_datetime=["pickup_datetime"],
+    )
+
+    context = empty_data_context
+    if not use_fds:
+        datasource_config = {
+            "name": "my_trino_datasource",
+            "class_name": "Datasource",
+            "execution_engine": {
+                "class_name": "SqlAlchemyExecutionEngine",
+                "connection_string": CONNECTION_STRING,
+            },
+            "data_connectors": {
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": ["default_identifier_name"],
+                },
+                "default_inferred_data_connector_name": {
+                    "class_name": "InferredAssetSqlDataConnector",
+                    "include_schema_name": True,
+                },
+            },
+        }
+
+        context.add_datasource(**datasource_config)
+        batch_request = RuntimeBatchRequest(
+            datasource_name="my_trino_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="default_name",  # this can be anything that identifies this data
+            runtime_parameters={
+                "query": "SELECT pickup_datetime, dropoff_datetime, store_and_fwd_flag from taxi_data LIMIT 10"
+            },
+            batch_identifiers={"default_identifier_name": "default_identifier"},
+        )
+    else:
+        datasource = context.sources.add_sql(
+            name="my_trino_datasource", connection_string=CONNECTION_STRING
+        )
+        asset = datasource.add_table_asset(name="taxi_data")
+        batch_request = asset.build_batch_request()
+
+    context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
+    validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name="test_suite"
+    )
+
+    desired_metric = MetricConfiguration(
+        metric_name="table.column_types",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    validator.execution_engine.resolve_metrics([desired_metric])
+
+    if not use_fds:
+        batch_ids = get_batch_ids(data_context=context, batch_request=batch_request)
+        # Ensure that the data types are read correctly
+        semantic_type_filter = SimpleSemanticTypeFilter(
+            validator=validator,
+            batch_ids=batch_ids,
+            column_names=["pickup_datetime", "dropoff_datetime", "store_and_fwd_flag"],
+        )
+        assert (
+            semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map
+            == {
+                "pickup_datetime": SemanticDomainTypes.DATETIME,
+                "dropoff_datetime": SemanticDomainTypes.TEXT,
+                "store_and_fwd_flag": SemanticDomainTypes.TEXT,
+            }
+        )
+
+    # Attempt to run the onboarding assistant
+    result = context.assistants.onboarding.run(
+        batch_request=batch_request,
+        estimation="flag_outliers",
+        include_column_names=[
+            "pickup_datetime",
+            "dropoff_datetime",
+            "store_and_fwd_flag",
+        ],
+    )
+
+    assert result
+    assert len(result.expectation_configurations) > 0
+
+    # Should have some expectations for all three columns
+    assert any(
+        x["kwargs"].get("column") == "pickup_datetime"
+        for x in result.expectation_configurations
+    )
+    assert any(
+        x["kwargs"].get("column") == "dropoff_datetime"
+        for x in result.expectation_configurations
+    )
+    assert any(
+        x["kwargs"].get("column") == "store_and_fwd_flag"
+        for x in result.expectation_configurations
     )

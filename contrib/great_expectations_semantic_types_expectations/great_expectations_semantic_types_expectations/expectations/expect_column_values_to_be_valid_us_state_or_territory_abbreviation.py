@@ -1,8 +1,5 @@
-from typing import Optional
-
 import us
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -21,7 +18,7 @@ def is_valid_state_or_territory_abbreviation(state: str, dc_statehood: bool):
         pass
     if len(state) != 2:
         return False
-    elif type(state) != str:
+    elif type(state) != str:  # noqa: E721
         return False
     elif state in list_of_state_and_territory_abbrs:
         return True
@@ -111,34 +108,6 @@ class ExpectColumnValuesToBeValidUSStateOrTerritoryAbbreviation(ColumnMapExpecta
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

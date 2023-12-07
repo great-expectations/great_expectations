@@ -117,12 +117,31 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)
@@ -224,12 +243,31 @@ def test_spark_happy_path_onboarding_data_assistant(
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)
@@ -329,12 +367,31 @@ def test_sql_happy_path_onboarding_data_assistant(
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)
@@ -455,7 +512,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
             if_exists="replace",
         )
     except ValueError as ve:
-        logger.warning(f"Unable to store information into database: {str(ve)}")
+        logger.warning(f"Unable to store information into database: {ve!s}")
 
     batch_options = {"year": 2021}
 

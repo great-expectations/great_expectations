@@ -1,4 +1,4 @@
-# isort:skip_file
+# ruff: noqa: I001, PTH118, PTH109, PTH120
 import os
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py imports">
@@ -7,7 +7,7 @@ import pandas as pd
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.util import get_context
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
@@ -165,7 +165,7 @@ my_checkpoint_name = "insert_your_checkpoint_name_here"
 my_checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 """
 

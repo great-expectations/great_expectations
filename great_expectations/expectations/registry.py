@@ -168,6 +168,31 @@ def register_expectation(expectation: Type[Expectation]) -> None:
     _registered_expectations[expectation_type] = expectation
 
 
+def register_core_metrics() -> None:
+    """As Metric registration is the responsibility of MetaMetricProvider.__new__,
+    simply importing a given class will ensure that it is added to the Metric
+    registry.
+
+    We use this to grab metrics by name within our workflows.
+
+    Without this function, we need to hope that core Metrics are imported somewhere
+    in our import graph - if not, our registry will be empty and we'll see
+    MetricResolutionErrors.
+    """
+    before_count = len(_registered_metrics)
+
+    # Implicitly calls MetaMetricProvider.__new__ as Metrics are loaded from metrics.__init__.py
+    # As __new__ calls upon register_metric this import builds our core registry
+    from great_expectations.expectations import metrics  # noqa: F401
+
+    after_count = len(_registered_metrics)
+
+    if before_count == after_count:
+        logger.debug("Already registered core metrics; no updates to registry")
+    else:
+        logger.debug(f"Registered {after_count-before_count} core metrics")
+
+
 def register_core_expectations() -> None:
     """As Expectation registration is the responsibility of MetaExpectation.__new__,
     simply importing a given class will ensure that it is added to the Expectation
@@ -341,7 +366,9 @@ def get_metric_kwargs(
         }
         if configuration:
             expectation_impl = get_expectation_impl(configuration.expectation_type)
-            configuration_kwargs = expectation_impl().get_runtime_kwargs(
+            configuration_kwargs = expectation_impl(
+                **configuration.kwargs
+            ).get_runtime_kwargs(
                 configuration=configuration, runtime_configuration=runtime_configuration
             )
             if len(metric_kwargs["metric_domain_keys"]) > 0:

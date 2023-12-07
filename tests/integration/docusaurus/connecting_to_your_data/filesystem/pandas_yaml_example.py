@@ -6,7 +6,6 @@ yaml = YAMLHandler()
 import great_expectations as gx
 
 # </snippet>
-
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import BatchRequest">
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
@@ -16,7 +15,7 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 context = gx.get_context()
 # </snippet>
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -79,7 +78,7 @@ batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 # Example using batch request to get a batch:
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with batch request">
-batch = context.get_batch(batch_request=batch_request)
+batch = context.get_batch_list(batch_request=batch_request)[0]
 # </snippet>
 
 # Example using parameters to get a batch:
@@ -92,7 +91,7 @@ data_asset_name = "<YOUR_DATA_ASSET_NAME>"
 data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters">
-context.get_batch(
+context.get_batch_list(
     datasource_name="taxi_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name=data_asset_name,

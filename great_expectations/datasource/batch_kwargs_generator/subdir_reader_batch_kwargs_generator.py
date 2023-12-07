@@ -26,6 +26,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
+# 20230830 - Chetan - Is open for deletion but is used in a number of tests; once decoupled, we should remove this
 class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """The SubdirReaderBatchKwargsGenerator inspects a filesystem and produces path-based batch_kwargs.
 

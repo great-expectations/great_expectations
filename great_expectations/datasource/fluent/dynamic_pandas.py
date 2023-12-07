@@ -30,11 +30,12 @@ from typing import (
 )
 
 import pandas as pd
-import pydantic
 from packaging.version import Version
-from pydantic import AnyUrl, Field, FilePath
 
-# from pydantic.typing import resolve_annotations
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import AnyUrl, Field, FilePath
+
+# from great_expectations.compatibility.pydantic.typing import resolve_annotations
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
@@ -50,13 +51,13 @@ except ImportError:
     # Types may not exist on earlier version of pandas (current min ver is v.1.1.0)
     # https://github.com/pandas-dev/pandas/blob/v1.1.0/pandas/_typing.py
     CompressionDict = Dict[str, Any]
-    CompressionOptions = Optional[
+    CompressionOptions = Optional[  # type: ignore[misc]
         Union[
             Literal["infer", "gzip", "bz2", "zip", "xz", "zstd", "tar"], CompressionDict
         ]
     ]
-    CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
-    StorageOptions = Optional[Dict[str, Any]]
+    CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]  # type: ignore[misc]
+    StorageOptions = Optional[Dict[str, Any]]  # type: ignore[misc]
 
 try:
     from pandas._libs.lib import _NoDefault

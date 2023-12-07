@@ -9,7 +9,6 @@ import pytest
 from ruamel.yaml.error import MarkedYAMLError
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -172,7 +171,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
     )
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     yaml_config: str = f"""
     store_name: my_checkpoint_store
@@ -581,7 +580,7 @@ data_connectors:
 def test_config_variables_in_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled, sa
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     db_file = file_relative_path(
         __file__,
@@ -695,7 +694,7 @@ def test_golden_path_sql_datasource_configuration(
     test_connectable_postgresql_db,
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
@@ -763,7 +762,7 @@ def test_golden_path_sql_datasource_configuration(
         print(json.dumps(report_object, indent=2))
         print(context.datasources)
 
-        context.get_batch(
+        context.get_batch_list(
             "my_datasource",
             "whole_table_with_limits",
             "test_df",
@@ -771,7 +770,7 @@ def test_golden_path_sql_datasource_configuration(
         # assert len(my_batch.data.fetchall()) == 10
 
         with pytest.raises(KeyError):
-            context.get_batch(
+            context.get_batch_list(
                 "my_datasource",
                 "whole_table_with_limits",
                 "DOES_NOT_EXIST",
@@ -840,7 +839,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx
@@ -911,7 +910,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         ]
         assert mock_emit.call_args_list == expected_call_args_list
 
-        my_batch = context.get_batch(
+        my_batch_list = context.get_batch_list(
             datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="A",
@@ -927,9 +926,8 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
                 },
             },
         )
+        my_batch = my_batch_list[0]
         assert my_batch.batch_definition["data_asset_name"] == "A"
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 2
 
         df_data = my_batch.data.dataframe
@@ -947,15 +945,13 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
             .equals(df_data.drop("timestamp", axis=1))
         )
 
-        with pytest.raises(ValueError):
-            # noinspection PyUnusedLocal
-            my_batch = context.get_batch(
-                datasource_name="my_directory_datasource",
-                data_connector_name="my_filesystem_data_connector",
-                data_asset_name="DOES_NOT_EXIST",
-            )
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        # Empty batch list won't error but still will emit usage stats
+        batch_list = context.get_batch_list(
+            datasource_name="my_directory_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="DOES_NOT_EXIST",
+        )
+        assert len(batch_list) == 0
         assert mock_emit.call_count == 3
 
         my_validator = context.get_validator(
@@ -975,8 +971,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
                 },
             },
         )
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 4
 
         my_evr = my_validator.expect_column_values_to_be_between(
@@ -1035,7 +1029,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx
@@ -1130,7 +1124,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         ]
         assert mock_emit.call_args_list == expected_call_args_list
 
-        my_batch = context.get_batch(
+        my_batch_list = context.get_batch_list(
             datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="A",
@@ -1146,9 +1140,8 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
                 },
             },
         )
+        my_batch = my_batch_list[0]
         assert my_batch.batch_definition["data_asset_name"] == "A"
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 2
 
         my_batch.head()
@@ -1168,15 +1161,13 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             .equals(df_data.drop("timestamp", axis=1))
         )
 
-        with pytest.raises(ValueError):
-            # noinspection PyUnusedLocal
-            my_batch = context.get_batch(
-                datasource_name="my_directory_datasource",
-                data_connector_name="my_filesystem_data_connector",
-                data_asset_name="DOES_NOT_EXIST",
-            )
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        # Empty batch list won't error but still will emit usage stats
+        batch_list = context.get_batch_list(
+            datasource_name="my_directory_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="DOES_NOT_EXIST",
+        )
+        assert len(batch_list) == 0
         assert mock_emit.call_count == 3
 
         my_validator = context.get_validator(
@@ -1198,8 +1189,6 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             column="d", min_value=1, max_value=31
         )
         assert my_evr.success
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 4
 
         # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
@@ -1244,7 +1233,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx
@@ -1346,7 +1335,7 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx

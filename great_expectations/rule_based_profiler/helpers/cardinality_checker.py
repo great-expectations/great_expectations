@@ -5,6 +5,7 @@ import enum
 from dataclasses import dataclass
 from typing import Union, cast
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import ProfilerConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -20,6 +21,7 @@ class RelativeCardinalityLimit(CardinalityLimit):
     max_proportion_unique: float
     metric_name_defining_limit: str = "column.unique_proportion"
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(
             {
@@ -35,6 +37,7 @@ class AbsoluteCardinalityLimit(CardinalityLimit):
     max_unique_values: int
     metric_name_defining_limit: str = "column.distinct_values.count"
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(
             {
@@ -131,7 +134,9 @@ class CardinalityChecker:
     ) -> AbsoluteCardinalityLimit | RelativeCardinalityLimit:
         return self._cardinality_limit_mode
 
-    def cardinality_within_limit(self, metric_value: Union[int, float]) -> bool:
+    def cardinality_within_limit(
+        self, metric_value: Union[int, float]  # noqa: PYI041
+    ) -> bool:
         """Determine if the cardinality is within configured limit.
 
         The metric_value supplied should be either a proportion of unique values
@@ -159,7 +164,7 @@ class CardinalityChecker:
         )
 
     @staticmethod
-    def _validate_metric_value(metric_value: Union[int, float]) -> None:
+    def _validate_metric_value(metric_value: Union[int, float]) -> None:  # noqa: PYI041
         if not isinstance(metric_value, (int, float)):
             raise ProfilerConfigurationError(
                 f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"

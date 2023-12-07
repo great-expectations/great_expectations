@@ -20,6 +20,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -32,7 +33,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
-from great_expectations.util import get_context
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -68,7 +68,7 @@ def yellow_trip_pandas_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext.GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,
                 FileDataContext.GX_YML,
             ),
         ),
@@ -498,7 +498,7 @@ def test_validator_batch_filter(
 
     jan_march_batch_filter: BatchFilter = build_batch_filter(
         data_connector_query_dict={
-            "custom_filter_function": lambda batch_identifiers: batch_identifiers[  # noqa: PLR1714
+            "custom_filter_function": lambda batch_identifiers: batch_identifiers[
                 "month"
             ]
             == "01"
@@ -950,6 +950,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "min_value": 0,
         "max_value": 5,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        "result_format": "BASIC",
     }
 
     expect_column_values_to_be_of_type_config = validator.validate_expectation(
@@ -960,6 +961,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "column": "passenger_count",
         "type_": "int",
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        "result_format": "BASIC",
     }
 
 
@@ -1054,39 +1056,6 @@ def test_validator_include_rendered_content_diagnostic(
     assert (
         expected_expectation_validation_result_diagnostic_rendered_content
         in validation_result.rendered_content
-    )
-
-    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
-        name="atomic.prescriptive.summary",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={
-                "column": {"schema": {"type": "string"}, "value": "passenger_count"},
-                "min_value": {
-                    "schema": {"type": "number"},
-                    "value": 1,
-                    "evaluation_parameter": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_min"},
-                    },
-                },
-                "max_value": {
-                    "schema": {"type": "number"},
-                    "value": 8,
-                    "evaluation_parameter": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_max"},
-                    },
-                },
-            },
-            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
-        ),
-        value_type="StringValueType",
-    )
-
-    assert (
-        expected_expectation_configuration_diagnostic_rendered_content
-        in validation_result.expectation_config.rendered_content
     )
 
     # test conditional expectations render
@@ -1258,7 +1227,7 @@ def _context_to_validator_and_expectation_sql(
         },
     )
     expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+        **expectation_configuration.kwargs
     )
 
     batch_request = BatchRequest(
@@ -1312,7 +1281,7 @@ def test_validator_result_format_config_from_expectation(
         context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
-        _: ExpectationValidationResult = expectation.validate(
+        _: ExpectationValidationResult = expectation.validate_(
             validator=validator, runtime_configuration=runtime_configuration
         )
 

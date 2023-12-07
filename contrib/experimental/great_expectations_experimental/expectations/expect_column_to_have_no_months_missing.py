@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from dateutil.relativedelta import relativedelta
 
@@ -43,7 +43,7 @@ class ColumnDistinctMonths(ColumnAggregateMetricProvider):
 
         # get all unique months from timestamp
         query = sa.select(
-            sa.func.strftime(MONTH_FORMAT, sa.func.Date(column)).distinct()
+            sa.func.date_format(sa.func.Date(column), MONTH_FORMAT).distinct()
         ).select_from(selectable)
         all_unique_months = [
             i[0] for i in execution_engine.execute_query(query).fetchall()
@@ -143,12 +143,6 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
         ],
         "tags": ["date-column"],
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        # Setting up a configuration
-        super().validate_configuration(configuration)
 
     def _validate(
         self,

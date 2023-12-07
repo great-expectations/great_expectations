@@ -7,12 +7,9 @@ For detailed instructions on how to use it, please see:
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.metrics.metric_provider import (
@@ -110,9 +107,6 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ()
 
-    # This dictionary contains default values for any parameters that should have default values.
-    default_kwarg_values = {}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -147,7 +141,7 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,
     ):
         # </snippet>

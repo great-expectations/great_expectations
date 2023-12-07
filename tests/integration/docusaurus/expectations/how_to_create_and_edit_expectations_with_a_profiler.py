@@ -1,6 +1,7 @@
 import pathlib
-import great_expectations as gx
 import tempfile
+
+import great_expectations as gx
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -38,8 +39,9 @@ assert "my_pandas_datasource" in context.datasources
 assert context.datasources["my_pandas_datasource"].get_asset("csv_asset") is not None
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler get_asset">
-import great_expectations as gx
 import pathlib
+
+import great_expectations as gx
 
 context = gx.get_context(
     context_root_dir=(
@@ -92,15 +94,14 @@ assert suite.expectation_suite_name == expectation_suite_name
 assert len(suite.expectations) > 0
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler e2e">
-from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
 
 # Review and save our Expectation Suite
 print(validator.get_expectation_suite(discard_failed_expectations=False))
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-# Set up and run a Simple Checkpoint for ad hoc validation of our data
+# Set up and run a Checkpoint for ad hoc validation of our data
 checkpoint_config = {
-    "class_name": "SimpleCheckpoint",
+    "class_name": "Checkpoint",
     "validations": [
         {
             "batch_request": batch_request,
@@ -108,9 +109,8 @@ checkpoint_config = {
         }
     ],
 }
-checkpoint = SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",
-    context,
     **checkpoint_config,
 )
 checkpoint_result = checkpoint.run()
@@ -118,13 +118,13 @@ checkpoint_result = checkpoint.run()
 # Build Data Docs
 context.build_data_docs()
 
-# Get the only validation_result_identifier from our SimpleCheckpoint run, and open Data Docs to that page
+# Get the only validation_result_identifier from our Checkpoint run, and open Data Docs to that page
 validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
 context.open_data_docs(resource_identifier=validation_result_identifier)
 # </snippet>
 
 assert len(checkpoint_result.list_validation_results()) == 1
-assert checkpoint_result.list_validation_results()[0]["success"] == True
+assert checkpoint_result.list_validation_results()[0]["success"] is True
 
 suite = None
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler optional_params">

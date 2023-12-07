@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from typing import Optional
 from unittest import mock
 
 import boto3
@@ -12,7 +13,7 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -37,7 +38,6 @@ from great_expectations.exceptions import InvalidKeyError, StoreBackendError, St
 from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import (
     gen_directory_tree_str,
-    get_context,
     is_library_loadable,
 )
 from tests import test_utils
@@ -122,7 +122,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),
@@ -144,7 +144,7 @@ def validation_operators_data_context(
 
 @pytest.fixture()
 def parameterized_expectation_suite(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     fixture_path = file_relative_path(
         __file__,
         "../../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
@@ -176,7 +176,7 @@ def test_StoreBackendValidation():
 
 
 def check_store_backend_store_backend_id_functionality(
-    store_backend: StoreBackend, store_backend_id: str = None
+    store_backend: StoreBackend, store_backend_id: Optional[str] = None
 ) -> None:
     """
     Assertions to check if a store backend is handling reading and writing a store_backend_id appropriately.
@@ -666,89 +666,6 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     )
 
 
-# NOTE: Chetan - 20211118: I am commenting out this test as it was introduced in: https://github.com/great-expectations/great_expectations/pull/3377
-# We've decided to roll back these changes for the time being since they introduce some unintendend consequences.
-#
-# This is a gentle reminder to future contributors to please re-enable this test when revisiting the matter.
-
-# @mock_s3
-# def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_prefix(
-#     validation_operators_data_context: DataContext,
-#     parameterized_expectation_suite: ExpectationSuite,
-# ):
-#     """
-#     What does this test test and why?
-
-#     In cases where an s3 store is used with the same prefix for both validations
-#     and expectations, the list_keys() operation picks up files ending in .json
-#     from both validations and expectations stores.
-
-#     To avoid this issue, the expectation suite configuration, if available, is used
-#     to locate the specific key for the suite in place of calling list_keys().
-
-#     NOTE: It is an issue with _all stores_ when the result of list_keys() contain paths
-#     with a period (.) and are passed to ExpectationSuiteIdentifier.from_tuple() method,
-#     as happens in the DataContext.store_evaluation_parameters() method. The best fix is
-#     to choose a different delimiter for generating expectation suite identifiers (or
-#     perhaps escape the period in path names).
-
-#     For now, the fix is to avoid the call to list_keys() in
-#     DataContext.store_evaluation_parameters() if the expectation suite is known (from config).
-#     This approach should also improve performance.
-
-#     This test confirms the fix for GitHub issue #3054.
-#     """
-#     bucket = "leakybucket"
-#     prefix = "this_is_a_test_prefix"
-
-#     # create a bucket in Moto's mock AWS environment
-#     conn = boto3.resource("s3", region_name="us-east-1")
-#     conn.create_bucket(Bucket=bucket)
-
-#     # replace store backends with the mock, both with the same prefix (per issue #3054)
-#     validation_operators_data_context.validations_store._store_backend = (
-#         TupleS3StoreBackend(
-#             bucket=bucket,
-#             prefix=prefix,
-#         )
-#     )
-#     validation_operators_data_context.expectations_store._store_backend = (
-#         TupleS3StoreBackend(
-#             bucket=bucket,
-#             prefix=prefix,
-#         )
-#     )
-
-#     validation_operators_data_context.save_expectation_suite(
-#         parameterized_expectation_suite, "param_suite"
-#     )
-
-#     # ensure the suite is in the context
-#     assert validation_operators_data_context.expectations_store.has_key(
-#         ExpectationSuiteIdentifier("param_suite")
-#     )
-
-#     res = validation_operators_data_context.run_validation_operator(
-#         "store_val_res_and_extract_eval_params",
-#         assets_to_validate=[
-#             (
-#                 validation_operators_data_context.build_batch_kwargs(
-#                     "my_datasource", "subdir_reader", "f1"
-#                 ),
-#                 "param_suite",
-#             )
-#         ],
-#         evaluation_parameters={
-#             "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
-#             ".observed_value": 3
-#         },
-#     )
-
-#     assert (
-#         res["success"] is True
-#     ), "No exception thrown, validation operators ran successfully"
-
-
 @mock_s3
 @pytest.mark.aws_deps
 def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0915
@@ -1204,7 +1121,50 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     )
 
 
-@pytest.mark.big
+@pytest.mark.unit
+def test_TupleAzureBlobStoreBackend_credential():
+    pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("azure.identity")
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    credential = "this_is_a_test_credential_string"
+    account_url = "this_is_a_test_account_url"
+    prefix = "this_is_a_test_prefix"
+    container = "dummy-container"
+
+    my_store = TupleAzureBlobStoreBackend(
+        credential=credential,
+        account_url=account_url,
+        prefix=prefix,
+        container=container,
+    )
+    with mock.patch(
+        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
+    ):
+        mock_container_client = my_store._container_client
+        my_store.set(("AAA",), "aaa")
+        mock_container_client.upload_blob.assert_called_once_with(
+            name="this_is_a_test_prefix/AAA",
+            data="aaa",
+            encoding="utf-8",
+            overwrite=True,
+        )
+
+        my_store.get(("BBB",))
+        mock_container_client.download_blob.assert_called_once_with(
+            "this_is_a_test_prefix/BBB"
+        )
+
+        my_store.list_keys()
+        mock_container_client.list_blobs.assert_called_once_with(
+            name_starts_with="this_is_a_test_prefix"
+        )
+
+
+@pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_connection_string():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1246,7 +1206,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
         )
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_account_url():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1348,7 +1308,7 @@ def test_TupleS3StoreBackend_list_over_1000_keys(aws_credentials):
 
 
 @pytest.mark.filesystem
-def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
+def test_InlineStoreBackend(empty_data_context) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
         resource_type=DataContextVariableSchema.CONFIG_VERSION,
@@ -1387,6 +1347,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     )
     assert sorted(inline_store_backend.list_keys()) == [
         ("anonymous_usage_statistics",),
+        ("batch_configs",),
         ("checkpoint_store_name",),
         ("concurrency",),
         ("config_variables_file_path",),
@@ -1397,7 +1358,6 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
         ("expectations_store_name",),
         ("fluent_datasources",),
         ("include_rendered_content",),
-        ("notebooks",),
         ("plugins_directory",),
         ("progress_bars",),
         ("stores",),
@@ -1457,7 +1417,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 
 
 @pytest.mark.filesystem
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
+def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
     path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
         empty_data_context.root_directory, empty_data_context.GX_YML
     )

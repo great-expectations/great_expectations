@@ -13,8 +13,6 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -116,8 +114,6 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -128,11 +124,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See also:
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
     """
+
+    type_: str
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -149,45 +147,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "type_",
         "mostly",
     )
-    default_kwarg_values = {
-        "type_": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "type_",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_of_type` it is required that:
-
-        - `_type` has been provided.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "type_" in configuration.kwargs, "type_ is required"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -244,7 +207,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
         if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = (

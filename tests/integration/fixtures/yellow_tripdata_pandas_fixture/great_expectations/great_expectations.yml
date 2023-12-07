@@ -114,4 +114,3 @@ data_docs_sites:
 anonymous_usage_statistics:
   enabled: false
   data_context_id: b6743b23-ed35-4b09-814d-88ba86566295
-notebooks:

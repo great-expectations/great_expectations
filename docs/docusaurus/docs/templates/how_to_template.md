@@ -49,34 +49,10 @@ When using Great Expectations there are sometimes choices to be made that do not
 
 Next, do {concise description of what the user is going to do} using either {choice in tab 1} or {choice in tab 2}.
 
-<Tabs
-  groupId="tab1-or-tab2"
-  defaultValue='cli'
-  values={[
-  {label: 'Using the CLI', value:'cli'},
-  {label: 'Using Python', value:'python'},
-  ]}>
-  <TabItem value="cli">
-
-  Run this command in the CLI.
-
-```console
-great_expectations suite new
-```
-
-  </TabItem>
-<TabItem value="python">
-
 Run this code in Python.
 
 ```python name="tests/integration/docusaurus/template/script_example.py imports"
 ```
-
-</TabItem>
-</Tabs>
-
-Congratulations!
-You successfully {did the thing this guide is about}.
 
 ## Additional Notes
 

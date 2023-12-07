@@ -2,9 +2,9 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, List
 
-import pydantic
 import pytest
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.fluent import BatchRequest

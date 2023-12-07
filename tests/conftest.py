@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -20,6 +20,12 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations import project_manager
+from great_expectations.checkpoint.configurator import (
+    ActionDetails,
+    ActionDict,
+    ActionDicts,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -42,8 +48,8 @@ from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
-    BaseDataContext,
     CloudDataContext,
+    get_context,
 )
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
@@ -81,6 +87,7 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
+from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -100,11 +107,17 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
-    get_context,
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.datasource.fluent._fake_cloud_api import (
+    DUMMY_JWT_TOKEN,
+    FAKE_ORG_ID,
+    GX_CLOUD_MOCK_BASE_URL,
+    CloudDetails,
+    gx_cloud_api_fake_ctx,
+)
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -144,6 +157,7 @@ REQUIRED_MARKERS: Final[set[str]] = {
     "postgresql",
     "project",
     "pyarrow",
+    "snowflake",
     "spark",
     "sqlite",
     "trino",
@@ -289,7 +303,9 @@ def pytest_addoption(parser):
         "--azure", action="store_true", help="If set, execute tests against Azure"
     )
     parser.addoption(
-        "--cloud", action="store_true", help="If set, execute tests against GX Cloud"
+        "--cloud",
+        action="store_true",
+        help="If set, execute tests against GX Cloud API",
     )
     parser.addoption(
         "--performance-tests",
@@ -956,6 +972,7 @@ def empty_data_context(
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
+    project_manager.set_project(context)
     return context
 
 
@@ -1017,6 +1034,7 @@ def data_context_with_connection_to_metrics_db(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1168,7 +1186,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1202,7 +1220,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1271,6 +1289,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    project_manager.set_project(context)
     return context
 
 
@@ -1489,11 +1508,15 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
+    # add minimal Checkpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -1503,12 +1526,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -1520,13 +1550,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -1536,12 +1572,20 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -1555,7 +1599,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1638,6 +1682,7 @@ def deterministic_asset_data_connector_context(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1768,7 +1813,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1823,7 +1868,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1854,7 +1899,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2073,11 +2118,14 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -2087,12 +2135,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2104,13 +2159,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -2120,12 +2181,20 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2139,7 +2208,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2194,7 +2263,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2225,7 +2294,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2242,6 +2311,7 @@ def empty_context_with_checkpoint(empty_data_context):
     )
     shutil.copy(fixture_path, checkpoints_file)
     assert os.path.isfile(checkpoints_file)  # noqa: PTH113
+    project_manager.set_project(context)
     return context
 
 
@@ -2254,6 +2324,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
+    project_manager.set_project(context)
     return context
 
 
@@ -2281,7 +2352,9 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2308,7 +2381,9 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2335,7 +2410,9 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2364,7 +2441,9 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2393,7 +2472,9 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2422,7 +2503,9 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture(scope="module")
@@ -3225,21 +3308,55 @@ def test_df(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_with_simple_sql_datasource_for_testing_get_batch(
-    sa, empty_data_context
-):
-    context = empty_data_context
-
+def sqlite_connection_string() -> str:
     db_file_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
             "test_sets", "test_cases_for_sql_data_connector.db"
         ),
     )
+    return f"sqlite:///{db_file_path}"
+
+
+@pytest.fixture
+def fds_data_context_datasource_name() -> str:
+    return "sqlite_datasource"
+
+
+@pytest.fixture
+def fds_data_context(
+    sa,
+    fds_data_context_datasource_name: str,
+    empty_data_context: AbstractDataContext,
+    sqlite_connection_string: str,
+) -> AbstractDataContext:
+    context = empty_data_context
+    datasource = context.sources.add_sqlite(
+        name=fds_data_context_datasource_name,
+        connection_string=sqlite_connection_string,
+    )
+
+    datasource.add_query_asset(
+        name="trip_asset",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    )
+    datasource.add_query_asset(
+        name="trip_asset_split_by_event_type",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    ).add_splitter_column_value("event_type")
+
+    return context
+
+
+@pytest.fixture
+def data_context_with_simple_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context, sqlite_connection_string
+) -> AbstractDataContext:
+    context = empty_data_context
 
     datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
-connection_string: sqlite:///{db_file_path}
+connection_string: {sqlite_connection_string}
 introspection:
     whole_table: {{}}
 
@@ -3457,17 +3574,17 @@ def ge_cloud_id():
 
 @pytest.fixture
 def ge_cloud_base_url() -> str:
-    return "https://app.test.greatexpectations.io"
+    return GX_CLOUD_MOCK_BASE_URL
 
 
 @pytest.fixture
 def ge_cloud_organization_id() -> str:
-    return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
+    return FAKE_ORG_ID
 
 
 @pytest.fixture
 def ge_cloud_access_token() -> str:
-    return "6bb5b6f5c7794892a4ca168c65c2603e"
+    return DUMMY_JWT_TOKEN
 
 
 @pytest.fixture
@@ -3591,18 +3708,19 @@ def empty_base_data_context_in_cloud_mode(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    context = gx.data_context.BaseDataContext(
+    context = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=ge_cloud_config,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
     )
-    assert context.list_datasources() == []
+
     return context
 
 
@@ -3637,11 +3755,16 @@ def empty_data_context_in_cloud_mode(
         context = CloudDataContext(
             context_root_dir=project_path_name,
         )
-        return context
+
+    context._datasources = (
+        {}
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    return context
 
 
 @pytest.fixture
 def empty_cloud_data_context(
+    cloud_api_fake,
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -3650,27 +3773,59 @@ def empty_cloud_data_context(
     project_path.mkdir()
     project_path_name: str = str(project_path)
 
-    cloud_data_context: CloudDataContext = CloudDataContext(
+    context = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_base_url=ge_cloud_config.base_url,
-        ge_cloud_access_token=ge_cloud_config.access_token,
-        ge_cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
     )
-    return cloud_data_context
+
+    return context
+
+
+@pytest.fixture
+def cloud_details(
+    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
+) -> CloudDetails:
+    return CloudDetails(
+        base_url=ge_cloud_base_url,
+        org_id=ge_cloud_organization_id,
+        access_token=ge_cloud_access_token,
+    )
+
+
+@pytest.fixture
+def cloud_api_fake(cloud_details: CloudDetails):
+    with gx_cloud_api_fake_ctx(cloud_details=cloud_details) as requests_mock:
+        yield requests_mock
+
+
+@pytest.fixture
+def empty_cloud_context_fluent(
+    cloud_api_fake, cloud_details: CloudDetails
+) -> CloudDataContext:
+    context = gx.get_context(
+        cloud_access_token=cloud_details.access_token,
+        cloud_organization_id=cloud_details.org_id,
+        cloud_base_url=cloud_details.base_url,
+        cloud_mode=True,
+    )
+
+    return context
 
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations.data_context.store.DatasourceStore.list_keys",
+    "great_expectations.data_context.store.DatasourceStore.get_all",
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode_custom_base_url(
-    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    mock_get_all: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -3679,11 +3834,12 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    context = gx.data_context.BaseDataContext(
+    context = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=custom_ge_cloud_config,
+        cloud_base_url=custom_ge_cloud_config.base_url,
+        cloud_access_token=custom_ge_cloud_config.access_token,
+        cloud_organization_id=custom_ge_cloud_config.organization_id,
     )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
@@ -3696,36 +3852,9 @@ def cloud_data_context_with_datasource_pandas_engine(
     empty_cloud_data_context: CloudDataContext, db_file
 ):
     context: CloudDataContext = empty_cloud_data_context
-    config = yaml.load(
-        """
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
 
-    # DatasourceStore.set() in a Cloud-back env usually makes an external HTTP request
-    # and returns the config it persisted. This side effect enables us to mimick that
-    # behavior while avoiding requests.
-    def set_side_effect(key, value):
-        return value
-
-    with mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
-        side_effect=set_side_effect,
-    ):
-        with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
-            context.add_datasource(
-                "my_datasource",
-                **config,
-            )
+    fds = PandasDatasource(name="my_datasource")
+    context.add_datasource(datasource=fds)
     return context
 
 
@@ -7464,7 +7593,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext.GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,
                 FileDataContext.GX_YML,
             ),
         ),
@@ -7545,7 +7674,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext.GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,
                 FileDataContext.GX_YML,
             ),
         ),
@@ -7716,7 +7845,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext.GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,
                 FileDataContext.GX_YML,
             ),
         ),
@@ -7904,7 +8033,7 @@ def quentin_columnar_table_multi_batch_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext.GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,
                 FileDataContext.GX_YML,
             ),
         ),
@@ -8398,3 +8527,11 @@ def aws_credentials():
     os.environ["AWS_SECURITY_TOKEN"] = "testing"
     os.environ["AWS_SESSION_TOKEN"] = "testing"
     os.environ["AWS_DEFAULT_REGION"] = "testing"
+
+
+@pytest.fixture(scope="function")
+def filter_gx_datasource_warnings() -> Generator[None, None, None]:
+    """Filter out GxDatasourceWarning warnings."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GxDatasourceWarning)
+        yield

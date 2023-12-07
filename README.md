@@ -3,6 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/great-expectations)](https://pypistats.org/packages/great-expectations)
 [![Build Status](https://img.shields.io/azure-devops/build/great-expectations/bedaf2c2-4c4a-4b37-87b0-3877190e71f5/1)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
+[![pre-commit.ci Status](https://results.pre-commit.ci/badge/github/great-expectations/great_expectations/develop.svg)](https://results.pre-commit.ci/latest/github/great-expectations/great_expectations/develop)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5683574.svg)](https://doi.org/10.5281/zenodo.5683574)
 [![Twitter Follow](https://img.shields.io/twitter/follow/expectgreatdata?style=social)](https://twitter.com/expectgreatdata)
 [![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://greatexpectations.io/slack)
@@ -92,10 +93,10 @@ pip install great_expectations
 ```
 and then run
 
-```
+```python
 import great_expectations as gx
 
-data_context = gx.get_context()
+context = gx.get_context()
 ```
 
 (We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/terms/supporting_resource/), which will teach you how to get up and running in minutes.)
@@ -187,7 +188,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/bigquery.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data">
 					BigQuery
 				</a>
 			</td>
@@ -226,7 +227,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/Google_Cloud_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data">
 					Google Cloud Platform &#40;GCP&#41;
 				</a>
 			</td>
@@ -468,10 +469,15 @@ Great Expectations OSS is under active development by GX Labs and the Great Expe
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) channel or post in our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions).
+If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) or post in our [Discourse](https://discourse.greatexpectations.io/).
 
 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
 Absolutely. Yes, please. See [Contributing code](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), [Contributing Expectations](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md), [Contributing packages](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md), or [Contribute to Great Expectations documentation](https://github.com/great-expectations/great_expectations/tree/develop/docs), and please don't be shy with questions.
+
+How do I stay up to date with Great Expectations?
+--------------------------------------------------------------------------------
+
+You can get updates on everything GX with our email newsletter. [Subscribe here!](https://greatexpectations.io/newsletter?utm_source=github&utm_medium=social&utm_campaign=newsletter&utm_content=form)

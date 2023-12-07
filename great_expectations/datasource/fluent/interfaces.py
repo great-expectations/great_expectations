@@ -28,16 +28,16 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import (
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import (
     Field,
     StrictBool,
     StrictInt,
     root_validator,
     validate_arguments,
 )
-from pydantic import dataclasses as pydantic_dc
-
+from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec
@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import pandas as pd
-    from typing_extensions import TypeAlias, TypeGuard
+    from typing_extensions import Self, TypeAlias, TypeGuard
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -83,7 +83,14 @@ class TestConnectionError(Exception):
     pass
 
 
-class GxSerializationWarning(UserWarning):
+class GxDatasourceWarning(UserWarning):
+    """
+    Warning related to usage or configuration of a Datasource that could lead to
+    unexpected behavior.
+    """
+
+
+class GxSerializationWarning(GxDatasourceWarning):
     pass
 
 
@@ -267,7 +274,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(self: _DataAssetT, sorters: SortersDefinition) -> _DataAssetT:
+    def add_sorters(self: Self, sorters: SortersDefinition) -> Self:
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.
@@ -429,7 +436,7 @@ class Datasource(
         cls._update_asset_forward_refs(asset_type)
 
         asset_of_intended_type = asset_type(**kwargs)
-        logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
+        logger.debug(f"{asset_type_name} - {asset_of_intended_type!r}")
         return asset_of_intended_type
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
@@ -507,7 +514,7 @@ class Datasource(
             return found_asset
         except IndexError as exc:
             raise LookupError(
-                f'"{asset_name}" not found. Available assets are {", ".join(self.get_asset_names())})'
+                f'"{asset_name}" not found. Available assets are ({", ".join(self.get_asset_names())})'
             ) from exc
 
     def delete_asset(self, asset_name: str) -> None:
@@ -516,9 +523,15 @@ class Datasource(
         Args:
             asset_name: name of DataAsset to be deleted.
         """
-        asset: _DataAssetT
-        self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
+        from great_expectations.data_context import CloudDataContext
 
+        asset: _DataAssetT
+        asset = self.get_asset(asset_name=asset_name)
+
+        if self._data_context and isinstance(self._data_context, CloudDataContext):
+            self._data_context._delete_asset(id=str(asset.id))
+
+        self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
         self._save_context_project_config()
 
     def _add_asset(
@@ -547,24 +560,61 @@ class Datasource(
 
         self.assets.append(asset)
 
-        self._save_context_project_config()
+        # if asset was added to a cloud FDS, _update_fluent_datasource will return FDS fetched from cloud,
+        # which will contain the new asset populated with an id
+        if self._data_context:
+            updated_datasource = self._data_context._update_fluent_datasource(
+                datasource=self
+            )
+            assert isinstance(updated_datasource, Datasource)
+            if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
+                asset.id = asset_id
+
         return asset
 
-    def _save_context_project_config(self):
+    def _save_context_project_config(self) -> None:
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
-                self._data_context._save_project_config(self)
+                self._data_context._save_project_config()
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
 
     def _rebuild_asset_data_connectors(self) -> None:
-        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        """
+        If Datasource required a data_connector we need to build the data_connector for each asset.
+
+        A warning is raised if a data_connector cannot be built for an asset.
+        Not all users will have access to the needed dependencies (packages or credentials) for every asset.
+        Missing dependencies will stop them from using the asset but should not stop them from loading it from config.
+        """
+        asset_build_failure_direct_cause: dict[str, Exception | BaseException] = {}
+
         if self.data_connector_type:
             for data_asset in self.assets:
-                # check if data_connector exist before rebuilding?
-                connect_options = getattr(data_asset, "connect_options", {})
-                self._build_data_connector(data_asset, **connect_options)
+                try:
+                    # check if data_connector exist before rebuilding?
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    self._build_data_connector(data_asset, **connect_options)
+                except Exception as dc_build_err:
+                    logger.info(
+                        f"Unable to build data_connector for {self.type} {data_asset.type} {data_asset.name}",
+                        exc_info=True,
+                    )
+                    # reveal direct cause instead of generic, unhelpful MyDatasourceError
+                    asset_build_failure_direct_cause[data_asset.name] = (
+                        dc_build_err.__cause__ or dc_build_err
+                    )
+        if asset_build_failure_direct_cause:
+            # TODO: allow users to opt out of these warnings
+            names_and_error: List[str] = [
+                f"{name}:{type(exc).__name__}"
+                for (name, exc) in asset_build_failure_direct_cause.items()
+            ]
+            warnings.warn(
+                f"data_connector build failure for {self.name} assets - {', '.join(names_and_error)}",
+                category=RuntimeWarning,
+            )
 
     @staticmethod
     def parse_order_by_sorters(
@@ -673,6 +723,7 @@ class HeadData:
 
     data: pd.DataFrame
 
+    @override
     def __repr__(self) -> str:
         return self.data.__repr__()
 

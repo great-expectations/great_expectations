@@ -281,7 +281,7 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler optional_params",
     "tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler semantic",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite",
-    "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint",
+    "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py checkpoint_example",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting",
@@ -347,7 +347,7 @@ def check_dependencies(*deps: str) -> None:
 
 def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
     try:
-        res_snippets = subprocess.run(
+        res_snippets = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
@@ -362,7 +362,7 @@ def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
             text=True,
             capture_output=True,
         )
-        res_snippet_names = subprocess.run(
+        res_snippet_names = subprocess.run(  # noqa: PLW1510
             ["sed", 's/.*name="//; s/">//; s/version-[0-9\\.]* //'],
             text=True,
             input=res_snippets.stdout,
@@ -377,7 +377,7 @@ def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
 
 def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
     try:
-        res_snippet_usages = subprocess.run(
+        res_snippet_usages = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
@@ -394,7 +394,7 @@ def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
             text=True,
             capture_output=True,
         )
-        res_snippet_used_names = subprocess.run(
+        res_snippet_used_names = subprocess.run(  # noqa: PLW1510
             ["sed", 's/.*="//; s/".*//; s/version-[0-9\\.]* //'],
             text=True,
             input=res_snippet_usages.stdout,

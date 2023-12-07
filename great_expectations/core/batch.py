@@ -17,6 +17,7 @@ from typing import (
 import pandas as pd
 
 from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -125,6 +126,7 @@ class BatchDefinition(SerializableDictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchDefinition.
 
@@ -142,6 +144,7 @@ class BatchDefinition(SerializableDictDot):
 
         return convert_to_json_serializable(data=fields_dict)
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "datasource_name": self._datasource_name,
@@ -163,7 +166,7 @@ class BatchDefinition(SerializableDictDot):
         if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
-"{str(type(datasource_name))}", which is illegal.
+"{type(datasource_name)!s}", which is illegal.
             """
             )
         if data_connector_name is None:
@@ -171,7 +174,7 @@ class BatchDefinition(SerializableDictDot):
         if data_connector_name and not isinstance(data_connector_name, str):
             raise TypeError(
                 f"""The type of a data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector_name))}", which is illegal.
+"{type(data_connector_name)!s}", which is illegal.
                 """
             )
         if data_asset_name is None:
@@ -179,13 +182,13 @@ class BatchDefinition(SerializableDictDot):
         if data_asset_name and not isinstance(data_asset_name, str):
             raise TypeError(
                 f"""The type of a data_asset name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
+"{type(data_asset_name)!s}", which is illegal.
                 """
             )
         if batch_identifiers and not isinstance(batch_identifiers, IDDict):
             raise TypeError(
                 f"""The type of batch_identifiers must be an IDDict object.  The type given is \
-"{str(type(batch_identifiers))}", which is illegal.
+"{type(batch_identifiers)!s}", which is illegal.
 """
             )
 
@@ -226,6 +229,7 @@ class BatchDefinition(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @override
     def __hash__(self) -> int:
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
@@ -242,14 +246,14 @@ class BatchRequestBase(SerializableDictDot):
 
     Previously, the very same BatchRequest was used for both the internal protocol purposes and as part of the API
     exposed to developers.  However, while convenient for internal data interchange, using the same BatchRequest class
-    as arguments to the externally-exported DataContext.get_batch(), DataContext.get_batch_list(), and
-    DataContext.get_validator() API calls for obtaining batches and/or validators was insufficiently expressive to
-    fulfill the needs of both. In the user-accessible API, BatchRequest, must enforce that all members of the triple,
-    consisting of data_source_name, data_connector_name, and data_asset_name, are not NULL.  Whereas for the internal
-    protocol, BatchRequest is used as a flexible bag of attributes, in which any fields are allowed to be NULL.  Hence,
-    now, BatchRequestBase is dedicated for the use as the bag oof attributes for the internal protocol use, whereby NULL
-    values are allowed as per the internal needs.  The BatchRequest class extends BatchRequestBase and adds to it strong
-    validation (described above plus additional attribute validation) so as to formally validate user specified fields.
+    as arguments to the externally-exported DataContext.get_batch_list() and DataContext.get_validator() API calls for
+    obtaining batches and/or validators was insufficiently expressive to fulfill the needs of both. In the user-accessible
+    API, BatchRequest, must enforce that all members of the triple, consisting of data_source_name, data_connector_name,
+    and data_asset_name, are not NULL.  Whereas for the internal protocol, BatchRequest is used as a flexible bag of attributes,
+    in which any fields are allowed to be NULL.  Hence, now, BatchRequestBase is dedicated for the use as the bag oof attributes
+    for the internal protocol use, whereby NULL values are allowed as per the internal needs.  The BatchRequest class extends
+    BatchRequestBase and adds to it strong validation (described above plus additional attribute validation) so as to formally
+    validate user specified fields.
     """
 
     def __init__(  # noqa: PLR0913
@@ -341,6 +345,7 @@ class BatchRequestBase(SerializableDictDot):
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
+    @override
     def to_dict(self) -> BlockConfigBatchRequestTypedDict:  # type: ignore[override] # TypedDict is more specific dict type
         return standardize_batch_request_display_ordering(
             batch_request=super().to_dict()  # type: ignore[arg-type] # TypedDict is more specific dict type
@@ -349,6 +354,7 @@ class BatchRequestBase(SerializableDictDot):
     # While this class is private, it is inherited from and this method is part
     # of the public api on the child.
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchRequestBase.
 
@@ -373,11 +379,11 @@ class BatchRequestBase(SerializableDictDot):
             batch_data: BatchRequestBase | dict = self.runtime_parameters["batch_data"]
             self.runtime_parameters["batch_data"] = str(type(batch_data))
 
-            serializeable_dict = convert_to_json_serializable(data=self.to_dict())
+            serializeable_dict = convert_to_json_serializable(data=self.to_dict())  # type: ignore[call-overload] # TypedDict is more specific dict type
             # after getting serializable_dict, restore original batch_data
             self.runtime_parameters["batch_data"] = batch_data
         else:
-            serializeable_dict = convert_to_json_serializable(data=self.to_dict())
+            serializeable_dict = convert_to_json_serializable(data=self.to_dict())  # type: ignore[call-overload] # TypedDict is more specific dict type
 
         return serializeable_dict
 
@@ -400,6 +406,7 @@ class BatchRequestBase(SerializableDictDot):
 
         return self.id == other.id
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -415,6 +422,7 @@ class BatchRequestBase(SerializableDictDot):
         )
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -437,31 +445,31 @@ class BatchRequestBase(SerializableDictDot):
         if not (datasource_name and isinstance(datasource_name, str)):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
-"{str(type(datasource_name))}", which is illegal.
+"{type(datasource_name)!s}", which is illegal.
             """
             )
         if not (data_connector_name and isinstance(data_connector_name, str)):
             raise TypeError(
                 f"""The type of data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector_name))}", which is illegal.
+"{type(data_connector_name)!s}", which is illegal.
                 """
             )
         if not (data_asset_name and isinstance(data_asset_name, str)):
             raise TypeError(
                 f"""The type of data_asset name must be a string (Python "str").  The type given is
-        "{str(type(data_asset_name))}", which is illegal.
+        "{type(data_asset_name)!s}", which is illegal.
                         """
             )
         # TODO Abe 20201015: Switch this to DataConnectorQuery.
         if data_connector_query and not isinstance(data_connector_query, dict):
             raise TypeError(
                 f"""The type of data_connector_query must be a dict object.  The type given is
-"{str(type(data_connector_query))}", which is illegal.
+"{type(data_connector_query)!s}", which is illegal.
                 """
             )
         if limit and not isinstance(limit, int):
             raise TypeError(
-                f"""The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
+                f"""The type of limit must be an integer (Python "int").  The type given is "{type(limit)!s}", which
 is illegal.
                 """
             )
@@ -642,20 +650,20 @@ class RuntimeBatchRequest(BatchRequestBase):
         if runtime_parameters and not (isinstance(runtime_parameters, dict)):
             raise TypeError(
                 f"""The runtime_parameters must be a non-empty dict object.
-                The type given is "{str(type(runtime_parameters))}", which is an illegal type or an empty dictionary."""
+                The type given is "{type(runtime_parameters)!s}", which is an illegal type or an empty dictionary."""
             )
 
         # if there is a value, make sure it is a dict
         if batch_identifiers and not isinstance(batch_identifiers, dict):
             raise TypeError(
                 f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
-                data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
+                data connector configuration.  The type given is "{type(batch_identifiers)!s}", which is illegal."""
             )
 
         if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
             raise TypeError(
                 f"""The type for batch_spec_passthrough must be a dict object. The type given is \
-"{str(type(batch_spec_passthrough))}", which is illegal.
+"{type(batch_spec_passthrough)!s}", which is illegal.
 """
             )
 
@@ -824,6 +832,7 @@ class Batch(SerializableDictDot):
     def batch_kwargs(self):
         return self._batch_kwargs
 
+    @override
     def to_dict(self) -> dict:
         dict_obj: dict = {
             "data": str(self.data),
@@ -837,6 +846,7 @@ class Batch(SerializableDictDot):
         return dict_obj
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this Batch.
 
@@ -960,7 +970,7 @@ def batch_request_contains_runtime_parameters(
 
 
 @overload
-def get_batch_request_as_dict(  # type: ignore[misc] # Overload with None
+def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with None
     batch_request: BatchRequestBase
     | FluentBatchRequest
     | dict

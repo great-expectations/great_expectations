@@ -1,12 +1,12 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -23,18 +23,6 @@ from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
-)
-from great_expectations.rule_based_profiler.config.base import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
 )
 
 if TYPE_CHECKING:
@@ -71,8 +59,6 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -83,7 +69,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_match_regex](https://greatexpectations.io/expectations/expect_column_values_to_match_regex)
@@ -94,6 +80,8 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
+
+    regex: Union[str, EvaluationParameterDict]
 
     library_metadata = {
         "maturity": "production",
@@ -110,100 +98,11 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     success_keys = (
         "regex",
         "mostly",
-        "auto",
-        "profiler_config",
     )
-
-    regex_pattern_string_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="RegexPatternStringParameterBuilder",
-            name="regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
-        )
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        regex_pattern_string_parameter_builder_config
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_not_match_regex",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_values_to_not_match_regex_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_values_to_not_match_regex",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "regex": f"{PARAMETER_KEY}{regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        "mostly": f"{VARIABLES_KEY}mostly",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
-        "auto": False,
-        "profiler_config": default_profiler_config,
-    }
     args_keys = (
         "column",
         "regex",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_not_match_regex` it is required that:
-            - 'regex' kwarg is of type str or dict
-            - if dict, assert a key "$PARAMETER" is present
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                  Expectation."
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], (str, dict)
-            ), "regex must be a string or dict"
-            if isinstance(configuration.kwargs["regex"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["regex"]
-                ), 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -271,7 +170,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         else:  # noqa: PLR5501
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:

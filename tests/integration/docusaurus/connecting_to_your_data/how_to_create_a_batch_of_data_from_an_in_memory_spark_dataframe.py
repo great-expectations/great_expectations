@@ -1,12 +1,9 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py imports">
-from great_expectations.compatibility import pyspark
-
 import great_expectations as gx
-from great_expectations import DataContext
+from great_expectations.compatibility import pyspark
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
-
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.validator.validator import Validator
 
@@ -14,7 +11,7 @@ yaml = YAMLHandler()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_context">
-context: DataContext = gx.get_context()
+context = gx.get_context()
 # </snippet>
 
 spark_session: pyspark.SparkSession = gx.core.util.get_or_create_spark_application()
@@ -31,7 +28,7 @@ suite: ExpectationSuite = context.get_expectation_suite(
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: my_spark_datasource
 class_name: Datasource
 module_name: great_expectations.datasource

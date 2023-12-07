@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import logging
 from functools import wraps
-from typing import Callable, Dict, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple, Type, TypeVar, Union
+
+from typing_extensions import ParamSpec
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -19,7 +22,14 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationConfiguration
+
 logger = logging.getLogger(__name__)
+
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 
 @public_api
@@ -27,7 +37,7 @@ def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
     **kwargs,
-):
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Decorator used to register a specific function as a metric value function.
 
     Metric value functions are used by MetricProviders to immediately return
@@ -44,9 +54,9 @@ def metric_value(
         Decorated function
     """
 
-    def wrapper(metric_fn: Callable):
+    def wrapper(metric_fn: Callable[P, T]) -> Callable[P, T]:
         @wraps(metric_fn)
-        def inner_func(*args, **kwargs):
+        def inner_func(*args: P.args, **kwargs: P.kwargs):
             return metric_fn(*args, **kwargs)
 
         inner_func.metric_engine = engine  # type: ignore[attr-defined]
@@ -60,10 +70,10 @@ def metric_value(
 @public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
-    partial_fn_type: Union[str, MetricPartialFunctionTypes],
+    partial_fn_type: MetricPartialFunctionTypes,
     domain_type: Union[str, MetricDomainTypes],
     **kwargs,
-):
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Decorator used to register a specific function as a metric partial.
 
     Metric partial functions are used by MetricProviders to support batching of
@@ -84,9 +94,9 @@ def metric_partial(
         Decorated function
     """
 
-    def wrapper(metric_fn: Callable):
+    def wrapper(metric_fn: Callable[P, T]) -> Callable[P, T]:
         @wraps(metric_fn)
-        def inner_func(*args, **kwargs):
+        def inner_func(*args: P.args, **kwargs: P.kwargs):
             return metric_fn(*args, **kwargs)
 
         inner_func.metric_engine = engine  # type: ignore[attr-defined]
@@ -114,8 +124,6 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
     In some cases, subclasses of Expectation, such as TableMetricProvider will already
     have correct values that may simply be inherited.
-
-    They *may* optionally override the `default_kwarg_values` attribute.
 
     MetricProvider classes *must* implement the following:
         1. `_get_evaluation_dependencies`. Note that often, _get_evaluation_dependencies should

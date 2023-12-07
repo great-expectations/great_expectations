@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, List
 import sqlalchemy as sa
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -109,7 +108,7 @@ def _execute_taxi_splitting_test_cases(
 
         # 1. Setup
 
-        context: DataContext = gx.get_context()
+        context = gx.get_context()
 
         datasource_name: str = "test_datasource"
         data_connector_name: str = "test_data_connector"
@@ -160,7 +159,8 @@ def _execute_taxi_splitting_test_cases(
         ] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
-
+        print(len(batch_definition_list), "batch definitions found")
+        print(test_case.num_expected_batch_definitions, "expected batch definitions")
         assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
         expected_batch_definition_list: List[BatchDefinition]

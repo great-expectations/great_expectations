@@ -1,18 +1,17 @@
+from __future__ import annotations
+
 import inspect
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 from packaging import version
 
 from great_expectations.compatibility import pyspark
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -45,12 +44,16 @@ from great_expectations.util import (
     get_trino_potential_type,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +72,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        type_list (str): \
+        type_list (list[str] or None): \
             A list of strings representing the data type that each column should have as entries. Valid types are \
             defined by the current backend implementation and are dynamically loaded. For example, valid types for \
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
@@ -86,8 +89,6 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -98,11 +99,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See also:
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
     """
+
+    type_list: Union[List[str], EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -120,58 +123,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "type_list",
         "mostly",
     )
-    default_kwarg_values = {
-        "type_list": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "type_list",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_in_type_list` it is required that:
-
-        - `type_list` has been provided.
-
-        - `type_list` is one of the following types: `list`, `dict`, or `None`
-
-        - If `type_list` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "type_list" in configuration.kwargs, "type_list is required"
-            assert (
-                isinstance(configuration.kwargs["type_list"], (list, dict))
-                or configuration.kwargs["type_list"] is None
-            ), "type_list must be a list or None"
-            if isinstance(configuration.kwargs["type_list"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["type_list"]
-                ), 'Evaluation Parameter dict for type_list kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -247,14 +202,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["type_list"])]
             )
 
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:

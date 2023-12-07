@@ -116,7 +116,7 @@ def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEng
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -320,23 +320,8 @@ class ExpectColumnSkewToBeBetween(ColumnAggregateExpectation):
         "strict_max": None,
         "abs": False,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
-
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
-    #     """
-    #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-    #     necessary configuration arguments have been provided for the validation of the expectation.
-    #
-    #     Args:
-    #         configuration (OPTIONAL[ExpectationConfiguration]): \
-    #             An optional Expectation Configuration entry that will be used to configure the expectation
-    #     Returns:
-    #         None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-    #     """
-    #     super().validate_configuration(configuration)
-    #     self.validate_metric_value_between_configuration(configuration=configuration)
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")

@@ -1,11 +1,10 @@
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -31,8 +30,7 @@ logger = logging.getLogger(__name__)
 class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     """Expect the column values to be increasing.
 
-    By default, this expectation only works for numeric or datetime data. \
-    When 'parse_strings_as_datetimes=True', it can also parse strings to datetimes.
+    By default, this expectation only works for numeric or datetime data.
 
     If 'strictly=True', then this expectation is only satisfied if each consecutive value \
     is strictly increasing--equal values are treated as failures.
@@ -47,8 +45,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     Keyword Args:
         strictly (Boolean or None): \
             If True, values must be strictly greater than previous values
-        parse_strings_as_datetimes (boolean or None) : \
-            If True, all non-null column values to datetimes before making comparisons
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
@@ -57,8 +53,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -69,11 +63,13 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_be_decreasing](https://greatexpectations.io/expectations/expect_column_values_to_be_decreasing)
     """
+
+    strictly: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -86,37 +82,8 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     }
 
     map_metric = "column_values.increasing"
-    success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "strictly": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "parse_strings_as_datetimes": False,
-    }
+    success_keys = ("strictly", "mostly")
     args_keys = ("column",)
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
 
     @classmethod
     def _prescriptive_template(
@@ -127,7 +94,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
             ("column", RendererValueType.STRING),
             ("strictly", RendererValueType.BOOLEAN),
             ("mostly", RendererValueType.NUMBER),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -146,9 +112,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-
-        if params.parse_strings_as_datetimes:
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -178,7 +141,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
                 "column",
                 "strictly",
                 "mostly",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -191,15 +153,12 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
         if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
             template_str = f"$column {template_str}"

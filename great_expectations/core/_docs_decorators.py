@@ -1,10 +1,14 @@
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
+from typing_extensions import ParamSpec
+
 from great_expectations.compatibility import docstring_parser
 
 WHITELISTED_TAG = "--Public API--"
 
+P = ParamSpec("P")
+T = TypeVar("T")
 F = TypeVar("F", bound=Callable[..., Any])
 
 
@@ -30,7 +34,7 @@ def public_api(func: F) -> F:
 def deprecated_method_or_class(
     version: str,
     message: str = "",
-):
+) -> Callable[[F], F]:
     """Add a deprecation warning to the docstring of the decorated method or class.
 
     Used as a decorator:
@@ -65,7 +69,7 @@ def deprecated_method_or_class(
 def new_method_or_class(
     version: str,
     message: str = "",
-):
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Add a version added note to the docstring of the decorated method or class.
 
     Used as a decorator:
@@ -87,7 +91,7 @@ def new_method_or_class(
 
     text = f".. versionadded:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: F) -> F:
+    def wrapper(func: Callable[P, T]) -> Callable[P, T]:
         """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_to_function_docstring_after_summary(
             func=func,
@@ -101,7 +105,7 @@ def deprecated_argument(
     argument_name: str,
     version: str,
     message: str = "",
-):
+) -> Callable[[F], F]:
     """Add an arg-specific deprecation warning to the decorated method or class.
 
     Used as a decorator:
@@ -144,7 +148,7 @@ def new_argument(
     argument_name: str,
     version: str,
     message: str = "",
-):
+) -> Callable[[F], F]:
     """Add an arg-specific version added note to the decorated method or class.
 
     Used as a decorator:
@@ -229,7 +233,7 @@ def _add_text_below_function_docstring_argument(
     """Add text below specified docstring argument.
 
     Args:
-        func: Function whose docstring will be modified.
+        func: Callable[P, T]unction whose docstring will be modified.
         argument_name: Name of the argument to add text to its description.
         text: Text to add to the argument description.
 

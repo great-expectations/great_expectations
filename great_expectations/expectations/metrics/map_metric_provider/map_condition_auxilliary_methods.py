@@ -365,7 +365,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             unexpected_count = 0
 
     except sqlalchemy.OperationalError as oe:
-        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
+        exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
@@ -408,7 +408,7 @@ def _sqlalchemy_map_condition_rows(
     try:
         return execution_engine.execute_query(query).fetchall()
     except sqlalchemy.OperationalError as oe:
-        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
+        exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
@@ -591,18 +591,16 @@ def _sqlalchemy_map_condition_index(
         final_query
     ).fetchall()
 
-    unexpected_index_list: List[Dict[str, Any]] = []
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
 
-    for row in query_result:
-        primary_key_dict: Dict[str, Any] = {}
-        # add the actual unexpected value
-        all_columns = unexpected_index_column_names + domain_column_name_list
-        for index in range(len(all_columns)):
-            name: str = all_columns[index]
-            primary_key_dict[name] = row[index]
-        unexpected_index_list.append(primary_key_dict)
-
-    return unexpected_index_list
+    return _get_sqlalchemy_customized_unexpected_index_list(
+        exclude_unexpected_values=exclude_unexpected_values,
+        unexpected_index_column_names=unexpected_index_column_names,
+        query_result=query_result,
+        domain_column_name_list=domain_column_name_list,
+    )
 
 
 def _spark_map_condition_unexpected_count_aggregate_fn(
@@ -747,7 +745,9 @@ def _spark_map_condition_index(
     filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
         F.col("__unexpected")
     )
-    unexpected_index_list: List[Dict[str, Any]] = []
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
 
     unexpected_index_column_names: List[str] = result_format[
         "unexpected_index_column_names"
@@ -768,13 +768,12 @@ def _spark_map_condition_index(
     # Prune the dataframe down only the columns we care about
     filtered = filtered.select(columns_to_keep)
 
-    for row in filtered.collect():
-        dict_to_add: dict = {}
-        for col_name in columns_to_keep:
-            dict_to_add[col_name] = row[col_name]
-        unexpected_index_list.append(dict_to_add)
-
-    return unexpected_index_list
+    return _get_spark_customized_unexpected_index_list(
+        exclude_unexpected_values=exclude_unexpected_values,
+        unexpected_index_column_names=unexpected_index_column_names,
+        filtered=filtered,
+        columns_to_keep=columns_to_keep,
+    )
 
 
 def _spark_map_condition_query(
@@ -838,3 +837,66 @@ def _generate_temp_table(
     )
     temp_table_obj.create(bind=connection, checkfirst=True)
     return temp_table_obj
+
+
+def _get_sqlalchemy_customized_unexpected_index_list(
+    exclude_unexpected_values: bool,
+    unexpected_index_column_names: List[str],
+    query_result: List[sqlalchemy.Row],
+    domain_column_name_list: List[Union[str, sqlalchemy.quoted_name]],
+) -> Union[List[Dict[str, Any]], None]:
+    unexpected_index_list: List[Dict[str, Any]] = []
+
+    if (
+        exclude_unexpected_values
+        and len(query_result) != 0
+        and len(unexpected_index_column_names) != 0
+    ):
+        primary_key_dict_list: dict[str, List[Any]] = {
+            idx_col: [] for idx_col in unexpected_index_column_names
+        }
+        for row in query_result:
+            for index in range(len(unexpected_index_column_names)):
+                primary_key_dict_list[unexpected_index_column_names[index]].append(
+                    row[index]
+                )
+        unexpected_index_list.append(primary_key_dict_list)
+
+    else:
+        for row in query_result:
+            primary_key_dict: Dict[str, Any] = {}
+            # add the actual unexpected value
+            all_columns = unexpected_index_column_names + domain_column_name_list
+            for index in range(len(all_columns)):
+                name: str = all_columns[index]
+                primary_key_dict[name] = row[index]
+            unexpected_index_list.append(primary_key_dict)
+
+    return unexpected_index_list
+
+
+def _get_spark_customized_unexpected_index_list(
+    exclude_unexpected_values: bool,
+    unexpected_index_column_names: List[str],
+    filtered: pyspark.sql.dataframe.DataFrame,
+    columns_to_keep: List[str],
+) -> Union[List[Dict[str, Any]], None]:
+    unexpected_index_list: List[Dict[str, Any]] = []
+
+    if exclude_unexpected_values and not filtered.isEmpty():
+        dict_list_to_add: dict[str, List[Any]] = {
+            idx_col: [] for idx_col in unexpected_index_column_names
+        }
+        for row in filtered.collect():
+            for col_name in unexpected_index_column_names:
+                dict_list_to_add[col_name].append(row[col_name])
+        unexpected_index_list.append(dict_list_to_add)
+
+    else:
+        for row in filtered.collect():
+            dict_to_add: dict = {}
+            for col_name in columns_to_keep:
+                dict_to_add[col_name] = row[col_name]
+            unexpected_index_list.append(dict_to_add)
+
+    return unexpected_index_list

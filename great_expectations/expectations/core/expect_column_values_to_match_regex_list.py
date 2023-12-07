@@ -1,12 +1,12 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -52,8 +52,6 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -64,7 +62,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
 
     See Also:
@@ -76,6 +74,9 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
+
+    regex_list: Union[List[str], EvaluationParameterDict]
+    match_on: Literal["any", "all"] = "any"
 
     library_metadata = {
         "maturity": "production",
@@ -94,42 +95,10 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         "match_on",
         "mostly",
     )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
-    }
     args_keys = (
         "column",
         "regex_list",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "regex_list" in configuration.kwargs, "regex_list is required"
-            assert isinstance(
-                configuration.kwargs["regex_list"], (list, dict)
-            ), "regex_list must be a list of regexes"
-            if (
-                not isinstance(configuration.kwargs["regex_list"], dict)
-                and len(configuration.kwargs["regex_list"]) > 0
-            ):
-                for i in configuration.kwargs["regex_list"]:
-                    assert isinstance(i, str), "regexes in list must be strings"
-            if isinstance(configuration.kwargs["regex_list"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["regex_list"]
-                ), 'Evaluation Parameter dict for regex_list kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -220,9 +189,9 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["regex_list"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["regex_list"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["regex_list"])]
             )
 
         if params.get("match_on") == "all":
@@ -238,7 +207,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
 
         if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."

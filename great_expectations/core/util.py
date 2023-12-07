@@ -30,11 +30,10 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
-import pydantic
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
@@ -153,7 +152,7 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
@@ -198,14 +197,14 @@ JSONConvertable: TypeAlias = Union[
 
 
 @overload
-def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToList`?
+def convert_to_json_serializable(
     data: ToDict,
 ) -> dict:
     ...
 
 
 @overload
-def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToDict`?
+def convert_to_json_serializable(
     data: ToList,
 ) -> list:
     ...
@@ -357,7 +356,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return data
 
     try:
-        if not isinstance(data, list) and pd.isna(data):
+        if not isinstance(data, list) and pd.isna(data):  # type: ignore[arg-type]
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
             # Hence, why we test for `not isinstance(list)`
             return None
@@ -373,8 +372,8 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         value_name = data.name or "value"
         return [
             {
-                index_name: convert_to_json_serializable(idx),
-                value_name: convert_to_json_serializable(val),
+                index_name: convert_to_json_serializable(idx),  # type: ignore[call-overload]
+                value_name: convert_to_json_serializable(val),  # type: ignore[dict-item]
             }
             for idx, val in data.items()
         ]
@@ -413,7 +412,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     # Unable to serialize (unrecognized data type).
     raise TypeError(
-        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+        f"{data!s} is of type {type(data).__name__} which cannot be serialized."
     )
 
 
@@ -495,14 +494,14 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         value_name = data.name or "value"
         _ = [
             {
-                index_name: ensure_json_serializable(idx),
-                value_name: ensure_json_serializable(val),
+                index_name: ensure_json_serializable(idx),  # type: ignore[func-returns-value]
+                value_name: ensure_json_serializable(val),  # type: ignore[func-returns-value]
             }
             for idx, val in data.items()
         ]
         return
 
-    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function] # ensure pyspark is installed
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
@@ -527,7 +526,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         return
 
     raise InvalidExpectationConfigurationError(
-        f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
+        f"{data!s} is of type {type(data).__name__} which cannot be serialized to json"
     )
 
 
@@ -561,7 +560,7 @@ def parse_string_to_datetime(
 ) -> datetime.datetime:
     if not isinstance(datetime_string, str):
         raise gx_exceptions.SorterError(
-            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            f"""Source "datetime_string" must have string type (actual type is "{type(datetime_string)!s}").
             """
         )
 
@@ -571,7 +570,7 @@ def parse_string_to_datetime(
     if datetime_format_string and not isinstance(datetime_format_string, str):
         raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
-"{str(type(datetime_format_string))}").
+"{type(datetime_format_string)!s}").
             """
         )
 

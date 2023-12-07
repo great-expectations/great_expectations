@@ -1,5 +1,4 @@
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.profile.user_configurable_profiler import (
@@ -21,7 +20,7 @@ assert context
 # First configure a new Datasource and add to DataContext
 
 # <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: getting_started_datasource
 class_name: Datasource
 execution_engine:
@@ -85,7 +84,6 @@ validator = context.get_validator(
 assert isinstance(validator, Validator)
 
 # Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
-# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py exclude_column_names no comment">
 exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
@@ -106,7 +104,6 @@ exclude_column_names = [
     "total_amount",
     "congestion_surcharge",
 ]
-# </snippet>
 
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
@@ -123,10 +120,8 @@ validator.expectation_suite = suite
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
-my_checkpoint_config = f"""
+my_checkpoint_config = """
 name: getting_started_checkpoint
-config_version: 1.0
-class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -154,21 +149,29 @@ my_checkpoint_config = my_checkpoint_config.replace(
 my_checkpoint_config = yaml.load(my_checkpoint_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
-# In the current test, site_names are set to None because we do not want to update and build data_docs
-# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-checkpoint = SimpleCheckpoint(
-    **my_checkpoint_config, data_context=context, site_names=None
+# In the current test, an action_list without a build data docs is passed to .run because we do not want to update
+# and build data_docs
+checkpoint = context.add_or_update_checkpoint(
+    **my_checkpoint_config,
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+    ],
 )
-checkpoint_result = checkpoint.run(site_names=None)
+checkpoint_result = checkpoint.run()
 assert checkpoint_result.run_results
 
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
 # <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config">
-yaml_config = f"""
+yaml_config = """
 name: getting_started_checkpoint
-config_version: 1.0
-class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -196,10 +199,20 @@ yaml_config = yaml_config.replace(
 my_new_checkpoint_config = yaml.load(yaml_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
-# In the current test, site_names are set to None because we do not want to update and build data_docs
-# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-new_checkpoint = SimpleCheckpoint(
-    **my_new_checkpoint_config, data_context=context, site_names=None
+# In the current test, an action_list without a build data docs is passed to .run because we do not want to update
+# and build data_docs
+new_checkpoint = context.add_or_update_checkpoint(
+    **my_new_checkpoint_config,
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+    ],
 )
-new_checkpoint_result = new_checkpoint.run(site_names=None)
+new_checkpoint_result = new_checkpoint.run()
 assert new_checkpoint_result.run_results

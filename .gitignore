@@ -149,3 +149,5 @@ metastore_db
 Pipfile
 Pipfile.lock
 
+# contract testing files
+tests/integration/cloud/rest_contracts/pacts

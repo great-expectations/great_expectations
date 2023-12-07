@@ -4,10 +4,11 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_a_sql_table" tests/integration/test_script_runner.py
 ```
 """
-import tests.test_utils as test_utils
-import great_expectations as gx
 import pathlib
+import warnings
+
 import great_expectations as gx
+from great_expectations.datasource.fluent import GxDatasourceWarning
 
 sqlite_database_path = str(
     pathlib.Path(
@@ -29,9 +30,11 @@ context = gx.get_context()
 
 connection_string = f"sqlite:///{sqlite_database_path}"
 
-datasource = context.sources.add_sql(
-    name="my_datasource", connection_string=connection_string
-)
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=GxDatasourceWarning)
+    datasource = context.sources.add_sql(
+        name="my_datasource", connection_string=connection_string
+    )
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource">
@@ -71,3 +74,13 @@ assert set(batches[0].columns()) == {
     "total_amount",
     "congestion_surcharge",
 }
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py add_vendor_id_splitter">
+table_asset.add_splitter_column_value("vendor_id")
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request">
+my_batch_request = my_asset.build_batch_request({"vendor_id": 1})
+# </snippet>
+
+batches = my_asset.get_batch_list_from_batch_request(my_batch_request)

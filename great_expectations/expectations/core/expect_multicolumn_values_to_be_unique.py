@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Optional, Union
+
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -21,6 +19,10 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -52,8 +54,6 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -64,8 +64,11 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
      Returns:
          An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
+
+    column_list: Union[tuple, list]
+    ignore_row_if: str = "all_values_are_missing"
 
     library_metadata = {
         "maturity": "production",
@@ -88,14 +91,6 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
         "ignore_row_if",
         "mostly",
     )
-    default_kwarg_values = {
-        "column_list": None,
-        "ignore_row_if": "all_values_are_missing",
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = ("column_list",)
 
     @classmethod
@@ -169,7 +164,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
         mostly_str = (
             ""
@@ -179,12 +174,12 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
-            template_str += f"$column_list_{str(idx)}, "
-            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+            template_str += f"$column_list_{idx!s}, "
+            params[f"column_list_{idx!s}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += f"$column_list_{str(last_idx)}"
-        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
+        template_str += f"$column_list_{last_idx!s}"
+        params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
@@ -7,7 +9,7 @@ import logging
 import traceback
 import uuid
 import warnings
-from collections import Counter, defaultdict, namedtuple
+from collections import Counter, defaultdict
 from collections.abc import Hashable
 from functools import wraps
 from typing import Any, Dict, List, Optional, Union
@@ -33,6 +35,9 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.validator.validation_statistics import (
+    calc_validation_statistics,
+)
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -84,8 +89,6 @@ class DataAsset:
         self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
-        if data_context and hasattr(data_context, "_expectation_explorer_manager"):
-            self.set_default_expectation_argument("include_config", True)
 
     def list_available_expectation_types(self):
         keys = dir(self)
@@ -109,12 +112,6 @@ class DataAsset:
         )
         return expectation_suite, validation_results
 
-    # TODO: add warning if no expectation_explorer_manager and how to turn on
-    def edit_expectation_suite(self):
-        return self._data_context._expectation_explorer_manager.edit_expectation_suite(
-            self
-        )
-
     @classmethod  # - complexity 24
     def expectation(cls, method_arg_names):  # noqa: C901, PLR0915
         """Manages configuration and running of expectation objects.
@@ -134,9 +131,6 @@ class DataAsset:
             signature from the implementing method.
 
             @expectation intercepts and takes action based on the following parameters:
-                * include_config (boolean or None) : \
-                    If True, then include the generated expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
                 * catch_exceptions (boolean or None) : \
                     If True, then catch exceptions and include them as part of the result object. \
                     For more detail, see :ref:`catch_exceptions`.
@@ -252,7 +246,7 @@ class DataAsset:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = f"{type(err).__name__}: {str(err)}"
+                            exception_message = f"{type(err).__name__}: {err!s}"
 
                             return_obj = ExpectationValidationResult(success=False)
 
@@ -476,7 +470,7 @@ class DataAsset:
         """
 
         expectation_suite = copy.deepcopy(self._expectation_suite)
-        expectations = expectation_suite.expectations
+        expectations = expectation_suite.expectation_configurations
 
         discards = defaultdict(int)
 
@@ -539,7 +533,7 @@ class DataAsset:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.expectations = expectations
+        expectation_suite.expectation_configurations = expectations
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -784,7 +778,7 @@ class DataAsset:
             # Group expectations by column
             columns = {}
 
-            for expectation in expectation_suite.expectations:
+            for expectation in expectation_suite.expectation_configurations:
                 if "column" in expectation.kwargs and isinstance(
                     expectation.kwargs["column"], Hashable
                 ):
@@ -856,7 +850,7 @@ class DataAsset:
 
                 results.append(result)
 
-            statistics = _calc_validation_statistics(results)
+            statistics = calc_validation_statistics(results)
 
             if only_return_failures:
                 abbrev_results = []
@@ -894,8 +888,7 @@ class DataAsset:
 
             self._data_context = validate__data_context
         except Exception:
-            if getattr(data_context, "_usage_statistics_handler", None):
-                handler = data_context._usage_statistics_handler
+            if handler := getattr(data_context, "_usage_statistics_handler", None):
                 handler.send_usage_message(
                     event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                     event_payload=handler.anonymizer.anonymize(obj=self),
@@ -905,8 +898,7 @@ class DataAsset:
         finally:
             self._active_validation = False
 
-        if getattr(data_context, "_usage_statistics_handler", None):
-            handler = data_context._usage_statistics_handler
+        if handler := getattr(data_context, "_usage_statistics_handler", None):
             handler.send_usage_message(
                 event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                 event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1171,40 +1163,3 @@ class DataAsset:
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
-
-
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
-
-
-def _calc_validation_statistics(validation_results):
-    """
-    Calculate summary statistics for the validation results and
-    return ``ExpectationStatistics``.
-    """
-    # calc stats
-    successful_expectations = sum(exp.success for exp in validation_results)
-    evaluated_expectations = len(validation_results)
-    unsuccessful_expectations = evaluated_expectations - successful_expectations
-    success = successful_expectations == evaluated_expectations
-    try:
-        success_percent = successful_expectations / evaluated_expectations * 100
-    except ZeroDivisionError:
-        # success_percent = float("nan")
-        success_percent = None
-
-    return ValidationStatistics(
-        successful_expectations=successful_expectations,
-        evaluated_expectations=evaluated_expectations,
-        unsuccessful_expectations=unsuccessful_expectations,
-        success=success,
-        success_percent=success_percent,
-    )

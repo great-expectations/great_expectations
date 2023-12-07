@@ -72,6 +72,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.validator.metrics_calculator import (
+        _MetricsDict,
+    )
     from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -271,8 +274,8 @@ def get_parameter_value_and_validate_return_type(
     if expected_return_type is not None:
         if not isinstance(parameter_reference, expected_return_type):
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"""Argument "{parameter_reference}" must be of type "{str(expected_return_type)}" \
-(value of type "{str(type(parameter_reference))}" was encountered).
+                message=f"""Argument "{parameter_reference}" must be of type "{expected_return_type!s}" \
+(value of type "{type(parameter_reference)!s}" was encountered).
 """
             )
 
@@ -360,9 +363,8 @@ def get_resolved_metrics_by_key(
 
     # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
     # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-    resolved_metrics: Dict[
-        Tuple[str, str, str], MetricValue
-    ] = validator.compute_metrics(
+    resolved_metrics: _MetricsDict
+    resolved_metrics, _ = validator.compute_metrics(
         metric_configurations=[
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()

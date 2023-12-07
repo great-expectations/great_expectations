@@ -17,6 +17,7 @@ from typing import (
 from tqdm.auto import tqdm
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -86,6 +87,7 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
+    @override
     def __eq__(self, other) -> bool:
         """Supports comparing two "ValidationGraph" objects."""
         return self.edge_ids == other.edge_ids
@@ -147,7 +149,7 @@ class ValidationGraph:
                 # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
                 if metric_dependency.id == metric_configuration.id:
                     logger.warning(
-                        f"Metric {str(metric_configuration.id)} has created a circular dependency"
+                        f"Metric {metric_configuration.id!s} has created a circular dependency"
                     )
                     continue
                 self.add(
@@ -314,7 +316,7 @@ class ValidationGraph:
             except Exception as e:
                 if catch_exceptions:
                     logger.error(
-                        f"""Caught exception {str(e)} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""
+                        f"""Caught exception {e!s} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""
                     )
                     done = True
                 else:

@@ -1,4 +1,5 @@
 import pathlib
+import uuid
 from logging import Logger
 from typing import (
     Any,
@@ -14,14 +15,15 @@ from typing import (
     overload,
 )
 
-import pydantic
-from typing_extensions import TypeAlias
+from typing_extensions import TypeAlias, override
 
+from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
 )
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
+    FabricPowerBIDatasource,
     PandasAzureBlobStorageDatasource,
     PandasDatasource,
     PandasDBFSDatasource,
@@ -45,9 +47,15 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
+from great_expectations.datasource.fluent.snowflake_datasource import (
+    ConnectionDetails as SnowflakeConnectionDetails,
+)
+from great_expectations.datasource.fluent.snowflake_datasource import (
+    SnowflakeDsn,
+)
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
+from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
@@ -66,7 +74,7 @@ def _get_field_details(
 ) -> _FieldDetails: ...
 
 class _SourceFactories:
-    type_lookup: ClassVar
+    type_lookup: ClassVar[TypeLookup]
     def __init__(self, data_context: GXDataContext) -> None: ...
     @classmethod
     def register_datasource(
@@ -78,6 +86,7 @@ class _SourceFactories:
     @property
     def factories(self) -> List[str]: ...
     def __getattr__(self, attr_name: str): ...
+    @override
     def __dir__(self) -> List[str]: ...
     def add_pandas(
         self,
@@ -577,7 +586,9 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -613,7 +624,9 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -649,7 +662,9 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -713,6 +728,14 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
+    def add_fabric_powerbi(
+        self,
+        name: Optional[str] = None,
+        datasource: Optional[FabricPowerBIDatasource] = None,
+        *,
+        workspace: Optional[Union[uuid.UUID, str]] = None,
+        dataset: Union[uuid.UUID, str] = ...,
+    ) -> FabricPowerBIDatasource: ...
 
 def _iter_all_registered_types(
     include_datasource: bool = True, include_data_asset: bool = True

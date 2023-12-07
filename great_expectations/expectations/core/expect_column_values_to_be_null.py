@@ -4,7 +4,6 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -56,8 +55,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -68,7 +65,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_not_be_null](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
@@ -86,25 +83,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
     map_metric = "column_values.null"
     args_keys = ("column",)
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
 
     @classmethod
     def _prescriptive_template(
@@ -155,7 +133,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
         if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "values must be null, at least $mostly_pct % of the time."
@@ -240,9 +218,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
+        mostly = self.get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"

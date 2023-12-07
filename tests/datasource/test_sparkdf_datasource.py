@@ -4,7 +4,6 @@ import re
 import pandas as pd
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -90,7 +89,7 @@ def test_sparkdf_datasource_custom_data_asset(
         name, "subdir_reader", "test"
     )
     batch_kwargs["reader_options"] = {"header": True, "inferSchema": True}
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name="test_sparkdf_datasource.default",
     )
@@ -136,7 +135,7 @@ def test_force_reuse_spark_context(
     df = spark.read.format("parquet").load(tmp_parquet_filename)
     batch_kwargs = {"dataset": df, "datasource": dataset_name}
     _ = data_context_parameterized_expectation_suite.add_expectation_suite(dataset_name)
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         batch_kwargs=batch_kwargs, expectation_suite_name=dataset_name
     )
     results = batch.expect_column_max_to_be_between("col1", min_value=1, max_value=100)
@@ -165,6 +164,7 @@ def test_spark_kwargs_are_passed_through(
         class_name="SparkDFDatasource",
         spark_config=spark_config,
         force_reuse_spark_context=False,
+        persist=False,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
@@ -183,6 +183,7 @@ def test_spark_kwargs_are_passed_through(
 
     assert datasource_config["spark_config"] == expected_spark_config
     assert datasource_config["force_reuse_spark_context"] is False
+    assert datasource_config["persist"] is False
 
     dataset_name = "test_spark_dataset_2"
     data_context_parameterized_expectation_suite.add_datasource(
@@ -190,6 +191,7 @@ def test_spark_kwargs_are_passed_through(
         class_name="SparkDFDatasource",
         spark_config={},
         force_reuse_spark_context=True,
+        persist=True,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
@@ -198,6 +200,7 @@ def test_spark_kwargs_are_passed_through(
     ).config
     assert datasource_config["spark_config"] == {}
     assert datasource_config["force_reuse_spark_context"] == True  # noqa: E712
+    assert datasource_config["persist"] is True
 
 
 @pytest.mark.spark
@@ -418,7 +421,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 def test_spark_datasource_processes_dataset_options(
     test_folder_connection_path_csv, test_backends, empty_data_context
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(

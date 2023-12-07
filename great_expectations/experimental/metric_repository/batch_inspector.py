@@ -17,21 +17,25 @@ if TYPE_CHECKING:
 
 
 class BatchInspector:
-    # TODO: Docstrings
+    """A BatchInspector is responsible for computing metrics for a batch of data.
+
+    It uses MetricRetriever objects to retrieve metrics.
+    """
+
     def __init__(
         self, context: AbstractDataContext, metric_retrievers: list[MetricRetriever]
     ):
         self._context = context
         self._metric_retrievers = metric_retrievers
 
-    def compute_metric_run(self, batch_request: BatchRequest) -> MetricRun:
-        run_id = self._generate_run_id()
-
+    def compute_metric_run(
+        self, data_asset_id: uuid.UUID, batch_request: BatchRequest
+    ) -> MetricRun:
         metrics: list[Metric] = []
         for metric_retriever in self._metric_retrievers:
             metrics.extend(metric_retriever.get_metrics(batch_request=batch_request))
 
-        return MetricRun(id=run_id, metrics=metrics)
+        return MetricRun(data_asset_id=data_asset_id, metrics=metrics)
 
     def _generate_run_id(self) -> uuid.UUID:
         return uuid.uuid4()

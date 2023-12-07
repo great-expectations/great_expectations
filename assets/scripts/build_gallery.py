@@ -19,7 +19,9 @@ import pkg_resources
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
-from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 from great_expectations.expectations.expectation import Expectation
 
@@ -67,8 +69,10 @@ def execute_shell_command(command: str) -> int:
     """
     cwd: str = os.getcwd()  # noqa: PTH109
 
-    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
-    env: dict = dict(os.environ, PATH=path_env_var)
+    path_env_var: str = os.pathsep.join(
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
+    )
+    env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 
     status_code: int = 0
     try:
@@ -97,7 +101,7 @@ def execute_shell_command(command: str) -> int:
         exception_message: str = "A Sub-Process call Exception occurred.\n"
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
+            f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
 
@@ -144,7 +148,7 @@ def get_expectations_info_dict(
 
     if include_core:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(  # noqa: PTH118
                     repo_path,
                     "great_expectations",
@@ -157,7 +161,7 @@ def get_expectations_info_dict(
         )
     if include_contrib:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(repo_path, "contrib", "**", "expect_*.py"),  # noqa: PTH118
                 recursive=True,
             )
@@ -206,10 +210,8 @@ def get_expectations_info_dict(
                     f"..{os.path.sep}..", grandparent_dir
                 )
 
-        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
-        created_at_cmd = (
-            f'git log --diff-filter=A --format="%ai %ar" -- {repr(file_path)}'
-        )
+        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {file_path!r}'
+        created_at_cmd = f'git log --diff-filter=A --format="%ai %ar" -- {file_path!r}'
         result[expectation_name] = {
             "updated_at": check_output(updated_at_cmd, shell=True)
             .decode("utf-8")
@@ -328,7 +330,7 @@ def combine_backend_results(
     expected_full_backend_files = [
         f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS
     ]
-    found_full_backend_files = glob("*_full.json")
+    found_full_backend_files = glob("*_full.json")  # noqa: PTH207
 
     if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
         logger.info(
@@ -434,7 +436,7 @@ def get_contrib_requirements(filepath: str) -> Dict:
                 if "library_metadata" in target_ids:
                     library_metadata = ast.literal_eval(node.value)
                     requirements = library_metadata.get("requirements", [])
-                    if type(requirements) == str:
+                    if type(requirements) == str:  # noqa: E721
                         requirements = [requirements]
                     requirements_info[current_class] = requirements
                     requirements_info["requirements"] += requirements
@@ -451,7 +453,7 @@ def build_gallery(  # noqa: C901 - 17
     outfile_name: str = "",
     only_these_expectations: List[str] | None = None,
     only_consider_these_backends: List[str] | None = None,
-    context: Optional[DataContext] = None,
+    context: Optional[FileDataContext] = None,
 ) -> None:
     """
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
@@ -669,13 +671,13 @@ def format_docstring_to_markdown(docstr: str) -> str:
     return clean_docstr
 
 
-def _disable_progress_bars() -> Tuple[str, DataContext]:
+def _disable_progress_bars() -> Tuple[str, FileDataContext]:
     """Return context_dir and context that was created"""
     context_dir = os.path.join(  # noqa: PTH118
         os.path.sep, "tmp", f"gx-context-{os.getpid()}"
     )
     os.makedirs(context_dir)  # noqa: PTH103
-    context = DataContext.create(context_dir, usage_statistics_enabled=False)
+    context = FileDataContext.create(context_dir, usage_statistics_enabled=False)
     context.variables.progress_bars = {
         "globally": False,
         "metric_calculations": False,

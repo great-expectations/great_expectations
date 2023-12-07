@@ -1,9 +1,7 @@
 import functools
 import operator
-from typing import Optional
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -34,32 +32,40 @@ class MulticolumnValuesSumValuesEqualToSingleColumn(MulticolumnMapMetricProvider
         "condition_parser",
         "ignore_row_if",
     )
-    condition_value_keys = ()
+    condition_value_keys = ("additional_value",)
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column_list, **kwargs):
+    def _sqlalchemy(cls, column_list, additional_value, **kwargs):
         columns_to_sum = column_list[0:-1]
         sqlalchemy_columns_to_sum = columns_to_sum[0]
         if len(columns_to_sum) > 1:
             for column in columns_to_sum[1:]:
                 sqlalchemy_columns_to_sum += column
         column_to_equal = column_list[-1]
+        sqlalchemy_columns_to_sum += additional_value
         return sqlalchemy_columns_to_sum == column_to_equal
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, dataframe, **kwargs):
+    def _spark(cls, dataframe, additional_value, **kwargs):
         column_list = dataframe.columns
         columns_to_sum = column_list[:-1]
         column_to_equal = column_list[-1]
-        return functools.reduce(
+
+        sum_columns = functools.reduce(
             operator.add, [F.col(column) for column in columns_to_sum]
-        ) == F.col(column_to_equal)
+        )
+        sum_columns += additional_value
+        equal_column = F.col(column_to_equal)
+
+        return sum_columns == equal_column
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, dataframe, **kwargs):
+    def _pandas(cls, dataframe, additional_value, **kwargs):
         columns_to_sum = dataframe.iloc[:, :-1]
         column_to_equal = dataframe.iloc[:, -1]
-        return columns_to_sum.sum(axis=1, skipna=False) == column_to_equal
+        sum_columns = columns_to_sum.sum(axis=1, skipna=False)
+        sum_columns += additional_value
+        return sum_columns == column_to_equal
 
 
 # This class defines the Expectation itself
@@ -73,10 +79,13 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
 
     Args:
         column_list (list of str): \
-            A list of 2 or more integer columns, in which we expect the sum of the first n-1th \
+            A list of 2 or more int or float columns, in which we expect the sum of the first n-1th \
             columns to be equal to the nth column. This means that if one wants to compare \
             between the sum of n-1 columns and the nth column, it needs to put the nth column \
             at the end of the list.
+        additional_value (optional): \
+            A numeric value that is included in the calculation to equal the nth column. \
+            The calculation becomes col_a + col_b + ... + col_n-1 + additional_value == col_n
     """
     # </snippet>
 
@@ -85,12 +94,18 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
     examples = [
         {
             "data": {
-                "col_a": [3, 6, 0, 1],
-                "col_b": [-6, -3, 1, 2],
-                "col_c": [1, 0, -1, 3],
-                "col_d": [-2, 3, 0, 6],
-                "col_e": [3, 6, 0, 1],
-                "col_f": [-3, 3, 1, 3],
+                "col_a": [3.15, 6.0, 0.0, 1.0],
+                "col_b": [-6.0, -3.0, 1.0, 2.0],
+                "col_c": [1.0, 0.0, -1.0, 3.0],
+                "col_d": [-1.85, 3.0, 0.0, 6.0],
+                "col_e": [3.15, 6.0, 0.0, 1.0],
+                "col_f": [-2.85, 3.0, 1.0, 3.0],
+                "col_g": [-1.85, 4.0, 2.0, 4.0],
+                "col_h": [5.15, 8.0, 2.0, 3.0],
+                "col_i": [-2, 3, 1, 0],
+                "col_j": [-1, 4, 2, 0],
+                "col_k": [-1, 9, 5, 2],
+                "col_l": [3.15, 16.0, 6.0, 4.0],
             },
             "tests": [
                 {
@@ -129,6 +144,75 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
                         "success": False,
                     },
                 },
+                {
+                    "title": "columns_to_sum 1 element set + additional value equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column_list": ["col_a", "col_h"], "additional_value": 2},
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "columns_to_sum 2-elements-set + additional value equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["col_a", "col_b", "col_g"],
+                        "additional_value": 1,
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "columns_to_sum set + additional value not equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["col_a", "col_c", "col_d"],
+                        "additional_value": 1,
+                    },
+                    "out": {
+                        "success": False,
+                    },
+                },
+                {
+                    "title": "columns_to_sum integer set + additional value equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["col_i", "col_j", "col_k"],
+                        "additional_value": 2,
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "columns_to_sum integer and float set + additional value equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["col_a", "col_k", "col_l"],
+                        "additional_value": 1,
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "columns_to_sum integer set + additional value not equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["col_i", "col_j", "col_k"],
+                        "additional_value": 1,
+                    },
+                    "out": {
+                        "success": False,
+                    },
+                },
             ],
         }
     ]
@@ -143,37 +227,11 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
     success_keys = (
         "column_list",
         "mostly",
+        "additional_value",
     )
 
     # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
+    default_kwarg_values = {"additional_value": 0}
 
     # This object contains metadata for display in the public Gallery
     # <snippet>
@@ -182,7 +240,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
             "multi-column expectation",
             "multi-column sum values to be equal to single column",
         ],
-        "contributors": ["@AsaFLachisch", "@mkopec87"],
+        "contributors": ["@calvingdu", "@AsaFLachisch", "@mkopec87"],
     }
     # </snippet>
 

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -6,7 +6,6 @@ from great_expectations.core import (
 )
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -37,14 +36,12 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         or_equal (boolean or None): If True, then values can be equal, not strictly greater
 
     Keyword Args:
-        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
 
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -55,8 +52,13 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
+
+    or_equal: Union[bool, None] = None
+    ignore_row_if: Literal[
+        "both_values_are_missing", "either_value_is_missing", "neither"
+    ] = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -76,49 +78,14 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "column_A",
         "column_B",
         "ignore_row_if",
-        "parse_strings_as_datetimes",
         "or_equal",
         "mostly",
     )
-    default_kwarg_values = {
-        "mostly": 1.0,
-        "parse_strings_as_datetimes": False,
-        "ignore_row_if": "both_values_are_missing",
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column_A",
         "column_B",
         "or_equal",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For `expect_column_pair_values_a_to_be_greater_than_b`
-        we require that the `configuraton.kwargs` contain both `column_A` and `column_B` keys.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert (
-                "column_A" in configuration.kwargs
-                and "column_B" in configuration.kwargs
-            ), "both columns must be provided"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -128,7 +95,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         add_param_args: AddParamArgs = (
             ("column_A", RendererValueType.STRING),
             ("column_B", RendererValueType.STRING),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("ignore_row_if", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("or_equal", RendererValueType.BOOLEAN),
@@ -156,9 +122,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
 
-        if params.parse_strings_as_datetimes:
-            template_str += " Values should be parsed as datetimes."
-
         renderer_configuration.template_str = template_str
 
         return renderer_configuration
@@ -181,7 +144,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             [
                 "column_A",
                 "column_B",
-                "parse_strings_as_datetimes",
                 "ignore_row_if",
                 "mostly",
                 "or_equal",
@@ -201,16 +163,13 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
         else:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if params["row_condition"] is not None:
             (

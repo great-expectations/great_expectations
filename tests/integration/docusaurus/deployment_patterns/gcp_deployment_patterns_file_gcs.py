@@ -1,6 +1,6 @@
 import os
-import tempfile
 import pathlib
+import tempfile
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
@@ -29,7 +29,7 @@ if not gcp_project:
     )
 
 # parse great_expectations.yml for comparison
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
@@ -112,7 +112,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 # adding validation results store
 
 # parse great_expectations.yml for comparison
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
@@ -222,7 +222,7 @@ data_docs_site_yaml = data_docs_site_yaml.replace(
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "test_datadocs_store"
 )
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
@@ -284,9 +284,8 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="gcs_checkpoint",
-    data_context=context,
     validations=[
         {"batch_request": batch_request, "expectation_suite_name": "test_gcs_suite"}
     ],

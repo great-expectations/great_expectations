@@ -8,7 +8,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
@@ -28,6 +28,7 @@ import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
@@ -59,7 +60,6 @@ from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    DEFAULT_RECONCILATION_DIRECTIVES,
     ReconciliationDirectives,
     ReconciliationStrategy,
 )
@@ -71,6 +71,7 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
+    _AbortedMetricsInfoDict,
     _MetricKey,
     _MetricsDict,
 )
@@ -78,6 +79,9 @@ from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
     ValidationGraph,
+)
+from great_expectations.validator.validation_statistics import (
+    calc_validation_statistics,
 )
 
 logger = logging.getLogger(__name__)
@@ -96,8 +100,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.expectations.expectation import Expectation
-    from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.rule_based_profiler.expectation_configuration_builder import (
         ExpectationConfigurationBuilder,
     )
@@ -152,18 +154,6 @@ class ValidationDependencies:
         return list(self.metric_configurations.values())
 
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
-
-
 @public_api
 class Validator:
     """Validator is the key object used to create Expectations, validate Expectations, and get Metrics for Expectations.
@@ -181,7 +171,6 @@ class Validator:
     """
 
     DEFAULT_RUNTIME_CONFIGURATION = {
-        "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
@@ -225,11 +214,6 @@ class Validator:
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
         self._active_validation: bool = False
-        if self._data_context and hasattr(
-            self._data_context, "_expectation_explorer_manager"
-        ):
-            # TODO: verify flow of default expectation arguments
-            self.set_default_expectation_argument("include_config", True)
 
         self._include_rendered_content: Optional[bool] = include_rendered_content
 
@@ -363,7 +347,7 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> _MetricsDict:
+    ) -> tuple[_MetricsDict, _AbortedMetricsInfoDict]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -373,7 +357,9 @@ class Validator:
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
 
         Returns:
-            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+            Tuple of two elements, the first is a dictionary with requested metrics resolved,
+            with unique metric ID as key and computed metric as value. The second is a dictionary of the
+            aborted metrics information, with metric ID as key if any metrics were aborted.
         """
         return self._metrics_calculator.compute_metrics(
             metric_configurations=metric_configurations,
@@ -414,6 +400,7 @@ class Validator:
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
         )
 
+    @override
     def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable expectation tab completion on Validator objects.
@@ -532,14 +519,10 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            configuration: ExpectationConfiguration = (
-                self._build_expectation_configuration(
-                    expectation_type=name,
-                    expectation_kwargs=expectation_kwargs,
-                    meta=meta,
-                    expectation_impl=expectation_impl,
-                    runtime_configuration=basic_runtime_configuration,
-                )
+            configuration = ExpectationConfiguration(
+                expectation_type=name,
+                kwargs=expectation_kwargs,
+                meta=meta,
             )
 
             exception_info: ExceptionInfo
@@ -552,7 +535,9 @@ class Validator:
                 )
 
             try:
-                expectation = expectation_impl(configuration)
+                expectation = expectation_impl(
+                    meta=configuration.meta, **configuration.kwargs
+                )
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
@@ -560,7 +545,7 @@ class Validator:
                         expectation_config=copy.deepcopy(expectation.configuration)
                     )
                 else:
-                    validation_result = expectation.validate(
+                    validation_result = expectation.validate_(
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
@@ -586,7 +571,7 @@ class Validator:
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     exception_traceback = traceback.format_exc()
-                    exception_message = f"{type(err).__name__}: {str(err)}"
+                    exception_message = f"{type(err).__name__}: {err!s}"
                     exception_info = ExceptionInfo(
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,
@@ -608,208 +593,6 @@ class Validator:
         inst_expectation.__doc__ = expectation_impl.__doc__
 
         return inst_expectation
-
-    def _build_expectation_configuration(  # noqa: PLR0913
-        self,
-        expectation_type: str,
-        expectation_kwargs: dict,
-        meta: Optional[dict],
-        expectation_impl: type[Expectation],
-        runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
-        auto: bool = expectation_kwargs.get("auto", False)
-        profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
-            "profiler_config"
-        )
-        default_profiler_config = expectation_impl.default_kwarg_values.get(
-            "profiler_config"
-        )
-        if default_profiler_config and not isinstance(
-            default_profiler_config, RuleBasedProfilerConfig
-        ):
-            raise TypeError("profiler_config must be None or RuleBasedProfilerConfig")
-
-        if auto and profiler_config is None and default_profiler_config is None:
-            raise ValueError(
-                "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
-            )
-
-        configuration: ExpectationConfiguration
-
-        profiler: Optional[
-            BaseRuleBasedProfiler
-        ] = self.build_rule_based_profiler_for_expectation(
-            expectation_type=expectation_type
-        )(
-            *(), **expectation_kwargs
-        )
-        if profiler is not None:
-            profiler_result: RuleBasedProfilerResult = profiler.run(
-                variables=None,
-                rules=None,
-                batch_list=list(self.batch_cache.values()),
-                batch_request=None,
-                runtime_configuration=runtime_configuration,
-                reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
-            )
-            expectation_configurations: List[
-                ExpectationConfiguration
-            ] = profiler_result.expectation_configurations
-            configuration = expectation_configurations[0]
-
-            # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.
-            success_keys: Tuple[str, ...] = (
-                expectation_impl.success_keys
-                if hasattr(expectation_impl, "success_keys")
-                else tuple()
-            )
-            arg_keys: Tuple[str, ...] = (
-                expectation_impl.arg_keys
-                if hasattr(expectation_impl, "arg_keys")
-                else tuple()
-            )
-            runtime_keys: Tuple[str, ...] = (
-                expectation_impl.runtime_keys
-                if hasattr(expectation_impl, "runtime_keys")
-                else None
-            ) or tuple()
-            # noinspection PyTypeChecker
-            override_keys: Tuple[str, ...] = success_keys + arg_keys + runtime_keys
-
-            key: str
-            value: Any
-            expectation_kwargs_overrides: dict = {
-                key: value
-                for key, value in expectation_kwargs.items()
-                if key in override_keys
-            }
-            expectation_kwargs_overrides = convert_to_json_serializable(
-                data=expectation_kwargs_overrides
-            )
-
-            expectation_kwargs = configuration.kwargs
-            expectation_kwargs.update(expectation_kwargs_overrides)
-
-            if meta is None:
-                meta = {}
-
-            meta["profiler_config"] = profiler.to_json_dict()
-
-        configuration = ExpectationConfiguration(
-            expectation_type=expectation_type,
-            kwargs=expectation_kwargs,
-            meta=meta,
-        )
-
-        return configuration
-
-    def build_rule_based_profiler_for_expectation(
-        self, expectation_type: str
-    ) -> Callable:
-        """
-        Given name of Expectation ("expectation_type"), builds effective RuleBasedProfiler object from configuration.
-        Args:
-            expectation_type (str): Name of Expectation for which Rule-Based Profiler may be configured.
-
-        Returns:
-            Function that builds effective RuleBasedProfiler object (for specified "expectation_type").
-        """
-        expectation_impl = get_expectation_impl(expectation_type)
-
-        def inst_rule_based_profiler(  # noqa: PLR0912
-            *args, **kwargs
-        ) -> Optional[BaseRuleBasedProfiler]:
-            if args is None:
-                args = tuple()
-
-            if kwargs is None:
-                kwargs = {}
-
-            expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
-
-            allowed_config_keys: Tuple[
-                str, ...
-            ] = expectation_impl.get_allowed_config_keys()
-
-            args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
-
-            arg_name: str
-
-            idx: int
-            arg: Any
-            for idx, arg in enumerate(args):
-                try:
-                    arg_name = args_keys[idx]
-                    if arg_name in allowed_config_keys:
-                        expectation_kwargs[arg_name] = arg
-                    if arg_name == "meta":
-                        logger.warning(
-                            "Setting meta via args could be ambiguous; please use a kwarg instead."
-                        )
-                except IndexError:
-                    raise InvalidExpectationConfigurationError(
-                        f"Invalid positional argument: {arg}"
-                    )
-
-            success_keys: Tuple[str, ...] = (
-                expectation_impl.success_keys
-                if hasattr(expectation_impl, "success_keys")
-                else tuple()
-            )
-
-            auto: Optional[bool] = expectation_kwargs.get("auto")
-            profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
-                "profiler_config"
-            )
-            default_profiler_config = expectation_impl.default_kwarg_values.get(
-                "profiler_config"
-            )
-            if default_profiler_config and not isinstance(
-                default_profiler_config, RuleBasedProfilerConfig
-            ):
-                raise TypeError(
-                    "profiler_config must be None or RuleBasedProfilerConfig"
-                )
-
-            if auto and profiler_config is None and default_profiler_config is None:
-                raise ValueError(
-                    "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
-                )
-
-            profiler: Optional[BaseRuleBasedProfiler]
-
-            if auto:
-                # Save custom Rule-Based Profiler configuration for reconciling it with optionally-specified default
-                # Rule-Based Profiler configuration as an override argument to "BaseRuleBasedProfiler.run()" method.
-                override_profiler_config: Optional[RuleBasedProfilerConfig]
-                if default_profiler_config:
-                    override_profiler_config = copy.deepcopy(profiler_config)
-                else:
-                    override_profiler_config = None
-
-                """
-                If default Rule-Based Profiler configuration exists, use it as base with custom Rule-Based Profiler
-                configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.
-                """
-                profiler_config_to_use = default_profiler_config or profiler_config
-                if not isinstance(profiler_config_to_use, RuleBasedProfilerConfig):
-                    raise TypeError(
-                        "profiler_config must be None or RuleBasedProfilerConfig"
-                    )
-
-                profiler = self._build_rule_based_profiler_from_config_and_runtime_args(
-                    expectation_type=expectation_type,
-                    expectation_kwargs=expectation_kwargs,
-                    success_keys=success_keys,
-                    profiler_config=profiler_config_to_use,
-                    override_profiler_config=override_profiler_config,
-                )
-            else:
-                profiler = None
-
-            return profiler
-
-        return inst_rule_based_profiler
 
     def _build_rule_based_profiler_from_config_and_runtime_args(  # noqa: PLR0913
         self,
@@ -1129,15 +912,17 @@ class Validator:
                 raise InvalidExpectationConfigurationError(str(e))
 
             evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            if self.active_batch_id:
+                evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies: ValidationDependencies = (
-                expectation_impl().get_validation_dependencies(
-                    configuration=evaluated_config,
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
+            validation_dependencies: ValidationDependencies = expectation_impl(
+                **evaluated_config.kwargs
+            ).get_validation_dependencies(
+                configuration=evaluated_config,
+                execution_engine=self._execution_engine,
+                runtime_configuration=runtime_configuration,
             )
 
             try:
@@ -1316,7 +1101,7 @@ class Validator:
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
-        res = self.validate(only_return_failures=True).results
+        res = self.validate(only_return_failures=True).results  # type: ignore[union-attr] # ExpectationValidationResult has no `.results` attr
         if any(res):
             for item in res:
                 self.remove_expectation(
@@ -1334,7 +1119,6 @@ class Validator:
             Ex::
 
                 {
-                    "include_config" : True,
                     "catch_exceptions" : False,
                     "result_format" : 'BASIC'
                 }
@@ -1407,7 +1191,7 @@ class Validator:
         """
 
         expectation_suite = copy.deepcopy(self.expectation_suite)
-        expectations = expectation_suite.expectations
+        expectations = expectation_suite.expectation_configurations
 
         discards: defaultdict[str, int] = defaultdict(int)
 
@@ -1470,7 +1254,7 @@ class Validator:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.expectations = expectations
+        expectation_suite.expectation_configurations = expectations
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -1529,7 +1313,6 @@ class Validator:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
     @public_api
     @deprecated_argument(
         argument_name="run_id",
@@ -1661,7 +1444,7 @@ class Validator:
             # Group expectations by column
             columns: dict[Any, list[ExpectationConfiguration]] = {}
 
-            for expectation in expectation_suite.expectations:
+            for expectation in expectation_suite.expectation_configurations:
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,
@@ -1694,7 +1477,7 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
-            statistics = self._calc_validation_statistics(results)
+            statistics = calc_validation_statistics(results)
 
             if only_return_failures:
                 abbrev_results = []
@@ -1945,34 +1728,6 @@ class Validator:
                 runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration
-
-    @staticmethod
-    def _calc_validation_statistics(
-        validation_results: List[ExpectationValidationResult],
-    ) -> ValidationStatistics:
-        """
-        Calculate summary statistics for the validation results and
-        return ``ExpectationStatistics``.
-        """
-        # calc stats
-        evaluated_expectations = len(validation_results)
-        successful_expectations = len(
-            [exp for exp in validation_results if exp.success]
-        )
-        unsuccessful_expectations = evaluated_expectations - successful_expectations
-        success = successful_expectations == evaluated_expectations
-        try:
-            success_percent = successful_expectations / evaluated_expectations * 100
-        except ZeroDivisionError:
-            success_percent = None
-
-        return ValidationStatistics(
-            successful_expectations=successful_expectations,
-            evaluated_expectations=evaluated_expectations,
-            unsuccessful_expectations=unsuccessful_expectations,
-            success=success,
-            success_percent=success_percent,
-        )
 
     def convert_to_checkpoint_validations_list(
         self,

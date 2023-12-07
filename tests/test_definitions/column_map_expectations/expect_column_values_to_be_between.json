@@ -264,25 +264,6 @@
           }
         },
         {
-          "title": "basic_positive_test_with_timestamps",
-          "suppress_test_for": [
-            "snowflake"
-          ],
-          "_notes": "Suppressed for snowflake because these are not valid timestamp formats https://docs.snowflake.com/en/sql-reference/data-types-datetime.html",
-          "exact_match_out": false,
-          "out": {
-            "unexpected_list": [],
-            "unexpected_index_list": [],
-            "success": true
-          },
-          "in": {
-            "column": "ts",
-            "max_value": "Jan 01 2020 12:00:02",
-            "min_value": "Jan 01 1970 12:00:00",
-            "parse_strings_as_datetimes": true
-          }
-        },
-        {
           "title": "missing_min_value",
           "exact_match_out": false,
           "out": {
@@ -385,32 +366,6 @@
             "column": "x",
             "max_value": 10,
             "min_value": 3
-          }
-        },
-        {
-          "title": "basic_negative_test_with_timestamps",
-          "suppress_test_for": [
-            "sqlalchemy"
-          ],
-          "exact_match_out": false,
-          "out": {
-            "unexpected_index_list": [
-              {
-                "ts": "1970-01-01T12:00:01",
-                "pk_index": 0
-              },
-              {
-                "ts": "2001-01-01T12:00:01",
-                "pk_index": 9
-              }
-            ],
-            "success": false
-          },
-          "in": {
-            "column": "ts",
-            "max_value": "Jan 01 2001 12:00:00",
-            "min_value": "Jan 01 1990 12:00:00",
-            "parse_strings_as_datetimes": true
           }
         },
         {
@@ -680,42 +635,6 @@
           "error": {
             "traceback_substring": "ValueError: min_value cannot be greater than max_value"
           }
-        },
-        {
-          "title": "test_allow_cross_type_comparisons",
-          "exact_match_out": false,
-          "in": {
-            "column": "y",
-            "min_value": 0,
-            "max_value": 10,
-            "allow_cross_type_comparisons": true,
-            "catch_exceptions": true
-          },
-          "out": {},
-          "error": {
-            "traceback_substring": "NotImplementedError"
-          },
-          "suppress_test_for": [
-            "spark"
-          ]
-        },
-        {
-          "title": "test_allow_cross_type_comparisons_again",
-          "exact_match_out": false,
-          "in": {
-            "column": "numeric",
-            "min_value": 0,
-            "max_value": 10,
-            "allow_cross_type_comparisons": true,
-            "catch_exceptions": true
-          },
-          "out": {},
-          "error": {
-            "traceback_substring": "NotImplementedError"
-          },
-          "suppress_test_for": [
-            "spark"
-          ]
         },
         {
           "title": "test_strict_min_failure",

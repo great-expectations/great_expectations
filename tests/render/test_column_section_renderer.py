@@ -3,7 +3,6 @@ from collections import OrderedDict
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -29,7 +28,7 @@ from great_expectations.self_check.util import (
 
 @pytest.fixture(scope="module")
 def titanic_expectations(empty_data_context_module_scoped):
-    context: DataContext = empty_data_context_module_scoped
+    context = empty_data_context_module_scoped
     with open(
         file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:
@@ -41,7 +40,7 @@ def titanic_expectations(empty_data_context_module_scoped):
 
 @pytest.fixture
 def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
@@ -113,7 +112,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
     # print(json.dumps(titanic_expectations, indent=2))
-    for exp in titanic_expectations.expectations:
+    for exp in titanic_expectations.expectation_configurations:
         try:
             column = exp.kwargs["column"]
             if column not in exp_groups:
@@ -1396,7 +1395,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "min_value": None,
                             "max_value": None,
                             "result_format": "SUMMARY",
-                            "parse_strings_as_datetimes": None,
                             "row_condition": None,
                             "condition_parser": None,
                             "strict_max": None,
@@ -1503,7 +1501,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                                 "min_value": {"$PARAMETER": "MIN_VAL_PARAM * 2"},
                                 "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
                                 "result_format": "SUMMARY",
-                                "parse_strings_as_datetimes": None,
                                 "row_condition": None,
                                 "condition_parser": None,
                                 "strict_min": None,
@@ -1638,7 +1635,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "min_value": {
                                 "$PARAMETER": "now() " "- " "timedelta(weeks=208)"
                             },
-                            "parse_strings_as_datetimes": None,
                             "result_format": "SUMMARY",
                             "row_condition": None,
                             "strict_max": None,

@@ -7,11 +7,8 @@ For detailed instructions on how to use it, please see:
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -82,9 +79,6 @@ class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
         "column_list",
         "mostly",
     )
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None

@@ -3,6 +3,7 @@ This is an example of a Custom QueryExpectation.
 For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
+from __future__ import annotations
 
 from typing import Optional, Union
 
@@ -23,12 +24,13 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring">
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
+
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies">
     metric_dependencies = ("query.table",)
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query">
-    query = """
+    query: str = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
@@ -41,15 +43,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
-
-    default_kwarg_values = {
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-        "value": None,
-        "query": query,
-    }
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -71,8 +64,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: dict | None = None,
+        execution_engine: ExecutionEngine | None = None,
     ) -> Union[ExpectationValidationResult, dict]:
         # </snippet>
         metrics = convert_to_json_serializable(data=metrics)

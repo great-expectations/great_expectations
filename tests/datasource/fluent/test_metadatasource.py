@@ -8,10 +8,11 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
-from pydantic import DirectoryPath, validate_arguments
 
+from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
+from great_expectations.data_context import get_context as get_gx_context
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -30,12 +31,12 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.util import get_context as get_gx_context
 
 yaml = YAMLHandler()
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.core.datasource_dict import DatasourceDict
 
 
 logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ class DataContext:
         cls,
         context_root_dir: Optional[DirectoryPath] = None,
         _config_file: str = "config.yaml",  # for ease of use during POC
-    ) -> DataContext:
+    ):
         if not cls._context:
             cls._context = DataContext(context_root_dir=context_root_dir)
 
@@ -89,8 +90,17 @@ class DataContext:
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _add_fluent_datasource(self, datasource: Datasource) -> None:
+    @property
+    def datasources(self) -> DatasourceDict:
+        return self._datasources
+
+    def _add_fluent_datasource(self, datasource: Datasource) -> Datasource:
         self._datasources[datasource.name] = datasource
+        return datasource
+
+    def _update_fluent_datasource(self, datasource: Datasource) -> Datasource:
+        self._datasources[datasource.name] = datasource
+        return datasource
 
     def get_datasource(self, datasource_name: str) -> Datasource:
         # NOTE: this same method exists on AbstractDataContext
@@ -102,13 +112,11 @@ class DataContext:
                 f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
             ) from exc
 
-    def _save_project_config(self, _fs_datasource=None) -> None:
+    def _save_project_config(self) -> None:
         ...
 
 
-def get_context(
-    context_root_dir: Optional[DirectoryPath] = None, **kwargs
-) -> DataContext:
+def get_context(context_root_dir: Optional[DirectoryPath] = None, **kwargs):
     """Experimental get_context placeholder function."""
     logger.info(f"Getting context {context_root_dir or ''}")
     context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)

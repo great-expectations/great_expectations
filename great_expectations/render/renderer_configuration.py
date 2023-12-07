@@ -21,7 +21,9 @@ from typing import (
 
 import dateutil
 from dateutil.parser import ParserError
-from pydantic import (
+from typing_extensions import TypeAlias, TypedDict
+
+from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
     ValidationError,
@@ -29,9 +31,8 @@ from pydantic import (
     root_validator,
     validator,
 )
-from pydantic.generics import GenericModel
-from typing_extensions import TypeAlias, TypedDict
-
+from great_expectations.compatibility.pydantic import generics as pydantic_generics
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -39,7 +40,11 @@ from great_expectations.core import (
 from great_expectations.render.exceptions import RendererConfigurationError
 
 if TYPE_CHECKING:
-    from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
+    from great_expectations.compatibility.pydantic.typing import (
+        AbstractSetIntStr,
+        DictStrAny,
+        MappingIntStrAny,
+    )
 
 
 class RendererValueType(str, Enum):
@@ -71,6 +76,7 @@ class _RendererValueBase(BaseModel):
     def __len__(self) -> int:
         return len(self.__fields__)
 
+    @override
     def dict(  # noqa: PLR0913
         self,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -129,7 +135,7 @@ class MetaNotes(TypedDict):
     content: List[str]
 
 
-class RendererConfiguration(GenericModel, Generic[RendererParams]):
+class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererParams]):
     """
     Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
         implementation-level.
@@ -214,7 +220,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     str(value)
                 except Exception as e:
                     raise RendererConfigurationError(
-                        f"Value was unable to be represented as a string: {str(e)}"
+                        f"Value was unable to be represented as a string: {e!s}"
                     )
             else:
                 renderer_configuration_error = RendererConfigurationError(
@@ -238,7 +244,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
             return values
 
-        def __eq__(self, other: Any) -> bool:
+        @override
+        def __eq__(self, other: object) -> bool:
             if isinstance(other, BaseModel):
                 return self.dict() == other.dict()
             elif isinstance(other, dict):
@@ -337,7 +344,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         )
         renderer_params_args = {}
         for idx, condition in enumerate(row_conditions_list):
-            name = f"row_condition__{str(idx)}"
+            name = f"row_condition__{idx!s}"
             value = condition.replace(" NOT ", " not ")
             renderer_params_args[name] = RendererConfiguration._RendererParamArgs(
                 schema=RendererSchema(type=RendererValueType.STRING), value=value
@@ -474,7 +481,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         )
         for idx, condition in enumerate(row_conditions_list):
             row_condition_str = row_condition_str.replace(
-                condition, f"$row_condition__{str(idx)}"
+                condition, f"$row_condition__{idx!s}"
             )
         row_condition_str = row_condition_str.lower()
         return f"If {row_condition_str}, then "
@@ -573,13 +580,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             # we need to combine the param passed to add_param() with those existing raw_kwargs
             if (
                 name in renderer_params_args
-                and renderer_params_args[name]["evaluation_parameter"]
+                and renderer_params_args[name]["evaluation_parameter"]  # type: ignore[index]
             ):
                 new_args = {
                     name: renderer_param(
                         schema=RendererSchema(type=param_type),
                         value=value,
-                        evaluation_parameter=renderer_params_args[name][
+                        evaluation_parameter=renderer_params_args[name][  # type: ignore[index]
                             "evaluation_parameter"
                         ],
                     )

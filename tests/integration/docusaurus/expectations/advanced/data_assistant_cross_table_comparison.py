@@ -41,7 +41,7 @@ inspector = inspect(engine)
 table_names = [table_name for table_name in inspector.get_table_names(schema="test_ci")]
 assert "mysql_taxi_data" in table_names
 
-pg_datasource = context.sources.add_sql(
+pg_datasource = context.sources.add_postgres(
     name="pg_datasource", connection_string=PG_CONNECTION_STRING
 )
 pg_datasource.add_table_asset(
@@ -85,9 +85,8 @@ expectation_suite = data_assistant_result.get_expectation_suite(
 context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py checkpoint_config">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="comparison_checkpoint",
-    data_context=context,
     validations=[
         {
             "batch_request": pg_batch_request,

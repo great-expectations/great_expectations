@@ -1,9 +1,6 @@
 import os
 
 import great_expectations as gx
-from great_expectations.datasource.fluent import (
-    BatchRequest as FluentBatchRequest,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -12,6 +9,9 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
+)
+from great_expectations.datasource.fluent import (
+    BatchRequest as FluentBatchRequest,
 )
 
 yaml = YAMLHandler()
@@ -31,31 +31,34 @@ context.add_or_update_expectation_suite("my_expectation_suite")
 context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # Add a Checkpoint
-checkpoint_yaml = """
-name: test_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%M-foo-bar-template"
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-    action_list:
-      - name: <ACTION NAME FOR STORING VALIDATION RESULTS>
-        action:
-          class_name: StoreValidationResultAction
-      - name: <ACTION NAME FOR STORING EVALUATION PARAMETERS>
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: <ACTION NAME FOR UPDATING DATA DOCS>
-        action:
-          class_name: UpdateDataDocsAction
-"""
-context.add_or_update_checkpoint(**yaml.load(checkpoint_yaml))
+context.add_or_update_checkpoint(
+    name="test_checkpoint",
+    run_name_template="%Y-%M-foo-bar-template",
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "01"},
+            },
+            "expectation_suite_name": "my_expectation_suite",
+            "action_list": [
+                {
+                    "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
+                    "action": {"class_name": "UpdateDataDocsAction"},
+                },
+            ],
+        }
+    ],
+)
 assert context.list_checkpoints() == ["test_checkpoint"]
 
 results = context.run_checkpoint(checkpoint_name="test_checkpoint")
@@ -134,42 +137,41 @@ validator.expect_table_row_count_to_be_between(
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting">
-no_nesting = f"""
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml">
-name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%M-foo-bar-template-$VAR"
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-evaluation_parameters:
-  GT_PARAM: 1000
-  LT_PARAM: 50000
-runtime_configuration:
-  result_format:
-    result_format: BASIC
-    partial_unexpected_count: 20
+context.add_or_update_checkpoint(
+    name="my_checkpoint",
+    run_name_template="%Y-%M-foo-bar-template-$VAR",
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "01"},
+            },
+            "expectation_suite_name": "my_expectation_suite",
+            "action_list": [
+                {
+                    "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
+                    "action": {"class_name": "UpdateDataDocsAction"},
+                },
+            ],
+        }
+    ],
+    evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
+    runtime_configuration={
+        "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+    },
+)
 # </snippet>
-"""
 # </snippet>
-
-context.add_or_update_checkpoint(**yaml.load(no_nesting))
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
@@ -189,48 +191,49 @@ assert (
 )
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults">
-nesting_with_defaults = """
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml">
-name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%M-foo-bar-template-$VAR"
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "02"
-expectation_suite_name: my_expectation_suite
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-evaluation_parameters:
-  GT_PARAM: 1000
-  LT_PARAM: 50000
-runtime_configuration:
-  result_format:
-    result_format: BASIC
-    partial_unexpected_count: 20
+context.add_or_update_checkpoint(
+    name="my_checkpoint",
+    run_name_template="%Y-%M-foo-bar-template-$VAR",
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "01"},
+            },
+        },
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "02"},
+            },
+        },
+    ],
+    expectation_suite_name="my_expectation_suite",
+    action_list=[
+        {
+            "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
+            "action": {"class_name": "UpdateDataDocsAction"},
+        },
+    ],
+    evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
+    runtime_configuration={
+        "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+    },
+)
 # </snippet>
-"""
 # </snippet>
 
-context.add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -273,33 +276,31 @@ assert second_batch_identifiers == {
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime">
-keys_passed_at_runtime = """
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime just the yaml">
-name: my_base_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%M-foo-bar-template-$VAR"
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-evaluation_parameters:
-  GT_PARAM: 1000
-  LT_PARAM: 50000
-runtime_configuration:
-  result_format:
-    result_format: BASIC
-    partial_unexpected_count: 20
+context.add_or_update_checkpoint(
+    name="my_base_checkpoint",
+    run_name_template="%Y-%M-foo-bar-template-$VAR",
+    action_list=[
+        {
+            "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
+            "action": {"class_name": "UpdateDataDocsAction"},
+        },
+    ],
+    evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
+    runtime_configuration={
+        "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+    },
+)
 # </snippet>
-"""
 # </snippet>
-context.add_or_update_checkpoint(**yaml.load(keys_passed_at_runtime))
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_3">
 results = context.run_checkpoint(
@@ -365,31 +366,32 @@ context.add_or_update_expectation_suite("my_expectation_suite")
 context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template">
-using_template = """
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template just the yaml">
-name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
-template_name: my_base_checkpoint
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "02"
-    expectation_suite_name: my_other_expectation_suite
+context.add_or_update_checkpoint(
+    name="my_checkpoint",
+    template_name="my_base_checkpoint",
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "01"},
+            },
+            "expectation_suite_name": "my_expectation_suite",
+        },
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "02"},
+            },
+            "expectation_suite_name": "my_other_expectation_suite",
+        },
+    ],
+)
 # </snippet>
-"""
 # </snippet>
-context.add_or_update_checkpoint(**yaml.load(using_template))
+
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_4">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -430,56 +432,8 @@ assert second_batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint">
-using_simple_checkpoint = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint just the yaml">
-name: my_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-site_names: all
-slack_webhook: <YOUR SLACK WEBHOOK URL>
-notify_on: failure
-notify_with: all
-# </snippet>
-"""
-# </snippet>
-using_simple_checkpoint = using_simple_checkpoint.replace(
-    "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
-)
-context.add_or_update_checkpoint(**yaml.load(using_simple_checkpoint))
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_5">
-results = context.run_checkpoint(checkpoint_name="my_checkpoint")
-# </snippet>
-assert results.success is True
-validation_result = list(results.run_results.items())[0][1]["validation_result"]
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite">
-expectation_suite = validation_result["meta"]["expectation_suite_name"]
-data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
-batch_identifiers = validation_result["meta"]["active_batch_definition"][
-    "batch_identifiers"
-]
-
-assert expectation_suite == "my_expectation_suite"
-assert data_asset == "taxi_asset"
-assert batch_identifiers == {
-    "path": "yellow_tripdata_sample_2019-01.csv",
-    "year": "2019",
-    "month": "01",
-}
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
 equivalent_using_checkpoint = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint just the yaml">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py checkpoint_example">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -510,20 +464,18 @@ action_list:
       renderer:
         module_name: great_expectations.render.renderer.slack_renderer
         class_name: SlackRenderer
-# </snippet>
 """
-# </snippet>
-equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
+checkpoint_example = equivalent_using_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_or_update_checkpoint(**yaml.load(equivalent_using_checkpoint))
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_6">
+context.add_or_update_checkpoint(**yaml.load(checkpoint_example))
+
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
-# </snippet>
+
 assert results.success is True
 validation_result = list(results.run_results.items())[0][1]["validation_result"]
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2">
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
 batch_identifiers = validation_result["meta"]["active_batch_definition"][
@@ -537,4 +489,3 @@ assert batch_identifiers == {
     "year": "2019",
     "month": "01",
 }
-# </snippet>

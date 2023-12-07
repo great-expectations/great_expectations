@@ -2,6 +2,7 @@ import copy
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain
 from great_expectations.core.util import (
@@ -214,6 +215,7 @@ class Rule(SerializableDictDot):
     ) -> Optional[List[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
 
+    @override
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
         parameter_builders: Optional[
@@ -254,6 +256,7 @@ class Rule(SerializableDictDot):
             "expectation_configuration_builders": expectation_configuration_builder_configs,
         }
 
+    @override
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -270,6 +273,7 @@ class Rule(SerializableDictDot):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -285,6 +289,7 @@ class Rule(SerializableDictDot):
         )
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>

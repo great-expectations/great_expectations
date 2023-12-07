@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import datetime
 import json
 import re
 from collections import OrderedDict
 from string import Template as pTemplate
+from typing import TYPE_CHECKING, Any, ClassVar, Iterable, Mapping
 from uuid import uuid4
 
 import mistune
@@ -14,8 +17,10 @@ from jinja2 import (
     select_autoescape,
 )
 
+from great_expectations.compatibility.typing_extensions import override
+
 try:
-    from jinja2 import contextfilter
+    from jinja2 import contextfilter  # type: ignore[attr-defined] # for jinja 2.0
 except ImportError:
     from jinja2 import pass_context as contextfilter
 
@@ -26,10 +31,9 @@ from great_expectations.render import (
     RenderedDocumentContent,
 )
 
-
-class NoOpTemplate:
-    def render(self, document):
-        return document
+if TYPE_CHECKING:
+    from jinja2 import BaseLoader
+    from jinja2 import Template as jTemplate
 
 
 class PrettyPrintTemplate:
@@ -55,7 +59,7 @@ class DefaultJinjaView:
 
     """
 
-    _template = NoOpTemplate
+    _template: ClassVar[str]
 
     def __init__(
         self, custom_styles_directory=None, custom_views_directory=None
@@ -66,7 +70,7 @@ class DefaultJinjaView:
         templates_loader = PackageLoader("great_expectations", "render/view/templates")
         styles_loader = PackageLoader("great_expectations", "render/view/static/styles")
 
-        loaders = [templates_loader, styles_loader]
+        loaders: list[BaseLoader] = [templates_loader, styles_loader]
         if self.custom_styles_directory:
             loaders.append(FileSystemLoader(self.custom_styles_directory))
         if self.custom_views_directory:
@@ -109,17 +113,16 @@ class DefaultJinjaView:
             document = document.to_json_dict()
         return t.render(document, **kwargs)
 
-    def _get_template(self, template):
-        if template is None:
-            return NoOpTemplate
-
-        template = self.env.get_template(template)
+    def _get_template(self, template_str: str) -> jTemplate:
+        template = self.env.get_template(template_str)
         template.globals["now"] = lambda: datetime.datetime.now(datetime.timezone.utc)
 
         return template
 
-    @contextfilter
-    def add_data_context_id_to_url(self, jinja_context, url, add_datetime=True):
+    @contextfilter  # type: ignore[misc] # untyped 3rd party decorator
+    def add_data_context_id_to_url(
+        self, jinja_context: Any, url: str, add_datetime: bool = True
+    ) -> str:
         data_context_id = jinja_context.get("data_context_id")
         if add_datetime:
             datetime_iso_string = datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -131,15 +134,15 @@ class DefaultJinjaView:
             url += data_context_id
         return url
 
-    @contextfilter
+    @contextfilter  # type: ignore[misc] # untyped 3rd party decorator
     def render_content_block(  # noqa: PLR0911, PLR0913, PLR0912
         self,
-        jinja_context,
-        content_block,
-        index=None,
-        content_block_id=None,
+        jinja_context: Any,
+        content_block: str | list | dict | RenderedComponentContent,
+        index: Any = None,
+        content_block_id: Any = None,
         render_to_markdown: bool = False,
-    ):
+    ) -> RenderedComponentContent | dict | str:
         """
 
         :param jinja_context:
@@ -164,7 +167,7 @@ class DefaultJinjaView:
                 ):
                     new_content_block_id = None
                     if content_block_id:
-                        new_content_block_id = f"{content_block_id}-{str(idx)}"
+                        new_content_block_id = f"{content_block_id}-{idx!s}"
                     rendered_block += self.render_content_block(
                         jinja_context,
                         content_block_el,
@@ -175,7 +178,7 @@ class DefaultJinjaView:
                     if render_to_markdown:
                         rendered_block += str(content_block_el)
                     else:
-                        rendered_block += f"<span>{str(content_block_el)}</span>"
+                        rendered_block += f"<span>{content_block_el!s}</span>"
             return rendered_block
         elif not isinstance(content_block, dict):
             return content_block
@@ -187,7 +190,7 @@ class DefaultJinjaView:
             template_filename = f"markdown_{content_block_type}.j2"
         else:
             template_filename = f"{content_block_type}.j2"
-        template = self._get_template(template=template_filename)
+        template = self._get_template(template_str=template_filename)
         if content_block_id:
             return template.render(
                 jinja_context,
@@ -201,7 +204,7 @@ class DefaultJinjaView:
             )
 
     def render_dict_values(
-        self, context, dict_, index=None, content_block_id=None
+        self, context: Any, dict_: dict, index: Any = None, content_block_id: Any = None
     ) -> None:
         for key, val in dict_.items():
             if key.startswith("_"):
@@ -210,18 +213,22 @@ class DefaultJinjaView:
                 context, val, index, content_block_id
             )
 
-    @contextfilter
+    @contextfilter  # type: ignore[misc] # untyped 3rd party decorator
     def render_bootstrap_table_data(
-        self, context, table_data, index=None, content_block_id=None
+        self,
+        context: Any,
+        table_data: Iterable[dict],
+        index: Any | None = None,
+        content_block_id: str | None = None,
     ):
         for table_data_dict in table_data:
             self.render_dict_values(context, table_data_dict, index, content_block_id)
         return table_data
 
-    def get_html_escaped_json_string_from_dict(self, source_dict):
+    def get_html_escaped_json_string_from_dict(self, source_dict: dict) -> str:
         return json.dumps(source_dict).replace('"', '\\"').replace('"', "&quot;")
 
-    def attributes_dict_to_html_string(self, attributes_dict, prefix=""):
+    def attributes_dict_to_html_string(self, attributes_dict: dict, prefix=""):
         attributes_string = ""
         if prefix:
             prefix += "-"
@@ -229,7 +236,7 @@ class DefaultJinjaView:
             attributes_string += f'{prefix}{attribute}="{value}" '
         return attributes_string
 
-    def render_styling(self, styling):
+    def render_styling(self, styling: Mapping) -> str:
         """Adds styling information suitable for an html tag.
 
         Example styling block::
@@ -260,7 +267,7 @@ class DefaultJinjaView:
         if class_list is None:
             class_str = ""
         else:
-            if type(class_list) == str:
+            if type(class_list) == str:  # noqa: E721
                 raise TypeError("classes must be a list, not a string.")
             class_str = f"class=\"{' '.join(class_list)}\" "
 
@@ -290,7 +297,7 @@ class DefaultJinjaView:
 
         return styling_string
 
-    def render_styling_from_string_template(self, template):
+    def render_styling_from_string_template(self, template: dict | OrderedDict) -> str:
         # NOTE: We should add some kind of type-checking to template
         """This method is a thin wrapper use to call `render_styling` from within jinja templates."""
         if not isinstance(template, (dict, OrderedDict)):
@@ -347,24 +354,20 @@ class DefaultJinjaView:
             tooltip_content = template["tooltip"]["content"]
             tooltip_content.replace("\n", "<br>")
             placement = template["tooltip"].get("placement", "top")
-            base_template_string = """
+            base_template_string = f"""
                 <{tag} $styling>
                     $template
                     <span class={placement}>
                         {tooltip_content}
                     </span>
                 </{tag}>
-            """.format(
-                placement=placement, tooltip_content=tooltip_content, tag=tag
-            )
+            """
         else:
-            base_template_string = """
+            base_template_string = f"""
                 <{tag} $styling>
                     $template
                 </{tag}>
-            """.format(
-                tag=tag
-            )
+            """
 
         if "styling" in template:
             params = template.get("params", {})
@@ -374,9 +377,7 @@ class DefaultJinjaView:
                 default_parameter_styling = template["styling"]["default"]
                 default_param_tag = default_parameter_styling.get("tag", "span")
                 base_param_template_string = (
-                    "<{param_tag} $styling>$content</{param_tag}>".format(
-                        param_tag=default_param_tag
-                    )
+                    f"<{default_param_tag} $styling>$content</{default_param_tag}>"
                 )
 
                 for parameter in template["params"].keys():
@@ -404,9 +405,7 @@ class DefaultJinjaView:
                         continue
                     param_tag = parameter_styling.get("tag", "span")
                     param_template_string = (
-                        "<{param_tag} $styling>$content</{param_tag}>".format(
-                            param_tag=param_tag
-                        )
+                        f"<{param_tag} $styling>$content</{param_tag}>"
                     )
                     params[parameter] = pTemplate(
                         param_template_string
@@ -443,7 +442,8 @@ class DefaultJinjaView:
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
-    def _validate_document(self, document) -> None:
+    @override
+    def _validate_document(self, document: RenderedDocumentContent) -> None:
         assert isinstance(document, RenderedDocumentContent)
 
 
@@ -454,7 +454,8 @@ class DefaultJinjaIndexPageView(DefaultJinjaPageView):
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
-    def _validate_document(self, document) -> None:
+    @override
+    def _validate_document(self, document: Mapping) -> None:
         assert isinstance(
             document["section"], dict
         )  # For now low-level views take dicts
@@ -463,7 +464,8 @@ class DefaultJinjaSectionView(DefaultJinjaView):
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
-    def _validate_document(self, document) -> None:
+    @override
+    def _validate_document(self, document: Mapping) -> None:
         assert isinstance(
             document["content_block"], dict
         )  # For now low-level views take dicts
@@ -474,7 +476,8 @@ class DefaultMarkdownPageView(DefaultJinjaView):
     Convert a document to markdown format.
     """
 
-    def _validate_document(self, document: RenderedDocumentContent) -> bool:
+    @override
+    def _validate_document(self, document: RenderedDocumentContent) -> None:
         """
         Validate that the document is of the appropriate type at runtime.
         """
@@ -482,7 +485,8 @@ class DefaultMarkdownPageView(DefaultJinjaView):
 
     _template = "markdown_validation_results_page.j2"
 
-    def render(self, document, template=None, **kwargs):
+    @override
+    def render(self, document: list, template=None, **kwargs) -> list[str] | str:
         """
         Handle list as well as single document
         """
@@ -498,7 +502,10 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         else:
             return super().render(document=document, template=template, **kwargs)
 
-    def render_string_template(self, template: pTemplate) -> pTemplate:
+    @override
+    def render_string_template(
+        self, template: pTemplate | dict | OrderedDict
+    ) -> pTemplate | str:
         """
         Render string for markdown rendering. Bold all parameters and perform substitution.
         Args:
@@ -555,19 +562,20 @@ class DefaultMarkdownPageView(DefaultJinjaView):
             "$PARAMETER", "$$PARAMETER"
         )
 
-        return pTemplate(template.get("template")).safe_substitute(
+        return pTemplate(template["template"]).safe_substitute(
             template.get("params", {})
         )
 
-    @contextfilter
+    @override
+    @contextfilter  # type: ignore[misc] # untyped 3rd party decorator
     def render_content_block(  # noqa: PLR0913
         self,
-        jinja_context,
-        content_block,
-        index=None,
-        content_block_id=None,
+        jinja_context: Any,
+        content_block: Any,
+        index: Any | None = None,
+        content_block_id: str | None = None,
         render_to_markdown: bool = True,
-    ):
+    ) -> RenderedComponentContent | dict | str:
         """
         Render a content block to markdown using jinja templates.
         Args:
