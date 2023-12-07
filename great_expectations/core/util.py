@@ -770,7 +770,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 
 
 if TYPE_CHECKING:
-    _ConcreteSparkSession = Union[pyspark.SparkSession, pyspark.SparkConnectSession]
+    SparkSession = Union[pyspark.SparkSession, pyspark.SparkConnectSession]
     _SparkSession = Union[pyspark.SparkSession, databricks.connect.DatabricksSession]
     _SparkSessionBuilder = Union[
         pyspark.SparkSession.Builder, databricks.connect.DatabricksSession.Builder
@@ -779,7 +779,7 @@ if TYPE_CHECKING:
 
 def get_or_create_spark_session(
     spark_config: Optional[dict[str, str]] = None,
-) -> _ConcreteSparkSession:
+) -> SparkSession:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Args:
@@ -802,7 +802,7 @@ def get_or_create_spark_session(
             spark_session_cls=spark_session_cls,
             spark_config=spark_config,
         )
-        spark_session: _ConcreteSparkSession
+        spark_session: SparkSession
         try:
             spark_session = builder.getOrCreate()
         except ValueError as e:
@@ -829,11 +829,11 @@ def get_or_create_spark_session(
 
 
 def _validate_spark_session_config(
-    spark_session: _ConcreteSparkSession,
+    spark_session: SparkSession,
     builder: _SparkSessionBuilder,
     spark_config: dict,
-) -> _ConcreteSparkSession:
-    if _config_updatable(spark_session=spark_session):
+) -> SparkSession:
+    if _spark_config_updatable(spark_session=spark_session):
         if spark_config.get("spark.app.name"):
             warnings.warn(
                 "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
@@ -854,18 +854,20 @@ def _validate_spark_session_config(
     return spark_session
 
 
-def _config_updatable(spark_session: _ConcreteSparkSession) -> bool:
+def _spark_config_updatable(spark_session: SparkSession) -> bool:
     """
     Tests whether we are able to update an existing Spark Session config.
 
     Returns:
         bool
     """
-    updatable = False
+    app_name: str
     try:
-        updatable = "databricks" in spark_session.sparkContext.appName.lower()
+        app_name = spark_session.sparkContext.appName
     except pyspark.PySparkNotImplementedError:
-        pass
+        app_name = ""
+
+    updatable = "databricks" in app_name.lower()
     return updatable
 
 
