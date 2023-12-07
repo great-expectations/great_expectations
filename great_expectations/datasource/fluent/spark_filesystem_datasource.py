@@ -48,15 +48,15 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        try:
-            super().test_connection()
-        except TestConnectionError as e:
-            raise TestConnectionError(e) from e
-
         if not self.base_directory.exists():
             raise TestConnectionError(
                 f"base_directory path: {self.base_directory.resolve()} does not exist."
             )
+
+        try:
+            super().test_connection()
+        except TestConnectionError as e:
+            raise TestConnectionError(e) from e
 
         if self.assets and test_assets:
             for asset in self.assets:

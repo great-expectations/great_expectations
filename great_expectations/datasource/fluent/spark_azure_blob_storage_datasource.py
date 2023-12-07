@@ -124,17 +124,17 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             TestConnectionError: If the connection test fails.
         """
         try:
-            super().test_connection()
-        except TestConnectionError as e:
-            raise TestConnectionError(e) from e
-
-        try:
             _ = self._get_azure_client()
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
+
+        try:
+            super().test_connection()
+        except TestConnectionError as e:
+            raise TestConnectionError(e) from e
 
         if self.assets and test_assets:
             for asset in self.assets:
