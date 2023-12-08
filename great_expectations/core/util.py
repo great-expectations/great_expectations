@@ -20,6 +20,7 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -773,7 +774,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 
 DATABRICKS_SHELL_APP_NAME: Final[str] = "Databricks Shell"
 
-SparkSessionType = Union[type[pyspark.SparkSession], type[pyspark.SparkConnectSession]]
+SparkSessionType = Union[Type[pyspark.SparkSession], Type[pyspark.SparkConnectSession]]
 
 
 def get_or_create_spark_application(

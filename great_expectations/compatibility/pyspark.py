@@ -80,18 +80,9 @@ except (ImportError, AttributeError):
     Window = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql.readwriter import DataFrameReader as _DataFrameReader
+    from pyspark.sql.readwriter import DataFrameReader
 except (ImportError, AttributeError):
-    _DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-try:
-    from pyspark.sql.connect.readwriter import (
-        DataFrameReader as _ConnectDataFrameReader,
-    )
-except (ImportError, AttributeError):
-    _ConnectDataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-DataFrameReader = Union[_DataFrameReader, _ConnectDataFrameReader]
+    DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql.utils import AnalysisException

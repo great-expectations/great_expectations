@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from great_expectations.compatibility.not_imported import NotImported
 
 DATABRICKS_CONNECT_NOT_IMPORTED = NotImported(
