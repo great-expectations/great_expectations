@@ -808,35 +808,30 @@ def get_or_create_spark_session(
     spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
     try:
         spark_session = pyspark.SparkSession.builder.getOrCreate()
-        spark_session_type = pyspark.SparkSession
     except RuntimeError as e:
         try:
             spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
-            spark_session_type = pyspark.SparkConnectSession
         except Exception:
             raise e
 
     return _get_session_with_spark_config(
         spark_config=spark_config,
-        spark_session_type=spark_session_type,
         spark_session=spark_session,
     )
 
 
 def _get_session_with_spark_config(
     spark_session: pyspark.SparkSession,
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_config: dict,
 ) -> pyspark.SparkSession:
     """Attempts to apply spark_config to a SparkSession by either:
-         1. Updating the existing SparkSession
-         2. Restarting the existing SparkSession with a new spark_config
+         1. Updating the existing SparkSession with spark_config values
+         2. Restarting the existing SparkSession and applying only spark_config
 
       If a spark_config option was unable to be set, a warning is raised.
 
     Args:
         spark_session: An existing pyspark.SparkSession.
-        spark_session_type: The type of class used to create the existing pyspark.SparkSession.
         spark_config: A dictionary of SparkSession.Builder.config objects.
 
     Returns:
@@ -850,31 +845,26 @@ def _get_session_with_spark_config(
     )
 
     if stopped:
-        spark_session = _create_new_spark_session_from_spark_config(
-            spark_session_type=spark_session_type,
+        spark_session = _start_spark_session_with_spark_config(
+            spark_session=spark_session,
             spark_config=spark_config,
         )
 
     return spark_session
 
 
-def _create_new_spark_session_from_spark_config(
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
+def _start_spark_session_with_spark_config(
+    spark_session: pyspark.SparkSession,
     spark_config: dict,
 ) -> pyspark.SparkSession:
-    spark_session: pyspark.SparkSession
-    if spark_session_type == pyspark.SparkSession:
-        builder = pyspark.SparkSession.builder
-        for key, value in spark_config.items():
-            if key == "spark.app.name":
-                builder.appName(value)
-            else:
-                builder.config(key, value)
+    builder = spark_session.builder
+    for key, value in spark_config.items():
+        if key == "spark.app.name":
+            builder.appName(value)
+        else:
+            builder.config(key, value)
 
-        spark_session = builder.getOrCreate()
-    else:
-        spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
-    return spark_session
+    return builder.getOrCreate()
 
 
 def _try_update_or_stop_misconfigured_spark_session(
