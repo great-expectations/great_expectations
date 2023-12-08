@@ -805,22 +805,26 @@ def get_or_create_spark_session(
     spark_config = spark_config or {}
 
     spark_session: pyspark.SparkSession
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
+    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession]
     try:
-        spark_session = pyspark.SparkSession.builder.getOrCreate()
+        spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+        spark_session_type = pyspark.SparkConnectSession
     except RuntimeError as e:
         try:
-            spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+            spark_session = pyspark.SparkSession.builder.getOrCreate()
+            spark_session_type = pyspark.SparkSession
         except Exception:
             raise e
 
     return _get_session_with_spark_config(
+        spark_session_type=spark_session_type,
         spark_config=spark_config,
         spark_session=spark_session,
     )
 
 
 def _get_session_with_spark_config(
+    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession],
     spark_session: pyspark.SparkSession,
     spark_config: dict,
 ) -> pyspark.SparkSession:
@@ -831,6 +835,7 @@ def _get_session_with_spark_config(
       If a spark_config option was unable to be set, a warning is raised.
 
     Args:
+        spark_session_type: The class used to create the existing pyspark.SparkSession.
         spark_session: An existing pyspark.SparkSession.
         spark_config: A dictionary of SparkSession.Builder.config objects.
 
@@ -839,6 +844,7 @@ def _get_session_with_spark_config(
     """
     stopped: bool
     spark_session, stopped = _try_update_or_stop_misconfigured_spark_session(
+        spark_session_type=spark_session_type,
         spark_session=spark_session,
         spark_config=spark_config,
     )
@@ -867,6 +873,7 @@ def _start_spark_session_with_spark_config(
 
 
 def _try_update_or_stop_misconfigured_spark_session(
+    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession],
     spark_session: pyspark.SparkSession,
     spark_config: dict,
 ) -> tuple[pyspark.SparkSession, bool]:
@@ -883,7 +890,12 @@ def _try_update_or_stop_misconfigured_spark_session(
             ):
                 spark_session.sparkContext.appName = value
         except (pyspark.PySparkAttributeError, pyspark.AnalysisException):
-            try:
+            if spark_session_type == pyspark.SparkConnectSession:
+                warning_messages.append(
+                    f"spark_config option `{key}` is not modifiable "
+                    "and Spark Session cannot be restarted in this environment."
+                )
+            else:
                 spark_session.stop()
                 stopped = True
                 warning_messages.append(
@@ -891,15 +903,6 @@ def _try_update_or_stop_misconfigured_spark_session(
                     "is not modifiable in this environment."
                 )
                 break
-            except Exception as e:
-                # can't catch the pyspark SparkConnectGrpcException because it doesn't inherit from BaseException
-                if "UNIMPLEMENTED" in str(e):
-                    warning_messages.append(
-                        f"spark_config option `{key}` is not modifiable "
-                        "and Spark Session cannot be restarted in this environment."
-                    )
-                else:
-                    raise e
 
     for message in warning_messages:
         print(message)
