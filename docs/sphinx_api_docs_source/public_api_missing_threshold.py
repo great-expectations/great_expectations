@@ -69,7 +69,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/render/renderer/site_builder.py Name: DefaultSiteIndexBuilder",
     "File: great_expectations/render/renderer/site_builder.py Name: SiteBuilder",
     "File: great_expectations/render/renderer/slack_renderer.py Name: SlackRenderer",
-    "File: great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py Name: show_expectations_by_domain_type",
     "File: great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py Name: to_json_dict",
     "File: great_expectations/rule_based_profiler/domain_builder/column_domain_builder.py Name: ColumnDomainBuilder",
     "File: great_expectations/rule_based_profiler/domain_builder/table_domain_builder.py Name: TableDomainBuilder",
