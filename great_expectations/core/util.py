@@ -909,7 +909,7 @@ def _try_stop_misconfigured_spark_session(
         # this error is raised when attempting to access sparkContext,
         # and the session cannot be restarted
         pass
-    except py4j.security.Py4JSecurityException:
+    except py4j.protocol.Py4JError:
         # if the session is in a Databricks Notebook on a shared cluster
         # with credential passthrough enabled, this error is raised when
         # attempting to call sparkContext.getConf(), and the session cannot be restarted
