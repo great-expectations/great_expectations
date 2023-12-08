@@ -867,7 +867,7 @@ def _start_spark_session_with_spark_config(
 
 
 def _session_is_not_stoppable(spark_session: pyspark.SparkSession) -> bool:
-    return isinstance(spark_session, pyspark.SparkConnectSession) or (
+    return (isinstance(spark_session, pyspark.SparkConnectSession)) or (
         os.environ.get("DATABRICKS_RUNTIME_VERSION")  # noqa: TID251
     )
 
