@@ -4034,6 +4034,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
+    print(result)
     assert result["success"]
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
