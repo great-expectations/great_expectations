@@ -906,8 +906,8 @@ def _try_update_or_stop_misconfigured_spark_session(
                 # can't catch the pyspark SparkConnectGrpcException because it doesn't inherit from BaseException
                 if "UNIMPLEMENTED" in str(e):
                     warning_messages.append(
-                        "Spark Session cannot be restarted, and spark_config option "
-                        f"`{key}` is not modifiable in this environment."
+                        f"spark_config option `{key}` is not modifiable "
+                        "and Spark Session cannot be restarted in this environment."
                     )
                 else:
                     raise e
