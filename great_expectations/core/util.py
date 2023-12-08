@@ -815,12 +815,9 @@ def get_or_create_spark_session(
     except RuntimeError:
         spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
 
-    if _spark_config_updatable(spark_session=spark_session):
-        allow_restart = False
-    else:
-        # in a local pyspark-shell the context config cannot be updated
-        # unless you stop the Spark context and re-create it
-        allow_restart = True
+    # in a local pyspark-shell the context config cannot be updated
+    # unless you stop the Spark context and re-create it
+    allow_restart: bool = not _spark_config_updatable(spark_session=spark_session)
 
     spark_session = _get_session_with_spark_config(
         spark_config=spark_config,
@@ -835,7 +832,6 @@ def get_or_create_spark_session(
         )
     else:
         for key in spark_config.keys():
-            print(key)
             if not spark_session.conf.isModifiable(key):
                 warnings.warn(
                     f"Passing {key} to spark_config had no effect in this environment.",
@@ -880,11 +876,18 @@ def _get_session_with_spark_config(
         SparkSession
     """
     if allow_restart:
-        retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
-        for key, value in spark_config.items():
-            if retrieved_spark_config.get(key) != value:
-                spark_session.stop()
-                break
+        try:
+            retrieved_spark_config: pyspark.SparkConf = (
+                spark_session.sparkContext.getConf()
+            )
+            for key, value in spark_config.items():
+                if retrieved_spark_config.get(key) != value:
+                    spark_session.stop()
+                    break
+        except pyspark.PySparkNotImplementedError:
+            # if the session is a Spark/Databricks Connect session,
+            # this error is raised and the session cannot be restarted
+            pass
 
     builder = spark_session.builder
     # user could get in trouble here if they try to set config options that are not allowed in their runtime
