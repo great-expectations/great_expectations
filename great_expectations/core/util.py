@@ -890,7 +890,10 @@ def _create_new_spark_session_from_spark_config(
             builder.appName(value)
         else:
             builder.config(key, value)
-    return builder.getOrCreate()
+
+    spark_session: pyspark.SparkSession = builder.getOrCreate()
+    assert not spark_session.isStopped()
+    return spark_session
 
 
 def _update_existing_spark_session_with_spark_config(
@@ -916,7 +919,10 @@ def _update_existing_spark_session_with_spark_config(
                     category=RuntimeWarning,
                 )
                 print(f"failed to update {key}: {value}")
-    return spark_session.builder.getOrCreate()
+
+    spark_session: pyspark.SparkSession = spark_session.builder.getOrCreate()
+    assert not spark_session.isStopped()
+    return spark_session
 
 
 def _try_stop_misconfigured_spark_session(
