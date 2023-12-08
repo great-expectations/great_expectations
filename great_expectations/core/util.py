@@ -807,30 +807,24 @@ def get_or_create_spark_session(
     """
     spark_config = spark_config or {}
 
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
     spark_session: pyspark.SparkSession
     try:
         spark_session = pyspark.SparkSession.builder.getOrCreate()
-        spark_session_type = pyspark.SparkSession
     except RuntimeError as e:
         try:
             spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
         except Exception:
             raise e
-        spark_session_type = pyspark.SparkConnectSession
 
     # in a local pyspark-shell the context config cannot be updated
     # unless you stop the Spark context and re-create it
     allow_restart: bool = not _spark_config_updatable(spark_session=spark_session)
 
-    spark_session = _get_session_with_spark_config(
-        spark_session_type=spark_session_type,
+    return _get_session_with_spark_config(
         spark_config=spark_config,
         spark_session=spark_session,
         allow_restart=allow_restart,
     )
-
-    return spark_session
 
 
 def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
@@ -855,7 +849,6 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
 
 
 def _get_session_with_spark_config(
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_session: pyspark.SparkSession,
     spark_config: dict,
     allow_restart: bool,
@@ -867,8 +860,6 @@ def _get_session_with_spark_config(
       If a spark_config option was unable to be set, a warning is raised.
 
     Args:
-        spark_session_type: Whether the existing SparkSession was created
-          from the class pyspark.SparkSession or pyspark.SparkConnectSession.
         spark_session: An existing pyspark.SparkSession.
         spark_config: A dictionary of SparkSession.Builder.config objects.
         allow_restart: Whether to restart the existing SparkSession.
