@@ -806,7 +806,6 @@ def get_or_create_spark_session(
     spark_config = spark_config or {}
 
     spark_session: pyspark.SparkSession
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
     try:
         spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
     except ValueError as e:
