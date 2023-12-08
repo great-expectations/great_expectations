@@ -4,7 +4,6 @@ import datetime
 import decimal
 import json
 import logging
-import os
 import pathlib
 import re
 import sys
@@ -31,7 +30,7 @@ import pandas as pd
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import py4j, pydantic, pyspark, sqlalchemy
+from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
@@ -817,34 +816,17 @@ def get_or_create_spark_session(
         except Exception:
             raise e
 
-    # in some environments the context config cannot be updated
-    # unless you stop the Spark context and re-create it
-    allow_restart: bool = not _spark_config_updatable()
-
     return _get_session_with_spark_config(
         spark_config=spark_config,
         spark_session_type=spark_session_type,
         spark_session=spark_session,
-        allow_restart=allow_restart,
     )
-
-
-def _spark_config_updatable() -> bool:
-    """Tests whether we are able to update an existing Spark Session config.
-
-    Returns:
-        bool
-    """
-    # if we are in a Databricks Notebook, this env var is available
-    # other sentinels such as spark config options can be changed
-    return os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
 
 
 def _get_session_with_spark_config(
     spark_session: pyspark.SparkSession,
     spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_config: dict,
-    allow_restart: bool,
 ) -> pyspark.SparkSession:
     """Attempts to apply spark_config to a SparkSession by either:
          1. Updating the existing SparkSession
@@ -856,26 +838,20 @@ def _get_session_with_spark_config(
         spark_session: An existing pyspark.SparkSession.
         spark_session_type: The type of class used to create the existing pyspark.SparkSession.
         spark_config: A dictionary of SparkSession.Builder.config objects.
-        allow_restart: Whether to restart the existing SparkSession.
 
     Returns:
         SparkSession
     """
-    stopped = False
-    if allow_restart:
-        stopped = _try_stop_misconfigured_spark_session(
-            spark_session=spark_session,
-            spark_config=spark_config,
-        )
+    spark_session: pyspark.SparkSession
+    stopped: bool
+    spark_session, stopped = _try_update_or_stop_misconfigured_spark_session(
+        spark_session=spark_session,
+        spark_config=spark_config,
+    )
 
     if stopped:
         spark_session = _create_new_spark_session_from_spark_config(
             spark_session_type=spark_session_type,
-            spark_config=spark_config,
-        )
-    else:
-        spark_session = _update_existing_spark_session_with_spark_config(
-            spark_session=spark_session,
             spark_config=spark_config,
         )
 
@@ -901,57 +877,49 @@ def _create_new_spark_session_from_spark_config(
     return spark_session
 
 
-def _update_existing_spark_session_with_spark_config(
+def _try_update_or_stop_misconfigured_spark_session(
     spark_session: pyspark.SparkSession,
     spark_config: dict,
-) -> pyspark.SparkSession:
-    for key, value in spark_config.items():
-        if key == "spark.app.name":
-            try:
-                spark_session.sparkContext.appName = value
-            except pyspark.PySparkAttributeError:
-                warnings.warn(
-                    "spark_config option `spark.app.name` is not modifiable in this environment.",
-                    category=RuntimeWarning,
-                )
-        else:
-            try:
-                spark_session.conf.set(key, value)
-            except (pyspark.AnalysisException, py4j.protocol.Py4JJavaError):
-                warnings.warn(
-                    f"spark_config option `{key}` is not modifiable in this environment.",
-                    category=RuntimeWarning,
-                )
-
-    return spark_session.builder.getOrCreate()
-
-
-def _try_stop_misconfigured_spark_session(
-    spark_session: pyspark.SparkSession,
-    spark_config: dict,
-) -> bool:
+) -> (pyspark.SparkSession, bool):
     stopped = False
-    try:
-        app_name = spark_session.sparkContext.appName
-        conf = spark_session.sparkContext.getConf()
-        for key, value in spark_config.items():
-            # if the user set a spark_config option
-            # that doesn't match the existing session
-            if (conf.get(key) != value) or (app_name != value):
+    warning_messages = []
+    for key, value in spark_config.items():
+        # if the user set a spark_config option that doesn't match the existing session
+        # try to update it, otherwise stop the spark session
+        try:
+            if key != "spark.app.name" and spark_session.conf.get(key) != value:
+                spark_session.conf.set(key, value)
+            elif (
+                key == "spark.app.name" and spark_session.sparkContext.appName != value
+            ):
+                spark_session.sparkContext.appName = value
+        except (pyspark.PySparkAttributeError, pyspark.AnalysisException):
+            try:
                 spark_session.stop()
                 stopped = True
+                warning_messages.append(
+                    f"Spark Session was restarted, because `{key}` "
+                    "is not modifiable in this environment."
+                )
                 break
-    except pyspark.PySparkAttributeError:
-        # if the session is a Spark/Databricks Connect session,
-        # this error is raised when attempting to access sparkContext,
-        # and the session cannot be restarted
-        pass
-    except py4j.protocol.Py4JError:
-        # if the session is in a Databricks Notebook on a shared cluster
-        # with credential passthrough enabled, this error is raised when
-        # attempting to call sparkContext.getConf(), and the session cannot be restarted
-        pass
-    return stopped
+            except Exception as e:
+                # can't catch the pyspark SparkConnectGrpcException because it doesn't inherit from BaseException
+                if "UNIMPLEMENTED" in str(e):
+                    warning_messages.append(
+                        f"spark_config option `{key}` is not modifiable in this environment."
+                    )
+                else:
+                    raise e
+
+    if not stopped:
+        for message in warning_messages:
+            print(message)
+            warnings.warn(
+                message=message,
+                category=RuntimeWarning,
+            )
+
+    return spark_session, stopped
 
 
 def get_sql_dialect_floating_point_infinity_value(
