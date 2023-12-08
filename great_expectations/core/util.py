@@ -837,7 +837,6 @@ def _get_session_with_spark_config(
     Returns:
         SparkSession
     """
-    spark_session: pyspark.SparkSession
     stopped: bool
     spark_session, stopped = _try_update_or_stop_misconfigured_spark_session(
         spark_session=spark_session,
@@ -870,7 +869,7 @@ def _start_spark_session_with_spark_config(
 def _try_update_or_stop_misconfigured_spark_session(
     spark_session: pyspark.SparkSession,
     spark_config: dict,
-) -> (pyspark.SparkSession, bool):
+) -> tuple[pyspark.SparkSession, bool]:
     stopped = False
     warning_messages = []
     for key, value in spark_config.items():
