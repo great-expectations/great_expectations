@@ -86,7 +86,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
+    ) -> ExpectationConfiguration | None:
         """
         Args:
             domain: Domain object that is context for execution of this ParameterBuilder object.
@@ -160,7 +160,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
+    ) -> ExpectationConfiguration | None:
         pass
 
     @property
