@@ -835,6 +835,7 @@ def get_or_create_spark_session(
         )
     else:
         for key in spark_config.keys():
+            print(key)
             if not spark_session.conf.isModifiable(key):
                 warnings.warn(
                     f"Passing {key} to spark_config had no effect in this environment.",
