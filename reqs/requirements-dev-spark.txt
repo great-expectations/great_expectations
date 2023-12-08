@@ -1,2 +1,1 @@
-py4j>=0.10.9.7  # jvm
 pyspark>=2.3.2  # spark
