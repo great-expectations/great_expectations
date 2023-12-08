@@ -86,7 +86,9 @@ checkpoint_result = checkpoint.run()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-assert checkpoint_result["success"] is True
+assert (
+    checkpoint_result["success"] is True
+), f"Checkpoint result failed: {checkpoint_result}"
 statistics = checkpoint_result["run_results"][
     list(checkpoint_result["run_results"].keys())[0]
 ]["validation_result"]["statistics"]
