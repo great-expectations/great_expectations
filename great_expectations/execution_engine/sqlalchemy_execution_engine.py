@@ -402,7 +402,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name="trino.sqlalchemy.dialect"
             )
         elif self.dialect_name == GXSqlDialect.CLICKHOUSE:
-            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            # WARNING: ClickHouse Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="clickhouse_sqlalchemy.drivers.base"
             )
