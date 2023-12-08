@@ -117,14 +117,18 @@ if __name__ == "__main__":
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics">
     ExpectColumnValuesToOnlyContainVowels(
         column="only_vowels",
-    ).print_diagnostic_checklist(backends=["pandas", "spark", "sqlite", "postgresql", "mssql"])
+    ).print_diagnostic_checklist(
+        backends=["pandas", "spark", "sqlite", "postgresql", "mssql"]
+    )
 #     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
 diagnostics = ExpectColumnValuesToOnlyContainVowels(
     column="only_vowels",
-).run_diagnostics(only_consider_these_backends=["pandas", "spark", "sqlite", "postgresql", "mssql"])
+).run_diagnostics(
+    only_consider_these_backends=["pandas", "spark", "sqlite", "postgresql", "mssql"]
+)
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
