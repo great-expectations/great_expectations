@@ -835,6 +835,8 @@ def _spark_config_updatable() -> bool:
     Returns:
         bool
     """
+    # if we are in a Databricks Notebook, this env var is available
+    # other sentinels such as spark config options can be changed
     return os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
 
 
