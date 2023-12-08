@@ -7,7 +7,6 @@ import pytest
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
@@ -20,9 +19,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
-)
-from great_expectations.rule_based_profiler.data_assistant_result import (
-    DataAssistantResult,
 )
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -282,57 +278,3 @@ def run_batch_head(  # noqa: PLR0915
         assert n_rows_validation_error in str(
             e.value
         ) or fetch_all_validation_error in str(e.value)
-
-
-def _configure_and_run_data_assistant(
-    context: AbstractDataContext,
-    batch_request: BatchRequest,
-) -> tuple[DataAssistantResult, CheckpointResult]:
-    expectation_suite_name = "my_onboarding_assistant_suite"
-    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
-    data_assistant_result = context.assistants.onboarding.run(
-        batch_request=batch_request,
-        numeric_columns_rule={
-            "estimator": "exact",
-            "random_seed": 2022080401,
-        },
-        # We exclude congestion_surcharge due to this bug:
-        # https://greatexpectations.atlassian.net/browse/GREAT-1465
-        exclude_column_names=["congestion_surcharge"],
-    )
-    expectation_suite = data_assistant_result.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
-
-    # Run a checkpoint
-    checkpoint_config = {
-        "validations": [
-            {
-                "batch_request": batch_request,
-                "expectation_suite_name": expectation_suite_name,
-            }
-        ],
-        "action_list": [
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
-                name="store_evaluation_params",
-                action=ActionDetails(class_name="StoreEvaluationParametersAction"),
-            ),
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(class_name="UpdateDataDocsAction"),
-            ),
-        ],
-    }
-    checkpoint = Checkpoint(
-        f"yellow_tripdata_sample_{expectation_suite_name}",
-        context,
-        **checkpoint_config,  # type: ignore[arg-type]
-    )
-    checkpoint_result = checkpoint.run()
-
-    return data_assistant_result, checkpoint_result
