@@ -806,7 +806,7 @@ def get_or_create_spark_session(
     spark_config = spark_config or {}
 
     spark_session: pyspark.SparkSession
-    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession]
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
     try:
         spark_session = pyspark.SparkConnectSession.getActiveSession()
         spark_session_type = pyspark.SparkConnectSession
@@ -825,7 +825,7 @@ def get_or_create_spark_session(
 
 
 def _get_session_with_spark_config(
-    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession],
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_session: pyspark.SparkSession,
     spark_config: dict,
 ) -> pyspark.SparkSession:
@@ -874,7 +874,7 @@ def _start_spark_session_with_spark_config(
 
 
 def _session_is_not_stoppable(
-    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession],
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
 ) -> bool:
     return (spark_session_type == pyspark.SparkConnectSession) or (
         os.environ.get("DATABRICKS_RUNTIME_VERSION")  # noqa: TID251
@@ -882,7 +882,7 @@ def _session_is_not_stoppable(
 
 
 def _try_update_or_stop_misconfigured_spark_session(
-    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession],
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_session: pyspark.SparkSession,
     spark_config: dict,
 ) -> tuple[pyspark.SparkSession, bool]:
