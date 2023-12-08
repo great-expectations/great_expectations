@@ -1680,7 +1680,10 @@ class Validator:
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
+                # burn this
+                old_expectation_suite = expectation_suite
                 expectation_suite = copy.deepcopy(expectation_suite)
+                expectation_suite._store = old_expectation_suite._store
             self._expectation_suite: ExpectationSuite = expectation_suite
 
             if expectation_suite_name is not None:
