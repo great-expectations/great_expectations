@@ -98,7 +98,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    suite.add_expectation_configurations(
+    suite.legacy_add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.add_expectation_suite(expectation_suite=suite)
@@ -227,7 +227,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    suite.add_expectation_configurations(
+    suite.legacy_add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.add_expectation_suite(expectation_suite=suite)
@@ -351,7 +351,7 @@ def test_sql_happy_path_onboarding_data_assistant(
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    suite.add_expectation_configurations(
+    suite.legacy_add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.add_expectation_suite(expectation_suite=suite)

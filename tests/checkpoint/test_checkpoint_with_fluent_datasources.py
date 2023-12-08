@@ -1632,7 +1632,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1708,7 +1708,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1785,7 +1785,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1879,7 +1879,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1956,7 +1956,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
@@ -2032,7 +2032,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
@@ -2124,7 +2124,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(
@@ -2218,7 +2218,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "Age", "min_value": 0, "max_value": 71},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(

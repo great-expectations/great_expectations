@@ -140,7 +140,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
             component_name=self.__class__.__name__,
             persist=False,
         )
-        expectation_suite.add_expectation_configurations(
+        expectation_suite.legacy_add_expectation_configurations(
             expectation_configurations=self.expectation_configurations,
             send_usage_event=False,
             match_type="domain",

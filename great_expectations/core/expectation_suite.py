@@ -607,7 +607,7 @@ class ExpectationSuite(SerializableDictDot):
                 success=success,
             )
 
-    def add_expectation_configurations(
+    def legacy_add_expectation_configurations(
         self,
         expectation_configurations: List[ExpectationConfiguration],
         send_usage_event: bool = True,
@@ -637,7 +637,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configurations_attempted_to_be_added: List[
             ExpectationConfiguration
         ] = [
-            self.add_expectation(
+            self.legacy_add_expectation_by_configuration(
                 expectation_configuration=expectation_configuration,
                 send_usage_event=send_usage_event,
                 match_type=match_type,
@@ -647,7 +647,7 @@ class ExpectationSuite(SerializableDictDot):
         ]
         return expectation_configurations_attempted_to_be_added
 
-    def add_expectation(
+    def legacy_add_expectation_by_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,
         send_usage_event: bool = True,

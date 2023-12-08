@@ -206,7 +206,9 @@ expectation_config = ExpectationConfiguration(
         "value_set": ["A", "B"],
     },
 )
-test_suite.add_expectation(expectation_configuration=expectation_config)
+test_suite.legacy_add_expectation_by_configuration(
+    expectation_configuration=expectation_config
+)
 
 test_suite.expectation_suite_name = "test_suite"
 context.add_or_update_expectation_suite(

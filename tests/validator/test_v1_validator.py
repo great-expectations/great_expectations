@@ -37,8 +37,8 @@ def expectation_suite(
     failing_expectation: Expectation, passing_expectation: Expectation
 ) -> ExpectationSuite:
     suite = ExpectationSuite("test_suite")
-    suite.add_expectation(failing_expectation.configuration)
-    suite.add_expectation(passing_expectation.configuration)
+    suite.legacy_add_expectation_by_configuration(failing_expectation.configuration)
+    suite.legacy_add_expectation_by_configuration(passing_expectation.configuration)
     return suite
 
 

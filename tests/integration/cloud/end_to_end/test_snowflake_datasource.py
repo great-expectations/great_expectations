@@ -132,7 +132,7 @@ def expectation_suite(
     """Add Expectations for the Data Assets defined in this module.
     Note: There is no need to test Expectation Suite CRUD.
     Those assertions can be found in the expectation_suite fixture."""
-    expectation_suite.add_expectation(
+    expectation_suite.legacy_add_expectation_by_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
