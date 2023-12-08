@@ -807,7 +807,7 @@ def get_or_create_spark_session(
     spark_session: pyspark.SparkSession
     spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession]
     try:
-        spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+        spark_session = pyspark.SparkConnectSession.getActiveSession()
         spark_session_type = pyspark.SparkConnectSession
     except RuntimeError as e:
         try:
