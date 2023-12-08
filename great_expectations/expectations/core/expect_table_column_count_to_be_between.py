@@ -70,8 +70,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         [expect_table_column_count_to_equal](https://greatexpectations.io/expectations/expect_table_column_count_to_equal)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None]
-    max_value: Union[float, EvaluationParameterDict, datetime, None]
+    min_value: Union[int, float, EvaluationParameterDict, datetime, None]
+    max_value: Union[int, float, EvaluationParameterDict, datetime, None]
 
     library_metadata = {
         "maturity": "production",

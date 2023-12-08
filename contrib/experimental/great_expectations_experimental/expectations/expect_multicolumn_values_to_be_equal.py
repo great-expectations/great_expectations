@@ -137,8 +137,8 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
 
     map_metric = "multicolumn_values_to_be_equal"
 
