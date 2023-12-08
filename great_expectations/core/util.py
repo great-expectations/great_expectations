@@ -909,11 +909,13 @@ def _update_existing_spark_session_with_spark_config(
         else:
             try:
                 spark_session.conf.set(key, value)
+                print(f"successfully updated {key}: {value}")
             except (pyspark.AnalysisException, py4j.protocol.Py4JJavaError):
                 warnings.warn(
                     f"spark_config option `{key}` is not modifiable in this environment.",
                     category=RuntimeWarning,
                 )
+                print(f"failed to update {key}: {value}")
     return spark_session.builder.getOrCreate()
 
 
