@@ -739,4 +739,9 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
             "great_expectations/experimental/metric_repository/column_descriptive_metrics_metric_retriever.py"
         ),
     ),
+    IncludeExcludeDefinition(
+        reason="This method should not be accessed by users.",
+        name="get_or_create_spark_session",
+        filepath=pathlib.Path("great_expectations/core/util.py"),
+    ),
 ]
