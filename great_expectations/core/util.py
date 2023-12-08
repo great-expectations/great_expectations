@@ -773,6 +773,8 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 
 DATABRICKS_SHELL_APP_NAME: Final[str] = "Databricks Shell"
 
+SparkSessionType = Union[type[pyspark.SparkSession], type[pyspark.SparkConnectSession]]
+
 
 def get_or_create_spark_application(
     spark_config: Optional[dict[str, str]] = None,
@@ -809,7 +811,7 @@ def get_or_create_spark_session(
     """
     spark_config = spark_config or {}
 
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
+    spark_session_type: SparkSessionType
     spark_session: pyspark.SparkSession
     try:
         spark_session_type = pyspark.SparkSession
@@ -823,37 +825,37 @@ def get_or_create_spark_session(
     allow_restart: bool = not _spark_config_updatable(spark_session=spark_session)
 
     spark_session = _get_session_with_spark_config(
-        spark_config=spark_config,
-        spark_session=spark_session,
-        allow_restart=allow_restart,
-    )
-
-    _raise_warnings_if_spark_config_not_updated(
         spark_session_type=spark_session_type,
         spark_config=spark_config,
         spark_session=spark_session,
+        allow_restart=allow_restart,
     )
 
     return spark_session
 
 
 def _raise_warnings_if_spark_config_not_updated(
-    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_config: dict,
     spark_session: pyspark.SparkSession,
 ) -> None:
-    if spark_session_type == pyspark.SparkConnectSession:
-        warnings.warn(
-            "Unable to update spark_config for remote sessions. Passing spark_config had no effect.",
-            category=RuntimeWarning,
-        )
-    else:
-        for key in spark_config.keys():
-            if not spark_session.conf.isModifiable(key):
+    for key, value in spark_config.items():
+        if key == "spark.app.name":
+            try:
+                if spark_session.sparkContext.appName != value:
+                    warnings.warn(
+                        "Passing `spark.app.name` to spark_config had no effect in this environment.",
+                        category=RuntimeWarning,
+                    )
+            except pyspark.PySparkNotImplementedError:
                 warnings.warn(
-                    f"Passing {key} to spark_config had no effect in this environment.",
+                    "Unable to change `spark.app.name` of a remote session.",
                     category=RuntimeWarning,
                 )
+        elif not spark_session.conf.isModifiable(key):
+            warnings.warn(
+                f"Passing `{key}` to spark_config had no effect in this environment.",
+                category=RuntimeWarning,
+            )
 
 
 def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
@@ -876,14 +878,21 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
 
 
 def _get_session_with_spark_config(
+    spark_session_type: SparkSessionType,
     spark_session: pyspark.SparkSession,
     spark_config: dict,
     allow_restart: bool,
 ) -> pyspark.SparkSession:
-    """Gets a SparkSession with spark_config by updating or re-starting an existing SparkSession.
+    """Attempts to apply spark_config to a SparkSession by either:
+         1. Updating the existing SparkSession
+         2. Restarting the existing SparkSession with a new spark_config
+
+      If a spark_config option was unable to be set, a warning is raised.
 
     Args:
-        spark_session: An existing PySpark SparkSession.
+        spark_session_type: Whether the existing SparkSession was created
+          from the class pyspark.SparkSession or pyspark.SparkConnectSession.
+        spark_session: An existing pyspark.SparkSession.
         spark_config: A dictionary of SparkSession.Builder.config objects.
         allow_restart: Whether to restart the existing SparkSession.
 
@@ -892,11 +901,10 @@ def _get_session_with_spark_config(
     """
     if allow_restart:
         try:
-            retrieved_spark_config: pyspark.SparkConf = (
-                spark_session.sparkContext.getConf()
-            )
+            app_name = spark_session.sparkContext.appName
+            conf = spark_session.sparkContext.getConf()
             for key, value in spark_config.items():
-                if retrieved_spark_config.get(key) != value:
+                if (conf.get(key) != value) or (app_name != value):
                     spark_session.stop()
                     break
         except pyspark.PySparkNotImplementedError:
@@ -904,17 +912,20 @@ def _get_session_with_spark_config(
             # this error is raised and the session cannot be restarted
             pass
 
-    builder = spark_session.builder
-    # user could get in trouble here if they try to set config options that are not allowed in their runtime
     for key, value in spark_config.items():
-        if key != "spark.app.name":
-            builder.config(key, value)
+        # we can't update the app name of a remote session
+        if key == "spark.app.name":
+            if spark_session_type == pyspark.SparkSession:
+                spark_session.sparkContext.appName = value
+        elif spark_session.conf.isModifiable(key):
+            spark_session.conf.set(key, value)
 
-    app_name: str | None = spark_config.get("spark.app.name")
-    if app_name:
-        builder.appName(app_name)
+    _raise_warnings_if_spark_config_not_updated(
+        spark_config=spark_config,
+        spark_session=spark_session,
+    )
 
-    return builder.getOrCreate()
+    return spark_session.builder.getOrCreate()
 
 
 def get_sql_dialect_floating_point_infinity_value(

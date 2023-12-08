@@ -12,7 +12,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/core/batch_spec.py Name: to_json_dict",
     "File: great_expectations/core/expectation_suite.py Name: show_expectations_by_expectation_type",
     "File: great_expectations/core/util.py Name: convert_to_json_serializable",
-    "File: great_expectations/core/util.py Name: get_or_create_spark_session",
     "File: great_expectations/data_asset/data_asset.py Name: DataAsset",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_datasource",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_expectation_suite",
