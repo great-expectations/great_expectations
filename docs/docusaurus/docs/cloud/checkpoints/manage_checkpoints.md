@@ -43,8 +43,8 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
         "name": checkpoint_name,
         "validations": [{
             "expectation_suite_name": expectation_suite.expectation_suite_name,
-             "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
-             "batch_request": {
+            "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
+            "batch_request": {
                 "datasource_name": "<data_source_name>",
                 "data_asset_name": "<data_asset_name>",
              },
