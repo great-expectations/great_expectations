@@ -51,7 +51,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """
 
     condition_parser: Union[str, None] = "pandas"
-    threshold: Union[float, EvaluationParameterDict]
+    threshold: Union[int, float, EvaluationParameterDict]
     double_sided: Union[bool, EvaluationParameterDict]
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "column",
