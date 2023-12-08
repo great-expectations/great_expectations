@@ -134,7 +134,7 @@ def reference_sql_checkpoint_config_for_multi_column_sum_table(
 def expectation_config_expect_multicolumn_sum_to_equal() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_multicolumn_sum_to_equal",
-        kwargs={"column_list": ["a", "b", "c"], "sum_total": 30},
+        kwargs={"column_list": ["a", "b", "c"], "sum_total": 30.0},
     )
 
 
@@ -628,7 +628,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
     ]
     assert (
         unexpected_index_query
-        == "SELECT pk_1, a, b, c \nFROM multi_column_sums \nWHERE 0 + a + b + c != 30;"
+        == "SELECT pk_1, a, b, c \nFROM multi_column_sums \nWHERE 0 + a + b + c != 30.0;"
     )
 
 
