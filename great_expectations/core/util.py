@@ -4,6 +4,7 @@ import datetime
 import decimal
 import json
 import logging
+import os
 import pathlib
 import re
 import sys
@@ -872,6 +873,14 @@ def _start_spark_session_with_spark_config(
     return builder.getOrCreate()
 
 
+def _session_is_not_stoppable(
+    spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession],
+) -> bool:
+    return (spark_session_type == pyspark.SparkConnectSession) or (
+        os.environ.get("DATABRICKS_RUNTIME_VERSION")  # noqa: TID251
+    )
+
+
 def _try_update_or_stop_misconfigured_spark_session(
     spark_session_type: type[pyspark.SparkSession, pyspark.SparkConnectSession],
     spark_session: pyspark.SparkSession,
@@ -890,7 +899,7 @@ def _try_update_or_stop_misconfigured_spark_session(
             ):
                 spark_session.sparkContext.appName = value
         except (pyspark.PySparkAttributeError, pyspark.AnalysisException):
-            if spark_session_type == pyspark.SparkConnectSession:
+            if _session_is_not_stoppable(spark_session_type=spark_session_type):
                 warning_messages.append(
                     f"spark_config option `{key}` is not modifiable "
                     "and Spark Session cannot be restarted in this environment."
