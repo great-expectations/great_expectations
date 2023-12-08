@@ -345,7 +345,6 @@ class ExpectationSuite(SerializableDictDot):
 
         return result
 
-    @public_api
     @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationSuite.
@@ -430,7 +429,6 @@ class ExpectationSuite(SerializableDictDot):
         """
         self.expectation_configurations.append(expectation_config)
 
-    @public_api
     @new_argument(
         argument_name="ge_cloud_id",
         version="0.13.33",
@@ -561,7 +559,6 @@ class ExpectationSuite(SerializableDictDot):
 
         return match_indexes
 
-    @public_api
     def find_expectations(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
@@ -739,7 +736,6 @@ class ExpectationSuite(SerializableDictDot):
         ]
         return expectation_configurations_attempted_to_be_added
 
-    @public_api
     def add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -788,7 +784,6 @@ class ExpectationSuite(SerializableDictDot):
                 f"Could not add expectation; provided configuration is not valid: {e.message}"
             ) from e
 
-    @public_api
     def show_expectations_by_domain_type(self) -> None:
         """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
 
