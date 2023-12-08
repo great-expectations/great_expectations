@@ -15,7 +15,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Final,
     List,
     Mapping,
     MutableMapping,
@@ -807,48 +806,41 @@ def get_or_create_spark_session(
     spark_config = spark_config or {}
 
     spark_session: pyspark.SparkSession
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
     try:
         spark_session = pyspark.SparkSession.builder.getOrCreate()
+        spark_session_type = pyspark.SparkSession
     except RuntimeError as e:
         try:
             spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+            spark_session_type = pyspark.SparkConnectSession
         except Exception:
             raise e
 
     # in a local pyspark-shell the context config cannot be updated
     # unless you stop the Spark context and re-create it
-    allow_restart: bool = not _spark_config_updatable(spark_session=spark_session)
+    allow_restart: bool = not _spark_config_updatable()
 
     return _get_session_with_spark_config(
         spark_config=spark_config,
+        spark_session_type=spark_session_type,
         spark_session=spark_session,
         allow_restart=allow_restart,
     )
 
 
-def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
+def _spark_config_updatable() -> bool:
     """Tests whether we are able to update an existing Spark Session config.
 
     Returns:
         bool
     """
-    databricks_shell_app_name: Final[str] = "Databricks Shell"
-
-    try:
-        app_name: str = spark_session.sparkContext.appName  # type: ignore[assignment]  # handled by try/except
-    except pyspark.PySparkAttributeError:
-        # if the session is a Spark/Databricks Connect session,
-        # this error is raised and the config is not updatable
-        return False
-
-    updatable = (app_name == databricks_shell_app_name) and (
-        os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
-    )
-    return updatable
+    return os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
 
 
 def _get_session_with_spark_config(
     spark_session: pyspark.SparkSession,
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_config: dict,
     allow_restart: bool,
 ) -> pyspark.SparkSession:
@@ -860,18 +852,51 @@ def _get_session_with_spark_config(
 
     Args:
         spark_session: An existing pyspark.SparkSession.
+        spark_session_type: The type of class used to create the existing pyspark.SparkSession.
         spark_config: A dictionary of SparkSession.Builder.config objects.
         allow_restart: Whether to restart the existing SparkSession.
 
     Returns:
         SparkSession
     """
+    stopped = False
     if allow_restart:
-        _try_stop_misconfigured_spark_session(
+        stopped = _try_stop_misconfigured_spark_session(
             spark_session=spark_session,
             spark_config=spark_config,
         )
 
+    if stopped:
+        spark_session = _create_new_spark_session_from_spark_config(
+            spark_session_type=spark_session_type,
+            spark_config=spark_config,
+        )
+    else:
+        spark_session = _update_existing_spark_session_with_spark_config(
+            spark_session=spark_session,
+            spark_config=spark_config,
+        )
+
+    return spark_session
+
+
+def _create_new_spark_session_from_spark_config(
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
+    spark_config: dict,
+) -> pyspark.SparkSession:
+    builder = spark_session_type.builder
+    for key, value in spark_config.items():
+        if key == "spark.app.name":
+            builder.appName(value)
+        else:
+            builder.config(key, value)
+    return builder.getOrCreate()
+
+
+def _update_existing_spark_session_with_spark_config(
+    spark_session: pyspark.SparkSession,
+    spark_config: dict,
+) -> pyspark.SparkSession:
     for key, value in spark_config.items():
         if key == "spark.app.name":
             try:
@@ -889,20 +914,21 @@ def _get_session_with_spark_config(
                     f"spark_config option `{key}` is not modifiable in this environment.",
                     category=RuntimeWarning,
                 )
-
     return spark_session.builder.getOrCreate()
 
 
 def _try_stop_misconfigured_spark_session(
     spark_session: pyspark.SparkSession,
     spark_config: dict,
-) -> None:
+) -> bool:
+    stopped = False
     try:
         app_name = spark_session.sparkContext.appName
         conf = spark_session.sparkContext.getConf()
         for key, value in spark_config.items():
             if (conf.get(key) != value) or (app_name != value):
                 spark_session.stop()
+                stopped = True
                 break
     except pyspark.PySparkAttributeError:
         # if the session is a Spark/Databricks Connect session,
@@ -914,6 +940,7 @@ def _try_stop_misconfigured_spark_session(
         # with credential passthrough enabled, this error is raised when
         # attempting to call sparkContext.getConf(), and the session cannot be restarted
         pass
+    return stopped
 
 
 def get_sql_dialect_floating_point_infinity_value(
