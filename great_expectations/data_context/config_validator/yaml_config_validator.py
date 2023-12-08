@@ -5,20 +5,19 @@ This validator evaluates YAML configurations of core Great Expectations componen
  configuration of the Data Context in some cases if the configuration is valid.
 
  Typical usage example:
- import great_expectations as ge
- context = ge.get_context()
+ import great_expectations as gx
+ context = gx.get_context()
  context.test_yaml_config(my_config)
 """
 from __future__ import annotations
 
-import os
 import traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union
 
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
@@ -26,29 +25,22 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message_from_handler,
 )
-from great_expectations.data_context.store import Store
+from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
-from great_expectations.datasource import DataConnector, Datasource
-from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler import RuleBasedProfiler  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext
+    from ruamel.yaml.comments import CommentedMap
 
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[assignment]
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource import DataConnector, Datasource
+
 
 # TODO: check if this can be refactored to use YAMLHandler class
 yaml = YAML()
@@ -92,7 +84,6 @@ class _YamlConfigValidator:
     ]
     TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
         "Checkpoint",
-        "SimpleCheckpoint",
     ]
     TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
         "RuleBasedProfiler",
@@ -130,15 +121,15 @@ class _YamlConfigValidator:
     def config_variables(self):
         return self._data_context.config_variables
 
-    def test_yaml_config(  # noqa: C901 - complexity 17
+    def test_yaml_config(  # noqa: C901, PLR0912, PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[
-            Literal["instantiated_class"], Literal["report_object"]
+        return_mode: Literal[
+            "instantiated_class", "report_object"
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
@@ -158,11 +149,12 @@ class _YamlConfigValidator:
 
         --Documentation--
             https://docs.greatexpectations.io/docs/terms/data_context
-            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
             yaml_config: A string containing the yaml config to be tested
-            name: (Optional) A string containing the name of the component to instantiate
+            name: Optional name of the component to instantiate
+            class_name: Optional, overridden if provided in the config
+            runtime_environment: Optional override for config items
             pretty_print: Determines whether to print human-readable output
             return_mode: Determines what type of object test_yaml_config will return.
                 Valid modes are "instantiated_class" and "report_object"
@@ -203,7 +195,7 @@ class _YamlConfigValidator:
             class_name = config["class_name"]
 
         instantiated_class: Any = None
-        usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
+        usage_stats_event_payload: dict[str, Union[str, List[str]]] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")
@@ -292,7 +284,7 @@ class _YamlConfigValidator:
                 usage_stats_event_payload.get("parent_class") is None
                 and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
             ):
-                # add parent_class if it doesn't exist and class_name is one of our supported core GE types
+                # add parent_class if it doesn't exist and class_name is one of our supported core GX types
                 usage_stats_event_payload["parent_class"] = class_name
             send_usage_message_from_handler(
                 event=usage_stats_event_name,
@@ -338,26 +330,16 @@ class _YamlConfigValidator:
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> str:
         try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
-            )
+            config_provider = self._data_context.config_provider
+            config_values = config_provider.get_values()
 
-            substitutions: dict = {
-                **substituted_config_variables,  # type: ignore[list-item]
-                **dict(os.environ),
-                **runtime_environment,
-            }
+            # While normally we'd just call `self.config_provider.substitute_config()`,
+            # we need to account for `runtime_environment` values that may have been passed.
+            config_values.update(runtime_environment)
 
-            config_str_with_substituted_variables: str = (
-                substitute_all_config_variables(
-                    yaml_config,
-                    substitutions,
-                )
+            return config_provider.substitute_config(
+                config=yaml_config, config_values=config_values
             )
-            return config_str_with_substituted_variables
         except Exception as e:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__substitution_error__"],
@@ -398,12 +380,9 @@ class _YamlConfigValidator:
         """
         print(f"\tInstantiating as a Store, since class_name is {class_name}")
         store_name: str = name or config.get("name") or "my_temp_store"
-        instantiated_class = cast(
-            Store,
-            self._data_context._build_store_from_config(
-                store_name=store_name,
-                store_config=config,
-            ),
+        instantiated_class = self._data_context._build_store_from_config(
+            store_name=store_name,
+            store_config=config,
         )
         store_name = instantiated_class.store_name or store_name
         self._data_context.config["stores"][store_name] = config
@@ -425,13 +404,10 @@ class _YamlConfigValidator:
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
         datasource_config = datasourceConfigSchema.load(config)
         datasource_config.name = datasource_name
-        instantiated_class = cast(
-            Datasource,
-            self._data_context._instantiate_datasource_from_config_and_update_project_config(
-                config=datasource_config,
-                initialize=True,
-                save_changes=False,
-            ),
+        instantiated_class = (
+            self._data_context._instantiate_datasource_from_config_with_substitution(
+                config=datasource_config
+            )
         )
 
         anonymizer = Anonymizer(self._data_context.data_context_id)
@@ -465,12 +441,12 @@ class _YamlConfigValidator:
 
         checkpoint_config: Union[CheckpointConfig, dict]
 
-        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)  # type: ignore[assignment]
-        checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
-        checkpoint_config.update({"name": checkpoint_name})
+        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
+        checkpoint_config_dict: dict[str, JSONValues] = checkpoint_config.to_json_dict()
+        checkpoint_config_dict.update({"name": checkpoint_name})
 
         checkpoint_class_args: dict = filter_properties_dict(  # type: ignore[assignment]
-            properties=checkpoint_config,
+            properties=checkpoint_config_dict,
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
@@ -479,17 +455,13 @@ class _YamlConfigValidator:
             instantiated_class = Checkpoint(
                 data_context=self._data_context, **checkpoint_class_args
             )
-        elif class_name == "SimpleCheckpoint":
-            instantiated_class = SimpleCheckpoint(
-                data_context=self._data_context, **checkpoint_class_args
-            )
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
         anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
+            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config_dict  # type: ignore[arg-type]
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -634,13 +606,15 @@ class _YamlConfigValidator:
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
-            checkpoint_config = CheckpointConfig.from_commented_map(  # type: ignore[assignment]
+            checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )
-            checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
-            checkpoint_config.update({"name": checkpoint_name})
+            checkpoint_config_dict: dict[
+                str, JSONValues
+            ] = checkpoint_config.to_json_dict()
+            checkpoint_config_dict.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
+                obj=checkpoint_config_dict, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
             )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(

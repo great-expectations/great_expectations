@@ -26,7 +26,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesNonemptyGeometries(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.nonempty_geometries"
     condition_value_keys = ()
@@ -122,7 +121,6 @@ class ExpectColumnValuesToBeNonemptyGeometries(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[
@@ -137,9 +135,8 @@ class ExpectColumnValuesToBeNonemptyGeometries(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

@@ -38,7 +38,7 @@ class PandasDatasource(LegacyDatasource):
     }
 
     @classmethod
-    def build_configuration(
+    def build_configuration(  # noqa: PLR0913
         cls,
         data_asset_type=None,
         batch_kwargs_generators=None,
@@ -105,7 +105,7 @@ class PandasDatasource(LegacyDatasource):
 
         return configuration
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="pandas",
         data_context=None,
@@ -210,14 +210,14 @@ class PandasDatasource(LegacyDatasource):
         elif "s3" in batch_kwargs:
             # deprecated-v0.13.0
             warnings.warn(
-                "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
+                "Direct GX Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
                 "Please use a path including the s3a:// protocol instead.",
                 DeprecationWarning,
             )
             try:
-                import boto3
+                from great_expectations.compatibility import aws
 
-                s3 = boto3.client("s3", **self._boto3_options)
+                s3 = aws.boto3.client("s3", **self._boto3_options)
             except ImportError:
                 raise BatchKwargsError(
                     "Unable to load boto3 client to read s3 asset.", batch_kwargs
@@ -267,7 +267,8 @@ class PandasDatasource(LegacyDatasource):
         )
 
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):  # noqa: PLR0911
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (
@@ -291,7 +292,8 @@ class PandasDatasource(LegacyDatasource):
             return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path}", {"path": path}
+            f"Unable to determine reader method from path: {path}",
+            {"path": path},
         )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:

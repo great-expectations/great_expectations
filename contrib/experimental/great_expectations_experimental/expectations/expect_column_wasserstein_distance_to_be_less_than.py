@@ -1,49 +1,23 @@
-import json
-from typing import Any, Dict, Optional, Tuple
+from __future__ import annotations
 
-import numpy as np
-import pandas as pd
-from scipy import stats as stats
+from datetime import datetime
+from typing import Dict, Union
+
+from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-    render_evaluation_parameter_string,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnWassersteinDistance(ColumnMetricProvider):
+class ColumnWassersteinDistance(ColumnAggregateMetricProvider):
     """MetricProvider Class for Wasserstein Distance MetricProvider"""
 
     metric_name = "column.custom.wasserstein"
@@ -67,7 +41,7 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
 
         return w_value
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -94,7 +68,7 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
     #
     #     return column_median
     #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -161,7 +135,17 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
+class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
+    """Expect that the Wasserstein Distance of the specified column with respect to an optional partition object to be lower than the provided value.
+
+    See Also:
+        [partition objects for distributional Expectations](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)
+        [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
+    """
+
+    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
     success_keys = (
@@ -192,7 +176,6 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
         "raw_values": None,
         "partition": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
 
@@ -238,22 +221,6 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
         },
     ]
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
-
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
     # @render_evaluation_parameter_string
@@ -261,15 +228,11 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

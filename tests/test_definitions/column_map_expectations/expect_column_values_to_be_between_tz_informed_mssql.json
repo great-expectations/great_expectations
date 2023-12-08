@@ -1,0 +1,19 @@
+{
+  "expectation_type": "expect_column_values_to_be_between",
+  "datasets": [{
+    "dataset_name": "expect_column_values_to_be_between_tz_informed_mssql_1",
+    "data": {
+      "ts": [
+        "1975-01-01T12:00:01.0000000",
+        "1985-12-31T12:00:01.0123456",
+        "2005-01-01T12:00:01.6789000"
+      ]
+    },
+    "schemas": {
+      "mssql": {
+        "ts": "DATETIME"
+      }
+    },
+    "tests": []
+  }]
+}

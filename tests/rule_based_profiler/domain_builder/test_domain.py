@@ -2,23 +2,26 @@ from typing import Optional
 
 import pytest
 
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 
+# module level markers
+pytestmark = pytest.mark.unit
 
-@pytest.mark.unit
+
 def test_semantic_domain_consistency():
     domain: Domain
 
     with pytest.raises(ValueError) as excinfo:
         # noinspection PyUnusedLocal
-        domain = Domain(
+        Domain(
             domain_type="column",
             domain_kwargs={"column": "passenger_count"},
             details={
@@ -37,7 +40,6 @@ def test_semantic_domain_consistency():
     )
 
 
-@pytest.mark.unit
 def test_semantic_domain_serialization():
     domain: Domain
 
@@ -118,7 +120,6 @@ def test_semantic_domain_serialization():
     }
 
 
-@pytest.mark.unit
 def test_semantic_domain_equivalence():
     domain_a: Domain
     domain_b: Domain
@@ -205,7 +206,7 @@ def test_semantic_domain_equivalence():
 
     with pytest.raises(ValueError) as excinfo:
         # noinspection PyUnusedLocal
-        domain_as_dict: dict = domain_d.to_json_dict()
+        domain_d.to_json_dict()
 
     assert (
         "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
@@ -227,7 +228,7 @@ def test_semantic_domain_equivalence():
 
     with pytest.raises(ValueError) as excinfo:
         # noinspection PyUnusedLocal
-        domain_as_dict: dict = domain_e.to_json_dict()
+        domain_e.to_json_dict()
 
     assert (
         "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
@@ -235,10 +236,52 @@ def test_semantic_domain_equivalence():
     )
 
 
-@pytest.mark.unit
 def test_semantic_domain_comparisons_inclusion():
     domain_a: Optional[Domain]
     domain_b: Optional[Domain]
+
+    domain_a = Domain(
+        domain_type=MetricDomainTypes.TABLE,
+        domain_kwargs={
+            "table": "animal_names",
+        },
+        rule_name="my_rule",
+    )
+
+    domain_b = Domain(
+        domain_type="table",
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_a = Domain(
+        domain_type="column_pair",
+        domain_kwargs={"column_A": "w", "column_B": "x"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "w": SemanticDomainTypes.NUMERIC,
+                "x": SemanticDomainTypes.NUMERIC,
+            },
+        },
+        rule_name="my_rule",
+    )
+
+    domain_b = Domain(
+        domain_type="column_pair",
+        domain_kwargs={
+            "column_A": "w",
+            "column_B": "x",
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        domain_type="column_pair",
+        domain_kwargs={
+            "column_B": "x",
+            "column_A": "w",
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
 
     domain_a = Domain(
         domain_type="column",
@@ -385,7 +428,6 @@ def test_semantic_domain_comparisons_inclusion():
     assert not domain_a.is_superset(other=domain_b)
 
 
-@pytest.mark.unit
 def test_integer_semantic_domain_type():
     domain: Domain
 

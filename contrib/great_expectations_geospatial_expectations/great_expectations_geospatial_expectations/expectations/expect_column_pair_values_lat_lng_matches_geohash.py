@@ -33,14 +33,13 @@ class ColumnPairValuesLatLngMatchesGeohash(ColumnPairMapMetricProvider):
 
 
 class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
-    """
-    Expect latlngs in column_A to match with geohashes in column_B.
+    """Expect latlngs in column A to match with geohashes in column B.
 
-    The more digits a geohash has, the smaller and more precise of an area it
-    represents. When converting a latlng to a geohash, we are only asserting
-    that it falls somewhere within the other geohash we're comparing it with.
-    To verify this, we only need to make sure that they share their left-most
-    digits. For example, dpz8 contains dpz80 (in addition to any other geohash
+    The more digits a geohash has, the smaller and more precise of an area it \
+    represents. When converting a latlng to a geohash, we are only asserting \
+    that it falls somewhere within the other geohash we're comparing it with. \
+    To verify this, we only need to make sure that they share their left-most \
+    digits. For example, dpz8 contains dpz80 (in addition to any other geohash \
     that begins with "dpz8".
     """
 
@@ -114,8 +113,7 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert (
                 "column_A" in configuration.kwargs

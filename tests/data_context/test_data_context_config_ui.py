@@ -1,11 +1,13 @@
 import copy
 import os
-from typing import Dict, Optional
+from typing import Dict, Final, Optional
 
 import pytest
 
-from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.types.base import (
     BaseStoreBackendDefaults,
     DatabaseStoreBackendDefaults,
@@ -26,6 +28,10 @@ What does this test and why?
 This file will hold various tests to ensure that the UI functions as expected when creating a DataContextConfig object. It will ensure that the appropriate defaults are used, including when the store_backend_defaults parameter is set.
 """
 
+_DEFAULT_CONFIG_VERSION: Final[float] = float(
+    DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
+)
+
 
 @pytest.fixture(scope="function")
 def construct_data_context_config():
@@ -38,9 +44,7 @@ def construct_data_context_config():
     def _construct_data_context_config(
         data_context_id: str,
         datasources: Dict,
-        config_version: float = float(
-            DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
-        ),
+        config_version: float = _DEFAULT_CONFIG_VERSION,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
@@ -70,7 +74,6 @@ def construct_data_context_config():
             "validation_operators": validation_operators,
             "stores": stores,
             "data_docs_sites": data_docs_sites,
-            "notebooks": None,
             "config_variables_file_path": None,
             "anonymous_usage_statistics": {
                 "data_context_id": data_context_id,
@@ -121,6 +124,7 @@ def default_spark_datasource_config():
     }
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -161,9 +165,15 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_S3StoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -262,9 +272,15 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -385,9 +401,15 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -447,9 +469,15 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults_no_root_directory(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -491,9 +519,15 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_GCSStoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -605,9 +639,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -738,9 +778,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -874,9 +920,15 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -1049,9 +1101,15 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.unit
 def test_override_general_defaults(
     construct_data_context_config,
     default_pandas_datasource_config,
@@ -1312,9 +1370,15 @@ def test_override_general_defaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
 
+@pytest.mark.big
 @pytest.mark.slow  # 1.81s
 def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
     monkeypatch, construct_data_context_config, default_pandas_datasource_config
@@ -1420,9 +1484,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )
 
-    data_context = BaseDataContext(project_config=data_context_config)
+    data_context = get_context(project_config=data_context_config)
     assert (
         data_context.datasources["my_pandas_datasource"]
         .get_batch_kwargs_generator("subdir_reader")
@@ -1431,6 +1500,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
     construct_data_context_config,
 ):
@@ -1484,4 +1554,9 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         properties=desired_config,
         clean_falsy=True,
     )
-    assert DataContext.validate_config(project_config=data_context_config)
+    assert isinstance(
+        SerializableDataContext.get_or_create_data_context_config(
+            project_config=data_context_config
+        ),
+        DataContextConfig,
+    )

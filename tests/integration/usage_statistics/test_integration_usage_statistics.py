@@ -130,6 +130,7 @@ def valid_usage_statistics_message() -> dict:
 # <WILL> This is being handled in GREAT-1117
 @pytest.mark.xfail
 @pytest.mark.slow  # 1.14s
+@pytest.mark.big
 def test_send_malformed_data(
     valid_usage_statistics_message: dict,
     requests_session_with_retries: requests.Session,
@@ -149,6 +150,7 @@ def test_send_malformed_data(
 
 
 @pytest.mark.slow  # 4.21s
+@pytest.mark.big
 def test_graceful_failure_with_no_internet():
     """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics."""
 

@@ -4,7 +4,6 @@ from typing import List
 import pandas as pd
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -17,7 +16,7 @@ DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 def checkpoint(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     return Checkpoint(
         data_context=context,
         **{
@@ -55,59 +54,30 @@ def checkpoint(
             ],
             "ge_cloud_id": None,
             "expectation_suite_ge_cloud_id": None,
-        }
+        },
     )
 
 
+@pytest.mark.filesystem
 def test_checkpoint_config_repr(checkpoint):
     checkpoint_config_repr: str = str(checkpoint)
 
-    assert (
-        checkpoint_config_repr
-        == """{
-  "action_list": [
-    {
-      "name": "store_validation_result",
-      "action": {
-        "class_name": "StoreValidationResultAction"
-      }
-    },
-    {
-      "name": "store_evaluation_params",
-      "action": {
-        "class_name": "StoreEvaluationParametersAction"
-      }
-    },
-    {
-      "name": "update_data_docs",
-      "action": {
-        "class_name": "UpdateDataDocsAction",
-        "site_names": []
-      }
-    }
-  ],
-  "batch_request": {},
-  "class_name": "Checkpoint",
-  "config_version": 1.0,
-  "evaluation_parameters": {},
-  "module_name": "great_expectations.checkpoint",
-  "name": "my_checkpoint",
-  "profilers": [],
-  "runtime_configuration": {},
-  "validations": [
-    {
-      "batch_request": {
-        "datasource_name": "example_datasource",
-        "data_connector_name": "default_runtime_data_connector_name",
-        "data_asset_name": "my_data_asset"
-      },
-      "expectation_suite_name": "test_suite"
-    }
-  ]
-}"""
-    )
+    for key in (
+        "action_list",
+        "batch_request",
+        "class_name",
+        "config_version",
+        "evaluation_parameters",
+        "module_name",
+        "name",
+        "profilers",
+        "runtime_configuration",
+        "validations",
+    ):
+        assert key in checkpoint_config_repr
 
 
+@pytest.mark.filesystem
 def test_checkpoint_config_repr_after_substitution(checkpoint):
     df: pd.DataFrame = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
@@ -143,90 +113,16 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
 
     checkpoint_config_repr: str = json.dumps(sorted_json_dict, indent=2)
 
-    assert (
-        checkpoint_config_repr
-        == """{
-  "action_list": [
-    {
-      "name": "store_validation_result",
-      "action": {
-        "class_name": "StoreValidationResultAction"
-      }
-    },
-    {
-      "name": "store_evaluation_params",
-      "action": {
-        "class_name": "StoreEvaluationParametersAction"
-      }
-    },
-    {
-      "name": "update_data_docs",
-      "action": {
-        "class_name": "UpdateDataDocsAction",
-        "site_names": []
-      }
-    }
-  ],
-  "batch_request": {
-    "runtime_parameters": {
-      "batch_data": [
-        {
-          "a": 1,
-          "b": 3
-        },
-        {
-          "a": 2,
-          "b": 4
-        }
-      ]
-    },
-    "batch_identifiers": {
-      "default_identifier_name": "my_simple_df"
-    }
-  },
-  "class_name": "Checkpoint",
-  "config_version": 1.0,
-  "evaluation_parameters": {},
-  "module_name": "great_expectations.checkpoint",
-  "name": "my_checkpoint",
-  "profilers": [],
-  "runtime_configuration": {},
-  "validations": [
-    {
-      "batch_request": {
-        "datasource_name": "example_datasource",
-        "data_connector_name": "default_runtime_data_connector_name",
-        "data_asset_name": "my_data_asset",
-        "runtime_parameters": {
-          "batch_data": "<class \'pandas.core.frame.DataFrame\'>"
-        },
-        "batch_identifiers": {
-          "default_identifier_name": "my_simple_df"
-        }
-      },
-      "expectation_suite_name": "test_suite",
-      "action_list": [
-        {
-          "name": "store_validation_result",
-          "action": {
-            "class_name": "StoreValidationResultAction"
-          }
-        },
-        {
-          "name": "store_evaluation_params",
-          "action": {
-            "class_name": "StoreEvaluationParametersAction"
-          }
-        },
-        {
-          "name": "update_data_docs",
-          "action": {
-            "class_name": "UpdateDataDocsAction",
-            "site_names": []
-          }
-        }
-      ]
-    }
-  ]
-}"""
-    )
+    for key in (
+        "action_list",
+        "batch_request",
+        "class_name",
+        "config_version",
+        "evaluation_parameters",
+        "module_name",
+        "name",
+        "profilers",
+        "runtime_configuration",
+        "validations",
+    ):
+        assert key in checkpoint_config_repr

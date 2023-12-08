@@ -1,37 +1,16 @@
-import json
-
 import langid  # version 1.1.6
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 class ColumnValuesAreInLanguage(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.are_in_language"
@@ -67,23 +46,23 @@ class ColumnValuesAreInLanguage(ColumnMapMetricProvider):
 class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
     """Expect the column to be in a specified language.
 
-        Args:
-            column (str): \
-                The column name
-            language (str): \
-                One of 97 ISO 639-1 language codes, e.g. af, am, an, ar, as, az, be, bg, bn, br, bs, ca, cs, cy, da, \
-                de, dz, el, en, eo, es, et, eu, fa, fi, fo, fr, ga, gl, gu, he, hi, hr, ht, hu, hy, id, is, it, ja, \
-                jv, ka, kk, km, kn, ko, ku, ky, la, lb, lo, lt, lv, mg, mk, ml, mn, mr, ms, mt, nb, ne, nl, nn, no, \
-                oc, or, pa, pl, ps, pt, qu, ro, ru, rw, se, si, sk, sl, sq, sr, sv, sw, ta, te, th, tl, tr, ug, uk, \
-                ur, vi, vo, wa, xh, zh, zu
+    Args:
+        column (str): \
+            The column name
+        language (str): \
+            One of 97 ISO 639-1 language codes, e.g. af, am, an, ar, as, az, be, bg, bn, br, bs, ca, cs, cy, da, \
+            de, dz, el, en, eo, es, et, eu, fa, fi, fo, fr, ga, gl, gu, he, hi, hr, ht, hu, hy, id, is, it, ja, \
+            jv, ka, kk, km, kn, ko, ku, ky, la, lb, lo, lt, lv, mg, mk, ml, mn, mr, ms, mt, nb, ne, nl, nn, no, \
+            oc, or, pa, pl, ps, pt, qu, ro, ru, rw, se, si, sk, sl, sq, sr, sv, sw, ta, te, th, tl, tr, ug, uk, \
+            ur, vi, vo, wa, xh, zh, zu
 
-        Notes:
-            * Language identification uses the [`langid` package](https://github.com/saffsd/langid.py).
-            * `langid` uses a custom, permissive [LICENSE](https://github.com/saffsd/langid.py/blob/master/LICENSE),
-              suitable for commercial purposes.
-            * Results may be inaccurate for strings shorter than 50 characters.
-            * No confidence threshold has been set, so language with the highest confidence will be selected, even if
-              confidence is low.
+    Notes:
+        * Language identification uses the [langid package](https://github.com/saffsd/langid.py).
+        * langid uses a custom, permissive [LICENSE](https://github.com/saffsd/langid.py/blob/master/LICENSE), \
+          suitable for commercial purposes.
+        * Results may be inaccurate for strings shorter than 50 characters.
+        * No confidence threshold has been set, so language with the highest confidence will be selected, even if \
+          confidence is low.
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

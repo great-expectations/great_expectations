@@ -1,7 +1,5 @@
 from http import HTTPStatus
-from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -11,6 +9,7 @@ from great_expectations.expectations.metrics import (
 
 HTTP_STATUS_CODE_LIST = [str(s.value) for s in HTTPStatus]
 
+
 # This method compares a string to the valid HTTP status code
 def is_valid_http_status_code(code: str) -> bool:
     return code in HTTP_STATUS_CODE_LIST
@@ -19,7 +18,6 @@ def is_valid_http_status_code(code: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidHttpStatusCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_http_status_code"
 
@@ -41,7 +39,7 @@ class ColumnValuesToBeValidHttpStatusCode(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidHttpStatusCode(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid HTTP status code."""
+    """Expect column values to be valid HTTP status codes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -89,34 +87,6 @@ class ExpectColumnValuesToBeValidHttpStatusCode(ColumnMapExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

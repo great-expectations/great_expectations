@@ -3,27 +3,24 @@ import shutil
 from collections import OrderedDict
 
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations as ge
-from great_expectations.data_context.data_context import DataContext
+from great_expectations.core.config_provider import _ConfigurationSubstitutor
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
     DatasourceConfig,
     DatasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    PasswordMasker,
-    file_relative_path,
-    substitute_config_variable,
-)
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 dataContextConfigSchema = DataContextConfigSchema()
 
@@ -37,19 +34,23 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         __file__,
         "../test_fixtures/great_expectations_basic_with_variables.yml",
     )
-    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
+    shutil.copy(
+        ge_config_path, os.path.join(root_dir, FileDataContext.GX_YML)  # noqa: PTH118
+    )
     config_variables_path = file_relative_path(
         __file__,
         "../test_fixtures/config_variables.yml",
     )
-    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
-    return DataContext(context_root_dir=root_dir)
+    shutil.copy(
+        config_variables_path, os.path.join(root_dir, "uncommitted")  # noqa: PTH118
+    )
+    return get_context(context_root_dir=root_dir)
 
 
+@pytest.mark.filesystem
 def test_config_variables_on_context_without_config_variables_filepath_configured(
     data_context_without_config_variables_filepath_configured,
 ):
-
     # test the behavior on a context that does not config_variables_filepath (the location of
     # the file with config variables values) configured.
 
@@ -65,162 +66,14 @@ def test_config_variables_on_context_without_config_variables_filepath_configure
     )
 
 
-def test_setting_config_variables_is_visible_immediately(
-    data_context_with_variables_in_config,
-):
-    context = data_context_with_variables_in_config
-
-    assert type(context.get_config()) == DataContextConfig
-
-    config_variables_file_path = context.get_config()["config_variables_file_path"]
-
-    assert config_variables_file_path == "uncommitted/config_variables.yml"
-
-    # The config variables must have been present to instantiate the config
-    assert os.path.isfile(
-        os.path.join(context._context_root_directory, config_variables_file_path)
-    )
-
-    # the context's config has two config variables - one using the ${} syntax and the other - $.
-    assert (
-        context.get_config()["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub1"]
-        == "${replace_me}"
-    )
-    assert (
-        context.get_config()["datasources"]["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub2"]
-        == "$replace_me"
-    )
-
-    config_variables = context.config_variables
-    assert config_variables["replace_me"] == {"n1": "v1"}
-
-    # the context's config has two config variables - one using the ${} syntax and the other - $.
-    assert context.get_config_with_variables_substituted().datasources["mydatasource"][
-        "batch_kwargs_generators"
-    ]["mygenerator"]["reader_options"]["test_variable_sub1"] == {"n1": "v1"}
-    assert context.get_config_with_variables_substituted().datasources["mydatasource"][
-        "batch_kwargs_generators"
-    ]["mygenerator"]["reader_options"]["test_variable_sub2"] == {"n1": "v1"}
-
-    # verify that we can save a config variable in the config variables file
-    # and the value is retrievable
-    context.save_config_variable("replace_me_2", {"n2": "v2"})
-    # Update the config itself
-    context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-        "mygenerator"
-    ]["reader_options"]["test_variable_sub1"] = "${replace_me_2}"
-
-    # verify that the value of the config variable is immediately updated.
-    # verify that the config variable will be substituted with the value from the file if the
-    # env variable is not set (for both ${} and $ syntax variations)
-    assert context.get_config_with_variables_substituted().datasources["mydatasource"][
-        "batch_kwargs_generators"
-    ]["mygenerator"]["reader_options"]["test_variable_sub1"] == {"n2": "v2"}
-    assert context.get_config_with_variables_substituted().datasources["mydatasource"][
-        "batch_kwargs_generators"
-    ]["mygenerator"]["reader_options"]["test_variable_sub2"] == {"n1": "v1"}
-
-    # verify the same for escaped variables
-    context.save_config_variable(
-        "escaped_password", "this_is_$mypassword_escape_the_$signs"
-    )
-    dict_to_escape = {
-        "drivername": "po$tgresql",
-        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-        "port": "5432",
-        "username": "postgres",
-        "password": "pas$wor$d1$",
-        "database": "postgres",
-    }
-    context.save_config_variable(
-        "escaped_password_dict",
-        dict_to_escape,
-    )
-
-    context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-        "mygenerator"
-    ]["reader_options"]["test_variable_sub_escaped"] = "${escaped_password}"
-    context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-        "mygenerator"
-    ]["reader_options"]["test_variable_sub_escaped_dict"] = "${escaped_password_dict}"
-
-    assert (
-        context.get_config().datasources["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub_escaped"]
-        == "${escaped_password}"
-    )
-    assert (
-        context.get_config().datasources["mydatasource"]["batch_kwargs_generators"][
-            "mygenerator"
-        ]["reader_options"]["test_variable_sub_escaped_dict"]
-        == "${escaped_password_dict}"
-    )
-
-    # Ensure that the value saved in config variables has escaped the $
-    config_variables_with_escaped_vars = context.config_variables
-    assert (
-        config_variables_with_escaped_vars["escaped_password"]
-        == r"this_is_\$mypassword_escape_the_\$signs"
-    )
-    assert config_variables_with_escaped_vars["escaped_password_dict"] == {
-        "drivername": r"po\$tgresql",
-        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-        "port": "5432",
-        "username": "postgres",
-        "password": r"pas\$wor\$d1\$",
-        "database": "postgres",
-    }
-
-    # Ensure that when reading the escaped config variable, the escaping should be removed
-    assert (
-        context.get_config_with_variables_substituted().datasources["mydatasource"][
-            "batch_kwargs_generators"
-        ]["mygenerator"]["reader_options"]["test_variable_sub_escaped"]
-        == "this_is_$mypassword_escape_the_$signs"
-    )
-    assert (
-        context.get_config_with_variables_substituted().datasources["mydatasource"][
-            "batch_kwargs_generators"
-        ]["mygenerator"]["reader_options"]["test_variable_sub_escaped_dict"]
-        == dict_to_escape
-    )
-
-    assert (
-        context.get_config_with_variables_substituted().datasources["mydatasource"][
-            "batch_kwargs_generators"
-        ]["mygenerator"]["reader_options"][
-            "test_escaped_manually_entered_value_from_config"
-        ]
-        == "correct_hor$e_battery_$taple"
-    )
-
-    try:
-        # verify that the value of the env var takes precedence over the one from the config variables file
-        os.environ["replace_me_2"] = "value_from_env_var"
-        assert (
-            context.get_config_with_variables_substituted().datasources["mydatasource"][
-                "batch_kwargs_generators"
-            ]["mygenerator"]["reader_options"]["test_variable_sub1"]
-            == "value_from_env_var"
-        )
-    except Exception:
-        raise
-    finally:
-        del os.environ["replace_me_2"]
-
-
+@pytest.mark.filesystem
 def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     # this test uses a great_expectations.yml with almost all values replaced
     # with substitution variables
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -243,16 +96,17 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = ge.data_context.DataContext(context_path)
+    context = get_context(context_root_dir=context_path)
     context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
-        ge.data_context.DataContext(context_path)._project_config
+        get_context(context_root_dir=context_path)._project_config
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 
     assert context_config_commented_map == expected_config_commented_map
 
 
+@pytest.mark.filesystem
 def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("FOO", "BAR")
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
@@ -263,8 +117,8 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     runtime_environment = {"replace_me": value_from_runtime_override}
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     create_data_context_files(
         context_path,
         asset_config_path,
@@ -272,8 +126,8 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    data_context = ge.data_context.DataContext(
-        context_path, runtime_environment=runtime_environment
+    data_context = get_context(
+        context_root_dir=context_path, runtime_environment=runtime_environment
     )
     config = data_context.get_config_with_variables_substituted()
 
@@ -296,7 +150,9 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         del os.environ["replace_me"]
 
 
+@pytest.mark.unit
 def test_substitute_config_variable():
+    config_substitutor = _ConfigurationSubstitutor()
     config_variables_dict = {
         "arg0": "val_of_arg_0",
         "arg2": {"v1": 2},
@@ -304,67 +160,88 @@ def test_substitute_config_variable():
         "ARG4": "val_of_ARG_4",
     }
     assert (
-        substitute_config_variable("abc${arg0}", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "abc${arg0}", config_variables_dict
+        )
         == "abcval_of_arg_0"
     )
     assert (
-        substitute_config_variable("abc$arg0", config_variables_dict)
+        config_substitutor.substitute_config_variable("abc$arg0", config_variables_dict)
         == "abcval_of_arg_0"
     )
     assert (
-        substitute_config_variable("${arg0}", config_variables_dict) == "val_of_arg_0"
+        config_substitutor.substitute_config_variable("${arg0}", config_variables_dict)
+        == "val_of_arg_0"
     )
-    assert substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
+    assert (
+        config_substitutor.substitute_config_variable("hhhhhhh", config_variables_dict)
+        == "hhhhhhh"
+    )
     with pytest.raises(MissingConfigVariableError) as exc:
-        substitute_config_variable(
+        config_substitutor.substitute_config_variable(
             "abc${arg1} def${foo}", config_variables_dict
         )  # does NOT equal "abc${arg1}"
     assert (
-        """Unable to find a match for config substitution variable: `arg1`.
-Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials"""
+        "Unable to find a match for config substitution variable: `arg1`."
         in exc.value.message
     )
     assert (
-        substitute_config_variable("${arg2}", config_variables_dict)
+        config_substitutor.substitute_config_variable("${arg2}", config_variables_dict)
         == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
 
     # Null cases
-    assert substitute_config_variable("", config_variables_dict) == ""
-    assert substitute_config_variable(None, config_variables_dict) == None
+    assert (
+        config_substitutor.substitute_config_variable("", config_variables_dict) == ""
+    )
+    assert (
+        config_substitutor.substitute_config_variable(None, config_variables_dict)
+        is None
+    )
 
     # Test with mixed case
     assert (
-        substitute_config_variable("prefix_${aRg3}_suffix", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix_${aRg3}_suffix", config_variables_dict
+        )
         == "prefix_val_of_aRg_3_suffix"
     )
     assert (
-        substitute_config_variable("${aRg3}", config_variables_dict) == "val_of_aRg_3"
+        config_substitutor.substitute_config_variable("${aRg3}", config_variables_dict)
+        == "val_of_aRg_3"
     )
     # Test with upper case
     assert (
-        substitute_config_variable("prefix_$ARG4/suffix", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix_$ARG4/suffix", config_variables_dict
+        )
         == "prefix_val_of_ARG_4/suffix"
     )
-    assert substitute_config_variable("$ARG4", config_variables_dict) == "val_of_ARG_4"
+    assert (
+        config_substitutor.substitute_config_variable("$ARG4", config_variables_dict)
+        == "val_of_ARG_4"
+    )
 
     # Test with multiple substitutions
     assert (
-        substitute_config_variable("prefix${arg0}$aRg3", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix${arg0}$aRg3", config_variables_dict
+        )
         == "prefixval_of_arg_0val_of_aRg_3"
     )
 
     # Escaped `$` (don't substitute, but return un-escaped string)
     assert (
-        substitute_config_variable(r"abc\${arg0}\$aRg3", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            r"abc\${arg0}\$aRg3", config_variables_dict
+        )
         == "abc${arg0}$aRg3"
     )
 
     # Multiple configurations together
     assert (
-        substitute_config_variable(
+        config_substitutor.substitute_config_variable(
             r"prefix$ARG4.$arg0/$aRg3:${ARG4}/\$dontsub${arg0}:${aRg3}.suffix",
             config_variables_dict,
         )
@@ -372,6 +249,7 @@ See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_context
     )
 
 
+@pytest.mark.filesystem
 def test_substitute_env_var_in_config_variable_file(
     monkeypatch, empty_data_context_with_config_variables
 ):
@@ -401,6 +279,7 @@ def test_substitute_env_var_in_config_variable_file(
     )
 
 
+@pytest.mark.unit
 def test_escape_all_config_variables(empty_data_context_with_config_variables):
     """
     Make sure that all types of input to escape_all_config_variables are escaped properly: str, dict, OrderedDict, list
@@ -515,6 +394,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     )
 
 
+@pytest.mark.unit
 def test_escape_all_config_variables_skip_substitution_vars(
     empty_data_context_with_config_variables,
 ):
@@ -760,6 +640,7 @@ def test_escape_all_config_variables_skip_substitution_vars(
     )
 
 
+@pytest.mark.filesystem
 def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypatch):
     """
     What does this test and why?
@@ -768,7 +649,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     """
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = ge.DataContext.create(
+    context = FileDataContext.create(
         project_root_dir=project_path,
         usage_statistics_enabled=False,
     )
@@ -802,26 +683,31 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
 
     datasource_config = DatasourceConfig(
-        class_name="SqlAlchemyDatasource",
-        credentials={
-            "drivername": "postgresql",
-            "host": "$DB_HOST",
-            "port": "65432",
-            "database": "${DB_NAME}",
-            "username": "${DB_USER}",
-            "password": "${DB_PWD}",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "credentials": {
+                "drivername": "postgresql",
+                "host": "$DB_HOST",
+                "port": "65432",
+                "database": "${DB_NAME}",
+                "username": "${DB_USER}",
+                "password": "${DB_PWD}",
+            },
         },
     )
+
     datasource_config_schema = DatasourceConfigSchema()
 
     # use context.add_datasource to test this by adding a datasource with values to substitute.
     context.add_datasource(
         initialize=False,
         name="test_datasource",
-        **datasource_config_schema.dump(datasource_config)
+        **datasource_config_schema.dump(datasource_config),
     )
 
-    assert context.list_datasources()[0]["credentials"] == {
+    assert context.list_datasources()[0]["execution_engine"]["credentials"] == {
         "drivername": "postgresql",
         "host": "DB_HOST_FROM_ENV_VAR_VALUE",
         "port": "65432",
@@ -839,7 +725,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
 
     test_datasource_credentials = context_with_variables_substituted_dict[
         "datasources"
-    ]["test_datasource"]["credentials"]
+    ]["test_datasource"]["execution_engine"]["credentials"]
 
     assert test_datasource_credentials["host"] == "DB_HOST_FROM_ENV_VAR_VALUE"
     assert test_datasource_credentials["username"] == "DB_USER"

@@ -1,59 +1,60 @@
 import os
-from contextlib import contextmanager
-from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions as gee
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,
-    secretmanager,
-    substitute_value_from_aws_secrets_manager,
-    substitute_value_from_azure_keyvault,
-    substitute_value_from_gcp_secret_manager,
-    substitute_value_from_secret_store,
 )
+from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_module_not_found():
-    with pytest.raises(gee.PluginModuleNotFoundError):
+    with pytest.raises(gx_exceptions.PluginModuleNotFoundError):
         load_class("foo", "bar")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_class_not_found():
-    with pytest.raises(gee.PluginClassNotFoundError):
+    with pytest.raises(gx_exceptions.PluginClassNotFoundError):
         load_class("TotallyNotARealClass", "great_expectations.datasource")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_class_name_is_None():
     with pytest.raises(TypeError):
         load_class(None, "great_expectations.datasource")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_class_name_is_not_string():
     for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
         with pytest.raises(TypeError):
             load_class(bad_input, "great_expectations.datasource")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_module_name_is_None():
     with pytest.raises(TypeError):
         load_class("foo", None)
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_module_name_is_not_string():
     for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
         with pytest.raises(TypeError):
             load_class(bad_input, "great_expectations.datasource")
 
 
+@pytest.mark.filesystem
 @pytest.mark.filterwarnings(
     "ignore:SQLAlchemy is not installed*:UserWarning:great_expectations.data_context.util"
 )
-def test_password_masker_mask_db_url(monkeypatch, tmp_path):
+def test_password_masker_mask_db_url(monkeypatch, tmp_path):  # noqa: PLR0912, PLR0915
     """
     What does this test and why?
     The PasswordMasker.mask_db_url() should mask passwords consistently in database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.
@@ -290,19 +291,36 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     assert PasswordMasker.mask_db_url("sqlite://", use_urlparse=True) == "sqlite://"
 
 
+@pytest.mark.unit
+def test_sanitize_config_azure_blob_store():
+    azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    assert (
+        PasswordMasker.mask_db_url(azure_url)
+        == "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=***;EndpointSuffix=core.windows.net"
+    )
+
+    azure_wrong_url: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    with pytest.raises(StoreConfigurationError):
+        PasswordMasker.mask_db_url(azure_wrong_url)
+
+    azure_missing_fields: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;EndpointSuffix=core.windows.net"
+    with pytest.raises(StoreConfigurationError):
+        PasswordMasker.mask_db_url(azure_missing_fields)
+
+
+@pytest.mark.unit
 def test_sanitize_config_raises_exception_with_bad_input(
     basic_data_context_config,
 ):
-
     # expect that an Exception is raised if something other than a dict is passed
     with pytest.raises(TypeError):
         PasswordMasker.sanitize_config(basic_data_context_config)
 
 
+@pytest.mark.unit
 def test_sanitize_config_doesnt_change_config_without_datasources(
     basic_data_context_config_dict,
 ):
-
     # expect no change without datasources
     config_without_creds = PasswordMasker.sanitize_config(
         basic_data_context_config_dict
@@ -314,13 +332,11 @@ def test_sanitize_config_doesnt_change_config_without_datasources(
 def test_sanitize_config_masks_cloud_store_backend_access_tokens(
     data_context_config_dict_with_cloud_backed_stores, ge_cloud_access_token
 ):
-
     # test that cloud store backend tokens have been properly masked
     config_with_creds_in_stores = PasswordMasker.sanitize_config(
         data_context_config_dict_with_cloud_backed_stores
     )
     for name, store_config in config_with_creds_in_stores["stores"].items():
-
         if (
             not store_config.get("store_backend")
             or not store_config["store_backend"].get("ge_cloud_credentials")
@@ -342,17 +358,17 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
                 ]["ge_cloud_credentials"]["access_token"]
                 == ge_cloud_access_token
             )
-            # expect that the GE Cloud token has been obscured
+            # expect that the GX Cloud token has been obscured
             assert (
                 store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
                 != ge_cloud_access_token
             )
 
 
+@pytest.mark.unit
 def test_sanitize_config_masks_execution_engine_connection_strings(
     data_context_config_dict_with_datasources, conn_string_password
 ):
-
     # test that datasource credentials have been properly masked
     unaltered_datasources = data_context_config_dict_with_datasources["datasources"]
     config_with_creds_masked = PasswordMasker.sanitize_config(
@@ -362,12 +378,10 @@ def test_sanitize_config_masks_execution_engine_connection_strings(
 
     # iterate through the processed datasources and check for correctness
     for name, processed_config in masked_datasources.items():
-
         # check if processed_config["execution_engine"]["connection_string"] exists
         if processed_config.get("execution_engine") and processed_config[
             "execution_engine"
         ].get("connection_string"):
-
             # check if the connection string contains a password
             if (
                 conn_string_password
@@ -389,8 +403,8 @@ def test_sanitize_config_masks_execution_engine_connection_strings(
             assert processed_config == unaltered_datasources[name]
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_arbitrarily_nested_sensitive_keys():
-
     # base case - this config should pass through unaffected
     config = {
         "some_field": "and a value",
@@ -402,8 +416,8 @@ def test_sanitize_config_with_arbitrarily_nested_sensitive_keys():
     assert res["some_other_field"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_password_field():
-
     # this case has a password field inside a credentials dict - expect it to be masked
     config = {"credentials": {"password": "my-super-duper-secure-passphrase-123"}}
     config_copy = safe_deep_copy(config)
@@ -412,10 +426,10 @@ def test_sanitize_config_with_password_field():
     assert res["credentials"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_url_field(
     conn_string_with_embedded_password, conn_string_password
 ):
-
     # this case has a url field inside a credentials dict - expect the password inside
     # of it to be masked
     config = {"credentials": {"url": conn_string_with_embedded_password}}
@@ -426,10 +440,10 @@ def test_sanitize_config_with_url_field(
     assert PasswordMasker.MASKED_PASSWORD_STRING in res["credentials"]["url"]
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_nested_url_field(
     conn_string_password, conn_string_with_embedded_password
 ):
-
     # this case has a connection string in an execution_engine dict
     config = {
         "execution_engine": {"connection_string": conn_string_with_embedded_password}
@@ -444,8 +458,8 @@ def test_sanitize_config_with_nested_url_field(
     )
 
 
+@pytest.mark.unit
 def test_sanitize_config_regardless_of_parent_key():
-
     # expect this config still be masked
     config = {
         "some_field": "and a value",
@@ -461,7 +475,6 @@ def test_sanitize_config_regardless_of_parent_key():
 
 @pytest.mark.cloud
 def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
-
     # expect the access token to be found and masked
     config = {
         "store_backend": {
@@ -477,6 +490,7 @@ def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
     )
 
 
+@pytest.mark.unit
 def test_sanitize_config_works_with_list():
     config = {"some_key": [{"access_token": "12345"}]}
     config_copy = safe_deep_copy(config)
@@ -485,6 +499,7 @@ def test_sanitize_config_works_with_list():
     assert res["some_key"][0]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_parse_substitution_variable():
     """
     What does this test and why?
@@ -502,229 +517,3 @@ def test_parse_substitution_variable():
     assert parse_substitution_variable("some_$tring") is None
     assert parse_substitution_variable("${SOME_$TRING}") is None
     assert parse_substitution_variable("$SOME_$TRING") == "SOME_"
-
-
-@contextmanager
-def does_not_raise():
-    yield
-
-
-@pytest.mark.parametrize(
-    "input_value,method_to_patch,return_value",
-    [
-        ("any_value", None, "any_value"),
-        ("secret|any_value", None, "secret|any_value"),
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
-            "great_expectations.data_context.util.substitute_value_from_aws_secrets_manager",
-            "success",
-        ),
-        (
-            "secret|projects/project_id/secrets/my_secret",
-            "great_expectations.data_context.util.substitute_value_from_gcp_secret_manager",
-            "success",
-        ),
-        (
-            "secret|https://my-vault-name.vault.azure.net/secrets/my_secret",
-            "great_expectations.data_context.util.substitute_value_from_azure_keyvault",
-            "success",
-        ),
-    ],
-)
-def test_substitute_value_from_secret_store(input_value, method_to_patch, return_value):
-    if method_to_patch:
-        with mock.patch(method_to_patch, return_value=return_value):
-            assert substitute_value_from_secret_store(value=input_value) == return_value
-    else:
-        assert substitute_value_from_secret_store(value=input_value) == return_value
-
-
-class MockedBoto3Client:
-    def __init__(self, secret_response):
-        self.secret_response = secret_response
-
-    def get_secret_value(self, *args, **kwargs):
-        return self.secret_response
-
-
-class MockedBoto3Session:
-    def __init__(self, secret_response):
-        self.secret_response = secret_response
-
-    def __call__(self):
-        return self
-
-    def client(self, *args, **kwargs):
-        return MockedBoto3Client(self.secret_response)
-
-
-@pytest.mark.parametrize(
-    "input_value,secret_response,raises,expected",
-    [
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
-            {"SecretString": "value"},
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
-            {"SecretBinary": b"dmFsdWU="},
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret|key",
-            {"SecretString": '{"key": "value"}'},
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret|key",
-            {"SecretBinary": b"eyJrZXkiOiAidmFsdWUifQ=="},
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-se%&et|key",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
-        (
-            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret:000000000-0000-0000-0000-00000000000|key",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
-    ],
-)
-def test_substitute_value_from_aws_secrets_manager(
-    input_value, secret_response, raises, expected
-):
-    with raises:
-        with mock.patch(
-            "great_expectations.data_context.util.boto3.session.Session",
-            return_value=MockedBoto3Session(secret_response),
-        ):
-            assert substitute_value_from_aws_secrets_manager(input_value) == expected
-
-
-class MockedSecretManagerServiceClient:
-    def __init__(self, secret_response):
-        self.secret_response = secret_response
-
-    def __call__(self):
-        return self
-
-    def access_secret_version(self, *args, **kwargs):
-        class Response:
-            pass
-
-        response = Response()
-        response._pb = Response()
-        response._pb.payload = Response()
-        response._pb.payload.data = self.secret_response
-
-        return response
-
-
-@pytest.mark.skipif(
-    secretmanager is None,
-    reason="Could not import 'secretmanager' from google.cloud in data_context.util",
-)
-@pytest.mark.parametrize(
-    "input_value,secret_response,raises,expected",
-    [
-        (
-            "secret|projects/project_id/secrets/my_secret",
-            b"value",
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|projects/project_id/secrets/my_secret|key",
-            b'{"key": "value"}',
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|projects/project_id/secrets/my_se%&et|key",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
-        (
-            "secret|projects/project_id/secrets/my_secret/version/A|key",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
-    ],
-)
-def test_substitute_value_from_gcp_secret_manager(
-    input_value, secret_response, raises, expected
-):
-    with raises:
-        with mock.patch(
-            "great_expectations.data_context.util.secretmanager.SecretManagerServiceClient",
-            return_value=MockedSecretManagerServiceClient(secret_response),
-        ):
-            assert substitute_value_from_gcp_secret_manager(input_value) == expected
-
-
-class MockedSecretClient:
-    def __init__(self, secret_response):
-        self.secret_response = secret_response
-
-    def __call__(self, *args, **kwargs):
-        return self
-
-    def get_secret(self, *args, **kwargs):
-        class Response:
-            pass
-
-        response = Response()
-        response.value = self.secret_response
-        return response
-
-
-@mock.patch("great_expectations.data_context.util.DefaultAzureCredential", new=object)
-@pytest.mark.parametrize(
-    "input_value,secret_response,raises,expected",
-    [
-        (
-            "secret|https://my-vault-name.vault.azure.net/secrets/my-secret",
-            "value",
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|https://my-vault-name.vault.azure.net/secrets/my-secret|key",
-            '{"key": "value"}',
-            does_not_raise(),
-            "value",
-        ),
-        (
-            "secret|https://my-vault-name.vault.azure.net/secrets/my-se%&et|key",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
-        (
-            "secret|https://my_vault_name.vault.azure.net/secrets/my-secret/A0000000000000000000000000000000|key",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
-    ],
-)
-def test_substitute_value_from_azure_keyvault(
-    input_value, secret_response, raises, expected
-):
-    with raises:
-        with mock.patch(
-            "great_expectations.data_context.util.SecretClient",
-            return_value=MockedSecretClient(secret_response),
-        ):
-            assert substitute_value_from_azure_keyvault(input_value) == expected

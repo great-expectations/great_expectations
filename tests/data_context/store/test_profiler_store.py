@@ -4,7 +4,6 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -37,9 +36,9 @@ def test_profiler_store_set_adds_valid_key(
     assert len(empty_profiler_store.list_keys()) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_profiler_store_integration(
-    empty_data_context: DataContext,
+    empty_data_context,
     profiler_store_name: str,
     profiler_name: str,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
@@ -104,13 +103,10 @@ def test_profiler_store_integration(
     }
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict(
+def test_gx_cloud_response_json_to_object_dict(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
-    store = ProfilerStore(store_name="profiler_store")
-
     profiler_id = "b1445fa5-d034-45d7-a4ae-d6dca19b207b"
 
     profiler_config = profiler_config_with_placeholder_args.to_dict()
@@ -126,7 +122,7 @@ def test_ge_cloud_response_json_to_object_dict(
     expected = profiler_config
     expected["id"] = profiler_id
 
-    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+    actual = ProfilerStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
 

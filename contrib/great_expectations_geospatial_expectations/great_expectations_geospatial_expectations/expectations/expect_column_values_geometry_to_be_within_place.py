@@ -1,16 +1,8 @@
-from typing import Optional
-
 import geopy
 import pandas as pd
 import pygeos as geos
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -21,7 +13,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.geometry.within_place"
     condition_value_keys = (
@@ -34,7 +25,6 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         column_shape_format = kwargs.get("column_shape_format")
         place = kwargs.get("place")
         geocoder = kwargs.get("geocoder")
@@ -51,7 +41,7 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
                 # Specify the default parameters for Nominatim and run query. User is responsible for config and query params otherwise.
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
-            except:
+            except Exception:
                 raise Exception(
                     "Geocoding configuration and query failed to produce a valid result."
                 )
@@ -103,40 +93,37 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryToBeWithinPlace(ColumnMapExpectation):
-    """
-    Expect that column values as geometries are within a place that can be returned through geocoding (as a shape)
+    """Expect that column values as geometries are within a place that can be returned through geocoding (as a shape).
 
-    expect_column_values_geometry_to_be_near_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_geometry_to_be_near_shape is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
-            The column name.
-            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
-            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
+            The column name. \
+            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
+            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL. \
             Values must be in longitude - latitude format for this method to work.
 
     Keyword Args:
-        place: str
+        place (str): \
             The country, place, address, etc. to query. Expect to return a geometry from OpenStreetMaps (Nominatim)
-
-        column_shape_format: str
-            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
+        column_shape_format (str): \
+            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-
-        geocoder: str
+        geocoder (str): \
             Geocoder from GeoPy to use to return the shape. While this is generic, the api is required to be available from GeoPy and must return a geometry.
-
-        geocoder_config: dict(str)
+        geocoder_config (dict str): \
             arguments to initialize the GeoPy geocoder. e.g. for paid services, an API_key is usually required. See GeoPy for reference.
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
     Notes:
-        The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
-        Other Coordinate Reference Systems are not yet supported.
-        See Nominatim for appropriate use of the service as open-source. Requests are subject to timeout and blocking.
-        Frequent queries should be cached locally and use (expect_column_value_geometries_to_be_within_shape)
+        * The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
+        * Other Coordinate Reference Systems are not yet supported.
+        * See Nominatim for appropriate use of the service as open-source. Requests are subject to timeout and blocking.
+        * Frequent queries should be cached locally and use (expect_column_value_geometries_to_be_within_shape)
     """
 
     # These examples will be shown in the public gallery.
@@ -206,35 +193,6 @@ class ExpectColumnValuesGeometryToBeWithinPlace(ColumnMapExpectation):
         "geocoder": "nominatim",
         "geocoder_config": dict(user_agent="great_expectations.hacakthon-2022"),
     }
-
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

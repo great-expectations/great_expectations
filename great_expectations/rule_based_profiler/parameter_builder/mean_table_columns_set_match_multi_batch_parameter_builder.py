@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import numpy as np
 
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValue,
-    MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -23,10 +22,14 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
+    )
+    from great_expectations.rule_based_profiler.metric_computation_result import (
+        MetricValues,
     )
 
 
@@ -42,8 +45,8 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
     Step-4: Compute mean value of match scores as "success_ratio" (divide sum of scores by number of Batch objects).
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
         "single_batch_mode",
@@ -52,7 +55,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         "reduce_scalar_metric",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
@@ -86,12 +89,13 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             data_context=data_context,
         )
 
+    @override
     def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -105,7 +109,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve "table.columns" metric values for all Batch objects.
@@ -122,8 +126,8 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set(one_batch_table_columns_names_value)
-            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
+            set(one_batch_table_columns_names_value)  # type: ignore[arg-type] # could be dict
+            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value  # type: ignore[union-attr] # not all iterable
         ]
 
         multi_batch_table_columns_names_as_set: Set[str] = set().union(

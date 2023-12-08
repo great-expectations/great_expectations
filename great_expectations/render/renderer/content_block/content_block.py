@@ -1,9 +1,10 @@
 import logging
 import traceback
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Dict, Optional, Type, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.alias_types import JSONValues
+from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
@@ -13,6 +14,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.render import (
     CollapseContent,
     LegacyRendererType,
+    RenderedComponentContent,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
@@ -23,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 class ContentBlockRenderer(Renderer):
-    _rendered_component_type = TextContent
+    _rendered_component_type: Type[RenderedComponentContent] = TextContent
     _default_header = ""
 
-    _default_content_block_styling = {"classes": ["col-12"]}
+    _default_content_block_styling: Dict[str, JSONValues] = {"classes": ["col-12"]}
 
     _default_element_styling = {}
 
@@ -71,7 +73,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_list(
+    def _render_list(  # noqa: PLR0913, PLR0912
         cls,
         render_object: list,
         exception_list_content_block: bool,
@@ -85,7 +87,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
             False if isinstance(render_object[0], ExpectationValidationResult) else None
         )
         for obj_ in render_object:
-
             expectation_type = cls._get_expectation_type(obj_)
 
             content_block_fn = cls._get_content_block_fn(expectation_type)
@@ -113,7 +114,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     exception_traceback = traceback.format_exc()
                     exception_message = (
                         data_docs_exception_message
-                        + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                        + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                     )
                     logger.error(exception_message)
 
@@ -135,7 +136,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             runtime_configuration=runtime_configuration,
                             **kwargs,
                         )
-            else:
+            else:  # noqa: PLR5501
                 if isinstance(obj_, ExpectationValidationResult):
                     content_block_fn = (
                         cls._missing_content_block_fn
@@ -208,7 +209,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(
+    def _render_other(  # noqa: PLR0912, PLR0913
         cls,
         render_object: Any,
         exception_list_content_block: bool,
@@ -241,7 +242,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 
@@ -261,7 +262,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         runtime_configuration=runtime_configuration,
                         **kwargs,
                     )
-        else:
+        else:  # noqa: PLR5501
             if isinstance(render_object, ExpectationValidationResult):
                 content_block_fn = (
                     cls._missing_content_block_fn
@@ -290,7 +291,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation):
+    def _render_expectation_meta_notes(cls, expectation):  # noqa: PLR0912
         if not expectation.meta.get("notes"):
             return None
         else:
@@ -416,10 +417,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _missing_content_block_fn(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         return []

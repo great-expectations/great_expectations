@@ -3,7 +3,7 @@ import pytest
 from great_expectations.core import ExpectationSuite
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_alice_fixture_generation(
     alice_columnar_table_single_batch,
 ):
@@ -20,13 +20,15 @@ def test_alice_fixture_generation(
     )
     assert (
         len(
-            alice_columnar_table_single_batch["expected_expectation_suite"].expectations
+            alice_columnar_table_single_batch[
+                "expected_expectation_suite"
+            ].expectation_configurations
         )
-        == 24
+        == 22
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_bobby_fixture_generation(
     bobby_columnar_table_multi_batch,
 ):
@@ -43,7 +45,7 @@ def test_bobby_fixture_generation(
         len(
             bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
                 "expected_expectation_suite"
-            ].expectations
+            ].expectation_configurations
         )
         == 39
     )

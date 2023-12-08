@@ -1,0 +1,103 @@
+{
+    "title": "ParquetAsset",
+    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "parquet",
+            "enum": [
+                "parquet"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "path": {
+            "title": "Path",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
+        },
+        "engine": {
+            "title": "Engine",
+            "default": "auto",
+            "type": "string"
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        },
+        "use_nullable_dtypes": {
+            "title": "Use Nullable Dtypes",
+            "default": false,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Extra keyword arguments that will be passed to the reader method",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "path"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

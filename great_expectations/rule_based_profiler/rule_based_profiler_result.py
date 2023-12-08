@@ -1,7 +1,15 @@
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from __future__ import annotations
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Dict, List, Optional
+
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import (
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationSuite,  # noqa: TCH001
+)
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -9,21 +17,40 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
 )
-from great_expectations.rule_based_profiler.parameter_container import ParameterNode
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterNode,  # noqa: TCH001
+)
 from great_expectations.types import SerializableDictDot
 
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
 
+
+@public_api
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
-    "RuleBasedProfilerResult" is an immutable "dataclass" object, designed to hold results with auxiliary information of
-    executing "RuleBasedProfiler.run()" method.  Principal properties are: "fully_qualified_parameter_names_by_domain",
-    "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation"
-    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled).
+    ``RuleBasedProfilerResult`` is an immutable ``dataclass`` object which holds the results of executing the ``RuleBasedProfiler.run()`` method.
+
+    Properties represents the configuration of the Rule-Based Profiler (effective configuration if run via a DataAssistant or auto-initializing expectation), with all run-time overrides properly reconciled.
+
+    Args:
+        fully_qualified_parameter_names_by_domain:
+            `dict` of `Domain` keys and a list of their parameter names.
+        parameter_values_for_fully_qualified_parameter_names_by_domain:
+            `dict` of `Domain` and nested `ParameterNode` mappings.
+        expectation_configurations:
+            List of `ExpectationConfiguration` objects.
+        citation:
+            `dict` of citations.
+        catch_exceptions (boolean): \
+            Defaults to False.
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+
     """
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
@@ -34,17 +61,24 @@ class RuleBasedProfilerResult(SerializableDictDot):
     citation: dict
     rule_domain_builder_execution_time: Dict[str, float]
     rule_execution_time: Dict[str, float]
+    rule_exception_tracebacks: Dict[str, Optional[str]]
+    catch_exceptions: bool = field(default=False)
     # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
+    @override
     def to_dict(self) -> dict:
         """
-        Returns: This RuleBasedProfilerResult as dictionary (JSON-serializable for RuleBasedProfilerResult objects).
+        Returns:
+            This `RuleBasedProfilerResult` as dictionary (JSON-serializable for `RuleBasedProfilerResult` objects).
         """
         domain: Domain
         fully_qualified_parameter_names: List[str]
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
+        parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = (self.parameter_values_for_fully_qualified_parameter_names_by_domain or {})
         return {
             "fully_qualified_parameter_names_by_domain": [
                 {
@@ -64,7 +98,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
                         data=parameter_values_for_fully_qualified_parameter_names
                     ),
                 }
-                for domain, parameter_values_for_fully_qualified_parameter_names in self.parameter_values_for_fully_qualified_parameter_names_by_domain.items()
+                for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
             ],
             "expectation_configurations": [
                 expectation_configuration.to_json_dict()
@@ -73,19 +107,31 @@ class RuleBasedProfilerResult(SerializableDictDot):
             "citation": self.citation,
         }
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    @override
+    def to_json_dict(self) -> dict[str, JSONValues]:
         """
-        Returns: This RuleBasedProfilerResult as JSON-serializable dictionary.
+        Returns the `RuleBasedProfilerResult` as a JSON-serializable dictionary.
+
+        Returns:
+            Dictionary containing only JSON compatible python primitives.
         """
         return self.to_dict()
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE,
         args_payload_fn=get_expectation_suite_usage_statistics,
     )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
-        Returns: "ExpectationSuite" object, built from properties, populated into this "RuleBasedProfilerResult" object.
+        Retrieve the `ExpectationSuite` generated during the `RuleBasedProfiler` run.
+
+        Args:
+            expectation_suite_name: The name of the desired `ExpectationSuite`.
+
+        Returns:
+            `ExpectationSuite`
         """
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,

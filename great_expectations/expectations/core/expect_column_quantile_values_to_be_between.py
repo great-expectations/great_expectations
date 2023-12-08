@@ -1,12 +1,18 @@
-from typing import Dict, List, Optional
+from numbers import Number
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
+from typing_extensions import TypedDict
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.compatibility import pydantic
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -21,123 +27,108 @@ from great_expectations.render import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererSchema,
+    RendererTableValue,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 from great_expectations.util import isclose
+from great_expectations.validator.validator import (
+    ValidationDependencies,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
+class QuantileRange(TypedDict):
+    quantiles: List[float]
+    value_ranges: List[List[Union[None, int, float]]]
+
+
+class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     # noinspection PyUnresolvedReferences
-    """Expect specific provided column quantiles to be between provided minimum and maximum values.
+    """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
-           ``quantile_ranges`` must be a dictionary with two keys:
+    expect_column_quantile_values_to_be_between is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-               * ``quantiles``: (list of float) increasing ordered list of desired quantile values
+    For example:
+    ::
 
-               * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
-                 and upper bound (inclusive) for the corresponding quantile. These values must be [min, max] ordered.
+        # my_df.my_col = [1,2,2,3,3,3,4]
+        >>> my_df.expect_column_quantile_values_to_be_between(
+            "my_col",
+            {
+                "quantiles": [0., 0.333, 0.6667, 1.],
+                "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
+            }
+        )
+        {
+          "success": True,
+            "result": {
+              "observed_value": {
+                "quantiles: [0., 0.333, 0.6667, 1.],
+                "values": [1, 2, 3, 4],
+              }
+              "element_count": 7,
+              "missing_count": 0,
+              "missing_percent": 0.0,
+              "details": {
+                "success_details": [true, true, true, true]
+              }
+            }
+          }
+        }
 
+    expect_column_quantile_values_to_be_between can be computationally intensive for large datasets.
 
-           For each provided range:
+    Args:
+        column (str): \
+            The column name.
+        quantile_ranges (dictionary with keys 'quantiles' and 'value_ranges'): \
+            Key 'quantiles' is an increasingly ordered list of desired quantile values (floats). \
+            Key 'value_ranges' is a list of 2-value lists that specify a lower and upper bound (inclusive) \
+            for the corresponding quantile (with [min, max] ordering). The length of the 'quantiles' list \
+            and the 'value_ranges' list must be equal.
+        allow_relative_error (boolean or string): \
+            Whether to allow relative error in quantile communications on backends that support or require it.
 
-               * min_value and max_value are both inclusive.
-               * If min_value is None, then max_value is treated as an upper bound only
-               * If max_value is None, then min_value is treated as a lower bound only
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-           The length of the quantiles list and quantile_values list must be equal.
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-           For example:
-           ::
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
-               # my_df.my_col = [1,2,2,3,3,3,4]
-               >>> my_df.expect_column_quantile_values_to_be_between(
-                   "my_col",
-                   {
-                       "quantiles": [0., 0.333, 0.6667, 1.],
-                       "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
-                   }
-               )
-               {
-                 "success": True,
-                   "result": {
-                     "observed_value": {
-                       "quantiles: [0., 0.333, 0.6667, 1.],
-                       "values": [1, 2, 3, 4],
-                     }
-                     "element_count": 7,
-                     "missing_count": 0,
-                     "missing_percent": 0.0,
-                     "details": {
-                       "success_details": [true, true, true, true]
-                     }
-                   }
-                 }
-               }
+    Notes:
+        * min_value and max_value are both inclusive.
+        * If min_value is None, then max_value is treated as an upper bound only
+        * If max_value is None, then min_value is treated as a lower bound only
+        * details.success_details field in the result object is customized for this expectation
 
-           `expect_column_quantile_values_to_be_between` can be computationally intensive for large datasets.
+    See Also:
+        [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
+        [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
+        [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
+    """
 
-           expect_column_quantile_values_to_be_between is a \
-           :func:`column_aggregate_expectation
-           <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-           Args:
-               column (str): \
-                   The column name.
-               quantile_ranges (dictionary): \
-                   Quantiles and associated value ranges for the column. See above for details.
-               allow_relative_error (boolean or string): \
-                   Whether to allow relative error in quantile communications on backends that support or require it.
-
-           Other Parameters:
-               result_format (str or None): \
-                   Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                   For more detail, see :ref:`result_format <result_format>`.
-               include_config (boolean): \
-                   If True, then include the expectation config as part of the result object. \
-                   For more detail, see :ref:`include_config`.
-               catch_exceptions (boolean or None): \
-                   If True, then catch exceptions and include them as part of the result object. \
-                   For more detail, see :ref:`catch_exceptions`.
-               meta (dict or None): \
-                   A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                   modification. For more detail, see :ref:`meta`.
-
-           Returns:
-               An ExpectationSuiteValidationResult
-
-               Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-               :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-           Notes:
-               These fields in the result object are customized for this expectation:
-               ::
-               details.success_details
-
-           See Also:
-               :func:`expect_column_min_to_be_between \
-               <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_min_to_be_between>`
-
-               :func:`expect_column_max_to_be_between \
-               <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_max_to_be_between>`
-
-               :func:`expect_column_median_to_be_between \
-               <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_median_to_be_between>`
-
-           """
+    quantile_ranges: QuantileRange
+    allow_relative_error: Union[bool, str] = False
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -153,305 +144,169 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
-        "auto",
-        "profiler_config",
     )
 
-    quantile_value_ranges_estimator_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="quantile_value_ranges_estimator",
-        metric_name="column.quantile_values",
-        metric_multi_batch_parameter_builder_name=None,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs={
-            "quantiles": f"{VARIABLES_KEY}quantiles",
-            "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
-        },
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        estimator=f"{VARIABLES_KEY}estimator",
-        n_resamples=f"{VARIABLES_KEY}n_resamples",
-        random_seed=f"{VARIABLES_KEY}random_seed",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
-        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
-        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-        truncate_values=f"{VARIABLES_KEY}truncate_values",
-        round_decimals=f"{VARIABLES_KEY}round_decimals",
-        evaluation_parameter_builder_configs=None,
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        quantile_value_ranges_estimator_parameter_builder_config,
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_quantile_values_to_be_between_rule": {
-                "variables": {
-                    "quantiles": [
-                        0.25,
-                        0.5,
-                        0.75,
-                    ],
-                    "allow_relative_error": "linear",
-                    "estimator": "exact",
-                    "include_estimator_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": None,
-                        "upper_bound": None,
-                    },
-                    "round_decimals": None,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_quantile_values_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "quantile_ranges": {
-                            "quantiles": f"{VARIABLES_KEY}quantiles",
-                            "value_ranges": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        },
-                        "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    }
-                ],
-            },
-        },
-    )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "quantile_ranges": None,
-        "result_format": "BASIC",
-        "allow_relative_error": False,
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-        "auto": False,
-        "profiler_config": default_profiler_config,
-    }
     args_keys = (
         "column",
         "quantile_ranges",
         "allow_relative_error",
     )
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
+    @pydantic.validator("quantile_ranges")
+    def validate_quantile_ranges(
+        cls, quantile_ranges: QuantileRange
+    ) -> Optional[QuantileRange]:
         try:
-            assert (
-                "quantile_ranges" in configuration.kwargs
-            ), "quantile_ranges must be provided"
-            assert isinstance(
-                configuration.kwargs["quantile_ranges"], dict
-            ), "quantile_ranges should be a dictionary"
-
             assert all(
-                [
-                    True if None in x or x == sorted(x) else False
-                    for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
-                ]
+                True
+                if None in x
+                else x == sorted([val for val in x if val is not None])
+                for x in quantile_ranges["value_ranges"]
             ), "quantile_ranges must consist of ordered pairs"
-
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        # Ensuring actual quantiles and their value ranges match up
-        quantile_ranges = configuration.kwargs["quantile_ranges"]
-        quantiles = quantile_ranges["quantiles"]
-        quantile_value_ranges = quantile_ranges["value_ranges"]
-
-        if len(quantiles) != len(quantile_value_ranges):
+        if len(quantile_ranges["quantiles"]) != len(quantile_ranges["value_ranges"]):
             raise ValueError(
                 "quantile_values and quantiles must have the same number of elements"
             )
 
+        return quantile_ranges
+
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration["kwargs"],
-            ["column", "quantile_ranges", "row_condition", "condition_parser"],
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        template_str = "quantiles must be within the following value ranges."
+
+        if renderer_configuration.include_column_name:
+            template_str = f"$column {template_str}"
+
+        renderer_configuration.template_str = template_str
+
+        quantiles: list = renderer_configuration.kwargs.get("quantile_ranges", {}).get(
+            "quantiles", []
         )
+        value_ranges: list = renderer_configuration.kwargs.get(
+            "quantile_ranges", {}
+        ).get("value_ranges", [])
 
-        header_params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
-
-        header_template_str = "quantiles must be within the following value ranges."
-
-        if include_column_name:
-            header_template_str = f"$column {header_template_str}"
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            header_template_str = (
-                conditional_template_str
-                + ", then "
-                + header_template_str[0].lower()
-                + header_template_str[1:]
-            )
-            header_params_with_json_schema.update(conditional_params)
-
-        quantile_ranges = (
-            params.get("quantile_ranges") if params.get("quantile_ranges") else {}
-        )
-        quantiles = (
-            quantile_ranges.get("quantiles") if quantile_ranges.get("quantiles") else []
-        )
-        value_ranges = (
-            quantile_ranges.get("value_ranges")
-            if quantile_ranges.get("value_ranges")
-            else []
-        )
-
-        table_header_row = [
-            {"schema": {"type": "string"}, "value": "Quantile"},
-            {"schema": {"type": "string"}, "value": "Min Value"},
-            {"schema": {"type": "string"}, "value": "Max Value"},
+        header_row = [
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Quantile"
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Min Value"
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Max Value"
+            ),
         ]
-        table_rows = []
 
+        renderer_configuration.header_row = header_row
+
+        table = []
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
-
         for quantile, value_range in zip(quantiles, value_ranges):
             quantile_string = quantile_strings.get(quantile, f"{quantile:3.2f}")
-            table_rows.append(
+            value_range_lower: Union[Number, str] = (
+                value_range[0] if value_range[0] else "Any"
+            )
+            value_rage_lower_type = (
+                RendererValueType.NUMBER if value_range[0] else RendererValueType.STRING
+            )
+            value_range_upper: Union[Number, str] = (
+                value_range[1] if value_range[1] else "Any"
+            )
+            value_range_upper_type = (
+                RendererValueType.NUMBER if value_range[0] else RendererValueType.STRING
+            )
+            table.append(
                 [
-                    {
-                        "value": quantile_string,
-                        "schema": {"type": "string"},
-                    },
-                    {
-                        "value": value_range[0]
-                        if value_range[0] is not None
-                        else "Any",
-                        "schema": {
-                            "type": "number" if value_range[0] is not None else "string"
-                        },
-                    },
-                    {
-                        "value": value_range[1]
-                        if value_range[1] is not None
-                        else "Any",
-                        "schema": {
-                            "type": "number" if value_range[1] is not None else "string"
-                        },
-                    },
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=quantile_string,
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=value_rage_lower_type),
+                        value=value_range_lower,
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=value_range_upper_type),
+                        value=value_range_upper,
+                    ),
                 ]
             )
 
-        return (
-            header_template_str,
-            header_params_with_json_schema,
-            styling,
-            table_header_row,
-            table_rows,
-        )
+        renderer_configuration.table = table
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
-        (
-            header_template_str,
-            header_params_with_json_schema,
-            _,
-            table_header_row,
-            table_rows,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+    ) -> RenderedAtomicContent:
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
+        renderer_configuration = cls._prescriptive_template(
+            renderer_configuration=renderer_configuration
+        )
+        header_row = [value.dict() for value in renderer_configuration.header_row]
+        table = []
+        for row in renderer_configuration.table:
+            table.append([value.dict() for value in row])
         value_obj = renderedAtomicValueSchema.load(
             {
                 "header": {
                     "schema": {"type": "StringValueType"},
                     "value": {
-                        "template": header_template_str,
-                        "params": header_params_with_json_schema,
+                        "template": renderer_configuration.template_str,
+                        "params": renderer_configuration.params.dict(),
                     },
                 },
-                "header_row": table_header_row,
-                "table": table_rows,
+                "header_row": header_row,
+                "table": table,
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "TableType"},
             }
         )
-        rendered = RenderedAtomicContent(
+        return RenderedAtomicContent(
             name=AtomicPrescriptiveRendererType.SUMMARY,
             value=value_obj,
             value_type="TableType",
         )
-        return rendered
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
-        styling = runtime_configuration.get("styling")
+        _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration["kwargs"],
             ["column", "quantile_ranges", "row_condition", "condition_parser"],
@@ -523,10 +378,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         if result.result is None or result.result.get("observed_value") is None:
@@ -565,76 +419,73 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @classmethod
     def _atomic_diagnostic_observed_value_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
+        renderer_configuration: RendererConfiguration,
     ):
-        template_string = None
-        params_with_json_schema = None
-        table_header_row = None
-        table_rows = None
+        if (
+            renderer_configuration.result.result is None
+            or renderer_configuration.result.result.get("observed_value") is None
+        ):
+            renderer_configuration.template_str = "--"
+            return renderer_configuration
 
-        if result.result is None or result.result.get("observed_value") is None:
-            template_string = "--"
-            params_with_json_schema = {}
-            return (
-                template_string,
-                params_with_json_schema,
-                table_header_row,
-                table_rows,
-            )
+        quantiles = renderer_configuration.result.result.get("observed_value", {}).get(
+            "quantiles", []
+        )
+        value_ranges = renderer_configuration.result.result.get(
+            "observed_value", {}
+        ).get("values", [])
 
-        quantiles = result.result.get("observed_value", {}).get("quantiles", [])
-        value_ranges = result.result.get("observed_value", {}).get("values", [])
-
-        table_header_row = [
-            {"schema": {"type": "string"}, "value": "Quantile"},
-            {"schema": {"type": "string"}, "value": "Value"},
+        header_row = [
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Quantile"
+            ),
+            RendererTableValue(
+                schema=RendererSchema(type=RendererValueType.STRING), value="Value"
+            ),
         ]
-        table_rows = []
 
+        table = []
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
-
         for idx, quantile in enumerate(quantiles):
-            quantile_string = quantile_strings.get(quantile)
-            table_rows.append(
+            quantile_string = quantile_strings.get(quantile) or f"{quantile:3.2f}"
+            table.append(
                 [
-                    {
-                        "value": quantile_string
-                        if quantile_string
-                        else f"{quantile:3.2f}",
-                        "schema": {"type": "string"},
-                    },
-                    {"value": value_ranges[idx], "schema": {"type": "number"}},
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.STRING),
+                        value=quantile_string,
+                    ),
+                    RendererTableValue(
+                        schema=RendererSchema(type=RendererValueType.NUMBER),
+                        value=value_ranges[idx],
+                    ),
                 ]
             )
 
-        return template_string, params_with_json_schema, table_header_row, table_rows
+        renderer_configuration.header_row = header_row
+        renderer_configuration.table = table
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
     ):
-        (
-            template_string,
-            params_with_json_schema,
-            table_header_row,
-            table_rows,
-        ) = cls._atomic_diagnostic_observed_value_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        if template_string is not None:
+        renderer_configuration = cls._atomic_diagnostic_observed_value_template(
+            renderer_configuration=renderer_configuration,
+        )
+        if renderer_configuration.template_str:
             value_obj = renderedAtomicValueSchema.load(
                 {
-                    "template": template_string,
+                    "template": renderer_configuration.template_str,
                     "params": {},
                     "schema": {"type": "StringValueType"},
                 }
@@ -645,10 +496,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 value_type="StringValueType",
             )
         else:
+            header_row = [value.dict() for value in renderer_configuration.header_row]
+            table = []
+            for row in renderer_configuration.table:
+                table.append([value.dict() for value in row])
             value_obj = renderedAtomicValueSchema.load(
                 {
-                    "header_row": table_header_row,
-                    "table": table_rows,
+                    "header_row": header_row,
+                    "table": table,
                     "schema": {"type": "TableType"},
                 }
             )
@@ -662,10 +517,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     @renderer(renderer_type=LegacyDescriptiveRendererType.QUANTILE_TABLE)
     def _descriptive_quantile_table_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must pass in result."
@@ -687,7 +541,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                             else f"{quantile:3.2f}",
                             "tooltip": {
                                 "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
-                                if quantile == 0.50
+                                if quantile == 0.50  # noqa: PLR2004
                                 else "expect_column_quantile_values_to_be_between"
                             },
                         },
@@ -720,15 +574,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        all_dependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+    ) -> ValidationDependencies:
+        validation_dependencies: ValidationDependencies = (
+            super().get_validation_dependencies(
+                configuration, execution_engine, runtime_configuration
+            )
         )
         # column.quantile_values expects a "quantiles" key
-        all_dependencies["metrics"]["column.quantile_values"].metric_value_kwargs[
+        validation_dependencies.get_metric_configuration(
+            metric_name="column.quantile_values"
+        ).metric_value_kwargs["quantiles"] = configuration.kwargs["quantile_ranges"][
             "quantiles"
-        ] = configuration.kwargs["quantile_ranges"]["quantiles"]
-        return all_dependencies
+        ]
+        return validation_dependencies
 
     def _validate(
         self,

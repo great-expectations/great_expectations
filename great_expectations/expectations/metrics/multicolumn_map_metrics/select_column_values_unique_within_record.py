@@ -1,14 +1,17 @@
 import logging
 from functools import reduce
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
     multicolumn_condition_partial,
 )
 
@@ -43,7 +46,7 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
         num_columns = len(column_list)
 
         # An arbitrary "num_columns" value used for issuing an explanatory message as a warning.
-        if num_columns > 100:
+        if num_columns > 100:  # noqa: PLR2004
             logger.warning(
                 f"""Batch data with {num_columns} columns is detected.  Computing the "{cls.condition_metric_name}" \
 metric for wide tables using SQLAlchemy leads to long WHERE clauses for the underlying database engine to process.
@@ -55,7 +58,8 @@ metric for wide tables using SQLAlchemy leads to long WHERE clauses for the unde
                 sa.or_(
                     column_list[idx_src] == column_list[idx_dest],
                     sa.and_(
-                        column_list[idx_src] == None, column_list[idx_dest] == None
+                        column_list[idx_src] == None,  # noqa: E711
+                        column_list[idx_dest] == None,  # noqa: E711
                     ),
                 )
                 for idx_src in range(num_columns - 1)

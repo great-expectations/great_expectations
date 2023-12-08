@@ -1,0 +1,145 @@
+stages:
+  - stage: cloud_db_integration_and_performance_tests
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: bigquery_performance_test
+        timeoutInMinutes: 30 # this should be more than sufficient since the performance typically runs < 5 min
+        variables:
+          python.version: '3.8'
+
+        strategy:
+          matrix:
+            performance:
+              test_script: 'tests/performance/test_bigquery_benchmarks.py'
+              extra_args: '--bigquery --performance-tests --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True-V3] '
+          maxParallel: 1
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          # includes explicit install of chardet, which was causing errors in pipeline
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines chardet==3.0.4
+            displayName: 'Install dependencies'
+
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
+
+          - script: |
+              pip freeze > pip-freeze.txt
+              mkdir -p junit
+              pytest -v $(test_script) \
+                $(extra_args) \
+                --bigquery \
+                --junitxml=junit/test-results.xml \
+                 --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+            env:
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+
+          - task: PublishTestResults@2
+            inputs:
+              searchFolder: junit
+              testResultsFiles: test-results.xml
+
+          - publish: junit/benchmark.json
+            artifact: BenchmarkResult
+
+          # The pip freeze output could be helpful to reproduce performance test results.
+          - publish: pip-freeze.txt
+            artifact: PipFreeze
+
+      - job: bigquery_expectations_test
+        timeoutInMinutes: 150 # Each stage runs in about 60 min and 30 min respectively.
+        variables:
+          python.version: '3.8'
+
+        strategy:
+          matrix:
+            expectations_v3_api:
+              test_script: 'tests/test_definitions/test_expectations_v3_api.py'
+              extra_args: ''
+          maxParallel: 1
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          # includes explicit install of chardet, which was causing errors in pipeline
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines chardet==3.0.4
+            displayName: 'Install dependencies'
+
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
+
+          - script: |
+              pip freeze > pip-freeze.txt
+              mkdir -p junit
+              pytest -v $(test_script) \
+                $(extra_args) \
+                --bigquery \
+                --junitxml=junit/test-results.xml \
+                --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+            env:
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+
+      - job: snowflake_expectations_test
+        timeoutInMinutes: 45 # snowflake tests will run in about 30 min
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          # includes explicit install of grpcio-status and chardet, which was causing errors in pipeline
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test, snowflake]" pytest-azurepipelines chardet==3.0.4 grpcio-status
+            displayName: 'Install dependencies'
+
+          - script: |
+              pytest -v --snowflake tests/test_definitions/test_expectations_v3_api.py
+            displayName: 'pytest'
+            env:
+              SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
+              SNOWFLAKE_USER: $(SNOWFLAKE_USER)
+              SNOWFLAKE_PW: $(SNOWFLAKE_PW)
+              SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
+              SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
+              SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)

@@ -1,6 +1,7 @@
 from json import loads
 from typing import Dict
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.util import load_class
 from great_expectations.render import RenderedDocumentContent
@@ -12,14 +13,13 @@ from great_expectations.util import (
 
 class JsonSiteStore(Store):
     """
-    A JsonSiteStore manages the JSON artifacts of our renderers, which allows us to render them into final views in HTML by GE Cloud.
+    A JsonSiteStore manages the JSON artifacts of our renderers, which allows us to render them into final views in HTML by GX Cloud.
 
     """
 
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name=None
     ) -> None:
-
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -48,10 +48,12 @@ class JsonSiteStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    @override
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         ge_cloud_json_site_id = response_json["data"]["id"]
         json_site_dict = response_json["data"]["attributes"]["rendered_data_doc"]
@@ -65,11 +67,13 @@ class JsonSiteStore(Store):
     def deserialize(self, value):
         return RenderedDocumentContent(**loads(value))
 
+    @override
     def self_check(self, pretty_print) -> None:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

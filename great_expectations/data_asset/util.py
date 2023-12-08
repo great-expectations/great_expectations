@@ -1,9 +1,11 @@
 # Utility methods for dealing with DataAsset objects
+from __future__ import annotations
 
 import datetime
 import decimal
 import sys
 from functools import wraps
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -18,7 +20,7 @@ def parse_result_format(result_format):
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, str):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
-    else:
+    else:  # noqa: PLR5501
         if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
 
@@ -79,9 +81,11 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexity 20
+def recursively_convert_to_json_serializable(
+    test_obj: dict,
+) -> dict:
     """
-    Helper function to convert a dict object to one that is serializable
+    Helper function to convert an object to one that is serializable
 
     Args:
         test_obj: an object to attempt to convert a corresponding json-serializable object
@@ -93,6 +97,12 @@ def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexi
         test_obj may also be converted in place.
 
     """
+    return _recursively_convert_to_json_serializable(test_obj)
+
+
+def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
+    test_obj: Any,
+) -> Any:
     # If it's one of our types, we pass
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
         return test_obj
@@ -133,7 +143,7 @@ def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexi
         # test_obj[key] = test_obj[key].tolist()
         # If we have an array or index, convert it first to a list--causing coercion to float--and then round
         # to the number of digits for which the string representation will equal the float representation
-        return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
+        return [_recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
 
     # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
@@ -165,14 +175,14 @@ def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexi
         value_name = test_obj.name or "value"
         return [
             {
-                index_name: recursively_convert_to_json_serializable(idx),
-                value_name: recursively_convert_to_json_serializable(val),
+                index_name: _recursively_convert_to_json_serializable(idx),
+                value_name: _recursively_convert_to_json_serializable(val),
             }
             for idx, val in test_obj.items()
         ]
 
     elif isinstance(test_obj, pd.DataFrame):
-        return recursively_convert_to_json_serializable(
+        return _recursively_convert_to_json_serializable(
             test_obj.to_dict(orient="records")
         )
 
@@ -188,7 +198,7 @@ def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexi
 
     else:
         raise TypeError(
-            f"{str(test_obj)} is of type {type(test_obj).__name__} which cannot be serialized."
+            f"{test_obj!s} is of type {type(test_obj).__name__} which cannot be serialized."
         )
 
 
@@ -212,5 +222,5 @@ def ensure_row_condition_is_correct(row_condition_string) -> None:
         )
     if "\n" in row_condition_string:
         raise InvalidExpectationConfigurationError(
-            f"{repr(row_condition_string)} cannot be serialized to json. Do not introduce \\n in configuration."
+            f"{row_condition_string!r} cannot be serialized to json. Do not introduce \\n in configuration."
         )

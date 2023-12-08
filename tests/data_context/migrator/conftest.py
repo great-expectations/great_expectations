@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Final, List, Optional, Tuple, Union
 
 import pytest
 
@@ -14,7 +14,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
 )
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
-from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 
 class StubUsageStats:
@@ -29,7 +28,7 @@ class StubUsageStats:
 
 
 class StubCheckpointStore:
-    def get_checkpoint(self, name: str, ge_cloud_id: Optional[str]) -> CheckpointConfig:
+    def get_checkpoint(self, name: str, id: Optional[str]) -> CheckpointConfig:
         return CheckpointConfig(name=name, class_name="Checkpoint")
 
 
@@ -67,6 +66,14 @@ class DummyDatasource:
     pass
 
 
+class StubConfigurationProvider:
+    def substitute_config(self, config):
+        return config
+
+
+_ANONYMIZED_USAGE_STATS_CONFIG: Final = AnonymizedUsageStatisticsConfig(enabled=True)
+
+
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
@@ -76,10 +83,9 @@ class StubBaseDataContext:
         self,
         anonymized_usage_statistics_config: Optional[
             AnonymizedUsageStatisticsConfig
-        ] = AnonymizedUsageStatisticsConfig(enabled=True),
+        ] = _ANONYMIZED_USAGE_STATS_CONFIG,
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
-        profiler_names: Tuple[Optional[str]] = ("my_profiler",),
         validation_results_keys: Tuple[Optional[str]] = ("some_key",),
         datasource_names: Tuple[Optional[str]] = ("my_datasource",),
     ):
@@ -91,7 +97,6 @@ class StubBaseDataContext:
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
         self._checkpoint_names = checkpoint_names
         self._expectation_suite_names = expectation_suite_names
-        self._profiler_names = profiler_names
         self._validation_results_keys = validation_results_keys
         self._datasource_names = datasource_names
 
@@ -111,11 +116,12 @@ class StubBaseDataContext:
 
     @property
     def variables(self) -> DataContextVariables:
-
         config = DataContextConfig(
             anonymous_usage_statistics=self._anonymized_usage_statistics_config
         )
-        return EphemeralDataContextVariables(config=config)
+        return EphemeralDataContextVariables(
+            config=config, config_provider=StubConfigurationProvider()
+        )
 
     @property
     def _datasource_store(self):
@@ -147,12 +153,6 @@ class StubBaseDataContext:
     def list_checkpoints(self) -> List[str]:
         return list(self._checkpoint_names)
 
-    def list_profilers(self) -> List[str]:
-        return list(self._profiler_names)
-
-    def get_profiler(self, name: str) -> RuleBasedProfiler:
-        return RuleBasedProfiler(name, config_version=1.0, rules={})
-
 
 @pytest.fixture
 def stub_base_data_context() -> StubBaseDataContext:
@@ -162,7 +162,9 @@ def stub_base_data_context() -> StubBaseDataContext:
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
+    StubBaseDataContext
+):
     return StubBaseDataContext(
         anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
             enabled=False
@@ -191,14 +193,12 @@ def empty_serialized_configuration_bundle() -> dict:
                 "expectation_validation_result": False,
                 "globally": False,
             },
-            "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [],
         "expectation_suites": [],
-        "profilers": [],
         "validation_results": {},
     }
 
@@ -210,9 +210,20 @@ def serialized_configuration_bundle() -> dict:
         "checkpoints": [
             {
                 "class_name": "Checkpoint",
-                "config_version": None,
+                "config_version": 1.0,
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_checkpoint",
+                "profilers": [],
+                "action_list": [],
+                "batch_request": {},
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": None,
+                "ge_cloud_id": None,
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": None,
+                "validations": [],
             }
         ],
         "data_context_variables": {
@@ -226,9 +237,8 @@ def serialized_configuration_bundle() -> dict:
                 "expectation_validation_result": False,
                 "globally": False,
             },
-            "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [
@@ -249,16 +259,6 @@ def serialized_configuration_bundle() -> dict:
                 "expectation_suite_name": "my_suite",
                 "expectations": [],
                 "ge_cloud_id": None,
-            }
-        ],
-        "profilers": [
-            {
-                "class_name": "RuleBasedProfiler",
-                "config_version": 1.0,
-                "module_name": "great_expectations.rule_based_profiler",
-                "name": "my_profiler",
-                "rules": {},
-                "variables": {},
             }
         ],
         "validation_results": {

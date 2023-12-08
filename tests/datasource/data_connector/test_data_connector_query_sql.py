@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -12,12 +12,15 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource import SimpleSqlalchemyDatasource
 
+# module level markers
+pytestmark = pytest.mark.sqlite
+
 
 @pytest.fixture()
 def create_db_and_instantiate_simple_sql_datasource():
     data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
             "test_sets",
@@ -73,7 +76,7 @@ def test_data_connector_query_non_recognized_param(
     )
 
     # Test 1: non valid_batch_identifiers_limit
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         batch_definition_list = (
             my_sql_datasource.get_batch_definition_list_from_batch_request(
@@ -87,7 +90,7 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 2: Unrecognized custom_filter is not a function
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         my_sql_datasource.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="taxi_multi_batch_sql_datasource",
@@ -98,9 +101,9 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 3: batch_identifiers is not dict
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list = (
+        batch_definition_list = (  # noqa: F841
             my_sql_datasource.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     datasource_name="taxi_multi_batch_sql_datasource",
@@ -153,7 +156,7 @@ def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasou
     assert len(batch_definition_list) == 2
 
     # illegal limit
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
@@ -173,9 +176,9 @@ def test_data_connector_query_illegal_index_and_limit_combination(
     my_sql_datasource: SimpleSqlalchemyDatasource = (
         create_db_and_instantiate_simple_sql_datasource
     )
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(

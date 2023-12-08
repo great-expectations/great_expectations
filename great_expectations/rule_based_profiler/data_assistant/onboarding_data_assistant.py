@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
@@ -9,7 +11,6 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
     OnboardingDataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     ColumnDomainBuilder,
@@ -76,6 +77,7 @@ class OnboardingDataAssistant(DataAssistant):
             validator=validator,
         )
 
+    @override
     def get_variables(self) -> Optional[Dict[str, Any]]:
         """
         Returns:
@@ -83,6 +85,7 @@ class OnboardingDataAssistant(DataAssistant):
         """
         return None
 
+    @override
     def get_rules(self) -> Optional[List[Rule]]:
         """
         Returns:
@@ -164,6 +167,7 @@ class OnboardingDataAssistant(DataAssistant):
             categorical_columns_rule,
         ]
 
+    @override
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
@@ -173,6 +177,7 @@ class OnboardingDataAssistant(DataAssistant):
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
+            rule_exception_tracebacks=data_assistant_result.rule_exception_tracebacks,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
@@ -195,8 +200,8 @@ class OnboardingDataAssistant(DataAssistant):
         table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
         )
-        table_columns_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder()
+        table_columns_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder(
+            include_nested=True
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
@@ -208,6 +213,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -301,7 +307,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -355,6 +361,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -366,6 +373,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -377,6 +385,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_quantile_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs={
                 "quantiles": f"{VARIABLES_KEY}quantiles",
                 "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
@@ -391,6 +400,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_median_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -402,6 +412,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_mean_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -413,6 +424,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_standard_deviation_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -653,6 +665,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -664,6 +677,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -770,6 +784,9 @@ class OnboardingDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_text_columns_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for text columns.
+        """
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
@@ -810,6 +827,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_min_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -821,6 +839,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_max_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -894,6 +913,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "upper_bound": None,
             },
             "round_decimals": 0,
+            "candidate_regexes": None,
             "success_ratio": 7.5e-1,
         }
         parameter_builders: List[ParameterBuilder] = [
@@ -946,7 +966,7 @@ class OnboardingDataAssistant(DataAssistant):
             DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder()
         )
         metric_name: str = "column.value_counts"
-        name: str = sanitize_parameter_name(name=metric_name)
+        name: str = sanitize_parameter_name(name=metric_name, suffix=None)
         column_value_counts_metric_multi_batch_parameter_builder_for_metrics = (
             MetricMultiBatchParameterBuilder(
                 name=name,
@@ -975,12 +995,14 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
         column_unique_proportion_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.unique_proportion",
+            suffix=None,
             metric_value_kwargs=None,
         )
 

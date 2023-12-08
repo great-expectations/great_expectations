@@ -1,13 +1,18 @@
 from typing import Optional
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -23,20 +28,27 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, value, _metrics, **kwargs):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
         return column_lengths == value
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, value, _metrics, **kwargs):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
         return column_lengths == value
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, value, _metrics, **kwargs):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
         return column_lengths == value
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -51,9 +63,14 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if metric.metric_name == "column_values.value_length.equals.condition":
-            dependencies["column_values.value_length.map"] = MetricConfiguration(
-                metric_name="column_values.value_length.map",
+        if (
+            metric.metric_name
+            == f"column_values.value_length.equals.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+        ):
+            dependencies[
+                f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+            ] = MetricConfiguration(
+                metric_name=f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
             )
 
@@ -84,7 +101,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         return F.length(column)
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         column,
         _metrics,
@@ -92,9 +109,11 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        **kwargs
+        **kwargs,
     ):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
 
         metric_series = None
         if min_value is not None and max_value is not None:
@@ -131,7 +150,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         return metric_series
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         column,
         _metrics,
@@ -139,9 +158,11 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        **kwargs
+        **kwargs,
     ):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -170,7 +191,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
             return column_lengths >= min_value
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         column,
         _metrics,
@@ -178,9 +199,11 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        **kwargs
+        **kwargs,
     ):
-        column_lengths, _, _ = _metrics.get("column_values.value_length.map")
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -206,6 +229,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
             return column_lengths >= min_value
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -220,9 +244,14 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if metric.metric_name == "column_values.value_length.between.condition":
-            dependencies["column_values.value_length.map"] = MetricConfiguration(
-                metric_name="column_values.value_length.map",
+        if (
+            metric.metric_name
+            == f"column_values.value_length.between.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+        ):
+            dependencies[
+                f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+            ] = MetricConfiguration(
+                metric_name=f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
             )
 

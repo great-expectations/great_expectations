@@ -44,8 +44,7 @@ PROJECT_HELP_COMMENT = f"""
 config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 
 # Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
+# Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
 datasources: {{}}
 """
 
@@ -54,7 +53,7 @@ CONFIG_VARIABLES_INTRO = """
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or
+# When GX encounters substitution syntax (like `my_key: ${my_value}` or
 # `my_key: $my_value`) in the great_expectations.yml file, it will attempt
 # to replace the value of `my_key` with the value from an environment
 # variable `my_value` or a corresponding key read from this config file,
@@ -70,7 +69,7 @@ CONFIG_VARIABLES_INTRO = """
 """
 
 CONFIG_VARIABLES_TEMPLATE = (
-    f"{CONFIG_VARIABLES_INTRO}instance_id: {str(uuid.uuid4())}{os.linesep}"
+    f"{CONFIG_VARIABLES_INTRO}instance_id: {uuid.uuid4()!s}{os.linesep}"
 )
 
 # Create yaml strings

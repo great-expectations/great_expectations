@@ -79,7 +79,7 @@ class LegacyDatasource:
         how_to_guide_url:
         maturity: Experimental
         maturity_details:
-            api_stability: Medium (supported via native ‘gs://' syntax in Pandas and Pyspark; medium because we expect configuration to evolve)
+            api_stability: Medium (supported via native `gs://' syntax in Pandas and Pyspark; medium because we expect configuration to evolve)
             implementation_completeness: Medium (works via passthrough, not via CLI)
             unit_test_coverage: Minimal
             integration_infrastructure_test_coverage: Minimal
@@ -94,7 +94,7 @@ class LegacyDatasource:
         how_to_guide_url:
         maturity: In Roadmap (Sub-Experimental - "Not Impossible")
         maturity_details:
-            api_stability: N/A (Supported on Databricks Spark via ‘wasb://' / ‘wasps://' url; requires local download first for Pandas)
+            api_stability: N/A (Supported on Databricks Spark via `wasb://' / `wasps://' url; requires local download first for Pandas)
             implementation_completeness: Minimal
             unit_test_coverage: N/A
             integration_infrastructure_test_coverage: N/A
@@ -384,17 +384,6 @@ class LegacyDatasource:
     def build_batch_kwargs(
         self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
     ):
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         generator_obj = self.get_batch_kwargs_generator(batch_kwargs_generator)
         if partition_id is not None:
             kwargs["partition_id"] = partition_id

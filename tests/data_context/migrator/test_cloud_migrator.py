@@ -6,13 +6,11 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import CloudMigrator
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.migrator.cloud_migrator import MigrationResponse
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from tests.data_context.migrator.conftest import StubBaseDataContext
 
@@ -26,9 +24,9 @@ def migrator_factory(
     def _create_migrator(context: Any) -> CloudMigrator:
         return gx.CloudMigrator(
             context=context,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-            ge_cloud_access_token=ge_cloud_access_token,
+            cloud_base_url=ge_cloud_base_url,
+            cloud_organization_id=ge_cloud_organization_id,
+            cloud_access_token=ge_cloud_access_token,
         )
 
     return _create_migrator
@@ -69,9 +67,9 @@ def mock_successful_migration(
             CloudMigrator.migrate(
                 context=context,
                 test_migrate=test_migrate,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+                cloud_base_url=ge_cloud_base_url,
+                cloud_access_token=ge_cloud_access_token,
+                cloud_organization_id=ge_cloud_organization_id,
             )
 
         return mock_send_usage_message
@@ -92,18 +90,18 @@ def mock_failed_migration(
             CloudMigrator,
             "_migrate_to_cloud",
             return_value=None,
-            side_effect=ge_exceptions.MigrationError,
+            side_effect=gx_exceptions.MigrationError,
         ), mock.patch(
             f"{CloudMigrator.__module__}.send_usage_message",
             autospec=True,
         ) as mock_send_usage_message:
-            with pytest.raises(ge_exceptions.MigrationError):
+            with pytest.raises(gx_exceptions.MigrationError):
                 CloudMigrator.migrate(
                     context=context,
                     test_migrate=test_migrate,
-                    ge_cloud_base_url=ge_cloud_base_url,
-                    ge_cloud_access_token=ge_cloud_access_token,
-                    ge_cloud_organization_id=ge_cloud_organization_id,
+                    cloud_base_url=ge_cloud_base_url,
+                    cloud_access_token=ge_cloud_access_token,
+                    cloud_organization_id=ge_cloud_organization_id,
                 )
 
         return mock_send_usage_message
@@ -111,6 +109,7 @@ def mock_failed_migration(
     return _build_mock_migrate
 
 
+@pytest.mark.unit
 def assert_stdout_is_accurate_and_properly_ordered(
     stdout: str, statements: List[str]
 ) -> None:
@@ -123,7 +122,6 @@ def assert_stdout_is_accurate_and_properly_ordered(
         ), f"Statement '{statement}' occurred in the wrong order"
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test__send_configuration_bundle_sends_valid_http_request(
     serialized_configuration_bundle: dict,
@@ -152,7 +150,6 @@ def test__send_configuration_bundle_sends_valid_http_request(
     )
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test__send_validation_results_sends_valid_http_request(
     migrator_with_mock_context: CloudMigrator,
@@ -183,7 +180,7 @@ def test__send_validation_results_sends_valid_http_request(
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-validation-results",
         json={
             "data": {
-                "type": GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT,
+                "type": GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT,
                 "attributes": {
                     "organization_id": ge_cloud_organization_id,
                     "result": validation_results[keys[0]],
@@ -195,7 +192,6 @@ def test__send_validation_results_sends_valid_http_request(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 class TestUsageStats:
     def test_migrate_successful_event(
         self, ge_cloud_organization_id: str, mock_successful_migration: Callable
@@ -244,7 +240,6 @@ class TestUsageStats:
         mock_send_usage_message.assert_not_called()
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize("test_migrate", [True, False])
 @pytest.mark.parametrize("include_datasources", [True, False])
@@ -298,7 +293,6 @@ def test__migrate_to_cloud_outputs_warnings(
     assert len(actual_logs) == expected_log_count
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "test_migrate,expected_statements",
@@ -314,7 +308,6 @@ def test__migrate_to_cloud_outputs_warnings(
                 "Bundled 1 Datasource(s):",
                 "Bundled 1 Checkpoint(s):",
                 "Bundled 1 Expectation Suite(s):",
-                "Bundled 1 Profiler(s):",
                 "[Step 2/4]: Preparing validation results",
                 "[Step 3/4]: Sending context configuration",
                 "[Step 4/4]: Sending validation results",
@@ -332,7 +325,6 @@ def test__migrate_to_cloud_outputs_warnings(
                 "Bundled 1 Datasource(s):",
                 "Bundled 1 Checkpoint(s):",
                 "Bundled 1 Expectation Suite(s):",
-                "Bundled 1 Profiler(s):",
                 "[Step 2/4]: Preparing validation results",
                 "[Step 3/4]: Sending context configuration",
                 "[Step 4/4]: Sending validation results",
@@ -360,7 +352,6 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
     )
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
@@ -369,7 +360,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     migrator = migrator_with_stub_base_data_context
 
     with mock.patch(
-        f"great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
+        "great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
         autospec=True,
     ) as mock_post:
         mock_post.return_value = MigrationResponse(
@@ -387,7 +378,6 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
         "Bundled 1 Datasource(s):",
         "Bundled 1 Checkpoint(s):",
         "Bundled 1 Expectation Suite(s):",
-        "Bundled 1 Profiler(s):",
         "[Step 2/4]: Preparing validation results",
         "[Step 3/4]: Sending context configuration",
         "There was an error sending your configuration to GX Cloud!",
@@ -402,7 +392,6 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     )
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
@@ -418,7 +407,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     )
 
     with mock.patch(
-        f"great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
+        "great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
         autospec=True,
     ) as mock_post:
         # Ensure that the first call, which is the bundle request, goes through successfully
@@ -435,7 +424,6 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
         "Bundled 1 Datasource(s):",
         "Bundled 1 Checkpoint(s):",
         "Bundled 1 Expectation Suite(s):",
-        "Bundled 1 Profiler(s):",
         "[Step 2/4]: Preparing validation results",
         "[Step 3/4]: Sending context configuration",
         "[Step 4/4]: Sending validation results",

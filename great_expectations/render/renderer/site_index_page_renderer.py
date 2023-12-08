@@ -322,7 +322,8 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _get_formatted_datetime(cls, _datetime):
         if isinstance(_datetime, datetime.datetime):
-            local_datetime = _datetime.astimezone(tz=tzlocal.get_localzone())
+            local_zone = tzlocal.get_localzone()
+            local_datetime = _datetime.astimezone(tz=local_zone)
             return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
         elif isinstance(_datetime, str):
             dt = parse(_datetime)
@@ -477,6 +478,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
             """
             exception_traceback = traceback.format_exc()
             exception_message += (
-                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
             )
             logger.error(exception_message)

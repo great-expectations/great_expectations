@@ -1,9 +1,10 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.5.0
     hooks:
       - id: check-ast
       - id: check-json
+        exclude: invalid_json_file.json|tests/test_sets/fixed_distributional_test_dataset.json|tests/test_sets/expected_cli_results_default.json
       - id: check-yaml
         exclude: docs/.*|tests/data_context/fixtures/bad_yml/great_expectations\.yml
       - id: end-of-file-fixer
@@ -12,36 +13,35 @@ repos:
         exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
         exclude: docs/.*
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
+      - id: no-commit-to-branch
+        args: [--branch, develop, --branch, main]
+      - id: detect-private-key
+        exclude: tests/test_fixtures/database_key_test*
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.11.0
     hooks:
-      - id: black
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
+      - id: black-jupyter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.1.6"
     hooks:
-      - id: flake8
-        files: ^(great_expectations/core)
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.7.2
-    hooks:
-      - id: pyupgrade
-        args: ["--py3-plus"]
+      - id: ruff
+        files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.
+        args: ["--fix"]
+  # Github Actions Linter
+  # Need to be able to inline ignore errors
+  # https://github.com/rhysd/actionlint/issues/237
+  # - repo: https://github.com/rhysd/actionlint
+  #   rev: main
+  #   hooks:
+  #     - id: actionlint
 # https://pre-commit.ci/
 ci:
     autofix_commit_msg: |
         [pre-commit.ci] auto fixes from pre-commit.com hooks
 
         for more information, see https://pre-commit.ci
-    autofix_prs: false
+    autofix_prs: true
     autoupdate_branch: 'develop'
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
     autoupdate_schedule: monthly
-    # skip flake8 enforcement with pre-commit CI as it is enforced elsewhere
-    # flake8 hook also doesn't have an options to auto-fix
-    # pre-commit hooks should either have mechanisms for auto-fixing or should be simple to do manually
-    skip: [flake8]
     submodules: false

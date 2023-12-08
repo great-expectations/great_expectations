@@ -1,3 +1,5 @@
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -8,7 +10,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.util import convert_pandas_series_decimal_to_float_dtype
 
 
 class ColumnSum(ColumnAggregateMetricProvider):
@@ -16,6 +18,7 @@ class ColumnSum(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
+        convert_pandas_series_decimal_to_float_dtype(data=column, inplace=True)
         return column.sum()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)

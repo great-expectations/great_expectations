@@ -1,8 +1,6 @@
-from ruamel import yaml
-
-import great_expectations as ge
-from great_expectations.checkpoint import SimpleCheckpoint
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
@@ -14,14 +12,15 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (  #
     GETTING_STARTED_CHECKPOINT_NAME,
 )
 
-context = ge.get_context()
+yaml = YAMLHandler()
+context = gx.get_context()
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert context
 
 # First configure a new Datasource and add to DataContext
 
-# <snippet>
-datasource_yaml = f"""
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py datasource_yaml">
+datasource_yaml = """
 name: getting_started_datasource
 class_name: Datasource
 execution_engine:
@@ -43,7 +42,7 @@ data_connectors:
 """
 # </snippet>
 
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
 datasource_yaml = datasource_yaml.replace(
     "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
@@ -60,7 +59,7 @@ batch_request = BatchRequest(
     limit=1000,
 )
 
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
 batch_request = BatchRequest(
     datasource_name=GETTING_STARTED_DATASOURCE_NAME,
@@ -71,11 +70,11 @@ batch_request = BatchRequest(
 
 expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 expectation_suite_name = GETTING_STARTED_EXPECTATION_SUITE_NAME
 
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name=expectation_suite_name
@@ -84,7 +83,6 @@ validator = context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
 
-# <snippet>
 # Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
 exclude_column_names = [
     "vendor_id",
@@ -106,7 +104,6 @@ exclude_column_names = [
     "total_amount",
     "congestion_surcharge",
 ]
-# </snippet>
 
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
@@ -123,10 +120,8 @@ validator.expectation_suite = suite
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
-my_checkpoint_config = f"""
+my_checkpoint_config = """
 name: getting_started_checkpoint
-config_version: 1.0
-class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -137,7 +132,7 @@ validations:
         index: -1
     expectation_suite_name: getting_started_expectation_suite_taxi.demo
 """
-# Note : these overrides are for internal GE purposes, and are intended to helps us better understand how the
+# Note : these overrides are for internal GX purposes, and are intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 my_checkpoint_config = my_checkpoint_config.replace(
     "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME
@@ -154,21 +149,29 @@ my_checkpoint_config = my_checkpoint_config.replace(
 my_checkpoint_config = yaml.load(my_checkpoint_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
-# In the current test, site_names are set to None because we do not want to update and build data_docs
-# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-checkpoint = SimpleCheckpoint(
-    **my_checkpoint_config, data_context=context, site_names=None
+# In the current test, an action_list without a build data docs is passed to .run because we do not want to update
+# and build data_docs
+checkpoint = context.add_or_update_checkpoint(
+    **my_checkpoint_config,
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+    ],
 )
-checkpoint_result = checkpoint.run(site_names=None)
+checkpoint_result = checkpoint.run()
 assert checkpoint_result.run_results
 
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
-# <snippet>
-yaml_config = f"""
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config">
+yaml_config = """
 name: getting_started_checkpoint
-config_version: 1.0
-class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -180,7 +183,7 @@ validations:
     expectation_suite_name: getting_started_expectation_suite_taxi.demo
 """
 # </snippet>
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 yaml_config = yaml_config.replace(
     "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME
@@ -196,10 +199,20 @@ yaml_config = yaml_config.replace(
 my_new_checkpoint_config = yaml.load(yaml_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
-# In the current test, site_names are set to None because we do not want to update and build data_docs
-# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-new_checkpoint = SimpleCheckpoint(
-    **my_new_checkpoint_config, data_context=context, site_names=None
+# In the current test, an action_list without a build data docs is passed to .run because we do not want to update
+# and build data_docs
+new_checkpoint = context.add_or_update_checkpoint(
+    **my_new_checkpoint_config,
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+    ],
 )
-new_checkpoint_result = new_checkpoint.run(site_names=None)
+new_checkpoint_result = new_checkpoint.run()
 assert new_checkpoint_result.run_results

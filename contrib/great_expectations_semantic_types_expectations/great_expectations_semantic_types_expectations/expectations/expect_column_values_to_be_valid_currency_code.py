@@ -1,14 +1,12 @@
-import json
-from typing import Optional, Tuple
+from typing import Tuple
 
 from moneyed import list_all_currencies
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -28,14 +26,12 @@ def is_valid_currency_code(code: str, currency_codes: Tuple[str]) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesCurrencyCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.currency_code"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         currency_codes: Tuple[str] = generate_all_currency_codes()
 
         return column.apply(lambda x: is_valid_currency_code(x, currency_codes))
@@ -46,14 +42,24 @@ class ColumnValuesCurrencyCode(ColumnMapMetricProvider):
     #     raise NotImplementedError
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    # @column_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column, **kwargs):
-    #     raise NotImplementedError
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        currency_codes: Tuple[str] = generate_all_currency_codes()
+
+        # Register the UDF
+        is_valid_currency_code_udf = F.udf(is_valid_currency_code, types.BooleanType())
+
+        # Apply the UDF to the column
+        result_column = F.when(
+            is_valid_currency_code_udf(column, F.lit(currency_codes)), True
+        ).otherwise(False)
+        return result_column
 
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidCurrencyCode(ColumnMapExpectation):
     """Expect values in this column to be valid currency codes (three capital letters).
+
     See ISO-4217 for more information.
     """
 
@@ -100,39 +106,11 @@ class ExpectColumnValuesToBeValidCurrencyCode(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": ["hackathon", "currency", "type-entities", "semantic-types"],
         "contributors": [
-            "@lucasasmith",
+            "@lucasasmith" "@calvingdu",
         ],
         "requirements": ["py-moneyed"],
     }

@@ -1,25 +1,32 @@
 from itertools import zip_longest
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    add_values_with_json_schema_from_list_in_params,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import substitute_none_for_missing
 
 
-class ExpectTableColumnsToMatchOrderedList(TableExpectation):
+class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     """Expect the columns to exactly match a specified list.
 
-    expect_table_columns_to_match_ordered_list is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_table_columns_to_match_ordered_list is a \
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column_list (list of str): \
@@ -27,25 +34,22 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
+
+    column_list: Union[list, set, EvaluationParameterDict, None]
 
     library_metadata = {
         "maturity": "production",
@@ -66,110 +70,51 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         "row_condition",
         "condition_parser",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "column_list": None,
-        "result_format": "BASIC",
-        "column": None,
-        "column_index": None,
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = ("column_list",)
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
-        # Ensuring that a proper value has been provided
-        try:
-            assert "column_list" in configuration.kwargs, "column_list is required"
-            assert (
-                isinstance(configuration.kwargs["column_list"], (list, set, dict))
-                or configuration.kwargs["column_list"] is None
-            ), "column_list must be a list, set, or None"
-            if isinstance(configuration.kwargs["column_list"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["column_list"]
-                ), 'Evaluation Parameter dict for column_list kwarg must have "$PARAMETER" key.'
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="column_list", param_type=RendererValueType.ARRAY
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
+        params = renderer_configuration.params
 
-        if params["column_list"] is None:
+        if not params.column_list:
             template_str = "Must have a list of columns in a specific order, but that order is not specified."
-
         else:
             template_str = "Must have these columns in this order: "
-            for idx in range(len(params["column_list"]) - 1):
-                template_str += f"$column_list_{str(idx)}, "
-                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            template_str += cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
 
-            last_idx = len(params["column_list"]) - 1
-            template_str += f"$column_list_{str(last_idx)}"
-            params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
+        renderer_configuration.template_str = template_str
 
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list"),
-            },
-        }
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="column_list",
-        )
-        return (template_str, params_with_json_schema, styling)
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
 
@@ -179,12 +124,12 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         else:
             template_str = "Must have these columns in this order: "
             for idx in range(len(params["column_list"]) - 1):
-                template_str += f"$column_list_{str(idx)}, "
-                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+                template_str += f"$column_list_{idx!s}, "
+                params[f"column_list_{idx!s}"] = params["column_list"][idx]
 
             last_idx = len(params["column_list"]) - 1
-            template_str += f"$column_list_{str(last_idx)}"
-            params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
+            template_str += f"$column_list_{last_idx!s}"
+            params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
 
         return [
             RenderedStringTemplateContent(

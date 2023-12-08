@@ -1,29 +1,26 @@
 import os
+from typing import Dict, Tuple
 from unittest import mock
 
 import pandas as pd
 import pytest
 
-# noinspection PyBroadException
-try:
-    # noinspection PyUnresolvedReferences
-    from azure.storage.blob import BlobServiceClient
-except:
-    azure = None
-
-
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import aws, azure, google
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
+
+# noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
-    storage,
 )
 from great_expectations.util import is_library_loadable
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
+@pytest.mark.unit
 def test_constructor_with_boto3_options():
     # default instantiation
     PandasExecutionEngine()
@@ -38,6 +35,7 @@ def test_constructor_with_boto3_options():
     assert engine.config.get("boto3_options")["region_name"] == "us-east-1"
 
 
+@pytest.mark.unit
 def test_reader_fn():
     engine = PandasExecutionEngine()
 
@@ -58,6 +56,7 @@ def test_reader_fn():
     assert "<function" in str(fn_new)
 
 
+@pytest.mark.unit
 def test_get_domain_records_with_column_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
@@ -81,6 +80,7 @@ def test_get_domain_records_with_column_domain():
     ), "Data does not match after getting full access compute domain"
 
 
+@pytest.mark.unit
 def test_get_domain_records_with_column_pair_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
@@ -157,6 +157,7 @@ def test_get_domain_records_with_column_pair_domain():
     ), "Data does not match after getting full access compute domain"
 
 
+@pytest.mark.unit
 def test_get_domain_records_with_multicolumn_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
@@ -237,6 +238,7 @@ def test_get_domain_records_with_multicolumn_domain():
     ), "Data does not match after getting full access compute domain"
 
 
+@pytest.mark.unit
 def test_get_compute_domain_with_no_domain_kwargs():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
@@ -259,6 +261,7 @@ def test_get_compute_domain_with_no_domain_kwargs():
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
+@pytest.mark.unit
 def test_get_compute_domain_with_column_pair_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]})
@@ -276,6 +279,7 @@ def test_get_compute_domain_with_column_pair_domain():
     }, "Accessor kwargs have been modified"
 
 
+@pytest.mark.unit
 def test_get_compute_domain_with_multicolumn_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
@@ -294,6 +298,7 @@ def test_get_compute_domain_with_multicolumn_domain():
     }, "Accessor kwargs have been modified"
 
 
+@pytest.mark.unit
 def test_get_compute_domain_with_column_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
@@ -308,6 +313,7 @@ def test_get_compute_domain_with_column_domain():
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
 
+@pytest.mark.unit
 def test_get_compute_domain_with_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
@@ -333,6 +339,7 @@ def test_get_compute_domain_with_row_condition():
 
 
 # What happens when we filter such that no value meets the condition?
+@pytest.mark.unit
 def test_get_compute_domain_with_unmeetable_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
@@ -362,18 +369,19 @@ def test_get_compute_domain_with_unmeetable_row_condition():
 
 
 # Just checking that the Pandas Execution Engine can perform these in sequence
+@pytest.mark.unit
 def test_resolve_metric_bundle():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
 
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={"made-up-id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     mean = MetricConfiguration(
@@ -408,6 +416,7 @@ def test_resolve_metric_bundle():
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
+@pytest.mark.unit
 def test_resolve_metric_bundle_with_nonexistent_metric():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
 
@@ -426,12 +435,13 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     desired_metrics = (mean, stdev)
 
     # noinspection PyUnusedLocal
-    with pytest.raises(ge_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError):
         # noinspection PyUnusedLocal
-        metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+        engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
 
 # Making sure dataframe property is functional
+@pytest.mark.unit
 def test_dataframe_property_given_loaded_batch():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4]})
@@ -443,6 +453,7 @@ def test_dataframe_property_given_loaded_batch():
     assert engine.dataframe.equals(df)
 
 
+@pytest.mark.unit
 def test_get_batch_data(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -452,14 +463,19 @@ def test_get_batch_data(test_df):
     assert split_df.dataframe.shape == (120, 10)
 
     # No dataset passed to RuntimeDataBatchSpec
-    with pytest.raises(ge_exceptions.InvalidBatchSpecError):
+    with pytest.raises(gx_exceptions.InvalidBatchSpecError):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
+@pytest.mark.skipif(
+    not aws.boto3,
+    reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+)
+@pytest.mark.big
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     bucket, keys = test_s3_files_compressed
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
@@ -467,20 +483,29 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
 
 
 @pytest.mark.skipif(
-    not is_library_loadable(library_name="pyarrow")
-    and not is_library_loadable(library_name="fastparquet"),
+    not aws.boto3
+    or (
+        not is_library_loadable(library_name="pyarrow")
+        and not is_library_loadable(library_name="fastparquet")
+    ),
     reason="pyarrow and fastparquet are not installed",
 )
+@pytest.mark.big
 def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     bucket, keys = test_s3_files_parquet
     path = [key for key in keys if key.endswith(".parquet")][0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.dataframe.shape == test_df_small.shape
 
 
+@pytest.mark.skipif(
+    not aws.boto3,
+    reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+)
+@pytest.mark.big
 def test_get_batch_with_no_s3_configured():
     batch_spec = S3BatchSpec(
         path="s3a://i_dont_exist",
@@ -490,10 +515,11 @@ def test_get_batch_with_no_s3_configured():
     # if S3 was not configured
     execution_engine_no_s3 = PandasExecutionEngine()
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_s3.get_batch_data(batch_spec=batch_spec)
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -518,9 +544,14 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
+@pytest.mark.skipif(
+    not (azure.storage and azure.BlobServiceClient),
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
+@mock.patch(
+    "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
+)
+@pytest.mark.big
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
     PandasExecutionEngine()
@@ -535,9 +566,14 @@ def test_constructor_with_azure_options(mock_azure_conn):
     assert engine.config.get("azure_options")["account_url"] == "my_account_url"
 
 
-@mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
+@pytest.mark.skipif(
+    not (azure.storage and azure.BlobServiceClient),
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
+@mock.patch(
+    "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
+)
+@pytest.mark.big
 def test_get_batch_data_with_azure_batch_spec(
     mock_azure_conn,
     azure_batch_spec,
@@ -558,26 +594,28 @@ def test_get_batch_data_with_azure_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
+@pytest.mark.big
 def test_get_batch_with_no_azure_configured(azure_batch_spec):
     # if Azure BlobServiceClient was not configured
     execution_engine_no_azure = PandasExecutionEngine()
     execution_engine_no_azure._azure = None
 
     # Raises error due the connection object not being set
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)
 
 
 @pytest.mark.skipif(
-    storage is None,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.service_account",
+    "great_expectations.execution_engine.pandas_execution_engine.google.service_account",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
+@pytest.mark.big
 def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     # default instantiation
     PandasExecutionEngine()
@@ -593,12 +631,13 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
 
 
 @pytest.mark.skipif(
-    storage is None,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
+@pytest.mark.big
 def test_get_batch_data_with_gcs_batch_spec(
     mock_gcs_conn,
     gcs_batch_spec,
@@ -620,23 +659,29 @@ def test_get_batch_data_with_gcs_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
+@pytest.mark.skipif(
+    not google.storage,
+    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+)
+@pytest.mark.big
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
     # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
     # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
     # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
 
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
-    with pytest.raises(Exception):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
 
 
 @pytest.mark.skipif(
-    storage is None,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
+@pytest.mark.big
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
     # gcs_batchspec point to data that the ExecutionEngine does not have access to
     execution_engine_no_gcs = PandasExecutionEngine()
     # Raises error if batch_spec causes ExecutionEngine error
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)

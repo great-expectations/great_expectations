@@ -1,0 +1,24 @@
+# Validate that PR titles are prefixed with one of our accepted labels
+name: "PR Title Checker"
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - auto_merge_enabled
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - name : Check PR title validity
+      run: |
+        echo "${{ github.event.pull_request.title }}" | grep -E "^\\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB|RELEASE)\\]"
+        if [ $? -ne 0 ]; then
+        echo "Invalid PR title - please prefix with one of: [FEATURE] | [BUGFIX] | [DOCS] | [MAINTENANCE] | [CONTRIB] | [RELEASE]"
+          exit 1
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

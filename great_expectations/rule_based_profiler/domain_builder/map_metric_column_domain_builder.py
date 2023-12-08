@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
+from great_expectations.core.domain import Domain, SemanticDomainTypes  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -11,8 +14,9 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -27,7 +31,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses relative tolerance of specified map metric to identify domains.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         map_metric_name: str,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
@@ -134,12 +138,14 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of domains that match the desired tolerance limits.
@@ -199,6 +205,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             validator=validator,
             batch_ids=batch_ids,
             variables=variables,
+            runtime_configuration=runtime_configuration,
         )
         mean_table_row_count_as_float: float = (
             1.0 * sum(table_row_counts.values()) / num_batch_ids
@@ -262,7 +269,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         metric_configurations: Dict[str, List[MetricConfiguration]] = {
             column_name: [
                 MetricConfiguration(
-                    metric_name=f"{map_metric_name}.unexpected_count",
+                    metric_name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                     metric_domain_kwargs={
                         "column": column_name,
                         "batch_id": batch_id,
@@ -277,13 +284,14 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         return metric_configurations
 
     @staticmethod
-    def _get_column_names_satisfying_tolerance_limits(
+    def _get_column_names_satisfying_tolerance_limits(  # noqa: PLR0913
         validator: Validator,
         num_batch_ids: int,
         metric_configurations_by_column_name: Dict[str, List[MetricConfiguration]],
         mean_table_row_count_as_float: float,
         max_unexpected_ratio: float,
         min_max_unexpected_values_proportion: float,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[str]:
         """
         Compute figures of merit and return column names satisfying tolerance limits.
@@ -294,24 +302,26 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             mean_table_row_count_as_float: average number of records over available Batch objects.
             max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" averaged over numbers of records
             min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_ratio"
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of column names satisfying tolerance limits.
         """
         column_name: str
-        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
 
         resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], Any]
+            str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metric_configurations_by_column_name,
+            runtime_configuration=runtime_configuration,
         )
 
         metric_value: Any
         intra_batch_unexpected_ratios_by_column_name: Dict[str, List[float]] = {
             column_name: [
-                metric_value / mean_table_row_count_as_float
+                (metric_value or 0.0) / mean_table_row_count_as_float
                 for metric_value in resolved_metrics.values()
             ]
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()

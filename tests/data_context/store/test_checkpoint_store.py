@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
@@ -6,18 +8,18 @@ from unittest import mock
 import pytest
 from marshmallow.exceptions import ValidationError
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store import CheckpointStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
 )
+from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
@@ -39,7 +41,7 @@ def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMoc
     return store, mock_backend
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
     base_directory: str = str(Path(empty_data_context.root_directory) / "checkpoints")
@@ -246,7 +248,7 @@ def test_checkpoint_store(empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -285,45 +287,116 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict() -> None:
-    store = CheckpointStore(store_name="checkpoint_store")
-
-    checkpoint_id = "7b5e962c-3c67-4a6d-b311-b48061d52103"
-    checkpoint_config = {
-        "name": "oss_test_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "expectation_suite_name": "oss_test_expectation_suite",
-        "validations": [
+@pytest.mark.parametrize(
+    "response_json, expected, error_type",
+    [
+        pytest.param(
             {
-                "expectation_suite_name": "taxi.demo_pass",
+                "data": {
+                    "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                    "attributes": {
+                        "checkpoint_config": {
+                            "name": "oss_test_checkpoint",
+                            "config_version": 1.0,
+                            "class_name": "Checkpoint",
+                            "expectation_suite_name": "oss_test_expectation_suite",
+                            "validations": [
+                                {
+                                    "expectation_suite_name": "taxi.demo_pass",
+                                },
+                                {
+                                    "batch_request": {
+                                        "datasource_name": "oss_test_datasource",
+                                        "data_connector_name": "oss_test_data_connector",
+                                        "data_asset_name": "users",
+                                    },
+                                },
+                            ],
+                        }
+                    },
+                }
             },
             {
-                "batch_request": {
-                    "datasource_name": "oss_test_datasource",
-                    "data_connector_name": "oss_test_data_connector",
-                    "data_asset_name": "users",
-                },
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "expectation_suite_name": "oss_test_expectation_suite",
+                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "name": "oss_test_checkpoint",
+                "validations": [
+                    {"expectation_suite_name": "taxi.demo_pass"},
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "oss_test_data_connector",
+                            "datasource_name": "oss_test_datasource",
+                        },
+                    },
+                ],
             },
-        ],
-    }
-    response_json = {
-        "data": {
-            "id": checkpoint_id,
-            "attributes": {
-                "checkpoint_config": checkpoint_config,
+            None,
+            id="single_config",
+        ),
+        pytest.param({"data": []}, None, ValueError, id="empty_payload"),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                        "attributes": {
+                            "checkpoint_config": {
+                                "name": "oss_test_checkpoint",
+                                "config_version": 1.0,
+                                "class_name": "Checkpoint",
+                                "expectation_suite_name": "oss_test_expectation_suite",
+                                "validations": [
+                                    {
+                                        "expectation_suite_name": "taxi.demo_pass",
+                                    },
+                                    {
+                                        "batch_request": {
+                                            "datasource_name": "oss_test_datasource",
+                                            "data_connector_name": "oss_test_data_connector",
+                                            "data_asset_name": "users",
+                                        },
+                                    },
+                                ],
+                            }
+                        },
+                    }
+                ]
             },
-        }
-    }
-
-    expected = checkpoint_config
-    expected["ge_cloud_id"] = checkpoint_id
-
-    actual = store.ge_cloud_response_json_to_object_dict(response_json)
-
-    assert actual == expected
+            {
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "expectation_suite_name": "oss_test_expectation_suite",
+                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "name": "oss_test_checkpoint",
+                "validations": [
+                    {"expectation_suite_name": "taxi.demo_pass"},
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "oss_test_data_connector",
+                            "datasource_name": "oss_test_datasource",
+                        },
+                    },
+                ],
+            },
+            None,
+            id="single_config_in_list",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict(
+    response_json: dict, expected: dict | None, error_type: Exception | None
+) -> None:
+    if error_type:
+        with pytest.raises(error_type):
+            _ = CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+    else:
+        actual = CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+        assert actual == expected
 
 
 @pytest.mark.unit
@@ -380,7 +453,6 @@ def test_list_checkpoints(
     assert checkpoints == ["a.b.c", "d.e.f"]
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_checkpoints_cloud_mode(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
@@ -409,18 +481,15 @@ def test_delete_checkpoint(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_delete_checkpoint_with_cloud_id(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
-    store.delete_checkpoint(ge_cloud_id="abc123")
+    store.delete_checkpoint(id="abc123")
 
     mock_backend.remove_key.assert_called_once_with(
-        GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
-        )
+        GXCloudIdentifier(resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123")
     )
 
 
@@ -429,12 +498,12 @@ def test_delete_checkpoint_with_invalid_key_raises_error(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
 ) -> None:
     def _raise_key_error(_: Any) -> None:
-        raise ge_exceptions.InvalidKeyError(message="invalid key")
+        raise gx_exceptions.InvalidKeyError(message="invalid key")
 
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.remove_key.side_effect = _raise_key_error
 
-    with pytest.raises(ge_exceptions.CheckpointNotFoundError) as e:
+    with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
         store.delete_checkpoint(name="my_fake_checkpoint")
 
     assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
@@ -450,7 +519,7 @@ def test_get_checkpoint(
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.get.return_value = checkpoint_config
 
-    checkpoint = store.get_checkpoint(name=checkpoint_config["name"], ge_cloud_id=None)
+    checkpoint = store.get_checkpoint(name=checkpoint_config["name"], id=None)
 
     actual_checkpoint_config = checkpoint.to_json_dict()
     for key, val in checkpoint_config.items():
@@ -462,13 +531,13 @@ def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
 ) -> None:
     def _raise_key_error(_: Any) -> None:
-        raise ge_exceptions.InvalidKeyError(message="invalid key")
+        raise gx_exceptions.InvalidKeyError(message="invalid key")
 
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.get.side_effect = _raise_key_error
 
-    with pytest.raises(ge_exceptions.CheckpointNotFoundError) as e:
-        store.get_checkpoint(name="my_fake_checkpoint", ge_cloud_id=None)
+    with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
+        store.get_checkpoint(name="my_fake_checkpoint", id=None)
 
     assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
         e.value
@@ -488,28 +557,10 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
     with mock.patch(
         "great_expectations.data_context.store.CheckpointStore.deserialize",
         side_effect=_raise_validation_error,
-    ), pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
-        store.get_checkpoint(name="my_fake_checkpoint", ge_cloud_id=None)
+    ), pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as e:
+        store.get_checkpoint(name="my_fake_checkpoint", id=None)
 
     assert "Invalid Checkpoint configuration" in str(e.value)
-
-
-@pytest.mark.unit
-def test_get_checkpoint_with_invalid_legacy_checkpoint_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
-) -> None:
-    store, mock_backend = checkpoint_store_with_mock_backend
-    mock_backend.get.return_value = (
-        CheckpointConfig().to_json_dict()
-    )  # Defaults to empty LegacyCheckpoint
-
-    with pytest.raises(ge_exceptions.CheckpointError) as e:
-        store.get_checkpoint(name="my_checkpoint", ge_cloud_id=None)
-
-    assert (
-        "Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments"
-        in str(e.value)
-    )
 
 
 @pytest.mark.unit
@@ -518,13 +569,14 @@ def test_add_checkpoint(
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
-    context = mock.MagicMock(spec=DataContext)
+    context = mock.MagicMock(spec=FileDataContext)
     context._usage_statistics_handler = mock.MagicMock()
-    checkpoint = Checkpoint(name="my_checkpoint", data_context=context)
+    checkpoint_name = "my_checkpoint"
+    checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
 
-    store.add_checkpoint(checkpoint=checkpoint, name="my_checkpoint", ge_cloud_id=None)
+    store.add_checkpoint(checkpoint=checkpoint)
 
-    mock_backend.set.assert_called_once_with(
-        ("my_checkpoint",),
-        "name: my_checkpoint\nconfig_version:\nmodule_name: great_expectations.checkpoint\nclass_name: LegacyCheckpoint\n",
+    mock_backend.add.assert_called_once_with(
+        (checkpoint_name,),
+        mock.ANY,  # Complex serialized payload so keeping it simple
     )

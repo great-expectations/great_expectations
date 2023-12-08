@@ -34,6 +34,18 @@ class ProfilerTypeMapping:
         "uint32",
         "uint64",
         "uint8",
+        "Uint8",
+        "Uint16",
+        "Uint32",
+        "Uint64",
+        "Uint128",
+        "Uint256",
+        "Int8",
+        "Int16",
+        "Int32",
+        "Int64",
+        "Int128",
+        "Int256",
     ]
     FLOAT_TYPE_NAMES = [
         "DECIMAL",
@@ -56,6 +68,8 @@ class ProfilerTypeMapping:
         "float64",
         "float_",
         "number",
+        "Float32",
+        "Float64",
     ]
     STRING_TYPE_NAMES = [
         "CHAR",
@@ -71,6 +85,7 @@ class ProfilerTypeMapping:
         "object",
         "str",
         "string",
+        "FixedString",
     ]
     BOOLEAN_TYPE_NAMES = [
         "BIT",
@@ -81,6 +96,7 @@ class ProfilerTypeMapping:
         "TINYINT",
         "bool",
         "boolean",
+        "Bool",
     ]
     DATETIME_TYPE_NAMES = [
         "DATE",
@@ -100,6 +116,10 @@ class ProfilerTypeMapping:
         "datetime64[ns]",
         "timedelta[ns]",
         "<M8[ns]",
+        "Date",
+        "Date32",
+        "DateTime",
+        "DateTime64",
     ]
     BINARY_TYPE_NAMES = [
         "BINARY",
@@ -116,10 +136,7 @@ class ProfilerTypeMapping:
         "money",
         "smallmoney",
     ]
-    IDENTIFIER_TYPE_NAMES = [
-        "UNIQUEIDENTIFIER",
-        "uniqueidentifier",
-    ]
+    IDENTIFIER_TYPE_NAMES = ["UNIQUEIDENTIFIER", "uniqueidentifier", "UUID"]
     MISCELLANEOUS_TYPE_NAMES = [
         "SQL_VARIANT",
         "sql_variant",
@@ -127,6 +144,7 @@ class ProfilerTypeMapping:
     RECORD_TYPE_NAMES = [
         "JSON",
         "json",
+        "JSON",
     ]
     OBJECT_TYPE_NAMES = [
         "OBJECT",

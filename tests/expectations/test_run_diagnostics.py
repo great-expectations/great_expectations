@@ -1,16 +1,14 @@
 import json
 
-import pandas as pd
 import pytest
 
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
 )
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    ExpectationConfiguration,
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
 )
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import _registered_expectations
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
@@ -19,9 +17,9 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 )
 
 
+@pytest.mark.unit
 def test_expectation_self_check():
-
-    my_expectation = ExpectColumnValuesToEqualThree()
+    my_expectation = ExpectColumnValuesToEqualThree(column="values")
     expectation_diagnostic = my_expectation.run_diagnostics()
     print(json.dumps(expectation_diagnostic.to_dict(), indent=2))
 
@@ -173,7 +171,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has a docstring, including a one-line short description",
+                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -194,12 +192,6 @@ def test_expectation_self_check():
                         }
                     ],
                 },
-                {
-                    "doc_url": None,
-                    "message": "Passes all linting checks",
-                    "passed": True,
-                    "sub_messages": [],
-                },
             ],
             "production": [
                 {
@@ -219,9 +211,9 @@ def test_expectation_self_check():
     }
 
 
+@pytest.mark.unit
 def test_include_in_gallery_flag():
-
-    my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
+    my_expectation = ExpectColumnValuesToEqualThree__SecondIteration(column="values")
     report_object = my_expectation.run_diagnostics()
     # print(json.dumps(report_object["examples"], indent=2))
 
@@ -242,6 +234,7 @@ def test_include_in_gallery_flag():
 
 
 @pytest.mark.skip("This raises a Spark error on my machine.")
+@pytest.mark.spark
 def test_self_check_on_an_existing_expectation():
     expectation_name = "expect_column_values_to_match_regex"
     expectation = _registered_expectations[expectation_name]
@@ -264,7 +257,6 @@ def test_self_check_on_an_existing_expectation():
             "camel_name": "ExpectColumnValuesToMatchRegex",
             "snake_name": "expect_column_values_to_match_regex",
             "short_description": "Expect column entries to be strings that match a given regular expression.",
-            # "docstring": "Expect column entries to be strings that match a given regular expression. Valid matches can be found     anywhere in the string, for example \"[at]+\" will identify the following strings as expected: \"cat\", \"hat\",     \"aa\", \"a\", and \"t\", and the following strings as unexpected: \"fish\", \"dog\".\n\n    expect_column_values_to_match_regex is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        regex (str):             The regular expression the column entries should match.\n\n    Keyword Args:\n        mostly (None or a float between 0 and 1):             Return `\"success\": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        :func:`expect_column_values_to_not_match_regex         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_not_match_regex>`\n\n        :func:`expect_column_values_to_match_regex_list         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_match_regex_list>`\n\n    ",
         },
         "execution_engines": {
             "PandasExecutionEngine": True,
@@ -284,8 +276,8 @@ def test_self_check_on_an_existing_expectation():
             "custom": [],
         },
         "metrics": [
-            "column_values.nonnull.unexpected_count",
-            "column_values.match_regex.unexpected_count",
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            f"column_values.match_regex.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             "table.row_count",
             "column_values.match_regex.unexpected_values",
         ],
@@ -348,8 +340,8 @@ def test_self_check_on_an_existing_expectation():
 @pytest.mark.skip(
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
+@pytest.mark.all_backends
 def test_expectation__get_renderers():
-
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 
@@ -518,16 +510,18 @@ def test_expectation__get_renderers():
     }
 
 
+@pytest.mark.unit
 def test_expectation_is_abstract():
     # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)
     assert ColumnMapExpectation.is_abstract()
     assert not ExpectColumnValuesToEqualThree.is_abstract()
 
 
+@pytest.mark.unit
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
-    expectation_diagnostics = (
-        ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
-    )
+    expectation_diagnostics = ExpectColumnValuesToEqualThree__BrokenIteration(
+        column="values"
+    ).run_diagnostics()
     # print(json.dumps(expectation_diagnostics.to_dict(), indent=2))
 
     tests = expectation_diagnostics["tests"]

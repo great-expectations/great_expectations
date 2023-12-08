@@ -1,28 +1,20 @@
-from typing import Dict, Optional
+from typing import Dict
 
 import pandas as pd
 import pygeos as geos
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your Metric.
     metric_name = "column.geometry.minimum_bounding_radius"
     value_keys = (
@@ -33,7 +25,6 @@ class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         column_shape_format = kwargs.get("column_shape_format")
 
         # Load the column into a pygeos Geometry vector from numpy array (Series not supported).
@@ -64,9 +55,8 @@ class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnExpectation):
-    """
-    Expect that column values as geometry points to be contained within a bounding circle with a given radius (or diameter).
+class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
+    """Expect that column values as geometry points to be contained within a bounding circle with a given radius (or diameter).
 
     expect_column_values_minimum_bounding_radius_to_be_between is a :func:`column_expectation <great_expectations.dataset.dataset.MetaDataset.column_expectation>`.
 
@@ -213,35 +203,6 @@ class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnExpectation):
         "diameter_flag": False,
         "column_shape_format": "wkt",
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(

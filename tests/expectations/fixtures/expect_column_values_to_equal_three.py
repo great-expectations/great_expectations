@@ -1,3 +1,9 @@
+from typing import Optional
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -9,13 +15,15 @@ from great_expectations.expectations.metrics import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     condition_metric_name = "column_values.equal_three"
-    # condition_value_keys = {}
-    # default_kwarg_values = {}
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -23,10 +31,11 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-
     map_metric = "column_values.equal_three"
     success_keys = ("mostly",)
-    # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
+
+    def validate_configuration(self, configuration) -> None:
+        pass  # no-op to make test setup easier
 
 
 class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
@@ -34,6 +43,7 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
 
     examples = [
         {
+            "dataset_name": "mostly_threes_second_iteration",
             "data": {
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
             },
@@ -89,9 +99,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
 ):
     @classmethod
     @renderer(renderer_type="renderer.question")
-    def _question_renderer(
-        cls, configuration, result=None, language=None, runtime_configuration=None
-    ):
+    def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
 
@@ -105,7 +113,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
     @classmethod
     @renderer(renderer_type="renderer.answer")
     def _answer_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None
+        cls, configuration=None, result=None, runtime_configuration=None
     ):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
@@ -119,7 +127,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
                 return (
                     f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
                 )
-        else:
+        else:  # noqa: PLR5501
             if result.success:
                 return f'All of the values in column "{column}" equal 3.'
             else:
@@ -130,16 +138,14 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -150,7 +156,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
         template_str = "values must be equal to 3"
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
@@ -185,9 +191,9 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
 class ExpectColumnValuesToEqualThree__BrokenIteration(
     ExpectColumnValuesToEqualThree__SecondIteration
 ):
-
     examples = [
         {
+            "dataset_name": "mostly_threes_third_broken_iteration",
             "data": {
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
                 "broken_column": [3, 3, 3, 3, 3, 3, 2, -1, "b", "b"],

@@ -1,4 +1,4 @@
-"""Example Script: How to create an Expectation Suite with the Onboarding Data Assistant
+"""Example Script: How to configure a Pandas Datasource
 
 This example script is intended for use in documentation on how to configure a Pandas Datasource.
 
@@ -14,19 +14,18 @@ the snippets that are specified for use in documentation are maintained.  These 
 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
+from __future__ import annotations
 
 import operator
 from functools import reduce
 from typing import List, Tuple
 
 # Import the necessary modules for the examples, and initialize a Data Context.
-# <snippet name="filesystem_datasource_config_gx_imports">
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
-data_context: gx.DataContext = gx.get_context()
-# </snippet>
+yaml = YAMLHandler()
+data_context = gx.get_context()
 
 # The following methods are used to verify that the example configuration snippets are consistent with each other.
 # Users can disregard them.
@@ -37,7 +36,7 @@ def get_by_path(root_dictionary: dict, keys: Tuple[str]) -> Tuple:
 
 
 def gather_key_paths(
-    target_dict: dict, current_path: List[str] = None
+    target_dict: dict, current_path: List[str] | None = None
 ) -> List[Tuple[str]]:
     key_paths: List[Tuple[str]] = []
     for key, value in target_dict.items():
@@ -52,13 +51,12 @@ def gather_key_paths(
             else:
                 # If this is an empty dictionary, then there will be no further nested keys to gather.
                 key_paths.append(tuple(next_path))
+        elif current_path:
+            next_path = current_path[:]
+            next_path.append(key)
+            key_paths.append(tuple(next_path))
         else:
-            if current_path:
-                next_path = current_path[:]
-                next_path.append(key)
-                key_paths.append(tuple(next_path))
-            else:
-                key_paths.append((key,))
+            key_paths.append((key,))
     return key_paths
 
 
@@ -1161,7 +1159,9 @@ def test_pandas_inferred_single_batch_full_configuration():
         ].keys()
     )
     # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert ["yellow_tripdata_sample_2020-01.csv",] in [
+    assert [
+        "yellow_tripdata_sample_2020-01.csv",
+    ] in [
         _["example_data_references"]
         for _ in datasource_check["data_connectors"][
             "name_of_my_inferred_data_connector"
@@ -1231,7 +1231,9 @@ def test_pandas_configured_single_batch_full_configuration():
         ].keys()
     )
     # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert ["yellow_tripdata_sample_2020-01.csv",] in [
+    assert [
+        "yellow_tripdata_sample_2020-01.csv",
+    ] in [
         _["example_data_references"]
         for _ in datasource_check["data_connectors"][
             "name_of_my_configured_data_connector"

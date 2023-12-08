@@ -1,18 +1,21 @@
 import pytest
 from moto import mock_glue
-from ruamel.yaml import YAML
 
-from great_expectations import DataContext
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.exceptions import DataConnectorError
 from great_expectations.validator.validator import Validator
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.big
 
 
 def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):
@@ -23,7 +26,7 @@ def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):
     partitions:
         - PClass
         - SexCode
-        
+
     assets:
         db_test.tb_titanic:
             table_name: tb_titanic_with_partitions
@@ -222,7 +225,7 @@ def test_invalid_instantiation(glue_titanic_catalog):
 def test_instantiation_from_a_config(
     empty_data_context_stats_enabled, glue_titanic_catalog
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     report_object = context.test_yaml_config(
         """
     module_name: great_expectations.datasource.data_connector
@@ -310,7 +313,7 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
             without_partitions:
                 database_name: db_test
                 table_name: tb_titanic_with_partitions
-        """,
+        """,  # noqa: F541
     )
     my_data_connector: ConfiguredAssetAWSGlueDataCatalogDataConnector = (
         instantiate_class_from_config(
@@ -460,6 +463,7 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
 
 @mock_glue
 def test_instantiation_with_minimal_options():
+    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -511,6 +515,7 @@ def test_instantiation_with_batch_spec_passthrough(
 
 
 def test_instantiation_with_asset_suffix_and_prefix(glue_titanic_catalog):
+    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -531,6 +536,7 @@ def test_instantiation_with_asset_suffix_and_prefix(glue_titanic_catalog):
 def test_instantiation_with_splitter_sampling_and_prefix(
     splitter_method_name_prefix, glue_titanic_catalog
 ):
+    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -622,6 +628,7 @@ def test_build_batch_spec_with_all_options(
 
 
 def test_build_batch_spec_with_minimal_options(glue_titanic_catalog):
+    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -647,6 +654,7 @@ def test_build_batch_spec_with_minimal_options(glue_titanic_catalog):
 
 
 def test_get_unmatched_data_references(glue_titanic_catalog):
+    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -663,6 +671,7 @@ def test_get_unmatched_data_references(glue_titanic_catalog):
 
 
 def test_get_available_data_asset_names(glue_titanic_catalog):
+    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -762,136 +771,169 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_batch_spec_
 
 
 def test_get_batch_data_and_metadata_with_sampling_method__mod(
+    in_memory_runtime_context,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
+                },
+            },
         },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": "_sample_using_mod",
-                "sampling_kwargs": {"column_name": "Age", "mod": 25, "value": 1},
-            },
-        )
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+            "sampling_method": "_sample_using_mod",
+            "sampling_kwargs": {"column_name": "Age", "mod": 25, "value": 1},
+        },
     )
-
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert validator.expect_column_values_to_not_be_in_set("Age", [25, 50]).success
-
     assert len(validator.head(fetch_all=True)) == 38
 
 
 def test_get_batch_data_and_metadata_with_sampling_method__list(
+    in_memory_runtime_context,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
+                },
+            },
         },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": "_sample_using_a_list",
-                "sampling_kwargs": {"column_name": "PClass", "value_list": ["1st"]},
-            },
-        )
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+            "sampling_method": "_sample_using_a_list",
+            "sampling_kwargs": {"column_name": "PClass", "value_list": ["1st"]},
+        },
     )
-
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
-
     assert len(validator.head(fetch_all=True)) == 322
 
 
 def test_get_batch_data_and_metadata_with_sampling_method__hash(
+    in_memory_runtime_context,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
-        },
-    )
-
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": "_sample_using_hash",
-                "sampling_kwargs": {
-                    "column_name": "Name",
-                    "hash_function_name": "md5",
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
                 },
             },
-        )
+        },
     )
-    batch = Batch(data=batch_data)
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    validator = Validator(execution_engine, batches=[batch])
-
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": "_split_on_whole_table",
+            "splitter_kwargs": {},
+            "sampling_method": "_sample_using_hash",
+            "sampling_kwargs": {
+                "column_name": "Name",
+                "hash_function_name": "md5",
+            },
+        },
+    )
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert len(validator.head(fetch_all=True)) == 77
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_metadata_with_splitting_method__whole_table(
+    in_memory_runtime_context,
     splitter_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
@@ -899,39 +941,50 @@ def test_get_batch_data_and_metadata_with_splitting_method__whole_table(
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
+                },
+            },
         },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
-            },
-        )
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
+        },
     )
-
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert len(validator.head(fetch_all=True)) == 1313
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_metadata_with_splitting_method__column_value(
+    in_memory_runtime_context,
     splitter_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
@@ -939,45 +992,55 @@ def test_get_batch_data_and_metadata_with_splitting_method__column_value(
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
-        },
-    )
-
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {
-                    "column_name": "PClass",
-                    "batch_identifiers": {"PClass": "1st"},
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
                 },
             },
-        )
+        },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+            "splitter_kwargs": {
+                "column_name": "PClass",
+                "batch_identifiers": {"PClass": "1st"},
+            },
+        },
+    )
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
-
     assert len(validator.head(fetch_all=True)) == 322
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_metadata_with_splitting_method__divided_integer(
+    in_memory_runtime_context,
     splitter_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
@@ -985,48 +1048,58 @@ def test_get_batch_data_and_metadata_with_splitting_method__divided_integer(
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
-        },
-    )
-
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": f"{splitter_method_name_prefix}split_on_divided_integer",
-                "splitter_kwargs": {
-                    "column_name": "Age",
-                    "divisor": 20,
-                    "batch_identifiers": {"Age": 1},
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
                 },
             },
-        )
+        },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": f"{splitter_method_name_prefix}split_on_divided_integer",
+            "splitter_kwargs": {
+                "column_name": "Age",
+                "divisor": 20,
+                "batch_identifiers": {"Age": 1},
+            },
+        },
+    )
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert validator.expect_column_values_to_be_in_set(
         "Age", list(range(20, 40))
     ).success
-
     assert len(validator.head(fetch_all=True)) == 420
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_metadata_with_splitting_method__mod_integer(
+    in_memory_runtime_context,
     splitter_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
@@ -1034,46 +1107,56 @@ def test_get_batch_data_and_metadata_with_splitting_method__mod_integer(
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
-        },
-    )
-
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": f"{splitter_method_name_prefix}split_on_mod_integer",
-                "splitter_kwargs": {
-                    "column_name": "Age",
-                    "mod": 25,
-                    "batch_identifiers": {"Age": 1},
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
                 },
             },
-        )
+        },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": f"{splitter_method_name_prefix}split_on_mod_integer",
+            "splitter_kwargs": {
+                "column_name": "Age",
+                "mod": 25,
+                "batch_identifiers": {"Age": 1},
+            },
+        },
+    )
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert validator.expect_column_values_to_be_in_set("Age", [26, 1, 1.5, 51]).success
-
     assert len(validator.head(fetch_all=True)) == 38
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_metadata_with_splitting_method__multi_column_values(
+    in_memory_runtime_context,
     splitter_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
@@ -1081,46 +1164,56 @@ def test_get_batch_data_and_metadata_with_splitting_method__multi_column_values(
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
-        },
-    )
-
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": f"{splitter_method_name_prefix}split_on_multi_column_values",
-                "splitter_kwargs": {
-                    "column_names": ["Age", "PClass"],
-                    "batch_identifiers": {"Age": 25, "PClass": "1st"},
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
                 },
             },
-        )
+        },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": f"{splitter_method_name_prefix}split_on_multi_column_values",
+            "splitter_kwargs": {
+                "column_names": ["Age", "PClass"],
+                "batch_identifiers": {"Age": 25, "PClass": "1st"},
+            },
+        },
+    )
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert validator.expect_column_values_to_be_in_set("Age", [25]).success
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
-
     assert len(validator.head(fetch_all=True)) == 4
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_metadata_with_splitting_method__hashed_column(
+    in_memory_runtime_context,
     splitter_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
@@ -1128,75 +1221,96 @@ def test_get_batch_data_and_metadata_with_splitting_method__hashed_column(
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-            }
-        },
-    )
-
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict(),
-            batch_spec_passthrough={
-                "splitter_method": f"{splitter_method_name_prefix}split_on_hashed_column",
-                "splitter_kwargs": {
-                    "column_name": "Name",
-                    "hash_digits": 1,
-                    "hash_function_name": "md5",
-                    "batch_identifiers": {"hash_value": "f"},
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                    },
                 },
             },
-        )
+        },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict(),
+        batch_spec_passthrough={
+            "splitter_method": f"{splitter_method_name_prefix}split_on_hashed_column",
+            "splitter_kwargs": {
+                "column_name": "Name",
+                "hash_digits": 1,
+                "hash_function_name": "md5",
+                "batch_identifiers": {"hash_value": "f"},
+            },
+        },
+    )
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert len(validator.head(fetch_all=True)) == 77
 
 
 def test_get_batch_data_and_metadata_with_partitions(
+    in_memory_runtime_context,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
-        name="my_glue_catalog_data_connector",
-        datasource_name="FAKE_Datasource_NAME",
-        execution_engine=execution_engine,
-        assets={
-            "db_test.tb_titanic": {
-                "table_name": "tb_titanic_with_partitions",
-                "database_name": "db_test",
-                "partitions": ["PClass", "SexCode"],
-            }
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_glue_catalog_data_connector": {
+                "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+                "assets": {
+                    "db_test.tb_titanic": {
+                        "table_name": "tb_titanic_with_partitions",
+                        "database_name": "db_test",
+                        "partitions": ["PClass", "SexCode"],
+                    },
+                },
+            },
         },
     )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_glue_catalog_data_connector",
-            data_asset_name="db_test.tb_titanic",
-            batch_identifiers=IDDict({"PClass": "2nd", "SexCode": "1"}),
-        )
+    batch_definition = BatchDefinition(
+        datasource_name="FAKE_Datasource_NAME",
+        data_connector_name="my_glue_catalog_data_connector",
+        data_asset_name="db_test.tb_titanic",
+        batch_identifiers=IDDict({"PClass": "2nd", "SexCode": "1"}),
     )
-
-    batch = Batch(data=batch_data)
-
-    validator = Validator(execution_engine, batches=[batch])
-
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_glue_catalog_data_connector"]
+    batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
+        batch_definition=batch_definition
+    )
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
     assert validator.expect_column_values_to_be_in_set("PClass", ["2nd"]).success
     assert validator.expect_column_values_to_be_in_set("SexCode", ["1"]).success

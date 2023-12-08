@@ -54,7 +54,7 @@ Install python dependencies
 
 **5. Create a new virtual environment**
 
-    * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
+    * Make a new virtual environment and name it "great_expectations_dev" or similar.
     * Ex virtualenv: ``python3 -m venv <path_to_environments_folder>/great_expectations_dev`` and then ``source <path_to_environments_folder>/great_expectations_dev/bin/activate``
     * Ex conda: ``conda create --name great_expectations_dev python=3.7`` and then ``conda activate great_expectations_dev`` (we support multiple python versions, you may select something other than 3.7).
     * This is not required, but highly recommended.
@@ -64,7 +64,7 @@ Install python dependencies
     * ``pip install -r requirements-dev.txt -c constraints-dev.txt``
     *  MacOS users will be able to pip / pip3 install ``requirements-dev.txt`` using the above command from within conda, yet Windows users utilizing a conda environment will need to individually install all files within ``requirements-dev.txt``
     *  This will ensure that sure you have the right libraries installed in your python environment.
-    
+
       * Note that you can also substitute ``requirements-dev-test.txt`` to only install requirements required for testing all backends, and ``requirements-dev-spark.txt`` or ``requirements-dev-sqlalchemy.txt`` if you would like to add support for spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
       * For some users, installation of certain Pyspark versions (such as 2.4.7) may cause import errors. To fix this simply run ``pip install pyspark --upgrade`` to upgrade to the latest version, which should fix all import errors.
       * `Installing Microsoft ODBC driver for MacOS <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos>`__
@@ -89,7 +89,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
         .. code-block::
 
-                    Name                       Command              State           Ports         
+                    Name                       Command              State           Ports
             ———————————————————————————————————————————
             postgresql_travis_db_1   docker-entrypoint.sh postgres   Up      0.0.0.0:5432->5432/tcp
 
@@ -106,7 +106,7 @@ Depending on which features of Great Expectations you want to work on, you may w
             could not connect to server: Connection refused
                 Is the server running on host "localhost" (127.0.0.1) and accepting
                 TCP/IP connections on port 5432?
-        
+
     * Or this...
 
         .. code-block::

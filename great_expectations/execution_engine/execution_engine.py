@@ -3,8 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from enum import Enum
+from dataclasses import asdict, dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -18,41 +17,38 @@ from typing import (
     Union,
 )
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchData,
-    BatchDataType,
-    BatchMarkers,
-    BatchSpec,
-)
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
-from great_expectations.execution_engine.bundled_metric_configuration import (
-    BundledMetricConfiguration,
-)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
+from great_expectations.types import DictDot
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.metrics import MetricProvider
+    from great_expectations.compatibility.pyspark import functions as F
+    from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+    from great_expectations.core.batch import (
+        BatchData,
+        BatchDataType,
+        BatchDataUnion,
+        BatchMarkers,
+        BatchSpec,
+    )
+    from great_expectations.expectations.metrics.metric_provider import MetricProvider
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class NoOpDict:
@@ -67,119 +63,36 @@ class NoOpDict:
         return None
 
 
-class MetricFunctionTypes(Enum):
-    VALUE = "value"
-    MAP_VALUES = "value"  # "map_values"
-    WINDOW_VALUES = "value"  # "window_values"
-    AGGREGATE_VALUE = "value"  # "aggregate_value"
+@dataclass(frozen=True)
+class MetricComputationConfiguration(DictDot):
+    """
+    MetricComputationConfiguration is a "dataclass" object, which holds components required for metric computation.
+    """
 
+    metric_configuration: MetricConfiguration
+    metric_fn: sa.func | F  # type: ignore[valid-type]
+    metric_provider_kwargs: dict
+    compute_domain_kwargs: Optional[dict] = None
+    accessor_domain_kwargs: Optional[dict] = None
 
-class MetricPartialFunctionTypes(Enum):
-    MAP_FN = "map_fn"
-    MAP_SERIES = "map_series"
-    MAP_CONDITION_FN = "map_condition_fn"
-    MAP_CONDITION_SERIES = "map_condition_series"
-    WINDOW_FN = "window_fn"
-    WINDOW_CONDITION_FN = "window_condition_fn"
-    AGGREGATE_FN = "aggregate_fn"
+    @public_api
+    @override
+    def to_dict(self) -> dict:
+        """Returns: this MetricComputationConfiguration as a Python dictionary
 
-    @property
-    def metric_suffix(self) -> str:
-        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
-            return "map"
+        Returns:
+            (dict) representation of present object
+        """
+        return asdict(self)
 
-        if self.name in [
-            "MAP_CONDITION_FN",
-            "MAP_CONDITION_SERIES",
-            "WINDOW_CONDITION_FN",
-        ]:
-            return "condition"
+    @public_api
+    def to_json_dict(self) -> dict:
+        """Returns: this MetricComputationConfiguration as a JSON dictionary
 
-        if self.name in ["AGGREGATE_FN"]:
-            return "aggregate_fn"
-
-        return ""
-
-
-class DataConnectorStorageDataReferenceResolver:
-    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
-        "InferredAssetS3DataConnector": "S3",
-        "ConfiguredAssetS3DataConnector": "S3",
-        "InferredAssetGCSDataConnector": "GCS",
-        "ConfiguredAssetGCSDataConnector": "GCS",
-        "InferredAssetAzureDataConnector": "ABS",
-        "ConfiguredAssetAzureDataConnector": "ABS",
-        "InferredAssetDBFSDataConnector": "DBFS",
-        "ConfiguredAssetDBFSDataConnector": "DBFS",
-    }
-    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
-        Tuple[str, str], Callable
-    ] = {
-        (
-            "S3",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "S3",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
-            **template_arguments
-        ),
-    }
-
-    @staticmethod
-    def resolve_data_reference(
-        data_connector_name: str,
-        execution_engine_name: str,
-        template_arguments: dict,
-    ):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-            data_connector_name
-        ]
-        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
-            (storage_name, execution_engine_name)
-        ](
-            template_arguments
-        )
+        Returns:
+            (dict) representation of present object as JSON-compatible Python dictionary
+        """
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 @dataclass
@@ -193,16 +106,47 @@ class SplitDomainKwargs:
     accessor: dict
 
 
+@public_api
 class ExecutionEngine(ABC):
+    """ExecutionEngine defines interfaces and provides common methods for loading Batch of data and compute metrics.
+
+    ExecutionEngine is the parent class of every backend-specific computational class, tasked with loading Batch of
+    data and computing metrics.  Each subclass (corresponding to Pandas, Spark, SQLAlchemy, and any other computational
+    components) utilizes generally-applicable methods defined herein, while implementing required backend-specific
+    interfaces.  ExecutionEngine base class also performs the important task of translating cloud storage resource URLs
+    to format and protocol compatible with given computational mechanism (e.g, Pandas, Spark).  Then ExecutionEngine
+    subclasses access the referenced data according to their paritcular compatible protocol and return Batch of data.
+
+    In order to obtain Batch of data, ExecutionEngine (through implementation of key interface methods by subclasses)
+    gets data records and also provides access references so that different aspects of data can be loaded at once.
+    ExecutionEngine uses BatchManager for Batch caching in order to reduce load on computational backends.
+
+    Crucially, ExecutionEngine serves as focal point for resolving (i.e., computing) metrics.  Wherever opportunities
+    arize to bundle multiple metric computations (e.g., SQLAlchemy, Spark), ExecutionEngine utilizes subclasses in order
+    to provide specific functionality (bundling of computation is available only for "deferred execution" computational
+    systems, such as SQLAlchemy and Spark; it is not available for Pandas, because Pandas computations are immediate).
+
+    Finally, ExecutionEngine defines interfaces for Batch data sampling and splitting Batch of data along defined axes.
+
+    Constructor builds an ExecutionEngine, using provided configuration options (instatiation is done by child classes).
+
+    Args:
+        name: (str) name of this ExecutionEngine
+        caching: (Boolean) if True (default), then resolved (computed) metrics are added to local in-memory cache.
+        batch_spec_defaults: dictionary of BatchSpec overrides (useful for amending configuration at runtime).
+        batch_data_dict: dictionary of Batch objects with corresponding IDs as keys supplied at initialization time
+        validator: Validator object (optional) -- not utilized in V3 and later versions
+    """
+
     recognized_batch_spec_defaults: Set[str] = set()
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        name=None,
-        caching=True,
-        batch_spec_defaults=None,
-        batch_data_dict=None,
-        validator=None,
+        name: Optional[str] = None,
+        caching: bool = True,
+        batch_spec_defaults: Optional[dict] = None,
+        batch_data_dict: Optional[dict] = None,
+        validator: Optional[Validator] = None,
     ) -> None:
         self.name = name
         self._validator = validator
@@ -223,7 +167,7 @@ class ExecutionEngine(ABC):
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
                 f"""Unrecognized batch_spec_default(s): \
-{str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
+{batch_spec_defaults_keys - self.recognized_batch_spec_defaults!s}
 """
             )
 
@@ -253,7 +197,9 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator) -> None:
+    def configure_validator(  # noqa: B027 # empty-method-without-abstract-decorator
+        self, validator
+    ) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 
@@ -279,9 +225,9 @@ class ExecutionEngine(ABC):
         batch_id: str
         batch_data: BatchDataType
         for batch_id, batch_data in batch_data_dict.items():
-            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
+            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)  # type: ignore[arg-type]
 
-    def load_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
+    def load_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:
         self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
@@ -304,12 +250,12 @@ class ExecutionEngine(ABC):
     def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
         raise NotImplementedError
 
-    def resolve_metrics(  # noqa: C901 - 16
+    def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
 
@@ -321,129 +267,39 @@ class ExecutionEngine(ABC):
         Returns:
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
-        if metrics is None:
-            metrics = {}
+        if not metrics_to_resolve:
+            return metrics or {}
 
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
-
-        metric_fn_bundle: List[BundledMetricConfiguration] = []
-
-        metric_fn_type: MetricFunctionTypes
-        metric_class: MetricProvider
-        metric_fn: Any
-        compute_domain_kwargs: dict
-        accessor_domain_kwargs: dict
-        metric_provider_kwargs: dict
-        metric_to_resolve: MetricConfiguration
-        metric_dependencies: dict
-        k: str
-        v: MetricConfiguration
-        for metric_to_resolve in metrics_to_resolve:
-            metric_dependencies = {}
-            for k, v in metric_to_resolve.metric_dependencies.items():
-                if v.id in metrics:
-                    metric_dependencies[k] = metrics[v.id]
-                elif self._caching and v.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
-                    metric_dependencies[k] = self._metric_cache[v.id]
-                else:
-                    raise ge_exceptions.MetricError(
-                        message=f'Missing metric dependency: {str(k)} for metric "{metric_to_resolve.metric_name}".'
-                    )
-
-            metric_class, metric_fn = get_metric_provider(
-                metric_name=metric_to_resolve.metric_name, execution_engine=self
-            )
-            metric_provider_kwargs = {
-                "cls": metric_class,
-                "execution_engine": self,
-                "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
-                "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
-                "metrics": metric_dependencies,
-                "runtime_configuration": runtime_configuration,
-            }
-            if metric_fn is None:
-                try:
-                    (
-                        metric_fn,
-                        compute_domain_kwargs,
-                        accessor_domain_kwargs,
-                    ) = metric_dependencies.pop("metric_partial_fn")
-                except KeyError as e:
-                    raise ge_exceptions.MetricError(
-                        message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
-                    )
-
-                metric_fn_bundle.append(
-                    BundledMetricConfiguration(
-                        metric_configuration=metric_to_resolve,
-                        metric_fn=metric_fn,
-                        compute_domain_kwargs=compute_domain_kwargs,
-                        accessor_domain_kwargs=accessor_domain_kwargs,
-                        metric_provider_kwargs=metric_provider_kwargs,
-                    )
-                )
-                continue
-
-            metric_fn_type = getattr(
-                metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
-            )
-            if metric_fn_type not in [
-                MetricPartialFunctionTypes.MAP_FN,
-                MetricPartialFunctionTypes.MAP_CONDITION_FN,
-                MetricPartialFunctionTypes.WINDOW_FN,
-                MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
-                MetricPartialFunctionTypes.AGGREGATE_FN,
-                MetricFunctionTypes.VALUE,
-                MetricPartialFunctionTypes.MAP_SERIES,
-                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-            ]:
-                logger.warning(
-                    f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
-                )
-
-            try:
-                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
-            except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
-                    message=str(e),
-                    failed_metrics=(metric_to_resolve,),
-                ) from e
-
-        if len(metric_fn_bundle) > 0:
-            try:
-                # an engine-specific way of computing metrics together
-                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
-                new_resolved: Dict[
-                    Tuple[str, str, str], Any
-                ] = self.resolve_metric_bundle(metric_fn_bundle)
-                resolved_metrics.update(new_resolved)
-            except Exception as e:
-                raise ge_exceptions.MetricResolutionError(
-                    message=str(e),
-                    failed_metrics=[x.metric_configuration for x in metric_fn_bundle],
-                ) from e
-
-        if self._caching:
-            self._metric_cache.update(resolved_metrics)
-
-        return resolved_metrics
+        metric_fn_direct_configurations: List[MetricComputationConfiguration]
+        metric_fn_bundle_configurations: List[MetricComputationConfiguration]
+        (
+            metric_fn_direct_configurations,
+            metric_fn_bundle_configurations,
+        ) = self._build_direct_and_bundled_metric_computation_configurations(
+            metrics_to_resolve=metrics_to_resolve,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+        )
+        return self._process_direct_and_bundled_metric_computation_configurations(
+            metric_fn_direct_configurations=metric_fn_direct_configurations,
+            metric_fn_bundle_configurations=metric_fn_bundle_configurations,
+        )
 
     def resolve_metric_bundle(
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], Any]:
-        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
+        """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
+    @public_api
     def get_domain_records(
         self,
         domain_kwargs: dict,
     ) -> Any:
-        """
-        get_domain_records computes the full-access data (dataframe or selectable) for computing metrics based on the
-        given domain_kwargs and specific engine semantics.
+        """get_domain_records() is an interface method, which computes the full-access data (dataframe or selectable) for computing metrics based on the given domain_kwargs and specific engine semantics.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
             data corresponding to the compute domain
@@ -451,20 +307,30 @@ class ExecutionEngine(ABC):
 
         raise NotImplementedError
 
+    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Any, dict, dict]:
-        """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
-        and specific engine semantics.
+        """get_compute_domain() is an interface method, which computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs and specific engine semantics.
+
+        Args:
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like \
+            to be using, or a corresponding string value representing it.  String types include "column", \
+            "column_pair", "table", and "other".  Enum types include capitalized versions of these from the class \
+            MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when \
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple consisting of three elements:
 
             1. data corresponding to the compute domain;
-            2. a modified copy of domain_kwargs describing the domain of the data returned in (1);
-            3. a dictionary describing the access instructions for data elements included in the compute domain
+            2. a modified copy of domain_kwargs describing the Domain of the data returned in (1);
+            3. a dictionary describing the access instructions for data elements included in the compute domain \
                 (e.g. specific column name).
 
             In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the
@@ -481,7 +347,7 @@ class ExecutionEngine(ABC):
         Add a row condition for handling null filter.
 
         Args:
-            domain_kwargs: the domain kwargs to use as the base and to which to add the condition
+            domain_kwargs: the Domain kwargs to use as the base and to which to add the condition
             column_name: if provided, use this name to add the condition; otherwise, will use "column" key from
                 table_domain_kwargs
             filter_null: if true, add a filter for null values
@@ -494,7 +360,7 @@ class ExecutionEngine(ABC):
             return domain_kwargs
 
         if filter_nan:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
@@ -514,15 +380,203 @@ class ExecutionEngine(ABC):
         new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
 
-    def resolve_data_reference(
-        self, data_connector_name: str, template_arguments: dict
-    ):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
-            data_connector_name=data_connector_name,
-            execution_engine_name=self.__class__.__name__,
-            template_arguments=template_arguments,
+    def _build_direct_and_bundled_metric_computation_configurations(
+        self,
+        metrics_to_resolve: Iterable[MetricConfiguration],
+        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
+        runtime_configuration: Optional[dict] = None,
+    ) -> Tuple[
+        List[MetricComputationConfiguration],
+        List[MetricComputationConfiguration],
+    ]:
+        """
+        This method organizes "metrics_to_resolve" ("MetricConfiguration" objects) into two lists: direct and bundled.
+        Directly-computable "MetricConfiguration" must have non-NULL metric function ("metric_fn").  Aggregate metrics
+        have NULL metric function, but non-NULL partial metric function ("metric_partial_fn"); aggregates are bundled.
+
+        See documentation in "MetricProvider._register_metric_functions()" for in-depth description of this mechanism.
+
+        Args:
+            metrics_to_resolve: the metrics to evaluate
+            metrics: already-computed metrics currently available to the engine
+            runtime_configuration: runtime configuration information
+
+        Returns:
+            Tuple with two elements: directly-computable and bundled "MetricComputationConfiguration" objects
+        """
+        metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
+        metric_fn_bundle_configurations: List[MetricComputationConfiguration] = []
+
+        if not metrics_to_resolve:
+            return (
+                metric_fn_direct_configurations,
+                metric_fn_bundle_configurations,
+            )
+
+        if metrics is None:
+            metrics = {}
+
+        resolved_metric_dependencies_by_metric_name: Dict[
+            str, Union[MetricValue, Tuple[Any, dict, dict]]
+        ]
+        metric_class: MetricProvider
+        metric_fn: Union[Callable, None]
+        metric_aggregate_fn: sa.func | F  # type: ignore[valid-type]
+        metric_provider_kwargs: dict
+        compute_domain_kwargs: dict
+        accessor_domain_kwargs: dict
+        metric_to_resolve: MetricConfiguration
+        for metric_to_resolve in metrics_to_resolve:
+            resolved_metric_dependencies_by_metric_name = (
+                self._get_computed_metric_evaluation_dependencies_by_metric_name(
+                    metric_to_resolve=metric_to_resolve,
+                    metrics=metrics,
+                )
+            )
+            metric_class, metric_fn = get_metric_provider(
+                metric_name=metric_to_resolve.metric_name, execution_engine=self
+            )
+            metric_provider_kwargs = {
+                "cls": metric_class,
+                "execution_engine": self,
+                "metric_domain_kwargs": metric_to_resolve.metric_domain_kwargs,
+                "metric_value_kwargs": metric_to_resolve.metric_value_kwargs,
+                "metrics": resolved_metric_dependencies_by_metric_name,
+                "runtime_configuration": runtime_configuration,
+            }
+            if metric_fn is None:
+                try:
+                    (
+                        metric_aggregate_fn,
+                        compute_domain_kwargs,
+                        accessor_domain_kwargs,
+                    ) = resolved_metric_dependencies_by_metric_name.pop(
+                        "metric_partial_fn"
+                    )
+                except KeyError as e:
+                    raise gx_exceptions.MetricError(
+                        message=f'Missing metric dependency: {e!s} for metric "{metric_to_resolve.metric_name}".'
+                    )
+
+                metric_fn_bundle_configurations.append(
+                    MetricComputationConfiguration(
+                        metric_configuration=metric_to_resolve,
+                        metric_fn=metric_aggregate_fn,
+                        metric_provider_kwargs=metric_provider_kwargs,
+                        compute_domain_kwargs=compute_domain_kwargs,
+                        accessor_domain_kwargs=accessor_domain_kwargs,
+                    )
+                )
+            else:
+                metric_fn_direct_configurations.append(
+                    MetricComputationConfiguration(
+                        metric_configuration=metric_to_resolve,
+                        metric_fn=metric_fn,
+                        metric_provider_kwargs=metric_provider_kwargs,
+                    )
+                )
+
+        return (
+            metric_fn_direct_configurations,
+            metric_fn_bundle_configurations,
         )
+
+    def _get_computed_metric_evaluation_dependencies_by_metric_name(
+        self,
+        metric_to_resolve: MetricConfiguration,
+        metrics: Dict[Tuple[str, str, str], MetricValue],
+    ) -> Dict[str, Union[MetricValue, Tuple[Any, dict, dict]]]:
+        """
+        Gathers resolved (already computed) evaluation dependencies of metric-to-resolve (not yet computed)
+        "MetricConfiguration" object by "metric_name" property of resolved "MetricConfiguration" objects.
+
+        Args:
+            metric_to_resolve: dependent (not yet resolved) "MetricConfiguration" object
+            metrics: resolved (already computed) "MetricConfiguration" objects keyd by ID of that object
+
+        Returns:
+            Dictionary keyed by "metric_name" with values as computed metric or partial bundling information tuple
+        """
+        metric_dependencies_by_metric_name: Dict[
+            str, Union[MetricValue, Tuple[Any, dict, dict]]
+        ] = {}
+
+        metric_name: str
+        metric_configuration: MetricConfiguration
+        for (
+            metric_name,
+            metric_configuration,
+        ) in metric_to_resolve.metric_dependencies.items():
+            if metric_configuration.id in metrics:
+                metric_dependencies_by_metric_name[metric_name] = metrics[
+                    metric_configuration.id
+                ]
+            elif self._caching and metric_configuration.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
+                metric_dependencies_by_metric_name[metric_name] = self._metric_cache[
+                    metric_configuration.id
+                ]
+            else:
+                raise gx_exceptions.MetricError(
+                    message=f'Missing metric dependency: "{metric_name}" for metric "{metric_to_resolve.metric_name}".'
+                )
+
+        return metric_dependencies_by_metric_name
+
+    def _process_direct_and_bundled_metric_computation_configurations(
+        self,
+        metric_fn_direct_configurations: List[MetricComputationConfiguration],
+        metric_fn_bundle_configurations: List[MetricComputationConfiguration],
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
+        """
+        This method processes directly-computable and bundled "MetricComputationConfiguration" objects.
+
+        Args:
+            metric_fn_direct_configurations: directly-computable "MetricComputationConfiguration" objects
+            metric_fn_bundle_configurations: bundled "MetricComputationConfiguration" objects (column aggregates)
+
+        Returns:
+            resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
+        """
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+        metric_computation_configuration: MetricComputationConfiguration
+
+        for metric_computation_configuration in metric_fn_direct_configurations:
+            try:
+                resolved_metrics[
+                    metric_computation_configuration.metric_configuration.id
+                ] = metric_computation_configuration.metric_fn(  # type: ignore[misc] # F not callable
+                    **metric_computation_configuration.metric_provider_kwargs
+                )
+            except Exception as e:
+                raise gx_exceptions.MetricResolutionError(
+                    message=str(e),
+                    failed_metrics=(
+                        metric_computation_configuration.metric_configuration,
+                    ),
+                ) from e
+
+        try:
+            # an engine-specific way of computing metrics together
+            resolved_metric_bundle: Dict[
+                Tuple[str, str, str], MetricValue
+            ] = self.resolve_metric_bundle(
+                metric_fn_bundle=metric_fn_bundle_configurations
+            )
+            resolved_metrics.update(resolved_metric_bundle)
+        except Exception as e:
+            raise gx_exceptions.MetricResolutionError(
+                message=str(e),
+                failed_metrics=[
+                    metric_computation_configuration.metric_configuration
+                    for metric_computation_configuration in metric_fn_bundle_configurations
+                ],
+            ) from e
+
+        if self._caching:
+            self._metric_cache.update(resolved_metrics)
+
+        return resolved_metrics
 
     def _split_domain_kwargs(
         self,
@@ -530,16 +584,16 @@ class ExecutionEngine(ABC):
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for all domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for all Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using, or a corresponding string value representing it. String types include "identity",
             "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
             class MetricDomainTypes.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys: keys that are part of the compute Domain but should be ignored when
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -548,7 +602,7 @@ class ExecutionEngine(ABC):
         # Extracting value from enum if it is given for future computation
         domain_type = MetricDomainTypes(domain_type)
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        # Warning user if accessor keys are in any Domain that is not of type table, will be ignored
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
@@ -592,18 +646,18 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_table_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for table domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for table Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys: keys that are part of the compute Domain but should be ignored when
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -634,21 +688,21 @@ class ExecutionEngine(ABC):
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
                 logger.warning(
-                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}"."""
+                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for Domain type "{domain_type.value}"."""
                 )
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
     def _split_column_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -663,7 +717,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column" not in compute_domain_kwargs:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Column not provided in compute_domain_kwargs"
             )
 
@@ -673,14 +727,14 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_column_pair_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -695,7 +749,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_A or column_B not found within domain_kwargs"
             )
 
@@ -706,14 +760,14 @@ class ExecutionEngine(ABC):
 
     @staticmethod
     def _split_multi_column_metric_domain_kwargs(
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -728,14 +782,14 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column_list" not in domain_kwargs:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_list not found within domain_kwargs"
             )
 
         column_list = compute_domain_kwargs.pop("column_list")
 
-        if len(column_list) < 2:
-            raise ge_exceptions.GreatExpectationsError(
+        if len(column_list) < 2:  # noqa: PLR2004
+            raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )
 

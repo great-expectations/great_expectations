@@ -1,20 +1,39 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+    Union,
+)
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain import (
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
 )
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
+
     from great_expectations.validator.validator import Validator
+
+T = TypeVar("T")
+
+
+def _is_sequence_of(sequence: Sequence, type_: Type[T]) -> TypeGuard[Sequence[T]]:
+    return all(isinstance(x, type_) for x in sequence)
 
 
 class SimpleSemanticTypeFilter(SemanticTypeFilter):
@@ -24,8 +43,8 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
     def __init__(
         self,
-        batch_ids: Optional[List[str]] = None,
-        validator: Optional[Validator] = None,
+        batch_ids: List[str],
+        validator: Validator,
         column_names: Optional[List[str]] = None,
     ) -> None:
         self._build_table_column_name_to_inferred_semantic_domain_type_map(
@@ -35,11 +54,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         )
 
     @property
+    @override
     def table_column_name_to_inferred_semantic_domain_type_map(
         self,
     ) -> Dict[str, SemanticDomainTypes]:
-        return self._table_column_name_to_inferred_semantic_domain_type_map
+        return self._table_column_name_to_inferred_semantic_domain_type_map  # type: ignore[return-value] # could be None
 
+    @override
     def parse_semantic_domain_type_argument(
         self,
         semantic_types: Optional[
@@ -49,56 +70,60 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         if semantic_types is None:
             return []
 
-        semantic_type: Union[str, SemanticDomainTypes]
-        if isinstance(semantic_types, str):
-            semantic_types = semantic_types.lower()
-            return [
-                SemanticDomainTypes(semantic_type) for semantic_type in [semantic_types]
-            ]
         if isinstance(semantic_types, SemanticDomainTypes):
-            return [semantic_type for semantic_type in [semantic_types]]
-        elif isinstance(semantic_types, list):
-            if all(
-                [isinstance(semantic_type, str) for semantic_type in semantic_types]
-            ):
-                semantic_types = [
-                    semantic_type.lower() for semantic_type in semantic_types
-                ]
-                return [
-                    SemanticDomainTypes(semantic_type)
-                    for semantic_type in semantic_types
-                ]
-            elif all(
-                [
-                    isinstance(semantic_type, SemanticDomainTypes)
-                    for semantic_type in semantic_types
-                ]
-            ):
+            return [semantic_types]
+
+        if isinstance(semantic_types, str):
+            return [SemanticDomainTypes(semantic_types.lower())]
+
+        if isinstance(semantic_types, list):
+            semantic_type: Union[str, SemanticDomainTypes]
+
+            if _is_sequence_of(semantic_types, SemanticDomainTypes):
                 return [semantic_type for semantic_type in semantic_types]
-            else:
-                raise ValueError(
-                    "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
-                )
-        else:
-            raise ValueError("Unrecognized semantic_types directive.")
+
+            if _is_sequence_of(semantic_types, str):
+                return [
+                    SemanticDomainTypes(semantic_type.lower())
+                    for semantic_type in semantic_types
+                ]
+
+            raise ValueError(
+                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
+            )
+
+        raise ValueError("Unrecognized semantic_types directive.")
 
     def _build_table_column_name_to_inferred_semantic_domain_type_map(
         self,
         batch_ids: List[str],
         validator: Validator,
-        column_names: List[str],
+        column_names: Optional[List[str]] = None,
     ) -> None:
         column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
                 metric_domain_kwargs={
-                    "batch_id": batch_ids[-1],  # active_batch_id
+                    "batch_id": validator.active_batch_id,
                 },
                 metric_value_kwargs={
                     "include_nested": True,
                 },
             )
         )
+
+        if column_names is None:
+            column_names = validator.get_metric(
+                metric=MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs={
+                        "batch_id": validator.active_batch_id,
+                    },
+                    metric_value_kwargs={
+                        "include_nested": True,
+                    },
+                )
+            )
 
         column_name: str
         self._table_column_name_to_inferred_semantic_domain_type_map = {
@@ -117,12 +142,16 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
         column_types_dict_list = list(
             filter(
-                lambda column_type_dict: column_name == column_type_dict["name"],
+                lambda column_type_dict: column_name == column_type_dict["name"]
+                or column_name
+                == column_type_dict["name"].strip(
+                    "`"
+                ),  # Spark specific fix to compare column names without backticks
                 column_types_dict_list,
             )
         )
         if len(column_types_dict_list) != 1:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: {len(column_types_dict_list)} columns were found while obtaining semantic type \
     information.  Please ensure that the specified column name refers to exactly one column.
     """
@@ -177,15 +206,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         else:
             semantic_column_type = SemanticDomainTypes.UNKNOWN
 
-        inferred_semantic_column_type: InferredSemanticDomainType = (
-            InferredSemanticDomainType(
-                semantic_domain_type=semantic_column_type,
-                details={
-                    "algorithm_type": "deterministic",
-                    "mechanism": "lookup_table",
-                    "source": "great_expectations.profile.base.ProfilerTypeMapping",
-                },
-            )
+        inferred_semantic_column_type: InferredSemanticDomainType = InferredSemanticDomainType(
+            semantic_domain_type=semantic_column_type,
+            details={
+                "algorithm_type": "deterministic",
+                "mechanism": "lookup_table",
+                "source": "great_expectations.core.profiler_types_mapping.ProfilerTypeMapping",
+            },
         )
 
         return inferred_semantic_column_type

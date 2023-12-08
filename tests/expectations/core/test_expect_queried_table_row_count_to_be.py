@@ -1,17 +1,21 @@
-import pandas as pd
+from typing import TYPE_CHECKING
+
 import pytest
+from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
+    ExpectQueriedTableRowCountToBe,  # noqa: F401 # needed for expectation registration
+)
 
 # noinspection PyUnresolvedReferences
-from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
-    ExpectQueriedTableRowCountToBe,
-)
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import DataContext
-from great_expectations.self_check.util import build_spark_validator_with_data
+from great_expectations.self_check.util import get_test_validator_with_data
+from great_expectations.util import build_in_memory_runtime_context
 from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 sqlite_runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     datasource_name="my_sqlite_db_datasource",
@@ -40,6 +44,7 @@ sqlite_batch_request: BatchRequest = BatchRequest(
     ],
 )
 @pytest.mark.slow  # 4.32s
+@pytest.mark.big
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     batch_request,
     success,
@@ -48,7 +53,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     row_condition,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -87,6 +92,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     ],
 )
 @pytest.mark.slow  # 1.59s
+@pytest.mark.big
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite(
     batch_request,
     success,
@@ -96,7 +102,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     row_condition,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -114,6 +120,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "success,value,observed,row_condition",
     [
@@ -121,6 +128,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
         (False, 100, 96, 'col("Age")<18'),
     ],
 )
+@pytest.mark.spark
 def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     success,
     value,
@@ -132,7 +140,13 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 ):
     df: pd.DataFrame = titanic_df
 
-    validator: Validator = build_spark_validator_with_data(df, spark_session)
+    context = build_in_memory_runtime_context(include_pandas=False)
+
+    validator = get_test_validator_with_data(
+        execution_engine="spark",
+        data=df,
+        context=context,
+    )
 
     result: ExpectationValidationResult = (
         validator.expect_queried_table_row_count_to_be(
@@ -147,6 +161,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "success,query,value,observed,row_condition",
     [
@@ -159,6 +174,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
         ),
     ],
 )
+@pytest.mark.spark
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_spark(
     success,
     query,
@@ -171,7 +187,13 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 ):
     df: pd.DataFrame = titanic_df
 
-    validator: Validator = build_spark_validator_with_data(df, spark_session)
+    context = build_in_memory_runtime_context(include_pandas=False)
+
+    validator = get_test_validator_with_data(
+        execution_engine="spark",
+        data=df,
+        context=context,
+    )
 
     result: ExpectationValidationResult = (
         validator.expect_queried_table_row_count_to_be(

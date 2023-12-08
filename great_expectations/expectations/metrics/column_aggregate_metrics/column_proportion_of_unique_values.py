@@ -1,6 +1,10 @@
 from typing import Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -18,7 +22,9 @@ def unique_proportion(_metrics):
     """Computes the proportion of unique non-null values out of all non-null values"""
     total_values = _metrics.get("table.row_count")
     unique_values = _metrics.get("column.distinct_values.count")
-    null_count = _metrics.get("column_values.nonnull.unexpected_count")
+    null_count = _metrics.get(
+        f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
 
     # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)
     if total_values > 0 and total_values != null_count:
@@ -43,6 +49,7 @@ class ColumnUniqueProportion(ColumnAggregateMetricProvider):
         return unique_proportion(metrics)
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -62,8 +69,10 @@ class ColumnUniqueProportion(ColumnAggregateMetricProvider):
             metric_domain_kwargs=metric.metric_domain_kwargs,
         )
 
-        dependencies["column_values.nonnull.unexpected_count"] = MetricConfiguration(
-            metric_name="column_values.nonnull.unexpected_count",
+        dependencies[
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+        ] = MetricConfiguration(
+            metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=metric.metric_domain_kwargs,
         )
 

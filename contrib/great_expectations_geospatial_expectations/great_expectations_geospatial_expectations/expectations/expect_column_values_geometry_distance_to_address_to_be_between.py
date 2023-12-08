@@ -6,12 +6,7 @@ from geopy import geocoders
 from geopy.distance import distance, lonlat
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -22,7 +17,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.geometry.distance_to_address"
     condition_value_keys = (
@@ -39,8 +33,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-
+    def _pandas(cls, column, **kwargs):  # noqa: C901 - 24
         column_shape_format = kwargs.get("column_shape_format")
         place = kwargs.get("place")
         geocoder = kwargs.get("geocoder")
@@ -67,7 +60,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
                 # Specify the default parameters for Nominatim and run query. User is responsible for config and query params otherwise.
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
-            except:
+            except Exception:
                 raise Exception(
                     "Geocoding configuration and query failed to produce a valid result."
                 )
@@ -160,41 +153,39 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryDistanceToAddressToBeBetween(ColumnMapExpectation):
-    """
-    Expect that column values as geometry points to be between a certain distance from a geocoded object.
+    """Expect that column values as geometry points to be between a certain distance from a geocoded object.
 
-    expect_column_values_geometry_distance_to_address_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_geometry_distance_to_address_to_be_between is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
-            The column name.
-            Column values must be provided in lon-lat or lat-long tuples/lists, WKT or WKB format, which are commom formats for GIS Database formats.
-            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
+            The column name. \
+            Column values must be provided in lon-lat or lat-long tuples/lists, WKT or WKB format, which are commom formats for GIS Database formats. \
+            WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL. \
             Values must be in longitude - latitude coordinates for this method to work with geocoding.
 
     Keyword Args:
-        place: str
-            The country, place, address, etc. to query. Expect to return a point from geocoder (Default: OpenStreetMaps (Nominatim)).
+        place (str): \
+            The country, place, address, etc. to query. Expect to return a point from geocoder (Default: OpenStreetMaps (Nominatim)). \
             Note that this method uses the Latitude - Longitude Point returned by the geocoder, and not the shape(geometry)
-        column_shape_format: str
-            Geometry format for 'column' (wkt, wkb, lonlat, latlon). Column values can be provided in WKT or WKB format, which are commom formats for GIS Database formats.
-            latlon or lonlat also supports tuple pairs or list pairs in either Longtitude or Latitude first formats.
+        column_shape_format (str): \
+            Geometry format for 'column' (wkt, wkb, lonlat, latlon). Column values can be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
+            latlon or lonlat also supports tuple pairs or list pairs in either Longtitude or Latitude first formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-
-        geocoder: str
+        geocoder (str): \
             Geocoder from GeoPy to use to return the shape. While this is generic, the api is required to be available from GeoPy and must return a geometry.
-
-        geocoder_config: dict(str)
+        geocoder_config (dict str): \
             arguments to initialize the GeoPy geocoder. e.g. for paid services, an API_key is usually required. See GeoPy for reference.
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
     Notes:
-        The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
-        Any geometry can be provided in the column value, but if it is not a POINT, the centroid will be evaluated.
-        Invalid geometries import as None and fail the test.
-        Other Coordinate Reference Systems are not yet supported.
+        * The user is responsible to transform the column to a WKT or WKB format that is in the WGS84 coordianate system for earth.
+        * Any geometry can be provided in the column value, but if it is not a POINT, the centroid will be evaluated.
+        * Invalid geometries import as None and fail the test.
+        * Other Coordinate Reference Systems are not yet supported.
     """
 
     # These examples will be shown in the public gallery.
@@ -281,8 +272,7 @@ class ExpectColumnValuesGeometryDistanceToAddressToBeBetween(ColumnMapExpectatio
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         min_val = None
         max_val = None

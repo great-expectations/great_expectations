@@ -2,12 +2,13 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import ValidationDependencies
 
 
-class ProfileNumericColumnsDiffExpectation(TableExpectation):
+class ProfileNumericColumnsDiffExpectation(BatchExpectation):
     profile_metric = None
 
     @classmethod
@@ -19,8 +20,8 @@ class ProfileNumericColumnsDiffExpectation(TableExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        dependencies = super().get_validation_dependencies(
+    ) -> ValidationDependencies:
+        dependencies: ValidationDependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
         assert isinstance(
@@ -31,18 +32,19 @@ class ProfileNumericColumnsDiffExpectation(TableExpectation):
         ), "ProfileNumericColumnsDiffExpectation must be configured using profile_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
 
-        metric_dependencies = dependencies["metrics"]
-
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.profile_metric}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
 
-        metric_dependencies[f"{self.profile_metric}"] = MetricConfiguration(
-            f"{self.profile_metric}",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        dependencies.set_metric_configuration(
+            metric_name=f"{self.profile_metric}",
+            metric_configuration=MetricConfiguration(
+                metric_name=f"{self.profile_metric}",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         return dependencies
@@ -56,7 +58,7 @@ class ProfileNumericColumnsDiffExpectation(TableExpectation):
     ):
         delta_between_thresholds = metrics.get(f"{self.profile_metric}")
         mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
+            "mostly", self._get_default_value("mostly")
         )
 
         unexpected_values = {}

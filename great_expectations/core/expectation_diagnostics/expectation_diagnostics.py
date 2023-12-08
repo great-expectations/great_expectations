@@ -1,19 +1,22 @@
+from __future__ import annotations
+
 import inspect
-import os
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Tuple, Union
+from typing import List, Sequence, Tuple, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestDataCases,
+    ExpectationTestDataCases,  # noqa: TCH001
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExpectationBackendTestResultCounts,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
+    ExpectationDiagnosticCheckMessageDict,
     ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
@@ -23,19 +26,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import camel_to_snake, lint_code
-
-try:
-    import black
-except ImportError:
-    black = None
-
-try:
-    import isort
-except ImportError:
-    isort = None
 
 
 @dataclass(frozen=True)
@@ -73,6 +64,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     maturity_checklist: ExpectationDiagnosticMaturityMessages
     coverage_score: float
 
+    @override
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
         result["execution_engines_list"] = sorted(
@@ -88,7 +80,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Generates the checklist in CLI-appropriate string format."""
         str_ = self._convert_checks_into_output_message(
             self.description["camel_name"],
-            self.library_metadata.maturity,
+            self.library_metadata.maturity,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
             self.maturity_checklist,
         )
         return str_
@@ -100,8 +92,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
-        sub_messages = []
-        for problem in library_metadata.problems:
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
+        for problem in library_metadata.problems:  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
             sub_messages.append(
                 {
                     "message": problem,
@@ -111,7 +103,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         return ExpectationDiagnosticCheckMessage(
             message="Has a valid library_metadata object",
-            passed=library_metadata.library_metadata_passed_checks,
+            passed=library_metadata.library_metadata_passed_checks,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
             sub_messages=sub_messages,
         )
 
@@ -121,12 +113,19 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has an informative docstring"""
 
-        message = "Has a docstring, including a one-line short description"
+        message = 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period'
         if "short_description" in description:
             short_description = description["short_description"]
         else:
             short_description = None
-        if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
+        if short_description in {"", "\n", "TODO: Add a docstring here", None}:
+            return ExpectationDiagnosticCheckMessage(
+                message=message,
+                passed=False,
+            )
+        elif short_description.startswith("Expect ") and short_description.endswith(
+            "."
+        ):
             return ExpectationDiagnosticCheckMessage(
                 message=message,
                 sub_messages=[
@@ -137,10 +136,15 @@ class ExpectationDiagnostics(SerializableDictDot):
                 ],
                 passed=True,
             )
-
         else:
             return ExpectationDiagnosticCheckMessage(
                 message=message,
+                sub_messages=[
+                    {
+                        "message": f'"{short_description}"',
+                        "passed": False,
+                    }
+                ],
                 passed=False,
             )
 
@@ -175,7 +179,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
-        sub_messages = []
+        sub_messages: List[ExpectationDiagnosticCheckMessageDict] = []
         passed = False
         message = "Has core logic and passes tests on at least one Execution Engine"
         all_passing = [
@@ -242,7 +246,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
 
-        sub_messages = []
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
         passed = False
         message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
         all_passing = [
@@ -277,7 +281,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             )
             sub_messages.append(
                 {
-                    "message": f"  - Failing: {', '.join(result.failing_names)}",
+                    "message": f"  - Failing: {', '.join(result.failing_names)}",  # type: ignore[arg-type]
                     "passed": False,
                 }
             )
@@ -316,7 +320,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _count_unexpected_test_cases(
-        test_diagnostics: ExpectationTestDiagnostics,
+        test_diagnostics: Sequence[ExpectationTestDiagnostics],
     ) -> int:
         """Scans test_diagnostics and returns the number of cases that did not pass."""
 
@@ -368,7 +372,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
-        sub_messages = []
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
         rx = re.compile(r"^[\s]+assert", re.MULTILINE)
         try:
             first_test = examples[0]["tests"][0]
@@ -447,113 +451,6 @@ class ExpectationDiagnostics(SerializableDictDot):
         )
 
     @staticmethod
-    def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
-        """Check if linting checks pass for Expectation"""
-        sub_messages: List[dict] = []
-        message: str = "Passes all linting checks"
-        passed: bool = False
-        black_ok: bool = False
-        isort_ok: bool = False
-        file_and_class_names_ok: bool = False
-        rx_expectation_instance_repr = re.compile(r"<.*\.([^\.]*) object at .*")
-
-        try:
-            expectation_camel_name = rx_expectation_instance_repr.match(
-                repr(expectation_instance)
-            ).group(1)
-        except AttributeError:
-            sub_messages.append(
-                {
-                    "message": "Arg passed to _check_linting was not an instance of an Expectation, so cannot check linting",
-                    "passed": False,
-                }
-            )
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=passed,
-                sub_messages=sub_messages,
-            )
-
-        impl = get_expectation_impl(camel_to_snake(expectation_camel_name))
-        try:
-            source_file_path = inspect.getfile(impl)
-        except TypeError:
-            sub_messages.append(
-                {
-                    "message": "inspect.getfile(impl) raised a TypeError (impl is a built-in class)",
-                    "passed": False,
-                }
-            )
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=passed,
-                sub_messages=sub_messages,
-            )
-
-        snaked_impl_name = camel_to_snake(impl.__name__)
-        source_file_base_no_ext = os.path.basename(source_file_path).rsplit(".", 1)[0]
-        with open(source_file_path) as fp:
-            code = fp.read()
-
-        if snaked_impl_name != source_file_base_no_ext:
-            sub_messages.append(
-                {
-                    "message": f"The snake_case of {impl.__name__} ({snaked_impl_name}) does not match filename part ({source_file_base_no_ext})",
-                    "passed": False,
-                }
-            )
-        else:
-            file_and_class_names_ok = True
-
-        if black is None:
-            sub_messages.append(
-                {
-                    "message": "Could not find 'black', so cannot check linting",
-                    "passed": False,
-                }
-            )
-
-        if isort is None:
-            sub_messages.append(
-                {
-                    "message": "Could not find 'isort', so cannot check linting",
-                    "passed": False,
-                }
-            )
-
-        if black and isort:
-            blacked_code = lint_code(code)
-            if code != blacked_code:
-                sub_messages.append(
-                    {
-                        "message": "Your code would be reformatted with black",
-                        "passed": False,
-                    }
-                )
-            else:
-                black_ok = True
-            isort_ok = isort.check_code(
-                code,
-                **isort.profiles.black,
-                ignore_whitespace=True,
-                known_local_folder=["great_expectations"],
-            )
-            if not isort_ok:
-                sub_messages.append(
-                    {
-                        "message": "Your code would be reformatted with isort",
-                        "passed": False,
-                    }
-                )
-
-        passed = black_ok and isort_ok and file_and_class_names_ok
-        return ExpectationDiagnosticCheckMessage(
-            message=message,
-            passed=passed,
-            sub_messages=sub_messages,
-        )
-
-    @staticmethod
     def _check_full_test_suite(
         library_metadata: Union[
             AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
@@ -562,7 +459,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
             message="Has a full suite of tests, as determined by a code owner",
-            passed=library_metadata.has_full_test_suite,
+            passed=library_metadata.has_full_test_suite,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
         )
 
     @staticmethod
@@ -574,5 +471,5 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check library_metadata to see if a manual code review has been performed"""
         return ExpectationDiagnosticCheckMessage(
             message="Has passed a manual review by a code owner for code standards and style guides",
-            passed=library_metadata.manually_reviewed_code,
+            passed=library_metadata.manually_reviewed_code,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
         )

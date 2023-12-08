@@ -4,11 +4,8 @@ import pytest
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.self_check.util import (
-    build_pandas_validator_with_data,
-    build_sa_validator_with_data,
-    build_spark_validator_with_data,
-)
+from great_expectations.self_check.util import get_test_validator_with_data
+from great_expectations.util import build_in_memory_runtime_context
 
 
 @pytest.fixture
@@ -44,12 +41,19 @@ def z_score_validation_result():
     )
 
 
+@pytest.mark.unit
 def test_pandas_expect_column_value_z_scores_to_be_less_than_impl(
     z_score_validation_result,
 ):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
 
-    validator = build_pandas_validator_with_data(df)
+    context = build_in_memory_runtime_context(include_spark=False)
+
+    validator = get_test_validator_with_data(
+        execution_engine="pandas",
+        data=df,
+        context=context,
+    )
 
     result = validator.expect_column_value_z_scores_to_be_less_than(
         column="a", mostly=0.9, threshold=4, double_sided=True
@@ -58,6 +62,7 @@ def test_pandas_expect_column_value_z_scores_to_be_less_than_impl(
     assert result == z_score_validation_result
 
 
+@pytest.mark.postgresql
 def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
     z_score_validation_result, test_backends
 ):
@@ -66,7 +71,14 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
 
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
 
-    validator = build_sa_validator_with_data(df=df, sa_engine_name="postgresql")
+    context = build_in_memory_runtime_context(include_spark=False)
+
+    validator = get_test_validator_with_data(
+        execution_engine="postgresql",
+        table_name="expect_column_value_z_scores_to_be_less_than_impl_1",
+        data=df,
+        context=context,
+    )
 
     result = validator.expect_column_value_z_scores_to_be_less_than(
         column="a", mostly=0.9, threshold=4, double_sided=True
@@ -75,12 +87,20 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
     assert result == z_score_validation_result
 
 
+# noinspection PyUnusedLocal
+@pytest.mark.spark
 def test_spark_expect_column_value_z_scores_to_be_less_than_impl(
     spark_session, basic_spark_df_execution_engine, z_score_validation_result
 ):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
 
-    validator = build_spark_validator_with_data(df, spark_session)
+    context = build_in_memory_runtime_context(include_pandas=False)
+
+    validator = get_test_validator_with_data(
+        execution_engine="spark",
+        data=df,
+        context=context,
+    )
 
     result = validator.expect_column_value_z_scores_to_be_less_than(
         column="a", mostly=0.9, threshold=4, double_sided=True

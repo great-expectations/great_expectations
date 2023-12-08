@@ -2,12 +2,12 @@ import logging
 
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -51,7 +51,7 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
 
         regex_expression = get_dialect_regex_expression(column, regex_list[0], _dialect)
         if regex_expression is None:
-            logger.warning(f"Regex is not supported for dialect {str(_dialect)}")
+            logger.warning(f"Regex is not supported for dialect {_dialect!s}")
             raise NotImplementedError
 
         if match_on == "any":

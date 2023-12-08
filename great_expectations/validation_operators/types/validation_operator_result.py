@@ -35,7 +35,7 @@ class ValidationOperatorResult(DictDot):
     }
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         run_id: RunIdentifier,
         run_results: Dict[
@@ -52,10 +52,8 @@ class ValidationOperatorResult(DictDot):
         self._validation_operator_config = validation_operator_config
         if success is None:
             self._success = all(
-                [
-                    run_result["validation_result"].success
-                    for run_result in run_results.values()
-                ]
+                run_result["validation_result"].success
+                for run_result in run_results.values()
             )
         else:
             self._success = success

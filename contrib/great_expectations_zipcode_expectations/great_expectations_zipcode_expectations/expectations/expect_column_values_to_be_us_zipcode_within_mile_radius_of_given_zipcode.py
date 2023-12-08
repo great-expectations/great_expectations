@@ -1,7 +1,13 @@
+from typing import Optional
+
 import uszipcode
 
 # !!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.execution_engine import (  # SparkDFExecutionEngine,
     PandasExecutionEngine,
 )
@@ -73,26 +79,7 @@ class ColumnValuesAreUSZipcodeWithinMileRadiusOfGivenZipcode(ColumnMapMetricProv
 class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
     ColumnMapExpectation
 ):
-    """
-    Given a zipcode and a radius, this expectation checks that all zipcodes in a column of a table are within a specified
-    radius, in miles, of the given zipcode.
-    """
-
-    def validate_configuration(self, configuration) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+    """Expect column values to be US zip codes within a specified number of miles of a given zipcode."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -262,7 +249,7 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
     #     @classmethod
     #     @renderer(renderer_type="renderer.question")
     #     def _question_renderer(
-    #         cls, configuration, result=None, language=None, runtime_configuration=None
+    #         cls, configuration, result=None, runtime_configuration=None
     #     ):
     #         column = configuration.kwargs.get("column")
     #         mostly = configuration.kwargs.get("mostly")
@@ -274,7 +261,7 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
     #     @classmethod
     #     @renderer(renderer_type="renderer.answer")
     #     def _answer_renderer(
-    #         cls, configuration=None, result=None, language=None, runtime_configuration=None
+    #         cls, configuration=None, result=None, runtime_configuration=None
     #     ):
     #         column = result.expectation_config.kwargs.get("column")
     #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -290,16 +277,14 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

@@ -1,8 +1,7 @@
 import datetime
-from typing import Any, Union, cast
+from typing import TYPE_CHECKING, Any, Union, cast
 from unittest import mock
 
-import pandas as pd
 import pytest
 
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -11,6 +10,9 @@ from great_expectations.util import isclose
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @pytest.fixture
@@ -43,19 +45,17 @@ def integer_and_datetime_sample_dataset() -> dict:
 @pytest.mark.parametrize(
     "backend,",
     [
-        pytest.param(
-            "pandas",
-        ),
-        pytest.param(
-            "sqlite",
-        ),
-        pytest.param(
-            "spark",
-        ),
+        pytest.param("pandas", marks=pytest.mark.unit),
+        pytest.param("sqlite", marks=pytest.mark.sqlite),
+        pytest.param("spark", marks=pytest.mark.spark),
     ],
 )
 def test_column_partition_metric(
-    sa, spark_session, integer_and_datetime_sample_dataset: dict, backend: str
+    sa,
+    in_memory_runtime_context,
+    spark_session,
+    integer_and_datetime_sample_dataset: dict,
+    backend: str,
 ):
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
@@ -69,7 +69,9 @@ def test_column_partition_metric(
     """
     validator_with_data: Validator = get_test_validator_with_data(
         execution_engine=backend,
+        table_name="column_partition_metric_test",
         data=integer_and_datetime_sample_dataset,
+        context=in_memory_runtime_context,
     )
 
     metrics_calculator: MetricsCalculator = validator_with_data.metrics_calculator
@@ -91,7 +93,9 @@ def test_column_partition_metric(
             "allow_relative_error": False,
         },
     )
-    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
+    results, _ = metrics_calculator.compute_metrics(
+        metric_configurations=[desired_metric]
+    )
 
     increment = float(n_bins + 1) / n_bins
     assert all(
@@ -110,7 +114,9 @@ def test_column_partition_metric(
             "allow_relative_error": False,
         },
     )
-    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
+    results, _ = metrics_calculator.compute_metrics(
+        metric_configurations=[desired_metric]
+    )
 
     increment = datetime.timedelta(
         seconds=(seconds_in_week * float(n_bins + 1) / n_bins)

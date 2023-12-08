@@ -66,3 +66,6 @@ data_docs_sites:
         endpoint_url: https://bucket_name.s3.region.amazonaws.com/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+
+anonymous_usage_statistics:
+  enabled: True

@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import copy
 import cProfile
 import datetime
 import decimal
 import importlib
+import inspect
 import io
-import json
 import logging
 import os
 import pstats
@@ -14,22 +16,14 @@ import time
 import uuid
 from collections import OrderedDict
 from functools import wraps
-from gc import get_referrers
 from inspect import (
-    ArgInfo,
     BoundArguments,
-    Parameter,
-    Signature,
-    currentframe,
-    getargvalues,
-    getclosurevars,
-    getmodule,
     signature,
     stack,
 )
 from numbers import Number
 from pathlib import Path
-from types import CodeType, FrameType, ModuleType
+from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -38,6 +32,7 @@ from typing import (
     List,
     Optional,
     Set,
+    SupportsFloat,
     Tuple,
     Union,
     cast,
@@ -48,58 +43,37 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from pkg_resources import Distribution
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.data_context.data_context.context_factory import (
+    get_context as context_factory,
+)
 from great_expectations.exceptions import (
-    GeCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-from great_expectations.expectations.registry import _registered_expectations
-
-if TYPE_CHECKING:
-    # needed until numpy min version 1.20
-    import numpy.typing as npt
-
-    from great_expectations.data_context.data_context import (
-        BaseDataContext,
-        CloudDataContext,
-        DataContext,
-    )
-    from great_expectations.data_context.types.base import DataContextConfig
-
-try:
-    from typing import TypeGuard  # type: ignore[attr-defined]
-except ImportError:
-    from typing_extensions import TypeGuard
 
 try:
     import black
 except ImportError:
-    black = None
+    black = None  # type: ignore[assignment]
 
-try:
-    # This library moved in python 3.8
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
-    # Fallback for python < 3.8
-    import importlib_metadata  # type: ignore[no-redef]
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sa
-    from sqlalchemy import Table
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.sql import Select
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    import numpy.typing as npt
+    from typing_extensions import TypeGuard
+
+    from great_expectations.alias_types import PathStr
+    from great_expectations.data_context import (
+        AbstractDataContext,
     )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
+    from great_expectations.data_context.types.base import DataContextConfig
 
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
@@ -117,12 +91,14 @@ class bidict(dict):
         for key, value in self.items():
             self.inverse.setdefault(value, []).append(key)
 
+    @override
     def __setitem__(self, key: str, value: Any) -> None:
         if key in self:
             self.inverse[self[key]].remove(key)
         super().__setitem__(key, value)
         self.inverse.setdefault(value, []).append(key)
 
+    @override
     def __delitem__(self, key: str):
         self.inverse.setdefault(self[key], []).remove(key)
         if self[key] in self.inverse and not self.inverse[self[key]]:
@@ -191,7 +167,7 @@ def measure_execution_time(
 
     Args:
         execution_time_holder_object_reference_name: Handle, provided in "kwargs", holds execution time property setter.
-        execution_time_property_name: Property attribute nane, provided in "kwargs", sets execution time value.
+        execution_time_property_name: Property attribute name, provided in "kwargs", sets execution time value.
         method: Name of method in "time" module (default: "process_time") to be used for recording timestamps.
         pretty_print: If True (default), prints execution time summary to standard output; if False, "silent" mode.
         include_arguments: If True (default), prints arguments of function, whose execution time is measured.
@@ -244,7 +220,7 @@ def measure_execution_time(
                         )
                         call_args: OrderedDict = bound_args.arguments
                         print(
-                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+                            f"""Total execution time of function {func.__name__}({dict(call_args)!s}): {delta_t} \
 seconds."""
                         )
                     else:
@@ -257,104 +233,6 @@ seconds."""
     return execution_time_decorator
 
 
-# noinspection SpellCheckingInspection
-def get_project_distribution() -> Optional[Distribution]:
-    ditr: Distribution
-    for distr in importlib_metadata.distributions():
-        relative_path: Path
-        try:
-            relative_path = Path(__file__).relative_to(distr.locate_file(""))
-        except ValueError:
-            pass
-        else:
-            if relative_path in distr.files:  # type: ignore[operator]
-                return distr  # type: ignore[return-value]
-    return None
-
-
-# Returns the object reference to the currently running function (i.e., the immediate function under execution).
-def get_currently_executing_function() -> Callable:
-    cf = cast(FrameType, currentframe())
-    fb = cast(FrameType, cf.f_back)
-    fc: CodeType = fb.f_code
-    func_obj: Callable = [
-        referer
-        for referer in get_referrers(fc)
-        if getattr(referer, "__code__", None) is fc
-        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
-    ][0]
-    return func_obj
-
-
-# noinspection SpellCheckingInspection
-def get_currently_executing_function_call_arguments(
-    include_module_name: bool = False, include_caller_names: bool = False, **kwargs
-) -> dict:
-    """
-    :param include_module_name: bool If True, module name will be determined and included in output dictionary (default is False)
-    :param include_caller_names: bool If True, arguments, such as "self" and "cls", if present, will be included in output dictionary (default is False)
-    :param kwargs:
-    :return: dict Output dictionary, consisting of call arguments as attribute "name: value" pairs.
-
-    Example usage:
-    # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-    # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-    self._config = get_currently_executing_function_call_arguments(
-        include_module_name=True,
-        **{
-            "class_name": self.__class__.__name__,
-        },
-    )
-    filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-    """
-    cf = cast(FrameType, currentframe())
-    fb = cast(FrameType, cf.f_back)
-    argvs: ArgInfo = getargvalues(fb)
-    fc: CodeType = fb.f_code
-    cur_func_obj: Callable = [
-        referer
-        for referer in get_referrers(fc)
-        if getattr(referer, "__code__", None) is fc
-        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
-    ][0]
-    cur_mod = getmodule(cur_func_obj)
-    sig: Signature = signature(cur_func_obj)
-    params: dict = {}
-    var_positional: dict = {}
-    var_keyword: dict = {}
-    for key, param in sig.parameters.items():
-        val: Any = argvs.locals[key]
-        params[key] = val
-        if param.kind == Parameter.VAR_POSITIONAL:
-            var_positional[key] = val
-        elif param.kind == Parameter.VAR_KEYWORD:
-            var_keyword[key] = val
-    bound_args: BoundArguments = sig.bind(**params)
-    call_args: OrderedDict = bound_args.arguments
-
-    call_args_dict: dict = dict(call_args)
-
-    for key, value in var_positional.items():
-        call_args_dict[key] = value
-
-    for key, value in var_keyword.items():
-        call_args_dict.pop(key)
-        call_args_dict.update(value)
-
-    if include_module_name:
-        call_args_dict.update({"module_name": cur_mod.__name__})  # type: ignore[union-attr]
-
-    if not include_caller_names:
-        if call_args.get("cls"):
-            call_args_dict.pop("cls", None)
-        if call_args.get("self"):
-            call_args_dict.pop("self", None)
-
-    call_args_dict.update(**kwargs)
-
-    return call_args_dict
-
-
 def verify_dynamic_loading_support(
     module_name: str, package_name: Optional[str] = None
 ) -> None:
@@ -362,16 +240,18 @@ def verify_dynamic_loading_support(
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
+    # noinspection PyUnresolvedReferences
+    module_spec: Optional[importlib.machinery.ModuleSpec]
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[attr-defined]
-            module_name, package=package_name
-        )
+        module_spec = importlib.util.find_spec(module_name, package=package_name)
     except ModuleNotFoundError:
-        module_spec = None  # type: ignore[assignment]
+        module_spec = None
+
     if not module_spec:
         if not package_name:
             package_name = ""
+
         message: str = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
 make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
 templates, and assets is supported in your execution environment.  This error is unrecoverable.
@@ -399,7 +279,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str):
+def load_class(class_name: str, module_name: str) -> type:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -417,6 +297,7 @@ def load_class(class_name: str, module_name: str):
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
+
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:
@@ -425,595 +306,76 @@ def load_class(class_name: str, module_name: str):
     return klass_
 
 
-def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
+def build_in_memory_runtime_context(
+    include_pandas: bool = True,
+    include_spark: bool = True,
+) -> AbstractDataContext:
     """
-    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
+    Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
 
     Args:
-        df: the DataFrame object to convert
-        dataset_class: the class to which to convert the existing DataFrame
-        expectation_suite: the expectation suite that should be attached to the resulting dataset
-        profiler: the profiler to use to generate baseline expectations, if any
-
-    Returns:
-        A new Dataset object
+        include_pandas (bool): If True, include pandas datasource
+        include_spark (bool): If True, include spark datasource
     """
-
-    if expectation_suite is not None:
-        # Create a dataset of the new class type, and manually initialize expectations according to
-        # the provided expectation suite
-        new_df = dataset_class.from_dataset(df)
-        new_df._initialize_expectations(expectation_suite)
-    else:
-        # Instantiate the new Dataset with default expectations
-        new_df = dataset_class.from_dataset(df)
-        if profiler is not None:
-            new_df.profile(profiler)
-
-    return new_df
-
-
-def _load_and_convert_to_dataset_class(
-    df, class_name, module_name, expectation_suite=None, profiler=None
-):
-    """
-    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
-
-    Args:
-        df: the DataFrame object to convert
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        expectation_suite: the expectation suite that should be attached to the resulting dataset
-        profiler: the profiler to use to generate baseline expectations, if any
-
-    Returns:
-        A new Dataset object
-    """
-    verify_dynamic_loading_support(module_name=module_name)
-    dataset_class = load_class(class_name, module_name)
-    return _convert_to_dataset_class(df, dataset_class, expectation_suite, profiler)
-
-
-def read_csv(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_csv and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
-    import pandas as pd
-
-    df = pd.read_csv(filename, *args, **kwargs)
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def read_json(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    accessor_func=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_json and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        accessor_func (Callable): functions to transform the json object in the file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
-    import pandas as pd
-
-    if accessor_func is not None:
-        json_obj = json.load(open(filename, "rb"))
-        json_obj = accessor_func(json_obj)
-        df = pd.read_json(json.dumps(json_obj), *args, **kwargs)
-
-    else:
-        df = pd.read_json(filename, *args, **kwargs)
-
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def read_excel(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_excel and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset or ordered dict of great_expectations datasets,
-        if multiple worksheets are imported
-    """
-    import pandas as pd
-
-    try:
-        df = pd.read_excel(filename, *args, **kwargs)
-    except ImportError:
-        raise ImportError(
-            "Pandas now requires 'openpyxl' as an optional-dependency to read Excel files. Please use pip or conda to install openpyxl and try again"
-        )
-
-    if dataset_class is None:
-        verify_dynamic_loading_support(module_name=module_name)
-        dataset_class = load_class(class_name=class_name, module_name=module_name)
-    if isinstance(df, dict):
-        for key in df:
-            df[key] = _convert_to_dataset_class(
-                df=df[key],
-                dataset_class=dataset_class,
-                expectation_suite=expectation_suite,
-                profiler=profiler,
-            )
-    else:
-        df = _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    return df
-
-
-def read_table(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_table and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
-    import pandas as pd
-
-    df = pd.read_table(filename, *args, **kwargs)
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def read_feather(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_feather and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
-    import pandas as pd
-
-    df = pd.read_feather(filename, *args, **kwargs)
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def read_parquet(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_parquet and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
-    import pandas as pd
-
-    df = pd.read_parquet(filename, *args, **kwargs)
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def from_pandas(
-    pandas_df,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-):
-    """Read a Pandas data frame and return a great_expectations dataset.
-
-    Args:
-        pandas_df (Pandas df): Pandas data frame
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string) = None: path to great_expectations expectation suite file
-        profiler (profiler class) = None: The profiler that should
-            be run on the dataset to establish a baseline expectation suite.
-
-    Returns:
-        great_expectations dataset
-    """
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=pandas_df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=pandas_df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def read_pickle(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_pickle and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
-    import pandas as pd
-
-    df = pd.read_pickle(filename, *args, **kwargs)
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def read_sas(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
-):
-    """Read a file using Pandas read_sas and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
-    import pandas as pd
-
-    df = pd.read_sas(filename, *args, **kwargs)
-    if dataset_class is not None:
-        return _convert_to_dataset_class(
-            df=df,
-            dataset_class=dataset_class,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-    else:
-        return _load_and_convert_to_dataset_class(
-            df=df,
-            class_name=class_name,
-            module_name=module_name,
-            expectation_suite=expectation_suite,
-            profiler=profiler,
-        )
-
-
-def validate(
-    data_asset,
-    expectation_suite=None,
-    data_asset_name=None,
-    expectation_suite_name=None,
-    data_context=None,
-    data_asset_class_name=None,
-    data_asset_module_name="great_expectations.dataset",
-    data_asset_class=None,
-    *args,
-    **kwargs,
-):
-    """Validate the provided data asset. Validate can accept an optional data_asset_name to apply, data_context to use
-    to fetch an expectation_suite if one is not provided, and data_asset_class_name/data_asset_module_name or
-    data_asset_class to use to provide custom expectations.
-
-    Args:
-        data_asset: the asset to validate
-        expectation_suite: the suite to use, or None to fetch one using a DataContext
-        data_asset_name: the name of the data asset to use
-        expectation_suite_name: the name of the expectation_suite to use
-        data_context: data context to use to fetch an an expectation suite, or the path from which to obtain one
-        data_asset_class_name: the name of a class to dynamically load a DataAsset class
-        data_asset_module_name: the name of the module to dynamically load a DataAsset class
-        data_asset_class: a class to use. overrides data_asset_class_name/ data_asset_module_name if provided
-        *args:
-        **kwargs:
-
-    Returns:
-
-    """
-    # Get an expectation suite if not provided
-    if expectation_suite is None and data_context is None:
-        raise ValueError(
-            "Either an expectation suite or a DataContext is required for validation."
-        )
-
-    if expectation_suite is None:
-        logger.info("Using expectation suite from DataContext.")
-        # Allow data_context to be a string, and try loading it from path in that case
-        if isinstance(data_context, str):
-            from great_expectations.data_context import DataContext
-
-            data_context = DataContext(data_context)
-
-        expectation_suite = data_context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    else:
-        from great_expectations.core.expectation_suite import (
-            ExpectationSuite,
-            expectationSuiteSchema,
-        )
-
-        if isinstance(expectation_suite, dict):
-            expectation_suite_dict: dict = expectationSuiteSchema.load(
-                expectation_suite
-            )
-            expectation_suite = ExpectationSuite(
-                **expectation_suite_dict, data_context=data_context
-            )
-
-        if data_asset_name is not None:
-            raise ValueError(
-                "When providing an expectation suite, data_asset_name cannot also be provided."
-            )
-
-        if expectation_suite_name is not None:
-            raise ValueError(
-                "When providing an expectation suite, expectation_suite_name cannot also be provided."
-            )
-
-        logger.info(
-            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
-        )
-
-    # If the object is already a DataAsset type, then this is purely a convenience method
-    # and no conversion is needed; try to run validate on the given object
-    if data_asset_class_name is None and data_asset_class is None:
-        return data_asset.validate(
-            expectation_suite=expectation_suite,
-            data_context=data_context,
-            *args,
-            **kwargs,
-        )
-
-    # Otherwise, try to convert and validate the dataset
-    if data_asset_class is None:
-        verify_dynamic_loading_support(module_name=data_asset_module_name)
-        data_asset_class = load_class(data_asset_class_name, data_asset_module_name)
-
-    import pandas as pd
-
-    from great_expectations.dataset import Dataset, PandasDataset
-
-    if data_asset_class is None:
-        # Guess the GE data_asset_type based on the type of the data_asset
-        if isinstance(data_asset, pd.DataFrame):
-            data_asset_class = PandasDataset
-        # Add other data_asset_type conditions here as needed
-
-    # Otherwise, we will convert for the user to a subclass of the
-    # existing class to enable new expectations, but only for datasets
-    if not isinstance(data_asset, (Dataset, pd.DataFrame)):
-        raise ValueError(
-            "The validate util method only supports dataset validations, including custom subclasses. For other data "
-            "asset types, use the object's own validate method."
-        )
-
-    if not issubclass(type(data_asset), data_asset_class):
-        if isinstance(data_asset, pd.DataFrame) and issubclass(
-            data_asset_class, PandasDataset
-        ):
-            pass  # This is a special type of allowed coercion
-        else:
-            raise ValueError(
-                "The validate util method only supports validation for subtypes of the provided data_asset_type."
-            )
-
-    data_asset_ = _convert_to_dataset_class(
-        data_asset, dataset_class=data_asset_class, expectation_suite=expectation_suite
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
     )
 
-    return data_asset_.validate(*args, data_context=data_context, **kwargs)
+    datasources = {}
+    if include_pandas:
+        datasources["pandas_datasource"] = {
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+    if include_spark:
+        datasources["spark_datasource"] = {
+            "execution_engine": {
+                "class_name": "SparkDFExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+
+    data_context_config: DataContextConfig = DataContextConfig(
+        datasources=datasources,  # type: ignore[arg-type]
+        expectations_store_name="expectations_store",
+        validations_store_name="validations_store",
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        checkpoint_store_name="checkpoint_store",
+        store_backend_defaults=InMemoryStoreBackendDefaults(),
+    )
+
+    context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
+
+    return context
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-def gen_directory_tree_str(startpath):
+def gen_directory_tree_str(startpath: PathStr):
     """Print the structure of directory as a tree:
 
     Ex:
@@ -1032,9 +394,9 @@ def gen_directory_tree_str(startpath):
     tuples.sort()
 
     for root, dirs, files in tuples:
-        level = root.replace(startpath, "").count(os.sep)
+        level = root.replace(str(startpath), "").count(os.sep)
         indent = " " * 4 * level
-        output_str += f"{indent}{os.path.basename(root)}/\n"
+        output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)
 
         files.sort()
@@ -1044,6 +406,7 @@ def gen_directory_tree_str(startpath):
     return output_str
 
 
+# NOTE: Can delete once CLI is removed
 def lint_code(code: str) -> str:
     """Lint strings of code passed in.  Optional dependency "black" must be installed."""
 
@@ -1066,6 +429,7 @@ def lint_code(code: str) -> str:
         return code
 
 
+# NOTE: Can delete once CLI is removed
 def convert_json_string_to_be_python_compliant(code: str) -> str:
     """Cleans JSON-formatted string to adhere to Python syntax
 
@@ -1084,6 +448,7 @@ def convert_json_string_to_be_python_compliant(code: str) -> str:
     return code
 
 
+# NOTE: Can delete once CLI is removed
 def _convert_nulls_to_None(code: str) -> str:
     pattern = r'"([a-zA-Z0-9_]+)": null'
     result = re.findall(pattern, code)
@@ -1095,6 +460,7 @@ def _convert_nulls_to_None(code: str) -> str:
     return code
 
 
+# NOTE: Can delete once CLI is removed
 def _convert_json_bools_to_python_bools(code: str) -> str:
     pattern = r'"([a-zA-Z0-9_]+)": (true|false)'
     result = re.findall(pattern, code)
@@ -1107,7 +473,7 @@ def _convert_json_bools_to_python_bools(code: str) -> str:
     return code
 
 
-def filter_properties_dict(
+def filter_properties_dict(  # noqa: PLR0913, PLR0912
     properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
@@ -1150,7 +516,7 @@ def filter_properties_dict(
 
     if not isinstance(properties, dict):
         raise ValueError(
-            f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
+            f'Source "properties" must be a dictionary (illegal type "{type(properties)!s}" detected).'
         )
 
     if not inplace:
@@ -1223,7 +589,7 @@ def filter_properties_dict(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: dict,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1236,7 +602,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: list,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1249,7 +615,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: set,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1262,7 +628,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: tuple,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1275,7 +641,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: None,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1287,7 +653,7 @@ def deep_filter_properties_iterable(
     ...
 
 
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: Union[dict, list, set, tuple, None] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
@@ -1439,7 +805,7 @@ def is_nan(value: Any) -> bool:
         return True
 
 
-def convert_decimal_to_float(d: decimal.Decimal) -> float:
+def convert_decimal_to_float(d: SupportsFloat) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
@@ -1456,7 +822,11 @@ def convert_decimal_to_float(d: decimal.Decimal) -> float:
         )
         > 0
     )
-    if not rule_based_profiler_call and requires_lossy_conversion(d=d):
+    if (
+        not rule_based_profiler_call
+        and isinstance(d, decimal.Decimal)
+        and requires_lossy_conversion(d=d)
+    ):
         logger.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
@@ -1514,8 +884,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),
-            b=np.float64(operand_b),
+            a=np.float64(operand_a),  # type: ignore[arg-type]
+            b=np.float64(operand_b),  # type: ignore[arg-type]
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
@@ -1563,7 +933,7 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
 
 
 def is_ndarray_datetime_dtype(
-    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+    data: npt.NDArray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
 ) -> bool:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "datetime.datetime" type objects.
@@ -1577,11 +947,11 @@ def is_ndarray_datetime_dtype(
 
 
 def convert_ndarray_to_datetime_dtype_best_effort(
-    data: np.ndarray,
+    data: npt.NDArray,
     datetime_detected: bool = False,
     parse_strings_as_datetimes: bool = False,
     fuzzy: bool = False,
-) -> Tuple[bool, bool, np.ndarray]:
+) -> Tuple[bool, bool, npt.NDArray]:
     """
     Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
 
@@ -1632,7 +1002,9 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
     """
     value: Any
-    return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
+    return np.asarray(
+        [datetime.datetime.utcfromtimestamp(value) for value in data]  # noqa: DTZ004
+    )
 
 
 def convert_ndarray_float_to_datetime_tuple(
@@ -1646,14 +1018,14 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(
-    data: "npt.NDArray",
-) -> TypeGuard["npt.NDArray"]:
+def does_ndarray_contain_decimal_dtype(
+    data: npt.NDArray,
+) -> TypeGuard[npt.NDArray]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
     value: Any
-    result: bool = all(isinstance(value, decimal.Decimal) for value in data)
+    result: bool = any(isinstance(value, decimal.Decimal) for value in data)
     return result
 
 
@@ -1667,109 +1039,26 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
-def get_context(
-    project_config: Optional[Union["DataContextConfig", dict]] = None,
-    context_root_dir: Optional[str] = None,
-    runtime_environment: Optional[dict] = None,
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: Optional[bool] = None,
-) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+def convert_pandas_series_decimal_to_float_dtype(
+    data: pd.Series, inplace: bool = False
+) -> pd.Series | None:
     """
-    Method to return the appropriate DataContext depending on parameters and environment.
-
-    Usage:
-        import great_expectations as gx
-        my_context = gx.get_context([parameters])
-
-    1. If gx.get_context() is run in a filesystem where `great_expectations init` has been run, then it will return a
-        DataContext
-
-    2. If gx.get_context() is passed in a `context_root_dir` (which contains great_expectations.yml) then it will return
-         a DataContext
-
-    3. If gx.get_context() is passed in an in-memory `project_config` then it will return BaseDataContext.
-        `context_root_dir` can also be passed in, but the configurations from the in-memory config will override the
-        configurations in the `great_expectations.yml` file.
-
-
-    4. If GX is being run in the cloud, and the information needed for ge_cloud_config (ie ge_cloud_base_url,
-        ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
-        environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
-
-
-    +-----------------------+---------------------+---------------+
-    |  get_context params   |    Env Not Config'd |  Env Config'd |
-    +-----------------------+---------------------+---------------+
-    | ()                    | Local               | Cloud         |
-    | (ge_cloud_mode=True)  | Exception!          | Cloud         |
-    | (ge_cloud_mode=False) | Local               | Local         |
-    +-----------------------+---------------------+---------------+
-
-    TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
-
-    Args:
-        project_config (dict or DataContextConfig): In-memory configuration for DataContext.
-        context_root_dir (str): Path to directory that contains great_expectations.yml file
-        runtime_environment (dict): A dictionary of values can be passed to a DataContext when it is instantiated.
-            These values will override both values from the config variables file and
-            from environment variables.
-
-        The following parameters are relevant when running ge_cloud
-        ge_cloud_base_url (str): url for ge_cloud endpoint.
-        ge_cloud_access_token (str): access_token for ge_cloud account.
-        ge_cloud_organization_id (str): org_id for ge_cloud account.
-        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is None).
-
-    Returns:
-        DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
-        parameters
-
+    Convert all elements of "pd.Series" argument from "decimal.Decimal" type to "float" type objects "pd.Series" result.
     """
-    from great_expectations.data_context.data_context import (
-        BaseDataContext,
-        CloudDataContext,
-        DataContext,
-    )
+    series_data: np.ndarray = data.to_numpy()
+    series_data_has_decimal: bool = does_ndarray_contain_decimal_dtype(data=series_data)
+    if series_data_has_decimal:
+        series_data = convert_ndarray_decimal_to_float_dtype(data=series_data)
+        if inplace:
+            data.update(pd.Series(series_data))
+            return None
 
-    # First, check for ge_cloud conditions
+        return pd.Series(series_data)
 
-    config_available = CloudDataContext.is_ge_cloud_config_available(
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_access_token=ge_cloud_access_token,
-        ge_cloud_organization_id=ge_cloud_organization_id,
-    )
+    if inplace:
+        return None
 
-    # If config available and not explicitly disabled
-    if config_available and ge_cloud_mode is not False:
-        return CloudDataContext(
-            project_config=project_config,
-            runtime_environment=runtime_environment,
-            context_root_dir=context_root_dir,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-
-    if ge_cloud_mode and not config_available:
-        raise GeCloudConfigurationError(
-            "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
-        )
-
-    # Second, check for which type of local
-
-    if project_config is not None:
-        return BaseDataContext(
-            project_config=project_config,
-            context_root_dir=context_root_dir,
-            runtime_environment=runtime_environment,
-        )
-
-    return DataContext(
-        context_root_dir=context_root_dir,
-        runtime_environment=runtime_environment,
-    )
+    return data
 
 
 def is_sane_slack_webhook(url: str) -> bool:
@@ -1781,11 +1070,13 @@ def is_sane_slack_webhook(url: str) -> bool:
 
 
 def is_list_of_strings(_list) -> TypeGuard[List[str]]:
-    return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
+    return isinstance(_list, list) and all(isinstance(site, str) for site in _list)
 
 
 def generate_library_json_from_registered_expectations():
     """Generate the JSON object used to populate the public gallery"""
+    from great_expectations.expectations.registry import _registered_expectations
+
     library_json = {}
 
     for expectation_name, expectation in _registered_expectations.items():
@@ -1795,25 +1086,12 @@ def generate_library_json_from_registered_expectations():
     return library_json
 
 
-def delete_blank_lines(text: str) -> str:
-    return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
-
-
 def generate_temporary_table_name(
-    default_table_name_prefix: str = "ge_temp_",
+    default_table_name_prefix: str = "gx_temp_",
     num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
-
-
-def get_sqlalchemy_inspector(engine):
-    if version.parse(sa.__version__) < version.parse("1.4"):
-        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-        insp = reflection.Inspector.from_engine(engine)
-    else:
-        insp = sa.inspect(engine)
-    return insp
 
 
 def get_sqlalchemy_url(drivername, **credentials):
@@ -1825,7 +1103,9 @@ def get_sqlalchemy_url(drivername, **credentials):
     return url
 
 
-def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+def get_sqlalchemy_selectable(
+    selectable: Union[sa.Table, sqlalchemy.Select]
+) -> Union[sa.Table, sqlalchemy.Select]:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
@@ -1836,7 +1116,7 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if isinstance(selectable, Select):
+    if sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
         else:
@@ -1861,7 +1141,7 @@ def get_sqlalchemy_domain_data(domain_data):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
         # select(query).subquery() should be used instead
-        domain_data = sa.select(["*"]).select_from(domain_data)
+        domain_data = sa.select(sa.text("*")).select_from(domain_data)
     # engine.get_domain_records returns a valid select object;
     # calling fetchall at execution is equivalent to a SELECT *
     return domain_data
@@ -1873,11 +1153,28 @@ def import_make_url():
     still be accessed from sqlalchemy.engine.url to avoid import errors.
     """
     if version.parse(sa.__version__) < version.parse("1.4"):
-        from sqlalchemy.engine.url import make_url
+        make_url = sqlalchemy.url.make_url
     else:
-        from sqlalchemy.engine import make_url
+        make_url = sqlalchemy.engine.make_url
 
     return make_url
+
+
+def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
+    ch_type = type_
+    if type(ch_type) is str:  # noqa: E721
+        if type_.lower() in ("decimal", "decimaltype()"):
+            ch_type = type_module.types.Decimal
+        elif type_.lower() in ("fixedstring"):
+            ch_type = type_module.types.String
+        else:
+            ch_type = type_module.ClickHouseDialect()._get_column_type("", ch_type)
+
+    if hasattr(ch_type, "nested_type"):
+        ch_type = type(ch_type.nested_type)
+    if not inspect.isclass(ch_type):
+        ch_type = type(ch_type)
+    return ch_type
 
 
 def get_pyathena_potential_type(type_module, type_) -> str:
@@ -1915,29 +1212,3 @@ def pandas_series_between_inclusive(
         metric_series = series.between(min_value, max_value)
 
     return metric_series
-
-
-def numpy_quantile(
-    a: np.ndarray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, np.ndarray]:
-    """
-    As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
-    Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
-    """
-    quantile: np.ndarray
-    if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(
-            a=a,
-            q=q,
-            axis=axis,
-            method=method,
-        )
-    else:
-        quantile = np.quantile(
-            a=a,
-            q=q,
-            axis=axis,
-            interpolation=method,
-        )
-
-    return quantile

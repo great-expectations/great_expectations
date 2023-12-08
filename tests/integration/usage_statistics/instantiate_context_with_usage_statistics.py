@@ -8,7 +8,7 @@ import uuid
 
 import pandas as pd
 
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import DataContextConfig
 
 logging.basicConfig(level=logging.INFO)
@@ -65,12 +65,12 @@ def main(
         },
         commented_map=None,
     )
-    context = BaseDataContext(config)
+    context = get_context(config)
     print("Done constructing a DataContext.")
     print("Building a suite and validating.")
     df = pd.DataFrame({"a": [1, 2, 3]})
-    context.create_expectation_suite("testing.batch")
-    batch = context.get_batch(
+    context.add_expectation_suite("testing.batch")
+    batch = context._get_batch_v2(
         batch_kwargs={"datasource": "pandas", "dataset": df},
         expectation_suite_name="testing.batch",
     )

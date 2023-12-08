@@ -1,16 +1,7 @@
-import json
-from typing import Optional
-
 import pandas as pd
 import pygeos as geos
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -21,7 +12,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.geometry.near_shape"
     condition_value_keys = (
@@ -34,7 +24,6 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         shape = kwargs.get("shape")
         shape_format = kwargs.get("shape_format")
         column_shape_format = kwargs.get("column_shape_format")
@@ -53,7 +42,7 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
                     raise NotImplementedError(
                         "Shape constructor method not implemented. Must be in WKT, WKB, or GeoJSON format."
                     )
-            except:
+            except Exception:
                 raise Exception("A valid reference shape was not given.")
         else:
             raise Exception("A shape must be provided for this method.")
@@ -89,45 +78,40 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryToBeNearShape(ColumnMapExpectation):
-    """
-    Expect that column values as geometries are near (within a given distance) of a given reference shape in the units of the provided geometries.
+    """Expect that column values as geometries are near (within a given distance) of a given reference shape in the units of the provided geometries.
 
-    expect_column_values_geometry_to_be_near_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_geometry_to_be_near_shape is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
-            The column name.
-            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
+            The column name. \
+            Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
 
     Keyword Args:
-        shape: str or list(str)
+        shape (str or list of str): \
             The reference geometry
-
-        shape_format: str
-            Geometry format for 'shape' string(s). Can be provided as 'Well Known Text' (WKT), 'Well Known Binary' (WKB), or as GeoJSON.
-            Must be one of: [wkt, wkb, geojson]
-            Default: wkt
-
-        column_shape_format: str
-            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
+        shape_format (str): \
+            Geometry format for 'shape' string(s). Can be provided as 'Well Known Text' (WKT), 'Well Known Binary' (WKB), or as GeoJSON. \
+            Must be one of: [wkt, wkb, geojson]. Default: wkt
+        column_shape_format (str): \
+            Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats. \
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-
-        distance_tol: float
-            Distance tolerance for the column value geometries to the reference shape. Note that 0 evaluates to expect_column_values_to_be_within_shape.
-            Distance values are always positive. Negative tolerances will always evaluate to False.
-            Default: 0
+        distance_tol (float): \
+            Distance tolerance for the column value geometries to the reference shape. Note that 0 evaluates to expect_column_values_to_be_within_shape. \
+            Distance values are always positive. Negative tolerances will always evaluate to False. Default: 0
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
     Notes:
-        The distance returned and specified is based on the coordinate system of the points, not Latitude and Longitude.
-        The user is responsible for the projection method and units (e.g. UTM in m).
-        The distance calculation is based on a cartesian coordinate system.
-        Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases.
-        Any convention can be followed as long as the test and reference shapes are consistent.
-        The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
+        * The distance returned and specified is based on the coordinate system of the points, not Latitude and Longitude.
+        * The user is responsible for the projection method and units (e.g. UTM in m).
+        * The distance calculation is based on a cartesian coordinate system.
+        * Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases.
+        * Any convention can be followed as long as the test and reference shapes are consistent.
+        * The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
     """
 
     # These examples will be shown in the public gallery.
@@ -246,35 +230,6 @@ class ExpectColumnValuesGeometryToBeNearShape(ColumnMapExpectation):
         "column_shape_format": "wkt",
         "distance_tol": 0.0,
     }
-
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

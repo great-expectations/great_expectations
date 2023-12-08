@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_pair_values_to_be_equal",
   "datasets" : [{
+    "dataset_name": "expect_column_pair_values_to_be_equal_1",
     "data" : {
       "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
       "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -10,12 +11,12 @@
       "b" : [1, 2, 3, 4, 5, null, null, null, null, null]
     },
     "data_alt" : {
-      "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      "z" : [1, 2, 3, 4, 5, null, null, null, null],
-      "a" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      "b" : [1, 2, 3, 4, 5, null, null, null, null]
+      "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
+      "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
+      "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
+      "a" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 11],
+      "b" : [1, 2, 3, 4, 5, null, null, null, null, null]
     },
     "schemas": {
       "spark": {
@@ -25,6 +26,14 @@
         "z": "IntegerType",
         "a": "IntegerType",
         "b": "IntegerType"
+      },
+      "snowflake": {
+        "w": "NUMBER",
+        "x": "NUMBER",
+        "y": "STRING",
+        "z": "NUMBER",
+        "a": "NUMBER",
+        "b": "NUMBER"
       }
     },
     "tests" : [{
@@ -57,7 +66,6 @@
       "title" : "basic_negative_example_compare_numbers",
       "include_in_gallery": true,
       "exact_match_out" : false,
-      "suppress_test_for": ["trino"],
       "in": {
         "column_A": "a",
         "column_B": "x"
@@ -87,7 +95,6 @@
     },{
       "title" : "positive_example_with_mostly_compare_numbers",
       "exact_match_out" : false,
-      "suppress_test_for": ["trino"],
       "in": {
         "column_A": "a",
         "column_B": "x",

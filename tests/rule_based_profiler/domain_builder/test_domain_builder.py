@@ -2,16 +2,15 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import (
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     ColumnPairDomainBuilder,
@@ -24,17 +23,19 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.big
 
 
 # noinspection PyPep8Naming
-@pytest.mark.integration
 @pytest.mark.slow  # 1.15s
 def test_table_domain_builder(
     alice_columnar_table_single_batch_context,
     table_Users_domain,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     domain_builder: DomainBuilder = TableDomainBuilder(data_context=data_context)
     domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule")
@@ -56,12 +57,11 @@ def test_table_domain_builder(
     assert domain.kwargs is None
 
 
-@pytest.mark.integration
 def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
     data_context_with_datasource_pandas_engine,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = data_context_with_datasource_pandas_engine
+    data_context = data_context_with_datasource_pandas_engine
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -127,13 +127,12 @@ def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
     ]
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.21s
 def test_column_domain_builder(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -247,13 +246,12 @@ def test_column_domain_builder(
     ]
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.20s
 def test_column_domain_builder_with_simple_semantic_type_included(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -313,13 +311,12 @@ def test_column_domain_builder_with_simple_semantic_type_included(
     ]
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.19s
 def test_column_pair_domain_builder_wrong_column_names(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -348,9 +345,9 @@ def test_column_pair_domain_builder_wrong_column_names(
         data_context=data_context,
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domains: List[Domain] = domain_builder.get_domains(
+        domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
@@ -360,13 +357,12 @@ def test_column_pair_domain_builder_wrong_column_names(
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.19s
 def test_column_pair_domain_builder_correct_sorted_column_names(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -404,8 +400,8 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
             "rule_name": "my_rule",
             "domain_type": "column_pair",
             "domain_kwargs": {
-                "column_A": "event_type",
-                "column_B": "user_id",
+                "column_A": "user_id",
+                "column_B": "event_type",
             },
             "details": {
                 INFERRED_SEMANTIC_TYPE_KEY: {
@@ -420,17 +416,16 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
 
     # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
     assert domain.domain_type.value == "column_pair"
-    assert domain.domain_kwargs.column_A == "event_type"
-    assert domain.domain_kwargs.column_B == "user_id"
+    assert domain.domain_kwargs.column_A == "user_id"
+    assert domain.domain_kwargs.column_B == "event_type"
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.30s
 def test_multi_column_domain_builder_wrong_column_list(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -455,9 +450,9 @@ def test_multi_column_domain_builder_wrong_column_list(
         data_context=data_context,
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domains: List[Domain] = domain_builder.get_domains(
+        domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
@@ -465,9 +460,9 @@ def test_multi_column_domain_builder_wrong_column_list(
         excinfo.value
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domains: List[Domain] = domain_builder.get_domains(
+        domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
@@ -476,13 +471,12 @@ def test_multi_column_domain_builder_wrong_column_list(
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.18s
 def test_multi_column_domain_builder_correct_column_list(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 

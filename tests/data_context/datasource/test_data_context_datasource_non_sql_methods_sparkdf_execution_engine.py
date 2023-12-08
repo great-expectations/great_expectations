@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import shutil
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Union
 
 import pandas as pd
 import pytest
@@ -13,19 +15,26 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
+if TYPE_CHECKING:
+    from great_expectations.compatibility.pyspark import DataFrame
+    from great_expectations.data_context import AbstractDataContext
+
 yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.spark
 
 
 @pytest.fixture
 def schema_for_spark_testset(spark_session):
-    from pyspark.sql.types import IntegerType, StructField, StructType
+    from great_expectations.compatibility import pyspark
 
     # add schema
-    schema = StructType(
+    schema = pyspark.types.StructType(
         [
-            StructField("x", IntegerType(), True),
-            StructField("y", IntegerType(), True),
-            StructField("z", IntegerType(), True),
+            pyspark.types.StructField("x", pyspark.types.IntegerType(), True),
+            pyspark.types.StructField("y", pyspark.types.IntegerType(), True),
+            pyspark.types.StructField("z", pyspark.types.IntegerType(), True),
         ]
     )
     return schema
@@ -43,14 +52,16 @@ def context_with_single_titanic_csv_spark(
         )
     )
 
-    titanic_asset_base_directory_path: str = os.path.join(base_directory, "data")
-    os.makedirs(titanic_asset_base_directory_path)
+    titanic_asset_base_directory_path: str = os.path.join(  # noqa: PTH118
+        base_directory, "data"
+    )
+    os.makedirs(titanic_asset_base_directory_path)  # noqa: PTH103
 
     titanic_csv_source_file_path: str = file_relative_path(
         __file__, "../../test_sets/Titanic.csv"
     )
     titanic_csv_destination_file_path: str = str(
-        os.path.join(base_directory, "data/Titanic_19120414_1313.csv")
+        os.path.join(base_directory, "data/Titanic_19120414_1313.csv")  # noqa: PTH118
     )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
@@ -86,9 +97,8 @@ def context_with_single_titanic_csv_spark(
     return context
 
 
-@pytest.mark.integration
 def test_get_validator(context_with_single_titanic_csv_spark):
-    context: "DataContext" = context_with_single_titanic_csv_spark
+    context: AbstractDataContext = context_with_single_titanic_csv_spark
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
@@ -99,7 +109,7 @@ def test_get_validator(context_with_single_titanic_csv_spark):
         },
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.create_expectation_suite(expectation_suite_name="temp_suite")
+    context.add_expectation_suite(expectation_suite_name="temp_suite")
     my_validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="temp_suite"
     )
@@ -109,23 +119,21 @@ def test_get_validator(context_with_single_titanic_csv_spark):
     assert len(my_validator.active_batch.data.dataframe.columns) == 7
 
 
-@pytest.mark.integration
 def test_get_validator_bad_batch_request(context_with_single_titanic_csv_spark):
-    context: "DataContext" = context_with_single_titanic_csv_spark
+    context: AbstractDataContext = context_with_single_titanic_csv_spark
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "I_DONT_EXIST",
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.create_expectation_suite(expectation_suite_name="temp_suite")
+    context.add_expectation_suite(expectation_suite_name="temp_suite")
     with pytest.raises(InvalidBatchRequestError):
         context.get_validator(
             batch_request=batch_request, expectation_suite_name="temp_suite"
         )
 
 
-@pytest.mark.integration
 def test_get_batch_list_spark_engine_inferred_assets(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -204,7 +212,6 @@ data_connectors:
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-@pytest.mark.integration
 def test_get_batch_list_from_datasource_with_runtime_data_connector(
     empty_data_context, tmp_path_factory, spark_session
 ):
@@ -228,10 +235,8 @@ data_connectors:
         **config,
     )
 
-    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+    test_df: DataFrame = spark_session.createDataFrame(
+        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     )
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
@@ -262,7 +267,6 @@ data_connectors:
     assert len(batch.data.dataframe.columns) == 2
 
 
-@pytest.mark.integration
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -361,7 +365,6 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-@pytest.mark.integration
 def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_filter(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -457,7 +460,6 @@ def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limi
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-@pytest.mark.integration
 def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_custom_filter_limit_param_ignored(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -572,7 +574,6 @@ def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limi
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-@pytest.mark.integration
 def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -664,7 +665,6 @@ def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_ba
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-@pytest.mark.integration
 def test_get_batch_list_from_datasource_schema_in_datasource_config_serialized(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -762,7 +762,6 @@ def test_get_batch_list_from_datasource_schema_in_datasource_config_serialized(
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-@pytest.mark.integration
 def test_get_batch_list_from_datasource_schema_in_datasource_config_non_serialized(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):

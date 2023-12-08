@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
 
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
@@ -34,8 +35,8 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute value counts using specified metric for one Batch of data.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
         "column_value_counts_metric_single_batch_parameter_builder_config",
         "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
@@ -112,12 +113,13 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             data_context=data_context,
         )
 
+    @override
     def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.

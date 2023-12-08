@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -13,52 +14,48 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError:
-    sparktypes = None
-
 
 class TableColumns(TableMetricProvider):
     metric_name = "table.columns"
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -75,11 +72,12 @@ class TableColumns(TableMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        metric_value_kwargs = {
+            "include_nested": True,
+        }
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",
             metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs={
-                "include_nested": True,
-            },
+            metric_value_kwargs=metric.metric_value_kwargs or metric_value_kwargs,
         )
         return dependencies

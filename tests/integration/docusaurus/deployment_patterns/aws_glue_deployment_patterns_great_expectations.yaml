@@ -65,3 +65,6 @@ data_docs_sites:
       bucket: bucket_name
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+
+anonymous_usage_statistics:
+  enabled: True

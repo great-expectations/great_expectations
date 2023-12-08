@@ -1,0 +1,78 @@
+import TipConfiguredDataConnectorOverview from '../components/_tip_configured_data_connector_overview.mdx'
+import PartNameTheDataConnector from '../components/_part_name_the_data_connector.mdx'
+import PartDataConnectorRequiredKeysOverview from './_part_data_connector_required_keys_overview.mdx'
+import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_connector_module_name.mdx'
+import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.mdx'
+
+<TipConfiguredDataConnectorOverview />
+
+<PartNameTheDataConnector data_connector_name="name_of_my_configured_data_connector" />
+
+At this point, your configuration should look like:
+
+```python name="sql datasource configuration with empty configured sql data_connector"
+```
+
+#### Required Data Connector configuration keys
+
+<PartDataConnectorRequiredKeysOverview data_connector_type="ConfiguredAssetSqlDataConnector" data_connector_name="name_of_my_configured_data_connector" inferred={false} configured={true} runtime={false} />
+
+For this example, you will be using the `ConfiguredAssetSqlDataConnector` as your `class_name`.  This is a subclass of the `ConfiguredAssetDataConnector` that is specialized to support SQL Execution Engines, such as the `SqlAlchemyExecutionEngine`.  This key/value entry will therefore look like:
+
+```python name="define data_connector class_name for configured sql datasource"
+```
+
+<TipCustomDataConnectorModuleName />
+
+With this value added, along with a blank dictionary for `assets`, your full configuration should now look like:
+
+```python name="configured sql datasource configuration with data_connector class_name defined"
+```
+
+#### Optional Data Connector configuration keys for splitting Data Assets into Batches
+
+In addition to the above key/value pairs, there are some optional key/value pairs that you can use to define how your Data Assets are split into Batches.  If you define these key/value pairs in your Data Connector dictionary, they will be applied to all the Data Connector's Data Assets.  However, if you choose not to define these key/value pairs, the Data Assets that are defined for this Data Connector will default to returning a single Batch consisting of a full table when requested from a Batch Request.
+
+The key/value pairs that used for splitting a Data Asset into Batches are:
+
+<NoteOptionalDataConnectorKeys splitting={true} />
+
+:::tip
+
+For more information on the available splitting methods, please see the [Splitting methods subsection under Additional notes](#splitting-methods) at the end of this guide.
+
+:::
+
+#### Optional Data Connector configuration keys for sampling data from returned Batches
+
+You may wish to only sample the data that is returned in your Data Asset's Batches.  To do this, you will need to define the optional keys `sampling_method` and `sampling_kwargs`.  As with `splitter_method` and `splitter_kwargs`, defining these key/value pairs in your Data Connector's dictionary will result in those values being applied to all Data Assets that are made available by the Data Connector.
+
+The key/value pairs that are used for sampling data from a Data Asset are:
+
+<NoteOptionalDataConnectorKeys sampling={true} />
+
+:::tip
+
+Although this guide will not use sampling in its examples, there is a list of the available sampling methods in [the Sampling methods subsection of the Additional notes section](#sampling-methods) at the end of this guide.
+
+:::
+
+#### Optional Data Connector configuration key for defining introspection behaviour
+
+Finally, there is an optional key that can be defined to alter the default behaviour of introspection methods such as those used by auto-initializing Expectations and Data Assistants.  This key is:
+
+<NoteOptionalDataConnectorKeys introspection={true} />
+
+:::tip
+
+You will find a list of the valid keys for the `introspection_directives` dictionary and their corresponding values in the [Introspection directives subsection of the Additional notes](#introspection-directives) at the end of this guide.
+
+:::
+
+#### A note on optional Data Connector keys
+
+:::note
+
+These key/value pairs can also be defined in the configurations for individual Data Assets, which will be shown later in this guide.  If these values are defined both in the Data Connector dictionary and in a Data Asset dictionary, the definition in the Data Asset will take precedence.
+
+:::

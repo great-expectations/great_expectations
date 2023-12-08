@@ -5,26 +5,17 @@ from typing import List, Optional
 
 import pytest
 from marshmallow import INCLUDE, Schema, fields, validates_schema
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
-from great_expectations.data_context.store.in_memory_store_backend import (
-    InMemoryStoreBackend,
-)
-from great_expectations.data_context.store.tuple_store_backend import (
-    TupleFilesystemStoreBackend,
-    TupleStoreBackend,
-)
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.util import gen_directory_tree_str
@@ -34,7 +25,7 @@ from tests.test_utils import (
     save_config_to_filesystem,
 )
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +41,8 @@ class SampleConfig(BaseYamlConfig):
 
     def __init__(
         self,
-        some_param_0: str = None,
-        some_param_1: int = None,
+        some_param_0: Optional[str] = None,
+        some_param_1: Optional[int] = None,
         commented_map: CommentedMap = None,
     ):
         if some_param_0 is None:
@@ -90,7 +81,7 @@ class SampleConfigurationStore(ConfigurationStore):
         ]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_v3_configuration_store(tmp_path_factory):
     root_directory_path: str = "test_v3_configuration_store"
     root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))
@@ -155,7 +146,7 @@ def test_v3_configuration_store(tmp_path_factory):
             base_directory="unknown_base_directory",
             configuration_key=configuration_name_0,
         )
-    with pytest.raises(ge_exceptions.InvalidKeyError):
+    with pytest.raises(gx_exceptions.InvalidKeyError):
         # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
             configuration_store_class_name="SampleConfigurationStore",
@@ -312,7 +303,7 @@ def test_self_check(capsys) -> None:
 
 
 @pytest.mark.parametrize(
-    "name,ge_cloud_id,expected_key",
+    "name,id,expected_key",
     [
         pytest.param(
             "my_name",
@@ -323,8 +314,8 @@ def test_self_check(capsys) -> None:
         pytest.param(
             None,
             "abc123",
-            GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
+            GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123"
             ),
             id="id",
         ),
@@ -332,14 +323,14 @@ def test_self_check(capsys) -> None:
 )
 @pytest.mark.unit
 def test_determine_key_constructs_key(
-    name: Optional[str], ge_cloud_id: Optional[str], expected_key: DataContextKey
+    name: Optional[str], id: Optional[str], expected_key: DataContextKey
 ) -> None:
-    actual_key = ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+    actual_key = ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
     assert actual_key == expected_key
 
 
 @pytest.mark.parametrize(
-    "name,ge_cloud_id",
+    "name,id",
     [
         pytest.param("my_name", "abc123", id="too many args"),
         pytest.param(
@@ -351,12 +342,12 @@ def test_determine_key_constructs_key(
 )
 @pytest.mark.unit
 def test_determine_key_raises_error_with_conflicting_args(
-    name: Optional[str], ge_cloud_id: Optional[str]
+    name: Optional[str], id: Optional[str]
 ) -> None:
     with pytest.raises(AssertionError) as e:
-        ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
 
-    assert "Must provide either name or ge_cloud_id" in str(e.value)
+    assert "Must provide either name or id" in str(e.value)
 
 
 @pytest.mark.unit

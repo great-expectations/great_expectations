@@ -1,9 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
@@ -17,15 +30,16 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.rule_based_profiler.parameter_container import (
+        ParameterContainer,
+    )
+    from great_expectations.validator.computed_metric import MetricValue
     from great_expectations.validator.validator import Validator
 
 
@@ -34,12 +48,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses column cardinality to identify domains.
     """
 
-    exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
+    exclude_field_names: ClassVar[
+        Set[str]
+    ] = ColumnDomainBuilder.exclude_field_names | {
         "cardinality_checker",
     }
-    cardinality_limit_modes: CardinalityLimitMode = CardinalityLimitMode
+    cardinality_limit_modes: Type[CardinalityLimitMode] = CardinalityLimitMode
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
@@ -122,7 +138,9 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 SemanticDomainTypes.LOGIC,
             ]
 
-        self._allowed_semantic_types_passthrough = allowed_semantic_types_passthrough
+        self._allowed_semantic_types_passthrough: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = allowed_semantic_types_passthrough
 
         super().__init__(
             include_column_names=include_column_names,
@@ -140,9 +158,10 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._max_unique_values = max_unique_values
         self._max_proportion_unique = max_proportion_unique
 
-        self._cardinality_checker = None
+        self._cardinality_checker: Optional[CardinalityChecker] = None
 
     @property
+    @override
     def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
@@ -187,23 +206,26 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     def cardinality_checker(self) -> Optional[CardinalityChecker]:
         return self._cardinality_checker
 
+    @override
     def _get_domains(
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """Return domains matching the selected cardinality_limit_mode.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of domains that match the desired cardinality.
         """
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)
+        batch_ids: Optional[List[str]] = self.get_batch_ids(variables=variables)
 
-        validator: Validator = self.get_validator(variables=variables)
+        validator: Optional[Validator] = self.get_validator(variables=variables)
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
@@ -264,10 +286,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
             parameters=None,
         )
-        allowed_semantic_types_passthrough = (
-            self.semantic_type_filter.parse_semantic_domain_type_argument(
-                semantic_types=allowed_semantic_types_passthrough
-            )
+        allowed_semantic_types_passthrough = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[assignment,union-attr] # could be None
+            semantic_types=allowed_semantic_types_passthrough
         )
 
         column_name: str
@@ -275,7 +295,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         allowed_column_names_passthrough: List[str] = [
             column_name
             for column_name in effective_column_names
-            if self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
+            if self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[operator,union-attr] # could be None
                 column_name
             ]
             in allowed_semantic_types_passthrough
@@ -290,47 +310,53 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         metrics_for_cardinality_check: Dict[
             str, List[MetricConfiguration]
         ] = self._generate_metric_configurations_to_check_cardinality(
-            batch_ids=batch_ids, column_names=effective_column_names
+            column_names=effective_column_names, batch_ids=batch_ids
         )
+
+        if validator is None:
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"Error: Failed to obtain Validator {self.__class__.__name__} (Validator is required for cardinality checks)."
+            )
 
         candidate_column_names: List[
             str
         ] = self._column_names_meeting_cardinality_limit(
             validator=validator,
             metrics_for_cardinality_check=metrics_for_cardinality_check,
+            runtime_configuration=runtime_configuration,
         )
         candidate_column_names.extend(allowed_column_names_passthrough)
 
-        column_name: str
         domains: List[Domain] = build_domains_from_column_names(
             rule_name=rule_name,
             column_names=candidate_column_names,
             domain_type=self.domain_type,
-            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,  # type: ignore[union-attr] # could be None
         )
 
         return domains
 
     def _generate_metric_configurations_to_check_cardinality(
         self,
-        batch_ids: List[str],
         column_names: List[str],
+        batch_ids: Optional[List[str]] = None,
     ) -> Dict[str, List[MetricConfiguration]]:
         """Generate metric configurations used to compute metrics for checking cardinality.
 
         Args:
-            batch_ids: List of batch_ids used to create metric configurations.
             column_names: List of column_names used to create metric configurations.
+            batch_ids: List of batch_ids used to create metric configurations.
 
         Returns:
             Dictionary of the form {
                 "my_column_name": List[MetricConfiguration],
             }
         """
+        batch_ids = batch_ids or []
 
         cardinality_limit_mode: Union[
             AbsoluteCardinalityLimit, RelativeCardinalityLimit
-        ] = self.cardinality_checker.cardinality_limit_mode
+        ] = self.cardinality_checker.cardinality_limit_mode  # type: ignore[union-attr] # could be None
 
         batch_id: str
         metric_configurations: Dict[str, List[MetricConfiguration]] = {
@@ -354,37 +380,38 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self,
         validator: Validator,
         metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
+        runtime_configuration: Optional[dict] = None,
     ) -> List[str]:
         """Compute cardinality and return column names meeting cardinality limit.
 
         Args:
             validator: Validator used to compute column cardinality.
             metrics_for_cardinality_check: metric configurations used to compute cardinality.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of column names meeting cardinality.
         """
         column_name: str
-        resolved_metrics: Dict[Tuple[str, str, str], Any]
-        metric_value: Any
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        metric_value: MetricValue
 
         resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], Any]
+            str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metrics_for_cardinality_check,
+            runtime_configuration=runtime_configuration,
         )
 
         candidate_column_names: List[str] = [
             column_name
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
             if all(
-                [
-                    self.cardinality_checker.cardinality_within_limit(
-                        metric_value=metric_value
-                    )
-                    for metric_value in resolved_metrics.values()
-                ]
+                self.cardinality_checker.cardinality_within_limit(  # type: ignore[union-attr] # could be None
+                    metric_value=metric_value  # type: ignore[arg-type] # Expecting Union[int, float] (subset of "MetricValue").
+                )
+                for metric_value in resolved_metrics.values()
             )
         ]
 

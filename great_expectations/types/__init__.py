@@ -1,23 +1,20 @@
 import copy
 import logging
 from enum import Enum
-from typing import Optional, Set
+from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
 
+from great_expectations.compatibility import pydantic, pyspark
+
+from ..alias_types import JSONValues
+from ..core._docs_decorators import public_api
 from .base import SerializableDotDict
-from .color_palettes import ColorPalettes, Colors
+from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
+from .fonts import FontFamily, FontFamilyURL
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark
-except ImportError:
-    pyspark = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
 
 
 class DictDot:
@@ -64,8 +61,8 @@ class DictDot:
     For more examples of usage, please see `test_dataclass_serializable_dot_dict_pattern.py` in the tests folder.
     """
 
-    include_field_names: Set[str] = set()
-    exclude_field_names: Set[str] = set()
+    include_field_names: ClassVar[Set[str]] = set()
+    exclude_field_names: ClassVar[Set[str]] = set()
 
     def __getitem__(self, item):
         if isinstance(item, int):
@@ -121,7 +118,7 @@ class DictDot:
                 new_dict[key] = value.value
 
             # ...and when DictDots and Enums are nested one layer deeper in lists or tuples
-            if isinstance(value, list) or isinstance(value, tuple):
+            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
@@ -143,15 +140,21 @@ class DictDot:
             )
         }
         for key, value in new_dict.items():
+            if isinstance(value, pydantic.BaseModel):
+                new_dict[key] = value.dict()
+
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
 
             if isinstance(value, Enum):
                 new_dict[key] = value.value
 
-            if isinstance(value, list) or isinstance(value, tuple):
+            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
+                    if isinstance(value, pydantic.BaseModel):
+                        new_dict[key][i] = element.dict()
+
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
 
@@ -212,7 +215,7 @@ class DictDot:
                         _ = self[f"_{name}"]
                     except AttributeError:
                         raise ValueError(
-                            f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
+                            f'Property "{name}", marked for {purpose} on object "{type(self)!s}", does not exist.'
                         )
 
         if include_keys:
@@ -235,12 +238,18 @@ class DictDot:
 
 
 class SerializableDictDot(DictDot):
-    def to_json_dict(self) -> dict:
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of the SerializableDictDot.
+
+        Subclasses must implement this abstract method.
+
+        Returns:
+            A JSON-serializable dict representation of the SerializableDictDot
         """
+
         # TODO: <Alex>2/4/2022</Alex>
-        A reference implementation can be provided, once circular import dependencies, caused by relative locations of
-        the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.
-        """
+        # A reference implementation can be provided, once circular import dependencies, caused by relative locations of
+        # the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.
         raise NotImplementedError
 
 
@@ -249,7 +258,7 @@ def safe_deep_copy(data, memo=None):
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
     if isinstance(data, (pd.Series, pd.DataFrame)) or (
-        pyspark and isinstance(data, pyspark.sql.DataFrame)
+        pyspark.pyspark and isinstance(data, pyspark.DataFrame)
     ):
         return data
 

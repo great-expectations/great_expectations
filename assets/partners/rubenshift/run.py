@@ -2,15 +2,14 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+import great_expectations as gx
+from great_expectations.core.batch import RuntimeBatchRequest
 
 
 def test_ge():
+    CONNECTION_STRING = os.environ.get("DB_URL")  # noqa: TID251
 
-    CONNECTION_STRING = os.environ.get("DB_URL")
-
-    context = ge.get_context()
+    context = gx.get_context()
 
     datasource_config = {
         "name": "my_datasource",
@@ -58,6 +57,6 @@ def test_ge():
     )
     print(validator.head())
 
-    assert isinstance(validator, ge.validator.validator.Validator)
+    assert isinstance(validator, gx.validator.validator.Validator)
 
     # TODO Run additional tests for your datasource

@@ -4,7 +4,6 @@ import re
 import mistune
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
@@ -14,12 +13,16 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
+
+# module level markers
+pytestmark = pytest.mark.filesystem
 
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     empty_data_context,
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
@@ -51,7 +54,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             expectation_suite_name="test",
             meta={
                 "notes": {
-                    "format": "string",
+                    "format": MetaNotesFormat.STRING,
                     "content": ["*alpha*", "_bravo_", "charlie"],
                 }
             },
@@ -69,7 +72,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={"notes": {"format": "markdown", "content": "*alpha*"}},
+            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": "*alpha*"}},
             data_context=context,
         )
     )
@@ -96,7 +99,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             expectation_suite_name="test",
             meta={
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": ["*alpha*", "_bravo_", "charlie"],
                 }
             },
@@ -154,7 +157,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={"notes": {"format": "markdown", "content": ["hi"]}},
+            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": ["hi"]}},
             data_context=context,
         )
     )
@@ -261,6 +264,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
     import pprint
 
     pprint.pprint(validation_header)
+
     assert validation_header == expected_validation_header
 
 
@@ -296,7 +300,6 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
             ["Run Time", "2020-03-22T17:02:47Z"],
         ],
     }
-
     assert validation_info == expected_validation_info
 
 
@@ -338,6 +341,7 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(
     assert validation_statistics == expected_validation_statistics
 
 
+@pytest.mark.filesystem
 def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
     batch_kwargs = {
         "path": "project_dir/project_path/data/titanic/Titanic.csv",
@@ -568,10 +572,6 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
-
-    # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start_nc.json"), "w") as f:
-    #     json.dump(rendered_validation_results, f, indent=2)
-
     assert (
         rendered_validation_results
         == ValidationResultsPageRenderer_render_with_run_info_at_start

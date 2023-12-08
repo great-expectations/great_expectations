@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import json
 import logging
-from typing import Any, List, Optional
+from typing import TYPE_CHECKING, Any
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.data_connector.sorter import Sorter
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +20,7 @@ class DictionarySorter(Sorter):
         name: str,
         orderby: str = "asc",
         order_keys_by: str = "asc",
-        key_reference_list: Optional[List[Any]] = None,
+        key_reference_list: list[Any] | None = None,
     ) -> None:
         """Defines sorting behavior for batch definitions based on batch identifiers in nested dictionary form.
 
@@ -38,15 +43,16 @@ class DictionarySorter(Sorter):
         elif order_keys_by == "desc":
             reverse_keys = True
         else:
-            raise ge_exceptions.SorterError(
+            raise gx_exceptions.SorterError(
                 f'Illegal key sort order "{order_keys_by}" for attribute "{name}".'
             )
         self._reverse_keys = reverse_keys
         self._key_reference_list = key_reference_list
 
+    @override
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
-        batch_keys: Optional[List[Any]]
+        batch_keys: list[Any] | None
         if self._key_reference_list is None:
             batch_keys = sorted(
                 batch_identifiers[self.name].keys(), reverse=self.reverse_keys
@@ -57,11 +63,12 @@ class DictionarySorter(Sorter):
                 for key in self.key_reference_list
                 if key in batch_identifiers[self.name].keys()
             ]
-        batch_values: List[Any] = [
+        batch_values: list[Any] = [
             batch_identifiers[self.name][key] for key in batch_keys
         ]
         return batch_values
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict = {
             "name": self.name,
@@ -77,5 +84,7 @@ class DictionarySorter(Sorter):
         return self._reverse_keys
 
     @property
-    def key_reference_list(self) -> List[Any]:
-        return self._key_reference_list  # type: ignore[return-value]
+    def key_reference_list(self) -> list[Any]:
+        if self._key_reference_list is None:
+            return []
+        return self._key_reference_list

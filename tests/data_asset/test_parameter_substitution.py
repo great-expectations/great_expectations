@@ -2,7 +2,7 @@
 Test the expectation decorator's ability to substitute parameters
 at evaluation time, and store parameters in expectation_suite
 """
-
+import datetime
 import json
 from typing import Dict
 
@@ -59,7 +59,7 @@ def validator_with_titanic_1911_asset(
 
     register_expectation(ExpectNothing)
 
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.create_expectation_suite(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.add_expectation_suite(
         expectation_suite_name="titanic_1911_suite"
     )
     batch_request = BatchRequest(
@@ -72,6 +72,7 @@ def validator_with_titanic_1911_asset(
     )
 
 
+@pytest.mark.unit
 def test_store_evaluation_parameter(data_asset):
     data_asset.set_evaluation_parameter("my_parameter", "value")
     assert data_asset.get_evaluation_parameter("my_parameter") == "value"
@@ -93,6 +94,7 @@ def test_store_evaluation_parameter(data_asset):
         )
 
 
+@pytest.mark.filesystem
 def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_asset):
     validator_with_titanic_1911_asset.set_evaluation_parameter("my_parameter", "value")
     assert (
@@ -101,7 +103,8 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
     )
 
     validator_with_titanic_1911_asset.set_evaluation_parameter(
-        "my_second_parameter", [1, 2, "value", None, np.nan]
+        "my_second_parameter",
+        [1, 2, "value", None, np.nan, datetime.datetime(year=2022, month=12, day=15)],
     )
     assert validator_with_titanic_1911_asset.get_evaluation_parameter(
         "my_second_parameter"
@@ -110,7 +113,8 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
         2,
         "value",
         None,
-        np.nan,
+        None,
+        "2022-12-15T00:00:00",
     ]
 
     with pytest.raises(TypeError):
@@ -119,6 +123,7 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
         )
 
 
+@pytest.mark.big
 def test_parameter_substitution(single_expectation_custom_data_asset):
     # Set our evaluation parameter from upstream
     single_expectation_custom_data_asset.set_evaluation_parameter(
@@ -134,11 +139,12 @@ def test_parameter_substitution(single_expectation_custom_data_asset):
     # Ensure our value has been substituted during evaluation, and set properly in the suite
     assert result.result["details"]["expectation_argument"] == "upstream_dag_value"
     assert suite.evaluation_parameters == {"upstream_dag_key": "upstream_dag_value"}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configurations[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 
 
+@pytest.mark.filesystem
 def test_parameter_substitution_with_validator(validator_with_titanic_1911_asset):
     # Set interactive_evaluation to False
     # validator_with_titanic_1911_asset.interactive_evaluation = False
@@ -157,11 +163,12 @@ def test_parameter_substitution_with_validator(validator_with_titanic_1911_asset
     # Ensure our value has been substituted during evaluation, and set properly in the suite
     assert result.result["details"]["expectation_argument"] == "upstream_dag_value"
     assert suite.evaluation_parameters == {"upstream_dag_key": "upstream_dag_value"}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configurations[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 
 
+@pytest.mark.big
 def test_exploratory_parameter_substitution(single_expectation_custom_data_asset):
     # Establish our expectation using a parameter provided at runtime
 
@@ -175,7 +182,7 @@ def test_exploratory_parameter_substitution(single_expectation_custom_data_asset
     # Ensure our value has been substituted during evaluation, and NOT stored in the suite
     assert result.result["details"]["expectation_argument"] == "temporary_value"
     assert suite.evaluation_parameters == {}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configurations[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 
@@ -195,6 +202,7 @@ def test_exploratory_parameter_substitution(single_expectation_custom_data_asset
     )
 
 
+@pytest.mark.filesystem
 def test_exploratory_parameter_substitution_with_validator(
     validator_with_titanic_1911_asset,
 ):
@@ -210,7 +218,7 @@ def test_exploratory_parameter_substitution_with_validator(
     # Ensure our value has been substituted during evaluation, and NOT stored in the suite
     assert result.result["details"]["expectation_argument"] == "temporary_value"
     assert suite.evaluation_parameters == {}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configurations[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 
@@ -230,6 +238,7 @@ def test_exploratory_parameter_substitution_with_validator(
     )
 
 
+@pytest.mark.big
 def test_validation_substitution(single_expectation_custom_data_asset):
     # Set up an expectation using a parameter, providing a default value.
     result = single_expectation_custom_data_asset.expect_nothing(
@@ -250,6 +259,7 @@ def test_validation_substitution(single_expectation_custom_data_asset):
     )
 
 
+@pytest.mark.filesystem
 def test_validation_substitution_with_validator(validator_with_titanic_1911_asset):
     # Set up an expectation using a parameter, providing a default value.
     result = validator_with_titanic_1911_asset.expect_nothing(
@@ -270,6 +280,7 @@ def test_validation_substitution_with_validator(validator_with_titanic_1911_asse
     )
 
 
+@pytest.mark.big
 def test_validation_substitution_with_json_coercion(
     single_expectation_custom_data_asset,
 ):
@@ -304,6 +315,7 @@ def test_validation_substitution_with_json_coercion(
         )
 
 
+@pytest.mark.filesystem
 def test_validation_substitution_with_json_coercion_with_validator(
     validator_with_titanic_1911_asset,
 ):
@@ -338,6 +350,7 @@ def test_validation_substitution_with_json_coercion_with_validator(
         )
 
 
+@pytest.mark.big
 def test_validation_parameters_returned(single_expectation_custom_data_asset):
     single_expectation_custom_data_asset.expect_nothing(
         expectation_argument={
@@ -353,6 +366,7 @@ def test_validation_parameters_returned(single_expectation_custom_data_asset):
     }
 
 
+@pytest.mark.filesystem
 def test_validation_parameters_returned_with_validator(
     validator_with_titanic_1911_asset,
 ):

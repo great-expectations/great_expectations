@@ -1,9 +1,13 @@
-from great_expectations.data_context import BaseDataContext
+import pytest
+
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_concurrency_disabled_by_default():
@@ -22,7 +26,7 @@ def test_concurrency_enabled_with_config():
 
 
 def test_data_context_concurrency_property():
-    data_context = BaseDataContext(
+    data_context = get_context(
         project_config=DataContextConfig(
             concurrency=ConcurrencyConfig(enabled=True),
             store_backend_defaults=InMemoryStoreBackendDefaults(),

@@ -1,12 +1,16 @@
 import glob
 import os
+import pathlib
 import subprocess
 
-from ruamel import yaml
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
-import great_expectations as ge
-
-context = ge.get_context()
+yaml = YAMLHandler()
+context = gx.get_context()
 
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
@@ -34,35 +38,36 @@ data_connectors:
         - data_asset_name
       pattern: (.*)\.csv
 """
-datasource = context.add_datasource(**yaml.safe_load(datasource_config))
+datasource = context.add_datasource(**yaml.load(datasource_config))
 
 expectation_suite_name = "my_expectation_suite"
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 checkpoint_name = "my_checkpoint"
-checkpoint_config = f"""
-name: {checkpoint_name}
-config_version: 1
-class_name: SimpleCheckpoint
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
-    expectation_suite_name: {expectation_suite_name}
-"""
-context.add_checkpoint(**yaml.safe_load(checkpoint_config))
+context.add_or_update_checkpoint(
+    name=checkpoint_name,
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_connector_name": "default_inferred_data_connector_name",
+                "data_asset_name": "yellow_tripdata_sample_2019-01",
+            },
+            "expectation_suite_name": expectation_suite_name,
+        }
+    ],
+)
 
 # run the checkpoint twice to create two validations
 context.run_checkpoint(checkpoint_name=checkpoint_name)
 context.run_checkpoint(checkpoint_name=checkpoint_name)
 
 # parse great_expectations.yml for comparison
-great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+great_expectations_yaml_file_path = pathlib.Path(
+    context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
 pop_stores = ["checkpoint_store", "evaluation_parameter_store", "expectations_store"]
@@ -76,6 +81,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 ]
 
 expected_existing_validations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -84,13 +90,15 @@ stores:
       base_directory: uncommitted/validations/
 
 validations_store_name: validations_store
+# </snippet>
 """
 
-assert actual_existing_validations_store == yaml.safe_load(
+assert actual_existing_validations_store == yaml.load(
     expected_existing_validations_store_yaml
 )
 
 configured_validations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml">
 stores:
   validations_GCS_store:
     class_name: ValidationsStore
@@ -101,10 +109,11 @@ stores:
       prefix: <YOUR GCS PREFIX NAME>
 
 validations_store_name: validations_GCS_store
+# </snippet>
 """
 
 # replace example code with integration test configuration
-configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
+configured_validations_store = yaml.load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
 ] = gcp_project
@@ -126,7 +135,7 @@ try:
     )
     stderr = result.stderr.decode("utf-8")
     assert "Operation completed" in stderr
-except Exception as e:
+except Exception:
     pass
 
 # add and set the new validation store
@@ -135,21 +144,29 @@ context.add_store(
     store_config=configured_validations_store["stores"]["validations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
 great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
+"""
+# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_command">
+gsutil cp uncommitted/validations/my_expectation_suite/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
+gsutil cp uncommitted/validations/my_expectation_suite/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
+# </snippet>
+"""
+
+# Override without snippet tag
 # try gsutil cp command
 copy_validation_command = """
 gsutil cp uncommitted/validations/my_expectation_suite/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
 gsutil cp uncommitted/validations/my_expectation_suite/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
 """
 
-validation_files = glob.glob(
+validation_files = glob.glob(  # noqa: PTH207 # can use Path.glob
     f"{context.root_directory}/uncommitted/validations/my_expectation_suite/__none__/*/*.json"
 )
 copy_validation_command = copy_validation_command.replace(
@@ -201,9 +218,18 @@ stderr = result.stderr.decode("utf-8")
 assert "Operation completed over 1 objects" in stderr
 
 copy_validation_output = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_output">
 Operation completed over 2 objects
+# </snippet>
 """
 
+"""
+# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_command">
+great_expectations store list
+# </snippet>
+"""
+
+# Override without snippet tag
 # list validation stores
 list_validation_stores_command = """
 great_expectations store list
@@ -217,6 +243,7 @@ result = subprocess.run(
 stdout = result.stdout.decode("utf-8")
 
 list_validation_stores_output = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_output">
   - name: validations_GCS_store
     class_name: ValidationsStore
     store_backend:
@@ -224,6 +251,7 @@ list_validation_stores_output = """
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
+# </snippet>
 """
 
 assert "validations_GCS_store" in list_validation_stores_output
@@ -256,9 +284,9 @@ assert (
 )
 
 # get the updated context and run a checkpoint to ensure validation store is updated
-context = ge.get_context()
+context = gx.get_context()
 validation_result = context.run_checkpoint(checkpoint_name=checkpoint_name)
-assert validation_result["success"] == True
+assert validation_result["success"] is True
 list_validation_store_files = (
     f"gsutil ls gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
     + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}"

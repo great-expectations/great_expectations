@@ -1,8 +1,6 @@
-from typing import Optional
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -16,7 +14,6 @@ BASE_API_URL = "https://api.github.com/users/"
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidGithubUsername(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_github_username"
 
@@ -51,14 +48,14 @@ class ColumnValuesToBeValidGithubUsername(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidGithubUsername(ColumnMapExpectation):
-    """This Expectation validates data as conforming to be valid github users."""
+    """Expect column values to be valid github users."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "valid_users": ["github", "git"],
+                "valid_users": ["github", "git", "great-expectations"],
                 "invalid_users": [
                     "RANDOM_123",
                     "memememememe",
@@ -93,34 +90,6 @@ class ExpectColumnValuesToBeValidGithubUsername(ColumnMapExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

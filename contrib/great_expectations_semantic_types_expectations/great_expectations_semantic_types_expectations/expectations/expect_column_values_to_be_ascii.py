@@ -1,32 +1,16 @@
-import json
-
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 # This class defines a Metric to support your Expectation
@@ -63,7 +47,7 @@ class ColumnValuesAreAscii(ColumnMapMetricProvider):
         def is_ascii(val):
             return str(val).isascii()
 
-        is_ascii_udf = F.udf(is_ascii, sparktypes.BooleanType())
+        is_ascii_udf = F.udf(is_ascii, pyspark.types.BooleanType())
 
         return is_ascii_udf(column)
 
@@ -71,36 +55,31 @@ class ColumnValuesAreAscii(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
-    """Expect the set of column values to be ASCII characters
+    """Expect the set of column values to be ASCII characters.
 
-           expect_column_values_to_not_contain_character is a \
-           :func:`column_map_expectation
-   <great_expectations.execution_engine.MetaExecutionEngine.column_map_expectation>`.
+    expect_column_values_to_be_ascii is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
-           Args:
-               column (str): \
-                   The provided column name
+    Args:
+        column (str): \
+            The provided column name
 
-           Other Parameters:
-               result_format (str or None): \
-                   Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                   For more detail, see :ref:`result_format <result_format>`.
-               include_config (boolean): \
-                   If True, then include the expectation config as part of the result object. \
-                   For more detail, see :ref:`include_config`.
-               catch_exceptions (boolean or None): \
-                   If True, then catch exceptions and include them as part of the result object. \
-                   For more detail, see :ref:`catch_exceptions`.
-               meta (dict or None): \
-                   A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                   modification. For more detail, see :ref:`meta`.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-           Returns:
-               An ExpectationSuiteValidationResult
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-               Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-               :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-           """
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -219,7 +198,7 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -231,7 +210,7 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -249,16 +228,12 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):
 #!!! This example renderer should be shorter
 #         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
+#         include_column_name = False if runtime_configuration.get("include_column_name") is False else True
 #         styling = runtime_configuration.get("styling")
 #         params = substitute_none_for_missing(
 #             configuration.kwargs,

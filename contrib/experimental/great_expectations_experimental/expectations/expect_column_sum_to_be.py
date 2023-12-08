@@ -1,18 +1,18 @@
 """
-This is a template for creating custom ColumnExpectations.
+This is a template for creating custom ColumnAggregateExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations
 """
 
-from typing import Dict, Optional
+from typing import Dict
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 
 
 # This class defines the Expectation itself
-class ExpectColumnSumToBe(ColumnExpectation):
+class ExpectColumnSumToBe(ColumnAggregateExpectation):
     """Expect the sum of a column to be exactly a value."""
 
     # These examples will be shown in the public gallery.
@@ -36,20 +36,6 @@ class ExpectColumnSumToBe(ColumnExpectation):
                     "out": {"success": False},
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-            ],
         }
     ]
 
@@ -61,35 +47,6 @@ class ExpectColumnSumToBe(ColumnExpectation):
 
     # This dictionary contains default values for any parameters that should have default values.
     default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(

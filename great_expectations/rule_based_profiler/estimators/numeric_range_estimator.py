@@ -4,8 +4,9 @@ from typing import Dict, Optional
 
 import numpy as np
 
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,
 )
@@ -90,14 +91,18 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         """
         pass
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
         """
-        dict_obj: dict = self._configuration.to_dict()
+        dict_obj: dict = (
+            self._configuration.to_dict()  # type: ignore[union-attr] # could be None
+        )
         dict_obj.update({"name": self._name})
         return dict_obj
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.

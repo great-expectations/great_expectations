@@ -2,20 +2,22 @@ import datetime
 from typing import List
 
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.filesystem
 
 
 @pytest.fixture()
 def create_files_and_instantiate_data_connector(tmp_path_factory):
-
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )
@@ -85,7 +87,7 @@ def test_data_connector_query_non_recognized_param(
     my_data_connector = create_files_and_instantiate_data_connector
 
     # Test 1: non valid_batch_identifiers_limit
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
@@ -99,7 +101,7 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 2: Unrecognized custom_filter is not a function
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="test_environment",
@@ -110,9 +112,9 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 3: batch_identifiers is not dict
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        sorted_batch_definition_list = (
+        sorted_batch_definition_list = (  # noqa: F841
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     datasource_name="test_environment",
@@ -163,7 +165,7 @@ def test_data_connector_query_limit(create_files_and_instantiate_data_connector)
     assert len(sorted_batch_definition_list) == 3
 
     # illegal limit
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
@@ -181,9 +183,9 @@ def test_data_connector_query_illegal_index_and_limit_combination(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        sorted_batch_definition_list = (
+        sorted_batch_definition_list = (  # noqa: F841
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     datasource_name="test_environment",

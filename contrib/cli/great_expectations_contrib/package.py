@@ -120,7 +120,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         self._update_contributors(diagnostics)
 
     def _update_from_package_info(self, path: str) -> None:
-        if not os.path.exists(path):
+        if not os.path.exists(path):  # noqa: PTH110
             logger.warning(f"Could not find package info file {path}")
             return
 
@@ -139,9 +139,11 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                     # If the user has provided an icon, we need to check if it is a relative URL.
                     # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
                     icon: Optional[str] = general.get(attr)
-                    if icon and os.path.exists(icon):
-                        package_name: str = os.path.basename(os.getcwd())
-                        url: str = os.path.join(
+                    if icon and os.path.exists(icon):  # noqa: PTH110
+                        package_name: str = os.path.basename(  # noqa: PTH119
+                            os.getcwd()  # noqa: PTH109
+                        )
+                        url: str = os.path.join(  # noqa: PTH118
                             "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
                             package_name,
                             icon,
@@ -165,13 +167,14 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         if domain_experts:
             self.domain_experts = []
             for expert in domain_experts:
-
                 # If the user has provided a picture, we need to check if it is a relative URL.
                 # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
                 picture_path: Optional[str] = expert.get("picture")
-                if picture_path and os.path.exists(picture_path):
-                    package_name: str = os.path.basename(os.getcwd())
-                    url: str = os.path.join(
+                if picture_path and os.path.exists(picture_path):  # noqa: PTH110
+                    package_name: str = os.path.basename(  # noqa: PTH119
+                        os.getcwd()  # noqa: PTH109
+                    )
+                    url: str = os.path.join(  # noqa: PTH118
                         "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
                         package_name,
                         picture_path,
@@ -203,7 +206,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         self.maturity = Maturity[maturity]
 
     def _update_dependencies(self, path: str) -> None:
-        if not os.path.exists(path):
+        if not os.path.exists(path):  # noqa: PTH110
             logger.warning(f"Could not find requirements file {path}")
             return
 
@@ -266,7 +269,9 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     def _identify_user_package() -> str:
         # Guaranteed to have a dir named '<MY_PACKAGE>_expectations' through Cookiecutter validation
         packages = [
-            d for d in os.listdir() if os.path.isdir(d) and d.endswith("_expectations")
+            d
+            for d in os.listdir()
+            if os.path.isdir(d) and d.endswith("_expectations")  # noqa: PTH112
         ]
 
         # A sanity check in case the user modifies the Cookiecutter template in unexpected ways
@@ -280,7 +285,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     @staticmethod
     def _import_expectations_module(package: str) -> Any:
         # Need to add user's project to the PYTHONPATH
-        cwd = os.getcwd()
+        cwd = os.getcwd()  # noqa: PTH109
         sys.path.append(cwd)
         try:
             expectations_module = importlib.import_module(f"{package}.expectations")

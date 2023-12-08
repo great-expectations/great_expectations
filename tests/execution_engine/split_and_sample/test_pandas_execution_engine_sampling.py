@@ -4,11 +4,12 @@ import random
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.execution_engine import PandasExecutionEngine
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "underscore_prefix",
     [
@@ -26,20 +27,19 @@ from great_expectations.execution_engine import PandasExecutionEngine
             {},
             0,
             id="n missing from sampling_kwargs",
-            marks=pytest.mark.xfail(strict=True, raises=ge_exceptions.SamplerError),
+            marks=pytest.mark.xfail(strict=True, raises=gx_exceptions.SamplerError),
         ),
         pytest.param(
             None,
             0,
             id="sampling_kwargs are None",
-            marks=pytest.mark.xfail(strict=True, raises=ge_exceptions.SamplerError),
+            marks=pytest.mark.xfail(strict=True, raises=gx_exceptions.SamplerError),
         ),
     ],
 )
 def test_limit_sampler_get_batch_data(
     sampling_kwargs, num_sampled_rows, underscore_prefix
 ):
-
     sampled_df = (
         PandasExecutionEngine()
         .get_batch_data(
@@ -57,6 +57,7 @@ def test_limit_sampler_get_batch_data(
     assert len(sampled_df) == num_sampled_rows
 
 
+@pytest.mark.unit
 def test_sample_using_random(test_df):
     random.seed(1)
     sampled_df = PandasExecutionEngine().get_batch_data(
@@ -65,6 +66,7 @@ def test_sample_using_random(test_df):
     assert sampled_df.dataframe.shape == (13, 10)
 
 
+@pytest.mark.unit
 def test_sample_using_mod(test_df):
     sampled_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -80,6 +82,7 @@ def test_sample_using_mod(test_df):
     assert sampled_df.dataframe.shape == (24, 10)
 
 
+@pytest.mark.unit
 def test_sample_using_a_list(test_df):
     sampled_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -94,8 +97,9 @@ def test_sample_using_a_list(test_df):
     assert sampled_df.dataframe.shape == (4, 10)
 
 
+@pytest.mark.unit
 def test_sample_using_md5(test_df):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         sampled_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(

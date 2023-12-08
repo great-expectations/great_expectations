@@ -1,5 +1,6 @@
 from typing import Optional
 
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -9,7 +10,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
-from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -98,12 +98,11 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
         "percentage": 0.1,
         "mostly": 1.0,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -119,8 +118,7 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
         mostly = configuration.kwargs["mostly"]
         percentage = configuration.kwargs["percentage"]
 
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # Check if both columns are provided and values of mostly and percentage are correct
         try:

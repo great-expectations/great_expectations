@@ -28,7 +28,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesPolygonArea(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.polygon_area"
@@ -69,7 +68,10 @@ class ColumnValuesPolygonArea(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
-    """This expectation will compute the area of each polygon/multipolygon in square kilometers and check if it's between two values."""
+    """Expect the area of polygons in the column are between two specified values.
+
+    This expectation will compute the area of each polygon/multipolygon in square kilometers and check if it's between two values.
+    """
 
     world = geopandas.read_file(geopandas.datasets.get_path("naturalearth_lowres"))
     # Index by name to make example data shorter
@@ -194,7 +196,6 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[
@@ -209,9 +210,8 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

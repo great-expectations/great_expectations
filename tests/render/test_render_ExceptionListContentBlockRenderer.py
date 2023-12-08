@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -7,6 +9,7 @@ from great_expectations.render.renderer.content_block import (
 )
 
 
+@pytest.mark.big
 def test_exception_list_content_block_renderer():
     # We should grab the exception message and add default formatting
     result = ExceptionListContentBlockRenderer.render(

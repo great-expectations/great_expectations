@@ -1,24 +1,27 @@
+from __future__ import annotations
+
 from unittest import mock
 
 import pytest
 
-import tests.test_utils as test_utils
-from great_expectations import DataContext
+from great_expectations import project_manager
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
 )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_expectations_store(empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     my_store = ExpectationsStore()
 
     with pytest.raises(TypeError):
@@ -53,9 +56,9 @@ def test_expectations_store(empty_data_context):
     }
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
 
@@ -138,7 +141,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
     tmp_path_factory,
 ):
@@ -200,7 +203,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -239,27 +242,76 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict() -> None:
-    store = ExpectationsStore(store_name="expectations_store")
-
-    suite_id = "03d61d4e-003f-48e7-a3b2-f9f842384da3"
-    suite_config = {
-        "expectation_suite_name": "my_suite",
-    }
-    response_json = {
-        "data": {
-            "id": suite_id,
-            "attributes": {
-                "suite": suite_config,
+@pytest.mark.parametrize(
+    "response_json, expected, error_type",
+    [
+        pytest.param(
+            {
+                "data": {
+                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                    "attributes": {
+                        "suite": {
+                            "expectation_suite_name": "my_suite",
+                        },
+                    },
+                }
             },
-        }
-    }
+            {
+                "expectation_suite_name": "my_suite",
+                "ge_cloud_id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+            },
+            None,
+            id="single_config",
+        ),
+        pytest.param({"data": []}, None, ValueError, id="empty_payload"),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                        "attributes": {
+                            "suite": {
+                                "expectation_suite_name": "my_suite",
+                            },
+                        },
+                    }
+                ]
+            },
+            {
+                "expectation_suite_name": "my_suite",
+                "ge_cloud_id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+            },
+            None,
+            id="single_config_in_list",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict(
+    response_json: dict, expected: dict | None, error_type: Exception | None
+) -> None:
+    if error_type:
+        with pytest.raises(error_type):
+            _ = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
+    else:
+        actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
+        assert actual == expected
 
-    expected = suite_config
-    expected["ge_cloud_id"] = suite_id
 
-    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+@pytest.mark.unit
+def test_get_key_in_non_cloud_mode(empty_data_context):
+    project_manager.set_project(empty_data_context)
+    name = "test-name"
+    suite = ExpectationSuite(expectation_suite_name=name)
+    key = empty_data_context.expectations_store.get_key(suite)
+    assert isinstance(key, ExpectationSuiteIdentifier)
 
-    assert actual == expected
+
+@pytest.mark.unit
+def test_get_key_in_cloud_mode(empty_data_context_in_cloud_mode):
+    cloud_data_context = empty_data_context_in_cloud_mode
+    project_manager.set_project(cloud_data_context)
+    name = "test-name"
+    suite = ExpectationSuite(expectation_suite_name=name)
+    key = cloud_data_context.expectations_store.get_key(suite)
+    assert isinstance(key, GXCloudIdentifier)

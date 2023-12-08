@@ -1,0 +1,109 @@
+# This file configures the `docs_integration` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# This pipeline runs tests against scripts that contain code samples that we use in our documentation.
+#
+# The pipeline is run under the following conditions:
+#   - On any PR
+
+trigger:
+  branches:
+    include:
+    - develop
+
+variables:
+  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+
+stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckDocsChanges
+            inputs:
+              verbose: true
+              rules: |
+                [DocsChanged]
+                docs/**
+                tests/integration/docusaurus/**
+                tests/integration/fixtures/**
+                tests/integration/test_definitions/**
+                tests/integration/test_script_runner.py
+                tests/test_sets/**
+
+  - stage: docusaurus_tests
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+
+    - job: test_docs_aws_spark
+      timeoutInMinutes: 30
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
+      variables:
+        python.version: '3.8'
+        spark.version: '3.3.2'
+        matching_aws_java_sdk_bundle_version: '1.11.1026'
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+        - script: |
+            pip install pyspark==$(spark.version)
+          displayName: Install Pyspark $(spark.version)
+        - script: |
+            export JAVA_HOME=$JAVA_HOME_11_X64
+          displayName: Set JAVA_HOME  to existing directory
+        - script: |
+            wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/$(spark.version)/hadoop-aws-$(spark.version).jar
+            wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/$(matching_aws_java_sdk_bundle_version)/aws-java-sdk-bundle-$(matching_aws_java_sdk_bundle_version).jar
+            export pyspark_dir=`python -c 'import pyspark; print(pyspark.__path__[0] + "/jars/")'`
+            mv hadoop-aws-$(spark.version).jar $pyspark_dir
+            mv aws-java-sdk-bundle-$(matching_aws_java_sdk_bundle_version).jar $pyspark_dir
+
+          displayName: download the AWS JARs and move to pyspark's JAR directory.
+        - script: |
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+          displayName: 'Install dependencies'
+        - script: |
+            pytest -v --docs-tests --aws --spark tests/integration/test_script_runner.py
+          displayName: 'pytest'
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+    - job: test_docs_athena
+      timeoutInMinutes: 30
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      variables:
+        python.version: '3.8'
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - script: |
+            pip install --constraint constraints-dev.txt ".[test, athena]" pytest-azurepipelines
+          displayName: 'Install dependencies'
+
+        - script: |
+            pytest -v --docs-tests --athena tests/integration/test_script_runner.py
+          displayName: 'pytest'
+          env:
+            ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+            ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
+            ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
+            ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
+            # aws credentials
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)

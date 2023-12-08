@@ -1,3 +1,4 @@
+import pytest
 from freezegun import freeze_time
 
 from great_expectations.checkpoint.actions import StoreMetricsAction
@@ -6,14 +7,18 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    ValidationMetricIdentifier,
     ValidationResultIdentifier,
 )
 
 
+@pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator):
     action = StoreMetricsAction(
@@ -115,6 +120,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
     )
 
 
+@pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreMetricsAction_column_metric(
     basic_in_memory_data_context_for_validation_operator,
@@ -126,7 +132,7 @@ def test_StoreMetricsAction_column_metric(
                 {
                     "column": {
                         "provider_id": [
-                            "expect_column_values_to_be_unique.result.unexpected_count"
+                            f"expect_column_values_to_be_unique.result.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
                         ]
                     }
                 },
@@ -179,7 +185,7 @@ def test_StoreMetricsAction_column_metric(
                 run_id=run_id,
                 data_asset_name=None,
                 expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
-                metric_name="expect_column_values_to_be_unique.result.unexpected_count",
+                metric_name=f"expect_column_values_to_be_unique.result.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_kwargs_id="column=provider_id",
             )
         )

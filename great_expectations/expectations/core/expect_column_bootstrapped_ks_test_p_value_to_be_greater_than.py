@@ -1,15 +1,14 @@
 from great_expectations.expectations.expectation import (
-    TableExpectation,
-    render_evaluation_parameter_string,
+    BatchExpectation,
 )
-from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
 
 
-class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
-    # This expectation is a stub - it needs migration to the modular expectation API
+# NOTE: This Expectation is incomplete and not ready for use.
+#       It should remain unexported until it meets the requirements set by our V1 API.
+class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(BatchExpectation):
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",
@@ -24,35 +23,9 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
 
     metric_dependencies = tuple()
     success_keys = ()
-    default_kwarg_values = {}
     args_keys = (
         "column",
         "distribution",
         "p_value",
         "params",
     )
-
-    @classmethod
-    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ) -> None:
-        pass
-
-    @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ) -> None:
-        pass

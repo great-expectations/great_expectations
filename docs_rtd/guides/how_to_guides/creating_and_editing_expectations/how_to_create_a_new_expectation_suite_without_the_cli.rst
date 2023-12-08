@@ -23,9 +23,9 @@ In some environments, you might not be able to use the :ref:`CLI <command_line>`
 
         .. code-block:: python
 
-            import great_expectations as ge
+            import great_expectations as gx
 
-            context = ge.data_context.DataContext()
+            context = gx.data_context.DataContext()
             suite = context.create_expectation_suite(
                 "my_suite_name", overwrite_existing=True # Configure these parameters for your needs
             )
@@ -73,10 +73,10 @@ In some environments, you might not be able to use the :ref:`CLI <command_line>`
 
         .. code-block:: python
 
-            import great_expectations as ge
+            import great_expectations as gx
             from great_expectations.core.batch import BatchRequest
 
-            context = ge.data_context.DataContext()
+            context = gx.data_context.DataContext()
             suite = context.create_expectation_suite(
                 "my_suite_name", overwrite_existing=True # Configure these parameters for your needs
             )

@@ -26,7 +26,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesLatLonLandOrOcean(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.lat_lon_land_or_ocean"
     condition_value_keys = ("land_or_ocean",)
@@ -34,7 +33,6 @@ class ColumnValuesLatLonLandOrOcean(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, land_or_ocean="land", **kwargs):
-
         if land_or_ocean == "land":
             return column.apply(lambda point: globe.is_land(point[0], point[1]))
         elif land_or_ocean == "ocean":
@@ -54,8 +52,6 @@ class ExpectColumnValuesLatLonToBeLandOrOcean(ColumnMapExpectation):
         land_or_ocean (str): \
             Either 'land' or 'ocean'. \
             represents whether to check if each point is on land or in an ocean.
-
-
     """
 
     # These examples will be shown in the public gallery.
@@ -157,7 +153,6 @@ class ExpectColumnValuesLatLonToBeLandOrOcean(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[
@@ -172,9 +167,8 @@ class ExpectColumnValuesLatLonToBeLandOrOcean(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

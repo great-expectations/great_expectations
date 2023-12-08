@@ -1,21 +1,33 @@
+from __future__ import annotations
+
+import logging
 import os
+import pathlib
+import sys
 from typing import List
 
+import pandas as pd
 import pytest
 
-import great_expectations as ge
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.util import file_relative_path
 
 yaml: YAMLHandler = YAMLHandler()
+
+logger = logging.getLogger(__name__)
+
 # constants used by the sql example
 pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
 CONNECTION_STRING: str = f"postgresql+psycopg2://postgres:@{pg_hostname}/test_ci"
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 19s
 def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None:
     """
@@ -35,9 +47,9 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Pandas.ipynb`
 
     """
-    data_context: ge.DataContext = empty_data_context
+    data_context: FileDataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+        __file__, pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
 
     datasource_config: dict = {
@@ -89,7 +101,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.add_expectation_suite(expectation_suite=suite)
 
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
@@ -105,12 +117,31 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)
@@ -118,7 +149,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     assert results.success is False
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 @pytest.mark.slow  # 149 seconds
 def test_spark_happy_path_onboarding_data_assistant(
     empty_data_context, spark_session, spark_df_taxi_data_schema
@@ -140,12 +171,12 @@ def test_spark_happy_path_onboarding_data_assistant(
     This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Spark.ipynb`
 
     """
-    from pyspark.sql.types import StructType
+    from great_expectations.compatibility import pyspark
 
-    schema: StructType = spark_df_taxi_data_schema
-    data_context: ge.DataContext = empty_data_context
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
+    data_context: FileDataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+        __file__, pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
 
     datasource_config: dict = {
@@ -199,7 +230,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.add_expectation_suite(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_data",
@@ -212,12 +243,31 @@ def test_spark_happy_path_onboarding_data_assistant(
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)
@@ -225,7 +275,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     assert results.success is False
 
 
-@pytest.mark.integration
+@pytest.mark.postgresql
 @pytest.mark.slow  # 104 seconds
 def test_sql_happy_path_onboarding_data_assistant(
     empty_data_context, test_backends, sa
@@ -252,7 +302,7 @@ def test_sql_happy_path_onboarding_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: ge.DataContext = empty_data_context
+    data_context: FileDataContext = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
@@ -304,7 +354,7 @@ def test_sql_happy_path_onboarding_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.add_expectation_suite(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multi_batch_sql_datasource",
@@ -317,17 +367,195 @@ def test_sql_happy_path_onboarding_data_assistant(
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
         ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
     }
     data_context.add_checkpoint(**checkpoint_config)
     results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
     assert results.success is False
+
+
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires Python3.8")
+@pytest.mark.filesystem
+@pytest.mark.slow  # 6.54 seconds
+def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_values(
+    sa,
+    empty_data_context,
+) -> None:
+    context: FileDataContext = empty_data_context
+
+    db_file = file_relative_path(
+        __file__,
+        pathlib.Path(
+            "..",
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "sqlite",
+            "yellow_tripdata.db",
+        ),
+    )
+
+    datasource = context.sources.add_sqlite(
+        name="test_datasource",
+        connection_string=f"sqlite:///{db_file}",
+    )
+
+    table_name = "yellow_tripdata_sample_2019_01"
+    split_col = "pickup_datetime"
+    asset = (
+        datasource.add_table_asset(
+            name="my_asset",
+            table_name=table_name,
+        )
+        .add_splitter_year_and_month(column_name=split_col)
+        .add_sorters(["year", "month"])
+    )
+
+    batch_request = asset.build_batch_request({"year": 2019, "month": 1})
+
+    result = context.assistants.onboarding.run(
+        batch_request=batch_request,
+        numeric_columns_rule={
+            "estimator": "exact",
+            "random_seed": 2022080401,
+        },
+    )
+    assert len(result.metrics_by_domain) == 36
+    assert len(result.expectation_configurations) == 122
+
+
+@pytest.mark.postgresql
+@pytest.mark.slow  # 26.57 seconds
+def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolean_column_unique_proportion_metric_values(
+    empty_data_context,
+    test_backends,
+    sa,
+) -> None:
+    if "postgresql" not in test_backends:
+        pytest.skip("testing data assistant in sql requires postgres backend")
+
+    context: FileDataContext = empty_data_context
+    postgresql_engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
+    # noinspection PyUnusedLocal
+    conn: sa.engine.Connection = postgresql_engine.connect()
+
+    table_name = "sampled_yellow_tripdata_test"
+
+    try:
+        csv_path: str = file_relative_path(
+            __file__,
+            pathlib.Path(
+                "..",
+                "..",
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "samples_2021",
+                "yellow_tripdata_sample_2021.csv",
+            ),
+        )
+        df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
+        df["test_bool"] = df.apply(
+            lambda row: True if row["test_bool"] == "t" else False, axis=1
+        )
+        add_dataframe_to_db(
+            df=df,
+            name=table_name,
+            con=conn,
+            schema="public",
+            index=False,
+            dtype={
+                "VendorID": sa.types.BIGINT(),
+                "tpep_pickup_datetime": sa.DateTime(),
+                "tpep_dropoff_datetime": sa.DateTime(),
+                "passenger_count": sa.types.INTEGER(),
+                "trip_distance": sa.types.NUMERIC(),
+                "RatecodeID": sa.types.INTEGER(),
+                "store_and_fwd_flag": sa.types.TEXT(),
+                "PULocationID": sa.types.BIGINT(),
+                "DOLocationID": sa.types.BIGINT(),
+                "payment_type": sa.types.BIGINT(),
+                "fare_amount": sa.types.NUMERIC(),
+                "extra": sa.types.NUMERIC(),
+                "mta_tax": sa.types.NUMERIC(),
+                "tip_amount": sa.types.NUMERIC(),
+                "tolls_amount": sa.types.NUMERIC(),
+                "improvement_surcharge": sa.types.NUMERIC(),
+                "total_amount": sa.types.NUMERIC(),
+                "congestion_surcharge": sa.types.NUMERIC(),
+                "test_bool": sa.types.Boolean(),
+            },
+            if_exists="replace",
+        )
+    except ValueError as ve:
+        logger.warning(f"Unable to store information into database: {ve!s}")
+
+    batch_options = {"year": 2021}
+
+    data_asset = (
+        context.sources.add_postgres(
+            name="postgres_demo_datasource",
+            connection_string=CONNECTION_STRING,
+        )
+        .add_table_asset(
+            name="sampled_yellow_tripdata_test",
+            table_name=table_name,
+        )
+        .add_splitter_year_and_month(column_name="tpep_pickup_datetime")
+        .add_sorters(["year", "-month"])
+    )
+
+    batch_request = data_asset.build_batch_request(batch_options)
+
+    result = context.assistants.onboarding.run(
+        batch_request=batch_request,
+        numeric_columns_rule={
+            "estimator": "exact",
+            "random_seed": 2022080401,
+        },
+    )
+    assert len(result.metrics_by_domain) == 49
+    assert len(result.expectation_configurations) == 171
+    assert list(
+        filter(
+            lambda element: element.expectation_type
+            == "expect_column_proportion_of_unique_values_to_be_between"
+            and element.kwargs["column"] == "test_bool",
+            result.get_expectation_suite(
+                send_usage_event=False
+            ).get_column_expectations(),
+        )
+    )[0].kwargs == {
+        "column": "test_bool",
+        "min_value": 0.001002004008016032,
+        "strict_max": False,
+        "max_value": 0.5,
+        "strict_min": False,
+    }
 
 
 def load_data_into_postgres_database(sa):
@@ -391,10 +619,11 @@ def load_data_into_postgres_database(sa):
     table_name: str = "yellow_tripdata_sample_2019"
 
     engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
-    connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+    with engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,
@@ -415,10 +644,11 @@ def load_data_into_postgres_database(sa):
     table_name: str = "yellow_tripdata_sample_2020"
 
     engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
-    connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+    with engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,

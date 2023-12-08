@@ -1,12 +1,14 @@
 import os
 
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations as ge
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
-yaml = YAML()
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 
 @pytest.fixture(scope="function")
@@ -16,7 +18,9 @@ def totally_empty_data_context(tmp_path_factory):
     # However, as of 2019/08/22, most tests still use filesystem-based fixtures.
     # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    os.mkdir(os.path.join(project_root_dir, "great_expectations"))
+    os.mkdir(  # noqa: PTH102
+        os.path.join(project_root_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
 
     config = {
         "config_version": 2,
@@ -38,24 +42,29 @@ def totally_empty_data_context(tmp_path_factory):
         "validation_operators": {},
     }
     with open(
-        os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), "w"
+        os.path.join(project_root_dir, "gx/great_expectations.yml"),  # noqa: PTH118
+        "w",
     ) as config_file:
         yaml.dump(config, config_file)
 
-    context = ge.data_context.DataContext(
-        os.path.join(project_root_dir, "great_expectations")
+    context = gx.get_context(
+        context_root_dir=os.path.join(  # noqa: PTH118
+            project_root_dir, FileDataContext.GX_DIR
+        )
     )
     # print(json.dumps(context._project_config, indent=2))
     return context
 
 
+@pytest.mark.filesystem
 def test_create(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("path_001"))
-    context = ge.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
 
-    assert isinstance(context, ge.data_context.DataContext)
+    assert isinstance(context, gx.data_context.FileDataContext)
 
 
+@pytest.mark.filesystem
 def test_add_store(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 1
 
@@ -70,9 +79,10 @@ def test_add_store(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 2
 
 
+@pytest.mark.filesystem
 def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    context = ge.data_context.DataContext.create(project_path)
+    context = gx.data_context.FileDataContext.create(project_path)
 
     assert set(context.stores.keys()) == {
         "expectations_store",

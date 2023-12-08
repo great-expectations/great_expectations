@@ -1,10 +1,5 @@
-import json
-from typing import Optional
-
 import geonamescache
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -19,7 +14,7 @@ def is_valid_us_county_fip(county_fip: str):
     list_of_county_fips = [d["fips"] for d in dict_of_counties]
     if len(county_fip) > 5:
         return False
-    elif type(county_fip) != str:
+    elif type(county_fip) != str:  # noqa: E721
         return False
     if county_fip in list_of_county_fips:
         return True
@@ -30,7 +25,6 @@ def is_valid_us_county_fip(county_fip: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUSCountyFip(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_us_county_fip"
 
@@ -52,7 +46,8 @@ class ColumnValuesToBeValidUSCountyFip(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidUSCountyFip(ColumnMapExpectation):
-    """Expect values in this column to be valid us county fip code.
+    """Expect values in this column to be valid us county fip codes.
+
     See https://github.com/yaph/geonamescache for more information.
     """
 
@@ -104,35 +99,6 @@ class ExpectColumnValuesToBeValidUSCountyFip(ColumnMapExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

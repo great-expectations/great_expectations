@@ -1,6 +1,7 @@
 import logging
 from typing import Set, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -17,22 +18,22 @@ class DataContextStore(ConfigurationStore):
 
     _configuration_class = DataContextConfig
 
-    ge_cloud_exclude_field_names: Set[DataContextVariableSchema] = {
+    cloud_exclude_field_names: Set[DataContextVariableSchema] = {
         DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
         DataContextVariableSchema.CHECKPOINT_STORE_NAME,
         DataContextVariableSchema.DATASOURCES,
         DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
         DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-        DataContextVariableSchema.PROFILER_STORE_NAME,
         DataContextVariableSchema.VALIDATIONS_STORE_NAME,
         DataContextVariableSchema.VALIDATION_OPERATORS,
     }
 
+    @override
     def serialize(self, value: DataContextConfig) -> Union[dict, str]:
         """
         Please see `ConfigurationStore.serialize` for more information.
 
-        Note that GE Cloud utilizes a subset of the config; as such, an explicit
+        Note that GX Cloud utilizes a subset of the config; as such, an explicit
         step to remove unnecessary keys is a required part of the serialization process.
 
         Args:
@@ -44,9 +45,9 @@ class DataContextStore(ConfigurationStore):
         payload: Union[str, dict] = super().serialize(value=value)
 
         # Cloud requires a subset of the DataContextConfig
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             assert isinstance(payload, dict)
-            for attr in self.ge_cloud_exclude_field_names:
+            for attr in self.cloud_exclude_field_names:
                 if attr in payload:
                     payload.pop(attr)
                     logger.debug(

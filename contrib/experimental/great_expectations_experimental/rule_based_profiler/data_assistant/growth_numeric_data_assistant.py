@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     GrowthNumericDataAssistantResult,
 )
+from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
@@ -11,7 +12,6 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant import
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     ColumnDomainBuilder,
@@ -24,10 +24,8 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
-from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
     MeanTableColumnsSetMatchMultiBatchParameterBuilder,
-    MetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -117,6 +115,7 @@ class GrowthNumericDataAssistant(DataAssistant):
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
+            rule_exception_tracebacks=data_assistant_result.rule_exception_tracebacks,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
@@ -583,24 +582,6 @@ class GrowthNumericDataAssistant(DataAssistant):
 
         column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder()
-        )
-        metric_name: str = "column.value_counts"
-        name: str = sanitize_parameter_name(name=metric_name)
-        column_value_counts_metric_multi_batch_parameter_builder_for_metrics = (
-            MetricMultiBatchParameterBuilder(
-                name=name,
-                metric_name=metric_name,
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs={
-                    "sort": "value",
-                },
-                single_batch_mode=False,
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
-                data_context=None,
-            )
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.

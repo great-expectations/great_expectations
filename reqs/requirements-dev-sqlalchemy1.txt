@@ -1,0 +1,3 @@
+# Used to construct the extras_requires dict in setup.py for sqlalchemy dialects that are not yet compatible with sqlalchemy 2.x
+
+sqlalchemy<2.0.0

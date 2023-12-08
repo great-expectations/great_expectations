@@ -2,6 +2,9 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, cast
 
+from great_expectations.compatibility import aws
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequestBase,
@@ -20,25 +23,32 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.exceptions import DataConnectorError
 from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine
 
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
-    """
-    The ConfiguredAssetAWSGlueDataCatalogDataConnector is one of two classes (InferredAssetAWSGlueDataCatalogDataConnector
-    being the other one) designed for connecting to data through AWS Glue Data Catalog.
+    """A Configured Asset Data Connector used to connect to data through an AWS Glue Data Catalog.
 
-    A ConfiguredAssetAWSGlueDataCatalogDataConnector requires an explicit listing of each DataAsset one want to
-    connect to. This allows more fine-tuning, but also requires more setup. One will need define the
-    database and table names.
+    Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
+    connect to. While this allows for fine-grained control over which Data Assets may be accessed,
+    it requires more setup.
+
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        catalog_id: The catalog ID from which to retrieve data. If none is provided, the AWS account
+            ID is used by default. Make sure you use the same catalog ID as configured in your spark session.
+        partitions: A list of partition keys to be defined for all Data Assets. The partitions defined in Data Asset
+            config will override the partitions defined in the connector level.
+        assets: A mapping of Data Asset names to their configuration.
+        boto3_options: Options passed to the `boto3` library.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -50,21 +60,6 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ):
-        """
-        A DataConnector that requires explicit listing of AWS Glue Data Catalog tables one want to connect to.
-
-        Args:
-            name (str): The name of this DataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
-            catalog_id (str): Optional catalog ID from which to retrieve databases. If none is provided, the AWS account ID is used by default.
-                Make sure you use the same catalog id configured in your spark session.
-            partitions (list): List of partition keys one want to define for all data assets. The partitions defined in data asset config
-                will override the partitions defined in the connector level.
-            assets (dict): dict of assets configuration
-            boto3_options (dict): optional boto3 options
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.warning(
             "Warning: great_expectations.datasource.data_connector.ConfiguredAssetAWSGlueDataCatalogDataConnector is "
             "experimental. Methods, APIs, and core behavior may change in the future."
@@ -83,7 +78,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             boto3_options = {}
 
         try:
-            self._glue_client: Any = boto3.client("glue", **boto3_options)
+            self._glue_client: Any = aws.boto3.client("glue", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetAWSGlueDataCatalogDataConnector)."
@@ -113,6 +108,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
     def partitions(self) -> Optional[List[str]]:
         return self._partitions
 
+    @override
     def build_batch_spec(
         self, batch_definition: BatchDefinition
     ) -> GlueDataCatalogBatchSpec:
@@ -151,15 +147,17 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         return GlueDataCatalogBatchSpec(batch_spec)
 
+    @public_api
+    @override
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector.
+        """Return the list of asset names known by this DataConnector.
 
         Returns:
             A list of available names
         """
         return list(self.assets.keys())
 
+    @override
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
@@ -170,6 +168,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         """
         return []
 
+    @override
     def get_batch_definition_list_from_batch_request(
         self, batch_request: BatchRequestBase
     ):
@@ -320,6 +319,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         return batch_identifiers_list or [{}]
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         self._data_references_cache = {}
 
@@ -332,6 +332,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             )
             self._data_references_cache[data_asset_name] = batch_identifiers_list
 
+    @override
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[dict]:
@@ -353,6 +354,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         )
         return data_asset_name
 
+    @override
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
@@ -366,6 +368,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             )
         ]
 
+    @override
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:

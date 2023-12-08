@@ -1,10 +1,18 @@
-import logging
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
 
+import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import deep_filter_properties_iterable
+
+if TYPE_CHECKING:
+    from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
+        Anonymizer,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -12,13 +20,14 @@ logger = logging.getLogger(__name__)
 class ProfilerAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
+    @override
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if obj and isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
@@ -54,7 +63,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         ), "ProfilerAnonymizer can only handle objects of type RuleBasedProfilerConfig"
         profiler_config: RuleBasedProfilerConfig = obj
 
-        name: str = profiler_config.name
+        name: str | None = profiler_config.name
         anonymized_name: Optional[str] = self._anonymize_string(name)
 
         config_version: float = profiler_config.config_version
@@ -230,13 +239,14 @@ class ProfilerAnonymizer(BaseAnonymizer):
             expectation_type (Optional[str]): The string name of the Expectation.
             info_dict (dict): A dictionary to update within this function.
         """
-        if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
+        if expectation_type in self.CORE_GX_EXPECTATION_TYPES:
             info_dict["expectation_type"] = expectation_type
         else:
             info_dict["anonymized_expectation_type"] = self._anonymize_string(
                 expectation_type
             )
 
+    @override
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return obj is not None and isinstance(
             obj, (RuleBasedProfilerConfig, RuleBasedProfiler)

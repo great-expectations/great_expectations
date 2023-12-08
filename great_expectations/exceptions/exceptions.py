@@ -1,10 +1,17 @@
+from __future__ import annotations
+
 import importlib
 import itertools
 import json
 from collections.abc import Iterable
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
+
+from great_expectations.compatibility.typing_extensions import override
+
+if TYPE_CHECKING:
+    import requests
 
 
 class GreatExpectationsError(Exception):
@@ -20,6 +27,7 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
         if validation_error is not None:
             self.messages = validation_error.messages
 
+    @override
     def __str__(self) -> str:
         if self.message is None:
             return str(self.messages)
@@ -36,6 +44,10 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class ExpectationSuiteError(DataContextError):
+    pass
+
+
 class CheckpointError(DataContextError):
     pass
 
@@ -45,6 +57,16 @@ class CheckpointNotFoundError(CheckpointError):
 
 
 class StoreBackendError(DataContextError):
+    pass
+
+
+class GitIgnoreScaffoldingError(GreatExpectationsError):
+    pass
+
+
+class StoreBackendTransientError(StoreBackendError):
+    """The result of a timeout or other networking issues"""
+
     pass
 
 
@@ -64,6 +86,10 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
+class RenderingError(GreatExpectationsError):
+    pass
+
+
 class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
     def __init__(self, message, validation_error=None, field_name=None) -> None:
         if validation_error is not None:
@@ -71,7 +97,7 @@ class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
                 validation_error
                 and validation_error.messages
                 and isinstance(validation_error.messages, dict)
-                and all([key is None for key in validation_error.messages.keys()])
+                and all(key is None for key in validation_error.messages.keys())
             ):
                 validation_error.messages = list(
                     itertools.chain.from_iterable(validation_error.messages.values())
@@ -223,7 +249,7 @@ class ConfigNotFoundError(DataContextError):
     """The great_expectations dir could not be found."""
 
     def __init__(self) -> None:
-        self.message = """Error: No great_expectations directory was found here!
+        self.message = """Error: No gx directory was found here!
     - Please check that you are in the correct directory or have specified the correct directory.
     - If you have never run Great Expectations in this project, please run `great_expectations init` to get started.
 """
@@ -258,12 +284,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
             "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
-            "DatabricksTableGenerator": "DatabricksTableBatchKwargsGenerator",
-            "GlobReaderGenerator": "GlobReaderBatchKwargsGenerator",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
-            "QueryGenerator": "QueryBatchKwargsGenerator",
-            "TableGenerator": "TableBatchKwargsGenerator",
-            "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",
@@ -304,7 +325,10 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
 
 class ClassInstantiationError(GreatExpectationsError):
     def __init__(self, module_name, package_name, class_name) -> None:
-        module_spec = importlib.util.find_spec(module_name, package=package_name)  # type: ignore[attr-defined]
+        # noinspection PyUnresolvedReferences
+        module_spec: Optional[
+            importlib.machinery.ModuleSpec
+        ] = importlib.util.find_spec(module_name, package=package_name)
         if not module_spec:
             if not package_name:
                 package_name = ""
@@ -349,10 +373,9 @@ class BatchSpecError(DataContextError):
 
 
 class DatasourceError(DataContextError):
-    def __init__(self, datasource_name, message) -> None:
-        self.message = "Cannot initialize datasource {}, error: {}".format(
-            datasource_name,
-            message,
+    def __init__(self, datasource_name: str, message: str) -> None:
+        self.message = (
+            f"Cannot initialize datasource {datasource_name}, error: {message}"
         )
         super().__init__(self.message)
 
@@ -366,6 +389,10 @@ class DatasourceInitializationError(DatasourceError):
 
 
 class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
+    pass
+
+
+class DatasourceNotFoundError(DataContextError):
     pass
 
 
@@ -429,13 +456,19 @@ class MetricResolutionError(MetricError):
         self.failed_metrics = failed_metrics
 
 
-class GeCloudError(GreatExpectationsError):
+class GXCloudError(GreatExpectationsError):
     """
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
+    response: requests.Response
 
-class GeCloudConfigurationError(GreatExpectationsError):
+    def __init__(self, message: str, response: requests.Response) -> None:
+        super().__init__(message)
+        self.response = response
+
+
+class GXCloudConfigurationError(GreatExpectationsError):
     """
     Error finding and verifying the required configuration values when preparing to connect to GX Cloud
     """

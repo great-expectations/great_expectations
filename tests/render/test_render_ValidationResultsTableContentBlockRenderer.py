@@ -16,6 +16,9 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 
+# module level markers
+pytestmark = pytest.mark.big
+
 
 @pytest.fixture
 def evr_failed_with_exception():
@@ -39,13 +42,101 @@ def evr_failed_with_exception():
     )
 
 
+@pytest.fixture()
+def evr_id_pk_basic_sql() -> ExpectationValidationResult:
+    return ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [
+                {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+                {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+                {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+            ],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_column_names": ["pk_1", "pk_2"],
+            "unexpected_index_list": [
+                {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+                {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+                {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+            ],
+            "unexpected_index_query": "SELECT animals, pk_1, pk_2 \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))",
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+    )
+
+
+@pytest.fixture()
+def evr_id_pk_basic_pandas() -> ExpectationValidationResult:
+    return ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [3, 4, 5],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_list": [3, 4, 5],
+            "unexpected_index_query": [3, 4, 5],
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+    )
+
+
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
     evr_failed_with_exception,
 ):
     result = ValidationResultsTableContentBlockRenderer.render(
         [evr_failed_with_exception]
     ).to_json_dict()
-    print(result)
     expected_result = {
         "content_block_type": "table",
         "styling": {
@@ -973,7 +1064,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
         object_name=evr_failed_partial_unexpected_list.expectation_config.expectation_type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_list)
-    assert output_4.to_json_dict() == {
+    assert output_4[0].to_json_dict() == {
         "content_block_type": "table",
         "table": [
             [1],
@@ -1006,32 +1097,32 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
         object_name=evr_failed_partial_unexpected_counts.expectation_config.expectation_type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_counts)
-    assert output_5.to_json_dict() == {
+    assert output_5[0].to_json_dict() == {
         "content_block_type": "table",
-        "table": [
-            [1],
-            [2],
-            [3],
-            [4],
-            [5],
-            [6],
-            [7],
-            [8],
-            [9],
-            [10],
-            [11],
-            [12],
-            [13],
-            [14],
-            [15],
-            [16],
-            [17],
-            [18],
-            [19],
-            [20],
-        ],
-        "header_row": ["Sampled Unexpected Values"],
+        "header_row": ["Sampled Unexpected Values", "Count"],
         "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            [1, 1],
+            [2, 1],
+            [3, 1],
+            [4, 1],
+            [5, 1],
+            [6, 1],
+            [7, 1],
+            [8, 1],
+            [9, 1],
+            [10, 1],
+            [11, 1],
+            [12, 1],
+            [13, 1],
+            [14, 1],
+            [15, 1],
+            [16, 1],
+            [17, 1],
+            [18, 1],
+            [19, 1],
+            [20, 1],
+        ],
     }
 
 
@@ -1097,4 +1188,213 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
                 }
             },
         },
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_no_id_pk_pandas():
+    evr_no_id_pk_pandas = ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [3, 4, 5],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_list": [3, 4, 5],
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+    )
+    rendered_value = get_renderer_impl(
+        object_name=evr_no_id_pk_pandas.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_no_id_pk_pandas)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [["giraffe", 1, "3"], ["lion", 1, "4"], ["zebra", 1, "5"]],
+        "header_row": ["Unexpected Value", "Count", "Index"],
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_and_query(
+    evr_id_pk_basic_pandas,
+):
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_basic_pandas.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_basic_pandas)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Unexpected Value", "Count", "Index"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [["giraffe", 1, "3"], ["lion", 1, "4"], ["zebra", 1, "5"]],
+    }
+    assert rendered_value[1].to_json_dict() == {
+        "collapse": [
+            {
+                "content_block_type": "string_template",
+                "string_template": {"tag": "code", "template": "[3, 4, 5]"},
+            }
+        ],
+        "collapse_toggle_link": "To retrieve all unexpected values...",
+        "content_block_type": "collapse",
+        "inline_link": False,
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_with_sampled_table(
+    evr_id_pk_basic_pandas,
+):
+    evr_id_pk_pandas = evr_id_pk_basic_pandas
+    new_index = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    new_unexpected_list = [
+        "giraffe",
+        "lion",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+    ]
+    evr_id_pk_pandas.result["partial_unexpected_index_list"] = new_index
+    evr_id_pk_pandas.result["partial_unexpected_list"] = new_unexpected_list
+    evr_id_pk_pandas.result["unexpected_count"] = 100
+    evr_id_pk_pandas.result["unexpected_index_list"] = new_index
+    evr_id_pk_pandas.result["unexpected_list"] = new_unexpected_list
+
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_pandas.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_pandas)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Sampled Unexpected Values", "Count", "Index"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            ["giraffe", 1, "3"],
+            ["lion", 1, "4"],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+        ],
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_sql_with_query(
+    evr_id_pk_basic_sql,
+):
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_basic_sql.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_basic_sql)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Unexpected Value", "Count", "pk_1", "pk_2"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            ["giraffe", 1, "3", "three"],
+            ["lion", 1, "4", "four"],
+            ["zebra", 1, "5", "five"],
+        ],
+    }
+    assert rendered_value[1].to_json_dict() == {
+        "collapse": [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "tag": "code",
+                    "template": "SELECT animals, pk_1, pk_2 \n"
+                    "FROM animal_names \n"
+                    "WHERE animals IS NOT NULL AND "
+                    "(animals NOT IN ('cat', "
+                    "'fish', 'dog'))",
+                },
+            }
+        ],
+        "collapse_toggle_link": "To retrieve all unexpected values...",
+        "content_block_type": "collapse",
+        "inline_link": False,
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_sql_with_query_with_sampled_table(
+    evr_id_pk_basic_sql,
+):
+    new_index = [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+        {"animals": "zebra", "pk_1": 6},
+        {"animals": "zebra", "pk_1": 7},
+        {"animals": "zebra", "pk_1": 8},
+        {"animals": "zebra", "pk_1": 9},
+        {"animals": "zebra", "pk_1": 10},
+        {"animals": "zebra", "pk_1": 11},
+        {"animals": "zebra", "pk_1": 12},
+        {"animals": "zebra", "pk_1": 13},
+        {"animals": "zebra", "pk_1": 14},
+        {"animals": "zebra", "pk_1": 15},
+    ]
+    new_unexpected_list = [
+        "giraffe",
+        "lion",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+    ]
+    evr_id_pk_basic_sql.result["unexpected_index_column_names"] = ["pk_1"]
+    evr_id_pk_basic_sql.result["partial_unexpected_index_list"] = new_index
+    evr_id_pk_basic_sql.result["partial_unexpected_list"] = new_unexpected_list
+    evr_id_pk_basic_sql.result["unexpected_count"] = 100
+    evr_id_pk_basic_sql.result["unexpected_index_list"] = new_index
+    evr_id_pk_basic_sql.result["unexpected_list"] = new_unexpected_list
+
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_basic_sql.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_basic_sql)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Sampled Unexpected Values", "Count", "pk_1"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            ["giraffe", 1, "3"],
+            ["lion", 1, "4"],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+        ],
     }

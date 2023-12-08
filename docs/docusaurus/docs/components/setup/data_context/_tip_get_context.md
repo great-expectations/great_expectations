@@ -1,0 +1,5 @@
+The `get_context(...)` method is a convenience method provided by a Data Context.  In the absence of provided parameters the method will attempt to return a previously initialized Cloud or Filesystem Data Context.  If a previous Data Context is not found the method will return an Ephemeral Data Context.
+
+Ephemeral Data Contexts exist in-memory and do not persist beyond the current session.  An Ephemeral Data Context can be converted to a Filesystem Data context with its `convert_to_filesystem(...)` method.  
+
+You can also specify a Filesystem Data Context to instantiate by providing `get_context(...)` with a folder path.  If a Filesystem Data Context does not exist at the specified path the `get_context(...)` method will initialize one at that location and then return an instance of the newly initialized Data Context.

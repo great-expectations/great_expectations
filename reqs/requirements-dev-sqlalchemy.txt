@@ -1,4 +1,8 @@
+# Do not `pip install -r` this file locally or in CI (outside of StaticTypeCheck).
+# It only exists to be included in requirements-dev.txt, which should only be used in the Dockerfile.tests file.
+
 --requirement requirements-dev-lite.txt
+--requirement requirements-dev-sqlalchemy1.txt
 
 --requirement requirements-dev-athena.txt
 --requirement requirements-dev-bigquery.txt
@@ -12,3 +16,4 @@
 --requirement requirements-dev-trino.txt
 --requirement requirements-dev-hive.txt
 --requirement requirements-dev-vertica.txt
+--requirement requirements-dev-clickhouse.txt

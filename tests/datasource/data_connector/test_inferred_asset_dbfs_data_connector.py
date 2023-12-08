@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import pathlib
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import boto3
 import botocore
@@ -13,9 +15,15 @@ from great_expectations.datasource.data_connector import InferredAssetDBFSDataCo
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
+if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
 
-@pytest.mark.integration
-def test__get_full_file_path_pandas(fs):
+# module level markers
+pytestmark = pytest.mark.big
+
+
+@pytest.mark.big
+def test__get_full_file_path_pandas(fs: FakeFilesystem):
     """
     What does this test and why?
     File paths in DBFS need to use the `dbfs:/` protocol base instead of `/dbfs/` when
@@ -35,7 +43,7 @@ def test__get_full_file_path_pandas(fs):
         fs.add_real_file(google_cred_file)
 
     base_directory: str = "/dbfs/great_expectations"
-    base_directory_colon: str = "dbfs:/great_expectations"
+    base_directory_colon: str = "dbfs:/great_expectations"  # noqa: F841
     fs.create_dir(base_directory)
 
     create_files_in_directory(
@@ -63,7 +71,7 @@ def test__get_full_file_path_pandas(fs):
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
     my_batch_definition_list: List[
@@ -86,7 +94,7 @@ def test__get_full_file_path_pandas(fs):
     assert batch_spec.path == f"{base_directory}/path/A-100.csv"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     """
     What does this test and why?
@@ -126,7 +134,7 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
     my_batch_definition_list: List[

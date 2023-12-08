@@ -1,18 +1,16 @@
 from typing import Union
 
 import pytest
-from ruamel.yaml import YAML
 
-try:
-    pyspark = pytest.importorskip("pyspark")
-except ImportError:
-    pyspark = None
-
-from great_expectations import DataContext
+from great_expectations.compatibility import pyarrow, pyspark
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
-yaml = YAML()
+pytestmark = pytest.mark.filesystem
+
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture
@@ -48,11 +46,18 @@ def data_source_config_with_aws_glue_catalog_data_connectors():
                     database_name: db_test
         glue_inferred_connector:
             class_name: InferredAssetAWSGlueDataCatalogDataConnector
-    """
+    """  # noqa: F541
     return yaml.load(config)
 
 
-@pytest.mark.integration
+@pytest.mark.skipif(
+    not pyspark.pyspark,
+    reason='Could not import "pyspark"',
+)
+@pytest.mark.skipif(
+    not pyarrow.pyarrow,
+    reason='Could not import "pyarrow"',
+)
 def test_instantiation_from_config(
     glue_titanic_catalog, data_source_config_with_aws_glue_catalog_data_connectors
 ):
@@ -130,7 +135,14 @@ def test_instantiation_from_config(
     }
 
 
-@pytest.mark.integration
+@pytest.mark.skipif(
+    not pyspark.pyspark,
+    reason='Could not import "pyspark"',
+)
+@pytest.mark.skipif(
+    not pyarrow.pyarrow,
+    reason='Could not import "pyarrow"',
+)
 def test_instantiation_from_datasource(
     glue_titanic_catalog,
     empty_data_context,
@@ -139,7 +151,7 @@ def test_instantiation_from_datasource(
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     context.add_datasource(
         name="my_datasource",

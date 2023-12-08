@@ -1,3 +1,4 @@
+# <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full">
 from datetime import timedelta
 
 import airflow
@@ -11,9 +12,9 @@ default_args = {
 }
 
 dag = DAG(
-    "GE_checkpoint_run",
+    "GX_checkpoint_run",
     default_args=default_args,
-    description="running GE checkpoint",
+    description="running GX checkpoint",
     schedule_interval=None,
     dagrun_timeout=timedelta(minutes=5),
 )
@@ -21,8 +22,9 @@ dag = DAG(
 # priority_weight has type int in Airflow DB, uses the maximum.
 t1 = BashOperator(
     task_id="checkpoint_run",
-    bash_command="(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations --v3-api checkpoint run gcs_checkpoint ) ",
+    bash_command="(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations checkpoint run gcs_checkpoint ) ",
     dag=dag,
     depends_on_past=False,
     priority_weight=2**31 - 1,
 )
+# </snippet>

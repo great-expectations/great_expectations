@@ -1,0 +1,155 @@
+{
+    "title": "XMLAsset",
+    "description": "Read XML document into a ``DataFrame`` object.\n\n.. versionadded:: 1.3.0",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "xml",
+            "enum": [
+                "xml"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "path_or_buffer": {
+            "title": "Path Or Buffer",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
+        },
+        "xpath": {
+            "title": "Xpath",
+            "default": "./*",
+            "type": "string"
+        },
+        "namespaces": {
+            "title": "Namespaces",
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "elems_only": {
+            "title": "Elems Only",
+            "default": false,
+            "type": "boolean"
+        },
+        "attrs_only": {
+            "title": "Attrs Only",
+            "default": false,
+            "type": "boolean"
+        },
+        "names": {
+            "title": "Names",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "default": "utf-8",
+            "type": "string"
+        },
+        "stylesheet": {
+            "title": "Stylesheet",
+            "format": "file-path",
+            "type": "string"
+        },
+        "iterparse": {
+            "title": "Iterparse",
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "path_or_buffer"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

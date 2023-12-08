@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant_result import (
@@ -17,7 +18,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
@@ -49,6 +52,7 @@ class VolumeDataAssistant(DataAssistant):
             validator=validator,
         )
 
+    @override
     def get_variables(self) -> Optional[Dict[str, Any]]:
         """
         Returns:
@@ -56,6 +60,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         return None
 
+    @override
     def get_rules(self) -> Optional[List[Rule]]:
         """
         Returns:
@@ -69,6 +74,7 @@ class VolumeDataAssistant(DataAssistant):
             categorical_columns_rule,
         ]
 
+    @override
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
@@ -78,6 +84,7 @@ class VolumeDataAssistant(DataAssistant):
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
+            rule_exception_tracebacks=data_assistant_result.rule_exception_tracebacks,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
@@ -110,6 +117,7 @@ class VolumeDataAssistant(DataAssistant):
         ]
         table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -204,6 +212,7 @@ class VolumeDataAssistant(DataAssistant):
         ]
         column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )

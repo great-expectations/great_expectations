@@ -1,0 +1,304 @@
+{
+    "title": "FabricPowerBIDatasource",
+    "description": "--Public API--\nMicrosoft Fabric Datasource.\n\nhttps://pypi.org/project/semantic-link/",
+    "type": "object",
+    "properties": {
+        "type": {
+            "title": "Type",
+            "default": "fabric_powerbi",
+            "enum": [
+                "fabric_powerbi"
+            ],
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "assets": {
+            "title": "Assets",
+            "default": [],
+            "type": "array",
+            "items": {
+                "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                        "powerbi_table": "#/definitions/PowerBITable",
+                        "powerbi_measure": "#/definitions/PowerBIMeasure",
+                        "powerbi_dax": "#/definitions/PowerBIDax"
+                    }
+                },
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/PowerBITable"
+                    },
+                    {
+                        "$ref": "#/definitions/PowerBIMeasure"
+                    },
+                    {
+                        "$ref": "#/definitions/PowerBIDax"
+                    }
+                ]
+            }
+        },
+        "workspace": {
+            "title": "Workspace",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "dataset": {
+            "title": "Dataset",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "required": [
+        "name",
+        "dataset"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "PowerBITable": {
+            "title": "PowerBITable",
+            "description": "--Public API--Microsoft PowerBI Table.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "powerbi_table",
+                    "enum": [
+                        "powerbi_table"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "table": {
+                    "title": "Table",
+                    "type": "string"
+                },
+                "fully_qualified_columns": {
+                    "title": "Fully Qualified Columns",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "num_rows": {
+                    "title": "Num Rows",
+                    "type": "integer"
+                },
+                "multiindex_hierarchies": {
+                    "title": "Multiindex Hierarchies",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "pandas_convert_dtypes": {
+                    "title": "Pandas Convert Dtypes",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "name",
+                "table"
+            ],
+            "additionalProperties": false
+        },
+        "PowerBIMeasure": {
+            "title": "PowerBIMeasure",
+            "description": "--Public API--Microsoft PowerBI Measure.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "powerbi_measure",
+                    "enum": [
+                        "powerbi_measure"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "measure": {
+                    "title": "Measure",
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "groupby_columns": {
+                    "title": "Groupby Columns",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "filters": {
+                    "title": "Filters",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "fully_qualified_columns": {
+                    "title": "Fully Qualified Columns",
+                    "type": "boolean"
+                },
+                "num_rows": {
+                    "title": "Num Rows",
+                    "type": "integer"
+                },
+                "pandas_convert_dtypes": {
+                    "title": "Pandas Convert Dtypes",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "use_xmla": {
+                    "title": "Use Xmla",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "name",
+                "measure"
+            ],
+            "additionalProperties": false
+        },
+        "PowerBIDax": {
+            "title": "PowerBIDax",
+            "description": "--Public API--Microsoft PowerBI DAX.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "powerbi_dax",
+                    "enum": [
+                        "powerbi_dax"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "dax_string": {
+                    "title": "Dax String",
+                    "type": "string"
+                },
+                "pandas_convert_dtypes": {
+                    "title": "Pandas Convert Dtypes",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "name",
+                "dax_string"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

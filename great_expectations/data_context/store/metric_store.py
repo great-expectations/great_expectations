@@ -1,16 +1,24 @@
-import json
+from __future__ import annotations
 
-from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.core.run_identifier import RunIdentifier
+import json
+from typing import TYPE_CHECKING, ClassVar, Type
+
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationMetricIdentifier,
+)
 from great_expectations.util import (
     filter_properties_dict,
     load_class,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.run_identifier import RunIdentifier
 
 
 class MetricStore(Store):
@@ -18,7 +26,7 @@ class MetricStore(Store):
     A MetricStore stores ValidationMetric information to be used between runs.
     """
 
-    _key_class = ValidationMetricIdentifier  # type: ignore[assignment]
+    _key_class: ClassVar[Type] = ValidationMetricIdentifier
 
     def __init__(self, store_backend=None, store_name=None) -> None:
         if store_backend is not None:
@@ -102,5 +110,6 @@ class EvaluationParameterStore(MetricStore):
         return params
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

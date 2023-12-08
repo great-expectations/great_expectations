@@ -2,6 +2,7 @@
   "expectation_type": "expect_table_row_count_to_equal",
   "datasets": [
     {
+      "dataset_name": "expect_table_row_count_to_equal_1",
       "data": {
         "c1": [
           4,
@@ -86,7 +87,7 @@
           },
           "out": {
             "success": false,
-            "traceback_substring": "ValueError"
+            "traceback_substring": "not a valid integer"
           }
         }
       ]

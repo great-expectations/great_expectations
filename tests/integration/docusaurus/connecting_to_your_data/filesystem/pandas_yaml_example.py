@@ -1,11 +1,21 @@
-from ruamel import yaml
+from great_expectations.core.yaml_handler import YAMLHandler
 
-import great_expectations as ge
+yaml = YAMLHandler()
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import gx">
+import great_expectations as gx
+
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import BatchRequest">
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
-context = ge.get_context()
+# </snippet>
 
-datasource_yaml = f"""
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context">
+context = gx.get_context()
+# </snippet>
+
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -47,17 +57,14 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters["path"] = "./data/yellow_tripdata_sample_2019-01.csv"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
-
+assert isinstance(validator, gx.validator.validator.Validator)
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
@@ -69,16 +76,36 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
+# Example using batch request to get a batch:
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with batch request">
+batch = context.get_batch_list(batch_request=batch_request)[0]
+# </snippet>
+
+# Example using parameters to get a batch:
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters data_asset_name">
+data_asset_name = "<YOUR_DATA_ASSET_NAME>"
+# </snippet>
+
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your data asset name directly in the get_batch call below
+data_asset_name = "yellow_tripdata_sample_2019-01.csv"
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters">
+context.get_batch_list(
+    datasource_name="taxi_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name=data_asset_name,
 )
+# </snippet>
+
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata_sample_2019-01.csv" in set(
     context.get_available_data_asset_names()["taxi_datasource"][

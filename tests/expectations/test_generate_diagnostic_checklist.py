@@ -1,10 +1,14 @@
 import pytest
 
+from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.skip(
@@ -18,7 +22,7 @@ def test_print_diagnostic_checklist__first_iteration():
         == """\
 Completeness checklist for ExpectColumnValuesToEqualThree:
    library_metadata object exists
-   Has a docstring, including a one-line short description
+   Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
    Has at least one positive and negative example case, and all test cases pass
    Has core logic and passes tests on at least one Execution Engine
 """
@@ -26,23 +30,21 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 
 def test_print_diagnostic_checklist__second_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__SecondIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__SecondIteration(
+        column="values"
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (
         output_message
-        == """\
-Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration (EXPERIMENTAL):
+        == f"""\
+Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Maturity.EXPERIMENTAL}):
  ✔ Has a valid library_metadata object
- ✔ Has a docstring, including a one-line short description
+ ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     ✔ "Expect values in this column to equal the number three."
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
     ✔ All 3 tests for pandas are passing
-   Passes all linting checks
-      The snake_case of ExpectColumnValuesToEqualThree__SecondIteration (expect_column_values_to_equal_three___second_iteration) does not match filename part (expect_column_values_to_equal_three)
    Has basic input validation and type checking
       No validate_configuration method defined on subclass
  ✔ Has both statement Renderers: prescriptive and diagnostic
@@ -55,22 +57,20 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration (EXPE
 
 
 def test_print_diagnostic_checklist__third_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__ThirdIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__ThirdIteration(
+        column="values"
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (
         output_message
-        == """\
-Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration (EXPERIMENTAL):
+        == f"""\
+Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration ({Maturity.EXPERIMENTAL}):
  ✔ Has a valid library_metadata object
-   Has a docstring, including a one-line short description
+   Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
     ✔ All 3 tests for pandas are passing
-   Passes all linting checks
-      The snake_case of ExpectColumnValuesToEqualThree__ThirdIteration (expect_column_values_to_equal_three___third_iteration) does not match filename part (expect_column_values_to_equal_three)
    Has basic input validation and type checking
       No validate_configuration method defined on subclass
  ✔ Has both statement Renderers: prescriptive and diagnostic

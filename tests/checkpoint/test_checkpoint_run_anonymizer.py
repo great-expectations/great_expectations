@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
@@ -14,7 +13,7 @@ DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 def checkpoint(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     return Checkpoint(
         data_context=context,
         **{
@@ -53,10 +52,11 @@ def checkpoint(
             "profilers": [],
             "ge_cloud_id": None,
             "expectation_suite_ge_cloud_id": None,
-        }
+        },
     )
 
 
+@pytest.mark.unit
 def test_resolve_config_using_acceptable_arguments(checkpoint):
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 

@@ -1,10 +1,8 @@
 from copy import deepcopy
 from unittest import mock
-from uuid import UUID
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.exceptions import (
@@ -15,7 +13,7 @@ from great_expectations.exceptions import (
 
 @pytest.fixture
 def empty_suite(empty_data_context_stats_enabled) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
@@ -26,7 +24,7 @@ def empty_suite(empty_data_context_stats_enabled) -> ExpectationSuite:
 
 @pytest.fixture
 def baseline_suite(exp1, exp2, empty_data_context_stats_enabled) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2],
@@ -147,7 +145,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
 def single_expectation_suite(
     exp1, empty_data_context_stats_enabled
 ) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1],
@@ -161,8 +159,8 @@ def single_expectation_suite_with_expectation_ge_cloud_id(
     exp1, empty_data_context_stats_enabled
 ) -> ExpectationSuite:
     exp1_with_ge_cloud_id = deepcopy(exp1)
-    exp1_with_ge_cloud_id.ge_cloud_id = UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774")
-    context: DataContext = empty_data_context_stats_enabled
+    exp1_with_ge_cloud_id.ge_cloud_id = "0faf94a9-f53a-41fb-8e94-32f218d4a774"
+    context = empty_data_context_stats_enabled
 
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -174,7 +172,7 @@ def single_expectation_suite_with_expectation_ge_cloud_id(
 
 @pytest.fixture
 def different_suite(exp1, exp4, empty_data_context_stats_enabled) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -188,7 +186,7 @@ def different_suite(exp1, exp4, empty_data_context_stats_enabled) -> Expectation
 def domain_success_runtime_suite(
     exp1, exp2, exp3, exp4, exp5, empty_data_context_stats_enabled
 ) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -210,7 +208,7 @@ def suite_with_table_and_column_expectations(
     table_exp3,
     empty_data_context_stats_enabled,
 ) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -226,7 +224,7 @@ def suite_with_table_and_column_expectations(
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
-    assert suite.expectations == [
+    assert suite.expectation_configurations == [
         exp1,
         exp2,
         exp3,
@@ -247,7 +245,7 @@ def suite_with_column_pair_and_table_expectations(
     column_pair_expectation,
     empty_data_context_stats_enabled,
 ) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     suite = ExpectationSuite(
         expectation_suite_name="warning",
@@ -260,7 +258,7 @@ def suite_with_column_pair_and_table_expectations(
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
-    assert suite.expectations == [
+    assert suite.expectation_configurations == [
         column_pair_expectation,
         table_exp1,
         table_exp2,
@@ -273,7 +271,7 @@ def suite_with_column_pair_and_table_expectations(
 def ge_cloud_suite(
     ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled
 ) -> ExpectationSuite:
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     for exp in (exp1, exp2, exp3):
         exp.ge_cloud_id = ge_cloud_id
@@ -286,10 +284,12 @@ def ge_cloud_suite(
     )
 
 
+@pytest.mark.filesystem
 def test_find_expectation_indexes_on_empty_suite(exp1, empty_suite):
     assert empty_suite.find_expectation_indexes(exp1, "domain") == []
 
 
+@pytest.mark.filesystem
 def test_find_expectation_indexes(
     exp1, exp4, domain_success_runtime_suite, single_expectation_suite
 ):
@@ -349,6 +349,7 @@ def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suit
     assert str(err.value) == "Ensure that expectation configuration is valid."
 
 
+@pytest.mark.filesystem
 def test_find_expectations(exp2, exp3, exp4, exp5, domain_success_runtime_suite):
     expectation_to_find1 = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -389,6 +390,7 @@ def test_find_expectations_without_necessary_args(ge_cloud_suite):
     )
 
 
+@pytest.mark.filesystem
 def test_remove_expectation(
     exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite
 ):
@@ -426,6 +428,7 @@ def test_remove_expectation(
     assert domain_success_runtime_suite.isEquivalentTo(single_expectation_suite)
 
 
+@pytest.mark.filesystem
 def test_remove_expectation_without_necessary_args(single_expectation_suite):
     with pytest.raises(TypeError) as err:
         single_expectation_suite.remove_expectation(
@@ -436,12 +439,13 @@ def test_remove_expectation_without_necessary_args(single_expectation_suite):
     )
 
 
+@pytest.mark.filesystem
 def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectations[4] is exp5
+    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
-        exp6, match_type="success"
-    )
+    assert not domain_success_runtime_suite.expectation_configurations[
+        4
+    ].isEquivalentTo(exp6, match_type="success")
     domain_success_runtime_suite.patch_expectation(
         exp5,
         op="replace",
@@ -449,17 +453,18 @@ def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
         value=[1, 2],
         match_type="runtime",
     )
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
         exp6, match_type="success"
     )
 
 
+@pytest.mark.filesystem
 def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectations[4] is exp5
+    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
-        exp7, match_type="success"
-    )
+    assert not domain_success_runtime_suite.expectation_configurations[
+        4
+    ].isEquivalentTo(exp7, match_type="success")
     domain_success_runtime_suite.patch_expectation(
         exp5,
         op="add",
@@ -467,17 +472,18 @@ def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
         value=4,
         match_type="runtime",
     )
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
         exp7, match_type="success"
     )
 
 
+@pytest.mark.filesystem
 def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectations[4] is exp5
+    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
-        exp8, match_type="runtime"
-    )
+    assert not domain_success_runtime_suite.expectation_configurations[
+        4
+    ].isEquivalentTo(exp8, match_type="runtime")
     domain_success_runtime_suite.patch_expectation(
         exp5,
         op="remove",
@@ -485,11 +491,12 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
         value=None,
         match_type="runtime",
     )
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
         exp8, match_type="runtime"
     )
 
 
+@pytest.mark.filesystem
 def test_add_expectation_configurations(
     exp1,
     exp2,
@@ -526,6 +533,7 @@ def test_add_expectation_configurations(
     assert single_expectation_suite.isEquivalentTo(different_suite)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -565,8 +573,9 @@ def test_add_expectation(
             exp2, match_type="success", overwrite_existing=False
         )
 
+    config = ExpectationConfiguration(expectation_type="not an expectation", kwargs={})
     with pytest.raises(InvalidExpectationConfigurationError):
-        single_expectation_suite.add_expectation("not an expectation")
+        single_expectation_suite.add_expectation(config)
 
     # Turn this on once we're ready to enforce strict typing.
     # with pytest.raises(TypeError):
@@ -615,11 +624,9 @@ def test_add_expectation_with_ge_cloud_id(
     """
     This test ensures that expectation does not lose ge_cloud_id attribute when updated
     """
-    expectation_ge_cloud_id = (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
-            0
-        ].ge_cloud_id
-    )
+    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
+        0
+    ].ge_cloud_id
     # updated expectation does not have ge_cloud_id
     updated_expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -634,15 +641,23 @@ def test_add_expectation_with_ge_cloud_id(
         updated_expectation, overwrite_existing=True
     )
     assert (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
+        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
             0
         ].ge_cloud_id
         == expectation_ge_cloud_id
     )
     # make sure expectation config was actually updated
-    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].kwargs[
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
+        0
+    ].kwargs[
         "value_set"
-    ] == [11, 22, 33, 44, 55]
+    ] == [
+        11,
+        22,
+        33,
+        44,
+        55,
+    ]
 
     # ensure usage statistics are being emitted correctly
     assert mock_emit.call_count == 1
@@ -657,6 +672,7 @@ def test_add_expectation_with_ge_cloud_id(
     ]
 
 
+@pytest.mark.filesystem
 def test_remove_all_expectations_of_type(
     suite_with_table_and_column_expectations,
     suite_with_column_pair_and_table_expectations,
@@ -677,7 +693,7 @@ def test_remove_all_expectations_of_type(
 @pytest.mark.cloud
 def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, exp1):
     # The state of the first expectation before update
-    expectation_before_update = ge_cloud_suite.expectations[0]
+    expectation_before_update = ge_cloud_suite.expectation_configurations[0]
     assert expectation_before_update["kwargs"]["column"] == "a"
     assert expectation_before_update["kwargs"]["value_set"] == [1, 2, 3]
     assert expectation_before_update["meta"]["notes"] == "This is an expectation."
@@ -694,7 +710,7 @@ def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, e
     )
 
     # The state of the first expectation after update
-    expectation_after_update = ge_cloud_suite.expectations[0]
+    expectation_after_update = ge_cloud_suite.expectation_configurations[0]
     assert expectation_after_update["kwargs"]["column"] == "b"
     assert expectation_after_update["kwargs"]["value_set"] == [4, 5, 6]
     assert (

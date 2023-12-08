@@ -1,33 +1,13 @@
-import json
-
 import requests
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 # This class defines a Metric to support your Expectation
@@ -35,7 +15,6 @@ from great_expectations.validator.validator import Validator
 # To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
     # for information on how to choose an id string for your Metric.
@@ -73,9 +52,10 @@ class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
-    """This Expectation checks whether a column contains valid titles/slugs of Wikipedia articles.
-    It simply plugs the column value into the Wikipedia URL and checks whether the HTTP status
-    code is 200. This Expectation can be used as a template for other (or a more generic) "does this website
+    """Expect column values to be valid Wikipedia article titles/slugs.
+
+    It simply plugs the column value into the Wikipedia URL and checks whether the HTTP status \
+    code is 200. This Expectation can be used as a template for other (or a more generic) "does this website \
     exist" type checks, e.g. for things like user handles, dictionary entries, etc.
     """
 
@@ -143,7 +123,7 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -155,7 +135,7 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -173,16 +153,12 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):
 #!!! This example renderer should be shorter
 #         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
+#         include_column_name = False if runtime_configuration.get("include_column_name") is False else True
 #         styling = runtime_configuration.get("styling")
 #         params = substitute_none_for_missing(
 #             configuration.kwargs,
