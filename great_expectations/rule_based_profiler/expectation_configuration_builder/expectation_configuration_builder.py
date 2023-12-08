@@ -111,16 +111,21 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         config = self._build_expectation_configuration(
             domain=domain, variables=variables, parameters=parameters
         )
-        return self._roundtrip_config_through_expectation(config=config)
+        if config:
+            return self._roundtrip_config_through_expectation(
+                domain=domain, config=config
+            )
+        return None
 
     def _roundtrip_config_through_expectation(
-        self, config: ExpectationConfiguration
+        self, domain: Domain, config: ExpectationConfiguration
     ) -> ExpectationConfiguration:
         """
         Utilize Pydantic validaton and type coercion to ensure the final expectation configuration is valid.
         """
         expectation_cls = get_expectation_impl(config.expectation_type)
-        expectation = expectation_cls(**config.kwargs, meta=config.meta)
+        kwargs = {**config.kwargs, **domain.domain_kwargs}
+        expectation = expectation_cls(**kwargs, meta=config.meta)
         return expectation.configuration
 
     def resolve_validation_dependencies(  # noqa: PLR0913
