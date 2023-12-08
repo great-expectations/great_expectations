@@ -810,12 +810,13 @@ def get_or_create_spark_session(
     spark_config = spark_config or {}
 
     spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
+    spark_session: pyspark.SparkSession
     try:
         spark_session_type = pyspark.SparkSession
+        spark_session = spark_session_type.builder.getOrCreate()
     except RuntimeError:
         spark_session_type = pyspark.SparkConnectSession
-
-    spark_session: pyspark.SparkSession = spark_session_type.builder.getOrCreate()
+        spark_session = spark_session_type.builder.getOrCreate()
 
     # in a local pyspark-shell the context config cannot be updated
     # unless you stop the Spark context and re-create it
