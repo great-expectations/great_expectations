@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
@@ -85,6 +85,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     }
 
     metric_dependencies = ("table.row_count",)
+    domain_keys: ClassVar[Tuple[str, ...]] = tuple()
     success_keys = (
         "min_value",
         "max_value",

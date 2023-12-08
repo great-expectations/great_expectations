@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -70,6 +70,13 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     See Also:
         [expect_column_values_to_not_be_null](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
     """
+
+    condition_parser: Union[None, str] = "pandas"
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

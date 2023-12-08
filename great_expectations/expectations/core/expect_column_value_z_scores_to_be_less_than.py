@@ -1,4 +1,4 @@
-from typing import Union
+from typing import ClassVar, Tuple, Union
 
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
@@ -11,7 +11,7 @@ from great_expectations.expectations.expectation import (
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """Expect the Z-scores of a column's values to be less than a given threshold.
 
-    expect_column_values_to_be_of_type is a \
+    expect_column_value_z_scores_to_be_less_than is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
     for typed-column backends, and also for PandasExecutionEngine where the column \
     dtype and provided type_ are unambiguous constraints \
@@ -50,8 +50,14 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
+    condition_parser: Union[str, None] = "pandas"
     threshold: Union[int, float, EvaluationParameterDict]
     double_sided: Union[bool, EvaluationParameterDict]
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
