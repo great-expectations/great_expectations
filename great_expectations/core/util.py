@@ -899,6 +899,7 @@ def _try_stop_misconfigured_spark_session(
 ) -> None:
     try:
         app_name = spark_session.sparkContext.appName
+        # test comment
         conf = spark_session.sparkContext.getConf()
         for key, value in spark_config.items():
             if (conf.get(key) != value) or (app_name != value):
