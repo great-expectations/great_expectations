@@ -32,11 +32,6 @@ except ImportError:
     SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark import SparkConf
-except ImportError:
-    SparkConf = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-try:
     from pyspark.ml.feature import Bucketizer
 except (ImportError, AttributeError):
     Bucketizer = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
