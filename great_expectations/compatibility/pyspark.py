@@ -101,4 +101,4 @@ except (ImportError, AttributeError):
 try:
     from py4j import security
 except ImportError:
-    security = PY4J_NOT_IMPORTED  # type: ignore[assignment,misc]
+    security = PY4J_NOT_IMPORTED
