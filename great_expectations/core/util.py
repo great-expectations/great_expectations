@@ -884,15 +884,18 @@ def _create_new_spark_session_from_spark_config(
     spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_config: dict,
 ) -> pyspark.SparkSession:
-    builder = spark_session_type.builder
-    for key, value in spark_config.items():
-        if key == "spark.app.name":
-            builder.appName(value)
-        else:
-            builder.config(key, value)
+    spark_session: pyspark.SparkSession
+    if spark_session_type == pyspark.SparkSession:
+        builder = pyspark.SparkSession.builder
+        for key, value in spark_config.items():
+            if key == "spark.app.name":
+                builder.appName(value)
+            else:
+                builder.config(key, value)
 
-    spark_session: pyspark.SparkSession = builder.getOrCreate()
-    assert not spark_session.isStopped()
+        spark_session = builder.getOrCreate()
+    else:
+        spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
     return spark_session
 
 
@@ -906,23 +909,19 @@ def _update_existing_spark_session_with_spark_config(
                 spark_session.sparkContext.appName = value
             except pyspark.PySparkAttributeError:
                 warnings.warn(
-                    "Unable to change `spark.app.name` of a remote session.",
+                    "spark_config option `spark.app.name` is not modifiable in this environment.",
                     category=RuntimeWarning,
                 )
         else:
             try:
                 spark_session.conf.set(key, value)
-                print(f"successfully updated {key}: {value}")
             except (pyspark.AnalysisException, py4j.protocol.Py4JJavaError):
                 warnings.warn(
                     f"spark_config option `{key}` is not modifiable in this environment.",
                     category=RuntimeWarning,
                 )
-                print(f"failed to update {key}: {value}")
 
-    spark_session: pyspark.SparkSession = spark_session.builder.getOrCreate()
-    assert not spark_session.isStopped()
-    return spark_session
+    return spark_session.builder.getOrCreate()
 
 
 def _try_stop_misconfigured_spark_session(
