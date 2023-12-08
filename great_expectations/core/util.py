@@ -809,11 +809,13 @@ def get_or_create_spark_session(
     """
     spark_config = spark_config or {}
 
-    spark_session: pyspark.SparkSession
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
     try:
-        spark_session = pyspark.SparkSession.builder.getOrCreate()
+        spark_session_type = pyspark.SparkSession
     except RuntimeError:
-        spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+        spark_session_type = pyspark.SparkConnectSession
+
+    spark_session: pyspark.SparkSession = spark_session_type.builder.getOrCreate()
 
     # in a local pyspark-shell the context config cannot be updated
     # unless you stop the Spark context and re-create it
@@ -825,7 +827,21 @@ def get_or_create_spark_session(
         allow_restart=allow_restart,
     )
 
-    if isinstance(spark_session, pyspark.SparkConnectSession):
+    _raise_warnings_if_spark_config_not_updated(
+        spark_session_type=spark_session_type,
+        spark_config=spark_config,
+        spark_session=spark_session,
+    )
+
+    return spark_session
+
+
+def _raise_warnings_if_spark_config_not_updated(
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
+    spark_config: dict,
+    spark_session: pyspark.SparkSession,
+) -> None:
+    if spark_session_type == pyspark.SparkConnectSession:
         warnings.warn(
             "Unable to update spark_config for remote sessions. Passing spark_config had no effect.",
             category=RuntimeWarning,
@@ -837,8 +853,6 @@ def get_or_create_spark_session(
                     f"Passing {key} to spark_config had no effect in this environment.",
                     category=RuntimeWarning,
                 )
-
-    return spark_session
 
 
 def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
