@@ -19,7 +19,7 @@ from pyparsing import Optional as ppOptional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
@@ -34,6 +34,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -381,16 +384,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             )
 
             if condition:
-                return ExpectationConfiguration(
-                    expectation_type=self._expectation_type,
-                    kwargs=expectation_kwargs,
-                    meta=meta,
-                )
+                expectation_cls = get_expectation_impl(self._expectation_type)
+                expectation = expectation_cls(**expectation_kwargs, meta=meta)
+                return expectation.configuration
             else:
                 return None
         else:
-            return ExpectationConfiguration(
-                expectation_type=self._expectation_type,
-                kwargs=expectation_kwargs,
-                meta=meta,
-            )
+            expectation_cls = get_expectation_impl(self._expectation_type)
+            expectation = expectation_cls(**expectation_kwargs, meta=meta)
+            return expectation.configuration
