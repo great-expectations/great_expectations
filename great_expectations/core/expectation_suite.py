@@ -337,6 +337,7 @@ class ExpectationSuite(SerializableDictDot):
         # map expectations to expectation_configurations
         attributes_to_copy.remove("expectations")
         attributes_to_copy.add("expectation_configurations")
+        attributes_to_copy.add("_store")
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
