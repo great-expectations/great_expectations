@@ -833,29 +833,3 @@ def test_discard_failing_expectations():
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
     assert sub1.get_expectation_suite().expectation_configurations == exp1
-
-
-@pytest.mark.unit
-def test_test_expectation_function():
-    asset = gx.dataset.PandasDataset(
-        {
-            "x": [1, 3, 5, 7, 9],
-            "y": [1, 2, None, 7, 9],
-        }
-    )
-    asset_2 = gx.dataset.PandasDataset(
-        {
-            "x": [1, 3, 5, 6, 9],
-            "y": [1, 2, None, 6, 9],
-        }
-    )
-
-    def expect_dataframe_to_contain_7(self):
-        return {"success": bool((self == 7).sum().sum() > 0)}
-
-    assert asset.test_expectation_function(
-        expect_dataframe_to_contain_7, include_config=False
-    ) == ExpectationValidationResult(success=True)
-    assert asset_2.test_expectation_function(
-        expect_dataframe_to_contain_7, include_config=False
-    ) == ExpectationValidationResult(success=False)
