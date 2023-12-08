@@ -29,6 +29,7 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
+import py4j
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
@@ -832,30 +833,6 @@ def get_or_create_spark_session(
     return spark_session
 
 
-def _raise_warnings_if_spark_config_not_updated(
-    spark_config: dict,
-    spark_session: pyspark.SparkSession,
-) -> None:
-    for key, value in spark_config.items():
-        if key == "spark.app.name":
-            try:
-                if spark_session.sparkContext.appName != value:
-                    warnings.warn(
-                        "Passing `spark.app.name` to spark_config had no effect in this environment.",
-                        category=RuntimeWarning,
-                    )
-            except pyspark.PySparkAttributeError:
-                warnings.warn(
-                    "Unable to change `spark.app.name` of a remote session.",
-                    category=RuntimeWarning,
-                )
-        elif not spark_session.conf.isModifiable(key):
-            warnings.warn(
-                f"Passing `{key}` to spark_config had no effect in this environment.",
-                category=RuntimeWarning,
-            )
-
-
 def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
     """Tests whether we are able to update an existing Spark Session config.
 
@@ -900,32 +877,53 @@ def _get_session_with_spark_config(
         SparkSession
     """
     if allow_restart:
-        try:
-            app_name = spark_session.sparkContext.appName
-            conf = spark_session.sparkContext.getConf()
-            for key, value in spark_config.items():
-                if (conf.get(key) != value) or (app_name != value):
-                    spark_session.stop()
-                    break
-        except pyspark.PySparkAttributeError:
-            # if the session is a Spark/Databricks Connect session,
-            # this error is raised and the session cannot be restarted
-            pass
+        _try_stop_misconfigured_spark_session(
+            spark_session=spark_session,
+            spark_config=spark_config,
+        )
 
     for key, value in spark_config.items():
-        # we can't update the app name of a remote session
         if key == "spark.app.name":
-            if spark_session_type == pyspark.SparkSession:
+            try:
                 spark_session.sparkContext.appName = value
-        elif spark_session.conf.isModifiable(key):
-            spark_session.conf.set(key, value)
-
-    _raise_warnings_if_spark_config_not_updated(
-        spark_config=spark_config,
-        spark_session=spark_session,
-    )
+            except pyspark.PySparkAttributeError:
+                warnings.warn(
+                    "Unable to change `spark.app.name` of a remote session.",
+                    category=RuntimeWarning,
+                )
+        else:
+            try:
+                spark_session.conf.set(key, value)
+            except pyspark.AnalysisException:
+                warnings.warn(
+                    f"spark_config option `{key}` is not modifiable in this environment.",
+                    category=RuntimeWarning,
+                )
 
     return spark_session.builder.getOrCreate()
+
+
+def _try_stop_misconfigured_spark_session(
+    spark_session: pyspark.SparkSession,
+    spark_config: dict,
+) -> None:
+    try:
+        app_name = spark_session.sparkContext.appName
+        conf = spark_session.sparkContext.getConf()
+        for key, value in spark_config.items():
+            if (conf.get(key) != value) or (app_name != value):
+                spark_session.stop()
+                break
+    except pyspark.PySparkAttributeError:
+        # if the session is a Spark/Databricks Connect session,
+        # this error is raised when attempting to access sparkContext,
+        # and the session cannot be restarted
+        pass
+    except py4j.security.Py4JSecurityException:
+        # if the session is in a Databricks Notebook on a shared cluster
+        # with credential passthrough enabled, this error is raised when
+        # attempting to call sparkContext.getConf(), and the session cannot be restarted
+        pass
 
 
 def get_sql_dialect_floating_point_infinity_value(
