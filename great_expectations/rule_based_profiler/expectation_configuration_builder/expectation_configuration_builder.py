@@ -10,6 +10,7 @@ from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
@@ -107,9 +108,20 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             runtime_configuration=runtime_configuration,
         )
 
-        return self._build_expectation_configuration(
+        config = self._build_expectation_configuration(
             domain=domain, variables=variables, parameters=parameters
         )
+        return self._roundtrip_config_through_expectation(config=config)
+
+    def _roundtrip_config_through_expectation(
+        self, config: ExpectationConfiguration
+    ) -> ExpectationConfiguration:
+        """
+        Utilize Pydantic validaton and type coercion to ensure the final expectation configuration is valid.
+        """
+        expectation_cls = get_expectation_impl(config.expectation_type)
+        expectation = expectation_cls(**config.kwargs, meta=config.meta)
+        return expectation.configuration
 
     def resolve_validation_dependencies(  # noqa: PLR0913
         self,
