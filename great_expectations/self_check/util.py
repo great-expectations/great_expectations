@@ -844,7 +844,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
             spark_df = spark.createDataFrame(data_reshaped, string_schema)
             for c in spark_df.columns:
                 spark_df = spark_df.withColumn(
-                    c, spark_df[c].cast(spark_types[schema[c]]())  # type: ignore[arg-type]  # db connect column incompatible
+                    c, spark_df[c].cast(spark_types[schema[c]]())
                 )
     elif len(data_reshaped) == 0:
         # if we have an empty dataset and no schema, need to assign an arbitrary type
@@ -1556,7 +1556,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if include_spark:
         from great_expectations.compatibility import pyspark
 
-        if not pyspark.SparkSession:
+        if not pyspark.SparkSession:  # type: ignore[truthy-function]
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"
