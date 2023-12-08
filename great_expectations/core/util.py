@@ -884,7 +884,7 @@ def _get_session_with_spark_config(
         else:
             try:
                 spark_session.conf.set(key, value)
-            except pyspark.AnalysisException:
+            except (pyspark.AnalysisException, py4j.protocol.Py4JJavaError):
                 warnings.warn(
                     f"spark_config option `{key}` is not modifiable in this environment.",
                     category=RuntimeWarning,
@@ -899,7 +899,6 @@ def _try_stop_misconfigured_spark_session(
 ) -> None:
     try:
         app_name = spark_session.sparkContext.appName
-        # test comment
         conf = spark_session.sparkContext.getConf()
         for key, value in spark_config.items():
             if (conf.get(key) != value) or (app_name != value):
