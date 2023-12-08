@@ -58,16 +58,16 @@ except (ImportError, AttributeError):
     Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import SparkSession as _SparkSession
+    from pyspark.sql import SparkSession
 except (ImportError, AttributeError):
-    _SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql.connect.session import SparkSession as _SparkConnectSession
+    from pyspark.sql.connect.session import SparkSession as SparkConnectSession
 except (ImportError, AttributeError):
-    _SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
-SparkSession = Union[_SparkSession, _SparkConnectSession]
+SparkSessionType = Union[SparkSession, SparkConnectSession]
 
 try:
     from pyspark.sql import SQLContext

@@ -4,6 +4,7 @@ import datetime
 import decimal
 import json
 import logging
+import os
 import pathlib
 import re
 import sys
@@ -14,6 +15,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Final,
     List,
     Mapping,
     MutableMapping,
@@ -30,7 +32,7 @@ import pandas as pd
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import databricks, pydantic, pyspark, sqlalchemy
+from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
@@ -769,8 +771,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
-if TYPE_CHECKING:
-    _SparkSession = Union[pyspark._SparkSession, databricks.connect.DatabricksSession]
+DATABRICKS_SHELL_APP_NAME: Final[str] = "Databricks Shell"
 
 
 def get_or_create_spark_application(
@@ -808,112 +809,93 @@ def get_or_create_spark_session(
     """
     spark_config = spark_config or {}
 
+    spark_session: pyspark.SparkSession
     try:
-        spark_session_cls: type[_SparkSession]
-        # if databricks-connect is installed
-        if databricks.connect:
-            spark_session_cls = databricks.connect.DatabricksSession
-        else:
-            spark_session_cls = pyspark._SparkSession
+        spark_session = pyspark.SparkSession.builder.getOrCreate()
+    except RuntimeError:
+        spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
 
-        builder: pyspark._SparkSession.Builder = _get_builder_from_spark_config(
-            spark_session_cls=spark_session_cls,
-            spark_config=spark_config,
-        )
-        spark_session: pyspark.SparkSession
-        try:
-            spark_session = builder.getOrCreate()
-        except ValueError as e:
-            if "auth" in str(e):
-                raise ConnectionError(
-                    f"If using Spark/Databricks Connect, environment variables must be set -> {e!r}"
-                ) from e
-            else:
-                raise e
-
-        spark_session = _validate_spark_session_config(
-            spark_session=spark_session,
-            builder=builder,
-            spark_config=spark_config,
-        )
-
-    except AttributeError as e:
-        logger.error(
-            "Unable to load spark context; install optional spark dependency for support."
-        )
-        raise e
-
-    return spark_session
-
-
-def _validate_spark_session_config(
-    spark_session: pyspark.SparkSession,
-    builder: pyspark._SparkSession.Builder,
-    spark_config: dict,
-) -> pyspark.SparkSession:
-    if _spark_config_updatable(spark_session=spark_session):
-        if spark_config.get("spark.app.name"):
-            warnings.warn(
-                "Passing spark.app.name to spark_config has no effect in a Databricks environment.",
-                category=RuntimeWarning,
-            )
-    # for connect sessions, the config is not updatable nor can we stop it
-    elif isinstance(spark_session, pyspark._SparkSession):
-        # in a local pyspark-shell the context config cannot be updated
-        # unless you stop the Spark context and re-recreate it
-        retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
-        stopped = False
-        for key, value in spark_config.items():
-            if retrieved_spark_config.get(key) != value:
-                spark_session.stop()
-                stopped = True
-                break
-        if stopped:
-            spark_session = builder.getOrCreate()
-    return spark_session
-
-
-def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
-    """
-    Tests whether we are able to update an existing Spark Session config.
-
-    Returns:
-        bool
-    """
-    app_name: str
-    try:
-        app_name = spark_session.sparkContext.appName  # type: ignore[assignment]  # handled by try/except
-    except pyspark.PySparkNotImplementedError:
-        # if the session is a Spark/Databricks Connect session,
-        # this error is raised and the config is not updatable
-        app_name = ""
-
-    updatable = "databricks" in app_name.lower()
-    return updatable
-
-
-def _get_builder_from_spark_config(
-    spark_session_cls: type[_SparkSession], spark_config: dict
-) -> pyspark._SparkSession.Builder:
-    builder: pyspark._SparkSession.Builder = spark_session_cls.builder
-
-    # unable to access builder config with connect sessions
-    if spark_session_cls == pyspark._SparkSession:
-        # user could get in trouble here if they try to set config options that are not allowed in their runtime
-        for k, v in spark_config.items():
-            if k != "spark.app.name":
-                builder.config(k, v)
-
-        app_name: str | None = spark_config.get("spark.app.name")
-        if app_name:
-            builder.appName(app_name)
-    elif spark_session_cls == pyspark._SparkConnectSession:
+    if isinstance(spark_session, pyspark.SparkConnectSession):
         warnings.warn(
             "Unable to update spark_config for remote sessions. Passing spark_config had no effect.",
             category=RuntimeWarning,
         )
+    elif _spark_config_updatable(spark_session=spark_session):
+        if spark_config.get("spark.app.name"):
+            warnings.warn(
+                "Passing spark.app.name to spark_config has no effect in a Databricks Notebook environment.",
+                category=RuntimeWarning,
+            )
 
-    return builder
+        spark_session = _get_new_session_with_spark_config(
+            spark_config=spark_config,
+            spark_session=spark_session,
+            allow_restart=False,
+        )
+    else:
+        # in a local pyspark-shell the context config cannot be updated
+        # unless you stop the Spark context and re-recreate it
+        spark_session = _get_new_session_with_spark_config(
+            spark_config=spark_config,
+            spark_session=spark_session,
+            allow_restart=True,
+        )
+
+    return spark_session
+
+
+def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
+    """Tests whether we are able to update an existing Spark Session config.
+
+    Returns:
+        bool
+    """
+    try:
+        app_name: str = spark_session.sparkContext.appName  # type: ignore[assignment]  # handled by try/except
+    except pyspark.PySparkNotImplementedError:
+        # if the session is a Spark/Databricks Connect session,
+        # this error is raised and the config is not updatable
+        return False
+
+    updatable = (app_name == DATABRICKS_SHELL_APP_NAME) and (
+        os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
+    )
+    return updatable
+
+
+def _get_new_session_with_spark_config(
+    spark_session: pyspark.SparkSession,
+    spark_config: dict,
+    allow_restart: bool,
+) -> pyspark.SparkSession:
+    """Gets a SparkSession with spark_config by updating or re-starting an existing SparkSession.
+
+    Args:
+        spark_session: An existing PySpark SparkSession.
+        spark_config: A dictionary of SparkSession.Builder.config objects.
+        allow_restart: Whether to restart the existing SparkSession.
+
+    Returns:
+        SparkSession
+    """
+    if allow_restart:
+        retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
+        for key, value in spark_config.items():
+            if retrieved_spark_config.get(key) != value:
+                spark_session.stop()
+                break
+
+    builder = spark_session.builder
+    # user could get in trouble here if they try to set config options that are not allowed in their runtime
+    for key, value in spark_config.items():
+        if key != "spark.app.name":
+            builder.config(key, value)
+
+    app_name: str | None = spark_config.get("spark.app.name")
+    if app_name:
+        builder.appName(app_name)
+
+    return builder.getOrCreate()
 
 
 def get_sql_dialect_floating_point_infinity_value(
