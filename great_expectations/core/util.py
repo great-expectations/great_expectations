@@ -20,7 +20,6 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -772,11 +771,6 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
-DATABRICKS_SHELL_APP_NAME: Final[str] = "Databricks Shell"
-
-SparkSessionType = Union[Type[pyspark.SparkSession], Type[pyspark.SparkConnectSession]]
-
-
 def get_or_create_spark_application(
     spark_config: Optional[dict[str, str]] = None,
     force_reuse_spark_context: Optional[bool] = None,
@@ -812,14 +806,17 @@ def get_or_create_spark_session(
     """
     spark_config = spark_config or {}
 
-    spark_session_type: SparkSessionType
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession]
     spark_session: pyspark.SparkSession
     try:
+        spark_session = pyspark.SparkSession.builder.getOrCreate()
         spark_session_type = pyspark.SparkSession
-        spark_session = spark_session_type.builder.getOrCreate()
-    except RuntimeError:
+    except RuntimeError as e:
+        try:
+            spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+        except Exception:
+            raise e
         spark_session_type = pyspark.SparkConnectSession
-        spark_session = spark_session_type.builder.getOrCreate()
 
     # in a local pyspark-shell the context config cannot be updated
     # unless you stop the Spark context and re-create it
@@ -865,6 +862,8 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
     Returns:
         bool
     """
+    databricks_shell_app_name: Final[str] = "Databricks Shell"
+
     try:
         app_name: str = spark_session.sparkContext.appName  # type: ignore[assignment]  # handled by try/except
     except pyspark.PySparkNotImplementedError:
@@ -872,14 +871,14 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
         # this error is raised and the config is not updatable
         return False
 
-    updatable = (app_name == DATABRICKS_SHELL_APP_NAME) and (
+    updatable = (app_name == databricks_shell_app_name) and (
         os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
     )
     return updatable
 
 
 def _get_session_with_spark_config(
-    spark_session_type: SparkSessionType,
+    spark_session_type: type[pyspark.SparkSession | pyspark.SparkConnectSession],
     spark_session: pyspark.SparkSession,
     spark_config: dict,
     allow_restart: bool,

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import warnings
-from typing import Union
 
 from great_expectations.compatibility.not_imported import NotImported
 
@@ -66,8 +65,6 @@ try:
     from pyspark.sql.connect.session import SparkSession as SparkConnectSession
 except (ImportError, AttributeError):
     SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-SparkSessionType = Union[SparkSession, SparkConnectSession]
 
 try:
     from pyspark.sql import SQLContext
