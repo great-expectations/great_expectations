@@ -99,6 +99,6 @@ except (ImportError, AttributeError):
     PySparkAttributeError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from py4j import security
+    import py4j
 except ImportError:
-    security = PY4J_NOT_IMPORTED
+    py4j = PY4J_NOT_IMPORTED
