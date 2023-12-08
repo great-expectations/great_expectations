@@ -912,13 +912,12 @@ def _try_update_or_stop_misconfigured_spark_session(
                 else:
                     raise e
 
-    if not stopped:
-        for message in warning_messages:
-            print(message)
-            warnings.warn(
-                message=message,
-                category=RuntimeWarning,
-            )
+    for message in warning_messages:
+        print(message)
+        warnings.warn(
+            message=message,
+            category=RuntimeWarning,
+        )
 
     return spark_session, stopped
 
