@@ -90,3 +90,8 @@ try:
     from pyspark.errors import PySparkNotImplementedError
 except (ImportError, AttributeError):
     PySparkNotImplementedError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
+    from pyspark.errors import PySparkAttributeError
+except (ImportError, AttributeError):
+    PySparkAttributeError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]

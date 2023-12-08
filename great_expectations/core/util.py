@@ -844,7 +844,7 @@ def _raise_warnings_if_spark_config_not_updated(
                         "Passing `spark.app.name` to spark_config had no effect in this environment.",
                         category=RuntimeWarning,
                     )
-            except pyspark.PySparkNotImplementedError:
+            except pyspark.PySparkAttributeError:
                 warnings.warn(
                     "Unable to change `spark.app.name` of a remote session.",
                     category=RuntimeWarning,
@@ -866,7 +866,7 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
 
     try:
         app_name: str = spark_session.sparkContext.appName  # type: ignore[assignment]  # handled by try/except
-    except pyspark.PySparkNotImplementedError:
+    except pyspark.PySparkAttributeError:
         # if the session is a Spark/Databricks Connect session,
         # this error is raised and the config is not updatable
         return False
@@ -907,7 +907,7 @@ def _get_session_with_spark_config(
                 if (conf.get(key) != value) or (app_name != value):
                     spark_session.stop()
                     break
-        except pyspark.PySparkNotImplementedError:
+        except pyspark.PySparkAttributeError:
             # if the session is a Spark/Databricks Connect session,
             # this error is raised and the session cannot be restarted
             pass
