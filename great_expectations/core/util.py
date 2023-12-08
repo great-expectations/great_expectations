@@ -817,7 +817,7 @@ def get_or_create_spark_session(
         except Exception:
             raise e
 
-    # in a local pyspark-shell the context config cannot be updated
+    # in some environments the context config cannot be updated
     # unless you stop the Spark context and re-create it
     allow_restart: bool = not _spark_config_updatable()
 
@@ -935,6 +935,8 @@ def _try_stop_misconfigured_spark_session(
         app_name = spark_session.sparkContext.appName
         conf = spark_session.sparkContext.getConf()
         for key, value in spark_config.items():
+            # if the user set a spark_config option
+            # that doesn't match the existing session
             if (conf.get(key) != value) or (app_name != value):
                 spark_session.stop()
                 stopped = True
