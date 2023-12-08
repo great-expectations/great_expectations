@@ -819,10 +819,10 @@ def get_or_create_spark_session(
         allow_restart = False
     else:
         # in a local pyspark-shell the context config cannot be updated
-        # unless you stop the Spark context and re-recreate it
+        # unless you stop the Spark context and re-create it
         allow_restart = True
 
-    spark_session = _get_new_session_with_spark_config(
+    spark_session = _get_session_with_spark_config(
         spark_config=spark_config,
         spark_session=spark_session,
         allow_restart=allow_restart,
@@ -863,7 +863,7 @@ def _spark_config_updatable(spark_session: pyspark.SparkSession) -> bool:
     return updatable
 
 
-def _get_new_session_with_spark_config(
+def _get_session_with_spark_config(
     spark_session: pyspark.SparkSession,
     spark_config: dict,
     allow_restart: bool,

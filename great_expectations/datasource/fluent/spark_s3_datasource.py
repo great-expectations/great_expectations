@@ -92,6 +92,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             TestConnectionError: If the connection test fails.
         """
         try:
+            # tests S3 connection
             _ = self._get_s3_client()
         except Exception as e:
             raise TestConnectionError(
@@ -99,10 +100,8 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 f"{e!s}"
             ) from e
 
-        try:
-            super().test_connection()
-        except TestConnectionError as e:
-            raise TestConnectionError(e) from e
+        # tests Spark connection, raising TestConnectionError
+        super().test_connection()
 
         if self.assets and test_assets:
             for asset in self.assets:
