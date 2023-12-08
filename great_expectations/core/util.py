@@ -815,31 +815,31 @@ def get_or_create_spark_session(
     except RuntimeError:
         spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
 
+    if _spark_config_updatable(spark_session=spark_session):
+        allow_restart = False
+    else:
+        # in a local pyspark-shell the context config cannot be updated
+        # unless you stop the Spark context and re-recreate it
+        allow_restart = True
+
+    spark_session = _get_new_session_with_spark_config(
+        spark_config=spark_config,
+        spark_session=spark_session,
+        allow_restart=allow_restart,
+    )
+
     if isinstance(spark_session, pyspark.SparkConnectSession):
         warnings.warn(
             "Unable to update spark_config for remote sessions. Passing spark_config had no effect.",
             category=RuntimeWarning,
         )
-    elif _spark_config_updatable(spark_session=spark_session):
-        if spark_config.get("spark.app.name"):
-            warnings.warn(
-                "Passing spark.app.name to spark_config has no effect in a Databricks Notebook environment.",
-                category=RuntimeWarning,
-            )
-
-        spark_session = _get_new_session_with_spark_config(
-            spark_config=spark_config,
-            spark_session=spark_session,
-            allow_restart=False,
-        )
     else:
-        # in a local pyspark-shell the context config cannot be updated
-        # unless you stop the Spark context and re-recreate it
-        spark_session = _get_new_session_with_spark_config(
-            spark_config=spark_config,
-            spark_session=spark_session,
-            allow_restart=True,
-        )
+        for key in spark_config.keys():
+            if spark_session.conf.isModifiable(key):
+                warnings.warn(
+                    f"Passing {key} to spark_config had no effect in this environment.",
+                    category=RuntimeWarning,
+                )
 
     return spark_session
 
