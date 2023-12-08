@@ -36,7 +36,6 @@ from great_expectations.core.evaluation_parameters import (
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
     ExpectationConfigurationSchema,
-    expectationConfigurationSchema,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -598,52 +597,6 @@ class ExpectationSuite(SerializableDictDot):
             ]
 
         return []
-
-    def replace_expectation(
-        self,
-        new_expectation_configuration: Union[ExpectationConfiguration, dict],
-        existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
-        match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
-        """
-        Find Expectations matching the given ExpectationConfiguration on the given match_type.
-        If a ge_cloud_id is provided, match_type is ignored and only Expectations with matching
-        ge_cloud_id are returned.
-
-        Args:
-            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
-                find the index of any matching Expectation Configurations on the suite.
-            match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
-                on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                 based on all configuration parameters
-            ge_cloud_id: Great Expectations Cloud id
-
-        Returns: A list of matching ExpectationConfigurations
-        """
-        if existing_expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError(
-                "Must provide either existing_expectation_configuration or ge_cloud_id"
-            )
-
-        if isinstance(new_expectation_configuration, dict):
-            new_expectation_configuration = expectationConfigurationSchema.load(
-                new_expectation_configuration
-            )
-
-        found_expectation_indexes = self.find_expectation_indexes(
-            existing_expectation_configuration, match_type, ge_cloud_id
-        )
-        if len(found_expectation_indexes) > 1:
-            raise ValueError(
-                "More than one matching expectation was found. Please be more specific with your search "
-                "criteria"
-            )
-        elif len(found_expectation_indexes) == 0:
-            raise ValueError("No matching Expectation was found.")
-
-        self.expectation_configurations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
     def patch_expectation(  # noqa: PLR0913
         self,
