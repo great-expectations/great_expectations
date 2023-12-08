@@ -384,12 +384,19 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             )
 
             if condition:
-                expectation_cls = get_expectation_impl(self._expectation_type)
-                expectation = expectation_cls(**expectation_kwargs, meta=meta)
-                return expectation.configuration
+                return self._get_config_from_expectation_kwargs(
+                    expectation_kwargs=expectation_kwargs, meta=meta
+                )
             else:
                 return None
         else:
-            expectation_cls = get_expectation_impl(self._expectation_type)
-            expectation = expectation_cls(**expectation_kwargs, meta=meta)
-            return expectation.configuration
+            return self._get_config_from_expectation_kwargs(
+                expectation_kwargs=expectation_kwargs, meta=meta
+            )
+
+    def _get_config_from_expectation_kwargs(
+        self, expectation_kwargs: dict, meta: dict
+    ) -> dict:
+        expectation_cls = get_expectation_impl(self._expectation_type)
+        expectation = expectation_cls(**expectation_kwargs, meta=meta)
+        return expectation.configuration
