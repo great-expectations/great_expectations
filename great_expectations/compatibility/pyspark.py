@@ -8,8 +8,6 @@ SPARK_NOT_IMPORTED = NotImported(
     "pyspark is not installed, please 'pip install pyspark'"
 )
 
-PY4J_NOT_IMPORTED = NotImported("py4j is not installed, please 'pip install py4j'")
-
 with warnings.catch_warnings():
     # DeprecationWarning: typing.io is deprecated, import directly from typing instead. typing.io will be removed in Python 3.12.
     warnings.simplefilter(action="ignore", category=DeprecationWarning)
@@ -97,8 +95,3 @@ try:
     from pyspark.errors import PySparkAttributeError
 except (ImportError, AttributeError):
     PySparkAttributeError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-try:
-    import py4j
-except ImportError:
-    py4j = PY4J_NOT_IMPORTED
