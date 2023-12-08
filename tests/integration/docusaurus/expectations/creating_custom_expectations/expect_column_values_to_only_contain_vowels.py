@@ -43,6 +43,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "success": True,
                     },
                     "include_in_gallery": True,
+                    "only_for": ["pandas", "spark", "sqlite", "postgresql", "mssql"],
                 },
                 {
                     "title": "negative_test",
@@ -53,6 +54,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "unexpected_index_list": [1, 2, 3, 5, 6],
                     },
                     "include_in_gallery": True,
+                    "only_for": ["pandas", "spark", "sqlite", "postgresql", "mssql"],
                 },
                 {
                     "title": "another_postive_test",
@@ -62,6 +64,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "success": True,
                     },
                     "include_in_gallery": True,
+                    "only_for": ["pandas", "spark", "sqlite", "postgresql", "mssql"],
                 },
                 {
                     "title": "another_negative_test",
@@ -72,6 +75,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "unexpected_index_list": [0, 1, 2, 3, 4, 5, 6],
                     },
                     "include_in_gallery": True,
+                    "only_for": ["pandas", "spark", "sqlite", "postgresql", "mssql"],
                 },
                 {
                     "title": "mostly_positive_test",
@@ -81,6 +85,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "success": True,
                     },
                     "include_in_gallery": True,
+                    "only_for": ["pandas", "spark", "sqlite", "postgresql", "mssql"],
                 },
                 {
                     "title": "mostly_negative_test",
@@ -90,6 +95,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "success": False,
                     },
                     "include_in_gallery": True,
+                    "only_for": ["pandas", "spark", "sqlite", "postgresql", "mssql"],
                 },
             ],
         }
@@ -110,15 +116,15 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
 if __name__ == "__main__":
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics">
     ExpectColumnValuesToOnlyContainVowels(
-        column="only_vowels"
-    ).print_diagnostic_checklist()
+        column="only_vowels",
+    ).print_diagnostic_checklist(backends=["pandas", "spark", "sqlite", "postgresql", "mssql"])
 #     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
 diagnostics = ExpectColumnValuesToOnlyContainVowels(
-    column="only_vowels"
-).run_diagnostics()
+    column="only_vowels",
+).run_diagnostics(only_consider_these_backends=["pandas", "spark", "sqlite", "postgresql", "mssql"])
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
