@@ -32,8 +32,6 @@ from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
     run_checkpoint_and_data_doc,
-    run_data_assistant_and_checkpoint,
-    run_multibatch_data_assistant_and_checkpoint,
 )
 
 if TYPE_CHECKING:
@@ -58,25 +56,6 @@ def test_run_checkpoint_and_data_doc(
     run_checkpoint_and_data_doc(
         datasource_test_data=datasource_test_data,
         include_rendered_content=include_rendered_content,
-    )
-
-
-# This is marked by the various backend used in testing in the datasource_test_data fixture.
-@pytest.mark.slow  # sql: 7s  # pandas: 4s
-def test_run_data_assistant_and_checkpoint(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
-):
-    run_data_assistant_and_checkpoint(datasource_test_data=datasource_test_data)
-
-
-# This is marked by the various backend used in testing in the multibatch_datasource_test_data fixture.
-@pytest.mark.slow  # sql: 33s  # pandas: 9s
-def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test_data):
-    """Test using data assistants to create expectation suite using multiple batches and to run checkpoint"""
-    run_multibatch_data_assistant_and_checkpoint(
-        multibatch_datasource_test_data=multibatch_datasource_test_data
     )
 
 

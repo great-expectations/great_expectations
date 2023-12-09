@@ -23,8 +23,6 @@ In this workflow, you use a <TechnicalTag tag="data_assistant" text="Data Assist
 
 As with creating Expectations interactively, you start with your Data Context.  However, you work in a Python environment, so you need to load or create your Data Context as an instantiated object.  Next, you create a Batch Request to specify the data you would like to profile with your Data Assistant.  Once you have a <TechnicalTag tag="batch_request" text="Batch Request" /> configured you will use it as the input for the run method of your Data Assistant, which can be accessed from your Data Context object.  Once the Data Assistant has run, you will be able to review the results and save the generated Expectations to an empty Expectation Suite.
 
-GX recommends using the Onboarding Data Assistant to create an Expectation Suite. See [How to create an Expectation Suite with the Onboarding Data Assistant](./data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md). After you've created the Expectation Suite, it's expected that you'll edit and update the Expectation Suite to better suit your specific use case. The Expectation Suite is not intended to be used without changes.
-
 ### Manually define Expectations
 
 Advanced users can use a manual process to create Expectations. This workflow does not require Data Assets, but it does require knowledge of the configurations available for Expectations. To create Expectations manually, see [how to create and edit expectations based on domain knowledge without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
