@@ -1180,6 +1180,25 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         return runtime_kwargs
 
+    def get_result_format(
+        self,
+        configuration: ExpectationConfiguration,
+        runtime_configuration: Optional[dict] = None,
+    ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
+        default_result_format: Optional[Any] = self._get_default_value("result_format")
+        configuration_result_format: Union[
+            Dict[str, Union[str, int, bool, List[str], None]], str
+        ] = configuration.kwargs.get("result_format", default_result_format)
+        result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration_result_format,
+            )
+        else:
+            result_format = configuration_result_format
+        return result_format
+
     @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
