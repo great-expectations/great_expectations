@@ -2709,7 +2709,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.result_format
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
 
         include_unexpected_rows: bool
         unexpected_index_column_names: int | str | list[str] | None
@@ -2965,7 +2967,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.result_format
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
@@ -3219,7 +3223,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.result_format
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
             unexpected_index_column_names = result_format.get(
