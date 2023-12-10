@@ -524,10 +524,6 @@ class Validator:
                 kwargs=expectation_kwargs,
                 meta=meta,
             )
-            expectation = expectation_impl(
-                meta=configuration.meta, **configuration.kwargs
-            )
-            configuration = expectation.configuration
 
             exception_info: ExceptionInfo
 
@@ -539,6 +535,9 @@ class Validator:
                 )
 
             try:
+                expectation = expectation_impl(
+                    meta=configuration.meta, **configuration.kwargs
+                )
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
