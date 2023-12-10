@@ -538,11 +538,12 @@ class Validator:
                 expectation = expectation_impl(
                     meta=configuration.meta, **configuration.kwargs
                 )
+                configuration = expectation.configuration
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
                     validation_result = ExpectationValidationResult(
-                        expectation_config=copy.deepcopy(expectation.configuration)
+                        expectation_config=copy.deepcopy(configuration)
                     )
                 else:
                     validation_result = expectation.validate_(
