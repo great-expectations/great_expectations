@@ -1184,25 +1184,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         return runtime_kwargs
 
-    def get_result_format(
-        self,
-        configuration: ExpectationConfiguration,
-        runtime_configuration: Optional[dict] = None,
-    ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
-        default_result_format: Optional[Any] = self._get_default_value("result_format")
-        configuration_result_format: Union[
-            Dict[str, Union[str, int, bool, List[str], None]], str
-        ] = configuration.kwargs.get("result_format", default_result_format)
-        result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration_result_format,
-            )
-        else:
-            result_format = configuration_result_format
-        return result_format
-
     @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -2713,9 +2694,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: str | dict[str, Any] = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
+        result_format = self.result_format
 
         include_unexpected_rows: bool
         unexpected_index_column_names: int | str | list[str] | None
@@ -2971,11 +2950,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[
-            Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
+        result_format = self.result_format
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
@@ -3229,9 +3204,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
+        result_format = self.result_format
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
             unexpected_index_column_names = result_format.get(
