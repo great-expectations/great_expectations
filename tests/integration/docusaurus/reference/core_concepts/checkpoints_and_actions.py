@@ -177,18 +177,13 @@ context.add_or_update_checkpoint(
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
-assert (
-    list(results.run_results.items())[0][1]["validation_result"]["results"][0][
-        "expectation_config"
-    ]["kwargs"]["max_value"]
-    == 50000
-)
-assert (
-    list(results.run_results.items())[0][1]["validation_result"]["results"][0][
-        "expectation_config"
-    ]["kwargs"]["min_value"]
-    == 1000
-)
+
+expectation_config = list(results.run_results.items())[0][1]["validation_result"][
+    "results"
+][0]["expectation_config"]
+print(expectation_config)
+assert expectation_config["kwargs"]["max_value"] == 50000
+assert expectation_config["kwargs"]["min_value"] == 1000
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults">
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml">
