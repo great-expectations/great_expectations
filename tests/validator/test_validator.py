@@ -734,7 +734,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
         kwargs={
             "column": "b",
             "mostly": 0.9,
-            "threshold": 4,
+            "threshold": 4.0,
             "double_sided": True,
         },
     )
@@ -792,7 +792,7 @@ def test_graph_validate_with_runtime_config(
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
+        kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
     try:
         # noinspection PyTypeChecker

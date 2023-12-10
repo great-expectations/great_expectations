@@ -49,7 +49,7 @@ print(validator.head())
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
-    column="congestion_surcharge", min_value=0, max_value=1000
+    column="congestion_surcharge", min_value=0.0, max_value=1000.0
 )
 # </snippet>
 
