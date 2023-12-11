@@ -611,10 +611,10 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
               column_max = metrics["column.aggregate.custom.max"]
 
               # Obtaining components needed for validation
-              min_value = self.get_success_kwargs(configuration).get("min_value")
-              strict_min = self.get_success_kwargs(configuration).get("strict_min")
-              max_value = self.get_success_kwargs(configuration).get("max_value")
-              strict_max = self.get_success_kwargs(configuration).get("strict_max")
+              min_value = self.get_success_kwargs().get("min_value")
+              strict_min = self.get_success_kwargs().get("strict_min")
+              max_value = self.get_success_kwargs().get("max_value")
+              strict_max = self.get_success_kwargs().get("strict_max")
 
               # Checking if mean lies between thresholds
               if min_value is not None:
