@@ -1428,7 +1428,7 @@ def compute_unexpected_pandas_indices(  # noqa: PLR0912
         )
     # named columns
     elif result_format.unexpected_index_column_names:
-        unexpected_index_column_names = result_format["unexpected_index_column_names"]
+        unexpected_index_column_names = result_format.unexpected_index_column_names
         unexpected_index_list = []
         unexpected_indices: List[int | str] = list(domain_records_df.index)
 

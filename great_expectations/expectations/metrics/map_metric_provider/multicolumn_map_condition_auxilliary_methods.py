@@ -82,7 +82,7 @@ def _pandas_multicolumn_map_condition_values(
     if result_format.result_format == "COMPLETE":
         return domain_values.to_dict("records")
 
-    return domain_values[: result_format["partial_unexpected_count"]].to_dict("records")
+    return domain_values[: result_format.partial_unexpected_count].to_dict("records")
 
 
 def _pandas_multicolumn_map_condition_filtered_row_count(
@@ -164,7 +164,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format.result_format != "COMPLETE":
-        query = query.limit(result_format["partial_unexpected_count"])
+        query = query.limit(result_format.partial_unexpected_count)
 
     return [val._asdict() for val in execution_engine.execute_query(query).fetchall()]
 
@@ -264,7 +264,7 @@ def _spark_multicolumn_map_condition_values(
     else:
         domain_values = (
             domain_values.select(column_selector)  # type: ignore[assignment]
-            .limit(result_format["partial_unexpected_count"])
+            .limit(result_format.partial_unexpected_count)
             .toPandas()
             .to_dict("records")
         )

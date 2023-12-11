@@ -3358,7 +3358,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         exclude_unexpected_values = False
     if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
-            : result_format["partial_unexpected_count"]
+            : result_format.partial_unexpected_count
         ]
 
     if unexpected_index_column_names is not None:
@@ -3374,7 +3374,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing
 
-    if result_format["include_unexpected_rows"]:
+    if result_format.include_unexpected_rows:
         return_obj["result"].update(
             {
                 "unexpected_rows": unexpected_rows,
@@ -3405,7 +3405,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     {"value": key, "count": value}
                     for key, value in sorted(
                         Counter(immutable_unexpected_list).most_common(
-                            result_format["partial_unexpected_count"]
+                            result_format.partial_unexpected_count
                         ),
                         key=lambda x: (-x[1], x[0]),
                     )
@@ -3422,7 +3422,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 return_obj["result"].update(
                     {
                         "partial_unexpected_index_list": unexpected_index_list[
-                            : result_format["partial_unexpected_count"]
+                            : result_format.partial_unexpected_count
                         ],
                     }
                 )

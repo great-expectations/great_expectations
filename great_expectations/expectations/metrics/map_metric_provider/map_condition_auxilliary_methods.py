@@ -138,7 +138,7 @@ def _pandas_map_condition_index(
     )
     if result_format.result_format == "COMPLETE":
         return unexpected_index_list
-    return unexpected_index_list[: result_format["partial_unexpected_count"]]
+    return unexpected_index_list[: result_format.partial_unexpected_count]
 
 
 def _pandas_map_condition_query(
@@ -253,7 +253,7 @@ def _pandas_map_condition_rows(
     if result_format.result_format == "COMPLETE":
         return df
 
-    return df.iloc[: result_format["partial_unexpected_count"]]
+    return df.iloc[: result_format.partial_unexpected_count]
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
@@ -404,7 +404,7 @@ def _sqlalchemy_map_condition_rows(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format.result_format != "COMPLETE":
-        query = query.limit(result_format["partial_unexpected_count"])
+        query = query.limit(result_format.partial_unexpected_count)
     try:
         return execution_engine.execute_query(query).fetchall()
     except sqlalchemy.OperationalError as oe:
@@ -585,7 +585,7 @@ def _sqlalchemy_map_condition_index(
     final_query: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             domain_records_as_selectable
-        ).limit(result_format["partial_unexpected_count"])
+        ).limit(result_format.partial_unexpected_count)
     )
     query_result: List[sqlalchemy.Row] = execution_engine.execute_query(
         final_query
@@ -678,7 +678,7 @@ def _spark_map_condition_rows(
     if result_format.result_format == "COMPLETE":
         return filtered.collect()
 
-    return filtered.limit(result_format["partial_unexpected_count"]).collect()
+    return filtered.limit(result_format.partial_unexpected_count).collect()
 
 
 def _spark_map_condition_index(
@@ -763,7 +763,7 @@ def _spark_map_condition_index(
             )
 
     if result_format.result_format != "COMPLETE":
-        filtered = filtered.limit(result_format["partial_unexpected_count"])
+        filtered = filtered.limit(result_format.partial_unexpected_count)
 
     # Prune the dataframe down only the columns we care about
     filtered = filtered.select(columns_to_keep)
