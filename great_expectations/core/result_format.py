@@ -16,3 +16,4 @@ class ResultFormatConfig(pydantic.BaseModel):
     unexpected_index_column_names: Optional[List[str]] = None
     include_unexpected_rows: Optional[bool] = None
     partial_unexpected_count: Optional[int] = None
+    return_unexpected_index_query: Optional[bool] = None

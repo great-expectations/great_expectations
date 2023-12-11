@@ -2316,7 +2316,7 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
                 }
             else:
                 runtime_kwargs = {
-                    "result_format": {ResultFormatConfig(result_format="COMPLETE")},
+                    "result_format": ResultFormatConfig(result_format="COMPLETE"),
                 }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
