@@ -71,6 +71,8 @@ from great_expectations.compatibility.bigquery import bigquery_types_tuple
 if TYPE_CHECKING:
     import pandas as pd
 
+    from great_expectations.core.result_format import ResultFormatConfig
+
 try:
     import teradatasqlalchemy.dialect
     import teradatasqlalchemy.types as teradatatypes
@@ -1378,7 +1380,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
 def compute_unexpected_pandas_indices(  # noqa: PLR0912
     domain_records_df: pd.DataFrame,
     expectation_domain_column_list: List[str],
-    result_format: Dict[str, Any],
+    result_format: ResultFormatConfig,
     execution_engine: PandasExecutionEngine,
     metrics: Dict[str, Any],
 ) -> List[int] | List[Dict[str, Any]]:

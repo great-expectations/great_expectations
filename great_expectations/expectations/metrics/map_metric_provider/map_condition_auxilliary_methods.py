@@ -41,6 +41,7 @@ from great_expectations.util import (
 if TYPE_CHECKING:
     import pandas as pd
 
+    from great_expectations.core.result_format import ResultFormatConfig
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -156,7 +157,7 @@ def _pandas_map_condition_query(
     Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
     to return, along with column the Expectation is run on.
     """
-    result_format: dict = metric_value_kwargs["result_format"]
+    result_format: ResultFormatConfig = metric_value_kwargs["result_format"]
 
     # We will not return map_condition_query if return_unexpected_index_query = False
     return_unexpected_index_query: Optional[
