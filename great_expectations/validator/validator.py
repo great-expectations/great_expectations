@@ -542,7 +542,7 @@ class Validator:
 
                 if not self.interactive_evaluation and not self._active_validation:
                     validation_result = ExpectationValidationResult(
-                        expectation_config=copy.deepcopy(configuration)
+                        expectation_config=copy.deepcopy(expectation.configuration)
                     )
                 else:
                     validation_result = expectation.validate_(
