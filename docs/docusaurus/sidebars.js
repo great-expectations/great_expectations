@@ -266,6 +266,38 @@ module.exports = {
             },
           ]
         },
+        {
+          type: 'category',
+          label: 'Application support policy',
+          link: { type: 'doc', id: 'contributing/application_integration_support' },
+          items: [
+            {
+              type: 'link',
+              label: 'Integrations',
+              href: '/docs/contributing/application_integration_support#integrations',
+            },
+            {
+              type: 'link',
+              label: 'GX components',
+              href: '/docs/contributing/application_integration_support#gx-components',
+            },
+            {
+              type: 'link',
+              label: 'Operating systems',
+              href: '/docs/contributing/application_integration_support#operating-systems',
+            },
+            {
+              type: 'link',
+              label: 'Python versions',
+              href: '/docs/contributing/application_integration_support#python-versions',
+            },
+            {
+              type: 'link',
+              label: 'GX versions',
+              href: '/docs/contributing/application_integration_support#gx-versions',
+            },
+          ]
+        },   
       ]
     },
     {
