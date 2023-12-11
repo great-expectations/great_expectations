@@ -54,13 +54,15 @@ class RuleOutput:
                 expectation_configuration_builders = []
 
             for expectation_configuration_builder in expectation_configuration_builders:
-                expectation_configurations.append(
+                config = (
                     expectation_configuration_builder.build_expectation_configuration(
                         domain=domain,
                         variables=self.rule_state.variables,
                         parameters=self.rule_state.parameters,
                     )
                 )
+                if config:
+                    expectation_configurations.append(config)
 
         return expectation_configurations
 

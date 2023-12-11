@@ -15,7 +15,7 @@ def test_rule_output_get_get_expectation_configurations(
     expected_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_my_validation",
+                "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "Age",
                 },
@@ -24,7 +24,7 @@ def test_rule_output_get_get_expectation_configurations(
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_my_validation",
+                "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "Date",
                 },

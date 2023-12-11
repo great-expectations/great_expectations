@@ -13,6 +13,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
+from great_expectations.expectations.core import ExpectColumnValuesToBeBetween
 
 
 @pytest.fixture
@@ -97,11 +98,12 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # create expectation suite
     suite = context.add_expectation_suite("my_expectation_suite")
-    expectation = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_between",
-        kwargs={"column": "col1", "min_value": 1, "max_value": 2},
+    expectation = ExpectColumnValuesToBeBetween(
+        column="col1",
+        min_value=1,
+        max_value=2,
     )
-    suite.legacy_add_expectation_by_configuration(expectation, send_usage_event=False)
+    suite.add(expectation=expectation)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()

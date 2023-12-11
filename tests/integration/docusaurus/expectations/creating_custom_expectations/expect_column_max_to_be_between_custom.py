@@ -137,8 +137,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     ]
     # </snippet>
 
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 
