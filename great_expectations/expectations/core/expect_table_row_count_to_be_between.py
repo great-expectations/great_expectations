@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
@@ -70,8 +70,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
     """
 
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
 
     library_metadata = {
         "maturity": "production",
@@ -85,6 +85,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     }
 
     metric_dependencies = ("table.row_count",)
+    domain_keys: ClassVar[Tuple[str, ...]] = tuple()
     success_keys = (
         "min_value",
         "max_value",

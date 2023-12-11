@@ -73,7 +73,9 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
             "expect_column_values_to_be_null",
         ]
         column = expectation.kwargs["column"]
-        assert expectation.kwargs["mostly"] == expected_results[column]["mostly"]
+        assert (
+            expectation.kwargs.get("mostly", 1.0) == expected_results[column]["mostly"]
+        )
         assert expectation.expectation_type == expected_results[column]["expectation"]
 
 
