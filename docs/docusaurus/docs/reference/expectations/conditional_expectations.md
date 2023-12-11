@@ -138,7 +138,7 @@ row_condition='col("foo") <= date("2023-03-13")'  # foo is earlier than 2023-03-
 
 Conditional Expectations are displayed differently from standard Expectations in the Data Docs. Each Conditional Expectation is qualified with *if 'row_condition_string', then values must be...* as shown in the following image:
 
-![Image](../../images/conditional_data_docs_screenshot.png)
+![Image](/docs/oss/images/conditional_data_docs_screenshot.png)
 
 If *'row_condition_string'* is a complex expression, it is split into several components to improve readability.
 

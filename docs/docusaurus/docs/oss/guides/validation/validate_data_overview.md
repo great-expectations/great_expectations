@@ -6,7 +6,7 @@ import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 
 Great Expectations recommends using Checkpoints to validate data.  Checkpoints validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally, create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  A Checkpoint can be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can create and configure additional Checkpoints for different business requirements.
 
-![How a Checkpoint works](../../images/universal_map/overviews/how_a_checkpoint_works.png)
+![How a Checkpoint works](/docs/oss/images/universal_map/overviews/how_a_checkpoint_works.png)
 
 After you've created your Checkpoint, configured it, and specified the Actions you want it to take based on the Validation Results, all you'll need to do in the future is run the Checkpoint.
 

@@ -52,7 +52,7 @@ To learn more about Validations, see [Validator](/docs/oss/terms/validator).
 
 6. Optional. Hover over a circle in the Validation timeline to view details about a specific Validation run, including the observed values.
 
-    ![Validation timeline detail](../../../static/img/view_validation_timeline_detail.png)
+    ![Validation timeline detail](/img/view_validation_timeline_detail.png)
 
-7. Optional. To hide the Validation timeline, click the **Validation timeline** (![Validation timeline icon](../../../static/img/validation_timeline.png)) icon.
+7. Optional. To hide the Validation timeline, click the **Validation timeline** (![Validation timeline icon](/img/validation_timeline.png)) icon.
 

@@ -3,7 +3,6 @@ sidebar_label: 'GX installation and configuration workflow'
 title: "Great Expectations installation and configuration workflow"
 ---
 import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
-import UniversalMap from '@site/docs/oss/images/universal_map/_universal_map.mdx';
 import GxData from '/docs/components/_data.jsx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
@@ -40,7 +39,7 @@ See [Install Great Expectations](./installation/install_gx.md).
 
 Your Data Context contains your Great Expectations project, and it is the entry point for configuring and interacting with Great Expectations. The Data Context manages various classes and helps limit the number of objects you need to manage to get Great Expectations working.
 
-![what the data context does for you](../images/overview_illustrations/data_context_does_for_you.png)
+![what the data context does for you](/docs/oss/guides/images/overview_illustrations/data_context_does_for_you.png)
 
 See [Configure Data Contexts](./configure_data_contexts_lp.md).
 

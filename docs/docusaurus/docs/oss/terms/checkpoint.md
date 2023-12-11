@@ -15,7 +15,7 @@ Like Expectation Suites and <TechnicalTag relative="../" tag="validation_result"
 
 ### Relationships to other objects
 
-![How a Checkpoint works](../images/universal_map/overviews/how_a_checkpoint_works.png)
+![How a Checkpoint works](/docs/oss/images/universal_map/overviews/how_a_checkpoint_works.png)
 
 A Checkpoint uses a <TechnicalTag relative="../" tag="validator" text="Validator" /> to run one or more Expectation Suites against one or more Batches provided by one or more <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" />. Running a Checkpoint produces Validation Results and will result in optional Actions being performed if they are configured to do so.
 

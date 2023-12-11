@@ -9,7 +9,7 @@ import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 
 The following image shows the four workflows you can follow to create <TechnicalTag tag="expectation" text="Expectations" />:
 
-![Where do Expectations come from?](../../images/universal_map/overviews/where_expectations_come_from.png)
+![Where do Expectations come from?](/docs/oss/images/universal_map/overviews/where_expectations_come_from.png)
 
 The methodology for saving and testing Expectations is the same for all workflows. GX recommends using the interactive workflow or the Data Assistant workflow to create Expectations.
 
