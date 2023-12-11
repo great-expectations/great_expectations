@@ -4,7 +4,6 @@ import datetime
 import decimal
 import json
 import logging
-import os
 import pathlib
 import re
 import sys
@@ -38,6 +37,11 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.datasource.fluent import (
+    _SparkDatasource,
+)
+
+# import of private class will be removed when deprecated methods are removed from this module
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
@@ -777,7 +781,7 @@ def get_or_create_spark_application(
     # deprecated-v1.0.0
     warnings.warn(
         "Utility method get_or_create_spark_application() is deprecated and will be removed in v1.0.0. "
-        "Please use the method great_expectations.core.get_or_create_spark_session() instead.",
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",
         category=DeprecationWarning,
     )
     if force_reuse_spark_context is not None:
@@ -789,7 +793,9 @@ def get_or_create_spark_application(
             "the spark_config, the context will be stopped and restarted with the new spark_config.",
             category=DeprecationWarning,
         )
-    return get_or_create_spark_session(spark_config=spark_config)
+    return _SparkDatasource._get_or_create_spark_session(
+        spark_config=spark_config
+    )  # type:ignore[arg-type]  # private call to be removed with this deprecated method
 
 
 def get_or_create_spark_session(
@@ -803,111 +809,17 @@ def get_or_create_spark_session(
     Returns:
         SparkSession
     """
+    # deprecated-v1.0.0
+    warnings.warn(
+        "Utility method get_or_create_spark_session() is deprecated and will be removed in v1.0.0. "
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",
+        category=DeprecationWarning,
+    )
     spark_config = spark_config or {}
 
-    spark_session: pyspark.SparkSession
-    try:
-        spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
-    except ValueError:
-        spark_session = pyspark.SparkSession.builder.getOrCreate()
-
-    return _get_session_with_spark_config(
-        spark_config=spark_config,
-        spark_session=spark_session,
+    return _SparkDatasource._get_or_create_spark_session(
+        spark_config=spark_config,  # type: ignore[arg-type]  # private call to be removed with this deprecated method
     )
-
-
-def _get_session_with_spark_config(
-    spark_session: pyspark.SparkSession,
-    spark_config: dict,
-) -> pyspark.SparkSession:
-    """Attempts to apply spark_config to a SparkSession by either:
-         1. Updating the existing SparkSession with spark_config values
-         2. Restarting the existing SparkSession and applying only spark_config
-
-      If a spark_config option was unable to be set, a warning is raised.
-
-    Args:
-        spark_session: An existing pyspark.SparkSession.
-        spark_config: A dictionary of SparkSession.Builder.config objects.
-
-    Returns:
-        SparkSession
-    """
-    stopped: bool
-    spark_session, stopped = _try_update_or_stop_misconfigured_spark_session(
-        spark_session=spark_session,
-        spark_config=spark_config,
-    )
-
-    if stopped:
-        spark_session = _start_spark_session_with_spark_config(
-            spark_session=spark_session,
-            spark_config=spark_config,
-        )
-
-    return spark_session
-
-
-def _start_spark_session_with_spark_config(
-    spark_session: pyspark.SparkSession,
-    spark_config: dict,
-) -> pyspark.SparkSession:
-    builder = spark_session.builder
-    for key, value in spark_config.items():
-        if key == "spark.app.name":
-            builder.appName(value)
-        else:
-            builder.config(key, value)
-
-    return builder.getOrCreate()
-
-
-def _session_is_not_stoppable(spark_session: pyspark.SparkSession) -> bool:
-    return isinstance(spark_session, pyspark.SparkConnectSession) or (
-        os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
-    )
-
-
-def _try_update_or_stop_misconfigured_spark_session(
-    spark_session: pyspark.SparkSession,
-    spark_config: dict,
-) -> tuple[pyspark.SparkSession, bool]:
-    stopped = False
-    warning_messages = []
-    for key, value in spark_config.items():
-        # if the user set a spark_config option that doesn't match the existing session
-        # try to update it, otherwise stop the spark session
-        try:
-            if key != "spark.app.name" and spark_session.conf.get(key) != value:
-                spark_session.conf.set(key, value)
-            elif (
-                key == "spark.app.name" and spark_session.sparkContext.appName != value
-            ):
-                spark_session.sparkContext.appName = value
-        except (pyspark.PySparkAttributeError, pyspark.AnalysisException):
-            if _session_is_not_stoppable(spark_session=spark_session):
-                warning_messages.append(
-                    f"spark_config option `{key}` is not modifiable "
-                    "and Spark Session cannot be restarted in this environment."
-                )
-            else:
-                spark_session.stop()
-                stopped = True
-                warning_messages.append(
-                    f"Spark Session was restarted, because `{key}` "
-                    "is not modifiable in this environment."
-                )
-                break
-
-    for message in warning_messages:
-        print(message)
-        warnings.warn(
-            message=message,
-            category=RuntimeWarning,
-        )
-
-    return spark_session, stopped
 
 
 def get_sql_dialect_floating_point_infinity_value(
