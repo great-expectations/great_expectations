@@ -72,7 +72,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
             include_unexpected_rows=False,
         )
     else:
-        if result_format.include_unexpected_rows and result_format.result_format:
+        if result_format.include_unexpected_rows and not result_format.result_format:
             raise ValueError(
                 "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
             )
