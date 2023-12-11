@@ -910,8 +910,6 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
             class_name: SparkDFExecutionEngine
             spark_config:
                 spark.master: local[*]
-                spark.executor.memory: 450m
-                spark.driver.memory: 6g
                 spark.sql.shuffle.partitions: 2
                 spark.default.parallelism: 4
         data_connectors:
