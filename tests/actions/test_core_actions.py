@@ -17,9 +17,9 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
+    BatchIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
-    BatchIdentifier,
 )
 from great_expectations.util import is_library_loadable
 from great_expectations.validation_operators import (
