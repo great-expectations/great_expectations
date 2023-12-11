@@ -334,7 +334,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         spark_session: pyspark.SparkSession,
     ) -> bool:
         return (
-            pyspark.SparkConnectSession
+            pyspark.SparkConnectSession  # type: ignore[truthy-function]  # returns false if module is not installed
             and isinstance(spark_session, pyspark.SparkConnectSession)
         ) or (
             os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
