@@ -11,6 +11,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core import (
     ExpectationConfiguration,
 )
+from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
@@ -365,10 +366,12 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     """
 
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            **{
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+            }
+        )
     }
 
     context = _add_expectations_and_checkpoint(
@@ -420,11 +423,13 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     """
 
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "return_unexpected_index_query": True,
-        }
+        "result_format": ResultFormatConfig(
+            **{
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+                "return_unexpected_index_query": True,
+            }
+        )
     }
 
     context = _add_expectations_and_checkpoint(
@@ -466,10 +471,12 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
     expect_column_pair_values_to_be_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            **{
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+            }
+        )
     }
 
     context = _add_expectations_and_checkpoint(
@@ -520,10 +527,12 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
     expect_column_pair_values_to_be_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            **{
+                "result_format": "SUMMARY",
+                "unexpected_index_column_names": ["pk_1"],
+            }
+        )
     }
 
     context = _add_expectations_and_checkpoint(
@@ -575,11 +584,13 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
     """
 
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "return_unexpected_index_query": True,
-        }
+        "result_format": ResultFormatConfig(
+            **{
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+                "return_unexpected_index_query": True,
+            }
+        )
     }
 
     context = _add_expectations_and_checkpoint(
@@ -636,10 +647,12 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
     expect_multicolumn_sum_to_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            **{
+                "result_format": "SUMMARY",
+                "unexpected_index_column_names": ["pk_1"],
+            }
+        )
     }
 
     context = _add_expectations_and_checkpoint(
@@ -695,11 +708,13 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     """
 
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "return_unexpected_index_query": False,
-        }
+        "result_format": ResultFormatConfig(
+            **{
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+                "return_unexpected_index_query": False,
+            }
+        )
     }
 
     context = _add_expectations_and_checkpoint(
@@ -753,10 +768,12 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         expectations_list=[expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
-    result_format: dict = {
-        "result_format": "COMPLETE",
-        "unexpected_index_column_names": ["pk_1"],
-    }
+    result_format: dict = ResultFormatConfig(
+        **{
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    )
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint", result_format=result_format
     )
@@ -799,11 +816,13 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expect_column_values_to_be_in_set],
     )
-    result_format: dict = {
-        "result_format": "COMPLETE",
-        "partial_unexpected_count": 1,
-        "unexpected_index_column_names": ["pk_1"],
-    }
+    result_format: dict = ResultFormatConfig(
+        **{
+            "result_format": "COMPLETE",
+            "partial_unexpected_count": 1,
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    )
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint", result_format=result_format
     )
@@ -844,10 +863,12 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         expectations_list=[expect_column_values_to_be_in_set],
     )
 
-    result_format: dict = {
-        "result_format": "COMPLETE",
-        "unexpected_index_column_names": ["i_dont_exist"],
-    }
+    result_format: dict = ResultFormatConfig(
+        **{
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["i_dont_exist"],
+        }
+    )
     with pytest.raises(CheckpointError) as e:
         context.run_checkpoint(
             checkpoint_name="my_checkpoint",
@@ -885,10 +906,12 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
             expect_column_values_to_not_be_in_set,
         ],
     )
-    result_format: dict = {
-        "result_format": "COMPLETE",
-        "unexpected_index_column_names": ["pk_1"],
-    }
+    result_format: dict = ResultFormatConfig(
+        **{
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    )
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint", result_format=result_format
@@ -938,12 +961,14 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         - SUMMARY output, which means we have `partial_unexpected_index_list` only
         - 1 Expectations added to suite
     """
-    dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1"],
+    dict_to_update_checkpoint: dict = ResultFormatConfig(
+        **{
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                unexpected_index_column_names=["pk_1"],
+            )
         }
-    }
+    )
     context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
@@ -983,12 +1008,14 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
         - BASIC output, which means we have no unexpected_index_list output
         - 1 Expectations added to suite
     """
-    dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "BASIC",
-            "unexpected_index_column_names": ["pk_1"],
+    dict_to_update_checkpoint: dict = ResultFormatConfig(
+        **{
+            "result_format": ResultFormatConfig(
+                result_format="BASIC",
+                unexpected_index_column_names=["pk_1"],
+            )
         }
-    }
+    )
     context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
@@ -1025,9 +1052,7 @@ def test_sql_complete_output_no_id_pk_fallback(
     expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-        }
+        "result_format": ResultFormatConfig(result_format="COMPLETE")
     }
     context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
@@ -1075,10 +1100,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 ):
     """ """
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1124,11 +1149,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 ):
     """ """
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "return_unexpected_index_query": True,
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+            return_unexpected_index_query=True,
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1174,11 +1199,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 ):
     """ """
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "return_unexpected_index_query": False,
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+            return_unexpected_index_query=False,
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1221,11 +1246,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 ):
     """ """
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "partial_unexpected_count": 1,
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+            partial_unexpected_count=1,
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1353,10 +1378,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["i_dont_exist"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["i_dont_exist"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1388,10 +1413,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1451,10 +1476,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
     expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="SUMMARY",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1568,10 +1593,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["i_dont_exist"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["i_dont_exist"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
