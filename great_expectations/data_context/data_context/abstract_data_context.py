@@ -1357,7 +1357,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
+        for datasource_name, datasource_config in self.config.datasources.items():
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(  # noqa: PLW2901
                     **datasource_config
@@ -1402,7 +1402,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             self.datasources.pop(datasource_name, None)
 
-        self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+        self.config.datasources.pop(datasource_name, None)
 
         self._save_project_config()
 
@@ -1624,6 +1624,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
         expectation_suite_id: str | None = ...,
+        expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
         validator: Validator | None = ...,
         checkpoint: None = ...,
@@ -1652,6 +1653,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         validations: None = ...,
         profilers: None = ...,
         expectation_suite_id: None = ...,
+        expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
         validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
@@ -1686,6 +1688,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
         expectation_suite_id: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
@@ -1708,6 +1711,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             default_validation_id: The default validation ID to use in generating this checkpoint.
             validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
@@ -1715,6 +1719,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
@@ -1939,7 +1947,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_time: The date/time of the run
             result_format: One of several supported formatting directives for expectation validation results
             ge_cloud_id: Great Expectations Cloud id for the checkpoint
-            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             id: Great Expectations Cloud id for the checkpoint (preferred over `ge_cloud_id`)
             expectation_suite_id: Great Expectations Cloud id for the expectation suite (preferred over `expectation_suite_ge_cloud_id`)
             **kwargs: Additional kwargs to pass to the validation operator
@@ -4225,7 +4233,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update
         # caches or config, but keeping existing behavior for now
         self.datasources[name] = datasource
-        self.config.datasources[name] = config  # type: ignore[index,assignment]
+        self.config.datasources[name] = config  # type: ignore[assignment]
 
         return datasource
 

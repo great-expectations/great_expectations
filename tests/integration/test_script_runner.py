@@ -219,13 +219,6 @@ local_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="how_to_create_an_expectation_suite_with_the_onboarding_data_assistant",
-        user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="how_to_create_an_expectation_suite_with_the_missingness_data_assistant",
         user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -266,13 +259,6 @@ fluent_datasources = [
         data_context_dir=None,
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_create_and_edit_expectations_with_a_profiler",
-        data_context_dir=None,
-        data_dir=None,
-        user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(

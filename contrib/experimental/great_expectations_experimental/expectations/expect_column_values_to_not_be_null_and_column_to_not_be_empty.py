@@ -65,8 +65,6 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -77,15 +75,15 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
         [expect_column_values_not_to_be_null](https://greatexpectations.io/expectations/expect_column_values_not_to_be_null)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
 
     library_metadata = {
         "maturity": "experimental",
@@ -328,7 +326,7 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
         mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
+            "mostly", self._get_default_value("mostly")
         )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(

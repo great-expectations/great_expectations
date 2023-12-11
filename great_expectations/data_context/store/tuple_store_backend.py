@@ -1132,7 +1132,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
-        for obj in self._container_client.list_blobs(name_starts_with=self.prefix):  # type: ignore[attr-defined]
+        for obj in self._container_client.list_blobs(name_starts_with=self.prefix):
             az_blob_key = os.path.relpath(obj.name)
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
@@ -1176,8 +1176,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             dest_blob_path = os.path.join(self.prefix, dest_blob_path)  # noqa: PTH118
 
         # azure storage sdk does not have _move method
-        source_blob = self._container_client.get_blob_client(source_blob_path)  # type: ignore[attr-defined]
-        dest_blob = self._container_client.get_blob_client(dest_blob_path)  # type: ignore[attr-defined]
+        source_blob = self._container_client.get_blob_client(source_blob_path)
+        dest_blob = self._container_client.get_blob_client(dest_blob_path)
 
         dest_blob.start_copy_from_url(source_blob.url, requires_sync=True)
         copy_properties = dest_blob.get_blob_properties().copy

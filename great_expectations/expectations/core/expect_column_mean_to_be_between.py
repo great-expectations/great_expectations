@@ -58,7 +58,6 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -83,8 +82,8 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 
@@ -107,15 +106,6 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         "strict_max",
     )
 
-    # Default values
-    default_kwarg_values = {
-        "min_value": None,
-        "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "min_value",

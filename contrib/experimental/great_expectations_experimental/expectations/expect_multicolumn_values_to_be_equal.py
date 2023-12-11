@@ -119,7 +119,6 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-
         catch_exceptions (boolean or None): If True, then catch exceptions and \
             include them as part of the result object. \
         For more detail, see [catch_exceptions]\
@@ -138,8 +137,8 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
 
     map_metric = "multicolumn_values_to_be_equal"
 
@@ -405,7 +404,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
         mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
+            "mostly", self._get_default_value("mostly")
         )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(

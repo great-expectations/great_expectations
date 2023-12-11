@@ -50,6 +50,7 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py docstring">
     """Expect a set of columns to contain multiples of three."""
+
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py map_metric">
     map_metric = "multicolumn_values.multiple_three"
@@ -94,14 +95,6 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
         "column_list",
         "mostly",
     )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1.0,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = ("column_list",)
 
     def validate_configuration(

@@ -68,7 +68,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:
-            threshold = self.default_kwarg_values["threshold"]
+            threshold = self._get_default_value("threshold")
 
         metrics = convert_to_json_serializable(data=metrics)
         holes_count: int
@@ -220,7 +220,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         super().validate_configuration(configuration)
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:
-            threshold = self.default_kwarg_values["threshold"]
+            threshold = self._get_default_value("threshold")
 
         try:
             assert isinstance(threshold, int) or isinstance(threshold, float)

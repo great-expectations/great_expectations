@@ -23,6 +23,7 @@ from typing import (
     Dict,
     Final,
     List,
+    Literal,
     Optional,
     Sequence,
     Set,
@@ -78,7 +79,6 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.result_format import ResultFormat, ResultFormatDict
-from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -136,7 +136,6 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.render.renderer_configuration import MetaNotes
-    from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -271,8 +270,6 @@ class MetaExpectation(ModelMetaclass):
     attribute, or, if that is not set, by snake-casing the name of the class.
     """
 
-    default_kwarg_values: Dict[str, object] = {}
-
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
         # noinspection PyUnresolvedReferences
@@ -284,14 +281,6 @@ class MetaExpectation(ModelMetaclass):
 
         # noinspection PyUnresolvedReferences
         newclass._register_renderer_functions()
-        default_kwarg_values = {}
-        for base in reversed(bases):
-            default_kwargs = getattr(base, "default_kwarg_values", {})
-            default_kwarg_values = nested_update(default_kwarg_values, default_kwargs)
-
-        newclass.default_kwarg_values = nested_update(
-            default_kwarg_values, attrs.get("default_kwarg_values", {})
-        )
         return newclass
 
 
@@ -308,12 +297,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     In some cases, subclasses of Expectation (such as BatchExpectation) can
     inherit these properties from their parent class.
 
-    They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
+    They *may* optionally override `runtime_keys`, and
     may optionally set an explicit value for expectation_type.
-        1. runtime_keys lists the keys that can be used to control output but will
-           not affect the actual success value of the expectation (such as result_format).
-        2. default_kwarg_values is a dictionary that will be used to fill unspecified
-           kwargs from the Expectation Configuration.
+    runtime_keys lists the keys that can be used to control output but will
+    not affect the actual success value of the expectation (such as result_format).
 
     Expectation classes *must* implement the following:
         1. `_validate`
@@ -330,12 +317,15 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     class Config:
         arbitrary_types_allowed = True
+        smart_union = True
         extra = pydantic.Extra.allow
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
     notes: Union[str, None] = None
     result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
+
+    catch_exceptions: bool = False
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
@@ -344,47 +334,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values: ClassVar[
-        dict[str, Union[bool, str, float, RuleBasedProfilerConfig, None]]
-    ] = {
-        "catch_exceptions": False,
-        "result_format": ResultFormat.BASIC,
-    }
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
-
-    def __init__(
-        self,
-        id: str | None = None,
-        meta: dict | None = None,
-        result_format: ResultFormat | ResultFormatDict = ResultFormat.BASIC,
-        **kwargs,
-    ) -> None:
-        # Safety precaution to prevent old-style instantiation
-        if "configuration" in kwargs:
-            raise ValueError(
-                "Cannot directly pass configuration into Expectation constructor; please pass in individual success keys and domain kwargs."
-            )
-
-        super().__init__(id=id, meta=meta, result_format=result_format, **kwargs)
-
-        # Add back result format for configuration validation
-        kwargs["result_format"] = result_format
-
-        # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
-        configuration = ExpectationConfiguration(
-            expectation_type=camel_to_snake(self.__class__.__name__),
-            kwargs=kwargs,
-            meta=meta,
-            ge_cloud_id=id,
-        )
-        self.validate_configuration(configuration)
-
-        # Currently only used in Validator.validate_expectation
-        # Once the V1 Validator is live, we can remove this and its related property
-        self._configuration = configuration
 
     @classmethod
     def is_abstract(cls) -> bool:
@@ -1163,11 +1116,22 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             metric_configurations={}, result_format=result_format
         )
 
+    def _get_default_value(self, key: str) -> Any:
+        field = self.__fields__.get(key)
+
+        if field is not None:
+            return field.default if not field.required else None
+        else:
+            logger.warning(
+                f"_get_default_value called with key {key}, but it is not a known field"
+            )
+            return None
+
     def get_domain_kwargs(
         self, configuration: ExpectationConfiguration
     ) -> Dict[str, Optional[str]]:
         domain_kwargs: Dict[str, Optional[str]] = {
-            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.domain_keys
         }
         missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(
@@ -1196,7 +1160,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             configuration=configuration
         )
         success_kwargs: Dict[str, Any] = {
-            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.success_keys
         }
         success_kwargs.update(domain_kwargs)
@@ -1217,7 +1181,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         success_kwargs = self.get_success_kwargs(configuration=configuration)
         runtime_kwargs = {
-            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.runtime_keys
         }
         runtime_kwargs.update(success_kwargs)
@@ -1233,9 +1197,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
-        default_result_format: Optional[Any] = self.default_kwarg_values.get(
-            "result_format"
-        )
+        default_result_format: Optional[Any] = self._get_default_value("result_format")
         configuration_result_format: Union[
             Dict[str, Union[str, int, bool, List[str], None]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
@@ -1305,7 +1267,15 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @property
     def configuration(self) -> ExpectationConfiguration:
-        return self._configuration
+        kwargs = self.dict(exclude_defaults=True)
+        meta = kwargs.pop("meta", None)
+        id = kwargs.pop("id", None)
+        return ExpectationConfiguration(
+            expectation_type=camel_to_snake(self.__class__.__name__),
+            kwargs=kwargs,
+            meta=meta,
+            ge_cloud_id=id,
+        )
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913
@@ -2408,6 +2378,18 @@ representation."""
 representation."""
                     )
 
+        if isinstance(min_value, datetime.datetime) or isinstance(
+            max_value, datetime.datetime
+        ):
+            if not isinstance(metric_value, datetime.datetime):
+                try:
+                    metric_value = parse(metric_value)
+                except TypeError:
+                    raise ValueError(
+                        f"""Could not parse "metric_value" of {metric_value} (of type "{type(metric_value)!s}) into datetime \
+representation."""
+                    )
+
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
@@ -2444,7 +2426,7 @@ class QueryExpectation(BatchExpectation, ABC):
 
     2. Data Docs rendering methods decorated with the @renderer decorator.
 
-    QueryExpectations may optionally define a `query` attribute, and specify that query as a default in `default_kwarg_values`.
+    QueryExpectations may optionally define a `query` attribute
 
     Doing so precludes the need to pass a query into the Expectation. This default will be overridden if a query is passed in.
 
@@ -2455,22 +2437,12 @@ class QueryExpectation(BatchExpectation, ABC):
             the expectation.
         runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
             not affect the actual success value of the expectation (such as result_format).
-        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-            kwargs from the Expectation Configuration.
         query (optional[str]): Optional. A SQL or Spark-SQL query to be executed. If not provided, a query must be passed
             into the QueryExpectation.
 
     --Documentation--
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
     """
-
-    default_kwarg_values: ClassVar[Dict] = {
-        "result_format": ResultFormat.BASIC,
-        "catch_exceptions": False,
-        "meta": None,
-        "row_condition": None,
-        "condition_parser": None,
-    }
 
     domain_keys: ClassVar[Tuple] = (
         "batch_id",
@@ -2497,10 +2469,10 @@ class QueryExpectation(BatchExpectation, ABC):
 
         query: Optional[Any] = configuration.kwargs.get(
             "query"
-        ) or self.default_kwarg_values.get("query")
+        ) or self._get_default_value("query")
         row_condition: Optional[Any] = configuration.kwargs.get(
             "row_condition"
-        ) or self.default_kwarg_values.get("row_condition")
+        ) or self._get_default_value("row_condition")
 
         try:
             assert (
@@ -2554,8 +2526,6 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
          expectation.
      success_keys (tuple): A tuple of the keys used to determine the success of
          the expectation.
-     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-         kwargs from the Expectation Configuration.
 
          - A  "column" key is required for column expectations.
 
@@ -2591,11 +2561,11 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             expectation.
         success_keys (tuple): A tuple of the keys used to determine the success of
             the expectation.
-        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-            kwargs from the Expectation Configuration.
     """
 
     column: str
+
+    catch_exceptions: bool = True
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -2607,13 +2577,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": ResultFormat.BASIC,
-        "catch_exceptions": True,
-    }
 
     @classmethod
     @override
@@ -2817,9 +2780,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 nonnull_count,
                 unexpected_count,
-                self.get_success_kwargs().get(
-                    "mostly", self.default_kwarg_values.get("mostly")
-                ),
+                self.get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
@@ -2859,12 +2820,12 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             expectation.
         success_keys (tuple): A tuple of the keys used to determine the success of
             the expectation.
-        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-            kwargs from the Expectation Configuration.
     """
 
     column_A: str
     column_B: str
+
+    catch_exceptions: bool = True
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
@@ -2877,13 +2838,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     )
     domain_type = MetricDomainTypes.COLUMN_PAIR
     success_keys = ("mostly",)
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": ResultFormat.BASIC,
-        "catch_exceptions": True,
-    }
 
     @classmethod
     @override
@@ -3073,9 +3027,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get(
-                    "mostly", self.default_kwarg_values.get("mostly")
-                ),
+                self.get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
@@ -3115,11 +3067,14 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             expectation.
         success_keys (tuple): A tuple of the keys used to determine the success of
             the expectation.
-        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-            kwargs from the Expectation Configuration.
     """
 
     column_list: List[str]
+
+    ignore_row_if: Literal[
+        "all_values_are_missing", "any_value_is_missing", "never"
+    ] = "all_values_are_missing"
+    catch_exceptions: bool = True
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
@@ -3132,14 +3087,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type = MetricDomainTypes.MULTICOLUMN
     success_keys = ("mostly",)
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "ignore_row_if": "all_values_are_missing",
-        "result_format": ResultFormat.BASIC,
-        "catch_exceptions": True,
-    }
 
     @classmethod
     @override
@@ -3336,9 +3283,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get(
-                    "mostly", self.default_kwarg_values.get("mostly")
-                ),
+                self.get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(

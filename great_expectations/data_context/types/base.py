@@ -2369,7 +2369,7 @@ class DataContextConfig(BaseYamlConfig):
 
         self._config_version = config_version
         if datasources is None:
-            datasources = {}  # type: ignore[assignment]
+            datasources = {}
         self.batch_configs = batch_configs or {}
         self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
