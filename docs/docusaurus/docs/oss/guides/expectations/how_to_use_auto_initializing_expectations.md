@@ -18,7 +18,7 @@ The following scripts are used in this topic and are available in GitHub:
 
 ## Prerequisites
 
-- Completion of the [Quickstart guide](/docs/oss/tutorials/quickstart/quickstart)
+- Completion of the [Quickstart guide](/docs/oss/tutorials/quickstart)
 - [A configured Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 - [A configured Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp)
 - [An understanding of how to configure a BatchRequest](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)

@@ -12,7 +12,7 @@ The following are some recommendations for resolving issues on your own. Resolvi
 
 ### Search the GX documentation
 
-Search the docs you're using currently for an answer to your issue or question. If you're new to GX OSS, try the [Quickstart](/docs/oss/tutorialsquickstart/quickstart.md) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](/docs/oss/tutorials/getting_started/how_to_use_great_expectations_in_databricks), or [Get started with Great Expectations and SQL](/docs/oss/tutorials/getting_started/how_to_use_great_expectations_with_sql).  
+Search the docs you're using currently for an answer to your issue or question. If you're new to GX OSS, try the [Quickstart](/docs/oss/tutorials/quickstart) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](/docs/oss/tutorials/getting_started/how_to_use_great_expectations_in_databricks), or [Get started with Great Expectations and SQL](/docs/oss/tutorials/getting_started/how_to_use_great_expectations_with_sql).  
 
 ### Search with your favorite search engine
 

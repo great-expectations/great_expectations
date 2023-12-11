@@ -14,7 +14,7 @@ Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="va
 ## Prerequisites
 
 - [A Great Expectations instance](/docs/oss/guides/setup/setup_overview)
-- Completion of the [Quickstart](/docs/oss/tutorials/quickstart/quickstart)
+- Completion of the [Quickstart](/docs/oss/tutorials/quickstart)
 - [A configured Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 ## Add a MetricStore

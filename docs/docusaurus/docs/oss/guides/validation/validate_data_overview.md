@@ -12,7 +12,7 @@ After you've created your Checkpoint, configured it, and specified the Actions y
 
 ## Prerequisites
 
-- Completion of the [Quickstart guide](/docs/oss/tutorials/quickstart/quickstart)
+- Completion of the [Quickstart guide](/docs/oss/tutorials/quickstart)
 
 ## Create a Checkpoint
 
