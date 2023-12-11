@@ -318,12 +318,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     class Config:
         arbitrary_types_allowed = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic.Extra.forbid
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
     notes: Union[str, None] = None
-    result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
+    result_format: Union[ResultFormat, ResultFormatDict, Any] = ResultFormat.BASIC
 
     catch_exceptions: bool = False
 
