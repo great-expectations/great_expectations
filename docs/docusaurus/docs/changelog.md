@@ -12,7 +12,7 @@ title: Changelog
 
 ### 0.18.4
 * [BUGFIX] 0.18.4 - Fix Snowflake error when using alternative connection details format. ([#9056](https://github.com/great-expectations/great_expectations/pull/9056))
-* [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068))
+* [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068) via [#9061](https://github.com/great-expectations/great_expectations/pull/9061)) (thanks @matveykortsev)
 * [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
 
 ### 0.18.3
