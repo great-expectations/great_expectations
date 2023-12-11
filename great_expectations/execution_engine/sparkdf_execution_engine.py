@@ -207,7 +207,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self._persist = persist
 
         spark_config = spark_config or {}
-        self.spark = pyspark.SparkSession
+        self.spark: pyspark.SparkSession
         if spark and not spark_config:
             self.spark = spark
         else:
