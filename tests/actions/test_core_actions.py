@@ -12,12 +12,14 @@ from great_expectations.checkpoint.actions import (
 )
 from great_expectations.checkpoint.util import smtplib
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult, )
+    ExpectationSuiteValidationResult,
+)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier, BatchIdentifier,
+    ValidationResultIdentifier,
+    BatchIdentifier,
 )
 from great_expectations.util import is_library_loadable
 from great_expectations.validation_operators import (
@@ -100,8 +102,8 @@ def test_StoreAction():
     stored_identifier = fake_in_memory_store.list_keys()[0]
     assert stored_identifier.batch_identifier == "1234"
     assert (
-            stored_identifier.expectation_suite_identifier.expectation_suite_name
-            == "default_expectations"
+        stored_identifier.expectation_suite_identifier.expectation_suite_name
+        == "default_expectations"
     )
     assert stored_identifier.run_id == expected_run_id
 
@@ -119,9 +121,9 @@ def test_StoreAction():
 @pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockSlackResponse(200))
 def test_SlackNotificationAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id,
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
 ):
     renderer = {
         "module_name": "great_expectations.render.renderer.slack_renderer",
@@ -164,9 +166,11 @@ def test_SlackNotificationAction(
     # test for long text message - should be split into multiple messages
     validation_result_suite.success = False
     long_text = "a" * 10000
-    validation_result_suite.meta = {"active_batch_definition": BatchIdentifier(
-        batch_identifier="1234", data_asset_name=long_text
-    ), }
+    validation_result_suite.meta = {
+        "active_batch_definition": BatchIdentifier(
+            batch_identifier="1234", data_asset_name=long_text
+        ),
+    }
 
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
@@ -256,9 +260,9 @@ def test_SlackNotificationAction(
 )
 @mock.patch("pypd.EventV2")
 def test_PagerdutyAlertAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id,
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
 ):
     api_key = "test"
     routing_key = "test"
@@ -290,9 +294,9 @@ def test_PagerdutyAlertAction(
 
 @pytest.mark.big
 def test_OpsgenieAlertAction(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id,
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
 ):
     renderer = {
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
@@ -329,9 +333,9 @@ def test_OpsgenieAlertAction(
 @pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(200))
 def test_MicrosoftTeamsNotificationAction_good_request(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_extended_id,
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_extended_id,
 ):
     renderer = {
         "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
@@ -348,12 +352,12 @@ def test_MicrosoftTeamsNotificationAction_good_request(
 
     # validation_result_suite is None
     assert (
-            teams_action.run(
-                validation_result_suite_identifier=validation_result_suite_extended_id,
-                validation_result_suite=None,
-                data_asset=None,
-            )
-            is None
+        teams_action.run(
+            validation_result_suite_identifier=validation_result_suite_extended_id,
+            validation_result_suite=None,
+            data_asset=None,
+        )
+        is None
     )
 
     # if validation_result_suite_identifier is not ValidationResultIdentifier
@@ -369,8 +373,8 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite=validation_result_suite,
         data_asset=None,
     ) == {
-               "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-           }
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
 
     # notify_on = success will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = True
@@ -401,8 +405,8 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite=validation_result_suite,
         data_asset=None,
     ) == {
-               "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-           }
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
 
     # notify_on failure will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = False
@@ -419,8 +423,8 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite=validation_result_suite,
         data_asset=None,
     ) == {
-               "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-           }
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
 
     validation_result_suite.success = True
     notify_on = "failure"
@@ -440,10 +444,10 @@ def test_MicrosoftTeamsNotificationAction_good_request(
 @pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(400))
 def test_MicrosoftTeamsNotificationAction_bad_request(
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_extended_id,
-        caplog,
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_extended_id,
+    caplog,
 ):
     caplog.set_level(logging.WARNING)
     renderer = {
@@ -498,9 +502,9 @@ class MockSMTPServer:
 
 @pytest.mark.parametrize(
     (
-            "class_to_patch,use_tls,use_ssl,raise_on,exception,expected,"
-            "data_context_parameterized_expectation_suite,"
-            "validation_result_suite,validation_result_suite_id"
+        "class_to_patch,use_tls,use_ssl,raise_on,exception,expected,"
+        "data_context_parameterized_expectation_suite,"
+        "validation_result_suite,validation_result_suite_id"
     ),
     [
         ("SMTP", False, False, None, None, "success", None, None, None),
@@ -508,37 +512,37 @@ class MockSMTPServer:
         ("SMTP", False, False, None, None, "success", None, None, None),
         ("SMTP_SSL", False, True, None, None, "success", None, None, None),
         (
-                "SMTP_SSL",
-                False,
-                True,
-                "__init__",
-                smtplib.SMTPConnectError(421, "Can't connect"),
-                None,
-                None,
-                None,
-                None,
+            "SMTP_SSL",
+            False,
+            True,
+            "__init__",
+            smtplib.SMTPConnectError(421, "Can't connect"),
+            None,
+            None,
+            None,
+            None,
         ),
         (
-                "SMTP",
-                True,
-                False,
-                "starttls",
-                smtplib.SMTPConnectError(421, "Can't connect"),
-                None,
-                None,
-                None,
-                None,
+            "SMTP",
+            True,
+            False,
+            "starttls",
+            smtplib.SMTPConnectError(421, "Can't connect"),
+            None,
+            None,
+            None,
+            None,
         ),
         (
-                "SMTP",
-                True,
-                False,
-                "login",
-                smtplib.SMTPAuthenticationError(534, "Can't authenticate"),
-                None,
-                None,
-                None,
-                None,
+            "SMTP",
+            True,
+            False,
+            "login",
+            smtplib.SMTPAuthenticationError(534, "Can't authenticate"),
+            None,
+            None,
+            None,
+            None,
         ),
     ],
     indirect=[
@@ -550,20 +554,20 @@ class MockSMTPServer:
 )
 @pytest.mark.big
 def test_EmailAction(
-        class_to_patch,
-        use_tls,
-        use_ssl,
-        raise_on,
-        exception,
-        expected,
-        data_context_parameterized_expectation_suite,
-        validation_result_suite,
-        validation_result_suite_id,
+    class_to_patch,
+    use_tls,
+    use_ssl,
+    raise_on,
+    exception,
+    expected,
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
 ):
     with mock.patch.object(
-            smtplib,
-            class_to_patch,
-            new=MockSMTPServer(raise_on=raise_on, exception=exception),
+        smtplib,
+        class_to_patch,
+        new=MockSMTPServer(raise_on=raise_on, exception=exception),
     ):
         renderer = {
             "module_name": "great_expectations.render.renderer.email_renderer",
@@ -614,10 +618,10 @@ def test_api_action_create_payload():
 @pytest.mark.big
 @mock.patch("great_expectations.checkpoint.actions.requests")
 def test_api_action_run(
-        mock_requests,
-        validation_result_suite,
-        validation_result_suite_id,
-        data_context_simple_expectation_suite,
+    mock_requests,
+    validation_result_suite,
+    validation_result_suite_id,
+    data_context_simple_expectation_suite,
 ):
     mock_response = mock.MagicMock()
     mock_response.status_code = 200
@@ -672,11 +676,11 @@ def test_api_action_run(
 
 @pytest.mark.cloud
 def test_cloud_sns_notification_action(
-        sns,
-        validation_result_suite,
-        cloud_data_context_with_datasource_pandas_engine,
-        validation_result_suite_id,
-        aws_credentials,
+    sns,
+    validation_result_suite,
+    cloud_data_context_with_datasource_pandas_engine,
+    validation_result_suite_id,
+    aws_credentials,
 ):
     subj_topic = "test-subj"
     created_subj = sns.create_topic(Name=subj_topic)
