@@ -10,6 +10,7 @@ import pandas as pd
 
 import great_expectations as gx
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 # Required by pyarrow>=2.0.0 within Spark to suppress UserWarning
 os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
@@ -20,7 +21,7 @@ if is_version_greater_or_equal(pd.__version__, "2.0.0"):
 
 context = gx.get_context()
 
-spark = gx.core.util.get_or_create_spark_session()
+spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py datasource">

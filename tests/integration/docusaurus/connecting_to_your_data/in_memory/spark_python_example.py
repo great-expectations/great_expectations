@@ -6,11 +6,12 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 yaml = YAMLHandler()
 
 # Set up a basic spark session
-spark = gx.core.util.get_or_create_spark_session()
+spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # basic dataframe
 data = [

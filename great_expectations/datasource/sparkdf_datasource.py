@@ -4,10 +4,10 @@ import uuid
 
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import Batch, BatchMarkers
-from great_expectations.core.util import get_or_create_spark_session
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource.datasource import LegacyDatasource
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 
@@ -144,7 +144,7 @@ class SparkDFDatasource(LegacyDatasource):
             **configuration_with_defaults,
         )
 
-        spark = get_or_create_spark_session(
+        spark = SparkDFExecutionEngine.get_or_create_spark_session(
             spark_config=spark_config or {},
         )
         self.spark = spark

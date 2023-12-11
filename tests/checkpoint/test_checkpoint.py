@@ -23,7 +23,6 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.core.util import get_or_create_spark_session
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
@@ -35,6 +34,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
@@ -3497,7 +3497,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = get_or_create_spark_session().createDataFrame(pandas_df)
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
+        pandas_df
+    )
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -3628,7 +3630,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = get_or_create_spark_session().createDataFrame(pandas_df)
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
+        pandas_df
+    )
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
