@@ -4,26 +4,20 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-import json
-from scipy import stats
+import re
 from typing import Optional
 
+from persiantools.jdatetime import JalaliDate
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-
-import re
-from persiantools.jdatetime import JalaliDate
-import datetime
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
@@ -60,7 +54,7 @@ class ColumnValuesNotJalaliAgeOutliers(ColumnMapMetricProvider):
                 birth_date = JalaliDate(int(year), int(month), int(day))
             except:
                 return None
-            age = int((today - birth_date).days/365)
+            age = int((today - birth_date).days / 365)
             return age if min < age < max else None
 
         # a true jalali input with all digits
@@ -80,7 +74,7 @@ class ColumnValuesNotJalaliAgeOutliers(ColumnMapMetricProvider):
                 birth_date = JalaliDate(int(year), int(month), int(day))
             except:
                 return None
-            age = int((today - birth_date).days/365)
+            age = int((today - birth_date).days / 365)
             return age if min < age < max else None
 
         # regex to find problems
@@ -96,14 +90,14 @@ class ColumnValuesNotJalaliAgeOutliers(ColumnMapMetricProvider):
             if re.search(month_reg, jalali_date):
                 index = re.search(month_reg, jalali_date).span()
                 temp = list(jalali_date)
-                temp.insert(index[0]+1, '0')
+                temp.insert(index[0] + 1, "0")
                 jalali_date = "".join(temp)
 
             # correct day
             if re.search(day_reg, jalali_date):
                 index = re.search(day_reg, jalali_date).span()
                 temp = list(jalali_date)
-                temp.insert(index[0]+1, '0')
+                temp.insert(index[0] + 1, "0")
                 jalali_date = "".join(temp)
 
             year = jalali_date[0:4]
@@ -121,7 +115,7 @@ class ColumnValuesNotJalaliAgeOutliers(ColumnMapMetricProvider):
                 birth_date = JalaliDate(int(year), int(month), int(day))
             except:
                 return None
-            age = int((today - birth_date).days/365)
+            age = int((today - birth_date).days / 365)
             return age if min < age < max else None
 
         return None
@@ -143,15 +137,27 @@ class ExpectColumnValuesToNotBeJalaliAgeOutliers(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "all_good": ["1401/01/01", "1395-03-1", "1342/08/5", "1365-7-9", "1376-11-23"],
-                "some_not_good": ["1401/12/26", "139-01-1", "13/08/15", "13656-07-19", "1376*11-23"],
+                "all_good": [
+                    "1401/01/01",
+                    "1395-03-1",
+                    "1342/08/5",
+                    "1365-7-9",
+                    "1376-11-23",
+                ],
+                "some_not_good": [
+                    "1401/12/26",
+                    "139-01-1",
+                    "13/08/15",
+                    "13656-07-19",
+                    "1376*11-23",
+                ],
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "all_good", 'lower_bound': 0, 'upper_bound': 120},
+                    "in": {"column": "all_good", "lower_bound": 0, "upper_bound": 120},
                     "out": {
                         "success": True,
                     },
@@ -160,7 +166,11 @@ class ExpectColumnValuesToNotBeJalaliAgeOutliers(ColumnMapExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "some_not_good", 'lower_bound': 100, 'upper_bound': 200},
+                    "in": {
+                        "column": "some_not_good",
+                        "lower_bound": 100,
+                        "upper_bound": 200,
+                    },
                     "out": {
                         "success": False,
                     },
@@ -214,7 +224,7 @@ class ExpectColumnValuesToNotBeJalaliAgeOutliers(ColumnMapExpectation):
             #         "experimental"
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
-            '@mortezahajipourworks',
+            "@mortezahajipourworks",
         ],
         "package": "experimental_expectations",
     }
