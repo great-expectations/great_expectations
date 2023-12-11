@@ -297,4 +297,6 @@ checkpoint = context.add_or_update_checkpoint(
 checkpoint_result = checkpoint.run()
 # </snippet>
 
-assert checkpoint_result.success is True
+assert (
+    checkpoint_result.success is True
+), f"Checkpoint did not pass: {checkpoint_result}"
