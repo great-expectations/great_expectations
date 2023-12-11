@@ -1065,7 +1065,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         result_format = parse_result_format(
             runtime_configuration.get("result_format", {})
         )
-        if result_format.get("result_format") == ResultFormat.BOOLEAN_ONLY:
+        if result_format.result_format == ResultFormat.BOOLEAN_ONLY:
             if isinstance(expectation_validation_result, ExpectationValidationResult):
                 expectation_validation_result.result = {}
             else:
@@ -2649,12 +2649,12 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        result_format_str: Optional[str] = validation_dependencies.result_format.get(
-            "result_format"
-        )
+        result_format_str: Optional[
+            str
+        ] = validation_dependencies.result_format.result_format
         include_unexpected_rows: Optional[
             bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        ] = validation_dependencies.result_format.include_unexpected_rows
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -2734,13 +2734,11 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         include_unexpected_rows: bool
         unexpected_index_column_names: int | str | list[str] | None
-        if isinstance(result_format, dict):
-            include_unexpected_rows = result_format.get(
-                "include_unexpected_rows", False
-            )
-            unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names", None
-            )
+        if isinstance(result_format, ResultFormatConfig):
+            include_unexpected_rows = result_format.include_unexpected_rows
+            if include_unexpected_rows is None:
+                include_unexpected_rows = False
+            unexpected_index_column_names = result_format.unexpected_index_column_names
         else:
             include_unexpected_rows = False
             unexpected_index_column_names = None
@@ -2908,12 +2906,12 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        result_format_str: Optional[str] = validation_dependencies.result_format.get(
-            "result_format"
-        )
+        result_format_str: Optional[
+            str
+        ] = validation_dependencies.result_format.result_format
         include_unexpected_rows: Optional[
             bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        ] = validation_dependencies.result_format.include_unexpected_rows
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -2993,10 +2991,8 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         )
 
         unexpected_index_column_names = None
-        if isinstance(result_format, dict):
-            unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names", None
-            )
+        if isinstance(result_format, ResultFormatConfig):
+            unexpected_index_column_names = result_format.unexpected_index_column_names
         total_count: Optional[int] = metrics.get("table.row_count")
         unexpected_count: Optional[int] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -3159,12 +3155,12 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        result_format_str: Optional[str] = validation_dependencies.result_format.get(
-            "result_format"
-        )
+        result_format_str: Optional[
+            str
+        ] = validation_dependencies.result_format.result_format
         include_unexpected_rows: Optional[
             bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        ] = validation_dependencies.result_format.include_unexpected_rows
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -3248,10 +3244,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
         unexpected_index_column_names = None
-        if isinstance(result_format, dict):
-            unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names", None
-            )
+        if isinstance(result_format, ResultFormatConfig):
+            unexpected_index_column_names = result_format.unexpected_index_column_names
 
         total_count: Optional[int] = metrics.get("table.row_count")
         unexpected_count: Optional[int] = metrics.get(
@@ -3328,7 +3322,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     # Incrementally add to result and return when all values for the specified level are present
     return_obj: Dict[str, Any] = {"success": success}
 
-    if result_format["result_format"] == ResultFormat.BOOLEAN_ONLY:
+    if result_format.result_format == ResultFormat.BOOLEAN_ONLY:
         return return_obj
 
     skip_missing = False
@@ -3359,7 +3353,9 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         "unexpected_percent": unexpected_percent_nonmissing,
     }
 
-    exclude_unexpected_values = result_format.get("exclude_unexpected_values", False)
+    exclude_unexpected_values = result_format.exclude_unexpected_values
+    if exclude_unexpected_values is None:
+        exclude_unexpected_values = False
     if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
@@ -3385,7 +3381,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
             }
         )
 
-    if result_format["result_format"] == ResultFormat.BASIC:
+    if result_format.result_format == ResultFormat.BASIC:
         return return_obj
 
     if unexpected_list is not None and not exclude_unexpected_values:
@@ -3400,9 +3396,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
             immutable_unexpected_list = unexpected_list
 
     # Try to return the most common values, if possible.
-    partial_unexpected_count: Optional[int] = result_format.get(
-        "partial_unexpected_count"
-    )
+    partial_unexpected_count: Optional[int] = result_format.partial_unexpected_count
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
     if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
@@ -3433,7 +3427,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     }
                 )
 
-    if result_format["result_format"] == ResultFormat.SUMMARY:
+    if result_format.result_format == ResultFormat.SUMMARY:
         return return_obj
 
     if unexpected_list is not None and not exclude_unexpected_values:
@@ -3442,7 +3436,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
     if unexpected_index_query is not None:
         return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
-    if result_format["result_format"] == ResultFormat.COMPLETE:
+    if result_format.result_format == ResultFormat.COMPLETE:
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")

@@ -91,7 +91,7 @@ def _pandas_column_pair_map_condition_values(
             domain_values[column_A_name].values, domain_values[column_B_name].values
         )
     ]
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         return unexpected_list
 
     return unexpected_list[: result_format["partial_unexpected_count"]]
@@ -171,7 +171,7 @@ def _sqlalchemy_column_pair_map_condition_values(
         query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
-    if result_format["result_format"] != "COMPLETE":
+    if result_format.result_format != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
 
     unexpected_list = [
@@ -248,7 +248,7 @@ def _spark_column_pair_map_condition_values(
     )
 
     result_format = metric_value_kwargs["result_format"]
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         rows = filtered.select(
             [
                 F.col(column_A_name).alias(column_A_name),

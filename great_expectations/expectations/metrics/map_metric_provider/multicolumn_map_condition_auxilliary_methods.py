@@ -79,7 +79,7 @@ def _pandas_multicolumn_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         return domain_values.to_dict("records")
 
     return domain_values[: result_format["partial_unexpected_count"]].to_dict("records")
@@ -163,7 +163,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
         query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
-    if result_format["result_format"] != "COMPLETE":
+    if result_format.result_format != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
 
     return [val._asdict() for val in execution_engine.execute_query(query).fetchall()]
@@ -257,7 +257,7 @@ def _spark_multicolumn_map_condition_values(
     domain_values = filtered.select(column_selector)
 
     result_format = metric_value_kwargs["result_format"]
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         domain_values = (
             domain_values.select(column_selector).toPandas().to_dict("records")  # type: ignore[assignment]
         )
