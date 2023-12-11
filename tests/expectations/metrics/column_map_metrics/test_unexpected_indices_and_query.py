@@ -7,6 +7,7 @@ from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
+from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -52,13 +53,13 @@ def metric_value_kwargs_complete() -> dict:
     return {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-            "exclude_unexpected_values": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+            exclude_unexpected_values=False,
+        ),
     }
 
 
@@ -116,11 +117,11 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
 
     engine: PandasExecutionEngine = build_pandas_engine(df=df)
@@ -154,12 +155,12 @@ def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-            "exclude_unexpected_values": True,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+            exclude_unexpected_values=True,
+        ),
     }
 
     engine: PandasExecutionEngine = build_pandas_engine(df=df)
@@ -226,13 +227,13 @@ def test_pd_unexpected_index_list_metric_with_id_pk_without_column_values(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-            "exclude_unexpected_values": True,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+            exclude_unexpected_values=True,
+        ),
     }
 
     engine: PandasExecutionEngine = build_pandas_engine(df=df)
@@ -302,13 +303,13 @@ def test_sa_unexpected_index_list_metric_with_id_pk_without_column_values(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-            "exclude_unexpected_values": True,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+            exclude_unexpected_values=True,
+        ),
     }
 
     engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
@@ -342,11 +343,11 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
 
     engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
@@ -379,12 +380,12 @@ def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-            "exclude_unexpected_values": True,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+            exclude_unexpected_values=True,
+        ),
     }
 
     engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
@@ -448,11 +449,11 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
 
     engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
@@ -523,13 +524,13 @@ def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-            "exclude_unexpected_values": True,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+            exclude_unexpected_values=True,
+        ),
     }
 
     engine: SparkDFExecutionEngine = build_spark_engine(
@@ -567,11 +568,11 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
 
     engine: SparkDFExecutionEngine = build_spark_engine(
@@ -605,12 +606,12 @@ def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-            "exclude_unexpected_values": True,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+            exclude_unexpected_values=True,
+        ),
     }
 
     engine: SparkDFExecutionEngine = build_spark_engine(
@@ -674,11 +675,11 @@ def test_pd_unexpected_index_query_metric_without_id_pk(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
     engine: PandasExecutionEngine = build_pandas_engine(df=df)
 
@@ -743,11 +744,11 @@ def test_spark_unexpected_index_query_metric_without_id_pk(
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
 
     engine: SparkDFExecutionEngine = build_spark_engine(

@@ -3294,7 +3294,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
 
 def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
-    result_format: dict,
+    result_format: dict | ResultFormatConfig,
     success: bool,
     element_count: Optional[int] = None,
     nonnull_count: Optional[int] = None,
@@ -3315,6 +3315,9 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
     This function handles the logic for mapping those fields for column_map_expectations.
     """
+    if isinstance(result_format, dict):
+        result_format = ResultFormatConfig(**result_format)
+
     if element_count is None:
         element_count = 0
 

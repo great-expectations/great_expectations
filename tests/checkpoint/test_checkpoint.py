@@ -23,6 +23,7 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
@@ -663,7 +664,9 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         "action_list": common_action_list,
         "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
         "runtime_configuration": {
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
         "template_name": None,
         "run_name_template": "%Y-%M-foo-bar-template-test",
@@ -1011,7 +1014,9 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
             "tolerance": 0.01,
         },
         "runtime_configuration": {
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
         "template_name": None,
         "run_name_template": None,
@@ -1102,7 +1107,9 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "action_list": common_action_list,
         "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
         "runtime_configuration": {
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
         "validations": [],
         "profilers": [],

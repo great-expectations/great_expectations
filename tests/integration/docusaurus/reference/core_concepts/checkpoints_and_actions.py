@@ -4,6 +4,7 @@ import great_expectations as gx
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
+from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -167,7 +168,9 @@ context.add_or_update_checkpoint(
     ],
     evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
     runtime_configuration={
-        "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        "result_format": ResultFormatConfig(
+            result_format="BASIC", partial_unexpected_count=20
+        )
     },
 )
 # </snippet>
@@ -228,7 +231,9 @@ context.add_or_update_checkpoint(
     ],
     evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
     runtime_configuration={
-        "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        "result_format": ResultFormatConfig(
+            result_format="BASIC", partial_unexpected_count=20
+        )
     },
 )
 # </snippet>
@@ -296,7 +301,9 @@ context.add_or_update_checkpoint(
     ],
     evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
     runtime_configuration={
-        "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        "result_format": ResultFormatConfig(
+            result_format="BASIC", partial_unexpected_count=20
+        )
     },
 )
 # </snippet>

@@ -2176,7 +2176,9 @@ def test_map_column_values_increasing_pd():
         metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=1
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {
@@ -2261,7 +2263,9 @@ def test_map_column_values_increasing_spark(spark_session):
         metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=1
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {
@@ -2352,7 +2356,9 @@ def test_map_column_values_decreasing_pd():
         metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=1
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {
@@ -2437,7 +2443,9 @@ def test_map_column_values_decreasing_spark(spark_session):
         metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=1
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {
@@ -2499,7 +2507,9 @@ def test_map_unique_column_exists_pd():
         metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=1
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {
@@ -2597,7 +2607,9 @@ def test_map_unique_column_exists_sa(sa):
         metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
     )
     desired_metric.metric_dependencies = {
@@ -2614,7 +2626,9 @@ def test_map_unique_column_exists_sa(sa):
         metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
     )
     desired_metric.metric_dependencies = {
@@ -2630,7 +2644,9 @@ def test_map_unique_column_exists_sa(sa):
         metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
     )
     desired_metric.metric_dependencies = {
@@ -2775,7 +2791,9 @@ def test_map_unique_column_exists_spark(spark_session):
         metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
     )
     desired_metric.metric_dependencies = {
@@ -2792,7 +2810,9 @@ def test_map_unique_column_exists_spark(spark_session):
         metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
     )
     desired_metric.metric_dependencies = {
@@ -2811,7 +2831,9 @@ def test_map_unique_column_exists_spark(spark_session):
             "column": "a",
         },
         metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+            "result_format": ResultFormatConfig(
+                result_format="BASIC", partial_unexpected_count=20
+            )
         },
     )
     desired_metric.metric_dependencies = {
@@ -3812,10 +3834,10 @@ def test_map_column_pairs_greater_metric_pd():
         },
         metric_value_kwargs={
             "or_equal": True,
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     condition_metric.metric_dependencies = {
@@ -3842,10 +3864,10 @@ def test_map_column_pairs_greater_metric_pd():
         },
         metric_value_kwargs={
             "or_equal": True,
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     unexpected_values_metric.metric_dependencies = {
@@ -3890,10 +3912,10 @@ def test_map_column_pairs_greater_metric_sa(sa):
         },
         metric_value_kwargs={
             "or_equal": True,
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     condition_metric.metric_dependencies = {
@@ -3914,10 +3936,10 @@ def test_map_column_pairs_greater_metric_sa(sa):
         },
         metric_value_kwargs={
             "or_equal": True,
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     unexpected_values_metric.metric_dependencies = {
@@ -3963,10 +3985,10 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
         },
         metric_value_kwargs={
             "or_equal": True,
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     condition_metric.metric_dependencies = {
@@ -3987,10 +4009,10 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
         },
         metric_value_kwargs={
             "or_equal": True,
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     unexpected_values_metric.metric_dependencies = {
@@ -4072,10 +4094,10 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     condition_metric.metric_dependencies = {
@@ -4096,10 +4118,10 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     unexpected_values_metric.metric_dependencies = {
@@ -4123,10 +4145,10 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     condition_metric.metric_dependencies = {
@@ -4147,10 +4169,10 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     unexpected_values_metric.metric_dependencies = {
@@ -4197,10 +4219,10 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     condition_metric.metric_dependencies = {
@@ -4221,10 +4243,10 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     unexpected_values_metric.metric_dependencies = {
@@ -4248,10 +4270,10 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     condition_metric.metric_dependencies = {
@@ -4272,10 +4294,10 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
         },
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
-            "result_format": {
-                "result_format": "SUMMARY",
-                "partial_unexpected_count": 6,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+                partial_unexpected_count=6,
+            ),
         },
     )
     unexpected_values_metric.metric_dependencies = {
@@ -6571,7 +6593,9 @@ def test_map_select_column_values_unique_within_record_pd():  # noqa: PLR0915
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=8
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {
@@ -6820,7 +6844,9 @@ def test_map_select_column_values_unique_within_record_sa(sa):  # noqa: PLR0915
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=8
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {
@@ -7043,7 +7069,9 @@ def test_map_select_column_values_unique_within_record_spark(  # noqa: PLR0915 #
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs={
-            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY", partial_unexpected_count=8
+            )
         },
     )
     unexpected_rows_metric.metric_dependencies = {

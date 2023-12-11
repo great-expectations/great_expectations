@@ -7,6 +7,7 @@ import pytest
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -180,11 +181,11 @@ def test_sqlalchemy_column_map_condition_values(
         "strict_min": False,
         "strict_max": False,
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
 
     desired_metric = MetricConfiguration(
@@ -254,11 +255,11 @@ def test_spark_column_map_condition_values(
         "strict_min": False,
         "strict_max": False,
         "parse_strings_as_datetimes": False,
-        "result_format": {
-            "result_format": "COMPLETE",
-            "partial_unexpected_count": 20,
-            "include_unexpected_rows": False,
-        },
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            partial_unexpected_count=20,
+            include_unexpected_rows=False,
+        ),
     }
 
     desired_metric = MetricConfiguration(

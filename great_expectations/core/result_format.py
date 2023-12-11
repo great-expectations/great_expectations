@@ -13,8 +13,8 @@ class ResultFormat(str, enum.Enum):
 
 class ResultFormatConfig(pydantic.BaseModel):
     result_format: ResultFormat
-    unexpected_index_column_names: Optional[List[str]] = None
+    exclude_unexpected_values: Optional[bool] = None
     include_unexpected_rows: Optional[bool] = None
     partial_unexpected_count: Optional[int] = None
     return_unexpected_index_query: Optional[bool] = None
-    exclude_unexpected_values: Optional[bool] = None
+    unexpected_index_column_names: Optional[List[str]] = None
