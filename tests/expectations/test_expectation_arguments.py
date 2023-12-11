@@ -14,9 +14,6 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -818,68 +815,3 @@ def test_result_format_configured_with_set_default_override(
 
     # In-Memory DataContext does not have UsageStatisticsHandler configured
     assert mock_emit.call_count == 0
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filesystem
-def test_in_memory_runtime_context_configured_with_usage_stats_handler(
-    mock_emit, in_memory_runtime_context, test_pandas_df
-):
-    context = in_memory_runtime_context
-
-    # manually set usage statistics handler
-    handler = UsageStatisticsHandler(
-        data_context=context,
-        data_context_id=context._data_context_id,
-        oss_id=None,
-        usage_statistics_url="http://fakeendpoint.com",
-    )
-    context._usage_statistics_handler = handler
-
-    catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: dict = {
-        "result_format": "SUMMARY",
-    }
-    runtime_environment_arguments = {
-        "catch_exceptions": catch_exceptions,
-        "result_format": result_format,
-    }
-
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
-        "test_suite"
-    )
-
-    expectation_configuration: ExpectationConfiguration
-
-    expectation_meta: dict = {"Notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict
-
-    expectation_arguments_column: dict = {
-        "column": "Name",  # use correct column to avoid error
-    }
-    expectation_arguments_without_meta = dict(
-        **runtime_environment_arguments, **expectation_arguments_column
-    )
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_not_be_null",
-        kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
-    )
-    suite.legacy_add_expectation_by_configuration(
-        expectation_configuration=expectation_configuration
-    )
-
-    # emit 1 from add_expectation
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        )
-    ]

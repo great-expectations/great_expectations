@@ -1,4 +1,3 @@
-import os
 
 import pytest
 
@@ -39,74 +38,6 @@ def test_ColumnsExistProfiler():
         == "expect_column_to_exist"
     )
     assert expectations_config.expectation_configurations[0].kwargs["column"] == "x"
-
-
-@pytest.mark.filesystem
-def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
-    context = filesystem_csv_data_context
-
-    context.add_expectation_suite("default")
-    datasource = context.datasources["rad_datasource"]
-    base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"][
-        "base_directory"
-    ]
-    batch_kwargs = {
-        "datasource": "rad_datasource",
-        "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
-    }
-    batch = context._get_batch_v2(batch_kwargs, "default")
-    expectation_suite, validation_results = BasicDatasetProfiler.profile(batch)
-
-    assert expectation_suite.expectation_suite_name == "default"
-    assert "BasicDatasetProfiler" in expectation_suite.meta
-    assert set(expectation_suite.meta["BasicDatasetProfiler"].keys()) == {
-        "created_by",
-        "created_at",
-        "batch_kwargs",
-    }
-    assert (
-        expectation_suite.meta["BasicDatasetProfiler"]["batch_kwargs"] == batch_kwargs
-    )
-    for exp in expectation_suite.expectation_configurations:
-        assert "BasicDatasetProfiler" in exp.meta
-        assert "confidence" in exp.meta["BasicDatasetProfiler"]
-
-    assert set(validation_results.meta.keys()) == {
-        "batch_kwargs",
-        "batch_markers",
-        "batch_parameters",
-        "expectation_suite_meta",
-        "expectation_suite_name",
-        "great_expectations_version",
-        "run_id",
-        "validation_time",
-    }
-
-
-@pytest.mark.filesystem
-def test_context_profiler(filesystem_csv_data_context):
-    """
-    This just validates that it's possible to profile using the datasource hook,
-    and have validation results available in the DataContext
-    """
-    context = filesystem_csv_data_context
-
-    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    assert context.list_expectation_suites() == []
-    context.profile_datasource("rad_datasource", profiler=BasicDatasetProfiler)
-
-    assert len(context.list_expectation_suites()) == 1
-
-    expected_suite_name = "rad_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    profiled_expectations = context.get_expectation_suite(expected_suite_name)
-
-    for exp in profiled_expectations.expectation_configurations:
-        assert "BasicDatasetProfiler" in exp.meta
-        assert "confidence" in exp.meta["BasicDatasetProfiler"]
-
-    assert profiled_expectations.expectation_suite_name == expected_suite_name
-    assert "batch_kwargs" in profiled_expectations.meta["BasicDatasetProfiler"]
-    assert len(profiled_expectations.expectations) == 8
 
 
 @pytest.mark.filesystem

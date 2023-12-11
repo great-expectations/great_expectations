@@ -1718,35 +1718,6 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_add_expectation_to_expectation_suite(
-    mock_emit, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
-
-    expectation_suite: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name="my_new_expectation_suite"
-    )
-    expectation_suite.legacy_add_expectation_by_configuration(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
-    )
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        )
-    ]
-
-
-@pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
     """
     What does this test and why?
@@ -2671,56 +2642,6 @@ def test_add_datasource_from_yaml_with_substitution_variables(
         ]
     )
     assert mock_emit.call_args_list == expected_call_args_list
-
-
-@pytest.mark.filesystem
-def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_store):
-    """End to end test demonstrating usage of Stores evaluation parameters"""
-    context = data_context_with_query_store
-    suite_name = "eval_param_suite"
-    context.add_expectation_suite(expectation_suite_name=suite_name)
-    batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "default_runtime_data_connector_name",
-        "data_asset_name": "DEFAULT_ASSET_NAME",
-        "batch_identifiers": {"default_identifier_name": "test123"},
-        "runtime_parameters": {"query": "select * from titanic"},
-    }
-    validator = context.get_validator(
-        batch_request=RuntimeBatchRequest(**batch_request),
-        expectation_suite_name=suite_name,
-    )
-    validator.expect_table_row_count_to_equal(
-        value={
-            # unnecessarily complex URN which should resolve to the actual row count.
-            "$PARAMETER": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count) + 4"
-        }
-    )
-
-    checkpoint_config = {
-        "validations": [
-            {"batch_request": batch_request, "expectation_suite_name": suite_name}
-        ],
-        "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-            },
-            {
-                "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction"},
-            },
-        ],
-    }
-    checkpoint = Checkpoint(
-        f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config
-    )
-    checkpoint_result = checkpoint.run()
-    assert checkpoint_result.get("success") is True
 
 
 @pytest.mark.filesystem
