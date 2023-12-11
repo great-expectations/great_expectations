@@ -816,10 +816,9 @@ def get_or_create_spark_session(
         "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",
         category=DeprecationWarning,
     )
-    spark_config = spark_config or {}
 
     return SparkDFExecutionEngine.get_or_create_spark_session(
-        spark_config=spark_config,  # type: ignore[arg-type]
+        spark_config=spark_config or {},  # type: ignore[arg-type]
     )
 
 
