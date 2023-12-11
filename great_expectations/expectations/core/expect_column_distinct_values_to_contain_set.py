@@ -190,7 +190,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         observed_value_counts = metrics.get("column.value_counts")
-        value_set = self.get_success_kwargs().get("value_set")
+        value_set = self.get_success_kwargs(configuration).get("value_set")
 
         parsed_value_set = value_set
 

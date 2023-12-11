@@ -1127,9 +1127,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
             return None
 
-    def get_domain_kwargs(self) -> Dict[str, Optional[str]]:
+    def get_domain_kwargs(
+        self, configuration: ExpectationConfiguration
+    ) -> Dict[str, Optional[str]]:
         domain_kwargs: Dict[str, Optional[str]] = {
-            key: self.configuration.kwargs.get(key, self._get_default_value(key))
+            key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.domain_keys
         }
         missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(
@@ -1142,11 +1144,21 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return domain_kwargs
 
     @public_api
-    def get_success_kwargs(self) -> Dict[str, Any]:
-        """Retrieve the success kwargs."""
-        configuration = self.configuration
+    def get_success_kwargs(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> Dict[str, Any]:
+        """Retrieve the success kwargs.
 
-        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs()
+        Args:
+            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
+                the success kwargs from the configuration attribute of the Expectation instance will be returned.
+        """
+        if not configuration:
+            configuration = self.configuration
+
+        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs(
+            configuration=configuration
+        )
         success_kwargs: Dict[str, Any] = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.success_keys
@@ -1167,7 +1179,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
 
-        success_kwargs = self.get_success_kwargs()
+        success_kwargs = self.get_success_kwargs(configuration=configuration)
         runtime_kwargs = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.runtime_keys
@@ -2331,11 +2343,18 @@ class BatchExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        success_kwargs = self.get_success_kwargs()
-        min_value: Optional[Any] = success_kwargs.get("min_value")
-        strict_min: Optional[bool] = success_kwargs.get("strict_min")
-        max_value: Optional[Any] = success_kwargs.get("max_value")
-        strict_max: Optional[bool] = success_kwargs.get("strict_max")
+        min_value: Optional[Any] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("min_value")
+        strict_min: Optional[bool] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("strict_min")
+        max_value: Optional[Any] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("max_value")
+        strict_max: Optional[bool] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("strict_max")
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
@@ -2709,7 +2728,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
+        result_format: str | dict[str, Any] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
@@ -2967,7 +2986,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
+        result_format: Union[
+            Dict[str, Union[int, str, bool, List[str], None]], str
+        ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 

@@ -57,7 +57,7 @@ class ExpectColumnSumToBe(ColumnAggregateExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         actual_value = metrics["column.sum"]
-        predicted_value = self.get_success_kwargs().get("sum_total")
+        predicted_value = self.get_success_kwargs(configuration).get("sum_total")
         success = actual_value == predicted_value
         return {"success": success, "result": {"observed_value": actual_value}}
 

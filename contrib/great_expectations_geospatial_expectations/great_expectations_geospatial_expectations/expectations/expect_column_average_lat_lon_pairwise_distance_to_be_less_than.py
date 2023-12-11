@@ -146,7 +146,7 @@ class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnAggregateExpec
         execution_engine: ExecutionEngine = None,
     ):
         distance = metrics.get("column.average_lat_lon_pairwise_distance")
-        max_distance = self.get_success_kwargs().get("max_distance")
+        max_distance = self.get_success_kwargs(configuration).get("max_distance")
         success = distance < max_distance
         return {"success": success, "result": {"observed_value": distance}}
 

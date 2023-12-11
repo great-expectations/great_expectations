@@ -213,11 +213,11 @@ class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         radius = metrics.get("column.geometry.minimum_bounding_radius")
-        diameter_flag = self.get_success_kwargs().get("diameter_flag")
-        min_value = self.get_success_kwargs().get("min_value")
-        max_value = self.get_success_kwargs().get("max_value")
-        strict_min = self.get_success_kwargs().get("strict_min")
-        strict_max = self.get_success_kwargs().get("strict_max")
+        diameter_flag = self.get_success_kwargs(configuration).get("diameter_flag")
+        min_value = self.get_success_kwargs(configuration).get("min_value")
+        max_value = self.get_success_kwargs(configuration).get("max_value")
+        strict_min = self.get_success_kwargs(configuration).get("strict_min")
+        strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
         if diameter_flag:
             distance = radius * 2
