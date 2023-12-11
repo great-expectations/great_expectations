@@ -270,7 +270,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         spark_session: pyspark.SparkSession
         try:
             spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
-        except ValueError:
+        except (ModuleNotFoundError, ValueError):
             spark_session = pyspark.SparkSession.builder.getOrCreate()
 
         return SparkDFExecutionEngine._get_session_with_spark_config(
@@ -333,7 +333,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def _session_is_not_stoppable(
         spark_session: pyspark.SparkSession,
     ) -> bool:
-        return isinstance(spark_session, pyspark.SparkConnectSession) or (
+        return (
+            pyspark.SparkConnectSession
+            and isinstance(spark_session, pyspark.SparkConnectSession)
+        ) or (
             os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
         )
 
