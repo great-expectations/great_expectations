@@ -131,14 +131,14 @@ class _SparkDatasource(Datasource):
         if pyspark:
             self.update_forward_refs()
 
-        try:
-            self._spark: pyspark.SparkSession = (
-                self.execution_engine_type().get_or_create_spark_session(
-                    spark_config=self.spark_config,
+            try:
+                self._spark: SparkSession = (
+                    self.execution_engine_type().get_or_create_spark_session(
+                        spark_config=self.spark_config,
+                    )
                 )
-            )
-        except ConnectionError as e:
-            raise TestConnectionError(e) from e
+            except ConnectionError as e:
+                raise TestConnectionError(e) from e
 
     # End Abstract Methods
 
