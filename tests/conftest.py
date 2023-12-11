@@ -175,8 +175,6 @@ def spark_warehouse_session(tmp_path_factory):
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
     spark: pyspark.SparkSession = SparkDFExecutionEngine.get_or_create_spark_session(
         spark_config={
-            "spark.sql.catalogImplementation": "in-memory",
-            "spark.executor.memory": "450m",
             "spark.sql.warehouse.dir": spark_warehouse_path,
         }
     )
@@ -643,13 +641,7 @@ def spark_session_v012(test_backends):
         import pyspark  # noqa: F401
         from pyspark.sql import SparkSession  # noqa: F401
 
-        return SparkDFExecutionEngine.get_or_create_spark_session(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 

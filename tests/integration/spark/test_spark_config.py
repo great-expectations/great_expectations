@@ -36,13 +36,16 @@ def test_spark_config_datasource(spark_session_v012):
         "spark.app.name": name,
         "spark.sql.catalogImplementation": "hive",
         "spark.executor.memory": "768m",
-        # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
     spark_datasource = SparkDatasource(
         name="my spark datasource",
         spark_config=spark_config,
     )
-    execution_engine: SparkDFExecutionEngine = spark_datasource.get_execution_engine()
+    # a warning is raised because passing unmodifiable config options results in restarting spark context
+    with pytest.warns(RuntimeWarning):
+        execution_engine: SparkDFExecutionEngine = (
+            spark_datasource.get_execution_engine()
+        )
     spark_session: pyspark.SparkSession = execution_engine.spark
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped

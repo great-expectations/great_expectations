@@ -765,13 +765,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
-    spark = SparkDFExecutionEngine.get_or_create_spark_session(
-        spark_config={
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "450m",
-            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-        }
-    )
+    spark = SparkDFExecutionEngine.get_or_create_spark_session()
     # We need to allow null values in some column types that do not support them natively, so we skip
     # use of df in this case.
     data_reshaped = list(zip(*(v for _, v in data.items())))  # create a list of rows
