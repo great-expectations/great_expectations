@@ -10,6 +10,23 @@ class TestProjectManagerStores:
     missing_project_error_str = "This action requires an active DataContext."
 
     @pytest.mark.unit
+    def test_get_datasource_store_success(self):
+        context = Mock(spec=AbstractDataContext)
+        project_manager = ProjectManager()
+        project_manager.set_project(project=context)
+
+        store = project_manager.get_evaluation_parameters_store()
+
+        assert store == context.evaluation_parameter_store
+
+    @pytest.mark.unit
+    def test_get_datasource_store_fails_without_context(self):
+        project_manager = ProjectManager()
+
+        with pytest.raises(RuntimeError, match=self.missing_project_error_str):
+            project_manager.get_evaluation_parameters_store()
+
+    @pytest.mark.unit
     def test_get_expectations_store_success(self):
         context = Mock(spec=AbstractDataContext)
         project_manager = ProjectManager()

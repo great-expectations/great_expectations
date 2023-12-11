@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import (
         CheckpointStore,
+        DatasourceStore,
         EvaluationParameterStore,
         ExpectationsStore,
         ValidationsStore,
@@ -84,37 +85,28 @@ class ProjectManager:
     def set_project(self, project: AbstractDataContext) -> None:
         self._project = project
 
+    def get_datasource_store(self) -> DatasourceStore:
+        return self._get_project_or_raise()._datasource_store
+
     def get_expectations_store(self) -> ExpectationsStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
-            )
-        return self._project.expectations_store
+        return self._get_project_or_raise().expectations_store
 
     def get_checkpoints_store(self) -> CheckpointStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
-            )
-        return self._project.checkpoint_store
+        return self._get_project_or_raise().checkpoint_store
 
     def get_validations_store(self) -> ValidationsStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
-            )
-        return self._project.validations_store
+        return self._get_project_or_raise().validations_store
 
     def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
+        return self._get_project_or_raise().evaluation_parameter_store
+
+    def _get_project_or_raise(self) -> AbstractDataContext:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
                 + "Please call `get_context()` first, then try your action again."
             )
-        return self._project.evaluation_parameter_store
+        return self._project
 
     def _build_context(  # noqa: PLR0913
         self,
