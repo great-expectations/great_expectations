@@ -56,10 +56,10 @@ export default class Prerequisites extends React.Component {
       returnItems.push(<li>An installation of Python {GxData.min_python} to {GxData.max_python}. To download and install Python, see <a href='https://www.python.org/downloads/'>Python downloads.</a></li>)
     }
     if (this.props.requireInstallation === true) {
-      returnItems.push(<li>A Great Expectations instance. See <a href='/docs/guides/setup/installation/install_gx'>Install Great Expectations with Data Source dependencies</a>.</li>)
+      returnItems.push(<li>A Great Expectations instance. See <a href='/docs/oss/guides/setup/installation/install_gx'>Install Great Expectations with Data Source dependencies</a>.</li>)
     }
     if (this.props.requireDataContext === true) {
-      returnItems.push(<li><a href='/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context'>A Data Context.</a></li>)
+      returnItems.push(<li><a href='/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context'>A Data Context.</a></li>)
     }
     if (this.props.requireSourceData === 'filesystem') {
       returnItems.push(<li>Access to data stored in a filesystem.</li>)
@@ -73,10 +73,10 @@ export default class Prerequisites extends React.Component {
     } else if (this.props.requireDatasource === 'SQL') {
       returnItems.push(<li><a href='/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource'>A Data Source configured to access your sData Assets.</a></li>)
     } else if (this.props.requireDatasource === true) {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/connect_to_data_overview'>A Data Source configured to access your Data Assets</a></li>)
+      returnItems.push(<li><a href='/docs/oss/guides/connecting_to_your_data/connect_to_data_overview'>A Data Source configured to access your Data Assets</a></li>)
     }
     if (this.props.requireExpectationSuite === true) {
-      returnItems.push(<li><a href='/docs/guides/expectations/create_expectations_overview'>A configured and saved Expectation Suite.</a></li>)
+      returnItems.push(<li><a href='/docs/oss/guides/expectations/create_expectations_overview'>A configured and saved Expectation Suite.</a></li>)
     }
 
     return returnItems

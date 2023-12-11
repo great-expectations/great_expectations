@@ -31,7 +31,7 @@ Metrics are generated as part of running Expectations against a Batch (and can b
 
 ## Use cases
 
-Metrics are generated in accordance with the requirements of an Expectation when an Expectation is evaluated.  This includes Expectations that are evaluated as part of the [interactive process for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) and when using a Data Assistant to create Expectations.
+Metrics are generated in accordance with the requirements of an Expectation when an Expectation is evaluated.  This includes Expectations that are evaluated as part of the [interactive process for creating Expectations](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data) and when using a Data Assistant to create Expectations.
 
 Past Metrics can also be accessed by some Expectations through Evaluation Parameters.  However, when you are creating Expectations there may not be past Metrics to provide.  In these cases, it is possible to define a temporary value that the Evaluation Parameter can use in place of the missing past Metric.
 
@@ -64,7 +64,7 @@ res.get_metric(
 )
 ```
 
-See the [How to configure a MetricsStore](../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md) guide for more information.
+See the [How to configure a MetricsStore](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore) guide for more information.
 
 ## Create
 

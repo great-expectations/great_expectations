@@ -10,7 +10,7 @@ A Metric Store is a connector to store and retrieve information about computed a
 
 The Metric Store is tailored for storing and retrieving Metrics.  Although it can be used within Great Expectations as a reference to populate Evaluation Parameters when an Expectation Suite is run, the fact that it doesn't include other information found in Validation Results means you can also use it to more easily examine trends in your Metrics over time.  To help with this, a Metric Store will track the `run_id` of a Validation and the Expectation Suite name in addition to the metric name and metric kwargs.
 
-For information on how to create and use a Metric Store, see [How to configure a Metric Store](../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md).
+For information on how to create and use a Metric Store, see [How to configure a Metric Store](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore).
 
 The Metric Store differs from an <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store" /> in how it formats its data.  Information stored in a Metric Store is kept in a format that more easily converted into tables which can be used for reports or to analyze trends.  It can also be referenced as values for <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" />.  
 
@@ -22,7 +22,7 @@ A Metric Store can be referenced by an <TechnicalTag relative="../" tag="expecta
 
 If you intend to use a Metric Store, you can configure it in your `great_expectations.yml` file when you configure other Stores.  A Metric Store is an optional addition to `great_expectations.yml`, and one will not be included by default when you first initialize your Data Context.
 
-For more information, please see [our guide on how to configure a Metric Store](../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md).
+For more information, please see [our guide on how to configure a Metric Store](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore).
 
 When creating Expectations, you can configure them to use your Metric Store to retrieve values for Evaluation Parameters.
 

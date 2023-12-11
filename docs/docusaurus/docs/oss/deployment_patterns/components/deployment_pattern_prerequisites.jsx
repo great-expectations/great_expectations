@@ -32,7 +32,7 @@ export default class Prerequisites extends React.Component {
 
   defaultPrerequisiteItems () {
     return [
-      <li key={0.1}><a href='/docs/tutorials/quickstart'>Completed the Quickstart guide</a></li>
+      <li key={0.1}><a href='/docs/oss/tutorials/quickstart'>Completed the Quickstart guide</a></li>
     ]
   }
 

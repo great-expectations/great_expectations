@@ -7,7 +7,7 @@ sidebar_custom_props: { icon: 'img/integrations/google_cloud_icon.png' }
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
+import Congratulations from '/docs/oss/guides/connecting_to_your_data/components/congratulations.md'
 import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 
 This guide will help you integrate Great Expectations (GX) with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP) using our recommended workflow.
@@ -52,10 +52,10 @@ The following diagram shows the recommended components for a Great Expectations 
 
 Relevant documentation for the components can also be found here:
 
-- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
-- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/configure_result_stores.md)
-- [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
-- Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+- [How to configure an Expectation store to use GCS](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores)
+- [How to configure a Validation Result store in GCS](/docs/oss/guides/setup/configuring_metadata_stores/configure_result_stores)
+- [How to host and share Data Docs on GCS](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
+- Optionally, you can also use a [Secret Manager for GCP Credentials](/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials)
 
 ## Part 1: Local Configuration of Great Expectations that connects to Google Cloud Platform
 
@@ -101,7 +101,7 @@ Great Expectations can then be configured to use this new Expectations Store, `e
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
-For additional details and example configurations, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
+For additional details and example configurations, see [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores).
 
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `gx/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
@@ -114,10 +114,10 @@ Great Expectations can then be configured to use this new Validations Store, `va
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
-For additional details and example configurations, see [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md).
+For additional details and example configurations, see [Configure Validation Result Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_result_stores).
 
 #### Add Data Docs Store
-To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/host_and_share_data_docs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
+To host and share Datadocs on GCS, we recommend using the [following guide](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 
@@ -240,7 +240,7 @@ In the second example, a query `Asset` named `my_query_asset` is built by submit
   ]}>
 <TabItem value="gcs">
 
-In the following example, you'll create an Expectation Suite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), that you'll describe in your `BatchRequest.` To create Expectation Suites, using domain knowledge or a Data Assistant, see (../guides/expectations/expectations/expectations_lp.md).
+In the following example, you'll create an Expectation Suite with [instant feedback from a sample Batch of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), that you'll describe in your `BatchRequest.` To create Expectation Suites, using domain knowledge or a Data Assistant, see (/docs/oss/guides/expectations/expectations/expectations_lp).
 
 First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
@@ -262,7 +262,7 @@ For more details on how to configure the RuntimeBatchRequest, as well as an exam
 </TabItem>
 <TabItem value="bigquery">
 
-For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
 Using the `table_asset` from the previous step, build a `BatchRequest`. 
 
@@ -291,7 +291,7 @@ To configure the BatchRequest and learn how you can load data by specifying a ta
 
 ### 5. Build and Run a Checkpoint
 
-In the following example, you'll create a basic Checkpoint configuration. For more information about data validation, see [Validate Data](../guides/validation/validate_data_lp.md).
+In the following example, you'll create a basic Checkpoint configuration. For more information about data validation, see [Validate Data](/docs/oss/guides/validation/validate_data_lp).
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"

@@ -29,5 +29,5 @@ The API of any given Plugin is determined by the individual or team that created
 
 ## Import Plugins
 
-Any Plugin dropped into the `plugins` folder can be imported with a standard Python import statement.  In some cases, this will be all you need to do in order to make use of the Plugin's functionality.  For example, a <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectation" /> Plugin could be imported and used the same as any other Expectation in the [interactive process for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+Any Plugin dropped into the `plugins` folder can be imported with a standard Python import statement.  In some cases, this will be all you need to do in order to make use of the Plugin's functionality.  For example, a <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectation" /> Plugin could be imported and used the same as any other Expectation in the [interactive process for creating Expectations](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 

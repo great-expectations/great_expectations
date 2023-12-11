@@ -4,7 +4,7 @@ The Checkpoint contains `UpdateDataDocsAction` which renders the <TechnicalTag t
 
 :::tip 
 
-For more information on Actions that Checkpoints can perform and how to add them, see [Configure Actions](/docs/oss/guides/validation/validation_actions/actions_lp.md).
+For more information on Actions that Checkpoints can perform and how to add them, see [Configure Actions](/docs/oss/guides/validation/validation_actions/actions_lp).
 
 :::
 

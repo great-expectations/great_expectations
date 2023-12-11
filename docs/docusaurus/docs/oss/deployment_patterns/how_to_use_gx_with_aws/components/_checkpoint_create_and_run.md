@@ -6,6 +6,6 @@ Checkpoints can be preconfigured with a Batch Request and Expectation Suite, or 
 
 :::tip 
 
-To preconfigure a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp.md)
+To preconfigure a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp)
 
 :::

@@ -59,7 +59,7 @@ Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of d
 
 If successful, you should receive an email that looks like this:
 
-![image](@site/docs/oss/images/email_example.png)
+![image](/docs/oss/images/email_example.png)
 
 ## Additional notes
 

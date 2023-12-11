@@ -24,7 +24,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Before you start
 
-Before you start installing and configuring GX, you should complete the [Quickstart guide](tutorials/quickstart/quickstart.md) and have the following items installed:
+Before you start installing and configuring GX, you should complete the [Quickstart guide](/docs/oss/tutorials/quickstart/quickstart) and have the following items installed:
 
 - <span>A supported version of Python. GX supports Python versions {GxData.min_python} to {GxData.max_python}.</span>
 - pip (the package installer for Python).

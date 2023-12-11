@@ -87,4 +87,4 @@ action_list:
     class_name: UpdateDataDocsAction
 ```
 
-To configure Actions in a Checkpoint, see [Configure Actions](../guides/validation/validation_actions/actions_lp.md).
+To configure Actions in a Checkpoint, see [Configure Actions](/docs/oss/guides/validation/validation_actions/actions_lp).

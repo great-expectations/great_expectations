@@ -1,7 +1,7 @@
 ---
 title: Compare two tables with the Onboarding Data Assistant
 ---
-import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import Prerequisites from '/docs/oss/guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -72,7 +72,7 @@ Some SQL dialects handle data types in different ways, and this can cause precis
 In our hypothetical use case these inconsistencies are tolerated, and therefore Expectations are not set against the columns likely to generate the errors.
 
 This is an example of how an Expectation Suite created by the Data Assistant can be customized.
-For more on these configurations, see our [guide on the `OnboardingDataAssistant](../../../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
+For more on these configurations, see our [guide on the `OnboardingDataAssistant](/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
 </details>
 
 ## Checkpoint Set-Up

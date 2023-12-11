@@ -3,11 +3,11 @@ title: Welcome
 slug: /
 ---
 
-Great Expectations is the leading tool for [validating](./terms/validation.md) and [documenting](./terms/data_docs.md) your data. If you're ready to get started, see the [Quickstart](tutorials/quickstart/quickstart.md).
+Great Expectations is the leading tool for [validating](./terms/validation.md) and [documenting](./terms/data_docs.md) your data. If you're ready to get started, see the [Quickstart](/docs/oss/tutorials/quickstart/quickstart).
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
-![overview](./guides/images/gx_oss_process.png)
+![overview](/docs/oss/guides/images/gx_oss_process.png)
 
 ### Why use Great Expectations?
 
@@ -44,7 +44,7 @@ Once you’ve created your Expectations, Great Expectations can load any batch o
 
 Great Expectations renders Expectations in a clean, human-readable format called Data Docs. These HTML docs contain both your Expectation Suites and your data Validation Results each time validation is run – think of it as a continuously updated data quality report. The following image shows a sample Data Doc:
 
-![Screenshot of Data Docs](./guides/images/datadocs.png)
+![Screenshot of Data Docs](/docs/oss/guides/images/datadocs.png)
 
 #### Support for various Data Sources and Store backends
 

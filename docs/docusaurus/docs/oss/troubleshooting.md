@@ -12,11 +12,11 @@ This issue is typically caused when an Expectation fails and `discard_failed_exp
 
 ### Why did a specific Expectation fail?
 
-See [Identify failed rows in an Expectation](./guides/expectations/advanced/identify_failed_rows_expectations.md). 
+See [Identify failed rows in an Expectation](/docs/oss/guides/expectations/advanced/identify_failed_rows_expectations). 
 
 ### How can I improve Validation performance with a large Data Asset?
 
-Use Batches and Spark. See [Request data from a Data Asset](./guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md) and [Connect to in-memory Data Assets - Spark](./guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data.md). 
+Use Batches and Spark. See [Request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset) and [Connect to in-memory Data Assets - Spark](/docs/oss/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data). 
 
 ### I'm experiencing issues with my Expectations and Data Sources after upgrading GX OSS
 

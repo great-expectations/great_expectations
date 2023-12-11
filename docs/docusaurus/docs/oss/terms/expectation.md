@@ -27,7 +27,7 @@ Expectations are grouped into <TechnicalTag relative="../" tag="expectation_suit
 
 ## Use cases
 
-Expectations are obviously a fundamental component of the Create Expectations step in working with Great Expectations.  There are two points at which you will have direct interaction with them.  The first is when you are creating new Expectations.  The second is when you are editing them.  Expectations are not meant to be static: the recommended best practice is an iterative process where your Expectations are edited as your data, and your understanding of that data, change.  For further information on this process, please see [our overview on the Create Expectations process](../guides/expectations/create_expectations_overview.md), and [our related how-to guides](../guides/expectations/expectations_lp.md).
+Expectations are obviously a fundamental component of the Create Expectations step in working with Great Expectations.  There are two points at which you will have direct interaction with them.  The first is when you are creating new Expectations.  The second is when you are editing them.  Expectations are not meant to be static: the recommended best practice is an iterative process where your Expectations are edited as your data, and your understanding of that data, change.  For further information on this process, please see [our overview on the Create Expectations process](/docs/oss/guides/expectations/create_expectations_overview), and [our related how-to guides](/docs/oss/guides/expectations/expectations_lp).
 
 When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle the use of the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> that are generated being passed along to the Checkpoint's (optional) <TechnicalTag relative="../" tag="action" text="Actions" /> for further processing.
 
@@ -44,13 +44,13 @@ These Expectations aren't included in the default set, but could be very useful 
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
-Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the [guides on creating custom Expectations](../guides/expectations/expectations_lp.md) for more information on building Expectations and updating <TechnicalTag relative="../" tag="data_context" text="Data Context" /> configurations to automatically load <TechnicalTag relative="../" tag="batch" text="Batches" /> of data with custom <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.
+Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the [guides on creating custom Expectations](/docs/oss/guides/expectations/expectations_lp) for more information on building Expectations and updating <TechnicalTag relative="../" tag="data_context" text="Data Context" /> configurations to automatically load <TechnicalTag relative="../" tag="batch" text="Batches" /> of data with custom <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.
 
 ## Distributional Expectations
 
 Distributional Expectations rely on expected distributions or "partition objects", which are built from intervals for continuous data or categorical classes and their associated weights, in order to help identify when new datasets or samples may be different from expected.  Distributional Expectations represent specific Expectation types, such as `expect_column_kl_divergence_to_be_less_than`.  You should use Distributional Expectations in the same way as other Expectations: to help accelerate identification of risks and changes to a modeled system or disruptions to a complex upstream data feed.
 
-For more information, see [reference guide on Distributional Expectations](../reference/expectations/distributional_expectations.md).
+For more information, see [reference guide on Distributional Expectations](/docs/reference/expectations/distributional_expectations).
 
 ## Conditional Expectations
 
@@ -58,17 +58,17 @@ Conditional Expectations are those that are intended to be applied not to an ent
 
 Conditional Expectations are **experimentally** available for Pandas, Spark, and SQLAlchemy backends.
 
-For more information on these Expectations, please see [our reference guide for Conditional Expectations](../reference/expectations/conditional_expectations.md).
+For more information on these Expectations, please see [our reference guide for Conditional Expectations](/docs/reference/expectations/conditional_expectations).
 
 ## Limitations
 
 Unfortunately, not all Expectations are implemented for all Data Sources. To view a list of available Expectations, see the [Expectations Gallery](https://greatexpectations.io/expectations.html).
 
-Likewise, Conditional Expectations are considered **experimental** and may exhibit unexpected behavior when utilized with Spark and SQLAlchemy backends.  You can reference our [documentation on Conditional Expectations](../reference/expectations/conditional_expectations.md) for more information.
+Likewise, Conditional Expectations are considered **experimental** and may exhibit unexpected behavior when utilized with Spark and SQLAlchemy backends.  You can reference our [documentation on Conditional Expectations](/docs/reference/expectations/conditional_expectations) for more information.
 
 ## Access
 
-You may directly access Expectations as part of the interactive workflow for creating new Expectations.  For further details on this process, see guide on [how to create and edit Expectations with instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).  
+You may directly access Expectations as part of the interactive workflow for creating new Expectations.  For further details on this process, see guide on [how to create and edit Expectations with instant feedback from a sample Batch of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).  
 
 ## Create
 
@@ -81,17 +81,17 @@ There are several paths to generating Expectations:
 - Expertise. Rich experience from subject-matter experts, Analysts, and data owners is often a critical source of Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure conditions can be can excellent way to generate Expectations.
 - Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter Notebooks)is an important way to develop experience with both raw and derived datasets and generate useful and testable Expectations about characteristics that may be important for the data's eventual purpose, whether reporting or feeding another downstream model or data system.
 
-For more information on these methods, see [overview guide for creating Expectations](../guides/expectations/create_expectations_overview.md#the-create-expectations-process).
+For more information on these methods, see [overview guide for creating Expectations](/docs/oss/guides/expectations/create_expectations_overview#the-create-expectations-process).
 
 ## Configure
 
-Most of the time you will not need to directly interact with an Expectation's configurations.  However, advanced users may have circumstances in which it is desirable to define Expectations based purely on domain knowledge, without comparing against underlying data.  To do this, you will need to directly write an Expectation's configuration.  For details on how to do this, please reference our guide on [how to create and edit Expectations based on domain knowledge, without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
+Most of the time you will not need to directly interact with an Expectation's configurations.  However, advanced users may have circumstances in which it is desirable to define Expectations based purely on domain knowledge, without comparing against underlying data.  To do this, you will need to directly write an Expectation's configuration.  For details on how to do this, please reference our guide on [how to create and edit Expectations based on domain knowledge, without inspecting data directly](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly).
 
-The other occasion when you may want to edit an Expectation's configuration is when you need to edit the `result_format` of a <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectation" />  The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.  For further details, please see [our reference guide on the result_format parameter](../reference/expectations/result_format.md).
+The other occasion when you may want to edit an Expectation's configuration is when you need to edit the `result_format` of a <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectation" />  The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.  For further details, please see [our reference guide on the result_format parameter](/docs/reference/expectations/result_format).
 
 ## Results
 
-All Expectations return a JSON-serializable dictionary when evaluated, which consists of four standard (though optional, depending on the type of Expectation in question) arguments.  These are: `result_format`, `include_config`, `catch_exceptions`, and `meta`.  For a more detailed explanation as to what each of these arguments consists of and which Expectations use them, please see [our reference guide on standard arguments](../reference/expectations/standard_arguments.md).
+All Expectations return a JSON-serializable dictionary when evaluated, which consists of four standard (though optional, depending on the type of Expectation in question) arguments.  These are: `result_format`, `include_config`, `catch_exceptions`, and `meta`.  For a more detailed explanation as to what each of these arguments consists of and which Expectations use them, please see [our reference guide on standard arguments](/docs/reference/expectations/standard_arguments).
 
 ## Domain and Success Keys
 

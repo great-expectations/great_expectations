@@ -16,17 +16,17 @@ Your Data Context provides you with the methods to configure your Stores, plugin
 
 ## Use Cases
 
-![What your Data Context does for you throughout using GX](../guides/images/overview_illustrations/data_context_does_for_you.png)
+![What your Data Context does for you throughout using GX](/docs/oss/guides/images/overview_illustrations/data_context_does_for_you.png)
 
-When you configure your GX environment, you'll instantiate a Data Context. See [Instantiate a Data Context](../guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+When you configure your GX environment, you'll instantiate a Data Context. See [Instantiate a Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
-You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  To configure Stores, see [Configure your GX environment](../guides/setup/setup_overview_lp.md). To host and share Data Docs, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
+You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  To configure Stores, see [Configure your GX environment](/docs/oss/guides/setup/setup_overview_lp). To host and share Data Docs, see [Host and share Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs).
 
-When you connect to data, you use your Data Context to create and configure Data Sources.  For more information on how to create and configure Data Sources, see [Connect to a Data Source](../guides/connecting_to_your_data/connect_to_data_lp.md).
+When you connect to data, you use your Data Context to create and configure Data Sources.  For more information on how to create and configure Data Sources, see [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp).
 
-When creating Expectations, you'll use your Data Context to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, and then save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />. The Data Context also manages Metrics and Validation Results. The Data Context manages the content of your Data Docs (displaying such things as the Validation Results and Expectations).  For more information about creating Expectations, see [Create Expectations](../guides/expectations/expectations_lp.md). 
+When creating Expectations, you'll use your Data Context to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, and then save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />. The Data Context also manages Metrics and Validation Results. The Data Context manages the content of your Data Docs (displaying such things as the Validation Results and Expectations).  For more information about creating Expectations, see [Create Expectations](/docs/oss/guides/expectations/expectations_lp). 
 
-When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, see [Validate Data](../guides/validation/validate_data_lp.md). 
+When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, see [Validate Data](/docs/oss/guides/validation/validate_data_lp). 
 
 ## Access to APIs
 

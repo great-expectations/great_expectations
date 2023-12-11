@@ -20,11 +20,11 @@ Execution Engines are components of <TechnicalTag relative="../" tag="datasource
 
 You define the Execution Engine that you want to use to process data to compute Metrics in the Data Source configuration.  After you define the Execution Engine, you don't need to interact with it because the Data Source it is configured for uses it automatically.
 
-If you use the [interactive workflow for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), an Execution Engine and the Data Source provide the data for introspection.
+If you use the [interactive workflow for creating Expectations](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), an Execution Engine and the Data Source provide the data for introspection.
 
 When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Validates data, it uses a Data Source (and therefore an Execution Engine) to execute one or more Batch Requests and acquire the data that the Validation is run on.
 
-When creating Custom Expectations and Metrics, often Execution Engine-specific logic is required for that Expectation or Metric. See [Custom Expectations](../guides/expectations/custom_expectations_lp.md) for more information.
+When creating Custom Expectations and Metrics, often Execution Engine-specific logic is required for that Expectation or Metric. See [Custom Expectations](/docs/oss/guides/expectations/custom_expectations_lp) for more information.
 
 ## Standardized data and Expectations
 

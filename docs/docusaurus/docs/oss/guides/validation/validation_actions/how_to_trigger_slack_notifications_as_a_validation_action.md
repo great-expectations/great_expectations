@@ -1,7 +1,7 @@
 ---
 title: Trigger Slack notifications as an Action
 ---
-import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import Prerequisites from '/docs/oss/guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -126,7 +126,7 @@ Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of d
 
   If successful, you should receive a Slack message that looks like this:
 
-![slack_notification_example](@site/docs/oss/images/slack_notification_example.png)
+![slack_notification_example](/docs/oss/images/slack_notification_example.png)
 
 
 ## Additional notes

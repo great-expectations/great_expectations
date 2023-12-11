@@ -96,7 +96,7 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_metrics"
   ```
 
-  ![Plot Metrics](@site/docs/oss/images/data_assistant_plot_metrics.png)
+  ![Plot Metrics](/docs/oss/images/data_assistant_plot_metrics.png)
 
   :::note
   Hover over a data point to view more information about the Batch and its calculated Metric value.
@@ -112,7 +112,7 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_expectations_and_metrics"
   ```
 
-  ![Plot Expectations and Metrics](@site/docs/oss/images/data_assistant_plot_expectations_and_metrics.png)
+  ![Plot Expectations and Metrics](/docs/oss/images/data_assistant_plot_expectations_and_metrics.png)
 
   :::note
   The Expectation and the Metric are not visualized by the `plot_expectations_and_metrics()` method when an Expectation is not produced by the Onboarding Data Assistant for a given Metric.

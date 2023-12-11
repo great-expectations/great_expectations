@@ -103,7 +103,7 @@ click 7 "#validate-data"
 
   The first <TechnicalTag tag="expectation" text="Expectation"/> uses domain knowledge (the `pickup_datetime` shouldn't be null).
 
-  The second <TechnicalTag tag="expectation" text="Expectation"/> uses [`auto=True` to detect a range of values](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) in the `passenger_count` column.
+  The second <TechnicalTag tag="expectation" text="Expectation"/> uses [`auto=True` to detect a range of values](/docs/oss/guides/expectations/how_to_use_auto_initializing_expectations#using-autotrue) in the `passenger_count` column.
 
 ## Validate data
 

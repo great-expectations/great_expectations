@@ -22,11 +22,11 @@ When you create Expectations, you'll need to provide a Batch of data to test you
 
 For more information, see:
 
-- [How to create Expectations interactively in Python](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [How to create Expectations interactively in Python](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
 
 When <TechnicalTag relative="../" tag="validation" text="Validating" /> data with a Checkpoint, you will need to provide one or more Batch Requests and one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  You can do this at runtime, or by defining Batch Request and Expectation Suite pairs in advance, in the Checkpoint's configuration.
 
-For more information on setting up Batch Request/Expectation Suite pairs in a Checkpoint configuration, see [How to add validations data or suites to a Checkpoint](../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md).
+For more information on setting up Batch Request/Expectation Suite pairs in a Checkpoint configuration, see [How to add validations data or suites to a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint).
 
 ## Guaranteed relationships
 

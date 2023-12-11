@@ -28,6 +28,6 @@ When looking for Renderers with Expectations, you will find them specified as pa
 
 If you need instructions on how to configure the renderer portion of an Action to send a message or alert, please see the relevant guide:
 
-- [How to trigger email as a Validation Action](../guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action.md)
-- [How to trigger Slack notifications as a Validation Action](../guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
-- [How to trigger Opsgenie notifications as a Validation Action](../guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action.md)
+- [How to trigger email as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action)
+- [How to trigger Slack notifications as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action)
+- [How to trigger Opsgenie notifications as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action)

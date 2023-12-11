@@ -21,8 +21,8 @@ The lifecycle of an Expectation Suite starts with creating it. Then it goes thro
 Expectation Suites are largely managed automatically in the workflows for creating Expectations.  When the Expectations are created, an Expectation Suite is created to contain them.  In an interactive workflow, an Expectation Suite will be configured to include Expectations as they are defined, but will not be saved to an Expectation Store until you issue the command for it to be.
 
 For more information on these processes, please see:
-- [Our overview on the process of Creating Expectations](../guides/expectations/create_expectations_overview.md)
-- [Our guide on how to create and edit Expectations with instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Our overview on the process of Creating Expectations](/docs/oss/guides/expectations/create_expectations_overview)
+- [Our guide on how to create and edit Expectations with instant feedback from a sample Batch of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
 
 Expectation Suites are *used* during the Validation of data.  In this step, you will need to provide one or more Expectation Suites to a Checkpoint.  This can either be done by configuring the Checkpoint to use a preset list of one or more Expectation Suites, or by configuring the Checkpoint to accept a list of one or more Expectation Suites at runtime.
 

@@ -28,11 +28,11 @@ validator.expect_column_values_to_not_be_null("my_column")
 validator.save_expectation_suite(discard_failed_expectations=False)
 ```
 
-To configure your Expectation store to load a Suite at a later time, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
+To configure your Expectation store to load a Suite at a later time, see [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores).
 
 ## Run validation
 
-To create and run a Checkpoint in code, see [How to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).  In a hosted environment you will not be able to store the Checkpoint for repeated use across Python sessions, but you can recreate it each time your scripts run.
+To create and run a Checkpoint in code, see [How to create a new Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint).  In a hosted environment you will not be able to store the Checkpoint for repeated use across Python sessions, but you can recreate it each time your scripts run.
 
 ## Use Data Docs
 

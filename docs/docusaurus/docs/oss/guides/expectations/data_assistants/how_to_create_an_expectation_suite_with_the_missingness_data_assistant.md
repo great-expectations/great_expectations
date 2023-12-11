@@ -7,7 +7,7 @@ import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 
 :::caution
 
-Missingness Data Assistant functionality is [Experimental](/docs/contributing/contributing_maturity).
+Missingness Data Assistant functionality is [Experimental](/docs/oss/contributing/contributing_maturity).
 
 :::
 
@@ -93,7 +93,7 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_metrics"
   ```
 
-  ![Plot Metrics](@site/docs/oss/images/data_assistant_plot_metrics.png)
+  ![Plot Metrics](/docs/oss/images/data_assistant_plot_metrics.png)
 
   :::note
   Hover over a data point to view more information about the Batch and its calculated Metric value.

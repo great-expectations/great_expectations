@@ -13,7 +13,7 @@ Data Docs can be used to view <TechnicalTag relative="../" tag="expectation_suit
 
 ## Use cases
 
-You can configure multiple Data Docs sites while setting up your Great Expectations project.  This allows you to tailor the information that is displayed by Data Docs as well as how they are hosted.  To host and share your Data Docs, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
+You can configure multiple Data Docs sites while setting up your Great Expectations project.  This allows you to tailor the information that is displayed by Data Docs as well as how they are hosted.  To host and share your Data Docs, see [Host and share Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs).
 
 You can view your saved Expectation Suites in Data Docs.  
 
@@ -64,4 +64,4 @@ Data Docs sites are configured under the `data_docs_sites` key in your deploymen
 - where the HTML files should be written (filesystem, S3, Azure, or GCS)
 - which <TechnicalTag relative="../" tag="renderer" text="Renderer" /> and view class should be used to render each section
 
-For more information, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
+For more information, see [Host and share Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs).

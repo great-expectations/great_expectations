@@ -20,7 +20,7 @@ This guide will help you set up Opsgenie alert notifications when running Great 
 
 - Navigate to Settings > Integration list within Opsgenie using the sidebar menu.
 
- ![/images/opsgenie_integration_list.png](@site/docs/oss/images/opsgenie_integration_list.png)
+ ![/images/opsgenie_integration_list.png](/docs/oss/images/opsgenie_integration_list.png)
 
 - Select add on the 'API' integration, this will generally be the first available option.
 - Name the integration something meaningful such as 'Great Expectations'

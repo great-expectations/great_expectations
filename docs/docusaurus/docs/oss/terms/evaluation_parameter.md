@@ -31,9 +31,9 @@ The core of this is a `$PARAMETER : URN` pair. When Great Expectations encounter
 
 If you do not have a previous Expectation Suite's Validation Results to reference, however, you can instead provide Evaluation Parameters with a temporary initial value. For example, the interactive method of creating Expectations is based on Validating Expectations against a previous run of the same Expectation Suite.  Since a previous run has not been performed when Expectations are being created, Evaluation Parameters cannot reference a past Validation and will require a temporary value instead.  This will allow you to test Expectations that are meant to rely on values from previous Validation runs before you have actually used them to Validate data.  
 
-Say you are creating additional Expectations for the data that you used in the [Quickstart guide](tutorials/quickstart/quickstart.md).  You want to create an expression that asserts that the row count for each Validation remains the same as the previous `upstream_row_count`, but since there is no previous `upstream_row_count` you need to provide a value that matches what the Expectation you are creating will find.
+Say you are creating additional Expectations for the data that you used in the [Quickstart guide](/docs/oss/tutorials/quickstart/quickstart).  You want to create an expression that asserts that the row count for each Validation remains the same as the previous `upstream_row_count`, but since there is no previous `upstream_row_count` you need to provide a value that matches what the Expectation you are creating will find.
 
-To do so, you would first edit your existing (or create a new) Expectation Suite using a `Validator` object, as shown in our guide on [How to create Expectations interactively in Python](guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+To do so, you would first edit your existing (or create a new) Expectation Suite using a `Validator` object, as shown in our guide on [How to create Expectations interactively in Python](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 
 The Expectation you will want to add to solve the above problem is the `expect_table_row_count_to_equal` Expectation, and this Expectation uses an evaluation parameter: `upstream_row_count`.  Therefore, when using the validator to add the `expect_table_row_count_to_equal` Expectation you will have to define the parameter in question (`upstream_row_count`) by assigning it to the `$PARAMETER` value in a dictionary.  Then, you would provide the temporary value for that parameter by setting it as the value of the `$PARAMETER.<parameter_in_question>` key in the same dictionary.  Or, in this case, the `$PARAMETER.upstream_row_count`.
 
@@ -63,7 +63,7 @@ This returns `{'success': True}`.
 
 Additionally, if the Evaluation Parameter's value is set in this way, you do not need to set it again (or define it alongside the use of the `$PARAMETER` key) for future Expectations that you create with this Validator.
 
-It is also possible for advanced users to create Expectations using Evaluation Parameters by turning off interactive evaluation and adding the Expectation configuration directly to the Expectation Suite.  For more information on this, see our guide on [how to create and edit Expectations based on domain knowledge without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
+It is also possible for advanced users to create Expectations using Evaluation Parameters by turning off interactive evaluation and adding the Expectation configuration directly to the Expectation Suite.  For more information on this, see our guide on [how to create and edit Expectations based on domain knowledge without inspecting data directly](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly).
 
 More typically, when validating Expectations, you will provide Evaluation Parameters that are only available at runtime.
 
@@ -111,7 +111,7 @@ The Evaluation Parameter references take the form of a dictionary with the `$PAR
 
 To store Evaluation Parameters, define a `StoreEvaluationParametersAction` subclass of the `ValidationAction` class in a Checkpoint configuration's `action_list`, and run that Checkpoint.
 
-It is also possible to [dynamically load Evaluation Parameters from a database](../guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.md).
+It is also possible to [dynamically load Evaluation Parameters from a database](/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database).
 
 ## Evaluation Parameter expressions
 

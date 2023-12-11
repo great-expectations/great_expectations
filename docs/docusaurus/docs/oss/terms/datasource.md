@@ -22,7 +22,7 @@ Data Sources function by bringing together a way of interacting with Data (an <T
 
 When connecting to data the Data Source is your primary tool. At this stage, you will create Data Sources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.  Under the hood, each Data Source uses an Execution Engine (ex: SQLAlchemy, Pandas, and Spark) to connect to and query data. Once a Data Source is configured you will be able to operate with the Data Source's API rather than needing a different API for each possible data backend you may be working with.
 
-When creating <TechnicalTag relative="../" tag="expectation" text="Expectations" />, you'll use your Data Sources to obtain <TechnicalTag relative="../" tag="batch" text="Batches" /> for analysis and for your <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />. For example, when you use [the interactive workflow](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) to create new Expectations.
+When creating <TechnicalTag relative="../" tag="expectation" text="Expectations" />, you'll use your Data Sources to obtain <TechnicalTag relative="../" tag="batch" text="Batches" /> for analysis and for your <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />. For example, when you use [the interactive workflow](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data) to create new Expectations.
 
 Data Sources are also used to obtain Batches for <TechnicalTag relative="../" tag="validator" text="Validators" /> to run against when you are validating data.
 
@@ -46,5 +46,5 @@ This next snippet shows how to retrieve the Data Source from the Data Context.
 ```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config"
 ```
 
-For detailed instructions on how to create Data Sources that are configured for various backends, see [our documentation on Connecting to Data Sources](../guides/connecting_to_your_data/connect_to_data_lp.md).
+For detailed instructions on how to create Data Sources that are configured for various backends, see [our documentation on Connecting to Data Sources](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp).
 

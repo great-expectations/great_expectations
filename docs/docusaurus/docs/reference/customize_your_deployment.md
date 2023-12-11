@@ -19,31 +19,31 @@ Here’s an overview of the components of a typical Great Expectations deploymen
   * [Connecting to Data](#connecting-to-data)
   * [Options for hosting Data Docs](#options-for-hosting-data-docs)
   * [Additional Checkpoints and Actions](#additional-checkpoints-and-actions)
-  * [How to update Data Docs as a Validation Action](../guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)
+  * [How to update Data Docs as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action)
 
 ## Options for storing Great Expectations configuration
 The simplest way to manage your Great Expectations configuration is usually by committing great_expectations/great_expectations.yml to Git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
 
 Here’s how to handle each of those cases:
 
-* [Configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
-* [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
+* [Configure credentials](/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+* [Instantiate an Ephemeral Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 ## Options for storing Expectations
 
 Many teams find it convenient to store Expectations in Git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. Git acts as a collaboration tool and source of record.
 
-Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database. See [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
+Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database. See [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores).
 
 ## Options for storing Validation Results
 
-By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database. See [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md).
+By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database. See [Configure Validation Result Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_result_stores).
 
 
 ## Reference Architectures
 
-* [How to instantiate a Data Context on an EMR Spark cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-* [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
+* [How to instantiate a Data Context on an EMR Spark cluster](/docs/oss/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+* [How to use Great Expectations in Databricks](/docs/oss/tutorials/getting_started/how_to_use_great_expectations_in_databricks)
 
 ## Connecting to Data
 
@@ -63,20 +63,20 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 
 ## Options for hosting Data Docs
 
-By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better solution is to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website. See [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
+By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better solution is to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website. See [Host and share Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs).
 
 
 ## Additional Checkpoints and Actions
 
 Most teams will want to configure various Checkpoints and Validation Actions as part of their deployment. There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.
 
-* [How to trigger Slack notifications as a Validation Action](../guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
-* [How to trigger Opsgenie notifications as a Validation Action](../guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action.md)
-* [How to trigger Email as a Validation Action](../guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action.md)
-* [How to deploy a scheduled Checkpoint with cron](../guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron.md)
-* [How to get Data Docs URLs for custom Validation Actions](../guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions.md)
-* [How to pass an in-memory DataFrame to a Checkpoint](../guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md)
-* [How to run a Checkpoint in Airflow](../deployment_patterns/how_to_use_great_expectations_with_airflow.md)
+* [How to trigger Slack notifications as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action)
+* [How to trigger Opsgenie notifications as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action)
+* [How to trigger Email as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action)
+* [How to deploy a scheduled Checkpoint with cron](/docs/oss/guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron)
+* [How to get Data Docs URLs for custom Validation Actions](/docs/oss/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions)
+* [How to pass an in-memory DataFrame to a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint)
+* [How to run a Checkpoint in Airflow](/docs/oss/deployment_patterns/how_to_use_great_expectations_with_airflow)
 
 ## Not interested in managing your own configuration or infrastructure?
 Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for [our weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to see our newest features and apply for our private Alpha program!

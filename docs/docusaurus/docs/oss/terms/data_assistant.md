@@ -34,7 +34,7 @@ Data Assistants can be accessed from your Data Context. To select a Data Assista
 
 To access the Onboarding Data Assistant, use `context.assistants.onboarding`.
 
-:::note For more information about the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
+:::note For more information about the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
 :::
 
 ## Configure
@@ -43,4 +43,4 @@ Data Assistants are pre-configured. You provide the Batch Request, and some opti
 
 ## Related documentation
 
-To learn more about working with the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
+To learn more about working with the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
