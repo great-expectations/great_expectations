@@ -549,9 +549,7 @@ def spark_session(test_backends) -> pyspark.SparkSession:
     if pyspark.SparkSession:
         return SparkDFExecutionEngine.get_or_create_spark_session(
             spark_config={
-                "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
 
