@@ -15,6 +15,7 @@ from enum import Enum
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+
 # </snippet>
 
 # Set up
