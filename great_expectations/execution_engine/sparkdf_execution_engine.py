@@ -351,7 +351,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
             # if the user set a spark_config option that doesn't match the existing session
             # try to update it, otherwise stop the spark session
             try:
-                if key != "spark.app.name" and spark_session.sparkContext.getConf().get(key) != value:
+                if (
+                    key != "spark.app.name"
+                    and spark_session.sparkContext.getConf().get(key) != value
+                ):
                     # attempts to update the runtime config
                     spark_session.conf.set(key, value)
                 elif (
