@@ -164,7 +164,6 @@ def test_SlackNotificationAction(
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # test for long text message - should be split into multiple messages
-    validation_result_suite.success = False
     long_text = "a" * 10000
     validation_result_suite.meta = {
         "active_batch_definition": BatchIdentifier(
