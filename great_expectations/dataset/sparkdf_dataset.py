@@ -79,10 +79,10 @@ class MetaSparkDFDataset(Dataset):
             # this is a little dangerous: expectations that specify "COMPLETE" result format and have a very
             # large number of unexpected results could hang for a long time. we should either call this out in docs
             # or put a limit on it
-            if result_format["result_format"] == "COMPLETE":
+            if result_format.result_format == "COMPLETE":
                 unexpected_count_limit = None
             else:
-                unexpected_count_limit = result_format["partial_unexpected_count"]
+                unexpected_count_limit = result_format.partial_unexpected_count
 
             col_df = self.spark_df.select(F.col(eval_col))  # pyspark.sql.DataFrame
 
@@ -218,10 +218,10 @@ class MetaSparkDFDataset(Dataset):
             # this is a little dangerous: expectations that specify "COMPLETE" result format and have a very
             # large number of unexpected results could hang for a long time. we should either call this out in docs
             # or put a limit on it
-            if result_format["result_format"] == "COMPLETE":
+            if result_format.result_format == "COMPLETE":
                 unexpected_count_limit = None
             else:
-                unexpected_count_limit = result_format["partial_unexpected_count"]
+                unexpected_count_limit = result_format.partial_unexpected_count
 
             cols_df = self.spark_df.select(eval_col_A, eval_col_B).withColumn(
                 "__row", F.monotonically_increasing_id()
@@ -387,10 +387,10 @@ class MetaSparkDFDataset(Dataset):
             # this is a little dangerous: expectations that specify "COMPLETE" result format and have a very
             # large number of unexpected results could hang for a long time. we should either call this out in docs
             # or put a limit on it
-            if result_format["result_format"] == "COMPLETE":
+            if result_format.result_format == "COMPLETE":
                 unexpected_count_limit = None
             else:
-                unexpected_count_limit = result_format["partial_unexpected_count"]
+                unexpected_count_limit = result_format.partial_unexpected_count
 
             temp_df = self.spark_df.select(*eval_cols)  # pyspark.sql.DataFrame
 

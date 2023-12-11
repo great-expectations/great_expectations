@@ -160,7 +160,7 @@ class MetaDataset(DataAsset):
 
             return_obj = {"success": bool(evaluation_result["success"])}
 
-            if result_format["result_format"] == "BOOLEAN_ONLY":
+            if result_format.result_format == "BOOLEAN_ONLY":
                 return return_obj
 
             return_obj["result"] = {
@@ -180,13 +180,13 @@ class MetaDataset(DataAsset):
                 return_obj["result"]["missing_count"] = None
                 return_obj["result"]["missing_percent"] = None
 
-            if result_format["result_format"] == "BASIC":
+            if result_format.result_format == "BASIC":
                 return return_obj
 
             if "details" in evaluation_result["result"]:
                 return_obj["result"]["details"] = evaluation_result["result"]["details"]
 
-            if result_format["result_format"] in ["SUMMARY", "COMPLETE"]:
+            if result_format.result_format in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
             raise ValueError(f"Unknown result_format {result_format['result_format']}.")

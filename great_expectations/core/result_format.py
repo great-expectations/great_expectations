@@ -1,6 +1,7 @@
 import enum
+from typing import List, Optional
 
-from typing_extensions import TypedDict
+from great_expectations.compatibility import pydantic
 
 
 class ResultFormat(str, enum.Enum):
@@ -10,5 +11,10 @@ class ResultFormat(str, enum.Enum):
     SUMMARY = "SUMMARY"
 
 
-class ResultFormatDict(TypedDict):
+class ResultFormatConfig(pydantic.BaseModel):
     result_format: ResultFormat
+    unexpected_index_column_names: Optional[List[str]] = None
+    return_unexpected_index_query: Optional[bool] = None
+    partial_unexpected_count: Optional[int] = None
+    include_unexpected_rows: Optional[bool] = None
+    exclude_unexpected_values: Optional[bool] = None

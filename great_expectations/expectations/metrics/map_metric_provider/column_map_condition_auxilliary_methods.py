@@ -85,10 +85,10 @@ def _pandas_column_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         return list(domain_values)
 
-    return list(domain_values[: result_format["partial_unexpected_count"]])
+    return list(domain_values[: result_format.partial_unexpected_count])
 
 
 # TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>
@@ -154,15 +154,15 @@ def _pandas_column_map_series_and_domain_values(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         return (
             list(domain_values),
             list(map_series),
         )
 
     return (
-        list(domain_values[: result_format["partial_unexpected_count"]]),
-        list(map_series[: result_format["partial_unexpected_count"]]),
+        list(domain_values[: result_format.partial_unexpected_count]),
+        list(map_series[: result_format.partial_unexpected_count]),
     )
 
 
@@ -227,10 +227,10 @@ def _pandas_column_map_condition_value_counts(
     if not value_counts:
         raise gx_exceptions.MetricComputationError("Unable to compute value counts")
 
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         return value_counts
 
-    return value_counts[result_format["partial_unexpected_count"]]
+    return value_counts[result_format.partial_unexpected_count]
 
 
 def _sqlalchemy_column_map_condition_values(
@@ -278,10 +278,10 @@ def _sqlalchemy_column_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format["result_format"] != "COMPLETE":
-        query = query.limit(result_format["partial_unexpected_count"])
+    if result_format.result_format != "COMPLETE":
+        query = query.limit(result_format.partial_unexpected_count)
     elif (
-        result_format["result_format"] == "COMPLETE"
+        result_format.result_format == "COMPLETE"
         and execution_engine.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
     ):
         logger.warning(
@@ -380,7 +380,7 @@ def _spark_column_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         rows = filtered.select(
             F.col(column_name).alias(column_name)
         ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
@@ -389,7 +389,7 @@ def _spark_column_map_condition_values(
             filtered.select(
                 F.col(column_name).alias(column_name)
             )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
-            .limit(result_format["partial_unexpected_count"])
+            .limit(result_format.partial_unexpected_count)
             .collect()
         )
     return [row[column_name] for row in rows]
@@ -434,8 +434,8 @@ def _spark_column_map_condition_value_counts(
     result_format = metric_value_kwargs["result_format"]
 
     value_counts = filtered.groupBy(F.col(column_name).alias(column_name)).count()
-    if result_format["result_format"] == "COMPLETE":
+    if result_format.result_format == "COMPLETE":
         rows = value_counts.collect()
     else:
-        rows = value_counts.collect()[: result_format["partial_unexpected_count"]]
+        rows = value_counts.collect()[: result_format.partial_unexpected_count]
     return rows
