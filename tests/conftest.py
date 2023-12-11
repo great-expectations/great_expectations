@@ -2823,7 +2823,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
             )
         ),
     )
-    return get_context(context_root_dir=context_path)
+    return get_context(context_root_dir=context_path, cloud_mode=False)
 
 
 @pytest.fixture
