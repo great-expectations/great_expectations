@@ -120,7 +120,6 @@ def test_spark_config_passed_to_execution_engine(
     spark_config: SparkConfig = {
         "spark.app.name": "gx_spark_fluent_datasource_test",
         "spark.default.parallelism": 4,
-        "spark.driver.memory": "16g",
         "spark.master": "local[*]",
     }
     datasource = empty_data_context.sources.add_spark(
