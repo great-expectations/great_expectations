@@ -4,7 +4,6 @@ import copy
 import logging
 import pathlib
 from typing import TYPE_CHECKING
-from unittest import mock
 
 import pytest
 
@@ -119,11 +118,9 @@ def test_spark_config_passed_to_execution_engine(
     spark_session,
 ):
     spark_config: SparkConfig = {
-        "spark.sql.catalogImplementation": "in-memory",
         "spark.app.name": "gx_spark_fluent_datasource_test",
         "spark.default.parallelism": 4,
         "spark.driver.memory": "16g",
-        "spark.executor.memory": 471859200,
         "spark.master": "local[*]",
     }
     datasource = empty_data_context.sources.add_spark(
@@ -158,16 +155,13 @@ def test_build_batch_request_raises_if_missing_dataframe(
 
 
 @pytest.mark.spark
-def test_databricks_app_name_warning(
+def test_unmodifiable_config_option_warning(
     empty_data_context: AbstractDataContext,
     spark_session,
 ):
-    spark_config = {"spark.app.name": "Name not containing `databricks`"}
+    spark_config = {"spark.executor.memory": "700m"}
     with pytest.warns(RuntimeWarning):
-        with mock.patch(
-            "great_expectations.core.util._spark_config_updatable", return_value=True
-        ):
-            _ = empty_data_context.sources.add_spark(
-                name="my_spark_datasource",
-                spark_config=spark_config,  # type: ignore[arg-type]
-            )
+        _ = empty_data_context.sources.add_spark(
+            name="my_spark_datasource",
+            spark_config=spark_config,  # type: ignore[arg-type]
+        )

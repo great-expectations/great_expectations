@@ -351,7 +351,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
             # if the user set a spark_config option that doesn't match the existing session
             # try to update it, otherwise stop the spark session
             try:
-                if key != "spark.app.name" and spark_session.sparkContext.getConf().get(key) != value:
+                if (
+                    key != "spark.app.name"
+                    and spark_session.sparkContext.getConf().get(key) != value
+                ):
                     # attempts to update the runtime config
                     spark_session.conf.set(key, value)
                 elif (
@@ -364,7 +367,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
                     spark_session=spark_session
                 ):
                     warning_messages.append(
-                        f"spark_config option `{key}` is not modifiable "
+                        f"Passing spark_config option `{key}` had no effect, because it is not modifiable, "
                         "and Spark Session cannot be restarted in this environment."
                     )
                 else:

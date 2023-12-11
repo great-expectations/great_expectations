@@ -547,11 +547,7 @@ def spark_session(test_backends) -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:
-        return SparkDFExecutionEngine.get_or_create_spark_session(
-            spark_config={
-                "spark.executor.memory": "450m",
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
 
     raise ValueError("spark tests are requested, but pyspark is not installed")
 
