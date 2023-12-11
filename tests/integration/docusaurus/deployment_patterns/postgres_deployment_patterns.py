@@ -49,7 +49,7 @@ print(validator.head())
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
-    column="congestion_surcharge", min_value=0.0, max_value=1000.0
+    column="congestion_surcharge", min_value=0, max_value=1000
 )
 # </snippet>
 
@@ -86,9 +86,7 @@ checkpoint_result = checkpoint.run()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-assert (
-    checkpoint_result["success"] is True
-), f"Checkpoint result failed: {checkpoint_result}"
+assert checkpoint_result["success"] is True
 statistics = checkpoint_result["run_results"][
     list(checkpoint_result["run_results"].keys())[0]
 ]["validation_result"]["statistics"]

@@ -30,7 +30,6 @@ from marshmallow import ValidationError
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -95,6 +94,9 @@ if TYPE_CHECKING:
         BatchDataUnion,
         BatchDefinition,
         BatchMarkers,
+    )
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context.data_context import AbstractDataContext
@@ -519,11 +521,8 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            configuration = ExpectationConfiguration(
-                expectation_type=name,
-                kwargs=expectation_kwargs,
-                meta=meta,
-            )
+            expectation = expectation_impl(**expectation_kwargs, meta=meta)
+            configuration = expectation.configuration
 
             exception_info: ExceptionInfo
 
