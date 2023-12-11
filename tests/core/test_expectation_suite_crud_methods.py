@@ -6,7 +6,6 @@ import pytest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.exceptions import (
-    DataContextError,
     InvalidExpectationConfigurationError,
 )
 
@@ -437,123 +436,6 @@ def test_remove_expectation_without_necessary_args(single_expectation_suite):
     assert (
         str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
     )
-
-
-@pytest.mark.filesystem
-def test_add_expectation_configurations(
-    exp1,
-    exp2,
-    exp3,
-    exp4,
-    exp5,
-    single_expectation_suite,
-    different_suite,
-):
-    expectation_configurations = [exp1, exp2, exp3, exp4, exp5]
-    assert len(single_expectation_suite.expectations) == 1
-    assert not single_expectation_suite.isEquivalentTo(different_suite)
-    result = single_expectation_suite.legacy_add_expectation_configurations(
-        expectation_configurations=expectation_configurations,
-        send_usage_event=False,
-        match_type="domain",
-        overwrite_existing=True,
-    )
-    assert len(result) == 5
-
-    # Collisions/overrites due to same "match_type" value
-    assert len(single_expectation_suite.expectations) == 2
-
-    # Should raise if overwrite_existing=False and a matching expectation is found
-    with pytest.raises(DataContextError):
-        # noinspection PyUnusedLocal
-        result = single_expectation_suite.legacy_add_expectation_configurations(
-            expectation_configurations=expectation_configurations,
-            send_usage_event=False,
-            match_type="domain",
-            overwrite_existing=False,
-        )
-
-    assert single_expectation_suite.isEquivalentTo(different_suite)
-
-
-@pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_add_expectation(
-    mock_emit,
-    exp2,
-    exp4,
-    single_expectation_suite,
-    baseline_suite,
-    different_suite,
-    domain_success_runtime_suite,
-):
-    assert len(single_expectation_suite.expectations) == 1
-    assert not single_expectation_suite.isEquivalentTo(baseline_suite)
-    single_expectation_suite.legacy_add_expectation_by_configuration(
-        exp2, match_type="runtime", overwrite_existing=False
-    )
-    assert single_expectation_suite.isEquivalentTo(baseline_suite)
-    assert len(single_expectation_suite.expectations) == 2
-
-    # Should raise if overwrite_existing=False and a matching expectation is found
-    with pytest.raises(DataContextError):
-        single_expectation_suite.legacy_add_expectation_by_configuration(
-            exp4, match_type="domain", overwrite_existing=False
-        )
-
-    assert not single_expectation_suite.isEquivalentTo(different_suite)
-    single_expectation_suite.legacy_add_expectation_by_configuration(
-        exp4, match_type="domain", overwrite_existing=True
-    )
-    assert single_expectation_suite.isEquivalentTo(different_suite)
-    assert len(single_expectation_suite.expectations) == 2
-
-    # Should raise if more than one matching expectation is found
-    with pytest.raises(ValueError):
-        domain_success_runtime_suite.legacy_add_expectation_by_configuration(
-            exp2, match_type="success", overwrite_existing=False
-        )
-
-    config = ExpectationConfiguration(expectation_type="not an expectation", kwargs={})
-    with pytest.raises(InvalidExpectationConfigurationError):
-        single_expectation_suite.legacy_add_expectation_by_configuration(config)
-
-    # Turn this on once we're ready to enforce strict typing.
-    # with pytest.raises(TypeError):
-    #     single_expectation_suite.append_expectation(exp1.to_json_dict())
-    assert mock_emit.call_count == 4
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": False,
-            }
-        ),
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": False,
-            }
-        ),
-    ]
 
 
 @pytest.mark.cloud
