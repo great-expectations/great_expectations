@@ -24,6 +24,9 @@ profile = "black"
 skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+
 [tool.mypy]
 python_version = "3.8"
 plugins = [
