@@ -71,6 +71,8 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
             partial_unexpected_count=20,
             include_unexpected_rows=False,
         )
+    elif isinstance(result_format, dict):
+        result_format = ResultFormatConfig(**result_format)
     else:
         if result_format.include_unexpected_rows and not result_format.result_format:
             raise ValueError(

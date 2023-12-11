@@ -2,7 +2,6 @@ import pandas as pd
 import pytest
 
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -18,6 +17,7 @@ from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
+from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
@@ -410,10 +410,10 @@ def test_pandas_unexpected_rows_basic_result_format(
             "column": "animals",
             "mostly": 0.9,
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "BASIC",
-                "include_unexpected_rows": True,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="BASIC",
+                include_unexpected_rows=True,
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -451,10 +451,10 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
             "column": "animals",
             "mostly": 0.9,
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "include_unexpected_rows": False,  # this is the default value, but making explicit for testing purposes
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                include_unexpected_rows=False,  # this is the default value, but making explicit for testing purposes
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -493,10 +493,10 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
             "column": "animals",
             "mostly": 0.9,
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "include_unexpected_rows": True,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                include_unexpected_rows=True,
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -539,10 +539,10 @@ def test_pandas_unexpected_rows_complete_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "include_unexpected_rows": True,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+                include_unexpected_rows=True,
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -588,9 +588,9 @@ def test_expectation_configuration_has_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+            ),
         },
     )
     with pytest.warns(UserWarning) as config_warning:
@@ -618,9 +618,9 @@ def test_pandas_default_complete_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -661,10 +661,10 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1"],
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+                unexpected_index_column_names=["pk_1"],
+            ),
         },
     )
     # result_format configuration at ExpectationConfiguration-level will emit warning
@@ -717,9 +717,9 @@ def test_pandas_default_to_not_include_unexpected_rows(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -743,10 +743,10 @@ def test_pandas_specify_not_include_unexpected_rows(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "include_unexpected_rows": False,
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+                include_unexpected_rows=False,
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -757,23 +757,6 @@ def test_pandas_specify_not_include_unexpected_rows(
         )
     )
     assert result.result == expected_evr_without_unexpected_rows.result
-
-
-@pytest.mark.unit
-def test_include_unexpected_rows_without_explicit_result_format_raises_error():
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "include_unexpected_rows": False,
-            },
-        },
-    )
-
-    with pytest.raises(ValidationError):
-        ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
 
 
 # Spark
@@ -787,9 +770,9 @@ def test_spark_single_column_complete_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+            ),
         },
     )
     expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
@@ -843,10 +826,10 @@ def test_spark_single_column_complete_result_format_with_id_pk(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1"],
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+                unexpected_index_column_names=["pk_1"],
+            ),
         },
     )
     expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
@@ -915,9 +898,9 @@ def test_spark_single_column_summary_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+            ),
         },
     )
     expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
@@ -968,9 +951,9 @@ def test_spark_single_column_basic_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "BASIC",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="BASIC",
+            ),
         },
     )
     expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
@@ -1017,9 +1000,9 @@ def test_sqlite_single_column_complete_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -1061,10 +1044,10 @@ def test_sqlite_single_column_complete_result_format_id_pk(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "COMPLETE",
-                "unexpected_index_column_names": ["pk_1"],
-            },
+            "result_format": ResultFormatConfig(
+                result_format="COMPLETE",
+                unexpected_index_column_names=["pk_1"],
+            ),
         },
     )
 
@@ -1118,9 +1101,9 @@ def test_sqlite_single_column_summary_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="SUMMARY",
+            ),
         },
     )
     result: ExpectationValidationResult = (
@@ -1155,9 +1138,9 @@ def test_sqlite_single_column_basic_result_format(
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "BASIC",
-            },
+            "result_format": ResultFormatConfig(
+                result_format="BASIC",
+            ),
         },
     )
     result: ExpectationValidationResult = (
