@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 import logging
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
@@ -8,10 +10,6 @@ import pandas as pd
 from great_expectations.compatibility import aws, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
-)
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -41,12 +39,16 @@ from great_expectations.util import (
     get_pyathena_potential_type,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 logger = logging.getLogger(__name__)
 

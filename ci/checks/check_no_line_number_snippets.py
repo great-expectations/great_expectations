@@ -2,6 +2,8 @@
 Purpose: To ensure that no docs snippets use the file and line number convention,
 only the named snippets convention.
 """
+from __future__ import annotations
+
 import pathlib
 import re
 import shutil

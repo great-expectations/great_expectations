@@ -1,4 +1,5 @@
 ### Universal datasource configuration elements:
+from __future__ import annotations
 
 CONNECTION_STRING = "sqlite:///data/yellow_tripdata_sample_2020_all_months_combined.db"
 

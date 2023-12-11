@@ -1,4 +1,5 @@
 # snapshottest: v1 - https://goo.gl/zC4yUc
+from __future__ import annotations
 
 from snapshottest import Snapshot
 

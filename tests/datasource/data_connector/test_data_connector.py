@@ -1,4 +1,6 @@
 # TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.core.batch import (

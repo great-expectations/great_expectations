@@ -1,6 +1,8 @@
 """
 The real meat of these tests lives in the test_definitions directory for individual expectations
 """
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration

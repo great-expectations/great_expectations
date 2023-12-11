@@ -1,9 +1,7 @@
-from typing import Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Optional
+
 from great_expectations.render import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
@@ -11,6 +9,12 @@ from great_expectations.render import (
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):

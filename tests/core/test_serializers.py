@@ -1,11 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
-from marshmallow import Schema
 
 from great_expectations.core.configuration import AbstractConfigSchema
 from great_expectations.core.serializer import (
     DictConfigSerializer,
     JsonConfigSerializer,
 )
+
+if TYPE_CHECKING:
+    from marshmallow import Schema
 
 
 @pytest.fixture

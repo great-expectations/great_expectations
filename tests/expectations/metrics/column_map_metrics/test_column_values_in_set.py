@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from types import ModuleType
 from typing import List, Optional
 

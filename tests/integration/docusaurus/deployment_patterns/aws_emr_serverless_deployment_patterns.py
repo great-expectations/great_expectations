@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import boto3
 
 import great_expectations as gx

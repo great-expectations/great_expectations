@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict
 
 from great_expectations.core.expectation_configuration import (

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()

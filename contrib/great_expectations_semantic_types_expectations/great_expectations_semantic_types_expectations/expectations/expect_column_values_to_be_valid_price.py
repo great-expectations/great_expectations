@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from price_parser import Price
 
 from great_expectations.execution_engine import PandasExecutionEngine

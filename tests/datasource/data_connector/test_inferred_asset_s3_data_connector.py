@@ -1,4 +1,6 @@
 # noinspection PyPep8Naming
+from __future__ import annotations
+
 from contextlib import ExitStack as does_not_raise
 from typing import List
 from unittest import mock

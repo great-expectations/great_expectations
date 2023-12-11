@@ -1,18 +1,22 @@
+from __future__ import annotations
+
 import copy
 import logging
 from enum import Enum
-from typing import ClassVar, Dict, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Set
 
 import pandas as pd
 
 from great_expectations.compatibility import pydantic, pyspark
 
-from ..alias_types import JSONValues
 from ..core._docs_decorators import public_api
 from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
 from .fonts import FontFamily, FontFamilyURL
+
+if TYPE_CHECKING:
+    from ..alias_types import JSONValues
 
 logger = logging.getLogger(__name__)
 

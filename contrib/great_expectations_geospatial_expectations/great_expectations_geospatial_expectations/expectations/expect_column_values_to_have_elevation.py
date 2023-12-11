@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import geopandas
 from shapely.geometry import Point, mapping, shape
 

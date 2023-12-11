@@ -1,4 +1,6 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview add_datasource">
+from __future__ import annotations
+
 import great_expectations as gx
 
 context = gx.get_context()

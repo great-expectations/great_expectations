@@ -1,9 +1,11 @@
 """Test cases and fixtures for sampler integration test configurations."""
+from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import TYPE_CHECKING, List
 
-import pandas as pd
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class SamplerTaxiTestData:

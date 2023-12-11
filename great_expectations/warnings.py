@@ -3,6 +3,8 @@
 This module consolidates warnings throughout our codebase into a single place
 so that changes e.g. to verbiage are restricted to this file.
 """
+from __future__ import annotations
+
 import warnings
 
 

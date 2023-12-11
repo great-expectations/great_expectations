@@ -9,6 +9,8 @@
      API documentation category under Reference, replacing the existing content of this list.
         3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
 """
+from __future__ import annotations
+
 import importlib
 import inspect
 import pydoc

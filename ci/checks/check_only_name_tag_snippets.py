@@ -34,6 +34,7 @@ context = gx.get_context()
 
 Adherence to this pattern is assertained by the present checker module.
 """
+from __future__ import annotations
 
 import pathlib
 import re

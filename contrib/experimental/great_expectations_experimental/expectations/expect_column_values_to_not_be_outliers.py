@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from scipy import stats
 
 # !!! This giant block of imports should be something simpler, such as:

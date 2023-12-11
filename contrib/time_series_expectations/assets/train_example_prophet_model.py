@@ -8,6 +8,7 @@ The average value is about 100 and the standard deviation is about 1.
 
 Note: this model is manually copied to the `expectations/` folder to support built-in tests for Expectation classes.
 """
+from __future__ import annotations
 
 import pandas as pd
 from prophet import Prophet

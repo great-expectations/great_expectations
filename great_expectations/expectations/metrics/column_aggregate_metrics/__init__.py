@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .column_distinct_values import (
     ColumnDistinctValues,
     ColumnDistinctValuesCount,

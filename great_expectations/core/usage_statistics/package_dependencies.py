@@ -13,6 +13,8 @@ checking and updating these static lists.
     files against the static lists returned via the methods above in the
     usage example and raise exceptions if there are discrepancies.
 """
+from __future__ import annotations
+
 import pathlib
 import re
 from typing import Dict, List, Set

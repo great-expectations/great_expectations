@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import great_expectations as gx
 
 if __name__ == "__main__":

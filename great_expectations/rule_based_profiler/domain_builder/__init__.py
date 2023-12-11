@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (  # isort:skip
     DomainBuilder,
 )

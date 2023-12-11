@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import glob
 
 json_files = glob.glob("tests/**/output/**/*.json", recursive=True)  # noqa: PTH207

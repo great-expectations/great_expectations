@@ -1,4 +1,6 @@
 """Contains general abstract or base classes used across configuration objects."""
+from __future__ import annotations
+
 from abc import ABC
 from pprint import pformat as pf
 from typing import Optional

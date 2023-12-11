@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_instantiate_a_specific_filesystem_data_context" tests/integration/test_script_runner.py
 ```
 """
+from __future__ import annotations
 
 import pathlib
 

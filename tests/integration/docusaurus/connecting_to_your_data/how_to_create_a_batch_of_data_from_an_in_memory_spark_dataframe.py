@@ -1,4 +1,6 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py imports">
+from __future__ import annotations
+
 import great_expectations as gx
 from great_expectations.compatibility import pyspark
 from great_expectations.core import ExpectationSuite

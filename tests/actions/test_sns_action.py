@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.checkpoint.util import send_sns_notification

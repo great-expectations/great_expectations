@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .data_assistant_result import DataAssistantResult  # isort:skip
 from .column_value_missing_data_assistant_result import (  # isort:skip
     ColumnValueMissingDataAssistantResult,

@@ -1,4 +1,6 @@
 """These tests exercise ConfigurationBundle including Serialization."""
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.data_context.migrator.configuration_bundle import (

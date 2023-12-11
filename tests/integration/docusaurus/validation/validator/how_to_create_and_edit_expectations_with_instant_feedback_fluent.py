@@ -1,4 +1,6 @@
 # <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context">
+from __future__ import annotations
+
 import great_expectations as gx
 
 context = gx.get_context()

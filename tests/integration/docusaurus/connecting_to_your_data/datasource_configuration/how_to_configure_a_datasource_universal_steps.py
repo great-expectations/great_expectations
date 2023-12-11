@@ -18,6 +18,7 @@ the snippets that are specified for use in documentation are maintained.  These 
 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
+from __future__ import annotations
 
 from datasource_configuration_test_utilities import is_subset
 from full_datasource_configurations import (

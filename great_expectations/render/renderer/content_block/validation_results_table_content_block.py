@@ -1,12 +1,12 @@
+from __future__ import annotations
+
 import logging
 import traceback
 import warnings
 from copy import deepcopy
+from typing import TYPE_CHECKING
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
@@ -16,6 +16,11 @@ from great_expectations.render import (
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 

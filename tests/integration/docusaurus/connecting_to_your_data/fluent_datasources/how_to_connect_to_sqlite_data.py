@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_sqlite_data" tests/integration/test_script_runner.py
 ```
 """
+from __future__ import annotations
 
 import pathlib
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.self_check.util import build_test_backends_list
 
 

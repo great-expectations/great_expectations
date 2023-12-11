@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.expectations.expectation import _format_map_output

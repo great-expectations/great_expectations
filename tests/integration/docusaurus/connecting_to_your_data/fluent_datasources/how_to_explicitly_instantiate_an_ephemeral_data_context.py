@@ -5,6 +5,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_explicitly_instantiate_an_ephemeral_data_context" tests/integration/test_script_runner.py
 ```
 """
+from __future__ import annotations
 
 import pathlib
 

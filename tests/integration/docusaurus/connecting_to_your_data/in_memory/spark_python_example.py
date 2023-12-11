@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler

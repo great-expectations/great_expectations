@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 from typing import Callable, Tuple
 from unittest import mock

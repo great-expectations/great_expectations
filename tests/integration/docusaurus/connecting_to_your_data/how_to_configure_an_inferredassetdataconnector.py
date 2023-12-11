@@ -1,5 +1,7 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports yaml">
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports python">
+from __future__ import annotations
+
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 

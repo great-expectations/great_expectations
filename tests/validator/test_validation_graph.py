@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from typing import Dict, Iterable, Optional, Set, Tuple, Union, cast
 from unittest import mock

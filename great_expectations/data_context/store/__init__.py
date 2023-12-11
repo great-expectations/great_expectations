@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.util import verify_dynamic_loading_support
 
 from .store import Store  # isort:skip

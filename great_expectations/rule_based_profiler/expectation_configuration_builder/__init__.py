@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (  # isort:skip
     ExpectationConfigurationBuilder,
     init_rule_expectation_configuration_builders,

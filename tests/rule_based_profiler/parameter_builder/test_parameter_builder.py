@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import ClassVar, Dict, List, Optional, Set, Union
 from unittest import mock
 

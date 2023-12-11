@@ -1,4 +1,6 @@
 """Test v3 API data connector serialization."""
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.data_context.types.base import (

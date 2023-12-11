@@ -4,6 +4,8 @@ This file contains example events primarily for usage stats schema validation te
 By splitting up these events into a separate file, the hope is we can organize them better here and separate
 them from tests so that test files are less verbose.
 """
+from __future__ import annotations
+
 from typing import List
 
 data_context_run_validation_operator_events: List[dict] = [

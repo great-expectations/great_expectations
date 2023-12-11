@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pprint import pprint as pp
 from typing import Iterable, Mapping, Optional, Tuple
 

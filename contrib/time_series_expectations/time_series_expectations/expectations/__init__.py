@@ -1,4 +1,6 @@
 # Make sure to include any Expectations your want exported below!
+from __future__ import annotations
+
 from .expect_batch_row_count_to_match_prophet_date_model import (
     ExpectBatchRowCountToMatchProphetDateModel,
 )

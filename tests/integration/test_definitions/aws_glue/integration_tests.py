@@ -1,4 +1,6 @@
 """Note: AWS Glue split from spark since it requires different test dependencies."""
+from __future__ import annotations
+
 from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.integration_test_fixture import IntegrationTestFixture
 

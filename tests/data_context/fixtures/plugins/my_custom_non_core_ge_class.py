@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class MyCustomNonCoreGeClass:
     """
     This class is used only for testing.

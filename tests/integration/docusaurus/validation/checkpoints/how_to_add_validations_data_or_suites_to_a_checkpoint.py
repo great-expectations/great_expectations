@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import great_expectations as gx
 
 context = gx.get_context(mode="ephemeral")

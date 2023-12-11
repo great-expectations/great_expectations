@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from pprint import pprint
 from typing import Callable, Dict, Union

@@ -1,4 +1,6 @@
 # Make sure to include any Expectations your want exported below!
+from __future__ import annotations
+
 from .expect_column_values_to_be_us_zipcode_within_mile_radius_of_given_zipcode import (
     ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode,
 )

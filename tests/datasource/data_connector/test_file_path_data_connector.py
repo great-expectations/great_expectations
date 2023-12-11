@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.datasource.data_connector.util import sanitize_prefix

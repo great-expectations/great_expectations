@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_column_profiler_report import (
     DataProfilerColumnProfileReport,
 )

@@ -1,4 +1,6 @@
 # <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full">
+from __future__ import annotations
+
 from datetime import timedelta
 
 import airflow

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .meta_metric_provider import (  # isort:skip
     MetaMetricProvider,
     DeprecatedMetaMetricProvider,

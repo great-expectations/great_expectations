@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sqlalchemy as sa  # noqa: TID251
 
 connection = "mssql://sa:BK72nEAoI72CSWmP@db:1433/integration?driver=ODBC+Driver+17+for+SQL+Server&charset=utf&autocommit=true"

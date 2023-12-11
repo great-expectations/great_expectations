@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class TemporaryNoOpSummarizer:
     def render(self, input):
         return input

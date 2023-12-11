@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from timeit import default_timer as timer
 

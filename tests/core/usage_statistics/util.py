@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 
 from great_expectations.core.usage_statistics.usage_statistics import (

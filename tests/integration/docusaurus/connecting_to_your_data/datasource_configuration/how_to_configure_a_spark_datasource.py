@@ -24,6 +24,8 @@ yarn snippet-check ./tests/integration/docusaurus/connecting_to_your_data/dataso
 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
+from __future__ import annotations
+
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
 from tests.integration.docusaurus.connecting_to_your_data.datasource_configuration.datasource_configuration_test_utilities import (

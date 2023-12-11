@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import pprint
+from typing import TYPE_CHECKING
 
 import great_expectations as gx
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource.fluent import BatchRequest, Datasource
-from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
+    from great_expectations.core.expectation_suite import ExpectationSuite
+    from great_expectations.data_context import CloudDataContext
+    from great_expectations.datasource.fluent import BatchRequest, Datasource
+    from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
 
 # Make sure GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID
 # are set in your environment or config_variables.yml

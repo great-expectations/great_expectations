@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ..util import verify_dynamic_loading_support
 from .actions import (
     EmailAction,

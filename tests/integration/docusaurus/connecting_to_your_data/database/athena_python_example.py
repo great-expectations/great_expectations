@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py imports">

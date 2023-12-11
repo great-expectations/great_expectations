@@ -1,4 +1,5 @@
 # Make sure to include any Expectations your want exported below!
+from __future__ import annotations
 
 from .expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold import (
     ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold,

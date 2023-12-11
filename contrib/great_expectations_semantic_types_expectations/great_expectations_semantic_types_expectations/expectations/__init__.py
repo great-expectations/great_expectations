@@ -1,4 +1,6 @@
 # Make sure to include any Expectations your want exported below!
+from __future__ import annotations
+
 from .expect_column_values_are_in_language import ExpectColumnValuesAreInLanguage
 from .expect_column_values_bic_belong_to_country import (
     ExpectColumnValuesBicBelongToCountry,

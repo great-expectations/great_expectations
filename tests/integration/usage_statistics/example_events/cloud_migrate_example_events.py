@@ -2,6 +2,8 @@
 
 This file contains example events primarily for usage stats schema validation testing.
 """
+from __future__ import annotations
+
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 cloud_migrate: dict = {

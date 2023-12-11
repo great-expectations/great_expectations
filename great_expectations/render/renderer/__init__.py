@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .call_to_action_renderer import CallToActionRenderer
 from .column_section_renderer import (
     ExpectationSuiteColumnSectionRenderer,

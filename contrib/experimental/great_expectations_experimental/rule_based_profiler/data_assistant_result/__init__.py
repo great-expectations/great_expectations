@@ -1,2 +1,4 @@
+from __future__ import annotations
+
 from .growth_numeric_data_assistant_result import GrowthNumericDataAssistantResult
 from .statistics_data_assistant_result import StatisticsDataAssistantResult

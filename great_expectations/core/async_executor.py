@@ -4,6 +4,8 @@ for both when concurrency is enabled and disabled.
 
 WARNING: This module is experimental.
 """
+from __future__ import annotations
+
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractContextManager
 from typing import Generic, Optional, TypeVar

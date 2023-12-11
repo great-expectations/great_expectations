@@ -17,6 +17,7 @@ should be included in the integration test suite as follows:
 Find all test files, generate the test suite and ensure that all test files are included in the test suite.
 Assumes that all integration test dependencies are installed and passed into pytest.
 """
+from __future__ import annotations
 
 import pathlib
 import shutil

@@ -278,7 +278,7 @@ def type_check(  # noqa: PLR0913, PLR0912
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
-            print("✅"),
+            (print("✅"),)
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 

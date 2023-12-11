@@ -1,6 +1,7 @@
-from typing import List
+from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING, List
+
 import sqlalchemy as sa
 
 import great_expectations as gx
@@ -22,6 +23,9 @@ from tests.integration.fixtures.split_and_sample_data.sampler_test_cases_and_fix
 from tests.test_utils import (
     get_connection_string_and_dialect,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 if __name__ == "test_script_module":
     dialect, connection_string = get_connection_string_and_dialect(

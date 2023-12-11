@@ -3,21 +3,25 @@
 """
 Test performance using bigquery.
 """
+from __future__ import annotations
 
 import cProfile
 import os
 import sys
 from collections.abc import Mapping
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-import _pytest.config
-import py.path
 import pytest
-from pytest_benchmark.fixture import BenchmarkFixture
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.async_executor import patch_https_connection_pool
 from tests.performance import taxi_benchmark_util
+
+if TYPE_CHECKING:
+    import _pytest.config
+    import py.path
+    from pytest_benchmark.fixture import BenchmarkFixture
 
 pytestmark = pytest.mark.performance
 

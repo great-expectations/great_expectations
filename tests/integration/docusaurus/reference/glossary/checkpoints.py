@@ -1,4 +1,6 @@
 # <snippet name="tests/integration/docusaurus/reference/glossary/checkpoints.py setup">
+from __future__ import annotations
+
 import great_expectations as gx
 from great_expectations.datasource.fluent import DataAsset, Datasource
 

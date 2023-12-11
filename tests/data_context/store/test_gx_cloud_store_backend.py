@@ -9,6 +9,7 @@ requests are actually made as part of this test. The actual value of the token d
 matter here but we leverage an existing fixture to mimic the contents of requests made
 in production. The same logic applies to all UUIDs in this test.
 """
+from __future__ import annotations
 
 from collections import OrderedDict
 from typing import Callable, Optional, Set, Union

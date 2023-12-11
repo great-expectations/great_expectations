@@ -1,4 +1,6 @@
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
+from __future__ import annotations
+
 import great_expectations as gx
 
 # </snippet>

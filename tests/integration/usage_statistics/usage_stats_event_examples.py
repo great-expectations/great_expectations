@@ -7,6 +7,8 @@ them from tests so that test files are less verbose.
 
 
 # data_context.__init__ events:
+from __future__ import annotations
+
 data_context_init_with_dependencies: dict = {
     "event_payload": {
         "platform.system": "Darwin",

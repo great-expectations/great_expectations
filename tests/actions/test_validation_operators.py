@@ -1,4 +1,6 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
+from __future__ import annotations
+
 import dateutil.parser
 import pandas as pd
 import pytest

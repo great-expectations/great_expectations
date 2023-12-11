@@ -2,6 +2,8 @@
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, Tuple
 
 from sklearn.inspection import permutation_importance

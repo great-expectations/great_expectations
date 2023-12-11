@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import geopandas
 import numpy as np
 from shapely.geometry import Point, Polygon

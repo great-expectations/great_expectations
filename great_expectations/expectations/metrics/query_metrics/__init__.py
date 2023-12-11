@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .query_column import QueryColumn
 from .query_column_pair import QueryColumnPair
 from .query_multiple_columns import QueryMultipleColumns

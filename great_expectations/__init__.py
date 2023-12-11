@@ -1,4 +1,6 @@
 # Set up version information immediately
+from __future__ import annotations
+
 from ._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip

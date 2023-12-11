@@ -1,4 +1,6 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py import pandas">
+from __future__ import annotations
+
 import pandas as pd
 
 # </snippet>

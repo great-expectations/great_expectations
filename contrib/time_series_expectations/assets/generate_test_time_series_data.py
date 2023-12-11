@@ -1,4 +1,5 @@
 """Generate test data for time series. Includes both CSVs and PNGs"""
+from __future__ import annotations
 
 import os.path
 

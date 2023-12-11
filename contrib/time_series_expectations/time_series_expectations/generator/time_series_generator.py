@@ -1,7 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import TypedDict
+from __future__ import annotations
 
-import pandas as pd
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class TrendParams(TypedDict):

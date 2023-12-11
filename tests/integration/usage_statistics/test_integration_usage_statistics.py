@@ -1,14 +1,19 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import subprocess
 import uuid
+from typing import TYPE_CHECKING
 
 import boto3
 import botocore
 import pytest
-import requests
 
 from great_expectations.data_context.util import file_relative_path
+
+if TYPE_CHECKING:
+    import requests
 
 USAGE_STATISTICS_QA_URL = (
     "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"

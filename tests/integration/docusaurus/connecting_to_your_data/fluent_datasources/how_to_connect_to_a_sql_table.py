@@ -4,6 +4,8 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_a_sql_table" tests/integration/test_script_runner.py
 ```
 """
+from __future__ import annotations
+
 import pathlib
 import warnings
 

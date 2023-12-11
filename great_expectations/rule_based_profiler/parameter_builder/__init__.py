@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip
     ParameterBuilder,
     init_rule_parameter_builders,

@@ -1,4 +1,6 @@
 # Make sure to include any Expectations your want exported below!
+from __future__ import annotations
+
 from .expect_column_average_lat_lon_pairwise_distance_to_be_less_than import (
     ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan,
 )

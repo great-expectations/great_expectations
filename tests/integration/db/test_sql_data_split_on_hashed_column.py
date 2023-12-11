@@ -1,4 +1,6 @@
-import pandas as pd
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from tests.integration.db.taxi_data_utils import (
     _execute_taxi_splitting_test_cases,
@@ -10,6 +12,9 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
     TaxiTestData,
 )
 from tests.test_utils import get_connection_string_and_dialect
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 if __name__ == "test_script_module":
     dialect: str

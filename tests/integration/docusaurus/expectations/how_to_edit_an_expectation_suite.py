@@ -1,6 +1,7 @@
 # ruff: noqa: I001, E401, B018
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite import_expectation_configuration">
+from __future__ import annotations
 from great_expectations.core.expectation_suite import ExpectationConfiguration
 
 # </snippet>

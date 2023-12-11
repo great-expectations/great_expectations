@@ -1,9 +1,10 @@
 """Test usage statistics transmission client-side."""
+from __future__ import annotations
+
 import copy
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
-import requests
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
@@ -25,6 +26,9 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 from tests.integration.usage_statistics.usage_stats_event_examples import (
     data_context_init_with_dependencies,
 )
+
+if TYPE_CHECKING:
+    import requests
 
 # Dummy values purely used for tests - analytics with these values should be ignored
 TEST_DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000002"

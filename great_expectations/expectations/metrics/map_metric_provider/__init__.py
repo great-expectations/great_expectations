@@ -1,4 +1,6 @@
 # Import MapMetricProvider classes
+from __future__ import annotations
+
 from great_expectations.expectations.metrics.map_metric_provider.column_condition_partial import (
     column_condition_partial,
 )

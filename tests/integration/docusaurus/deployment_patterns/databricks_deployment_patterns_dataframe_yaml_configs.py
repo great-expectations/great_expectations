@@ -1,4 +1,5 @@
 # ruff: noqa: I001, PTH118, PTH109, PTH120
+from __future__ import annotations
 import os
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py imports">

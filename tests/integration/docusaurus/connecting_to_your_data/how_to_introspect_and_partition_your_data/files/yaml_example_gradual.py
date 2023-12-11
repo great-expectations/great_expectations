@@ -1,4 +1,6 @@
 # ruff: noqa: PTH118
+from __future__ import annotations
+
 import os
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py imports">

@@ -1,4 +1,6 @@
 """Test v3 API RuleBasedProfiler serialization."""
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.rule_based_profiler.config.base import (

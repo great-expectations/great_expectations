@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py imports">

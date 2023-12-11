@@ -1,4 +1,6 @@
 # <snippet name="tests/integration/docusaurus/setup/setup_overview.py setup">
+from __future__ import annotations
+
 import great_expectations as gx
 
 context = gx.get_context()

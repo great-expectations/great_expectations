@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import geopy
 import pandas as pd
 import pygeos as geos

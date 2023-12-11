@@ -18,6 +18,7 @@ context = gx.get_context()
 
 Find all named snippets and ensure that they are referenced in the docs using the above syntax.
 """
+from __future__ import annotations
 
 import pathlib
 import shutil
