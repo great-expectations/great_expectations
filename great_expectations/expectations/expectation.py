@@ -78,7 +78,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.result_format import ResultFormat, ResultFormatDict
+from great_expectations.core.result_format import ResultFormat, ResultFormatConfig
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -323,7 +323,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     id: Union[str, None] = None
     meta: Union[dict, None] = None
     notes: Union[str, None] = None
-    result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
+    result_format: Union[ResultFormat, ResultFormatConfig] = ResultFormat.BASIC
 
     catch_exceptions: bool = False
 
