@@ -4015,8 +4015,8 @@ def alice_columnar_table_single_batch(empty_data_context):
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_between",
             kwargs={
-                "min_value": 1000,
-                "max_value": 999999999999,
+                "min_value": 1000.0,
+                "max_value": 999999999999.0,
                 "column": "user_id",
             },
             meta={},
@@ -4032,7 +4032,7 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     event_ts_column_data: Dict[str, str] = {
         "column_name": "event_ts",
-        "observed_max_time_str": "2004-10-19 11:05:20",
+        "observed_max_time_str": "2004-10-19T11:05:20",
         "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
     }
 
@@ -4040,7 +4040,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         event_ts_column_data,
         {
             "column_name": "server_ts",
-            "observed_max_time_str": "2004-10-19 11:05:20",
+            "observed_max_time_str": "2004-10-19T11:05:20",
         },
         {
             "column_name": "device_ts",
@@ -4715,7 +4715,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 7500, "max_value": 9000},
+                "kwargs": {"min_value": 7500.0, "max_value": 9000.0},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -4737,9 +4737,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "VendorID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4758,9 +4757,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 4,
-                    "min_value": 4,
+                    "max_value": 4.0,
+                    "min_value": 4.0,
                     "column": "VendorID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4779,9 +4777,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 0,
+                    "max_value": 1.0,
+                    "min_value": 0.0,
                     "column": "passenger_count",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4800,9 +4797,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 6,
-                    "min_value": 6,
+                    "max_value": 6.0,
+                    "min_value": 6.0,
                     "column": "passenger_count",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4821,7 +4817,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.0,
                     "min_value": 0.0,
                     "column": "trip_distance",
@@ -4842,7 +4837,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 57.8,
                     "min_value": 37.57,
                     "column": "trip_distance",
@@ -4863,9 +4857,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "RatecodeID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4884,9 +4877,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 6,
-                    "min_value": 5,
+                    "max_value": 6.0,
+                    "min_value": 5.0,
                     "column": "RatecodeID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4905,9 +4897,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "PULocationID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4926,9 +4917,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 265,
-                    "min_value": 265,
+                    "max_value": 265.0,
+                    "min_value": 265.0,
                     "column": "PULocationID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4947,9 +4937,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "DOLocationID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4968,9 +4957,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 265,
-                    "min_value": 265,
+                    "max_value": 265.0,
+                    "min_value": 265.0,
                     "column": "DOLocationID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4989,9 +4977,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "payment_type",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -5010,9 +4997,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 4,
-                    "min_value": 4,
+                    "max_value": 4.0,
+                    "min_value": 4.0,
                     "column": "payment_type",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -5031,7 +5017,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -21.02,
                     "min_value": -51.7,
                     "column": "fare_amount",
@@ -5052,7 +5037,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 2976.46,
                     "min_value": 215.35,
                     "column": "fare_amount",
@@ -5073,7 +5057,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -1.0,
                     "min_value": -36.35,
                     "column": "extra",
@@ -5094,7 +5077,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 7.0,
                     "min_value": 4.53,
                     "column": "extra",
@@ -5115,7 +5097,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -0.5,
                     "min_value": -0.5,
                     "column": "mta_tax",
@@ -5136,7 +5117,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 37.14,
                     "min_value": 0.5,
                     "column": "mta_tax",
@@ -5157,7 +5137,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.0,
                     "min_value": 0.0,
                     "column": "tip_amount",
@@ -5178,7 +5157,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 74.72,
                     "min_value": 38.93,
                     "column": "tip_amount",
@@ -5199,7 +5177,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.0,
                     "min_value": 0.0,
                     "column": "tolls_amount",
@@ -5220,7 +5197,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 495.58,
                     "min_value": 24.31,
                     "column": "tolls_amount",
@@ -5241,7 +5217,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -0.3,
                     "min_value": -0.3,
                     "column": "improvement_surcharge",
@@ -5262,7 +5237,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.3,
                     "min_value": 0.3,
                     "column": "improvement_surcharge",
@@ -5283,7 +5257,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -24.32,
                     "min_value": -52.54,
                     "column": "total_amount",
@@ -5304,7 +5277,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 2980.13,
                     "min_value": 253.18,
                     "column": "total_amount",
@@ -5325,7 +5297,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -0.03,
                     "min_value": -2.5,
                     "column": "congestion_surcharge",
@@ -5346,7 +5317,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 2.5,
                     "min_value": 0.02,
                     "column": "congestion_surcharge",
@@ -5564,7 +5534,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_be_in_set",
                 "kwargs": {
                     "column": "VendorID",
-                    "value_set": [1, 2, 4],
+                    "value_set": [1.0, 2.0, 4.0],
                 },
                 "meta": {},
             }
@@ -5574,7 +5544,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_be_in_set",
                 "kwargs": {
                     "column": "passenger_count",
-                    "value_set": [0, 1, 2, 3, 4, 5, 6],
+                    "value_set": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
                 },
                 "meta": {},
             }
@@ -8500,7 +8470,7 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
     project_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
-    return EphemeralDataContext(project_config=project_config)
+    return get_context(project_config=project_config, mode="ephemeral")
 
 
 @pytest.fixture
