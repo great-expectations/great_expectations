@@ -30,6 +30,9 @@ from marshmallow import ValidationError
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -94,9 +97,6 @@ if TYPE_CHECKING:
         BatchDataUnion,
         BatchDefinition,
         BatchMarkers,
-    )
-    from great_expectations.core.expectation_configuration import (
-        ExpectationConfiguration,
     )
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context.data_context import AbstractDataContext
@@ -521,27 +521,24 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            expectation = expectation_impl(**expectation_kwargs, meta=meta)
-            configuration = expectation.configuration
-
-            exception_info: ExceptionInfo
-
-            if self.interactive_evaluation:
-                configuration.process_evaluation_parameters(
-                    self._expectation_suite.evaluation_parameters,
-                    True,
-                    self._data_context,
-                )
+            configuration: ExpectationConfiguration | None = None
 
             try:
-                expectation = expectation_impl(
-                    meta=configuration.meta, **configuration.kwargs
-                )
+                expectation = expectation_impl(**expectation_kwargs, meta=meta)
+                configuration = expectation.configuration
+
+                if self.interactive_evaluation:
+                    configuration.process_evaluation_parameters(
+                        self._expectation_suite.evaluation_parameters,
+                        True,
+                        self._data_context,
+                    )
+
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
                     validation_result = ExpectationValidationResult(
-                        expectation_config=copy.deepcopy(expectation.configuration)
+                        expectation_config=copy.deepcopy(configuration)
                     )
                 else:
                     validation_result = expectation.validate_(
@@ -575,6 +572,12 @@ class Validator:
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,
                     )
+
+                    if not configuration:
+                        configuration = ExpectationConfiguration(
+                            expectation_type=name, kwargs=expectation_kwargs, meta=meta
+                        )
+
                     validation_result = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,

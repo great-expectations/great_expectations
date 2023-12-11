@@ -36,7 +36,14 @@ from dateutil.parser import parse
 from typing_extensions import ParamSpec
 
 import great_expectations.compatibility.bigquery as BigQueryDialect
-from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy, trino
+from great_expectations.compatibility import (
+    aws,
+    pydantic,
+    pyspark,
+    snowflake,
+    sqlalchemy,
+    trino,
+)
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
@@ -2325,6 +2332,7 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
         MetricProviderError,
         MetricResolutionError,
         InvalidExpectationConfigurationError,
+        pydantic.ValidationError,
     ) as e:
         if raise_exception:
             raise
