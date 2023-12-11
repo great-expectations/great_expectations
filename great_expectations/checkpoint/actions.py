@@ -18,7 +18,6 @@ try:
 except ImportError:
     pypd = None
 
-
 from great_expectations.checkpoint.util import (
     send_email,
     send_microsoft_teams_notifications,
@@ -300,7 +299,7 @@ class SlackNotificationAction(ValidationAction):
                 validation_result_urls.append(
                     payload["store_validation_result"]["validation_result_url"]
                 )
-
+        result = {"slack_notification_result": "none required"}
         if (
             self.notify_on == "all"
             or self.notify_on == "success"
@@ -316,17 +315,39 @@ class SlackNotificationAction(ValidationAction):
                 validation_result_urls,
             )
 
-            # this will actually send the POST request to the Slack webapp server
-            slack_notif_result = send_slack_notification(
-                query,
-                slack_webhook=self.slack_webhook,
-                slack_token=self.slack_token,
-                slack_channel=self.slack_channel,
-            )
-            return {"slack_notification_result": slack_notif_result}
+            blocks = query.get("blocks")
+            if blocks:
+                if len(blocks) >= 1:
+                    if blocks[0].get("text"):
+                        result = self._send_notifications_in_batches(
+                            blocks, query, result
+                        )
+                    else:
+                        result = self._get_slack_result(query)
 
-        else:
-            return {"slack_notification_result": "none required"}
+        return result
+
+    def _send_notifications_in_batches(self, blocks, query, result):
+        text = blocks[0]["text"]["text"]
+        chunks, chunk_size = len(text), len(text) // 4
+        split_text = [
+            text[position : position + chunk_size]
+            for position in range(0, chunks, chunk_size)
+        ]
+        for batch in split_text:
+            query["text"] = batch
+            result = self._get_slack_result(query)
+        return result
+
+    def _get_slack_result(self, query):
+        # this will actually send the POST request to the Slack webapp server
+        slack_notif_result = send_slack_notification(
+            query,
+            slack_webhook=self.slack_webhook,
+            slack_token=self.slack_token,
+            slack_channel=self.slack_channel,
+        )
+        return {"slack_notification_result": slack_notif_result}
 
 
 @public_api
