@@ -4015,8 +4015,8 @@ def alice_columnar_table_single_batch(empty_data_context):
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_between",
             kwargs={
-                "min_value": 1000,
-                "max_value": 999999999999,
+                "min_value": 1000.0,
+                "max_value": 999999999999.0,
                 "column": "user_id",
             },
             meta={},
@@ -4032,7 +4032,7 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     event_ts_column_data: Dict[str, str] = {
         "column_name": "event_ts",
-        "observed_max_time_str": "2004-10-19 11:05:20",
+        "observed_max_time_str": "2004-10-19T11:05:20",
         "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
     }
 
@@ -4040,7 +4040,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         event_ts_column_data,
         {
             "column_name": "server_ts",
-            "observed_max_time_str": "2004-10-19 11:05:20",
+            "observed_max_time_str": "2004-10-19T11:05:20",
         },
         {
             "column_name": "device_ts",
