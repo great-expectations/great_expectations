@@ -323,7 +323,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     id: Union[str, None] = None
     meta: Union[dict, None] = None
     notes: Union[str, None] = None
-    result_format: Union[ResultFormat, ResultFormatDict, Any] = ResultFormat.BASIC
+    result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
 
     catch_exceptions: bool = False
 
