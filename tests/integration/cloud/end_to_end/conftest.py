@@ -172,7 +172,6 @@ def spark_session() -> pyspark.SparkSession:
     if pyspark.SparkSession:  # type: ignore[truthy-function]
         return SparkDFExecutionEngine.get_or_create_spark_session(
             spark_config={
-                "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
             }
         )
