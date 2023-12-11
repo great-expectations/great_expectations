@@ -24,7 +24,7 @@ from great_expectations.compatibility.pydantic import (
     StrictInt,
     StrictStr,
 )
-from great_expectations.compatibility.pyspark import DataFrame, pyspark
+from great_expectations.compatibility.pyspark import DataFrame, SparkSession, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -32,6 +32,7 @@ from great_expectations.core._docs_decorators import (
     public_api,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
+from great_expectations.core.util import get_or_create_spark_session
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
@@ -71,6 +72,9 @@ class _SparkDatasource(Datasource):
     spark_config: Union[SparkConfig, None] = None
     force_reuse_spark_context: bool = True
     persist: bool = True
+
+    # private attrs
+    _spark: Union[SparkSession, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("force_reuse_spark_context")
     @classmethod
@@ -116,7 +120,9 @@ class _SparkDatasource(Datasource):
             TestConnectionError: If the connection test fails.
         """
         try:
-            self.get_execution_engine()
+            self._spark: pyspark.SparkSession = get_or_create_spark_session(
+                spark_config=self.spark_config
+            )
         except ConnectionError as e:
             raise TestConnectionError(e) from e
 

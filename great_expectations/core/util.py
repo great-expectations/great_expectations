@@ -808,11 +808,8 @@ def get_or_create_spark_session(
     spark_session: pyspark.SparkSession
     try:
         spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
-    except ValueError as e:
-        try:
-            spark_session = pyspark.SparkSession.builder.getOrCreate()
-        except Exception:
-            raise e
+    except ValueError:
+        spark_session = pyspark.SparkSession.builder.getOrCreate()
 
     return _get_session_with_spark_config(
         spark_config=spark_config,

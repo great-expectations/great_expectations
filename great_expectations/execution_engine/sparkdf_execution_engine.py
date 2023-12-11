@@ -200,14 +200,20 @@ class SparkDFExecutionEngine(ExecutionEngine):
         *args,
         persist: bool = True,
         spark_config: Optional[dict] = None,
+        spark: Optional[pyspark.SparkSession] = None,
         force_reuse_spark_context: Optional[bool] = None,
         **kwargs,
     ) -> None:
         self._persist = persist
 
-        self.spark: pyspark.SparkSession = get_or_create_spark_session(
-            spark_config=spark_config,
-        )
+        spark_config = spark_config or {}
+        self.spark = pyspark.SparkSession
+        if spark and not spark_config:
+            self.spark = spark
+        else:
+            self.spark = get_or_create_spark_session(
+                spark_config=spark_config,
+            )
 
         azure_options: dict = kwargs.pop("azure_options", {})
         self._azure_options = azure_options

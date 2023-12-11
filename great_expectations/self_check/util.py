@@ -1556,7 +1556,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if include_spark:
         from great_expectations.compatibility import pyspark
 
-        if not pyspark.SparkSession:  # type: ignore[truthy-function]
+        if not pyspark.pyspark:  # type: ignore[truthy-function]
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"
