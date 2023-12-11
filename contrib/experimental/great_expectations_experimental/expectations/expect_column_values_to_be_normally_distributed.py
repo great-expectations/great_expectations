@@ -124,8 +124,8 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
