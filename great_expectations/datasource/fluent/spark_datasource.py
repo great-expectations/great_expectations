@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import warnings
 from pprint import pformat as pf
 from typing import (
@@ -134,7 +133,7 @@ class _SparkDatasource(Datasource):
 
         try:
             self._spark: pyspark.SparkSession = (
-                _SparkDatasource._get_or_create_spark_session(
+                self.execution_engine_type().get_or_create_spark_session(
                     spark_config=self.spark_config,
                 )
             )
@@ -142,132 +141,6 @@ class _SparkDatasource(Datasource):
             raise TestConnectionError(e) from e
 
     # End Abstract Methods
-
-    @staticmethod
-    def _get_or_create_spark_session(
-        spark_config: Optional[SparkConfig] = None,
-    ) -> pyspark.SparkSession:
-        """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
-
-        Args:
-            spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
-
-        Returns:
-            SparkSession
-        """
-        spark_config = spark_config or {}
-
-        spark_session: pyspark.SparkSession
-        try:
-            spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
-        except ValueError:
-            spark_session = pyspark.SparkSession.builder.getOrCreate()
-
-        return _SparkDatasource._get_session_with_spark_config(
-            spark_config=spark_config,
-            spark_session=spark_session,
-        )
-
-    @staticmethod
-    def _get_session_with_spark_config(
-        spark_session: pyspark.SparkSession,
-        spark_config: dict,
-    ) -> pyspark.SparkSession:
-        """Attempts to apply spark_config to a SparkSession by either:
-             1. Updating the existing SparkSession with spark_config values
-             2. Restarting the existing SparkSession and applying only spark_config
-
-          If a spark_config option was unable to be set, a warning is raised.
-
-        Args:
-            spark_session: An existing pyspark.SparkSession.
-            spark_config: A dictionary of SparkSession.Builder.config objects.
-
-        Returns:
-            SparkSession
-        """
-        stopped: bool
-        (
-            spark_session,
-            stopped,
-        ) = _SparkDatasource._try_update_or_stop_misconfigured_spark_session(
-            spark_session=spark_session,
-            spark_config=spark_config,
-        )
-
-        if stopped:
-            spark_session = _SparkDatasource._start_spark_session_with_spark_config(
-                spark_session=spark_session,
-                spark_config=spark_config,
-            )
-
-        return spark_session
-
-    @staticmethod
-    def _start_spark_session_with_spark_config(
-        spark_session: pyspark.SparkSession,
-        spark_config: dict,
-    ) -> pyspark.SparkSession:
-        builder = spark_session.builder
-        for key, value in spark_config.items():
-            if key == "spark.app.name":
-                builder.appName(value)
-            else:
-                builder.config(key, value)
-
-        return builder.getOrCreate()
-
-    @staticmethod
-    def _session_is_not_stoppable(
-        spark_session: pyspark.SparkSession,
-    ) -> bool:
-        return isinstance(spark_session, pyspark.SparkConnectSession) or (
-            os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
-        )
-
-    @staticmethod
-    def _try_update_or_stop_misconfigured_spark_session(
-        spark_session: pyspark.SparkSession,
-        spark_config: dict,
-    ) -> tuple[pyspark.SparkSession, bool]:
-        stopped = False
-        warning_messages = []
-        for key, value in spark_config.items():
-            # if the user set a spark_config option that doesn't match the existing session
-            # try to update it, otherwise stop the spark session
-            try:
-                if key != "spark.app.name" and spark_session.conf.get(key) != value:
-                    spark_session.conf.set(key, value)
-                elif (
-                    key == "spark.app.name"
-                    and spark_session.sparkContext.appName != value
-                ):
-                    spark_session.sparkContext.appName = value
-            except (pyspark.PySparkAttributeError, pyspark.AnalysisException):
-                if _SparkDatasource._session_is_not_stoppable(
-                    spark_session=spark_session
-                ):
-                    warning_messages.append(
-                        f"spark_config option `{key}` is not modifiable "
-                        "and Spark Session cannot be restarted in this environment."
-                    )
-                else:
-                    spark_session.stop()
-                    stopped = True
-                    warning_messages.append(
-                        f"Spark Session was restarted, because `{key}` "
-                        "is not modifiable in this environment."
-                    )
-                    break
-
-        for message in warning_messages:
-            print(message)
-            warnings.warn(
-                message=message,
-                category=RuntimeWarning,
-            )
-
-        return spark_session, stopped
 
 
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):

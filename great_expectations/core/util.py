@@ -37,9 +37,6 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.datasource.fluent import (
-    _SparkDatasource,
-)
 
 # import of private class will be removed when deprecated methods are removed from this module
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -778,6 +775,8 @@ def get_or_create_spark_application(
     spark_config: Optional[dict[str, str]] = None,
     force_reuse_spark_context: Optional[bool] = None,
 ) -> pyspark.SparkSession:
+    from great_expectations.execution_engine import SparkDFExecutionEngine
+
     # deprecated-v1.0.0
     warnings.warn(
         "Utility method get_or_create_spark_application() is deprecated and will be removed in v1.0.0. "
@@ -793,9 +792,9 @@ def get_or_create_spark_application(
             "the spark_config, the context will be stopped and restarted with the new spark_config.",
             category=DeprecationWarning,
         )
-    return _SparkDatasource._get_or_create_spark_session(
-        spark_config=spark_config
-    )  # type:ignore[arg-type]  # private call to be removed with this deprecated method
+    return SparkDFExecutionEngine.get_or_create_spark_session(
+        spark_config=spark_config  # type:ignore[arg-type]
+    )
 
 
 def get_or_create_spark_session(
@@ -809,6 +808,8 @@ def get_or_create_spark_session(
     Returns:
         SparkSession
     """
+    from great_expectations.execution_engine import SparkDFExecutionEngine
+
     # deprecated-v1.0.0
     warnings.warn(
         "Utility method get_or_create_spark_session() is deprecated and will be removed in v1.0.0. "
@@ -817,8 +818,8 @@ def get_or_create_spark_session(
     )
     spark_config = spark_config or {}
 
-    return _SparkDatasource._get_or_create_spark_session(
-        spark_config=spark_config,  # type: ignore[arg-type]  # private call to be removed with this deprecated method
+    return SparkDFExecutionEngine.get_or_create_spark_session(
+        spark_config=spark_config,  # type: ignore[arg-type]
     )
 
 

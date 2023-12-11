@@ -3,9 +3,11 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
+import os
 import warnings
 from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -41,7 +43,6 @@ from great_expectations.core.metric_domain_types import (
 from great_expectations.core.util import (
     AzureUrl,
     convert_to_json_serializable,
-    get_or_create_spark_session,
 )
 from great_expectations.exceptions import (
     BatchSpecError,
@@ -72,10 +73,12 @@ from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
 
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.spark_datasource import SparkConfig
+
 logger = logging.getLogger(__name__)
 
 
-# noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
     assert len(column.columns) == 1, "Expected DataFrame with 1 column"
     col_name = column.columns[0]
@@ -211,7 +214,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if spark and not spark_config:
             self.spark = spark
         else:
-            self.spark = get_or_create_spark_session(
+            self.spark = SparkDFExecutionEngine.get_or_create_spark_session(
                 spark_config=spark_config,
             )
 
@@ -249,6 +252,134 @@ class SparkDFExecutionEngine(ExecutionEngine):
             )
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
+
+    @staticmethod
+    def get_or_create_spark_session(
+        spark_config: Optional[SparkConfig] = None,
+    ) -> pyspark.SparkSession:
+        """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
+
+        Args:
+            spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
+
+        Returns:
+            SparkSession
+        """
+        spark_config = spark_config or {}
+
+        spark_session: pyspark.SparkSession
+        try:
+            spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+        except ValueError:
+            spark_session = pyspark.SparkSession.builder.getOrCreate()
+
+        return SparkDFExecutionEngine._get_session_with_spark_config(
+            spark_config=spark_config,
+            spark_session=spark_session,
+        )
+
+    @staticmethod
+    def _get_session_with_spark_config(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> pyspark.SparkSession:
+        """Attempts to apply spark_config to a SparkSession by either:
+             1. Updating the existing SparkSession with spark_config values
+             2. Restarting the existing SparkSession and applying only spark_config
+
+          If a spark_config option was unable to be set, a warning is raised.
+
+        Args:
+            spark_session: An existing pyspark.SparkSession.
+            spark_config: A dictionary of SparkSession.Builder.config objects.
+
+        Returns:
+            SparkSession
+        """
+        stopped: bool
+        (
+            spark_session,
+            stopped,
+        ) = SparkDFExecutionEngine._try_update_or_stop_misconfigured_spark_session(
+            spark_session=spark_session,
+            spark_config=spark_config,
+        )
+
+        if stopped:
+            spark_session = (
+                SparkDFExecutionEngine._start_spark_session_with_spark_config(
+                    spark_session=spark_session,
+                    spark_config=spark_config,
+                )
+            )
+
+        return spark_session
+
+    @staticmethod
+    def _start_spark_session_with_spark_config(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> pyspark.SparkSession:
+        builder = spark_session.builder
+        for key, value in spark_config.items():
+            if key == "spark.app.name":
+                builder.appName(value)
+            else:
+                builder.config(key, value)
+
+        return builder.getOrCreate()
+
+    @staticmethod
+    def _session_is_not_stoppable(
+        spark_session: pyspark.SparkSession,
+    ) -> bool:
+        return isinstance(spark_session, pyspark.SparkConnectSession) or (
+            os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
+        )
+
+    @staticmethod
+    def _try_update_or_stop_misconfigured_spark_session(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> tuple[pyspark.SparkSession, bool]:
+        stopped = False
+        warning_messages = []
+        for key, value in spark_config.items():
+            # if the user set a spark_config option that doesn't match the existing session
+            # try to update it, otherwise stop the spark session
+            try:
+                if key != "spark.app.name" and spark_session.conf.get(key) != value:
+                    spark_session.conf.set(key, value)
+                elif (
+                    key == "spark.app.name"
+                    and spark_session.sparkContext.appName != value
+                ):
+                    spark_session.sparkContext.appName = value
+            except (pyspark.PySparkAttributeError, pyspark.AnalysisException):
+                if SparkDFExecutionEngine._session_is_not_stoppable(
+                    spark_session=spark_session
+                ):
+                    warning_messages.append(
+                        f"spark_config option `{key}` is not modifiable "
+                        "and Spark Session cannot be restarted in this environment."
+                    )
+                else:
+                    spark_session.stop()
+                    stopped = True
+                    warning_messages.append(
+                        f"Spark Session was restarted, because `{key}` "
+                        "is not modifiable in this environment."
+                    )
+                    break
+
+        for message in warning_messages:
+            print(message)
+            warnings.warn(
+                message=message,
+                category=RuntimeWarning,
+            )
+
+        return spark_session, stopped
 
     @override
     def load_batch_data(  # type: ignore[override]
