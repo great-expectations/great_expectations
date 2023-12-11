@@ -4,6 +4,12 @@
 Changelog
 #########
 
+0.18.4
+-----------------
+* [BUGFIX] 0.18.4 - Fix Snowflake error when using alternative connection details format. ([#9056](https://github.com/great-expectations/great_expectations/pull/9056))
+* [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068))
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+
 0.18.3
 -----------------
 * [FEATURE] Update SnowflakeDatasource connection details ([#8922](https://github.com/great-expectations/great_expectations/pull/8922))
