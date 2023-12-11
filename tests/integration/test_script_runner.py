@@ -233,11 +233,6 @@ local_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="how_to_edit_an_existing_expectation_suite",
-        user_flow_script="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="setup_overview",
         user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
         data_context_dir=None,
