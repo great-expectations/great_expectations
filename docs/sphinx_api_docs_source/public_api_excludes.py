@@ -744,4 +744,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="get_or_create_spark_session",
         filepath=pathlib.Path("great_expectations/core/util.py"),
     ),
+    IncludeExcludeDefinition(
+        reason="This method does not need to be accessed by users.",
+        name="get_or_create_spark_session",
+        filepath=pathlib.Path(
+            "great_expectations/execution_engine/sparkdf_execution_engine.py"
+        ),
+    ),
 ]
