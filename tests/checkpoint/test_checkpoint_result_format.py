@@ -1628,10 +1628,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1683,10 +1683,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
     expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="SUMMARY",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1721,10 +1721,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
     expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "BASIC",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="BASIC",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1769,10 +1769,10 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
     """
 
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="COMPLETE",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -2084,10 +2084,10 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
         - 1 Expectations added to suite
     """
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="SUMMARY",
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -2135,11 +2135,11 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
         - limit is 1 so we only get 1 output in the `partial_unexpected_index_list`
     """
     dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "SUMMARY",
-            "partial_unexpected_count": 1,
-            "unexpected_index_column_names": ["pk_1"],
-        }
+        "result_format": ResultFormatConfig(
+            result_format="SUMMARY",
+            partial_unexpected_count=1,
+            unexpected_index_column_names=["pk_1"],
+        )
     }
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
