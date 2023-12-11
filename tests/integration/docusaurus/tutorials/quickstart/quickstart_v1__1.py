@@ -15,13 +15,12 @@ from enum import Enum
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
-
 # </snippet>
 
 # Set up
 # NOTE: Context is a singleton now. Once the context has been set instantiated in a session
 # <snippet name="tutorials/quickstart/quickstart.py get_context">
-context = gx.set_context()
+context = gx.get_context()
 # </snippet>
 
 
@@ -42,10 +41,11 @@ def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
 
     elif datasource_type == QuickstartDatasourceTabs.SQL_QUERY:
         # TODO: add local postgresql db to quickstart? or add public snowflake?
-        # <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas_csv">
+        connection_string = "postgresql://postgres:postgres@localhost:5432/postgres"
+        # <snippet name="tutorials/quickstart/quickstart.py connect_to_data sql_query">
         datasource = context.sources.add_postgresql_datasource(
             name="quickstart_db",
-            connection_string="postgresql://localhost/quickstart",
+            connection_string=connection_string,
         )
         batch = datasource.read_query("SELECT * FROM yellow_tripdata_sample_2019_01")
         # </snippet>
