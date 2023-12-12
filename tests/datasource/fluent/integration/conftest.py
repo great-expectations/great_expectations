@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def default_pandas_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     relative_path = pathlib.Path(
@@ -48,6 +49,7 @@ def default_pandas_data(
 
 
 def pandas_sql_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     passenger_count = np.repeat([1, 1, 1, 2, 6], 2000)
@@ -104,7 +106,7 @@ def pandas_data(
 
 
 def sqlite_datasource(
-    context: AbstractDataContext, db_filename: str
+    test_backends, context: AbstractDataContext, db_filename: str
 ) -> SqliteDatasource:
     relative_path = pathlib.Path(
         "..",
@@ -124,6 +126,7 @@ def sqlite_datasource(
 
 
 def sql_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
@@ -163,6 +166,9 @@ def spark_data(
     test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, SparkFilesystemDatasource, DataAsset, BatchRequest]:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     spark_ds = spark_filesystem_datasource(test_backends=test_backends, context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
