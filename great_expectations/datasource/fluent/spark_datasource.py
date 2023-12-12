@@ -163,7 +163,7 @@ class _SparkDatasource(Datasource):
         """
         try:
             self.get_spark()
-        except ConnectionError as e:
+        except Exception as e:
             raise TestConnectionError(e) from e
 
     # End Abstract Methods
