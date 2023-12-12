@@ -85,7 +85,7 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-    # 'expectations/core/expect_column_values_to_be_of_type\.py',                                            # 12
+    'expectations/core/expect_column_values_to_be_of_type\.py',                                            # 6
     'expectations/core/expect_column_values_to_not_match_regex_list\.py',                                  # 2
     'expectations/core/expect_column_values_to_not_match_regex\.py',                                       # 2
     'expectations/core/expect_column_values_to_not_match_like_pattern_list\.py',                           # 3
@@ -103,6 +103,7 @@ exclude = [
     'expectations/core/expect_column_values_to_be_in_type_list\.py',                                       # 6
     'expectations/core/expect_column_values_to_be_decreasing\.py',                                         # 1
     'expectations/core/expect_column_values_to_be_dateutil_parseable\.py',                                 # 1
+    'expectations/core/expect_column_unique_value_count_to_be_between\.py',                                # 1
     'expectations/core/expect_column_stdev_to_be_between\.py',                                             # 1
     'expectations/core/expect_column_quantile_values_to_be_between\.py',                                   # 15
     'expectations/core/expect_column_value_lengths_to_equal\.py',                                          # 1
@@ -127,6 +128,7 @@ exclude = [
     'expectations/core/expect_table_columns_to_match_set\.py',                                             # 8
     'expectations/core/expect_table_columns_to_match_ordered_list\.py',                                    # 11
     'expectations/core/expect_table_column_count_to_equal\.py',                                            # 5
+    'expectations/set_based_column_map_expectation\.py',                                                   # 3
     'render/renderer/content_block/content_block\.py',                                                     # 5
     'render/renderer/content_block/exception_list_content_block\.py',                                      # 4
     'render/renderer/page_renderer\.py',                                                                   # 10
