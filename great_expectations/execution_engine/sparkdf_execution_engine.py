@@ -370,7 +370,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 ):
                     spark_session.sparkContext.appName = value
             # attribute error can be raised for connect sessions that haven't implemented a conf.get
-            # analysis exception can be raises in environments that don't allow updating config of that option
+            # analysis exception can be raised in environments that don't allow updating config of that option
             except (
                 pyspark.PySparkAttributeError,
                 pyspark.AnalysisException,
