@@ -10,6 +10,7 @@ from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
@@ -85,7 +86,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
+    ) -> ExpectationConfiguration | None:
         """
         Args:
             domain: Domain object that is context for execution of this ParameterBuilder object.
@@ -107,9 +108,25 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             runtime_configuration=runtime_configuration,
         )
 
-        return self._build_expectation_configuration(
+        config = self._build_expectation_configuration(
             domain=domain, variables=variables, parameters=parameters
         )
+        if config:
+            return self._roundtrip_config_through_expectation(
+                domain=domain, config=config
+            )
+        return None
+
+    def _roundtrip_config_through_expectation(
+        self, domain: Domain, config: ExpectationConfiguration
+    ) -> ExpectationConfiguration:
+        """
+        Utilize Pydantic validaton and type coercion to ensure the final expectation configuration is valid.
+        """
+        expectation_cls = get_expectation_impl(config.expectation_type)
+        kwargs = {**config.kwargs, **domain.domain_kwargs}
+        expectation = expectation_cls(**kwargs, meta=config.meta)
+        return expectation.configuration
 
     def resolve_validation_dependencies(  # noqa: PLR0913
         self,
@@ -143,7 +160,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
+    ) -> ExpectationConfiguration | None:
         pass
 
     @property
