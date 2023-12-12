@@ -156,9 +156,10 @@ def spark_filesystem_datasource(
 
 
 def spark_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, SparkFilesystemDatasource, DataAsset, BatchRequest]:
-    spark_ds = spark_filesystem_datasource(context=context)
+    spark_ds = spark_filesystem_datasource(test_backends, context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
