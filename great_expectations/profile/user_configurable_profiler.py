@@ -583,7 +583,8 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs={"column": column},
-            )
+            ),
+            remove_multiple_matches=True,
         )
 
         return type_
