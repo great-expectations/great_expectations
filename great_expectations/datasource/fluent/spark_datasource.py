@@ -24,7 +24,7 @@ from great_expectations.compatibility.pydantic import (
     StrictInt,
     StrictStr,
 )
-from great_expectations.compatibility.pyspark import DataFrame, SparkSession, pyspark
+from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -47,6 +47,7 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
@@ -89,6 +90,13 @@ class _SparkDatasource(Datasource):
             )
         return v
 
+    @classmethod
+    @override
+    def update_forward_refs(cls) -> None:
+        from great_expectations.compatibility.pyspark import SparkSession
+
+        super().update_forward_refs(SparkSession=SparkSession)
+
     @staticmethod
     @override
     def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
@@ -108,6 +116,7 @@ class _SparkDatasource(Datasource):
         return SparkDFExecutionEngine
 
     def get_spark(self) -> SparkSession:
+        self.update_forward_refs()
         self._spark: SparkSession = (
             self.execution_engine_type().get_or_create_spark_session(
                 spark_config=self.spark_config,
