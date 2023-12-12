@@ -73,7 +73,6 @@ The following table defines the GX components supported by GX Cloud and GX OSS.
 | Expectations                             | See [Available Expectations](/docs/cloud/expectations/manage_expectations#available-expectations) ¹. | See [Create Expectations](/docs/guides/expectations/expectations_lp) ¹.                |
 | GX Agent                                 | All versions               | N/A        |
 
-¹ The creation and execution of custom Expectations are supported, but inner queries are not.
 
 ## Community supported
 
@@ -85,7 +84,7 @@ The following table defines the operating systems supported by the community.
 
 | GX Cloud                       | GX OSS                        |
 |--------------------------------|-------------------------------|
-| - Mac/Linux ¹<br/>- Windows ²  | - Mac/Linux<br/>- Windows ²   | 
+| - Windows ²  | Windows ²   | 
 
 ¹ Required to run the GX Agent.<br/>
 ² Untested and unsupported by GX
