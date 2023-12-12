@@ -106,7 +106,8 @@ def pandas_data(
 
 
 def sqlite_datasource(
-    test_backends, context: AbstractDataContext, db_filename: str
+    context: AbstractDataContext,
+    db_filename: str,
 ) -> SqliteDatasource:
     relative_path = pathlib.Path(
         "..",
@@ -261,7 +262,9 @@ def multibatch_spark_data(
     ]
 )
 def datasource_test_data(
-    test_backends, empty_data_context, request
+    test_backends,
+    empty_data_context,
+    request,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     return request.param(test_backends=test_backends, context=empty_data_context)
 
