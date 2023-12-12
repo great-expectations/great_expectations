@@ -11,6 +11,7 @@ import pytest
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.data_asset import DataAsset
 from great_expectations.exceptions import EvaluationParameterError
 from great_expectations.execution_engine import ExecutionEngine
@@ -42,6 +43,8 @@ def validator_with_titanic_1911_asset(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     class ExpectNothing(Expectation):
+        expectation_argument: dict
+
         success_keys = ("expectation_argument",)
 
         def _validate(
