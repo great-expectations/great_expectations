@@ -366,8 +366,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
                     spark_session=spark_session
                 ):
                     warning_messages.append(
-                        f"Passing spark_config option `{key}` had no effect, because it is not modifiable, "
-                        "and Spark Session cannot be restarted in this environment."
+                        f"Passing spark_config option `{key}` had no effect, because in this environment "
+                        "it is not modifiable and the Spark Session cannot be restarted."
                     )
                 else:
                     spark_session.stop()
