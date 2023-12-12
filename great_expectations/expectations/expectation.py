@@ -1016,13 +1016,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def metrics_validate(
         self,
         metrics: dict,
-        configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
-        if not configuration:
-            configuration = self.configuration
+        configuration = self.configuration
 
         if runtime_configuration is None:
             runtime_configuration = {}
