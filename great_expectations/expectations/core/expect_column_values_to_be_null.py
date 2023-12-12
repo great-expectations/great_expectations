@@ -223,7 +223,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration
         )
         mostly = self.get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")

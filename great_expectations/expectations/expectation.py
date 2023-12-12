@@ -1107,7 +1107,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         runtime_configuration = self.get_runtime_kwargs(
-            configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         result_format: dict = runtime_configuration["result_format"]
@@ -1154,13 +1153,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def get_runtime_kwargs(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> dict:
-        if not configuration:
-            configuration = self.configuration
-
-        configuration = deepcopy(configuration)
+        configuration = deepcopy(self.configuration)
 
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
@@ -1180,13 +1175,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def get_result_format(
         self,
-        configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
         default_result_format: Optional[Any] = self._get_default_value("result_format")
         configuration_result_format: Union[
             Dict[str, Union[str, int, bool, List[str], None]], str
-        ] = configuration.kwargs.get("result_format", default_result_format)
+        ] = self.configuration.kwargs.get("result_format", default_result_format)
         result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
@@ -2708,7 +2702,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: str | dict[str, Any] = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration
         )
 
         include_unexpected_rows: bool
@@ -2967,9 +2961,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     ):
         result_format: Union[
             Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
+        ] = self.get_result_format(runtime_configuration=runtime_configuration)
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
@@ -3224,7 +3216,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration
         )
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
