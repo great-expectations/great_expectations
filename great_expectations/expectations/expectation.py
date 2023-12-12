@@ -1173,7 +1173,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         return runtime_kwargs
 
-    def get_result_format(
+    def _get_result_format(
         self,
         runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
@@ -2701,7 +2701,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: str | dict[str, Any] = self.get_result_format(
+        result_format: str | dict[str, Any] = self._get_result_format(
             runtime_configuration=runtime_configuration
         )
 
@@ -2961,7 +2961,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     ):
         result_format: Union[
             Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self.get_result_format(runtime_configuration=runtime_configuration)
+        ] = self._get_result_format(runtime_configuration=runtime_configuration)
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
@@ -3215,7 +3215,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
+        result_format = self._get_result_format(
             runtime_configuration=runtime_configuration
         )
         unexpected_index_column_names = None
