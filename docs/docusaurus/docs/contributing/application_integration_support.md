@@ -83,7 +83,7 @@ The following table defines the operating systems supported by the community.
 |--------------------------------|-------------------------------|
 | - Mac/Linux ¹<br/>- Windows ²  | - Mac/Linux<br/>- Windows ²   | 
 
-¹ Required to run the GX Agent.
+¹ Required to run the GX Agent.<br/>
 ² Untested and unsupported by GX
 
 ### Python versions
