@@ -6,6 +6,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import BatchRequest, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
+from great_expectations.expectations.core import ExpectColumnMinToBeBetween
 
 # Make sure GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID
 # are set in your environment or config_variables.yml
@@ -73,20 +74,12 @@ column_name = None
 assert column_name is not None, "Please set column_name."
 
 # Look up all expectations types here - https://greatexpectations.io/expectations/
-expectation_configuration = gx.core.ExpectationConfiguration(
-    **{
-        "expectation_type": "expect_column_min_to_be_between",
-        "kwargs": {"column": column_name, "min_value": 0.1},
-        "meta": {},
-    }
-)
+expectation = ExpectColumnMinToBeBetween(column=column_name, min_value=0.1)
 
-expectation_suite.legacy_add_expectation_by_configuration(
-    expectation_configuration=expectation_configuration
-)
+expectation_suite.add(expectation=expectation)
 
 # Save the Expectation Suite
-context.update_expectation_suite(expectation_suite=expectation_suite)
+expectation_suite.save()
 
 print(f"\n{20*'='}\nExpectation Suite\n{20*'='}\n")
 pprint.pprint(expectation_suite)
