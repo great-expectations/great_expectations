@@ -1126,7 +1126,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
             return None
 
-    def get_domain_kwargs(self) -> Dict[str, Optional[str]]:
+    def _get_domain_kwargs(self) -> Dict[str, Optional[str]]:
         domain_kwargs: Dict[str, Optional[str]] = {
             key: self.configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.domain_keys
@@ -1143,7 +1143,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @public_api
     def get_success_kwargs(self) -> Dict[str, Any]:
         """Retrieve the success kwargs."""
-        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs()
+        domain_kwargs: Dict[str, Optional[str]] = self._get_domain_kwargs()
         success_kwargs: Dict[str, Any] = {
             key: self.configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.success_keys
