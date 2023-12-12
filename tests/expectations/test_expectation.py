@@ -247,3 +247,11 @@ def test_expectation_configuration_property_recognizes_state_changes():
             "max_value": 15,
         },
     )
+
+
+@pytest.mark.unit
+def test_unrecognized_expectation_arg_raises_error():
+    with pytest.raises(pydantic.ValidationError, match="foo"):
+        ExpectColumnMaxToBeBetween(
+            column="foo", min_value=0, max_value=10, mostyl=0.95  # 'mostly' typo
+        )
