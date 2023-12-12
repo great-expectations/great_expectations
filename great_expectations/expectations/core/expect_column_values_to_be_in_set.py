@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core import (
@@ -117,6 +117,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "value_set",
     )
 
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
     success_keys = (
         "value_set",
         "mostly",

@@ -366,8 +366,8 @@ def test_deduplicate_evaluation_parameter_dependencies():
                     expectation_type="expect_column_values_to_be_between",
                     kwargs={
                         "column": "my_date",
-                        "min_value": "2016-12-10T00:00:00",
-                        "max_value": "2022-12-06T00:00:00",
+                        "min_value": datetime(year=2016, month=12, day=10),
+                        "max_value": datetime(year=2022, month=12, day=6),
                         "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
                     },
                     meta={

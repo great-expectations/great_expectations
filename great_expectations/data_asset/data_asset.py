@@ -214,14 +214,13 @@ class DataAsset:
                     )
 
                 # update evaluation_args with defaults from expectation signature
-                if method_name not in ExpectationConfiguration.kwarg_lookup_dict:
-                    default_kwarg_values = {
-                        k: v.default
-                        for k, v in inspect.signature(func).parameters.items()
-                        if v.default is not inspect.Parameter.empty
-                    }
-                    default_kwarg_values.update(evaluation_args)
-                    evaluation_args = default_kwarg_values
+                default_kwarg_values = {
+                    k: v.default
+                    for k, v in inspect.signature(func).parameters.items()
+                    if v.default is not inspect.Parameter.empty
+                }
+                default_kwarg_values.update(evaluation_args)
+                evaluation_args = default_kwarg_values
 
                 # Construct the expectation_config object
                 expectation_config = ExpectationConfiguration(

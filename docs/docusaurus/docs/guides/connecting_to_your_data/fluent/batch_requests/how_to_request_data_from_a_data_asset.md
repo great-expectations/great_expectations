@@ -92,6 +92,5 @@ Because Batch definitions are quite verbose, it is easiest to determine what dat
 
 Now that you have a retrieved data from a Data Asset, you may be interested in creating Expectations about your data:
 - [How to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [How to use the Onboarding Data Assistant to evaluate data](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
 
 
