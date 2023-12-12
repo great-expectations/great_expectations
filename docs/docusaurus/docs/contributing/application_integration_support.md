@@ -2,9 +2,10 @@
 title: Integration support policy
 ---
 
-A defined integration support policy allows Great Expectations (GX) to prioritize its response to application integration, operating system, and programming language issues.
 
-For production environments where uptime is critical, GX recommends using the applications, operating systems, and programming languages defined as GX-supported. Community-supported platforms such as Pandas, Spark, and SQLAlchemy allow you to integrate your existing datasets with GX Cloud and GX OSS.
+For production environments, GX recommends using the integrations defined as GX-supported. 
+
+GX uses libraries such as Pandas, Spark, and SQLAlchemy to integrate with a wide range of data sources. This also allows you to deploy GX with Community-supported integrations.
 
 ## Support categories
 
@@ -99,7 +100,6 @@ The following table defines the GX Cloud and GX OSS integrations supported by th
 | Orchestrator                              | Airflow ⁵           | - Airflow<br/>- Prefect<br/>- Dagster ⁶<br/>- Flyte ⁶<br/>- mage.ai ⁶<br/>- Github Action ⁶        |
 
 
-¹ Partially tested and supported by GX.<br/>
 ² Untested and unsupported by GX.<br/>
 ³ When used with the GX OSS library.<br/>
 ⁴ Untested and unsupported by GX.<br/>
