@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import ValidationDependencies
 
 _TEST_DEFS_DIR: Final = pathlib.Path(
-    __file__, "..", "..", "..", "tests", "test_definitions"
+    __file__, "..", "..", "..", "..", "tests", "test_definitions"
 ).resolve()
 
 
