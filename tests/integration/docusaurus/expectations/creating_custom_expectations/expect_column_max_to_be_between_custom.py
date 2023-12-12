@@ -221,10 +221,11 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
         column_max = metrics["column.custom_max"]
 
         # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
+        success_kwargs = self.get_success_kwargs()
+        min_value = success_kwargs.get("min_value")
+        max_value = success_kwargs.get("max_value")
+        strict_min = success_kwargs.get("strict_min")
+        strict_max = success_kwargs.get("strict_max")
 
         # Checking if mean lies between thresholds
         if min_value is not None:
