@@ -49,6 +49,7 @@ LOGGER = logging.getLogger(__name__)
 SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 
 _REQUIRED_FABRIC_SERVICE: Final[str] = "Microsoft.ProjectArcadia"
+Mode = Literal["xlma", "rest", "onelake"]
 
 
 class _PowerBIAsset(DataAsset):
@@ -214,7 +215,7 @@ class PowerBITable(_PowerBIAsset):
     fully_qualified_columns: bool = False
     num_rows: Optional[int] = None
     multiindex_hierarchies: bool = False
-    mode: str = "xmla"
+    mode: Mode = "xmla"
 
 
 # This improves our error messages by providing a more specific type for pydantic to validate against
