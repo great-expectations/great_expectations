@@ -2335,10 +2335,11 @@ class BatchExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value: Optional[Any] = self.get_success_kwargs().get("min_value")
-        strict_min: Optional[bool] = self.get_success_kwargs().get("strict_min")
-        max_value: Optional[Any] = self.get_success_kwargs().get("max_value")
-        strict_max: Optional[bool] = self.get_success_kwargs().get("strict_max")
+        success_kwargs = self.get_success_kwargs()
+        min_value: Optional[Any] = success_kwargs.get("min_value")
+        strict_min: Optional[bool] = success_kwargs.get("strict_min")
+        max_value: Optional[Any] = success_kwargs.get("max_value")
+        strict_max: Optional[bool] = success_kwargs.get("strict_max")
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
