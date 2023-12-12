@@ -14,8 +14,6 @@ The following are the levels of support provided by GX:
 
 - Community-supported - integrations are successfully implemented by community members. They are not tested or updated by GX, and GX is not responsible for ensuring reliability or compatibility.
 
-
-
 ## GX supported
 
 The following are the levels of support offered by GX for integrated applications, operating systems, and programming languages.
@@ -62,7 +60,7 @@ The following table defines the supported GX Cloud and GX OSS integrations.
 ¹ Connection strings for various SQL Data Sources are supported, but dialect-specific SQL commands are not.<br/>
 ² Support for Slack, email, and Zapier are planned for future releases.<br/>
 ³ When used with the GX OSS library.<br/>
-⁴ GX officially only supports Airflow, but it should work with any orchestrator that executes Python code.
+⁴ Although only Airflow is supported, GX Cloud and GX OSS should work with any orchestrator that executes Python code.
 
 ### GX components
 
@@ -84,27 +82,9 @@ The following table defines the operating systems supported by the community.
 
 | GX Cloud                       | GX OSS                        |
 |--------------------------------|-------------------------------|
-| - Windows ²  | Windows ²   | 
+| Windows ¹                      | Windows ¹                     | 
 
-¹ Required to run the GX Agent.<br/>
-² Untested and unsupported by GX
-
-### Python versions
-
-The following table defines the Python versions supported by the community.
-
-| GX Cloud                    | GX OSS                          |
-|-----------------------------|---------------------------------|
-| N/A                         | 3.7.X and earlier             | 
- 
-
-### GX versions
-
-The following table defines the GX versions supported by the community.
-
-| GX Cloud                    | GX OSS                          |
-|-----------------------------|---------------------------------|
-| N/A                         | Previous two minor releases. For example, 0.15.X, 0.16.X              | 
+¹ Untested and unsupported by GX
 
 ### Integrations
 
