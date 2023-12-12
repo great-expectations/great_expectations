@@ -2,15 +2,19 @@
 title: Application support policy
 ---
 
-A defined application support policy allows Great Expectations (GX) to better prioritize its response to application integration, operating system, and programming language issues. Formally defining the support policy also provides contributors with a better understanding of who is responsible for resolving application integration, operating system, and programming language issues.
+A defined support policy allows Great Expectations (GX) to prioritize its response to application integration, operating system, and programming language issues.
+
+For production environments where uptime is critical, GX recommends using the applications, operating systems, and programming languages defined as GX-supported. Community-supported platforms such as Pandas, Spark, and SQLAlchemy allow you to integrate your existing datasets with GX Cloud and GX OSS.
 
 ## Support categories
 
-The following are the types of support available for application integration, operating system, and programming language issues:
+The following are the levels of support provided by GX:
 
-- **GX supported** - The GX Developer Relations (DevRel) team triages, reproduces, and then assigns issues to the appropriate GX Engineering team. Issues with application integration, operating system, and programming languages in maintenance mode are reviewed, but new features or functionality are not implemented as part of the resolution.
+- GX-supported - integrations are tested throughout the development lifecycle, and actively maintained and updated when new versions of GX Cloud or GX OSS are released.
 
-- **Community supported** - The GX DevRel team triages and reproduces issues, and then determines if GX should implement new features or functionality to resolve the issue. If the DevRel team determines that new features or functionality are not warranted, the GX community is responsible for issue resolution. If new features or functionality are required, DevRel assigns the issue to the appropriate GX Engineering team.
+- Community-supported - integrations are successfully implemented by community members. They are not tested or updated by GX, and GX is not responsible for ensuring reliability or compatibility.
+
+
 
 ## GX supported
 
@@ -58,7 +62,7 @@ The following table defines the supported GX Cloud and GX OSS integrations.
 ¹ Connection strings for various SQL Data Sources are supported, but dialect-specific SQL commands are not.<br/>
 ² Support for Slack, email, and Zapier are planned for future releases.<br/>
 ³ When used with the GX OSS library.<br/>
-⁴ Other Orchestrator applications that execute Python code are not supported.
+⁴ GX officially only supports Airflow, but it should work with any orchestrator that executes Python code.
 
 ### GX components
 
