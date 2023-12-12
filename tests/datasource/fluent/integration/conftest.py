@@ -69,6 +69,7 @@ def pandas_sql_data(
 
 
 def pandas_filesystem_datasource(
+    test_backends,
     context: AbstractDataContext,
 ) -> PandasFilesystemDatasource:
     relative_path = pathlib.Path(
@@ -172,6 +173,7 @@ def spark_data(
 
 
 def multibatch_pandas_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     relative_path = pathlib.Path(
@@ -194,6 +196,7 @@ def multibatch_pandas_data(
 
 
 def multibatch_sql_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     datasource = sqlite_datasource(
