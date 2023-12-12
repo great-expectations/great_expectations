@@ -37,8 +37,15 @@ from great_expectations.expectations.registry import (
     _registered_renderers,
 )
 from great_expectations.render import (
+    CollapseContent,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
+    RenderedAtomicContent,
+    RenderedContentBlockContainer,
+    RenderedGraphContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+    ValueListContent,
 )
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
@@ -55,7 +62,7 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import ValidationDependencies
 
 _TEST_DEFS_DIR: Final = pathlib.Path(
-    __file__, "..", "..", "tests", "test_definitions"
+    __file__, "..", "..", "..", "tests", "test_definitions"
 ).resolve()
 
 
@@ -272,9 +279,9 @@ class ExpectationDoctor:
         }
         problems = []
 
-        if hasattr(self, "library_metadata"):
-            augmented_library_metadata.update(self.library_metadata)
-            keys = set(self.library_metadata.keys())
+        if hasattr(self._expectation, "library_metadata"):
+            augmented_library_metadata.update(self._expectation.library_metadata)
+            keys = set(self._expectation.library_metadata.keys())
             missing_required_keys = required_keys - keys
             forbidden_keys = keys - allowed_keys
 
@@ -322,9 +329,11 @@ class ExpectationDoctor:
             )
         )
         beta_checks.append(
-            ExpectationDiagnostics._check_input_validation(self, examples)
+            ExpectationDiagnostics._check_input_validation(self._expectation, examples)
         )
-        beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
+        beta_checks.append(
+            ExpectationDiagnostics._check_renderer_methods(self._expectation)
+        )
         beta_checks.append(
             ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
                 backend_test_result_counts
@@ -474,9 +483,11 @@ class ExpectationDoctor:
     def _get_docstring_and_short_description(self) -> tuple[str, str]:
         """Conveninence method to get the Exepctation's docstring and first line"""
 
-        if self.__doc__ is not None:
-            docstring = self.__doc__
-            short_description = next(line for line in self.__doc__.split("\n") if line)
+        if self._expectation.__doc__ is not None:
+            docstring = self._expectation.__doc__
+            short_description = next(
+                line for line in self._expectation.__doc__.split("\n") if line
+            )
         else:
             docstring = ""
             short_description = ""
@@ -810,3 +821,63 @@ class ExpectationDoctor:
         supported_renderers = list(registered_renderers[expectation_type].keys())
         supported_renderers.sort()
         return supported_renderers
+
+    def _get_rendered_result_as_string(  # noqa: C901, PLR0912
+        self, rendered_result
+    ) -> str:
+        """Convenience method to get rendered results as strings."""
+
+        result: str = ""
+
+        if isinstance(rendered_result, str):
+            result = rendered_result
+
+        elif isinstance(rendered_result, list):
+            sub_result_list = []
+            for sub_result in rendered_result:
+                res = self._get_rendered_result_as_string(sub_result)
+                if res is not None:
+                    sub_result_list.append(res)
+
+            result = "\n".join(sub_result_list)
+
+        elif isinstance(rendered_result, RenderedStringTemplateContent):
+            result = rendered_result.__str__()
+
+        elif isinstance(rendered_result, CollapseContent):
+            result = rendered_result.__str__()
+
+        elif isinstance(rendered_result, RenderedAtomicContent):
+            result = f"(RenderedAtomicContent) {rendered_result.to_json_dict()!r}"
+
+        elif isinstance(rendered_result, RenderedContentBlockContainer):
+            result = "(RenderedContentBlockContainer) " + repr(
+                rendered_result.to_json_dict()
+            )
+
+        elif isinstance(rendered_result, RenderedTableContent):
+            result = f"(RenderedTableContent) {rendered_result.to_json_dict()!r}"
+
+        elif isinstance(rendered_result, RenderedGraphContent):
+            result = f"(RenderedGraphContent) {rendered_result.to_json_dict()!r}"
+
+        elif isinstance(rendered_result, ValueListContent):
+            result = f"(ValueListContent) {rendered_result.to_json_dict()!r}"
+
+        elif isinstance(rendered_result, dict):
+            result = f"(dict) {rendered_result!r}"
+
+        elif isinstance(rendered_result, int):
+            result = repr(rendered_result)
+
+        elif rendered_result is None:
+            result = ""
+
+        else:
+            raise TypeError(
+                f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
+            )
+
+        if "inf" in result:
+            result = ""
+        return result

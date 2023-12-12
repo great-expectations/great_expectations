@@ -77,11 +77,8 @@ from great_expectations.render import (
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
-    RenderedContentBlockContainer,
-    RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    ValueListContent,
     renderedAtomicValueSchema,
 )
 from great_expectations.render.exceptions import RendererConfigurationError
@@ -103,11 +100,6 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
         ExpectationDiagnostics,
-    )
-    from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-        ExpectationTestCase,
-        ExpectationTestDataCases,
-        TestData,
     )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.render.renderer_configuration import MetaNotes
@@ -1302,31 +1294,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             context=context,
         )
 
-    def _warn_if_result_format_config_in_runtime_configuration(
-        self, runtime_configuration: Union[dict, None] = None
-    ) -> None:
-        """
-        Issues warning if result_format is in runtime_configuration for Validator
-        """
-        if runtime_configuration and runtime_configuration.get("result_format"):
-            warnings.warn(
-                "`result_format` configured at the Validator-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
-                UserWarning,
-            )
-
-    def _warn_if_result_format_config_in_expectation_configuration(
-        self, configuration: ExpectationConfiguration
-    ) -> None:
-        """
-        Issues warning if result_format is in ExpectationConfiguration
-        """
-
-        if configuration.kwargs.get("result_format"):
-            warnings.warn(
-                "`result_format` configured at the Expectation-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
-                UserWarning,
-            )
-
     @public_api
     def print_diagnostic_checklist(
         self,
@@ -1352,6 +1319,31 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             backends=backends,
             show_debug_messages=show_debug_messages,
         )
+
+    def _warn_if_result_format_config_in_runtime_configuration(
+        self, runtime_configuration: Union[dict, None] = None
+    ) -> None:
+        """
+        Issues warning if result_format is in runtime_configuration for Validator
+        """
+        if runtime_configuration and runtime_configuration.get("result_format"):
+            warnings.warn(
+                "`result_format` configured at the Validator-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
+                UserWarning,
+            )
+
+    def _warn_if_result_format_config_in_expectation_configuration(
+        self, configuration: ExpectationConfiguration
+    ) -> None:
+        """
+        Issues warning if result_format is in ExpectationConfiguration
+        """
+
+        if configuration.kwargs.get("result_format"):
+            warnings.warn(
+                "`result_format` configured at the Expectation-level will not be persisted. Please add the configuration to your Checkpoint config or checkpoint_run() method instead.",
+                UserWarning,
+            )
 
     @staticmethod
     def _add_array_params(
@@ -1445,81 +1437,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             if renderer_configuration.params.strict_max.value is True
             else "less than or equal to"
         )
-
-    @staticmethod
-    def _choose_example(
-        examples: List[ExpectationTestDataCases],
-    ) -> Tuple[TestData, ExpectationTestCase]:
-        """Choose examples to use for run_diagnostics.
-
-        This implementation of this method is very naive---it just takes the first one.
-        """
-        example = examples[0]
-
-        example_test_data = example["data"]
-        example_test_case = example["tests"][0]
-
-        return example_test_data, example_test_case
-
-    def _get_rendered_result_as_string(  # noqa: C901, PLR0912
-        self, rendered_result
-    ) -> str:
-        """Convenience method to get rendered results as strings."""
-
-        result: str = ""
-
-        if isinstance(rendered_result, str):
-            result = rendered_result
-
-        elif isinstance(rendered_result, list):
-            sub_result_list = []
-            for sub_result in rendered_result:
-                res = self._get_rendered_result_as_string(sub_result)
-                if res is not None:
-                    sub_result_list.append(res)
-
-            result = "\n".join(sub_result_list)
-
-        elif isinstance(rendered_result, RenderedStringTemplateContent):
-            result = rendered_result.__str__()
-
-        elif isinstance(rendered_result, CollapseContent):
-            result = rendered_result.__str__()
-
-        elif isinstance(rendered_result, RenderedAtomicContent):
-            result = f"(RenderedAtomicContent) {rendered_result.to_json_dict()!r}"
-
-        elif isinstance(rendered_result, RenderedContentBlockContainer):
-            result = "(RenderedContentBlockContainer) " + repr(
-                rendered_result.to_json_dict()
-            )
-
-        elif isinstance(rendered_result, RenderedTableContent):
-            result = f"(RenderedTableContent) {rendered_result.to_json_dict()!r}"
-
-        elif isinstance(rendered_result, RenderedGraphContent):
-            result = f"(RenderedGraphContent) {rendered_result.to_json_dict()!r}"
-
-        elif isinstance(rendered_result, ValueListContent):
-            result = f"(ValueListContent) {rendered_result.to_json_dict()!r}"
-
-        elif isinstance(rendered_result, dict):
-            result = f"(dict) {rendered_result!r}"
-
-        elif isinstance(rendered_result, int):
-            result = repr(rendered_result)
-
-        elif rendered_result is None:
-            result = ""
-
-        else:
-            raise TypeError(
-                f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
-            )
-
-        if "inf" in result:
-            result = ""
-        return result
 
 
 @public_api
