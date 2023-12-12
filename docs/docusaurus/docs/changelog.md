@@ -10,6 +10,11 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.4
+* [BUGFIX] 0.18.4 - Fix Snowflake error when using alternative connection details format. ([#9056](https://github.com/great-expectations/great_expectations/pull/9056))
+* [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068) via [#9061](https://github.com/great-expectations/great_expectations/pull/9061)) (thanks @matveykortsev)
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+
 ### 0.18.3
 * [FEATURE] Update SnowflakeDatasource connection details ([#8922](https://github.com/great-expectations/great_expectations/pull/8922))
 * [DOCS] Minor Updates to Create a Data Asset ([#8952](https://github.com/great-expectations/great_expectations/pull/8952))
@@ -22,8 +27,6 @@ title: Changelog
 * [MAINTENANCE] Update type hints so our decorators play well with classes ([#8935](https://github.com/great-expectations/great_expectations/pull/8935))
 * [CONTRIB] add sqlalchemy execution engine compatability to expect_column_values… ([#8942](https://github.com/great-expectations/great_expectations/pull/8942)) (thanks @mcornew)
 * [CONTRIB] add sqlalchemy support for expect_multicolumn_values_not_to_be_all_null ([#8938](https://github.com/great-expectations/great_expectations/pull/8938)) (thanks @itaise)
-
-
 
 ### 0.18.2
 * [DOCS] Update Connect to SQL Database Data Assets ([#8918](https://github.com/great-expectations/great_expectations/pull/8918))
