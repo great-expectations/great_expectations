@@ -128,7 +128,7 @@ class _SparkDatasource(Datasource):
 
     @override
     def get_execution_engine(self) -> SparkDFExecutionEngine:
-        # Method override is required because PrivateAttr won't be passed into Execution Engine
+        # Method override is required because PrivateAttr _spark won't be passed into Execution Engine
         # unless it is passed explicitly.
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
