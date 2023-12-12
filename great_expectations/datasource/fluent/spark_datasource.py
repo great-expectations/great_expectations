@@ -138,9 +138,15 @@ class _SparkDatasource(Datasource):
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
             or not self._execution_engine
         ):
-            self._execution_engine = self._execution_engine_type()(
-                spark=self._spark, **current_execution_engine_kwargs
-            )
+            if self._spark:
+                self._execution_engine = self._execution_engine_type()(
+                    spark=self._spark, **current_execution_engine_kwargs
+                )
+            else:
+                self._execution_engine = self._execution_engine_type()(
+                    **current_execution_engine_kwargs
+                )
+
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
         return self._execution_engine
 
