@@ -86,10 +86,13 @@ def pandas_filesystem_datasource(
 
 
 def pandas_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, PandasFilesystemDatasource, DataAsset, BatchRequest]:
     context.config_variables.update({"pipeline_filename": __file__})
-    pandas_ds = pandas_filesystem_datasource(context=context)
+    pandas_ds = pandas_filesystem_datasource(
+        test_backends=test_backends, context=context
+    )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
