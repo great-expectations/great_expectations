@@ -22,7 +22,7 @@ from typing import (
 
 from dateutil.parser import parse
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import py4j, pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
@@ -361,7 +361,11 @@ class SparkDFExecutionEngine(ExecutionEngine):
                     and spark_session.sparkContext.appName != value
                 ):
                     spark_session.sparkContext.appName = value
-            except (pyspark.PySparkAttributeError, pyspark.AnalysisException):
+            except (
+                pyspark.PySparkAttributeError,
+                pyspark.AnalysisException,
+                py4j.protocol.Py4JJavaError,
+            ):
                 if SparkDFExecutionEngine._session_is_not_stoppable(
                     spark_session=spark_session
                 ):
