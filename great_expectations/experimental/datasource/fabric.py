@@ -291,7 +291,7 @@ class FabricPowerBIDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_powerbi_dax_asset(  # noqa: PLR0913
+    def add_powerbi_dax_asset(
         self,
         name: str,
         dax_string: str,
