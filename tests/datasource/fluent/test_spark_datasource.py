@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from great_expectations.compatibility import pydantic
+from great_expectations.datasource.fluent import TestConnectionError
 from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
     SparkConfig,
@@ -164,3 +165,12 @@ def test_unmodifiable_config_option_warning(
             name="my_spark_datasource",
             spark_config=spark_config,  # type: ignore[arg-type]
         )
+
+
+@pytest.mark.unit
+def test_spark_test_connection(
+    empty_data_context: AbstractDataContext,
+):
+    # no spark marker means pyspark is not installed when this is run
+    with pytest.raises(TestConnectionError):
+        _ = empty_data_context.sources.add_spark(name="my_spark_datasource")
