@@ -1171,7 +1171,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
 
-        success_kwargs = self.get_success_kwargs(configuration=configuration)
+        success_kwargs = self.get_success_kwargs()
         runtime_kwargs = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.runtime_keys
@@ -2335,18 +2335,10 @@ class BatchExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value: Optional[Any] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("min_value")
-        strict_min: Optional[bool] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("strict_min")
-        max_value: Optional[Any] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("max_value")
-        strict_max: Optional[bool] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("strict_max")
+        min_value: Optional[Any] = self.get_success_kwargs().get("min_value")
+        strict_min: Optional[bool] = self.get_success_kwargs().get("strict_min")
+        max_value: Optional[Any] = self.get_success_kwargs().get("max_value")
+        strict_max: Optional[bool] = self.get_success_kwargs().get("strict_max")
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
