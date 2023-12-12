@@ -392,7 +392,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
                     break
 
         for message in warning_messages:
-            print(message)
             warnings.warn(
                 message=message,
                 category=RuntimeWarning,
