@@ -10,6 +10,24 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.4
+* [BUGFIX] 0.18.4 - Fix Snowflake error when using alternative connection details format. ([#9056](https://github.com/great-expectations/great_expectations/pull/9056))
+* [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068) via [#9061](https://github.com/great-expectations/great_expectations/pull/9061)) (thanks @matveykortsev)
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+
+### 0.18.3
+* [FEATURE] Update SnowflakeDatasource connection details ([#8922](https://github.com/great-expectations/great_expectations/pull/8922))
+* [DOCS] Minor Updates to Create a Data Asset ([#8952](https://github.com/great-expectations/great_expectations/pull/8952))
+* [DOCS] List the Available GX Cloud Expectations in Manage Expectations ([#8959](https://github.com/great-expectations/great_expectations/pull/8959))
+* [DOCS] DSB-484 Improve Quickstart diagram links ([#8951](https://github.com/great-expectations/great_expectations/pull/8951))
+* [DOCS] Update Add Validation Data or Expectation Suites to a Checkpoint ([#8931](https://github.com/great-expectations/great_expectations/pull/8931))
+* [MAINTENANCE] Add delete Data Source and Data Asset methods to end-to-end tests ([#8956](https://github.com/great-expectations/great_expectations/pull/8956))
+* [MAINTENANCE] Add Nevin and cleanup teams.yml ([#8955](https://github.com/great-expectations/great_expectations/pull/8955))
+* [MAINTENANCE] dry up validation status calc ([#8962](https://github.com/great-expectations/great_expectations/pull/8962))
+* [MAINTENANCE] Update type hints so our decorators play well with classes ([#8935](https://github.com/great-expectations/great_expectations/pull/8935))
+* [CONTRIB] add sqlalchemy execution engine compatability to expect_column_values… ([#8942](https://github.com/great-expectations/great_expectations/pull/8942)) (thanks @mcornew)
+* [CONTRIB] add sqlalchemy support for expect_multicolumn_values_not_to_be_all_null ([#8938](https://github.com/great-expectations/great_expectations/pull/8938)) (thanks @itaise)
+
 ### 0.18.2
 * [DOCS] Update Connect to SQL Database Data Assets ([#8918](https://github.com/great-expectations/great_expectations/pull/8918))
 * [DOCS] DSB-353: Add GX Cloud Architecture and Deployment Patterns page ([#8904](https://github.com/great-expectations/great_expectations/pull/8904))
