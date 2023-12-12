@@ -318,7 +318,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     class Config:
         arbitrary_types_allowed = True
         smart_union = True
-        extra = pydantic.Extra.forbid
+        extra = pydantic.Extra.allow
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
