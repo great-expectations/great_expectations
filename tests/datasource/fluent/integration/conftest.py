@@ -163,7 +163,7 @@ def spark_data(
     test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, SparkFilesystemDatasource, DataAsset, BatchRequest]:
-    spark_ds = spark_filesystem_datasource(test_backends, context=context)
+    spark_ds = spark_filesystem_datasource(test_backends=test_backends, context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
@@ -257,10 +257,7 @@ def multibatch_spark_data(
 def datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
-    return request.param(empty_data_context)
+    return request.param(test_backends=test_backends, context=empty_data_context)
 
 
 @pytest.fixture(
@@ -273,9 +270,9 @@ def datasource_test_data(
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    return request.param(test_backends, empty_data_context)
+    return request.param(test_backends=test_backends, context=empty_data_context)
 
 
 @pytest.fixture(params=[pandas_filesystem_datasource, spark_filesystem_datasource])
 def filesystem_datasource(test_backends, empty_data_context, request) -> Datasource:
-    return request.param(test_backends, empty_data_context)
+    return request.param(test_backends=test_backends, context=empty_data_context)
