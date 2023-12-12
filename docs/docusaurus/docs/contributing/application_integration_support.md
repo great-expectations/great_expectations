@@ -1,8 +1,8 @@
 ---
-title: Application support policy
+title: Integration support policy
 ---
 
-A defined support policy allows Great Expectations (GX) to prioritize its response to application integration, operating system, and programming language issues.
+A defined integration support policy allows Great Expectations (GX) to prioritize its response to application integration, operating system, and programming language issues.
 
 For production environments where uptime is critical, GX recommends using the applications, operating systems, and programming languages defined as GX-supported. Community-supported platforms such as Pandas, Spark, and SQLAlchemy allow you to integrate your existing datasets with GX Cloud and GX OSS.
 
@@ -68,7 +68,7 @@ The following table defines the GX components supported by GX Cloud and GX OSS.
 
 | Component                                | GX Cloud             | GX OSS          |
 |------------------------------------------|----------------------|-----------------|
-| Expectations                             | See [Available Expectations](/docs/cloud/expectations/manage_expectations#available-expectations) ¹. | See [Create Expectations](/docs/guides/expectations/expectations_lp) ¹.                |
+| Expectations                             | See [Available Expectations](/docs/cloud/expectations/manage_expectations#available-expectations). | See [Create Expectations](/docs/guides/expectations/expectations_lp).                |
 | GX Agent                                 | All versions               | N/A        |
 
 
@@ -84,7 +84,7 @@ The following table defines the operating systems supported by the community.
 |--------------------------------|-------------------------------|
 | Windows ¹                      | Windows ¹                     | 
 
-¹ Untested and unsupported by GX
+¹ Untested and unsupported by GX.
 
 ### Integrations
 

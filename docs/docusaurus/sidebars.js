@@ -268,7 +268,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Application support policy',
+          label: 'Integration support policy',
           link: { type: 'doc', id: 'contributing/application_integration_support' },
           items: [
             {
