@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -53,7 +53,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
-    sum_total: Union[int, float]
+    sum_total: float
     ignore_row_if: Literal[
         "all_values_are_missing", "any_value_is_missing", "never"
     ] = "all_values_are_missing"
