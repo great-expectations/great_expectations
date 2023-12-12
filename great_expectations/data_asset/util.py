@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import datetime
 import decimal
-import json
 import sys
 from functools import wraps
 from typing import Any
@@ -11,7 +10,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import pydantic
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 
@@ -24,7 +22,7 @@ def parse_result_format(result_format):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
     else:  # noqa: PLR5501
         if "partial_unexpected_count" not in result_format:
-            result_format.partial_unexpected_count = 20
+            result_format["partial_unexpected_count"] = 20
 
     return result_format
 
@@ -197,9 +195,6 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     elif isinstance(test_obj, decimal.Decimal):
         return float(test_obj)
-
-    elif isinstance(test_obj, pydantic.BaseModel):
-        return json.loads(test_obj.json())
 
     else:
         raise TypeError(

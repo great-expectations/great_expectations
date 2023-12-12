@@ -55,7 +55,6 @@ from great_expectations.core import (
     IDDict,
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
-from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
@@ -2309,14 +2308,16 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
         else:
             if pk_column:
                 runtime_kwargs = {
-                    "result_format": ResultFormatConfig(
-                        result_format="COMPLETE",
-                        unexpected_index_column_names=["pk_index"],
-                    )
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                        "unexpected_index_column_names": ["pk_index"],
+                    },
                 }
             else:
                 runtime_kwargs = {
-                    "result_format": ResultFormatConfig(result_format="COMPLETE")
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                    },
                 }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)

@@ -136,9 +136,9 @@ def _pandas_map_condition_index(
         metrics=metrics,
         expectation_domain_column_list=domain_column_name_list,
     )
-    if result_format.result_format == "COMPLETE":
+    if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list
-    return unexpected_index_list[: result_format.partial_unexpected_count]
+    return unexpected_index_list[: result_format["partial_unexpected_count"]]
 
 
 def _pandas_map_condition_query(
@@ -159,9 +159,9 @@ def _pandas_map_condition_query(
     result_format: dict = metric_value_kwargs["result_format"]
 
     # We will not return map_condition_query if return_unexpected_index_query = False
-    return_unexpected_index_query: Optional[
-        bool
-    ] = result_format.return_unexpected_index_query
+    return_unexpected_index_query: Optional[bool] = result_format.get(
+        "return_unexpected_index_query"
+    )
     if return_unexpected_index_query is False:
         return None
 
@@ -250,10 +250,10 @@ def _pandas_map_condition_rows(
 
     df = df[boolean_mapped_unexpected_values]
 
-    if result_format.result_format == "COMPLETE":
+    if result_format["result_format"] == "COMPLETE":
         return df
 
-    return df.iloc[: result_format.partial_unexpected_count]
+    return df.iloc[: result_format["partial_unexpected_count"]]
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
@@ -403,8 +403,8 @@ def _sqlalchemy_map_condition_rows(
         query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
-    if result_format.result_format != "COMPLETE":
-        query = query.limit(result_format.partial_unexpected_count)
+    if result_format["result_format"] != "COMPLETE":
+        query = query.limit(result_format["partial_unexpected_count"])
     try:
         return execution_engine.execute_query(query).fetchall()
     except sqlalchemy.OperationalError as oe:
@@ -437,9 +437,9 @@ def _sqlalchemy_map_condition_query(
 
     result_format: dict = metric_value_kwargs["result_format"]
     # We will not return map_condition_query if return_unexpected_index_query = False
-    return_unexpected_index_query: Optional[
-        bool
-    ] = result_format.return_unexpected_index_query
+    return_unexpected_index_query: Optional[bool] = result_format.get(
+        "return_unexpected_index_query"
+    )
     if return_unexpected_index_query is False:
         return None
 
@@ -466,9 +466,9 @@ def _sqlalchemy_map_condition_query(
     column_selector: List[sa.Column] = []
 
     all_table_columns: List[str] = metrics.get("table.columns", [])
-    unexpected_index_column_names: List[
-        str
-    ] | None = result_format.unexpected_index_column_names
+    unexpected_index_column_names: List[str] | None = result_format.get(
+        "unexpected_index_column_names"
+    )
     if unexpected_index_column_names:
         for column_name in unexpected_index_column_names:
             if column_name not in all_table_columns:
@@ -552,8 +552,8 @@ def _sqlalchemy_map_condition_index(
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     all_table_columns: List[str] = metrics.get("table.columns", [])
 
-    unexpected_index_column_names: List[str] = (
-        result_format.unexpected_index_column_names or []
+    unexpected_index_column_names: List[str] = result_format.get(
+        "unexpected_index_column_names", []
     )
 
     column_selector: List[sa.Column] = []
@@ -585,13 +585,15 @@ def _sqlalchemy_map_condition_index(
     final_query: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             domain_records_as_selectable
-        ).limit(result_format.partial_unexpected_count)
+        ).limit(result_format["partial_unexpected_count"])
     )
     query_result: List[sqlalchemy.Row] = execution_engine.execute_query(
         final_query
     ).fetchall()
 
-    exclude_unexpected_values: bool = result_format.exclude_unexpected_values or False
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
 
     return _get_sqlalchemy_customized_unexpected_index_list(
         exclude_unexpected_values=exclude_unexpected_values,
@@ -673,10 +675,10 @@ def _spark_map_condition_rows(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format.result_format == "COMPLETE":
+    if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
 
-    return filtered.limit(result_format.partial_unexpected_count).collect()
+    return filtered.limit(result_format["partial_unexpected_count"]).collect()
 
 
 def _spark_map_condition_index(
@@ -733,7 +735,7 @@ def _spark_map_condition_index(
         domain_kwargs=domain_kwargs
     )
     result_format = metric_value_kwargs["result_format"]
-    if not result_format.unexpected_index_column_names:
+    if not result_format.get("unexpected_index_column_names"):
         raise gx_exceptions.MetricResolutionError(
             message="unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration.",
             failed_metrics=["unexpected_index_list"],
@@ -743,7 +745,9 @@ def _spark_map_condition_index(
     filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
         F.col("__unexpected")
     )
-    exclude_unexpected_values: bool = result_format.exclude_unexpected_values or False
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
 
     unexpected_index_column_names: List[str] = result_format[
         "unexpected_index_column_names"
@@ -758,8 +762,8 @@ def _spark_map_condition_index(
                 f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."
             )
 
-    if result_format.result_format != "COMPLETE":
-        filtered = filtered.limit(result_format.partial_unexpected_count)
+    if result_format["result_format"] != "COMPLETE":
+        filtered = filtered.limit(result_format["partial_unexpected_count"])
 
     # Prune the dataframe down only the columns we care about
     filtered = filtered.select(columns_to_keep)
@@ -793,9 +797,9 @@ def _spark_map_condition_query(
     """
     result_format: dict = metric_value_kwargs["result_format"]
     # We will not return map_condition_query if return_unexpected_index_query = False
-    return_unexpected_index_query: Optional[
-        bool
-    ] = result_format.return_unexpected_index_query
+    return_unexpected_index_query: Optional[bool] = result_format.get(
+        "return_unexpected_index_query"
+    )
     if return_unexpected_index_query is False:
         return None
 

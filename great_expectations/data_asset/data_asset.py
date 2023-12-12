@@ -996,7 +996,7 @@ class DataAsset:
         # Incrementally add to result and return when all values for the specified level are present
         return_obj = {"success": success}
 
-        if result_format.result_format == "BOOLEAN_ONLY":
+        if result_format["result_format"] == "BOOLEAN_ONLY":
             return return_obj
 
         missing_count = element_count - nonnull_count
@@ -1025,11 +1025,11 @@ class DataAsset:
             "unexpected_percent_total": unexpected_percent_total,
             "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
             "partial_unexpected_list": unexpected_list[
-                : result_format.partial_unexpected_count
+                : result_format["partial_unexpected_count"]
             ],
         }
 
-        if result_format.result_format == "BASIC":
+        if result_format["result_format"] == "BASIC":
             return return_obj
 
         if unexpected_list is not None:
@@ -1044,7 +1044,9 @@ class DataAsset:
                 immutable_unexpected_list = unexpected_list
 
         # Try to return the most common values, if possible.
-        partial_unexpected_count: Optional[int] = result_format.partial_unexpected_count
+        partial_unexpected_count: Optional[int] = result_format.get(
+            "partial_unexpected_count"
+        )
         partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
 
         if partial_unexpected_count is not None and 0 < partial_unexpected_count:
@@ -1053,7 +1055,7 @@ class DataAsset:
                     {"value": key, "count": value}
                     for key, value in sorted(
                         Counter(immutable_unexpected_list).most_common(
-                            result_format.partial_unexpected_count
+                            result_format["partial_unexpected_count"]
                         ),
                         key=lambda x: (-x[1], x[0]),
                     )
@@ -1069,7 +1071,7 @@ class DataAsset:
                 return_obj["result"].update(
                     {
                         "partial_unexpected_index_list": unexpected_index_list[
-                            : result_format.partial_unexpected_count
+                            : result_format["partial_unexpected_count"]
                         ]
                         if unexpected_index_list is not None
                         else None,
@@ -1077,7 +1079,7 @@ class DataAsset:
                     }
                 )
 
-        if result_format.result_format == "SUMMARY":
+        if result_format["result_format"] == "SUMMARY":
             return return_obj
 
         return_obj["result"].update(
@@ -1087,7 +1089,7 @@ class DataAsset:
             }
         )
 
-        if result_format.result_format == "COMPLETE":
+        if result_format["result_format"] == "COMPLETE":
             return return_obj
 
         raise ValueError(f"Unknown result_format {result_format['result_format']}.")

@@ -98,7 +98,7 @@ class MetaPandasDataset(Dataset):
                 # we will instruct the result formatting method to skip this step.
                 # FIXME rename to mapped_ignore_values?
                 boolean_mapped_null_values = np.full(series.shape, False)
-                result_format.partial_unexpected_count = 0
+                result_format["partial_unexpected_count"] = 0
             else:
                 boolean_mapped_null_values = series.isnull().values
 

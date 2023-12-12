@@ -1399,12 +1399,14 @@ def compute_unexpected_pandas_indices(
     """
     unexpected_index_column_names: List[str]
     unexpected_index_list: List[Dict[str, Any]]
-    exclude_unexpected_values: bool = result_format.exclude_unexpected_values or False
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
 
     if domain_records_df.index.name is not None:
-        unexpected_index_column_names = result_format.unexpected_index_column_names or [
-            domain_records_df.index.name
-        ]
+        unexpected_index_column_names = result_format.get(
+            "unexpected_index_column_names", [domain_records_df.index.name]
+        )
         unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
             domain_records_df=domain_records_df,
             unexpected_index_column_names=unexpected_index_column_names,
@@ -1413,9 +1415,8 @@ def compute_unexpected_pandas_indices(
         )
     # multiple named indices
     elif domain_records_df.index.names[0] is not None:
-        unexpected_index_column_names = (
-            result_format.unexpected_index_column_names
-            or list(domain_records_df.index.names)
+        unexpected_index_column_names = result_format.get(
+            "unexpected_index_column_names", list(domain_records_df.index.names)
         )
         unexpected_index_list = (
             get_unexpected_indices_for_multiple_pandas_named_indices(
@@ -1426,8 +1427,8 @@ def compute_unexpected_pandas_indices(
             )
         )
     # named columns
-    elif result_format.unexpected_index_column_names:
-        unexpected_index_column_names = result_format.unexpected_index_column_names
+    elif result_format.get("unexpected_index_column_names"):
+        unexpected_index_column_names = result_format["unexpected_index_column_names"]
         unexpected_index_list = []
         unexpected_indices: List[int | str] = list(domain_records_df.index)
 

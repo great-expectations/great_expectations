@@ -28,7 +28,6 @@ from great_expectations.core.evaluation_parameters import (
     find_evaluation_parameter_dependencies,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.result_format import ResultFormatConfig
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -66,22 +65,25 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, str):
-        result_format = ResultFormatConfig(
-            result_format=result_format,
-            partial_unexpected_count=20,
-            include_unexpected_rows=False,
-        )
+        result_format = {
+            "result_format": result_format,
+            "partial_unexpected_count": 20,
+            "include_unexpected_rows": False,
+        }
     else:
-        if result_format.include_unexpected_rows and not result_format.result_format:
+        if (
+            "include_unexpected_rows" in result_format
+            and "result_format" not in result_format
+        ):
             raise ValueError(
                 "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
             )
 
-        if not result_format.partial_unexpected_count:
-            result_format.partial_unexpected_count = 20
+        if "partial_unexpected_count" not in result_format:
+            result_format["partial_unexpected_count"] = 20
 
-        if not result_format.include_unexpected_rows:
-            result_format.include_unexpected_rows = False
+        if "include_unexpected_rows" not in result_format:
+            result_format["include_unexpected_rows"] = False
 
     return result_format
 
