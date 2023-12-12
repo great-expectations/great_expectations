@@ -274,7 +274,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test_test_connection_failures(
     spark_session,
     s3_mock,
