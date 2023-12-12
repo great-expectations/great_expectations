@@ -50,10 +50,10 @@
             "default": false,
             "type": "boolean"
         },
-        "pandas_convert_dtypes": {
-            "title": "Pandas Convert Dtypes",
-            "default": true,
-            "type": "boolean"
+        "mode": {
+            "title": "Mode",
+            "default": "xmla",
+            "type": "string"
         }
     },
     "required": [
