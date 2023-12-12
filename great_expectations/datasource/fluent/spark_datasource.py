@@ -120,7 +120,7 @@ class _SparkDatasource(Datasource):
         # only when assigning to self._spark for SparkSession isinstance check
         self.update_forward_refs()
         self._spark: SparkSession = (
-            self.execution_engine_type().get_or_create_spark_session(
+            self.execution_engine_type.get_or_create_spark_session(
                 spark_config=self.spark_config,
             )
         )
