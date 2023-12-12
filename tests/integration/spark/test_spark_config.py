@@ -63,9 +63,9 @@ def test_spark_config_execution_engine_block_config(spark_session):
         "spark.app.name": "great_expectations-ee-config",
         "spark.sql.catalogImplementation": "hive",
         "spark.executor.memory": "512m",
-        # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
-    execution_engine = SparkDFExecutionEngine(spark_config=new_spark_config)
+    with pytest.warns(RuntimeWarning):
+        execution_engine = SparkDFExecutionEngine(spark_config=new_spark_config)
     new_spark_session: pyspark.SparkSession = execution_engine.spark
 
     # noinspection PyProtectedMember
