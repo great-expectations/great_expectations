@@ -116,6 +116,8 @@ class _SparkDatasource(Datasource):
         return SparkDFExecutionEngine
 
     def get_spark(self) -> SparkSession:
+        # circular imports require us to import SparkSession and update_forward_refs
+        # only when assigning to self._spark for SparkSession isinstance check
         self.update_forward_refs()
         self._spark: SparkSession = (
             self.execution_engine_type().get_or_create_spark_session(
@@ -126,6 +128,8 @@ class _SparkDatasource(Datasource):
 
     @override
     def get_execution_engine(self) -> SparkDFExecutionEngine:
+        # Method override is required because PrivateAttr won't be passed into Execution Engine
+        # unless it is passed explicitly.
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,

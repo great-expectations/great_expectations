@@ -136,8 +136,12 @@ def sql_data(
 
 
 def spark_filesystem_datasource(
+    test_backends,
     context: AbstractDataContext,
 ) -> SparkFilesystemDatasource:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     relative_path = pathlib.Path(
         "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -207,8 +211,12 @@ def multibatch_sql_data(
 
 
 def multibatch_spark_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     relative_path = pathlib.Path(
         "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -256,20 +264,11 @@ def datasource_test_data(
     ]
 )
 def multibatch_datasource_test_data(
-    test_backends, empty_data_context, request
+    empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if (
-        request.param.__name__ == "multibatch_spark_data"
-        and "SparkDFDataset" not in test_backends
-    ):
-        pytest.skip("No spark backend selected.")
-
     return request.param(empty_data_context)
 
 
 @pytest.fixture(params=[pandas_filesystem_datasource, spark_filesystem_datasource])
-def filesystem_datasource(test_backends, empty_data_context, request) -> Datasource:
-    if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
+def filesystem_datasource(empty_data_context, request) -> Datasource:
     return request.param(empty_data_context)
