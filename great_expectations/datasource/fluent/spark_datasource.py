@@ -24,7 +24,7 @@ from great_expectations.compatibility.pydantic import (
     StrictInt,
     StrictStr,
 )
-from great_expectations.compatibility.pyspark import DataFrame, pyspark
+from great_expectations.compatibility.pyspark import DataFrame, SparkSession, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -47,7 +47,6 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
@@ -90,15 +89,6 @@ class _SparkDatasource(Datasource):
             )
         return v
 
-    @classmethod
-    @override
-    def update_forward_refs(cls) -> None:  # type: ignore[override]
-        from great_expectations.compatibility.pyspark import SparkSession
-
-        super().update_forward_refs(
-            SparkSession=SparkSession,
-        )
-
     @staticmethod
     @override
     def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
@@ -117,6 +107,30 @@ class _SparkDatasource(Datasource):
 
         return SparkDFExecutionEngine
 
+    def get_spark(self) -> SparkSession:
+        self._spark: SparkSession = (
+            self.execution_engine_type().get_or_create_spark_session(
+                spark_config=self.spark_config,
+            )
+        )
+        return self._spark
+
+    @override
+    def get_execution_engine(self) -> SparkDFExecutionEngine:
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
+        )
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            self._execution_engine = self._execution_engine_type()(
+                spark=self._spark, **current_execution_engine_kwargs
+            )
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+        return self._execution_engine
+
     @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the _SparkDatasource.
@@ -128,17 +142,10 @@ class _SparkDatasource(Datasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if pyspark:
-            self.update_forward_refs()
-
-            try:
-                self._spark: SparkSession = (
-                    self.execution_engine_type().get_or_create_spark_session(
-                        spark_config=self.spark_config,
-                    )
-                )
-            except ConnectionError as e:
-                raise TestConnectionError(e) from e
+        try:
+            self.get_spark()
+        except ConnectionError as e:
+            raise TestConnectionError(e) from e
 
     # End Abstract Methods
 
@@ -146,7 +153,6 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
     dataframe: Optional[_SparkDataFrameT] = pydantic.Field(
         default=None, exclude=True, repr=False
     )
@@ -181,7 +187,6 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
     @public_api
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>
     @new_argument(
         argument_name="dataframe",
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',

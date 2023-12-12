@@ -107,6 +107,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
         spark_config: Dictionary of Spark configuration options. If there is an existing Spark context,
           the spark_config will be used to update that context in environments that allow it. In local
           environments the Spark context will be stopped and restarted with the new spark_config.
+        spark: A PySpark Session used to set the SparkDFExecutionEngine being configured. Will override
+          spark_config if provided.
         force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
         **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
 
@@ -211,7 +213,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         spark_config = spark_config or {}
         self.spark: pyspark.SparkSession
-        if spark and not spark_config:
+        if spark:
             self.spark = spark
         else:
             self.spark = SparkDFExecutionEngine.get_or_create_spark_session(
