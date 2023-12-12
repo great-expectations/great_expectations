@@ -353,7 +353,15 @@ class SparkDFExecutionEngine(ExecutionEngine):
             # if the user set a spark_config option that doesn't match the existing session
             # try to update it, otherwise stop the spark session
             try:
-                if key != "spark.app.name" and spark_session.conf.get(key) != value:
+                # conf.get will look first at the runtime conf and then at the sparkContext conf
+                try:
+                    current_value = spark_session.conf.get(key)
+                # Py4J Java Error can be raised if the option has not been set on the context at all
+                except py4j.protocol.Py4JJavaError:
+                    current_value = None
+                if key != "spark.app.name" and (
+                    current_value != value or current_value is None
+                ):
                     # attempts to update the runtime config
                     spark_session.conf.set(key, value)
                 elif (
@@ -361,10 +369,11 @@ class SparkDFExecutionEngine(ExecutionEngine):
                     and spark_session.sparkContext.appName != value
                 ):
                     spark_session.sparkContext.appName = value
+            # attribute error can be raised for connect sessions that haven't implemented a method
+            # analysis exception can be raises in environments that don't allow updating config of that option
             except (
                 pyspark.PySparkAttributeError,
                 pyspark.AnalysisException,
-                py4j.protocol.Py4JJavaError,
             ):
                 if SparkDFExecutionEngine._session_is_not_stoppable(
                     spark_session=spark_session
