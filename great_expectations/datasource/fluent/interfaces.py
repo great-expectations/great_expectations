@@ -53,6 +53,7 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import Self, TypeAlias, TypeGuard
 
+    BatchConfig = Any
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
@@ -171,10 +172,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
+    batch_configs: list[Any] = Field(default_factory=list)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
+    _persist: Callable[[], None] = pydantic.PrivateAttr()
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
@@ -210,6 +213,14 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One needs to implement "batch_request_options" on a DataAsset subclass."""
         )
+
+    def add_batch_config(self, name: str) -> BatchConfig:
+        batch_config = BatchConfig(name=name, data_asset=self, _persist=self.save)
+        self.batch_configs.append(batch_config)
+        return batch_config
+
+    def save(self) -> None:
+        self._persist()
 
     def build_batch_request(
         self,
@@ -551,6 +562,7 @@ class Datasource(
         self._build_data_connector(asset, **connect_options)
 
         asset.test_connection()
+        asset._persist = self._save
 
         asset_names: Set[str] = self.get_asset_names()
         if asset.name in asset_names:
@@ -571,6 +583,11 @@ class Datasource(
                 asset.id = asset_id
 
         return asset
+
+    def _save(self) -> None:
+        if self._data_context is None:
+            raise TypeError("Datasource has no DataContext")
+        self._data_context._update_fluent_datasource(self)
 
     def _save_context_project_config(self) -> None:
         """Check if a DataContext is available and save the project config."""
