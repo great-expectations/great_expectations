@@ -276,6 +276,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.big
 def test_test_connection_failures(
+    spark_session,
     s3_mock,
     spark_s3_datasource: SparkS3Datasource,
     bad_regex_config: tuple[re.Pattern, str],
