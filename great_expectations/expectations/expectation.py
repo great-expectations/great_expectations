@@ -339,6 +339,16 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
+    @pydantic.validator("result_format")
+    def _validate_result_format(
+        cls, result_format: ResultFormat | dict
+    ) -> ResultFormat | dict:
+        if isinstance(result_format, dict) and "result_format" not in result_format:
+            raise ValueError(
+                "If configuring result format with a dictionary, the key 'result_format' must be present."
+            )
+        return result_format
+
     @classmethod
     def is_abstract(cls) -> bool:
         return isabstract(cls)
