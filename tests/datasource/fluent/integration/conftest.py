@@ -264,11 +264,11 @@ def datasource_test_data(
     ]
 )
 def multibatch_datasource_test_data(
-    empty_data_context, request
+    test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    return request.param(empty_data_context)
+    return request.param(test_backends, empty_data_context)
 
 
 @pytest.fixture(params=[pandas_filesystem_datasource, spark_filesystem_datasource])
-def filesystem_datasource(empty_data_context, request) -> Datasource:
-    return request.param(empty_data_context)
+def filesystem_datasource(test_backends, empty_data_context, request) -> Datasource:
+    return request.param(test_backends, empty_data_context)
