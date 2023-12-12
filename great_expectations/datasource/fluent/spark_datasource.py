@@ -92,7 +92,7 @@ class _SparkDatasource(Datasource):
 
     @classmethod
     @override
-    def update_forward_refs(cls) -> None:
+    def update_forward_refs(cls) -> None:  # type: ignore[override]
         from great_expectations.compatibility.pyspark import SparkSession
 
         super().update_forward_refs(SparkSession=SparkSession)
