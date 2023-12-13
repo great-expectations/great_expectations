@@ -294,9 +294,7 @@ class ExpectationConfiguration(SerializableDictDot):
             domain_keys = expectation_kwargs_dict["domain_kwargs"]
         else:
             domain_keys = impl.domain_keys
-            default_kwarg_values = self._get_expectation_class_defaults(
-                self.expectation_type
-            )
+            default_kwarg_values = self._get_expectation_class_defaults()
 
         domain_kwargs = {
             key: self.kwargs.get(key, default_kwarg_values.get(key))
@@ -333,9 +331,7 @@ class ExpectationConfiguration(SerializableDictDot):
             success_keys = expectation_kwargs_dict["success_kwargs"]
         else:
             success_keys = impl.success_keys
-            default_kwarg_values = self._get_expectation_class_defaults(
-                self.expectation_type
-            )
+            default_kwarg_values = self._get_expectation_class_defaults()
 
         domain_kwargs = self.get_domain_kwargs()
         success_kwargs = {
@@ -361,9 +357,7 @@ class ExpectationConfiguration(SerializableDictDot):
             runtime_keys = self.runtime_kwargs
         else:
             runtime_keys = impl.runtime_keys
-            default_kwarg_values = self._get_expectation_class_defaults(
-                self.expectation_type
-            )
+            default_kwarg_values = self._get_expectation_class_defaults()
 
         success_kwargs = self.get_success_kwargs()
         lookup_kwargs = deepcopy(self.kwargs)
@@ -569,8 +563,8 @@ class ExpectationConfiguration(SerializableDictDot):
             'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'
         )
 
-    def _get_expectation_class_defaults(self, expectation_type: str) -> dict[str, Any]:
-        cls = self._get_expectation_impl(expectation_type)
+    def _get_expectation_class_defaults(self) -> dict[str, Any]:
+        cls = self._get_expectation_impl()
         return {
             name: field.default if not field.required else None
             for name, field in cls.__fields__.items()
