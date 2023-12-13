@@ -54,7 +54,7 @@ To make the identification of Data Assets containing splitters easier, a label w
 
     - **Latest Batch** - Run the Validation on the latest Batch of data.
 
-    - **Year/Year - Month/Year - Month - Day** - Select or enter a value to run the Validation on a Batch of data from a specific period.
+    - **Custom Batch** - Enter the **Year**, **Month/Year**, or the **Year/Month/Day** value to run the Validation on a Batch of data for a specific period.
 
 6. Click **Validate**.
 
