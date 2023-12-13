@@ -25,19 +25,6 @@ def data_asset():
 
 
 @pytest.fixture
-def single_expectation_custom_data_asset():
-    class SlimCustomDataAsset(DataAsset):
-        @DataAsset.expectation("expectation_argument")
-        def expect_nothing(self, expectation_argument):
-            return {
-                "success": True,
-                "result": {"details": {"expectation_argument": expectation_argument}},
-            }
-
-    return SlimCustomDataAsset()
-
-
-@pytest.fixture
 def validator_with_titanic_1911_asset(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -123,27 +110,6 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
         )
 
 
-@pytest.mark.big
-def test_parameter_substitution(single_expectation_custom_data_asset):
-    # Set our evaluation parameter from upstream
-    single_expectation_custom_data_asset.set_evaluation_parameter(
-        "upstream_dag_key", "upstream_dag_value"
-    )
-
-    # Establish our expectation using that parameter
-    result = single_expectation_custom_data_asset.expect_nothing(
-        expectation_argument={"$PARAMETER": "upstream_dag_key"}
-    )
-    suite = single_expectation_custom_data_asset.get_expectation_suite()
-
-    # Ensure our value has been substituted during evaluation, and set properly in the suite
-    assert result.result["details"]["expectation_argument"] == "upstream_dag_value"
-    assert suite.evaluation_parameters == {"upstream_dag_key": "upstream_dag_value"}
-    assert suite.expectation_configurations[0].kwargs == {
-        "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
-    }
-
-
 @pytest.mark.filesystem
 def test_parameter_substitution_with_validator(validator_with_titanic_1911_asset):
     # Set interactive_evaluation to False
@@ -166,40 +132,6 @@ def test_parameter_substitution_with_validator(validator_with_titanic_1911_asset
     assert suite.expectation_configurations[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
-
-
-@pytest.mark.big
-def test_exploratory_parameter_substitution(single_expectation_custom_data_asset):
-    # Establish our expectation using a parameter provided at runtime
-
-    result = single_expectation_custom_data_asset.expect_nothing(
-        expectation_argument={
-            "$PARAMETER": "upstream_dag_key",
-            "$PARAMETER.upstream_dag_key": "temporary_value",
-        }
-    )
-    suite = single_expectation_custom_data_asset.get_expectation_suite()
-    # Ensure our value has been substituted during evaluation, and NOT stored in the suite
-    assert result.result["details"]["expectation_argument"] == "temporary_value"
-    assert suite.evaluation_parameters == {}
-    assert suite.expectation_configurations[0].kwargs == {
-        "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
-    }
-
-    # Evaluating the expectation without the parameter should now fail, because no parameters were set
-    with pytest.raises(EvaluationParameterError) as excinfo:
-        single_expectation_custom_data_asset.validate(catch_exceptions=False)
-    assert str(excinfo.value) == "No value found for $PARAMETER upstream_dag_key"
-
-    # Setting a parameter value should allow it to succeed
-    single_expectation_custom_data_asset.set_evaluation_parameter(
-        "upstream_dag_key", "upstream_dag_value"
-    )
-    validation_result = single_expectation_custom_data_asset.validate()
-    assert (
-        validation_result.results[0].result["details"]["expectation_argument"]
-        == "upstream_dag_value"
-    )
 
 
 @pytest.mark.filesystem
@@ -238,27 +170,6 @@ def test_exploratory_parameter_substitution_with_validator(
     )
 
 
-@pytest.mark.big
-def test_validation_substitution(single_expectation_custom_data_asset):
-    # Set up an expectation using a parameter, providing a default value.
-    result = single_expectation_custom_data_asset.expect_nothing(
-        expectation_argument={
-            "$PARAMETER": "upstream_dag_key",
-            "$PARAMETER.upstream_dag_key": "temporary_value",
-        }
-    )
-    assert result.result["details"]["expectation_argument"] == "temporary_value"
-
-    # Provide a run-time evaluation parameter
-    validation_result = single_expectation_custom_data_asset.validate(
-        evaluation_parameters={"upstream_dag_key": "upstream_dag_value"}
-    )
-    assert (
-        validation_result.results[0].result["details"]["expectation_argument"]
-        == "upstream_dag_value"
-    )
-
-
 @pytest.mark.filesystem
 def test_validation_substitution_with_validator(validator_with_titanic_1911_asset):
     # Set up an expectation using a parameter, providing a default value.
@@ -278,41 +189,6 @@ def test_validation_substitution_with_validator(validator_with_titanic_1911_asse
         validation_result.results[0].result["details"]["expectation_argument"]
         == "upstream_dag_value"
     )
-
-
-@pytest.mark.big
-def test_validation_substitution_with_json_coercion(
-    single_expectation_custom_data_asset,
-):
-    # Set up an expectation using a parameter, providing a default value.
-
-    # Use a value that is a set. Note that there is no problem converting the type for the expectation (set -> list)
-    result = single_expectation_custom_data_asset.expect_nothing(
-        expectation_argument={
-            "$PARAMETER": "upstream_dag_key",
-            "$PARAMETER.upstream_dag_key": {"temporary_value"},
-        }
-    )
-    assert result.result["details"]["expectation_argument"] == ["temporary_value"]
-
-    # Provide a run-time evaluation parameter
-    validation_result = single_expectation_custom_data_asset.validate(
-        evaluation_parameters={"upstream_dag_key": {"upstream_dag_value"}}
-    )
-    assert validation_result.results[0].result["details"]["expectation_argument"] == [
-        "upstream_dag_value"
-    ]
-
-    # Verify that the entire result object including evaluation_parameters is serializable
-    assert validation_result["evaluation_parameters"]["upstream_dag_key"] == [
-        "upstream_dag_value"
-    ]
-    try:
-        json.dumps(expectationSuiteValidationResultSchema.dumps(validation_result))
-    except TypeError as err:
-        pytest.fail(
-            "Error converting validation_result to json. Got TypeError: %s" + str(err)
-        )
 
 
 @pytest.mark.filesystem
@@ -348,22 +224,6 @@ def test_validation_substitution_with_json_coercion_with_validator(
         pytest.fail(
             "Error converting validation_result to json. Got TypeError: %s" + str(err)
         )
-
-
-@pytest.mark.big
-def test_validation_parameters_returned(single_expectation_custom_data_asset):
-    single_expectation_custom_data_asset.expect_nothing(
-        expectation_argument={
-            "$PARAMETER": "upstream_dag_key",
-            "$PARAMETER.upstream_dag_key": "temporary_value",
-        }
-    )
-    validation_result = single_expectation_custom_data_asset.validate(
-        evaluation_parameters={"upstream_dag_key": "upstream_dag_value"}
-    )
-    assert validation_result["evaluation_parameters"] == {
-        "upstream_dag_key": "upstream_dag_value"
-    }
 
 
 @pytest.mark.filesystem
