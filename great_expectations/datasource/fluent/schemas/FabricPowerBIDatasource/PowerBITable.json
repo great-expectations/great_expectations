@@ -53,6 +53,11 @@
         "mode": {
             "title": "Mode",
             "default": "xmla",
+            "enum": [
+                "xmla",
+                "rest",
+                "onelake"
+            ],
             "type": "string"
         }
     },
