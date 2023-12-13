@@ -49,7 +49,7 @@ LOGGER = logging.getLogger(__name__)
 SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 
 _REQUIRED_FABRIC_SERVICE: Final[str] = "Microsoft.ProjectArcadia"
-Mode = Literal["xmla", "rest", "onelake"]
+Mode: TypeAlias = Literal["xmla", "rest", "onelake"]
 
 
 class _PowerBIAsset(DataAsset):
