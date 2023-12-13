@@ -61,11 +61,11 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:
             threshold = self._get_default_value("threshold")

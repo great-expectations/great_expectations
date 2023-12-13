@@ -35,11 +35,6 @@
         "dax_string": {
             "title": "Dax String",
             "type": "string"
-        },
-        "pandas_convert_dtypes": {
-            "title": "Pandas Convert Dtypes",
-            "default": true,
-            "type": "boolean"
         }
     },
     "required": [

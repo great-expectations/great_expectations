@@ -368,7 +368,7 @@ def get_metric_kwargs(
             expectation_impl = get_expectation_impl(configuration.expectation_type)
             configuration_kwargs = expectation_impl(
                 **configuration.kwargs
-            ).get_runtime_kwargs(runtime_configuration=runtime_configuration)
+            )._get_runtime_kwargs(runtime_configuration=runtime_configuration)
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {

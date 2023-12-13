@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
@@ -208,14 +208,13 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         observed_value_counts = metrics["column.value_counts"]
         observed_value_set = set(observed_value_counts.index)
-        value_set: Iterable = self.get_success_kwargs()["value_set"]
+        value_set = self._get_success_kwargs()["value_set"]
 
         parsed_value_set = value_set
 
