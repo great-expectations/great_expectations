@@ -49,7 +49,7 @@ LOGGER = logging.getLogger(__name__)
 SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 
 _REQUIRED_FABRIC_SERVICE: Final[str] = "Microsoft.ProjectArcadia"
-Mode = Literal["xlma", "rest", "onelake"]
+Mode = Literal["xmla", "rest", "onelake"]
 
 
 class _PowerBIAsset(DataAsset):
@@ -367,7 +367,7 @@ class FabricPowerBIDatasource(Datasource):
         fully_qualified_columns: bool = False,
         num_rows: Optional[int] = None,
         multiindex_hierarchies: bool = False,
-        mode: str = "xmla",
+        mode: Mode = "xmla",
     ) -> PowerBITable:
         """Adds a PowerBITable asset to this datasource.
 
