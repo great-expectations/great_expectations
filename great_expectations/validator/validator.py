@@ -919,13 +919,13 @@ class Validator:
             if self.active_batch_id:
                 evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
-            expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies: ValidationDependencies = expectation_impl(
-                **evaluated_config.kwargs
-            ).get_validation_dependencies(
-                configuration=evaluated_config,
-                execution_engine=self._execution_engine,
-                runtime_configuration=runtime_configuration,
+            expectation = evaluated_config.to_domain_obj()
+            validation_dependencies: ValidationDependencies = (
+                expectation.get_validation_dependencies(
+                    configuration=evaluated_config,
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
             )
 
             try:
