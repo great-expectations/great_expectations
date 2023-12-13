@@ -27,6 +27,7 @@ from pyparsing import (
     dictOf,
 )
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
@@ -38,9 +39,11 @@ logger = logging.getLogger(__name__)
 _epsilon = 1e-12
 
 
-class EvaluationParameter:
-    def __init__(self, params: dict) -> None:
-        self._params = params
+class EvaluationParameter(pydantic.BaseModel):
+    param: str
+
+    def to_dict(self) -> dict:
+        return {"$PARAMETER": self._param}
 
 
 class EvaluationParameterParser:

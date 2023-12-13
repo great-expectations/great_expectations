@@ -16,6 +16,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
 )
+from great_expectations.core.evaluation_parameters import EvaluationParameter
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -1033,8 +1034,8 @@ def test_validator_include_rendered_content_diagnostic(
     validation_result: ExpectationValidationResult = (
         validator_include_rendered_content.expect_column_max_to_be_between(
             column="passenger_count",
-            min_value={"$PARAMETER": "upstream_column_min"},
-            max_value={"$PARAMETER": "upstream_column_max"},
+            min_value=EvaluationParameter("upstream_column_min"),
+            max_value=EvaluationParameter("upstream_column_max"),
             result_format={"result_format": "BOOLEAN_ONLY"},
         )
     )
