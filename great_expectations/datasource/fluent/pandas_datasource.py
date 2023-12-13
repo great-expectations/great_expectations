@@ -66,9 +66,11 @@ if TYPE_CHECKING:
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
+
 
 logger = logging.getLogger(__name__)
 
@@ -176,19 +178,29 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     @public_api
     @override
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: The batch request options must be empty/None for this data asset.
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
         if options not in ({}, None):
-            raise ValueError("Options must not be set for PandasDataAsset subclass.")
+            raise ValueError(
+                "options is not currently supported for this DataAssets and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise ValueError(
+                "batch_slice is not currently supported and must be None for this DataAsset."
+            )
 
         return BatchRequest(
             datasource_name=self.datasource.name,
@@ -389,19 +401,28 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         self,
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
-            options: The batch request options must be empty/None for this data asset.
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
         if options not in ({}, None):
-            raise ValueError("Options must be empty for a Panda's DataAsset subclass.")
+            raise ValueError(
+                "options is not currently supported for this DataAssets and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise ValueError(
+                "batch_slice is not currently supported and must be None for this DataAsset."
+            )
 
         if dataframe is None:
             df = self.dataframe

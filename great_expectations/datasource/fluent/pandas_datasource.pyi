@@ -35,6 +35,7 @@ from great_expectations.core._docs_decorators import (
 from great_expectations.core._docs_decorators import (
     public_api as public_api,
 )
+from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
     CSVEngine,
@@ -75,7 +76,9 @@ class _PandasDataAsset(DataAsset):
     ) -> list[Batch]: ...
     @override
     def build_batch_request(  # type: ignore[override]
-        self, options: Optional[BatchRequestOptions] = ...
+        self,
+        options: Optional[BatchRequestOptions] = ...,
+        batch_slice: Optional[BatchSlice] = ...,
     ) -> BatchRequest: ...
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...

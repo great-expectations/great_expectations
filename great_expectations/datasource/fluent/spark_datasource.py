@@ -45,9 +45,9 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
-
 
 logger = logging.getLogger(__name__)
 
@@ -155,12 +155,14 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         self,
         dataframe: Optional[_SparkDataFrameT] = None,
         options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             dataframe: The Spark Dataframe containing the data for this DataFrame data asset.
-            options: The batch request options must be empty/None for this data asset.
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -168,7 +170,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         """
         if options:
             raise ValueError(
-                "Options must be empty/None for Spark DataFrameAsset subclass."
+                "options is not currently supported for this DataAssets and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise ValueError(
+                "batch_slice is not currently supported and must be None for this DataAsset."
             )
 
         if dataframe is None:
