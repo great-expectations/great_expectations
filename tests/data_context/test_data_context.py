@@ -10,7 +10,6 @@ from typing import Dict, List, Union
 
 import pandas as pd
 import pytest
-from freezegun import freeze_time
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
@@ -19,7 +18,6 @@ from great_expectations.core import ExpectationConfiguration, expectationSuiteSc
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
@@ -45,7 +43,6 @@ from great_expectations.datasource import (
     LegacyDatasource,
     SimpleSqlalchemyDatasource,
 )
-from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -335,48 +332,6 @@ def test_update_datasource_persists_changes_with_store(
     assert mock_update_by_name.call_count == 1
 
 
-@pytest.mark.filesystem
-@freeze_time("09/26/2019 13:42:41")
-def test_data_context_get_validation_result(titanic_data_context):
-    """
-    Test that validation results can be correctly fetched from the configured results store
-    """
-    run_id = RunIdentifier(run_name="profiling")
-    titanic_data_context.profile_datasource("mydatasource", run_id=run_id)
-
-    all_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler", run_id=run_id
-    )
-    assert len(all_validation_result.results) == 51
-
-    failed_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler",
-        run_id=run_id,
-        failed_only=True,
-    )
-    assert len(failed_validation_result.results) == 8
-
-
-@pytest.mark.filesystem
-def test_data_context_get_latest_validation_result(titanic_data_context):
-    """
-    Test that the latest validation result can be correctly fetched from the configured results
-    store
-    """
-    for _ in range(2):
-        titanic_data_context.profile_datasource("mydatasource")
-    assert len(titanic_data_context.validations_store.list_keys()) == 2
-
-    validation_results = [
-        titanic_data_context.validations_store.get(val_key)
-        for val_key in titanic_data_context.validations_store.list_keys()
-    ]
-    latest_validation_result = titanic_data_context.get_validation_result(
-        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler"
-    )
-    assert latest_validation_result in validation_results
-
-
 @pytest.mark.unit
 def test_data_context_get_datasource(titanic_data_context):
     isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
@@ -420,240 +375,6 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
 ):
     with pytest.raises(ValueError):
         _ = titanic_data_context.get_datasource("fakey_mc_fake")
-
-
-@pytest.mark.unit
-def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_error(
-    titanic_data_context,
-):
-    with pytest.raises(ValueError):
-        _ = titanic_data_context.profile_datasource("fakey_mc_fake")
-
-
-@pytest.mark.filesystem
-@freeze_time("09/26/2019 13:42:41")
-@pytest.mark.rendered_output
-@pytest.mark.slow  # 1.02s
-def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
-    # TODO : Use a standard test fixture
-    # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
-
-    project_dir = os.path.join(tmp_path, "project_path")  # noqa: PTH118
-    os.mkdir(project_dir)  # noqa: PTH102
-
-    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH103, PTH118
-    os.makedirs(os.path.join(project_dir, "data/titanic"))  # noqa: PTH103, PTH118
-    shutil.copy(
-        file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(os.path.join(project_dir, "data/titanic/Titanic.csv")),  # noqa: PTH118
-    )
-
-    os.makedirs(os.path.join(project_dir, "data/random"))  # noqa: PTH103, PTH118
-    shutil.copy(
-        os.path.join(filesystem_csv_3, "f1.csv"),  # noqa: PTH118
-        str(os.path.join(project_dir, "data/random/f1.csv")),  # noqa: PTH118
-    )
-    shutil.copy(
-        os.path.join(filesystem_csv_3, "f2.csv"),  # noqa: PTH118
-        str(os.path.join(project_dir, "data/random/f2.csv")),  # noqa: PTH118
-    )
-
-    assert (
-        gen_directory_tree_str(project_dir)
-        == """\
-project_path/
-    data/
-        random/
-            f1.csv
-            f2.csv
-        titanic/
-            Titanic.csv
-"""
-    )
-
-    context = FileDataContext.create(project_dir)
-    context.add_datasource(
-        "titanic",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(  # noqa: PTH118
-                    project_dir, "data/titanic/"
-                ),
-            }
-        },
-    )
-
-    context.add_datasource(
-        "random",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(  # noqa: PTH118
-                    project_dir, "data/random/"
-                ),
-            }
-        },
-    )
-
-    context.profile_datasource("titanic")
-
-    # Replicate the batch id of the batch that will be profiled in order to generate the file path of the
-    # validation result
-    titanic_profiled_batch_id = PathBatchKwargs(
-        {
-            "path": os.path.join(  # noqa: PTH118
-                project_dir, "data/titanic/Titanic.csv"
-            ),
-            "datasource": "titanic",
-            "data_asset_name": "Titanic",
-        }
-    ).to_id()
-
-    tree_str = gen_directory_tree_str(project_dir)
-    assert (
-        tree_str
-        == f"""project_path/
-    data/
-        random/
-            f1.csv
-            f2.csv
-        titanic/
-            Titanic.csv
-    gx/
-        .gitignore
-        great_expectations.yml
-        checkpoints/
-        expectations/
-            .ge_store_backend_id
-            titanic/
-                subdir_reader/
-                    Titanic/
-                        BasicDatasetProfiler.json
-        plugins/
-            custom_data_docs/
-                renderers/
-                styles/
-                    data_docs_custom_styles.css
-                views/
-        profilers/
-        uncommitted/
-            config_variables.yml
-            data_docs/
-            validations/
-                .ge_store_backend_id
-                titanic/
-                    subdir_reader/
-                        Titanic/
-                            BasicDatasetProfiler/
-                                profiling/
-                                    20190926T134241.000000Z/
-                                        {titanic_profiled_batch_id}.json
-"""
-    )
-
-    context.profile_datasource("random")
-    context.build_data_docs()
-
-    f1_profiled_batch_id = PathBatchKwargs(
-        {
-            "path": os.path.join(project_dir, "data/random/f1.csv"),  # noqa: PTH118
-            "datasource": "random",
-            "data_asset_name": "f1",
-        }
-    ).to_id()
-
-    f2_profiled_batch_id = PathBatchKwargs(
-        {
-            "path": os.path.join(project_dir, "data/random/f2.csv"),  # noqa: PTH118
-            "datasource": "random",
-            "data_asset_name": "f2",
-        }
-    ).to_id()
-
-    data_docs_dir = os.path.join(  # noqa: PTH118
-        project_dir, "gx/uncommitted/data_docs"
-    )
-    observed = gen_directory_tree_str(data_docs_dir)
-    assert (
-        observed
-        == f"""\
-data_docs/
-    local_site/
-        index.html
-        expectations/
-            random/
-                subdir_reader/
-                    f1/
-                        BasicDatasetProfiler.html
-                    f2/
-                        BasicDatasetProfiler.html
-            titanic/
-                subdir_reader/
-                    Titanic/
-                        BasicDatasetProfiler.html
-        static/
-            fonts/
-                HKGrotesk/
-                    HKGrotesk-Bold.otf
-                    HKGrotesk-BoldItalic.otf
-                    HKGrotesk-Italic.otf
-                    HKGrotesk-Light.otf
-                    HKGrotesk-LightItalic.otf
-                    HKGrotesk-Medium.otf
-                    HKGrotesk-MediumItalic.otf
-                    HKGrotesk-Regular.otf
-                    HKGrotesk-SemiBold.otf
-                    HKGrotesk-SemiBoldItalic.otf
-            images/
-                favicon.ico
-                glossary_scroller.gif
-                iterative-dev-loop.png
-                logo-long-vector.svg
-                logo-long.png
-                short-logo-vector.svg
-                short-logo.png
-                validation_failed_unexpected_values.gif
-            styles/
-                data_docs_custom_styles_template.css
-                data_docs_default_styles.css
-        validations/
-            random/
-                subdir_reader/
-                    f1/
-                        BasicDatasetProfiler/
-                            profiling/
-                                20190926T134241.000000Z/
-                                    {f1_profiled_batch_id:s}.html
-                    f2/
-                        BasicDatasetProfiler/
-                            profiling/
-                                20190926T134241.000000Z/
-                                    {f2_profiled_batch_id:s}.html
-            titanic/
-                subdir_reader/
-                    Titanic/
-                        BasicDatasetProfiler/
-                            profiling/
-                                20190926T134241.000000Z/
-                                    {titanic_profiled_batch_id:s}.html
-"""
-    )
-
-    # save data_docs locally if you need to inspect the files manually
-    # os.makedirs("./tests/data_context/output", exist_ok=True)
-    # os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
-    #
-    # if os.path.isdir("./tests/data_context/output/data_docs"):
-    #     shutil.rmtree("./tests/data_context/output/data_docs")
-    # shutil.copytree(
-    #     os.path.join(ge_directory, "uncommitted/data_docs/"),
-    #     "./tests/data_context/output/data_docs",
-    # )
 
 
 @pytest.mark.unit
