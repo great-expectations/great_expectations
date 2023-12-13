@@ -4,7 +4,7 @@ title: Create a Custom Query Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 **`QueryExpectations`** are a type of <TechnicalTag tag="expectation" text="Expectation"/>, enabled for SQL and Spark, that enable a higher-complexity type of workflow
 when compared with core Expectation classes such as **`ColumnAggregate`**, **`ColumnMap`**, and **`Table`**.

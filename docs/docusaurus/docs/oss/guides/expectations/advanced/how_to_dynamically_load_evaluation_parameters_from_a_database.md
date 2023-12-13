@@ -3,7 +3,7 @@ title: Dynamically load evaluation parameters from a database
 ---
 
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 This guide will help you create an <TechnicalTag tag="expectation" text="Expectation" /> that loads part of its Expectation configuration from a database at runtime. Using a dynamic <TechnicalTag tag="evaluation_parameter" text="Evaluation Parameter" /> makes it possible to maintain part of an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> in a shared database.
 

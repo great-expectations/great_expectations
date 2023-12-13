@@ -2,7 +2,7 @@
 title: Compare two tables with the Onboarding Data Assistant
 ---
 import Prerequisites from '/docs/oss/guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -13,7 +13,7 @@ In this guide, you will utilize a <TechnicalTag tag="data_assistant" text="Data 
 <Prerequisites>
 
 - A minimum of two configured [Data Sources](https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/connect_to_data_overview) and [Assets](https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/manage_data_assets_lp)
-- A basic understanding of how to [configure Expectation in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
+- A basic understanding of how to [configure Expectation in Great Expectations](https://docs.greatexpectations.io/docs/reference/learn/expectations/expectations)
 - Completion of the <TechnicalTag tag="data_assistant" text="Data Assistants" /> overview
 
 </Prerequisites>

@@ -3,7 +3,7 @@ title: Create Expectations that span multiple Batches using Evaluation Parameter
 ---
 
 import Prerequisites from '/docs/oss/guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 This guide will help you create <TechnicalTag tag="expectation" text="Expectations" /> that span multiple <TechnicalTag tag="batch" text="Batches" /> of data using <TechnicalTag tag="evaluation_parameter" text="Evaluation Parameters" /> (see also <TechnicalTag tag="evaluation_parameter_store" text="Evaluation Parameter Stores" />). This pattern is useful for things like verifying that row counts between tables stay consistent.
 

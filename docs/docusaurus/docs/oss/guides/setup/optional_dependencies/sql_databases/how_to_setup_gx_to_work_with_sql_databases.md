@@ -7,7 +7,7 @@ keywords: [Great Expectations, SQL]
 
 # How to set up Great Expectations to work with general SQL databases
 
-import TechnicalTag from '/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 <!-- ## Prerequisites -->

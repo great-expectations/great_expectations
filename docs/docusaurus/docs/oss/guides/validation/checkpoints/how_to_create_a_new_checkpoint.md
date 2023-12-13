@@ -2,7 +2,7 @@
 title: Create a new Checkpoint
 ---
 
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 import Preface from './components_how_to_create_a_new_checkpoint/_preface.mdx'
 import StepsForCheckpoints from './components_how_to_create_a_new_checkpoint/_steps_for_checkpoints_.mdx'
 import AdditionalResources from './components_how_to_create_a_new_checkpoint/_additional_resources.mdx'

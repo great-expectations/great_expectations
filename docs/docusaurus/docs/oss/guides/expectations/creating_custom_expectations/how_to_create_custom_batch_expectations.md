@@ -2,7 +2,7 @@
 title: Create a Custom Batch Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 **`BatchExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation"/>. 
 They are evaluated for an entire Batch, and answer a semantic question about the Batch itself. For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer how many columns and rows are in your Batch.

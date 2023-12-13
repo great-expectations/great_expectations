@@ -5,7 +5,7 @@ description: A technical guide demonstrating how to organize Batches of data in 
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, GCS, Google Cloud Storage, AWS S3, Amazon Web Services S3, Azure Blob Storage, Local Filesystem]
 ---
 
-import TechnicalTag from '/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
 
 
 <!-- ## Introduction -->

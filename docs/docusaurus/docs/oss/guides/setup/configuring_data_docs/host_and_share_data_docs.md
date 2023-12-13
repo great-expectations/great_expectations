@@ -15,7 +15,7 @@ import AddANewS3SiteToTheDataDocsSitesSectionOfYourGreatExpectationsYml from './
 import TestThatYourConfigurationIsCorrectByBuildingTheSite from './components_how_to_host_and_share_data_docs_on_amazon_s3/_test_that_your_configuration_is_correct_by_building_the_site.mdx'
 import AdditionalNotes from './components_how_to_host_and_share_data_docs_on_amazon_s3/_additional_notes.mdx'
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 

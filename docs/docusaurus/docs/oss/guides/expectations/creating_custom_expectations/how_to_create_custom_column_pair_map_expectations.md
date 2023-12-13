@@ -2,7 +2,7 @@
 title: Create a Custom Column Pair Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 **`ColumnPairMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="Expectation" />. They are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 

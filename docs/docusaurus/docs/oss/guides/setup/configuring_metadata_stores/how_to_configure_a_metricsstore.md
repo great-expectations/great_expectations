@@ -1,7 +1,7 @@
 ---
 title: Configure a MetricStore
 ---
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 :::note Note:
 Metric storage is an **experimental** feature.

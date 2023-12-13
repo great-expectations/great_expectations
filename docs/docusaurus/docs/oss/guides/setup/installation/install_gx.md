@@ -13,7 +13,7 @@ import ChooseInstallationMethod from './components_local/_choose_installation_me
 import InstallGreatExpectations from './components_local/_install_great_expectations.mdx'
 import VerifyGeInstallSucceeded from './components_local/_verify_ge_install_succeeded.mdx'
 import NextSteps from '/docs/oss/guides/setup/components/install_nextsteps.md'
-import TechnicalTag from '/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import PrereqInstalledAwsCli from '/docs/components/prerequisites/_aws_installed_the_aws_cli.mdx'
 import PrereqAwsConfiguredCredentials from '/docs/components/prerequisites/_aws_configured_your_credentials.mdx'

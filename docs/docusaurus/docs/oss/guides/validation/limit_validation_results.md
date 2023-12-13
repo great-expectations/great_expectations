@@ -5,7 +5,7 @@ id: limit_validation_results
 description: Limit Validation Results to improve Data Doc updating and rendering performance.
 ---
 
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 As you use Great Expectations (GX), the number of <TechnicalTag tag="validation_result" text="Validation Results"/> that are generated, stored, and rendered for your <TechnicalTag tag="data_docs" text="Data Docs"/> also grows. This increasing Data Doc accumulation can result in a degradation of performance and an increased use of computational resources when you update or render them. 
 

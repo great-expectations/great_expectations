@@ -5,7 +5,7 @@ description: A technical guide demonstrating how to split the data returned by a
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, SQL]
 ---
 
-import TechnicalTag from '/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
 
 import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
 

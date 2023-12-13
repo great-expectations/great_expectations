@@ -2,7 +2,7 @@
 title: Create a Custom Set-Based Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 **`SetBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectation"/>. They are evaluated for a single column and ask whether each row in that column belongs to the specified set.
 

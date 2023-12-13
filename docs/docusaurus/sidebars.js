@@ -269,7 +269,7 @@ module.exports = {
           items: [
             'oss/tutorials/quickstart/quickstart',
             {
-              type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
+              type: 'doc', id: 'reference/learn/conceptual_guides/gx_overview', label: 'GX Overview'
             },
             'oss/get_started/get_started_with_gx_and_databricks',
             'oss/get_started/get_started_with_gx_and_sql',
@@ -455,11 +455,11 @@ module.exports = {
         {
           type: 'category',
           label: 'Reference',
-          link: { type: 'doc', id: 'reference/reference_overview' },
+          link: { type: 'doc', id: 'reference/learn/reference_overview' },
           items: [
             'oss/contributing/contributing_maturity',
-            'reference/customize_your_deployment',
-            'reference/usage_statistics',
+            'reference/learn/customize_your_deployment',
+            'reference/learn/usage_statistics',
           ]
         },
         { type: 'doc', id: 'oss/guides/miscellaneous/migration_guide' },
@@ -476,6 +476,7 @@ module.exports = {
         type: 'generated-index',
         title: 'GX OSS API',
         description: 'GX OSS API reference content is generated from classes and methods docstrings.',
+        slug: '/reference/api/'
       },
       items: [
         {
@@ -486,59 +487,59 @@ module.exports = {
     },
   ],
   learn: [
-      'conceptual_guides/expectation_classes',
-      'conceptual_guides/metricproviders',
+      'reference/learn/conceptual_guides/expectation_classes',
+      'reference/learn/conceptual_guides/metricproviders',
       {
       type: 'category',
       label: 'Glossary',
-      link: { type: 'doc', id: 'glossary' },
+      link: { type: 'doc', id: 'reference/learn/glossary' },
       items: [
-        'oss/terms/action',
-        'oss/terms/batch',
-        'oss/terms/batch_request',
-        'oss/terms/custom_expectation',
-        'oss/terms/checkpoint',
-        'oss/terms/cli',
-        'oss/terms/datasource',
-        'oss/terms/data_context',
-        'oss/terms/data_asset',
-        'oss/terms/data_assistant',
-        'oss/terms/data_docs',
-        'oss/terms/evaluation_parameter',
-        'oss/terms/execution_engine',
+        'reference/learn/terms/action',
+        'reference/learn/terms/batch',
+        'reference/learn/terms/batch_request',
+        'reference/learn/terms/custom_expectation',
+        'reference/learn/terms/checkpoint',
+        'reference/learn/terms/cli',
+        'reference/learn/terms/datasource',
+        'reference/learn/terms/data_context',
+        'reference/learn/terms/data_asset',
+        'reference/learn/terms/data_assistant',
+        'reference/learn/terms/data_docs',
+        'reference/learn/terms/evaluation_parameter',
+        'reference/learn/terms/execution_engine',
         {
           type: 'category',
           label: 'Expectations',
-          link: { type: 'doc', id: 'oss/terms/expectation' },
+          link: { type: 'doc', id: 'reference/learn/terms/expectation' },
           collapsed: true,
           items: [
-            { type: 'doc', id: 'reference/expectations/conditional_expectations' },
-            { type: 'doc', id: 'reference/expectations/distributional_expectations' },
-            { type: 'doc', id: 'reference/expectation_suite_operations' },
-            { type: 'doc', id: 'reference/expectations/result_format' },
-            { type: 'doc', id: 'reference/expectations/standard_arguments' }
+            { type: 'doc', id: 'reference/learn/expectations/conditional_expectations' },
+            { type: 'doc', id: 'reference/learn/expectations/distributional_expectations' },
+            { type: 'doc', id: 'reference/learn/expectation_suite_operations' },
+            { type: 'doc', id: 'reference/learn/expectations/result_format' },
+            { type: 'doc', id: 'reference/learn/expectations/standard_arguments' }
           ]
         },
-        'oss/terms/expectation_suite',
-        'oss/terms/metric',
-        'conceptual_guides/metricproviders',
+        'reference/learn/terms/expectation_suite',
+        'reference/learn/terms/metric',
+        'reference/learn/conceptual_guides/metricproviders',
         {
           type: 'category',
           label: 'Stores',
-          link: { type: 'doc', id: 'oss/terms/store' },
+          link: { type: 'doc', id: 'reference/learn/terms/store' },
           items: [
-            'oss/terms/checkpoint_store',
-            'oss/terms/data_docs_store',
-            'oss/terms/evaluation_parameter_store',
-            'oss/terms/expectation_store',
-            'oss/terms/metric_store',
-            'oss/terms/validation_result_store'
+            'reference/learn/terms/checkpoint_store',
+            'reference/learn/terms/data_docs_store',
+            'reference/learn/terms/evaluation_parameter_store',
+            'reference/learn/terms/expectation_store',
+            'reference/learn/terms/metric_store',
+            'reference/learn/terms/validation_result_store'
           ]
         },
-        'oss/terms/renderer',
-        'oss/terms/supporting_resource',
-        'oss/terms/validator',
-        'oss/terms/validation_result'
+        'reference/learn/terms/renderer',
+        'reference/learn/terms/supporting_resource',
+        'reference/learn/terms/validator',
+        'reference/learn/terms/validation_result'
       ]
     },
   ]

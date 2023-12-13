@@ -3,7 +3,7 @@ title: Update Data Docs after Validating a Checkpoint
 ---
 
 import Prerequisites from '/docs/oss/guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new <TechnicalTag tag="validation_result" text="Validation Results" /> from running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
@@ -86,5 +86,5 @@ The ``UpdateDataDocsAction`` generates an HTML file for the latest Validation Re
 
 ## Related documentation
 
-- [Checkpoints overview page](../../../terms/checkpoint.md)
-- [Actions overview page](../../../terms/action.md)
+- [Checkpoints overview page](/reference/learn/terms/checkpoint)
+- [Actions overview page](/reference/learn/terms/action)

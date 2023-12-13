@@ -7,7 +7,7 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import TechnicalTag from '/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'

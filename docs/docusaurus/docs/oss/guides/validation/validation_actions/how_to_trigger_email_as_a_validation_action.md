@@ -2,7 +2,7 @@
 title: Trigger Email as an Action
 ---
 
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 This guide will help you trigger emails as an <TechnicalTag tag="action" text="Action" /> . It will allow you to send an email including information about a <TechnicalTag tag="validation_result" text="Validation Result" />, including whether or not the <TechnicalTag tag="validation" text="Validation" /> succeeded.
 

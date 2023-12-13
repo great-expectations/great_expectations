@@ -1,6 +1,6 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 Verify your new <TechnicalTag tag="datasource" text="Data Source" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a `BatchRequest`.
 

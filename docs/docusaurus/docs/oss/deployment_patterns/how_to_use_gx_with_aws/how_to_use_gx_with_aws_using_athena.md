@@ -7,7 +7,7 @@ import PrereqPython from '@site/docs/components/prerequisites/_python_version.md
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_athena.md'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 <!-- Part 1: Setup -->
 

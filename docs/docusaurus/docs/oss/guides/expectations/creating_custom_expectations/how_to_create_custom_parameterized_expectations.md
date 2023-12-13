@@ -2,7 +2,7 @@
 title: Create Custom Parameterized Expectations
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 This guide will walk you through the process of creating Parameterized <TechnicalTag tag="expectation" text="Expectations" /> - very quickly. This method is only available using the new Modular Expectations API in 0.13.
 

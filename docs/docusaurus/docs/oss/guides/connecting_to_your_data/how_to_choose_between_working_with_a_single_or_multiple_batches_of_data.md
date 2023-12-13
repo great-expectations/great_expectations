@@ -4,7 +4,7 @@ title: How to choose between working with a single or multiple Batches of data
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 This guide will help you decide when you should use a single Batch and when it is beneficial to use multiple Batches, instead.  Building on that knowledge, this guide will also explain the principles behind configuring a Data Source's Data Asset to either only allow for a single Batch to be returned when requested, or to potentially include multiple Batches.  Finally, this guide will discuss how to configure Batch Requests to return a specific Batch or subset of Batches when you are requesting data from a Data Asset that has been configured to include multiple Batches, so that you can get the most versatility out of your Data Source configurations.
 
@@ -14,7 +14,7 @@ By the end of this guide, you will know when it will be most beneficial to be wo
 
 <Prerequisites>
 
-- [An understanding of Data Source basics](../../terms/datasource.md)
+- [An understanding of Data Source basics](/reference/learn/terms/datasource)
 - [An understanding of how to request data with a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
 
 </Prerequisites>

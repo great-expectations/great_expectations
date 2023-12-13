@@ -6,7 +6,7 @@ description: Create and manage Expectations in GX Cloud.
 
 An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. An Expectation Suite contains multiple Expectations.
 
-To learn more about Expectations, see [Expectation](/docs/oss/terms/expectation).
+To learn more about Expectations, see [Expectation](/docs/reference/learn/terms/expectation).
 
 ## Prerequisites
 

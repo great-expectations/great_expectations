@@ -3,7 +3,7 @@ title: Create an Expectation Suite with the Onboarding Data Assistant
 ---
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use the Onboarding Data Assistant to Profile your data and automate the generation of an Expectation Suite.
 

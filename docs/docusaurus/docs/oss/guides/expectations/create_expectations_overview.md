@@ -5,7 +5,7 @@ id: create_expectations_overview
 description: An overview of the process for creating and managing Expectations and Expectation Suites.
 ---
 
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 The following image shows the four workflows you can follow to create <TechnicalTag tag="expectation" text="Expectations" />:
 

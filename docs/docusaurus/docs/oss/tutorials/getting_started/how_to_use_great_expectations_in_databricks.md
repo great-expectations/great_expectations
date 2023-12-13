@@ -6,7 +6,7 @@ title: Get started with Great Expectations and Databricks
 import Prerequisites from '../../deployment_patterns/components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use Great Expectations (GX) with [Databricks](https://databricks.com/).
 

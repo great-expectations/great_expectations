@@ -2,7 +2,7 @@
 sidebar_label: 'GX installation and configuration workflow'
 title: "Great Expectations installation and configuration workflow"
 ---
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 import GxData from '/docs/components/_data.jsx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->

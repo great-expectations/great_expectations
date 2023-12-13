@@ -2,7 +2,7 @@
 title: Create a Custom Column Aggregate Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 **`ColumnAggregateExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation" />. 
 They are evaluated for a single column, and produce an aggregate <TechnicalTag tag="metric" text="Metric" />, such as a mean, standard deviation, number of unique values, column type, etc. If that Metric meets the conditions you set, the Expectation considers that data valid.

@@ -2,7 +2,7 @@
 title: Create example cases for a Custom Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 This guide will help you add example cases to document and test the behavior of your <TechnicalTag tag="expectation" text="Expectation" />. 
 

@@ -7,7 +7,7 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import TechnicalTag from '/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import PrereqInstalledAwsCli from '/docs/components/prerequisites/_aws_installed_the_aws_cli.mdx'
 import PrereqAwsConfiguredCredentials from '/docs/components/prerequisites/_aws_configured_your_credentials.mdx'

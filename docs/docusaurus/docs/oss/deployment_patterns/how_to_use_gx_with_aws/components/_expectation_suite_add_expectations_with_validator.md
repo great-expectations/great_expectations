@@ -1,4 +1,4 @@
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 There are many Expectations available for you to use.  To demonstrate the creation of an Expectation through the use of the Validator you defined earlier, here are examples of the process for two of them:
 

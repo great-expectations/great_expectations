@@ -14,7 +14,7 @@ import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_
 import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
 import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
 import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
-import TechnicalTag from '/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 

@@ -14,7 +14,7 @@ import IdentifyYourDataContextValidationResultsStore from './components_how_to_c
 import UpdateYourConfigurationFileToIncludeANewStoreForValidationResultsOnS from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
 import CopyExistingValidationResultsToTheSBucketThisStepIsOptional from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_copy_existing_validation_results_to_the_s_bucket_this_step_is_optional.mdx'
 import ConfirmThatTheValidationsResultsStoreHasBeenCorrectlyConfigured from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_validations_results_store_has_been_correctly_configured.mdx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -153,7 +153,7 @@ To make Great Expectations look for Validation Results on the Azure store, set t
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint) to store results in the new Validation Results Store on Azure Blob and then visualize the results by [re-building Data Docs](/docs/oss/terms/data_docs).
+[Run a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint) to store results in the new Validation Results Store on Azure Blob and then visualize the results by [re-building Data Docs](/docs/reference/learn/terms/data_docs).
 
 </TabItem>
 <TabItem value="gcs">
@@ -223,7 +223,7 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/docs/oss/guides/validation//checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/oss/terms/data_docs).
+[Run a Checkpoint](/docs/oss/guides/validation//checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/reference/learn/terms/data_docs).
 
 </TabItem>
 <TabItem value="filesystem">
@@ -288,7 +288,7 @@ stores:
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](/docs/oss/terms/data_docs).
+Run a [Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](/docs/reference/learn/terms/data_docs).
 
 </TabItem>
 <TabItem value="postgresql">
@@ -399,7 +399,7 @@ store_backend:
 
 ### Confirm the Validation Results Store is configured correctly
 
-[Run a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](/docs/oss/terms/data_docs).
+[Run a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](/docs/reference/learn/terms/data_docs).
 
 Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
 

@@ -65,7 +65,7 @@ Run the following code to import the example Checkpoint:
 
 The failed rows are defined as values in the `unexpected_index_column_names` parameter.  In the following example, you are setting the parameter to `event_id` to return the `event_ids` of the rows that fail the Expectation. However, `unexpected_index_column_names` can also return a list of columns that are representative of the failed rows. The Checkpoint also returns the `unexpected_index_query`, which you can use to retrieve the full set of failed results. 
 
-In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/expectations/result_format/#configure-result-format).
+In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/learn/expectations/result_format/#configure-result-format).
 
 ```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py set unexpected_index_column_names"
 ```
@@ -152,7 +152,7 @@ Run the following code to import the example Checkpoint:
 
 The failed rows are defined as values in the `unexpected_index_column_names` parameter. In the following example, you are setting the parameter to `event_id` to return the `event_ids` of the rows that fail the Expectation. However, `unexpected_index_column_names` can also return a list of columns that are representative of the failed rows. The Checkpoint also returns the `unexpected_index_query`, which you can use to retrieve the full set of failed results. 
 
-In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/expectations/result_format/#configure-result-format).
+In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/learn/expectations/result_format/#configure-result-format).
 
 ```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py set unexpected_index_column_names"
 ```
@@ -240,7 +240,7 @@ Run the following code to import the example Checkpoint:
 
 The failed rows are defined as values in the `unexpected_index_column_names` parameter. In the following example, you are setting the parameter to `event_id` to return the `event_ids` of the rows that fail the Expectation. However, `unexpected_index_column_names` can also return a list of columns that are representative of the failed rows. The Checkpoint also returns the `unexpected_index_query`, which you can use to retrieve the full set of failed results. 
 
-In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/expectations/result_format/#configure-result-format).
+In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/learn/expectations/result_format/#configure-result-format).
 
 ```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py set unexpected_index_column_names"
 ```

@@ -3,7 +3,7 @@ title: Create an Expectation Suite with the Missingness Data Assistant
 ---
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 :::caution
 
