@@ -778,32 +778,25 @@ class Batch(FluentBaseModel):
 
     # frozen=True is a pydantic V2 concept that makes these fields immutable.
     # v1 Fields had a argument allow_mutation which is equivalen but didn't work when there was no default argument.
-    datasource: Datasource = Field(frozen=True)
-    data_asset: DataAsset = Field(frozen=True)
-    batch_request: BatchRequest = Field(frozen=True)
-    data: BatchData = Field(frozen=True)
-    id: str = Field("", frozen=True)
+    datasource: Datasource
+    data_asset: DataAsset
+    batch_request: BatchRequest
+    data: BatchData
+    id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any] = Field(default_factory=dict, frozen=False)
+    # metadata is "immutable" so you can't overwrite the dictionary. You can, however, do updates to it.
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    batch_markers: BatchMarkers = Field(alias="legacy_batch_markers", frozen=True)
-    batch_spec: BatchSpec = Field(alias="legacy_batch_spec", frozen=True)
-    batch_definition: BatchDefinition = Field(
-        alias="legacy_batch_definition", frozen=True
-    )
-
-    # This should be a property that passes through to the _validator. However,
-    # pydantic v1 does not have support for property setters..
-    # https://github.com/pydantic/pydantic/issues/3395
-    result_format: ResultFormat = Field(ResultFormat.SUMMARY, frozen=False)
+    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
+    batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
+    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
 
     class Config:
+        allow_mutation = False
         arbitrary_types_allowed = True
-        # result_format is for an interactive, exploratory and does not need to be deser-ed
-        exclude = {"result_format"}
 
     @root_validator(pre=True)
     def _set_id(cls, values: dict) -> dict:
@@ -883,6 +876,25 @@ class Batch(FluentBaseModel):
             fetch_all=fetch_all,
         )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
+
+    # Settable properties are supported in pydantic v1 and will not be backported:
+    # https://github.com/pydantic/pydantic/issues/3395
+    # https://github.com/pydantic/pydantic/issues/1577
+    # Issue 1577, does discuss a __setattr__ workaround which I've simplified for our use case.
+    # The one issue here is IDEs may think result_format is not settable so will highlight lines like
+    # `batch.result_format = "BOOLEAN_ONLY"` while the line will execute just fine.
+    @property
+    def result_format(self) -> ResultFormat:
+        return self._validator.result_format
+
+    def _set_result_format(self, result_format: ResultFormat):
+        self._validator.result_format = result_format
+
+    def __setattr__(self, key, value):
+        if key == "result_format":
+            self._set_result_format(value)
+        else:
+            super().__setattr__(key, value)
 
     @overload
     def validate(self, expect: Expectation) -> ExpectationValidationResult:
