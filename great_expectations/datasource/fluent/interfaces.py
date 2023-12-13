@@ -776,8 +776,6 @@ class Batch(FluentBaseModel):
     a spark or a sql database. An exception exists for pandas or any in-memory datastore.
     """
 
-    # frozen=True is a pydantic V2 concept that makes these fields immutable.
-    # v1 Fields had a argument allow_mutation which is equivalen but didn't work when there was no default argument.
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
@@ -887,8 +885,9 @@ class Batch(FluentBaseModel):
     def result_format(self) -> ResultFormat:
         return self._validator.result_format
 
-    def _set_result_format(self, result_format: ResultFormat):
-        self._validator.result_format = result_format
+    def _set_result_format(self, result_format: str | ResultFormat):
+        # We allow a str result_format because this is an interactive workflow
+        self._validator.result_format = ResultFormat(result_format)
 
     def __setattr__(self, key, value):
         if key == "result_format":
@@ -911,16 +910,13 @@ class Batch(FluentBaseModel):
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
 
-        # We set the result format on every call to validate.
-        # We allow string assignments so must convert it to a ResultFormat if it's a string.
-        self._validator.result_format = ResultFormat(self.result_format)
         if isinstance(expect, Expectation):
             return self._validate_expectation(expect)
         elif isinstance(expect, ExpectationSuite):
             return self._validate_expectation_suite(expect)
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory
-            # workflows are probably not being type checked.
+            # workflows are not being type checked.
             raise ValueError(
                 f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"
             )
@@ -943,12 +939,8 @@ class Batch(FluentBaseModel):
             raise ValueError(
                 "We can't validate batches that are attached to datasources without a data context"
             )
-        batch_config = BatchConfig(
-            context=context,
-            data_asset=self.data_asset,
-        )
         return V1Validator(
             context=context,
-            batch_config=batch_config,
+            batch_config=BatchConfig(data_asset=self.data_asset),
             batch_request_options=self.batch_request.options,
         )
