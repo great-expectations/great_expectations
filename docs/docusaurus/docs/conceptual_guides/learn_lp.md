@@ -3,7 +3,6 @@ sidebar_label: 'Concepts'
 title: 'Concepts'
 id: learn_lp
 description: Longer format conceptual information about Great Expectations features and functionality.
-displayed_sidebar: 'learn'
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';

@@ -110,11 +110,11 @@ module.exports = {
         },
         {
           label: 'GX API',
-          to: '/docs/reference/api',
+          to: '/docs/reference/api_reference',
         },
         {
           label: 'LEARN',
-          to: '/docs/conceptual_guides',
+          to: '/docs/conceptual_guides/expectation_classes',
         },
         {
           to: 'https://greatexpectations.io/cloud',

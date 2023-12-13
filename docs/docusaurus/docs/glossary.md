@@ -1,8 +1,6 @@
 ---
 id: glossary
-title: "Concepts"
-displayed_sidebar: 'learn'
-slug: '/conceptual_guides/'
+title: "Glossary"
 ---
 
 [**Action:**](/docs/oss/terms/action) A Python class with a run method that takes a Validation Result and does something with it
@@ -10,6 +8,8 @@ slug: '/conceptual_guides/'
 [**Batch:**](/docs/oss/terms/batch) A selection of records from a Data Asset.
 
 [**Batch Request:**](/docs/oss/terms/batch_request) Provided to a Data Source in order to create a Batch.
+
+[**CLI:**](/docs/oss/terms/cli) Command Line Interface
 
 [**Checkpoint:**](/docs/oss/terms/checkpoint) The primary means for validating data in a production deployment of Great Expectations.
 
