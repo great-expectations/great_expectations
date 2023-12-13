@@ -288,7 +288,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def get_domain_kwargs(self) -> dict:
         default_kwarg_values: dict[str, Any] = {}
         try:
-            impl = self._get_expectation_impl(self.expectation_type)
+            impl = self._get_expectation_impl()
         except ExpectationNotFoundError:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
             domain_keys = expectation_kwargs_dict["domain_kwargs"]
@@ -324,7 +324,7 @@ class ExpectationConfiguration(SerializableDictDot):
             str, str | bool | float | RuleBasedProfilerConfig | object | None
         ]
         try:
-            impl = self._get_expectation_impl(self.expectation_type)
+            impl = self._get_expectation_impl()
         except ExpectationNotFoundError:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
             default_kwarg_values = expectation_kwargs_dict.get(
@@ -352,7 +352,7 @@ class ExpectationConfiguration(SerializableDictDot):
             str, str | bool | float | RuleBasedProfilerConfig | object | None
         ]
         try:
-            impl = self._get_expectation_impl(self.expectation_type)
+            impl = self._get_expectation_impl()
         except ExpectationNotFoundError:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
             default_kwarg_values = expectation_kwargs_dict.get(
