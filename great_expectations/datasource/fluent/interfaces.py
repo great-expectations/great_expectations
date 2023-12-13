@@ -215,7 +215,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     def add_batch_config(self, name: str) -> BatchConfig:
-        batch_config = BatchConfig(name=name, data_asset=self)
+        batch_config = BatchConfig(
+            name=name,
+            data_asset=self,
+        )
         self.batch_configs.append(batch_config)
         return batch_config
 
@@ -563,7 +566,6 @@ class Datasource(
         self._build_data_connector(asset, **connect_options)
 
         asset.test_connection()
-        asset._persist = self._save
 
         asset_names: Set[str] = self.get_asset_names()
         if asset.name in asset_names:

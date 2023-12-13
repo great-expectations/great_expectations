@@ -6,9 +6,6 @@ from unittest.mock import Mock
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
 from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 from great_expectations.datasource.fluent.interfaces import DataAsset
 
@@ -20,15 +17,6 @@ def mock_data_asset(monkeypatch) -> DataAsset:
     data_asset._save_batch_config = Mock()
 
     return data_asset
-
-
-@pytest.fixture
-def data_asset(
-    fds_data_context: AbstractDataContext,
-) -> DataAsset:
-    return fds_data_context.sources.add_pandas("my_datasource").add_csv_asset(
-        "taxi town", "taxi.csv"
-    )
 
 
 @pytest.mark.unit
