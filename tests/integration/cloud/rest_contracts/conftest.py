@@ -126,7 +126,7 @@ def pact_test(request) -> pact.Pact:
     # in GH, and we run the release build process on the tagged commit.
     version = f"{get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
 
-    pact_test: pact.Pact = pact.Consumer(
+    _pact: pact.Pact = pact.Consumer(
         name=CONSUMER_NAME,
         version=version,
         tag_with_git_branch=True,
@@ -141,9 +141,9 @@ def pact_test(request) -> pact.Pact:
         publish_to_broker=publish_to_broker,
     )
 
-    pact_test.start_service()
-    yield pact_test
-    pact_test.stop_service()
+    _pact.start_service()
+    yield _pact
+    _pact.stop_service()
 
 
 class ContractInteraction(pydantic.BaseModel):
