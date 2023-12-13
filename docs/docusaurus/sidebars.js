@@ -332,7 +332,6 @@ module.exports = {
                 'oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
                 'oss/guides/expectations/how_to_edit_an_existing_expectationsuite',
-                'oss/guides/expectations/how_to_use_auto_initializing_expectations',
                 'oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
                 'oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
                 'oss/guides/expectations/advanced/identify_failed_rows_expectations',
@@ -343,8 +342,6 @@ module.exports = {
               label: 'Data Assistants',
               link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
               items: [
-                'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
-                'oss/guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant',
                 'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
               ]
             },
@@ -408,7 +405,6 @@ module.exports = {
                 'oss/guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
                 'oss/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
                 'oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-                'oss/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action',
                 'oss/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
               ]
             },
@@ -499,7 +495,6 @@ module.exports = {
         'reference/learn/terms/batch_request',
         'reference/learn/terms/custom_expectation',
         'reference/learn/terms/checkpoint',
-        'reference/learn/terms/cli',
         'reference/learn/terms/datasource',
         'reference/learn/terms/data_context',
         'reference/learn/terms/data_asset',
