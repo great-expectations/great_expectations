@@ -10,9 +10,9 @@ GX uses libraries such as Pandas, Spark, and SQLAlchemy to integrate with a wide
 
 The following are the levels of support provided by GX:
 
-- GX-supported - integrations are tested throughout the development lifecycle, and actively maintained and updated when new versions of GX Cloud or GX OSS are released.
+- GX-supported - integrations are tested throughout the development lifecycle and are actively maintained and updated when new GX Cloud or GX OSS versions are released.
 
-- Community-supported - integrations are implemented by community members. They are not tested or updated by GX, and GX is not responsible for ensuring reliability or compatibility.
+- Community-supported - integrations are implemented by the community or GX. They are not tested or updated by GX, and GX is not responsible for ensuring reliability or compatibility.
 
 ## GX supported
 
@@ -42,7 +42,7 @@ The following table defines the GX versions supported by GX Cloud and GX OSS.
 
 | GX Cloud                    | GX OSS                          |
 |-----------------------------|---------------------------------|
-| N/A                         | - 0.17<br/> - 0.18              | 
+| N/A                         | 0.17<br/>0.18              | 
 
 ### Integrations
 
@@ -51,9 +51,9 @@ The following table defines the supported GX Cloud and GX OSS integrations.
 
 | Integration Type                         | GX Cloud             | GX OSS          |
 |------------------------------------------|----------------------|-----------------|
-| Data Source                              | Snowflake ¹          | - Snowflake<br/> - Generic SQL ²               |
-| Configuration Stores                     | N/A                  | - Filesystem<br/> - AWS S3GCS Buckets<br/> - Azure Blob Store                |
-| Notifications                            | N/A ³                | - Slack (local) ⁴<br/> - email (local)<br/> - Microsoft Teams (local)<br/> - PagerDuty (local)                 |
+| Data Source                              | Snowflake ¹          | Snowflake<br/>Generic SQL ²               |
+| Configuration Stores                     | N/A                  | Filesystem<br/>AWS S3GCS Buckets<br/>Azure Blob Store                |
+| Notifications                            | N/A ³                | Slack (local) ⁴<br/>email (local)<br/>Microsoft Teams (local)<br/>PagerDuty (local)                 |
 | Orchestrator                              | Airflow ⁵           | Airflow ⁵       |
 
 
@@ -83,7 +83,7 @@ The following table lists the operating systems supported by the community.
 
 | GX Cloud                       | GX OSS                        |
 |--------------------------------|-------------------------------|
-| Windows ¹                      | Windows ¹                     | 
+| N/A                            | Windows ¹                     | 
 
 ¹ Untested and unsupported by GX.
 
@@ -94,6 +94,6 @@ The following table lists the GX Cloud and GX OSS integrations supported by the 
 
 | Integration Type                         | GX Cloud             | GX OSS          |
 |------------------------------------------|----------------------|-----------------|
-| Data Source                              | N/A          | - Pandas<br/>- Spark<br/>- Databricks (Spark)<br/>- Databricks (SQL)<br/>- Trino<br/>- Clickhouse<br/>- Dremio<br/>- Teradata<br/>- Vertica<br/>- EMR Spark<br/>- AWS Glue<br/>- Google Cloud Storage<br/>- Azure Blog Storage<br/>- AWS S3|
-| Notifications                             | N/A            | - Opsgenie<br/>- Amazon SNS<br/>- DataHub |
-| Orchestrator                              | N/A            | - Prefect<br/>- Dagster <br/>- Flyte <br/>- mage.ai  |
+| Data Source                              | N/A          | Pandas<br/>Spark<br/>Databricks (Spark)<br/>Databricks (SQL)<br/>Trino<br/>Clickhouse<br/>Dremio<br/> Teradata<br/>Vertica<br/>EMR Spark<br/>AWS Glue<br/>Google Cloud Storage<br/>Azure Blog Storage<br/>AWS S3|
+| Notifications                             | N/A            | Opsgenie<br/>Amazon SNS<br/>DataHub |
+| Orchestrator                              | N/A            | Prefect<br/>Dagster <br/>Flyte <br/>mage.ai  |
