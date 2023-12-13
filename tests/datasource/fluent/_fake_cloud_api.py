@@ -544,6 +544,30 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     return result
 
 
+def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
+    # not returning errors, just patching the endpoint
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    if not request.body:
+        raise NotImplementedError("Handling missing body")
+
+    payload: dict = json.loads(request.body)
+    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+
+    exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
+
+    id_ = FAKE_EXPECTATION_SUITE_ID
+    payload["data"]["id"] = id_
+    exp_suites[id_] = payload
+    exp_suite_names.add(name)
+    result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))
+
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
 def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
     url = requests.url
     LOGGER.debug(f"{requests.method} {url}")
@@ -734,6 +758,16 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base}/expectation-suites",
             post_expectation_suites_cb,
+        )
+        resp_mocker.add_callback(
+            responses.PUT,
+            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            put_expectation_suites_cb,
+        )
+        resp_mocker.add_callback(
+            responses.PATCH,
+            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            put_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
