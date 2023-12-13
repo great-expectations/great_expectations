@@ -12,7 +12,7 @@ The following are the levels of support provided by GX:
 
 - GX-supported - integrations are tested throughout the development lifecycle and are actively maintained and updated when new GX Cloud or GX OSS versions are released.
 
-- Community-supported - integrations are implemented by the community or GX. They are not tested or updated by GX, and GX is not responsible for ensuring reliability or compatibility.
+- Community-supported - integrations are implemented by the community or GX. GX is not responsible for ensuring integration reliability or compatibility.
 
 ## GX supported
 
