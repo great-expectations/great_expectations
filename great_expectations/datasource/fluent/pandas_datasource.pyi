@@ -75,7 +75,7 @@ class _PandasDataAsset(DataAsset):
         self, batch_request: BatchRequest
     ) -> list[Batch]: ...
     @override
-    def build_batch_request(  # type: ignore[override]
+    def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = ...,
         batch_slice: Optional[BatchSlice] = ...,
