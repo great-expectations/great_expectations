@@ -213,11 +213,13 @@ class DataAssistantResult(SerializableDictDot):
         Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
         and displays this "ExpectationConfiguration" list, grouped by "domain_type", in predetermined order.
         """
-        self.get_expectation_suite(
+        suite = self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
             send_usage_event=send_usage_event,
-        ).show_expectations_by_domain_type()
+        )
+
+        ExpectationSuiteViewer(suite=suite).show_expectations_by_domain_type()
 
     @public_api
     def show_expectations_by_expectation_type(
@@ -234,11 +236,12 @@ class DataAssistantResult(SerializableDictDot):
                 generate the Expectation Suite.
             send_usage_event: Set to False to disable sending usage events for this method.
         """
-        self.get_expectation_suite(
+        suite = self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
             send_usage_event=send_usage_event,
-        ).show_expectations_by_expectation_type()
+        )
+        ExpectationSuiteViewer(suite=suite).show_expectations_by_expectation_type()
 
     @public_api
     def get_expectation_suite(
