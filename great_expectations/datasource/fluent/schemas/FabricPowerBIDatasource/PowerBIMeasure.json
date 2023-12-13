@@ -71,11 +71,6 @@
             "title": "Num Rows",
             "type": "integer"
         },
-        "pandas_convert_dtypes": {
-            "title": "Pandas Convert Dtypes",
-            "default": true,
-            "type": "boolean"
-        },
         "use_xmla": {
             "title": "Use Xmla",
             "default": false,

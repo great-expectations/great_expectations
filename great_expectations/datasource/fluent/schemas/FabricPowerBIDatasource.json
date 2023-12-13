@@ -148,10 +148,15 @@
                     "default": false,
                     "type": "boolean"
                 },
-                "pandas_convert_dtypes": {
-                    "title": "Pandas Convert Dtypes",
-                    "default": true,
-                    "type": "boolean"
+                "mode": {
+                    "title": "Mode",
+                    "default": "xmla",
+                    "enum": [
+                        "xmla",
+                        "rest",
+                        "onelake"
+                    ],
+                    "type": "string"
                 }
             },
             "required": [
@@ -233,11 +238,6 @@
                     "title": "Num Rows",
                     "type": "integer"
                 },
-                "pandas_convert_dtypes": {
-                    "title": "Pandas Convert Dtypes",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "use_xmla": {
                     "title": "Use Xmla",
                     "default": false,
@@ -287,11 +287,6 @@
                 "dax_string": {
                     "title": "Dax String",
                     "type": "string"
-                },
-                "pandas_convert_dtypes": {
-                    "title": "Pandas Convert Dtypes",
-                    "default": true,
-                    "type": "boolean"
                 }
             },
             "required": [
