@@ -84,27 +84,28 @@ def test_batch_validate_with_updated_expectation(
     assert result.success is True
 
 
-@pytest.mark.filesystem
-def test_batch_validate_expectation_suite_with_updated_expectation(
-    pandas_setup: Tuple[AbstractDataContext, Batch]
-):
-    context, batch = pandas_setup
-
-    # Make Expectation Suite
-    suite = context.add_expectation_suite("my_suite")
-    suite.add(ExpectColumnValuesToNotBeNull(column="vendor_id"))
-    # Validate
-    result = batch.validate(suite)
-    # Asserts on result
-    assert result.success is False
-    # Update suite and validate
-    assert len(suite.expectations) == 1
-    expectation = suite.expectations[0]
-    assert type(expectation) == ExpectColumnValuesToNotBeNull
-    expectation.mostly = 0.95
-    # TODO: Do I need to and how do I save the expectation?
-    result = batch.validate(suite)
-    # assert result.success is True
+# TODO: This test is waiting on the ability to update an expectation in a suite.
+# @pytest.mark.filesystem
+# def test_batch_validate_expectation_suite_with_updated_expectation(
+#     pandas_setup: Tuple[AbstractDataContext, Batch]
+# ):
+#     context, batch = pandas_setup
+#
+#     # Make Expectation Suite
+#     suite = context.add_expectation_suite("my_suite")
+#     suite.add(ExpectColumnValuesToNotBeNull(column="vendor_id"))
+#     # Validate
+#     result = batch.validate(suite)
+#     # Asserts on result
+#     assert result.success is False
+#     # Update suite and validate
+#     assert len(suite.expectations) == 1
+#     expectation = suite.expectations[0]
+#     assert type(expectation) == ExpectColumnValuesToNotBeNull
+#     expectation.mostly = 0.95
+#     # TODO: This is where I need to update the expectation and make sure the changes are in the suite.
+#     result = batch.validate(suite)
+#     assert result.success is True
 
 
 @pytest.mark.filesystem
