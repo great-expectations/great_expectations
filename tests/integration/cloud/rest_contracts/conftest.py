@@ -105,6 +105,11 @@ def get_git_commit_hash() -> str:
 
 @pytest.fixture
 def pact_test(request) -> pact.Pact:
+    """
+    pact_test can be used as a context manager and will:
+    1. write a new contract to the pact dir
+    2. verify the contract against the mock service
+    """
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
 
     broker_token: str
