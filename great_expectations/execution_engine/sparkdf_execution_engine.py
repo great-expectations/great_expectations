@@ -289,7 +289,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
              1. Updating the existing SparkSession with spark_config values
              2. Restarting the existing SparkSession and applying only spark_config
 
-          If a spark_config option was unable to be set, a warning is raised.
+          If a spark_config option is unable to be set, a warning is raised.
 
         Args:
             spark_session: An existing pyspark.SparkSession.
@@ -347,6 +347,15 @@ class SparkDFExecutionEngine(ExecutionEngine):
         spark_session: pyspark.SparkSession,
         spark_config: dict,
     ) -> tuple[pyspark.SparkSession, bool]:
+        """Tries to update the SparkSession if it doesn't have the options specified in spark_config set.
+        If updates fail, and the SparkSession can be stopped, it will be stopped.
+        If the SparkSession cannot be stopped, it will be returned unaltered.
+
+        Warns if the SparkSession was stopped or a config option could not be set.
+
+        Returns:
+            SparkSession, Boolean specifying if SparkSession is stopped
+        """
         stopped = False
         warning_messages = []
         for key, value in spark_config.items():
