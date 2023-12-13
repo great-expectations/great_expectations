@@ -191,9 +191,13 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
-        validations = convert_validations_list_to_checkpoint_validation_configs(
-            validations
-        )
+        validations = validations or []
+        if validations:
+            validations = (
+                self._convert_runtime_validations_list_to_checkpoint_validation_configs(
+                    runtime_validations=validations
+                )
+            )
 
         if (
             sum(bool(x) for x in [self._validator is not None, validator is not None])
@@ -548,6 +552,28 @@ class BaseCheckpoint(ConfigPeer):
             raise gx_exceptions.CheckpointError(
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
             ) from e
+
+    def _convert_runtime_validations_list_to_checkpoint_validation_configs(
+        self,
+        runtime_validations: list[dict] | list[CheckpointValidationConfig],
+    ) -> list[CheckpointValidationConfig]:
+        for runtime_validation in runtime_validations:
+            if isinstance(runtime_validation, dict) and (
+                "id" not in runtime_validation.keys()
+            ):
+                for config_validation in self.validations:
+                    if (
+                        config_validation.batch_request
+                        == runtime_validation.get("batch_request")
+                    ) and (
+                        config_validation.expectation_suite_name
+                        == config_validation.get("expectation_suite_name")
+                    ):
+                        runtime_validation["id"] = config_validation.id
+
+        return convert_validations_list_to_checkpoint_validation_configs(
+            validations=runtime_validations
+        )
 
     def self_check(self, pretty_print: bool = True) -> dict:
         """Method that is intended to provide visibility into parameters that Checkpoint was instantiated with.

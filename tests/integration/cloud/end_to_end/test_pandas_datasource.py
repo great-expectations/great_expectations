@@ -148,7 +148,21 @@ def test_interactive_validator(
 
 
 @pytest.mark.cloud
-def test_checkpoint_run(checkpoint: Checkpoint):
+def test_checkpoint_run(
+    checkpoint: Checkpoint,
+    batch_request: BatchRequest,
+    expectation_suite: ExpectationSuite,
+):
     """Test running a Checkpoint that was created using the entities defined in this module."""
-    checkpoint_result: CheckpointResult = checkpoint.run()
+
+    # in-memory dataframe referenced by BatchRequest isn't serialized in Checkpoint config
+    # so we need to pass the batch request again at runtime
+    validations = [
+        {
+            "batch_request": batch_request,
+            "expectation_suite_name": expectation_suite.expectation_suite_name,
+        }
+    ]
+
+    checkpoint_result: CheckpointResult = checkpoint.run(validations=validations)
     assert checkpoint_result.success

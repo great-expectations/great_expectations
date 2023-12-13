@@ -24,6 +24,22 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
+def spark_test_df(
+    spark_session: pyspark.SparkSession,
+    spark_df_from_pandas_df: Callable[
+        [pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame
+    ],
+) -> pyspark.DataFrame:
+    pandas_df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4],
+            "name": [1, 2, 3, 4],
+        },
+    )
+    return spark_df_from_pandas_df(spark_session, pandas_df)
+
+
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     datasource_name: str,
@@ -89,24 +105,14 @@ def data_asset(
 @pytest.fixture(scope="module")
 def batch_request(
     data_asset: DataAsset,
-    spark_session: pyspark.SparkSession,
-    spark_df_from_pandas_df: Callable[
-        [pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame
-    ],
     in_memory_batch_request_missing_dataframe_error_type: type[Exception],
+    spark_test_df: pyspark.DataFrame,
 ) -> BatchRequest:
     """Build a BatchRequest depending on the types of Data Assets tested in the module."""
     if isinstance(data_asset, DataFrameAsset):
         with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
             data_asset.build_batch_request()
-        pandas_df = pd.DataFrame(
-            {
-                "id": [1, 2, 3, 4],
-                "name": [1, 2, 3, 4],
-            },
-        )
-        spark_df: pyspark.DataFrame = spark_df_from_pandas_df(spark_session, pandas_df)
-        batch_request = data_asset.build_batch_request(dataframe=spark_df)
+        batch_request = data_asset.build_batch_request(dataframe=spark_test_df)
     else:
         batch_request = data_asset.build_batch_request()
     return batch_request
@@ -151,7 +157,21 @@ def test_interactive_validator(
 
 
 @pytest.mark.cloud
-def test_checkpoint_run(checkpoint: Checkpoint):
+def test_checkpoint_run(
+    checkpoint: Checkpoint,
+    batch_request: BatchRequest,
+    expectation_suite: ExpectationSuite,
+):
     """Test running a Checkpoint that was created using the entities defined in this module."""
-    checkpoint_result: CheckpointResult = checkpoint.run()
+
+    # in-memory dataframe referenced by BatchRequest isn't serialized in Checkpoint config
+    # so we need to pass the batch request again at runtime
+    validations = [
+        {
+            "batch_request": batch_request,
+            "expectation_suite_name": expectation_suite.expectation_suite_name,
+        }
+    ]
+
+    checkpoint_result: CheckpointResult = checkpoint.run(validations=validations)
     assert checkpoint_result.success
