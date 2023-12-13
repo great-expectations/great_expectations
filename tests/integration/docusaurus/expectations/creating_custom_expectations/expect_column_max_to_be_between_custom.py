@@ -220,7 +220,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
         column_max = metrics["column.custom_max"]
 
         # Obtaining components needed for validation
-        success_kwargs = self.get_success_kwargs()
+        success_kwargs = self._get_success_kwargs()
         min_value = success_kwargs.get("min_value")
         max_value = success_kwargs.get("max_value")
         strict_min = success_kwargs.get("strict_min")

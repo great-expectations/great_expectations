@@ -1019,8 +1019,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
-        configuration = self.configuration
-
         if runtime_configuration is None:
             runtime_configuration = {}
 
@@ -1039,7 +1037,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         _validate_dependencies_against_available_metrics(
             validation_dependencies=validation_dependencies_metric_configurations,
             metrics=metrics,
-            configuration=configuration,
         )
 
         metric_name: str
@@ -1068,19 +1065,18 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         evr: ExpectationValidationResult = self._build_evr(
             raw_response=expectation_validation_result,
-            configuration=configuration,
         )
         return evr
 
-    # noinspection PyUnusedLocal
-    @staticmethod
     def _build_evr(
+        self,
         raw_response: Union[ExpectationValidationResult, dict],
-        configuration: ExpectationConfiguration,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
+        configuration = self.configuration
+
         evr: ExpectationValidationResult
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
@@ -1100,7 +1096,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
-        runtime_configuration = self.get_runtime_kwargs(
+        runtime_configuration = self._get_runtime_kwargs(
             runtime_configuration=runtime_configuration,
         )
         result_format: dict = runtime_configuration["result_format"]
@@ -1134,8 +1130,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
         return domain_kwargs
 
-    @public_api
-    def get_success_kwargs(self) -> Dict[str, Any]:
+    def _get_success_kwargs(self) -> Dict[str, Any]:
         """Retrieve the success kwargs."""
         domain_kwargs: Dict[str, Optional[str]] = self._get_domain_kwargs()
         success_kwargs: Dict[str, Any] = {
@@ -1145,7 +1140,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         success_kwargs.update(domain_kwargs)
         return success_kwargs
 
-    def get_runtime_kwargs(
+    def _get_runtime_kwargs(
         self,
         runtime_configuration: Optional[dict] = None,
     ) -> dict:
@@ -1154,7 +1149,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
 
-        success_kwargs = self.get_success_kwargs()
+        success_kwargs = self._get_success_kwargs()
         runtime_kwargs = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.runtime_keys
@@ -1196,7 +1191,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
-        configuration: Optional[ExpectationConfiguration] = None,
         evaluation_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
@@ -1207,7 +1201,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Args:
             validator: A Validator object that can be used to create Expectations, validate Expectations,
                 and get Metrics for Expectations.
-            configuration: Defines the parameters and name of a specific expectation.
             evaluation_parameters: Dictionary of dynamic values used during Validation of an Expectation.
             interactive_evaluation: Setting the interactive_evaluation flag on a DataAsset
                 make it possible to declare expectations and store expectations without
@@ -1217,8 +1210,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Returns:
             An ExpectationValidationResult object
         """
-        if not configuration:
-            configuration = deepcopy(self.configuration)
+        configuration = deepcopy(self.configuration)
 
         # issue warnings if necessary
         self._warn_if_result_format_config_in_runtime_configuration(
@@ -2301,10 +2293,9 @@ class BatchExpectation(Expectation, ABC):
 
         return validation_dependencies
 
-    def _validate_metric_value_between(  # noqa: PLR0912, PLR0913
+    def _validate_metric_value_between(  # noqa: PLR0912
         self,
         metric_name,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
@@ -2315,7 +2306,7 @@ class BatchExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        success_kwargs = self.get_success_kwargs()
+        success_kwargs = self._get_success_kwargs()
         min_value: Optional[Any] = success_kwargs.get("min_value")
         strict_min: Optional[bool] = success_kwargs.get("strict_min")
         max_value: Optional[Any] = success_kwargs.get("max_value")
@@ -2742,7 +2733,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 nonnull_count,
                 unexpected_count,
-                self.get_success_kwargs()["mostly"],
+                self._get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
@@ -2986,7 +2977,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs()["mostly"],
+                self._get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
@@ -3239,7 +3230,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs()["mostly"],
+                self._get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
@@ -3407,14 +3398,12 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
 def _validate_dependencies_against_available_metrics(
     validation_dependencies: List[MetricConfiguration],
     metrics: dict,
-    configuration: ExpectationConfiguration,
 ) -> None:
     """Check that validation_dependencies for current Expectations are available as Metrics.
 
     Args:
         validation_dependencies_as_metric_configurations: dependencies calculated for current Expectation.
         metrics: dict of metrics available to current Expectation.
-        configuration: current ExpectationConfiguration
 
     Raises:
         InvalidExpectationConfigurationError: If a validation dependency is not available as a Metric.
@@ -3422,7 +3411,7 @@ def _validate_dependencies_against_available_metrics(
     for metric_config in validation_dependencies:
         if metric_config.id not in metrics:
             raise InvalidExpectationConfigurationError(
-                f"Metric {metric_config.id} is not available for validation of {configuration}. Please check your configuration."
+                f"Metric {metric_config.id} is not available for validation of configuration. Please check your configuration."
             )
 
 

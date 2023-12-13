@@ -95,7 +95,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
             False
         ), "Validate configuration threw an error when testing default mostly value"
     assert (
-        fake_expectation.get_success_kwargs().get("mostly") == 1
+        fake_expectation._get_success_kwargs().get("mostly") == 1
     ), "Default mostly success ratio is not 1"
 
 
@@ -138,7 +138,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
 def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     fake_expectation = fake_expectation_cls(**config.kwargs)
     assert (
-        fake_expectation.get_success_kwargs().get("mostly") == config.kwargs["mostly"]
+        fake_expectation._get_success_kwargs().get("mostly") == config.kwargs["mostly"]
     ), "Default mostly success ratio is not 1"
 
 
@@ -183,14 +183,9 @@ def test_validate_dependencies_against_available_metrics_success(metrics_dict):
             "column": "i_exist",
         },
     )
-    expectation_configuration: ExpectationConfiguration = fake_expectation_config(
-        expectation_type="expect_column_values_to_not_be_null",
-        config_kwargs={"column": "i_exist", "batch_id": "projects-projects"},
-    )
     expectation._validate_dependencies_against_available_metrics(
         validation_dependencies=metric_config_list,
         metrics=metrics_dict,
-        configuration=expectation_configuration,
     )
 
 
@@ -203,15 +198,10 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
             "column": "i_dont_exist",
         },
     )
-    expectation_configuration: ExpectationConfiguration = fake_expectation_config(
-        expectation_type="expect_column_values_to_not_be_null",
-        config_kwargs={"column": "i_dont_exist", "batch_id": "projects-projects"},
-    )
     with pytest.raises(InvalidExpectationConfigurationError):
         expectation._validate_dependencies_against_available_metrics(
             validation_dependencies=metric_config_list,
             metrics=metrics_dict,
-            configuration=expectation_configuration,
         )
 
 

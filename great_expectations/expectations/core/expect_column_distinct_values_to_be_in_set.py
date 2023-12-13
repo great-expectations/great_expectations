@@ -322,7 +322,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     ):
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
-        value_set = self.get_success_kwargs().get("value_set") or []
+        value_set = self._get_success_kwargs().get("value_set") or []
 
         parsed_value_set = value_set
 

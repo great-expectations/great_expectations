@@ -167,8 +167,8 @@ class ExpectColumnToExist(BatchExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         actual_columns = metrics["table.columns"]
-        expected_column_name = self.get_success_kwargs().get("column")
-        expected_column_index = self.get_success_kwargs().get("column_index")
+        expected_column_name = self._get_success_kwargs().get("column")
+        expected_column_index = self._get_success_kwargs().get("column_index")
 
         if expected_column_index:
             try:

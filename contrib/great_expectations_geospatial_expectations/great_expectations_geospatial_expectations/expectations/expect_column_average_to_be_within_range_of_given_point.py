@@ -130,7 +130,7 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnAggregateExpectation)
         execution_engine: ExecutionEngine = None,
     ):
         distance = metrics.get("column.coordinates.distance")
-        range = self.get_success_kwargs().get("range")
+        range = self._get_success_kwargs().get("range")
 
         success = distance <= range
 

@@ -212,7 +212,7 @@ class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
     ):
         radius = metrics.get("column.geometry.minimum_bounding_radius")
 
-        success_kwargs = self.get_success_kwargs()
+        success_kwargs = self._get_success_kwargs()
         diameter_flag = success_kwargs.get("diameter_flag")
         min_value = success_kwargs.get("min_value")
         max_value = success_kwargs.get("max_value")
