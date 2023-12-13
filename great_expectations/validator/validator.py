@@ -865,7 +865,8 @@ class Validator:
             try:
                 runtime_configuration_default = copy.deepcopy(runtime_configuration)
 
-                result = configuration.metrics_validate(
+                expectation = configuration.to_domain_obj()
+                result = expectation.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration_default,
