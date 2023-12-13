@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility import pydantic
 
@@ -30,4 +30,4 @@ class BatchConfig(pydantic.BaseModel):
         return self.data_asset.build_batch_request(options=batch_request_options)
 
     def save(self) -> None:
-        self._persist()
+        self.data_asset._save_batch_config(self)

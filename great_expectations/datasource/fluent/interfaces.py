@@ -175,9 +175,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     batch_configs: list[Any] = Field(default_factory=list)
 
     # non-field private attributes
+    _save_batch_config: Callable[[BatchConfig], None] = pydantic.PrivateAttr()
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
-    _persist: Callable[[], None] = pydantic.PrivateAttr()
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
