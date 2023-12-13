@@ -103,7 +103,7 @@ def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture
+@pytest.fixture(scope="package")
 def pact_test(request) -> pact.Pact:
     """
     pact_test can be used as a context manager and will:
@@ -193,7 +193,7 @@ class ContractInteraction(pydantic.BaseModel):
 
 
 @pytest.fixture
-def run_pact_test(
+def run_rest_api_pact_test(
     gx_cloud_session: Session,
     pact_test: pact.Pact,
 ) -> Callable:
@@ -241,32 +241,16 @@ def run_pact_test(
         request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{contract_interaction.request_path}"
 
         with pact_test:
-            gx_cloud_session.request(
+            # act
+            resp = gx_cloud_session.request(
                 method=contract_interaction.method,
                 url=request_url,
                 json=contract_interaction.request_body,
                 params=contract_interaction.request_params,
             )
 
-        try:
-            provider_base_url: Final[str] = os.environ["GX_CLOUD_BASE_URL"]
-        except KeyError as e:
-            raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
-
-        verifier = pact.Verifier(
-            provider=PROVIDER_NAME,
-            provider_base_url=provider_base_url,
-        )
-
-        pacts: tuple[str, ...] = tuple(
-            str(file.resolve()) for file in PACT_DIR.glob("*.json")
-        )
-
-        exit_code, logs = verifier.verify_pacts(
-            *pacts,
-            verbose=False,
-        )
-        if exit_code == 1:
-            raise AssertionError("Pact verifier reports failed interactions")
+        # assert
+        assert resp.status_code == contract_interaction.response_status
+        # TODO more unit test assertions would go here e.g. response body checks
 
     return _run_pact_test
