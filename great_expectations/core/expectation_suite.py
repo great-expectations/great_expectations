@@ -345,6 +345,7 @@ class ExpectationSuite(SerializableDictDot):
 
         return result
 
+    @public_api
     @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationSuite.
@@ -429,6 +430,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         self.expectation_configurations.append(expectation_config)
 
+    @public_api
     @new_argument(
         argument_name="ge_cloud_id",
         version="0.13.33",
@@ -648,6 +650,7 @@ class ExpectationSuite(SerializableDictDot):
         ]
         return expectation_configurations_attempted_to_be_added
 
+    @public_api
     def legacy_add_expectation_by_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,
