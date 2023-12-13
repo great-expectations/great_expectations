@@ -78,7 +78,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.result_format import ResultFormat, ResultFormatDict
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -318,12 +318,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     class Config:
         arbitrary_types_allowed = True
         smart_union = True
-        extra = pydantic.Extra.allow
+        extra = pydantic.Extra.forbid
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
     notes: Union[str, None] = None
-    result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
+    result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
 
     catch_exceptions: bool = False
 
@@ -338,6 +338,16 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
+
+    @pydantic.validator("result_format")
+    def _validate_result_format(
+        cls, result_format: ResultFormat | dict
+    ) -> ResultFormat | dict:
+        if isinstance(result_format, dict) and "result_format" not in result_format:
+            raise ValueError(
+                "If configuring result format with a dictionary, the key 'result_format' must be present."
+            )
+        return result_format
 
     @classmethod
     def is_abstract(cls) -> bool:

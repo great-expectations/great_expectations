@@ -57,6 +57,7 @@ class ExpectColumnToExist(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
+    column: str
     column_index: Union[int, EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
