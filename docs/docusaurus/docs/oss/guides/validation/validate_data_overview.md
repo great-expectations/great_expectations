@@ -20,7 +20,7 @@ See [How to create a new Checkpoint](./checkpoints/how_to_create_a_new_checkpoin
 
 ## Configure your Checkpoint
 
-When you configure your Checkpoint you can add additional validation data, or specify that validation data must be specified at run time.  You can add additional <TechnicalTag tag="expectation_suite" text="Expectation Suites" />, and you can add Actions which the Checkpoint executes when it finishes Validating data.  To learn more about Checkpoint configuration, see [Checkpoints](/reference/learn/terms/checkpoint) and [Actions](/reference/learn/terms/action).
+When you configure your Checkpoint you can add additional validation data, or specify that validation data must be specified at run time.  You can add additional <TechnicalTag tag="expectation_suite" text="Expectation Suites" />, and you can add Actions which the Checkpoint executes when it finishes Validating data.  To learn more about Checkpoint configuration, see [Checkpoints](/docs/reference/learn/terms/checkpoint) and [Actions](/docs/reference/learn/terms/action).
 
 ### Checkpoints, Batch Requests, and Expectation Suites
 

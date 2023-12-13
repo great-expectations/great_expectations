@@ -62,7 +62,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
    Each validation dictionary has three required and three optional keys:
     #### Required keys
         - `batch_request`: a dictionary describing the batch of data to validate (learn more about specifying Batches
-           here: [Batches](/reference/learn/terms/batch))
+           here: [Batches](/docs/reference/learn/terms/batch))
         - `expectation_suite_name`: the name of the Expectation Suite to validate the batch of data against
         - `action_list`: a list of actions to perform after each batch is validated
 
@@ -70,7 +70,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
         - `name`: providing a name will allow referencing the validation inside the run by name (e.g. "
            user_table_validation")
         - `evaluation_parameters`: used to define named parameters using Great
-           Expectations [Evaluation Parameter syntax](/reference/learn/terms/evaluation_parameter)
+           Expectations [Evaluation Parameter syntax](/docs/reference/learn/terms/evaluation_parameter)
         - `runtime_configuration`: provided to the Validator's `runtime_configuration` (e.g. `result_format`)
 
 ### Optional keys

@@ -62,7 +62,7 @@ Our [guide on how to Validate data by running a Checkpoint](../checkpoints/how_t
 
 ## Related documentation
 
-- [Checkpoints overview page](/reference/learn/terms/checkpoint)
-- [Actions overview page](/reference/learn/terms/action)
+- [Checkpoints overview page](/docs/reference/learn/terms/checkpoint)
+- [Actions overview page](/docs/reference/learn/terms/action)
 - The [OpenLineage Spec](https://github.com/OpenLineage/OpenLineage/blob/main/spec/OpenLineage.md)
 - Blog: [Expecting Great Quality with OpenLineage Facets](https://openlineage.io/blog/dataquality_expectations_facet/)

@@ -14,7 +14,7 @@ By the end of this guide, you will know when it will be most beneficial to be wo
 
 <Prerequisites>
 
-- [An understanding of Data Source basics](/reference/learn/terms/datasource)
+- [An understanding of Data Source basics](/docs/reference/learn/terms/datasource)
 - [An understanding of how to request data with a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
 
 </Prerequisites>

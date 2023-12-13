@@ -86,5 +86,5 @@ The ``UpdateDataDocsAction`` generates an HTML file for the latest Validation Re
 
 ## Related documentation
 
-- [Checkpoints overview page](/reference/learn/terms/checkpoint)
-- [Actions overview page](/reference/learn/terms/action)
+- [Checkpoints overview page](/docs/reference/learn/terms/checkpoint)
+- [Actions overview page](/docs/reference/learn/terms/action)
