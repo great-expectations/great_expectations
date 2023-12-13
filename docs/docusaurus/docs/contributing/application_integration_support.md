@@ -4,7 +4,7 @@ title: Integration support policy
 
 For production environments, GX recommends using the integrations defined as GX-supported. 
 
-GX uses libraries such as Pandas, Spark, and SQLAlchemy to integrate with a wide range of data sources. This also allows you to deploy GX with Community-supported integrations.
+GX uses libraries such as Pandas, Spark, and SQLAlchemy to integrate with different Data Sources. This also allows you to deploy GX with community-supported integrations.
 
 ## Support categories
 
@@ -14,7 +14,7 @@ The following are the levels of support provided by GX:
 
 - Community-supported - integrations are implemented by the community or GX. GX is not responsible for ensuring integration reliability or compatibility.
 
-## GX supported
+## GX-supported
 
 The following are the levels of support offered by GX for integrated applications, operating systems, and programming languages.
 
@@ -52,8 +52,8 @@ The following table defines the supported GX Cloud and GX OSS integrations.
 | Integration Type                         | GX Cloud             | GX OSS          |
 |------------------------------------------|----------------------|-----------------|
 | Data Source                              | Snowflake ¹          | Snowflake<br/>Generic SQL ²               |
-| Configuration Stores                     | N/A                  | Filesystem<br/>AWS S3GCS Buckets<br/>Azure Blob Store                |
-| Notifications                            | N/A ³                | Slack (local) ⁴<br/>email (local)<br/>Microsoft Teams (local)<br/>PagerDuty (local)                 |
+| Configuration Stores                     | N/A                  | Filesystem<br/>AWS S3<br/>GCS Buckets<br/>Azure Blob Store          |
+| Notifications                            | N/A ³                | Slack ⁴<br/>email<br/>Microsoft Teams<br/>PagerDuty                 |
 | Orchestrator                              | Airflow ⁵           | Airflow ⁵       |
 
 
@@ -73,7 +73,7 @@ The following table defines the GX components supported by GX Cloud and GX OSS.
 | GX Agent                                 | All versions               | N/A        |
 
 
-## Community supported
+## Community-supported
 
 The following integrated applications, operating systems, and programming languages are supported by the community.
 

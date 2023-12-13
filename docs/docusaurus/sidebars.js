@@ -273,12 +273,12 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'GX supported',
+              label: 'GX-supported',
               href: '/docs/contributing/application_integration_support#gx-supported',
             },
             {
               type: 'link',
-              label: 'Community supported',
+              label: 'Community-supported',
               href: '/docs/contributing/application_integration_support#community-supported',
             },
           ]
