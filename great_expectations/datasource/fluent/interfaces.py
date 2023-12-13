@@ -26,6 +26,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
 from great_expectations.compatibility import pydantic
@@ -47,6 +48,7 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.validator.metrics_calculator import MetricsCalculator
+from great_expectations.validator.v1_validator import ResultFormat
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,11 @@ if TYPE_CHECKING:
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
+    from great_expectations.core import (
+        ExpectationSuite,
+        ExpectationSuiteValidationResult,
+        ExpectationValidationResult,
+    )
     from great_expectations.core.batch import (
         BatchData,
         BatchDefinition,
@@ -77,6 +84,10 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
+    )
+    from great_expectations.expectations.expectation import Expectation
+    from great_expectations.validator.v1_validator import (
+        Validator as V1Validator,
     )
 
 
@@ -277,7 +288,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
-        config_variables = self._datasource._data_context.config_variables  # type: ignore[attr-defined]
+        config_variables = self._datasource.data_context.config_variables  # type: ignore[attr-defined]
         batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
             data=batch_metadata, replace_variables_dict=config_variables
         )
@@ -430,6 +441,14 @@ class Datasource(
     @property
     def _config_provider(self) -> Union[_ConfigurationProvider, None]:
         return getattr(self._data_context, "config_provider", None)
+
+    @property
+    def data_context(self) -> GXDataContext | None:
+        """The data context that this datasource belongs to.
+
+        This method should only be used by library implementers.
+        """
+        return self._data_context
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -749,6 +768,7 @@ class HeadData:
         return self.data.__repr__()
 
 
+@public_api
 class Batch(FluentBaseModel):
     """This represents a batch of data.
 
@@ -756,24 +776,34 @@ class Batch(FluentBaseModel):
     a spark or a sql database. An exception exists for pandas or any in-memory datastore.
     """
 
-    datasource: Datasource
-    data_asset: DataAsset
-    batch_request: BatchRequest
-    data: BatchData
-    id: str = ""
+    # frozen=True is a pydantic V2 concept that makes these fields immutable.
+    # v1 Fields had a argument allow_mutation which is equivalen but didn't work when there was no default argument.
+    datasource: Datasource = Field(frozen=True)
+    data_asset: DataAsset = Field(frozen=True)
+    batch_request: BatchRequest = Field(frozen=True)
+    data: BatchData = Field(frozen=True)
+    id: str = Field("", frozen=True)
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any] = Field(default_factory=dict, allow_mutation=True)
+    metadata: Dict[str, Any] = Field(default_factory=dict, frozen=False)
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
-    batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
+    batch_markers: BatchMarkers = Field(alias="legacy_batch_markers", frozen=True)
+    batch_spec: BatchSpec = Field(alias="legacy_batch_spec", frozen=True)
+    batch_definition: BatchDefinition = Field(
+        alias="legacy_batch_definition", frozen=True
+    )
+
+    # This should be a property that passes through to the _validator. However,
+    # pydantic v1 does not have support for property setters..
+    # https://github.com/pydantic/pydantic/issues/3395
+    result_format: ResultFormat = Field(ResultFormat.SUMMARY, frozen=False)
 
     class Config:
-        allow_mutation = False
         arbitrary_types_allowed = True
+        # result_format is for an interactive, exploratory and does not need to be deser-ed
+        exclude = {"result_format"}
 
     @root_validator(pre=True)
     def _set_id(cls, values: dict) -> dict:
@@ -853,3 +883,60 @@ class Batch(FluentBaseModel):
             fetch_all=fetch_all,
         )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
+
+    @overload
+    def validate(self, expect: Expectation) -> ExpectationValidationResult:
+        ...
+
+    @overload
+    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult:
+        ...
+
+    @public_api
+    def validate(
+        self, expect: Expectation | ExpectationSuite
+    ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
+        from great_expectations.core import ExpectationSuite
+        from great_expectations.expectations.expectation import Expectation
+
+        # We set the result format on every call to validate.
+        # We allow string assignments so must convert it to a ResultFormat if it's a string.
+        self._validator.result_format = ResultFormat(self.result_format)
+        if isinstance(expect, Expectation):
+            return self._validate_expectation(expect)
+        elif isinstance(expect, ExpectationSuite):
+            return self._validate_expectation_suite(expect)
+        else:
+            # If we are type checking, we should never fall through to this case. However, exploratory
+            # workflows are probably not being type checked.
+            raise ValueError(
+                f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"
+            )
+
+    def _validate_expectation(self, expect: Expectation) -> ExpectationValidationResult:
+        return self._validator.validate_expectation(expect)
+
+    def _validate_expectation_suite(
+        self, expect: ExpectationSuite
+    ) -> ExpectationSuiteValidationResult:
+        return self._validator.validate_expectation_suite(expect)
+
+    @functools.cached_property
+    def _validator(self) -> V1Validator:
+        from great_expectations.core.batch_config import BatchConfig
+        from great_expectations.validator.v1_validator import Validator as V1Validator
+
+        context = self.datasource.data_context
+        if context is None:
+            raise ValueError(
+                "We can't validate batches that are attached to datasources without a data context"
+            )
+        batch_config = BatchConfig(
+            context=context,
+            data_asset=self.data_asset,
+        )
+        return V1Validator(
+            context=context,
+            batch_config=batch_config,
+            batch_request_options=self.batch_request.options,
+        )
