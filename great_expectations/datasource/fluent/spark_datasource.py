@@ -31,7 +31,7 @@ from great_expectations.core._docs_decorators import (
     public_api,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
-from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
@@ -152,17 +152,25 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     )
     @override
     def build_batch_request(  # type: ignore[override]
-        self, dataframe: Optional[_SparkDataFrameT] = None
+        self,
+        dataframe: Optional[_SparkDataFrameT] = None,
+        options: Optional[BatchRequestOptions] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             dataframe: The Spark Dataframe containing the data for this DataFrame data asset.
+            options: The batch request options must be empty/None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options:
+            raise ValueError(
+                "Options must be empty/None for Spark DataFrameAsset subclass."
+            )
+
         if dataframe is None:
             df = self.dataframe
         else:

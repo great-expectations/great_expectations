@@ -35,7 +35,7 @@ from great_expectations.core._docs_decorators import (
     public_api,
 )
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
-from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -175,13 +175,21 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @public_api
     @override
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: The batch request options must be empty/None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options not in ({}, None):
+            raise ValueError("Options must not be set for PandasDataAsset subclass.")
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -378,17 +386,23 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     )
     @override
     def build_batch_request(  # type: ignore[override]
-        self, dataframe: Optional[pd.DataFrame] = None
+        self,
+        dataframe: Optional[pd.DataFrame] = None,
+        options: Optional[BatchRequestOptions] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
+            options: The batch request options must be empty/None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options not in ({}, None):
+            raise ValueError("Options must be empty for a Panda's DataAsset subclass.")
+
         if dataframe is None:
             df = self.dataframe
         else:
