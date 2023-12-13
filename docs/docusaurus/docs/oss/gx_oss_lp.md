@@ -35,6 +35,6 @@ import LinkCard from '/docs/components/LinkCard';
 ### Learn and contribute
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Reference" description="Supplemental information that will help you get the most out of GX OSS." href="/docs/reference/learn/reference_overview" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Reference" description="Supplemental information that will help you get the most out of GX OSS." href="/docs/reference/learn" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Contribute" description="Contribute to GX OSS documentation or code." href="/docs/oss/contributing/contributing" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
