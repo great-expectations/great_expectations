@@ -70,9 +70,6 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
 
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:

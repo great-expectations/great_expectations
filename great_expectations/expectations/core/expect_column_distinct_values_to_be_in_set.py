@@ -118,12 +118,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
 
-    # Default values
-    default_kwarg_values = {
-        "value_set": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",
@@ -329,7 +323,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     ):
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
-        value_set = self.get_success_kwargs(configuration).get("value_set") or []
+        value_set = self.get_success_kwargs().get("value_set") or []
 
         parsed_value_set = value_set
 

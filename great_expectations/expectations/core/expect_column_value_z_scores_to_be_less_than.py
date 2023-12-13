@@ -1,4 +1,4 @@
-from typing import Union
+from typing import ClassVar, Tuple, Union
 
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
@@ -11,7 +11,7 @@ from great_expectations.expectations.expectation import (
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """Expect the Z-scores of a column's values to be less than a given threshold.
 
-    expect_column_values_to_be_of_type is a \
+    expect_column_value_z_scores_to_be_less_than is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
     for typed-column backends, and also for PandasExecutionEngine where the column \
     dtype and provided type_ are unambiguous constraints \
@@ -37,8 +37,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the Expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -49,11 +47,17 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
+    condition_parser: Union[str, None] = "pandas"
     threshold: Union[float, EvaluationParameterDict]
     double_sided: Union[bool, EvaluationParameterDict]
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -68,16 +72,4 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "column_values.z_score.under_threshold"
     success_keys = ("threshold", "double_sided", "mostly")
-
-    # Default values
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "threshold": None,
-        "double_sided": True,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = ("column", "threshold")

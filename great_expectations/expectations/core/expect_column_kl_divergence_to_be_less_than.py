@@ -112,8 +112,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -124,7 +122,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * observed_value field in the result object is customized for this expectation to be a float \
@@ -190,16 +188,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         "internal_weight_holdout",
         "bucketize_data",
     )
-    default_kwarg_values = {
-        "partition_object": None,
-        "threshold": None,
-        "tail_weight_holdout": 0,
-        "internal_weight_holdout": 0,
-        "bucketize_data": True,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "partition_object",
@@ -217,7 +205,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 configuration, execution_engine, runtime_configuration
             )
         )
-        partition_object = configuration.kwargs["partition_object"]
+        partition_object = configuration.kwargs.get("partition_object")
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
         bins = None

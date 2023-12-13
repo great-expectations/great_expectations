@@ -48,17 +48,17 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         "column_B",
         "threshold",
     )
-    default_kwarg_values = {
-        "column_A": None,
-        "column_B": None,
-        "bins_A": None,
-        "bins_B": None,
-        "n_bins_A": None,
-        "n_bins_B": None,
-        "threshold": 0.1,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
+    # default_kwarg_values = {
+    #     "column_A": None,
+    #     "column_B": None,
+    #     "bins_A": None,
+    #     "bins_B": None,
+    #     "n_bins_A": None,
+    #     "n_bins_B": None,
+    #     "threshold": 0.1,
+    #     "result_format": "BASIC",
+    #     "catch_exceptions": False,
+    # }
     args_keys = (
         "column_A",
         "column_B",

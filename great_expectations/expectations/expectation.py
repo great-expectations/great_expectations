@@ -270,8 +270,6 @@ class MetaExpectation(ModelMetaclass):
     attribute, or, if that is not set, by snake-casing the name of the class.
     """
 
-    default_kwarg_values: Dict[str, object] = {}
-
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
         # noinspection PyUnresolvedReferences
@@ -319,6 +317,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     class Config:
         arbitrary_types_allowed = True
+        smart_union = True
         extra = pydantic.Extra.allow
 
     id: Union[str, None] = None
@@ -1050,13 +1049,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def metrics_validate(
         self,
         metrics: dict,
-        configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
-        if not configuration:
-            configuration = self.configuration
+        configuration = self.configuration
 
         if runtime_configuration is None:
             runtime_configuration = {}
@@ -1141,7 +1138,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         runtime_configuration = self.get_runtime_kwargs(
-            configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         result_format: dict = runtime_configuration["result_format"]
@@ -1161,11 +1157,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
             return None
 
-    def get_domain_kwargs(
-        self, configuration: ExpectationConfiguration
-    ) -> Dict[str, Optional[str]]:
+    def _get_domain_kwargs(self) -> Dict[str, Optional[str]]:
         domain_kwargs: Dict[str, Optional[str]] = {
-            key: configuration.kwargs.get(key, self._get_default_value(key))
+            key: self.configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.domain_keys
         }
         missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(
@@ -1178,23 +1172,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return domain_kwargs
 
     @public_api
-    def get_success_kwargs(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> Dict[str, Any]:
-        """Retrieve the success kwargs.
-
-        Args:
-            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
-                the success kwargs from the configuration attribute of the Expectation instance will be returned.
-        """
-        if not configuration:
-            configuration = self.configuration
-
-        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs(
-            configuration=configuration
-        )
+    def get_success_kwargs(self) -> Dict[str, Any]:
+        """Retrieve the success kwargs."""
+        domain_kwargs: Dict[str, Optional[str]] = self._get_domain_kwargs()
         success_kwargs: Dict[str, Any] = {
-            key: configuration.kwargs.get(key, self._get_default_value(key))
+            key: self.configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.success_keys
         }
         success_kwargs.update(domain_kwargs)
@@ -1202,18 +1184,14 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def get_runtime_kwargs(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> dict:
-        if not configuration:
-            configuration = self.configuration
-
-        configuration = deepcopy(configuration)
+        configuration = deepcopy(self.configuration)
 
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
 
-        success_kwargs = self.get_success_kwargs(configuration=configuration)
+        success_kwargs = self.get_success_kwargs()
         runtime_kwargs = {
             key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.runtime_keys
@@ -1226,15 +1204,14 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         return runtime_kwargs
 
-    def get_result_format(
+    def _get_result_format(
         self,
-        configuration: ExpectationConfiguration,
         runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
         default_result_format: Optional[Any] = self._get_default_value("result_format")
         configuration_result_format: Union[
             Dict[str, Union[str, int, bool, List[str], None]], str
-        ] = configuration.kwargs.get("result_format", default_result_format)
+        ] = self.configuration.kwargs.get("result_format", default_result_format)
         result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
@@ -1301,7 +1278,15 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @property
     def configuration(self) -> ExpectationConfiguration:
-        return self._configuration
+        kwargs = self.dict(exclude_defaults=True)
+        meta = kwargs.pop("meta", None)
+        id = kwargs.pop("id", None)
+        return ExpectationConfiguration(
+            expectation_type=camel_to_snake(self.__class__.__name__),
+            kwargs=kwargs,
+            meta=meta,
+            ge_cloud_id=id,
+        )
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913
@@ -2384,18 +2369,11 @@ class BatchExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value: Optional[Any] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("min_value")
-        strict_min: Optional[bool] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("strict_min")
-        max_value: Optional[Any] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("max_value")
-        strict_max: Optional[bool] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("strict_max")
+        success_kwargs = self.get_success_kwargs()
+        min_value: Optional[Any] = success_kwargs.get("min_value")
+        strict_min: Optional[bool] = success_kwargs.get("strict_min")
+        max_value: Optional[Any] = success_kwargs.get("max_value")
+        strict_max: Optional[bool] = success_kwargs.get("strict_max")
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
@@ -2416,6 +2394,18 @@ representation."""
                 except TypeError:
                     raise ValueError(
                         f"""Could not parse "max_value" of {max_value} (of type "{type(max_value)!s}) into datetime \
+representation."""
+                    )
+
+        if isinstance(min_value, datetime.datetime) or isinstance(
+            max_value, datetime.datetime
+        ):
+            if not isinstance(metric_value, datetime.datetime):
+                try:
+                    metric_value = parse(metric_value)
+                except TypeError:
+                    raise ValueError(
+                        f"""Could not parse "metric_value" of {metric_value} (of type "{type(metric_value)!s}) into datetime \
 representation."""
                     )
 
@@ -2757,8 +2747,8 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: str | dict[str, Any] = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+        result_format: str | dict[str, Any] = self._get_result_format(
+            runtime_configuration=runtime_configuration
         )
 
         include_unexpected_rows: bool
@@ -3017,9 +3007,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     ):
         result_format: Union[
             Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
+        ] = self._get_result_format(runtime_configuration=runtime_configuration)
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
@@ -3273,8 +3261,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+        result_format = self._get_result_format(
+            runtime_configuration=runtime_configuration
         )
         unexpected_index_column_names = None
         if isinstance(result_format, dict):

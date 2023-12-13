@@ -1,6 +1,6 @@
 import inspect
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -114,7 +114,6 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -144,16 +143,15 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     }
 
     map_metric = "column_values.of_type"
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
     success_keys = (
         "type_",
         "mostly",
     )
-    default_kwarg_values = {
-        "type_": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "type_",
