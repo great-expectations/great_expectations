@@ -172,7 +172,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
-    batch_configs: list[Any] = Field(default_factory=list)
+    batch_configs: List[Any] = Field(default_factory=list)
 
     # non-field private attributes
     _save_batch_config: Callable[[BatchConfig], None] = pydantic.PrivateAttr()
