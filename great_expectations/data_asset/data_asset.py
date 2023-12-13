@@ -131,9 +131,6 @@ class DataAsset:
             signature from the implementing method.
 
             @expectation intercepts and takes action based on the following parameters:
-                * include_config (boolean or None) : \
-                    If True, then include the generated expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
                 * catch_exceptions (boolean or None) : \
                     If True, then catch exceptions and include them as part of the result object. \
                     For more detail, see :ref:`catch_exceptions`.
@@ -217,14 +214,13 @@ class DataAsset:
                     )
 
                 # update evaluation_args with defaults from expectation signature
-                if method_name not in ExpectationConfiguration.kwarg_lookup_dict:
-                    default_kwarg_values = {
-                        k: v.default
-                        for k, v in inspect.signature(func).parameters.items()
-                        if v.default is not inspect.Parameter.empty
-                    }
-                    default_kwarg_values.update(evaluation_args)
-                    evaluation_args = default_kwarg_values
+                default_kwarg_values = {
+                    k: v.default
+                    for k, v in inspect.signature(func).parameters.items()
+                    if v.default is not inspect.Parameter.empty
+                }
+                default_kwarg_values.update(evaluation_args)
+                evaluation_args = default_kwarg_values
 
                 # Construct the expectation_config object
                 expectation_config = ExpectationConfiguration(

@@ -107,9 +107,6 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ()
 
-    # This dictionary contains default values for any parameters that should have default values.
-    default_kwarg_values = {}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -142,7 +139,6 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,

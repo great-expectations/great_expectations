@@ -1,6 +1,5 @@
 from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
@@ -17,12 +16,11 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         dependencies: ValidationDependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+            execution_engine, runtime_configuration
         )
         assert isinstance(
             self.profile_metric, str
@@ -34,7 +32,7 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.profile_metric}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
 
@@ -51,14 +49,13 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         delta_between_thresholds = metrics.get(f"{self.profile_metric}")
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
+        mostly = self._get_success_kwargs().get(
+            "mostly", self._get_default_value("mostly")
         )
 
         unexpected_values = {}
@@ -86,7 +83,7 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
         results = {
             "success": success,
-            "expectation_config": configuration,
+            "expectation_config": self.configuration,
             "result": {
                 "unexpected_values": unexpected_values,
             },

@@ -3,4 +3,3 @@
 
 ### Using Data Assets to create Expectations
 - [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)

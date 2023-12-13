@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import get_context
+from great_expectations import get_context, project_manager
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -29,8 +29,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     GXCloudConfig,
     IncludeRenderedContentConfig,
-    NotebookConfig,
-    NotebookTemplateConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -52,7 +50,6 @@ def data_context_config_dict() -> dict:
         "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
-        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -73,7 +70,6 @@ def data_context_config_dict() -> dict:
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
-        "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
         "include_rendered_content": {
@@ -146,6 +142,7 @@ def file_data_context(
     context = FileDataContext(
         project_config=data_context_config, context_root_dir=context_root_dir
     )
+    project_manager.set_project(context)
     return context
 
 
@@ -166,16 +163,17 @@ def cloud_data_context(
         cloud_organization_id=ge_cloud_config_e2e.organization_id,
         context_root_dir=context_root_dir,
     )
+    project_manager.set_project(cloud_data_context)
     return cloud_data_context
 
 
 def stores() -> dict:
     return {
-        "profiler_store": {
-            "class_name": "ProfilerStore",
+        "checkpoint_store": {
+            "class_name": "CheckpointStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "profilers/",
+                "base_directory": "checkpoints/",
             },
         },
     }
@@ -199,17 +197,6 @@ def data_docs_sites() -> dict:
 def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
     return AnonymizedUsageStatisticsConfig(
         enabled=False,
-    )
-
-
-@pytest.fixture
-def notebooks() -> NotebookConfig:
-    return NotebookConfig(
-        class_name="SuiteEditNotebookRenderer",
-        module_name="great_expectations.render.renderer.v3.suite_edit_notebook_renderer",
-        header_markdown=NotebookTemplateConfig(
-            file_name="my_notebook_template.md",
-        ),
     )
 
 
@@ -267,10 +254,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store getter",
         ),
-        pytest.param(
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            id="profiler_store getter",
-        ),
         pytest.param(DataContextVariableSchema.STORES, id="stores getter"),
         pytest.param(
             DataContextVariableSchema.DATA_DOCS_SITES,
@@ -279,10 +262,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks getter",
         ),
         pytest.param(
             DataContextVariableSchema.CONCURRENCY,
@@ -399,11 +378,6 @@ def test_data_context_variables_get_with_substitutions(
             id="anonymous_usage_statistics setter",
         ),
         pytest.param(
-            notebooks,
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks setter",
-        ),
-        pytest.param(
             concurrency,
             DataContextVariableSchema.CONCURRENCY,
             id="concurrency setter",
@@ -486,7 +460,6 @@ def test_data_context_variables_save_config(
             "config_variables_file_path",
             "config_version",
             "data_docs_sites",
-            "notebooks",
             "plugins_directory",
             "stores",
             "include_rendered_content",

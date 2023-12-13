@@ -1,6 +1,5 @@
 from typing import Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -37,7 +36,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "condition_parser",
     )
     default_kwarg_values = {
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "query": query,
@@ -45,7 +43,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

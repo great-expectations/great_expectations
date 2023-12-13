@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -44,8 +47,6 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -56,7 +57,7 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive.
@@ -68,6 +69,9 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     See Also:
         [expect_table_column_count_to_equal](https://greatexpectations.io/expectations/expect_table_column_count_to_equal)
     """
+
+    min_value: Union[float, EvaluationParameterDict, datetime, None]
+    max_value: Union[float, EvaluationParameterDict, datetime, None]
 
     library_metadata = {
         "maturity": "production",
@@ -85,39 +89,10 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         "min_value",
         "max_value",
     )
-    default_kwarg_values = {
-        "min_value": None,
-        "max_value": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = (
         "min_value",
         "max_value",
     )
-
-    @override
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration for the Expectation.
-
-        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` as a number.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
-                it will be pulled from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required
-                by the Expectation.
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @override
@@ -204,14 +179,12 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="table.column_count",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

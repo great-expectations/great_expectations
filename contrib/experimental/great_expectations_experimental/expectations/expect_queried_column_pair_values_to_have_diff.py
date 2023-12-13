@@ -33,7 +33,6 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "column_A": None,
@@ -62,11 +61,11 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         diff: Union[float, int] = configuration["kwargs"].get("diff")
         mostly: str = configuration["kwargs"].get("mostly")
         query_result = metrics.get("query.column_pair")

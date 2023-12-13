@@ -98,7 +98,7 @@ PANDAS_210_OR_GREATER = packaging.version.parse(
 
 
 def pandas_map(df: pd.DataFrame) -> Callable:
-    return df.map if PANDAS_210_OR_GREATER else df.applymap
+    return df.map if PANDAS_210_OR_GREATER else df.applymap  # type: ignore[return-value]
 
 
 class ColumnDataFrame(NamedTuple):
@@ -960,7 +960,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
             df_new_shape = df.iloc[ilocations, columns].reset_index(drop=True)
             cols_flat_df: pd.DataFrame = pd.DataFrame(cols_flat).T
-            cols_flat_df.columns = list_column_names
+            cols_flat_df.columns = list_column_names  # type: ignore[assignment]
             df_transformed = pd.concat([df_new_shape, cols_flat_df], axis=1)
 
             if "table_columns" in list_column_names:

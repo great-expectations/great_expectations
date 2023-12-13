@@ -7,6 +7,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
+from great_expectations.expectations.core import ExpectColumnMaxToBeBetween
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -94,7 +95,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
             False
         ), "Validate configuration threw an error when testing default mostly value"
     assert (
-        fake_expectation.get_success_kwargs().get("mostly") == 1
+        fake_expectation._get_success_kwargs().get("mostly") == 1
     ), "Default mostly success ratio is not 1"
 
 
@@ -137,7 +138,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
 def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     fake_expectation = fake_expectation_cls(**config.kwargs)
     assert (
-        fake_expectation.get_success_kwargs().get("mostly") == config.kwargs["mostly"]
+        fake_expectation._get_success_kwargs().get("mostly") == config.kwargs["mostly"]
     ), "Default mostly success ratio is not 1"
 
 
@@ -182,14 +183,9 @@ def test_validate_dependencies_against_available_metrics_success(metrics_dict):
             "column": "i_exist",
         },
     )
-    expectation_configuration: ExpectationConfiguration = fake_expectation_config(
-        expectation_type="expect_column_values_to_not_be_null",
-        config_kwargs={"column": "i_exist", "batch_id": "projects-projects"},
-    )
     expectation._validate_dependencies_against_available_metrics(
         validation_dependencies=metric_config_list,
         metrics=metrics_dict,
-        configuration=expectation_configuration,
     )
 
 
@@ -202,13 +198,50 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
             "column": "i_dont_exist",
         },
     )
-    expectation_configuration: ExpectationConfiguration = fake_expectation_config(
-        expectation_type="expect_column_values_to_not_be_null",
-        config_kwargs={"column": "i_dont_exist", "batch_id": "projects-projects"},
-    )
     with pytest.raises(InvalidExpectationConfigurationError):
         expectation._validate_dependencies_against_available_metrics(
             validation_dependencies=metric_config_list,
             metrics=metrics_dict,
-            configuration=expectation_configuration,
+        )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_property():
+    expectation = ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
+
+    assert expectation.configuration == ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "foo",
+            "min_value": 0,
+            "max_value": 10,
+        },
+    )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_property_recognizes_state_changes():
+    expectation = ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
+
+    expectation.column = "bar"
+    expectation.min_value = 5
+    expectation.max_value = 15
+    expectation.mostly = 0.95
+
+    assert expectation.configuration == ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "bar",
+            "mostly": 0.95,
+            "min_value": 5,
+            "max_value": 15,
+        },
+    )
+
+
+@pytest.mark.unit
+def test_unrecognized_expectation_arg_raises_error():
+    with pytest.raises(pydantic.ValidationError, match="extra fields not permitted"):
+        ExpectColumnMaxToBeBetween(
+            column="foo", min_value=0, max_value=10, mostyl=0.95  # 'mostly' typo
         )

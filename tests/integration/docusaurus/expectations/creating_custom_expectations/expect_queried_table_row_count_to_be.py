@@ -24,12 +24,13 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring">
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
+
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies">
     metric_dependencies = ("query.table",)
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query">
-    query = """
+    query: str = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
@@ -42,15 +43,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
-
-    default_kwarg_values = {
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-        "value": None,
-        "query": query,
-    }
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -70,7 +62,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # <snippet name="expect_queried_table_row_count_to_be.py _validate function signature">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
@@ -78,7 +69,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         # </snippet>
         metrics = convert_to_json_serializable(data=metrics)
         query_result = list(metrics.get("query.table")[0].values())[0]
-        value = configuration["kwargs"].get("value")
+        value = self.configuration["kwargs"].get("value")
 
         success = query_result == value
 

@@ -58,9 +58,6 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnAggregateExpectation):
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
-    # This dictionary contains default values for any parameters that should have default values.
-    default_kwarg_values = {}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -92,7 +89,6 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnAggregateExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

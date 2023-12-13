@@ -20,6 +20,7 @@ import Tabs from '@theme/Tabs';
 Use the information provided here to connect to Data Assets stored in SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL Data Assets, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 <Tabs
+  queryString="sql-database-type"
   groupId="connect-sql-source-data"
   defaultValue='sql'
   values={[
@@ -910,8 +911,6 @@ Run the following Python code to create a SQL Data Source:
 - [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
 
 - [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
 
 - [Configure Expectation Stores](../../../setup/configuring_metadata_stores/configure_expectation_stores.md)
 

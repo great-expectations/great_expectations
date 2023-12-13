@@ -1,15 +1,16 @@
 from itertools import zip_longest
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -35,8 +36,6 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -47,8 +46,10 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
+
+    column_list: Union[list, set, EvaluationParameterDict, None]
 
     library_metadata = {
         "maturity": "production",
@@ -69,60 +70,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         "row_condition",
         "condition_parser",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "column_list": None,
-        "result_format": "BASIC",
-        "column": None,
-        "column_index": None,
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = ("column_list",)
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For this expectation it is required that:
-
-        - `column_list` has been provided.
-        - `column_list` is one of the following types: `list`, `set`, or `None`
-        - If `column_list` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
-        # Ensuring that a proper value has been provided
-        try:
-            assert "column_list" in configuration.kwargs, "column_list is required"
-            assert (
-                isinstance(configuration.kwargs["column_list"], (list, set, dict))
-                or configuration.kwargs["column_list"] is None
-            ), "column_list must be a list, set, or None"
-            if isinstance(configuration.kwargs["column_list"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["column_list"]
-                ), 'Evaluation Parameter dict for column_list kwarg must have "$PARAMETER" key.'
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -198,13 +146,12 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
-        expected_column_list = self.get_success_kwargs(configuration).get("column_list")
+        expected_column_list = self._get_success_kwargs().get("column_list")
         actual_column_list = metrics.get("table.columns")
 
         if expected_column_list is None or list(actual_column_list) == list(

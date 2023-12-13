@@ -24,11 +24,6 @@
     "definition": "A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.",
     "url": "/docs/reference/learn/terms/checkpoint_store"
   },
-  "cli": {
-    "term": "CLI",
-    "definition": "Command Line Interface",
-    "url": "/docs/reference/learn/terms/cli"
-  },
   "custom_expectation": {
     "term": "Custom Expectation",
     "definition": "An extension of the `Expectation` class, developed outside of the Great Expectations library.",

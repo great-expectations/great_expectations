@@ -1,14 +1,15 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -34,8 +35,6 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -46,11 +45,13 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
     """
+
+    value: Union[int, EvaluationParameterDict]
 
     library_metadata = {
         "maturity": "production",
@@ -65,50 +66,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
 
     metric_dependencies = ("table.column_count",)
     success_keys = ("value",)
-    default_kwarg_values = {
-        "value": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = ("value",)
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration for the Expectation.
-
-        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` as a number.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
-                it will be pulled from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required
-                by the Expectation.
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
-        # Ensuring that a proper value has been provided
-        try:
-            assert (
-                "value" in configuration.kwargs
-            ), "An expected column count must be provided"
-            assert isinstance(
-                configuration.kwargs["value"], (int, dict)
-            ), "Provided threshold must be an integer"
-            if isinstance(configuration.kwargs["value"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value"]
-                ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -151,12 +109,11 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        expected_column_count = configuration.kwargs.get("value")
+        expected_column_count = self.configuration.kwargs.get("value")
         actual_column_count = metrics.get("table.column_count")
 
         return {

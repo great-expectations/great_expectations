@@ -734,7 +734,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
         kwargs={
             "column": "b",
             "mostly": 0.9,
-            "threshold": 4,
+            "threshold": 4.0,
             "double_sided": True,
         },
     )
@@ -792,7 +792,7 @@ def test_graph_validate_with_runtime_config(
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
+        kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
     try:
         # noinspection PyTypeChecker
@@ -950,7 +950,6 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "min_value": 0,
         "max_value": 5,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-        "result_format": "BASIC",
     }
 
     expect_column_values_to_be_of_type_config = validator.validate_expectation(
@@ -961,7 +960,6 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "column": "passenger_count",
         "type_": "int",
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-        "result_format": "BASIC",
     }
 
 

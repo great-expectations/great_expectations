@@ -1,6 +1,6 @@
 import inspect
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -13,8 +13,6 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -116,8 +114,6 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -128,11 +124,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See also:
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
     """
+
+    type_: str
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -145,49 +143,19 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     }
 
     map_metric = "column_values.of_type"
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
     success_keys = (
         "type_",
         "mostly",
     )
-    default_kwarg_values = {
-        "type_": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "type_",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_of_type` it is required that:
-
-        - `_type` has been provided.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "type_" in configuration.kwargs, "type_ is required"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -404,7 +372,6 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
@@ -417,9 +384,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
             ColumnMapExpectation, self
-        ).get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )
+        ).get_validation_dependencies(execution_engine, runtime_configuration)
+
+        configuration = self.configuration
 
         # Only PandasExecutionEngine supports the column map version of the expectation.
         if isinstance(execution_engine, PandasExecutionEngine):
@@ -463,7 +430,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ):
                 # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
                 validation_dependencies = super().get_validation_dependencies(
-                    configuration, execution_engine, runtime_configuration
+                    execution_engine, runtime_configuration
                 )
 
         # this adds table.column_types dependency for both aggregate and map versions of expectation
@@ -485,11 +452,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         column_name = configuration.kwargs.get("column")
         expected_type = configuration.kwargs.get("type_")
         actual_column_types_list = metrics.get("table.column_types")
@@ -510,7 +477,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ]:
                 # this calls ColumnMapMetric._validate
                 return super()._validate(
-                    configuration, metrics, runtime_configuration, execution_engine
+                    metrics, runtime_configuration, execution_engine
                 )
             return self._validate_pandas(
                 actual_column_type=actual_column_type, expected_type=expected_type

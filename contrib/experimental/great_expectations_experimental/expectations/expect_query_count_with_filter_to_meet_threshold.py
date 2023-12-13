@@ -35,7 +35,6 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "query": query,
@@ -59,11 +58,11 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         metrics = convert_to_json_serializable(data=metrics)
         count: int = list(metrics.get("query.template_values")[0].values())[0]
         threshold: Union[float, int] = configuration["kwargs"].get("threshold")

@@ -49,7 +49,7 @@ title: <!-- Add the topic title here -->
 
 <!-- If necessary, add a secondary task here. Use the same format that you used in the first task. What follows is an example provided for your reference. -->
 
-1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](/docs/oss/guides/expectations/how_to_use_auto_initializing_expectations#using-autotrue) to detect a range of values in the `passenger_count` column. 
+1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses explicit kwargs with the `passenger_count` column. 
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```

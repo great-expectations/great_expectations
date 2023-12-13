@@ -1,11 +1,8 @@
-from copy import deepcopy
-from typing import Dict, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
-from great_expectations.execution_engine import ExecutionEngine
+from copy import deepcopy
+from typing import TYPE_CHECKING, Dict, Optional
+
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -24,9 +21,16 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
@@ -43,8 +47,6 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -55,12 +57,14 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
     """
+
+    other_table_name: str
 
     library_metadata = {
         "maturity": "production",
@@ -75,12 +79,6 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
     metric_dependencies = ("table.row_count",)
     success_keys = ("other_table_name",)
-    default_kwarg_values = {
-        "other_table_name": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = ("other_table_name",)
 
     @classmethod
@@ -155,15 +153,15 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
+
+        configuration = self.configuration
+
         other_table_name = configuration.kwargs.get("other_table_name")
         # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
         table_row_count_metric_config_other: MetricConfiguration = deepcopy(
@@ -192,7 +190,6 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,

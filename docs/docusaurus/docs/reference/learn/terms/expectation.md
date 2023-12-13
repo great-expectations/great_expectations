@@ -91,7 +91,7 @@ The other occasion when you may want to edit an Expectation's configuration is w
 
 ## Results
 
-All Expectations return a JSON-serializable dictionary when evaluated, which consists of four standard (though optional, depending on the type of Expectation in question) arguments.  These are: `result_format`, `include_config`, `catch_exceptions`, and `meta`.  For a more detailed explanation as to what each of these arguments consists of and which Expectations use them, please see [our reference guide on standard arguments](/docs/reference/learn/expectations/standard_arguments).
+All Expectations return a JSON-serializable dictionary when evaluated, which consists of four standard (though optional, depending on the type of Expectation in question) arguments.  These are: `result_format`, `catch_exceptions`, and `meta`.  For a more detailed explanation as to what each of these arguments consists of and which Expectations use them, please see [our reference guide on standard arguments](/docs/reference/learn/expectations/standard_arguments).
 
 ## Domain and Success Keys
 

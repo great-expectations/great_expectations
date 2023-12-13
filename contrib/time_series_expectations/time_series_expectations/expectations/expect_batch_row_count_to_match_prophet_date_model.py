@@ -2,7 +2,6 @@ from typing import Dict
 
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -30,8 +29,6 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
         result_format (str or None):
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY.
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean):
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None):
             If True, then catch exceptions and include them as part of the result object.
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -42,7 +39,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
@@ -101,12 +98,12 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         batch_row_count = metrics["table.row_count"]
+        configuration = self.configuration
         model_json = configuration.kwargs["model"]
         date = configuration.kwargs["date"]
 

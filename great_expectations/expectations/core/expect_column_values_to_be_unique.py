@@ -3,10 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -58,8 +56,6 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -70,7 +66,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -85,57 +81,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
 
     map_metric = "column_values.unique"
     success_keys = ("mostly",)
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
-    }
     args_keys = ("column",)
-
-    @override
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_unique` it is required that:
-
-        - `column` has been provided.
-
-        - If `mostly` was provided, it is of type `int` or `float`.
-
-        - If `mostly` was provided, it is between 0 and 1 inclusive.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     @override

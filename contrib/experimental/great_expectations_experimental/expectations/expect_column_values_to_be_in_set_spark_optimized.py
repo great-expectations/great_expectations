@@ -98,9 +98,9 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
 
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        value_set = configuration.kwargs.get(
+        value_set = configuration.kwargs.get("value_set") or self._get_default_value(
             "value_set"
-        ) or self.default_kwarg_values.get("value_set")
+        )
         column = configuration.kwargs.get("column")
 
         try:
@@ -121,11 +121,11 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        configuration = self.configuration
         mostly = configuration["kwargs"].get("mostly")
         strict = configuration["kwargs"].get("strict")
         result = metrics.get("column_values.in_set.spark_optimized")

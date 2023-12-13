@@ -21,6 +21,8 @@ from great_expectations.expectations.expectation import (
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
 
+    value: int
+
     metric_dependencies = ("query.table",)
 
     query = """
@@ -37,7 +39,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "value": None,
@@ -60,11 +61,11 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         metrics = convert_to_json_serializable(data=metrics)
         query_result = list(metrics.get("query.table")[0].values())[0]
         value = configuration["kwargs"].get("value")

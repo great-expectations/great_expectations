@@ -1,18 +1,17 @@
-from typing import Optional
+from typing import ClassVar, Tuple, Union
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
 )
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """Expect the Z-scores of a column's values to be less than a given threshold.
 
-    expect_column_values_to_be_of_type is a \
+    expect_column_value_z_scores_to_be_less_than is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
     for typed-column backends, and also for PandasExecutionEngine where the column \
     dtype and provided type_ are unambiguous constraints \
@@ -38,8 +37,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the Expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -50,8 +47,17 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
+
+    condition_parser: Union[str, None] = "pandas"
+    threshold: Union[float, EvaluationParameterDict]
+    double_sided: Union[bool, EvaluationParameterDict]
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -66,70 +72,4 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "column_values.z_score.under_threshold"
     success_keys = ("threshold", "double_sided", "mostly")
-
-    # Default values
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "threshold": None,
-        "double_sided": True,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = ("column", "threshold")
-
-    @public_api
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validate the configuration of an Expectation.
-
-        For `expect_column_value_z_scores_to_be_less_than` it is required that:
-            - A Z-score `threshold` is provided.
-            - `threshold` is one of the following types: `float`, `int`, or `dict`
-            - If `threshold` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-             dictionary keys must be `$PARAMETER`.
-            - If provided, `double_sided` is one of the following types: `bool` or `dict`
-            - If `double_sided` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-             dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-            from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-            Expectation
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            # Ensuring Z-score Threshold metric has been properly provided
-            assert (
-                "threshold" in configuration.kwargs
-            ), "A Z-score threshold must be provided"
-            assert isinstance(
-                configuration.kwargs["threshold"], (float, int, dict)
-            ), "Provided threshold must be a number"
-            if isinstance(configuration.kwargs["threshold"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["threshold"]
-                ), 'Evaluation Parameter dict for threshold kwarg must have "$PARAMETER" key.'
-
-            assert isinstance(
-                configuration.kwargs["double_sided"], (bool, dict)
-            ), "Double sided parameter must be a boolean value"
-            if isinstance(configuration.kwargs["double_sided"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["double_sided"]
-                ), 'Evaluation Parameter dict for double_sided kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))

@@ -22,7 +22,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     metric_dependencies = ("METRIC NAME GOES HERE",)
 
     # This is the default, baked-in SQL Query for this QueryExpectation
-    query = """
+    query: str = """
             SQL QUERY GOES HERE
             """
 
@@ -30,15 +30,6 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     success_keys = ("query",)
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-        "query": query,  # Passing the above `query` attribute here as a default kwarg allows for the Expectation to be run with the defaul query, or have that query overridden by passing a `query` kwarg into the expectation
-    }
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
@@ -70,7 +61,6 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

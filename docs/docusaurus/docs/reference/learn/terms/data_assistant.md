@@ -32,15 +32,6 @@ When working in a Jupyter Notebook you can use the `plot_metrics()` method of a 
 
 Data Assistants can be accessed from your Data Context. To select a Data Assistant in a Jupyter Notebook, enter `context.assistants.` and use code completion.  All Data Assistants have a `run(...)` method that takes in a Batch Request and numerous optional parameters, and then loads the results into an Expectation Suite for future use.
 
-To access the Onboarding Data Assistant, use `context.assistants.onboarding`.
-
-:::note For more information about the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
-:::
-
 ## Configure
 
 Data Assistants are pre-configured. You provide the Batch Request, and some optional parameters in the Data Assistant's `run(...)` method.
-
-## Related documentation
-
-To learn more about working with the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).

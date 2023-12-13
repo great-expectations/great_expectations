@@ -32,10 +32,15 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
+
+# NOTE: Temporary alias - to be converted to a rich type
+EvaluationParameterDict: TypeAlias = dict
 
 
 class EvaluationParameterParser:

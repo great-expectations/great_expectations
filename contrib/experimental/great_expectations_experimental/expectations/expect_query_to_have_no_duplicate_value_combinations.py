@@ -7,7 +7,6 @@ For detailed information on QueryExpectations, please see:
 
 from typing import Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -33,7 +32,6 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "columns": None,
@@ -42,11 +40,11 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         query_result = metrics.get("query.multiple_columns")
         query_result = [tuple(element.values()) for element in query_result]
 
