@@ -358,7 +358,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @abstractmethod
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
@@ -1053,7 +1052,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         expectation_validation_result: Union[
             ExpectationValidationResult, dict
         ] = self._validate(
-            configuration=configuration,
             metrics=provided_metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
@@ -2688,7 +2686,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
@@ -2946,7 +2943,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
@@ -3200,7 +3196,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,

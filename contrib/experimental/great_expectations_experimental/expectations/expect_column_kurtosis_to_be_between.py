@@ -3,7 +3,6 @@ from typing import Dict
 from scipy import stats
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -320,14 +319,13 @@ class ExpectColumnKurtosisToBeBetween(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.custom.kurtosis",
-            configuration=configuration,
+            configuration=self.configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

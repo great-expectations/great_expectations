@@ -1,6 +1,5 @@
 from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
@@ -50,7 +49,6 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -85,7 +83,7 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
         results = {
             "success": success,
-            "expectation_config": configuration,
+            "expectation_config": self.configuration,
             "result": {
                 "unexpected_values": unexpected_values,
             },

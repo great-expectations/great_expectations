@@ -46,12 +46,11 @@ def validator_with_titanic_1911_asset(
 
         def _validate(
             self,
-            configuration: ExpectationConfiguration,
             metrics: Dict,
             runtime_configuration: dict = None,
             execution_engine: ExecutionEngine = None,
         ):
-            expectation_argument = configuration.kwargs.get("expectation_argument")
+            expectation_argument = self.configuration.kwargs.get("expectation_argument")
             return {
                 "success": True,
                 "result": {"details": {"expectation_argument": expectation_argument}},

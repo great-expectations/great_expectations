@@ -1,7 +1,6 @@
 from datetime import date, datetime, timedelta
 from typing import Dict, List
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import QueryExpectation
@@ -183,7 +182,6 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

@@ -356,11 +356,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def _validate(  # noqa: C901, PLR0912, PLR0915
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self._get_default_value("bucketize_data")
         )
