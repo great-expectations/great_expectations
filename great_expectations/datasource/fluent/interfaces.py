@@ -585,11 +585,6 @@ class Datasource(
 
         return asset
 
-    def _save(self) -> None:
-        if self._data_context is None:
-            raise TypeError("Datasource has no DataContext")
-        self._data_context._update_fluent_datasource(self)
-
     def _save_context_project_config(self) -> None:
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
