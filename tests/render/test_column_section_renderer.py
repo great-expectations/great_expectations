@@ -20,6 +20,9 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
+from great_expectations.rule_based_profiler.data_assistant_result.data_assistant_result import (
+    ExpectationSuiteViewer,
+)
 from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
@@ -56,7 +59,9 @@ def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
     (
         columns,
         ordered_columns,
-    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
+    ) = ExpectationSuiteViewer(
+        titanic_profiled_expectations
+    ).get_grouped_and_ordered_expectations_by_column()
     name_column_expectations = columns["Name"]
 
     return name_column_expectations
