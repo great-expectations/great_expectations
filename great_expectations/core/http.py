@@ -33,7 +33,7 @@ class _TimeoutHTTPAdapter(HTTPAdapter):
 
     @override
     def send(self, request: requests.PreparedRequest, **kwargs) -> requests.Response:  # type: ignore[override]
-        kwargs["timeout"] = kwargs.get("timeout", self.timeout)
+        kwargs["timeout"] = kwargs.get("timeout", DEFAULT_TIMEOUT)
         return super().send(request, **kwargs)
 
 
