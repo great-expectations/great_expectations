@@ -119,8 +119,6 @@ exclude = [
     'expectations/core/expect_column_pair_values_to_be_in_set\.py',                                        # 2
     'expectations/core/expect_column_pair_values_to_be_equal\.py',                                         # 3
     'expectations/core/expect_column_pair_values_a_to_be_greater_than_b\.py',                              # 3
-    'expectations/core/expect_column_distinct_values_to_equal_set\.py',                                    # 2
-    'expectations/core/expect_column_distinct_values_to_contain_set\.py',                                  # 4
     'expectations/core/expect_column_distinct_values_to_be_in_set\.py',                                    # 1
     'expectations/core/expect_compound_columns_to_be_unique\.py',                                          # 3
     'expectations/core/expect_multicolumn_sum_to_equal\.py',                                               # 4
