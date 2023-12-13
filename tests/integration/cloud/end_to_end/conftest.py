@@ -39,6 +39,18 @@ def context() -> CloudDataContext:
     return context
 
 
+@pytest.fixture(scope="function")
+def reloaded_context() -> CloudDataContext:
+    context = gx.get_context(
+        mode="cloud",
+        cloud_base_url=os.environ.get("GX_CLOUD_BASE_URL"),
+        cloud_organization_id=os.environ.get("GX_CLOUD_ORGANIZATION_ID"),
+        cloud_access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"),
+    )
+    assert isinstance(context, CloudDataContext)
+    return context
+
+
 @pytest.fixture(scope="module")
 def datasource_name(
     context: CloudDataContext,

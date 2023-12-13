@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import os
 import uuid
 from typing import TYPE_CHECKING, Callable, Iterator
 
 import pandas as pd
 import pytest
 
-import great_expectations as gx
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 
@@ -175,8 +173,8 @@ def test_checkpoint_run(
 
 @pytest.mark.cloud
 def test_checkpoint_run_runtime_validations(
-    context: CloudDataContext,
     checkpoint: Checkpoint,
+    reloaded_context: CloudDataContext,
     spark_test_df: pyspark.DataFrame,
 ):
     """This Checkpoint only has one in-memory validation configured.
@@ -189,15 +187,8 @@ def test_checkpoint_run_runtime_validations(
     checkpoint_result: CheckpointResult = checkpoint.run()
     assert checkpoint_result.success
 
-    # destroy and retrieve the Data Context, losing the in-memory DataFrame
-    del context
-    context = gx.get_context(
-        mode="cloud",
-        cloud_base_url=os.environ.get("GX_CLOUD_BASE_URL"),
-        cloud_organization_id=os.environ.get("GX_CLOUD_ORGANIZATION_ID"),
-        cloud_access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"),
-    )
-    checkpoint: Checkpoint = context.get_checkpoint(name=checkpoint.name)
+    # re-retrieve the Data Context, losing the in-memory DataFrame
+    checkpoint: Checkpoint = reloaded_context.get_checkpoint(name=checkpoint.name)
     # failure to pass runtime validations results in error
     with pytest.raises(RuntimeError):
         _ = checkpoint.run()
