@@ -211,7 +211,14 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     ) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
-        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
+        if self.dataframe is not None:
+            batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
+        else:
+            raise RuntimeError(
+                "DataFrame is missing from DataFrameAsset. If you are running an existing Checkpoint, "
+                "the Batch Request used should be passed to Checkpoint.run()."
+            )
+
         execution_engine: SparkDFExecutionEngine = (
             self.datasource.get_execution_engine()
         )

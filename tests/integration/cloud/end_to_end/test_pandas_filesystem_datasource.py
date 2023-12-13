@@ -120,9 +120,10 @@ def expectation_suite(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
 ) -> ExpectationSuite:
-    """Add Expectations for the Data Assets defined in this module.
-    Note: There is no need to test Expectation Suite CRUD.
-    Those assertions can be found in the expectation_suite fixture."""
+    """Add Expectations for the Data Assets defined in this module, and update the Expectation Suite.
+    Note: There is no need to test Expectation Suite create, get, or delete in this module.
+    Those assertions can be found in the expectation_suite fixture.
+    """
     expectation_suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
@@ -131,6 +132,9 @@ def expectation_suite(
                 "mostly": 1,
             },
         )
+    )
+    expectation_suite = context.add_or_update_expectation_suite(
+        expectation_suite=expectation_suite
     )
     return expectation_suite
 

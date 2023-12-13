@@ -67,9 +67,6 @@ def expectation_suite(
     )
     assert len(expectation_suite.expectations) == 0
     yield expectation_suite
-    expectation_suite = context.add_or_update_expectation_suite(
-        expectation_suite=expectation_suite
-    )
     assert len(expectation_suite.expectations) > 0
     _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)

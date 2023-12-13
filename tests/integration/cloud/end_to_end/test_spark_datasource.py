@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import os
 import uuid
 from typing import TYPE_CHECKING, Callable, Iterator
 
 import pandas as pd
 import pytest
 
+import great_expectations as gx
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 
@@ -123,9 +125,10 @@ def expectation_suite(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
 ) -> ExpectationSuite:
-    """Add Expectations for the Data Assets defined in this module.
-    Note: There is no need to test Expectation Suite CRUD.
-    Those assertions can be found in the expectation_suite fixture."""
+    """Add Expectations for the Data Assets defined in this module, and update the Expectation Suite.
+    Note: There is no need to test Expectation Suite create, get, or delete in this module.
+    Those assertions can be found in the expectation_suite fixture.
+    """
     expectation_suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
@@ -134,6 +137,9 @@ def expectation_suite(
                 "mostly": 1,
             },
         )
+    )
+    expectation_suite = context.add_or_update_expectation_suite(
+        expectation_suite=expectation_suite
     )
     return expectation_suite
 
@@ -163,15 +169,35 @@ def test_checkpoint_run(
     expectation_suite: ExpectationSuite,
 ):
     """Test running a Checkpoint that was created using the entities defined in this module."""
-
-    # in-memory dataframe referenced by BatchRequest isn't serialized in Checkpoint config
-    # so we need to pass the batch request again at runtime
-    validations = [
-        {
-            "batch_request": batch_request,
-            "expectation_suite_name": expectation_suite.expectation_suite_name,
-        }
-    ]
-
-    checkpoint_result: CheckpointResult = checkpoint.run(validations=validations)
+    checkpoint_result: CheckpointResult = checkpoint.run()
     assert checkpoint_result.success
+
+
+@pytest.mark.cloud
+def test_checkpoint_run_runtime_validations(
+    context: CloudDataContext,
+    checkpoint: Checkpoint,
+    spark_test_df: pyspark.DataFrame,
+):
+    """This Checkpoint only has one in-memory validation configured.
+    This means if we don't pass runtime validations we should get an error,
+    because nothing is actually going to be validated.
+    """
+    # in-memory DataFrame referenced by BatchRequest isn't serialized in Checkpoint config
+    # the Checkpoint from the fixture hasn't been round-tripped,
+    # so it will work as long as it stays in memory
+    checkpoint_result: CheckpointResult = checkpoint.run()
+    assert checkpoint_result.success
+
+    # destroy and retrieve the Data Context, losing the in-memory DataFrame
+    del context
+    context = gx.get_context(
+        mode="cloud",
+        cloud_base_url=os.environ.get("GX_CLOUD_BASE_URL"),
+        cloud_organization_id=os.environ.get("GX_CLOUD_ORGANIZATION_ID"),
+        cloud_access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"),
+    )
+    checkpoint: Checkpoint = context.get_checkpoint(name=checkpoint.name)
+    # failure to pass runtime validations results in error
+    with pytest.raises(RuntimeError):
+        _ = checkpoint.run()
