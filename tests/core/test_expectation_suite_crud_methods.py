@@ -438,6 +438,7 @@ def test_remove_expectation_without_necessary_args(single_expectation_suite):
     )
 
 
+@pytest.mark.xfail("Requires Expectation.save()")
 @pytest.mark.cloud
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"

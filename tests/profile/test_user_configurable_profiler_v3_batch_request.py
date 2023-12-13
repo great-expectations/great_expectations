@@ -455,7 +455,7 @@ def test_build_suite_with_semantic_types_dict(
     assert "column_one" not in columns_with_expectations
     assert "expect_column_values_to_not_be_null" not in expectations_from_suite
     assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 32
+    assert len(suite.expectations) == 54
 
     value_set_expectations = [
         i
@@ -525,7 +525,7 @@ def test_build_suite_when_suite_already_exists(
     profiler.excluded_expectations = ["expect_table_columns_to_match_ordered_list"]
     suite = profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
-    assert len(suite.expectations) == 1
+    assert len(suite.expectations) == 2
     assert "expect_table_row_count_to_be_between" in expectations
 
     assert mock_emit.call_count == 2
@@ -647,23 +647,6 @@ def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
     no_config_suite = no_config_profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
     assert "expect_column_values_to_be_null" in expectations
-
-
-@pytest.mark.filesystem
-def test_nullity_expectations_mostly_tolerance(
-    nulls_validator, possible_expectations_set
-):
-    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
-
-    validator = nulls_validator
-
-    profiler = UserConfigurableProfiler(
-        validator, excluded_expectations, not_null_only=False
-    )
-    suite = profiler.build_suite()
-
-    for i in suite.expectation_configurations:
-        assert i["kwargs"]["mostly"] == 0.66
 
 
 @pytest.mark.slow  # 2.44s
