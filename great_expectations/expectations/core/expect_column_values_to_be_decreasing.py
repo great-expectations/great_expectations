@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -65,6 +65,8 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     See Also:
         [expect_column_values_to_be_increasing](https://greatexpectations.io/expectations/expect_column_values_to_be_increasing)
     """
+
+    strictly: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

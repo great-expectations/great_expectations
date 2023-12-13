@@ -258,11 +258,12 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        configuration = self.configuration
+
         observed_value_counts = metrics.get("column.value_counts", [])
         observed_max = metrics.get("column.max")
         observed_min = metrics.get("column.min")
