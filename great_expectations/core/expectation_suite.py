@@ -867,6 +867,11 @@ class ExpectationSuite(SerializableDictDot):
                 f"Could not add expectation; provided configuration is not valid: {e.message}"
             ) from e
 
+
+class ExpectationSuiteViewer:
+    def __init__(self, suite: ExpectationSuite):
+        self._suite = suite
+
     @public_api
     def show_expectations_by_domain_type(self) -> None:
         """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
@@ -988,7 +993,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.TABLE,
-                self.expectation_configurations,
+                self._suite.expectation_configurations,
             )
         )
 
@@ -1005,7 +1010,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN,
-                self.expectation_configurations,
+                self._suite.expectation_configurations,
             )
         )
 
@@ -1028,7 +1033,7 @@ class ExpectationSuite(SerializableDictDot):
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.COLUMN_PAIR,
-                self.expectation_configurations,
+                self._suite.expectation_configurations,
             )
         )
 
@@ -1056,7 +1061,7 @@ class ExpectationSuite(SerializableDictDot):
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.MULTICOLUMN,
-                self.expectation_configurations,
+                self._suite.expectation_configurations,
             )
         )
 
@@ -1080,7 +1085,7 @@ class ExpectationSuite(SerializableDictDot):
 
         column: str
         expectation: ExpectationConfiguration
-        for expectation in self.expectation_configurations:
+        for expectation in self._suite.expectation_configurations:
             if "column" in expectation.kwargs:
                 column = expectation.kwargs["column"]
             else:
