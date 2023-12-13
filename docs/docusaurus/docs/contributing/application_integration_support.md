@@ -2,7 +2,6 @@
 title: Integration support policy
 ---
 
-
 For production environments, GX recommends using the integrations defined as GX-supported. 
 
 GX uses libraries such as Pandas, Spark, and SQLAlchemy to integrate with a wide range of data sources. This also allows you to deploy GX with Community-supported integrations.
@@ -50,18 +49,19 @@ The following table defines the GX versions supported by GX Cloud and GX OSS.
 The following table defines the supported GX Cloud and GX OSS integrations.
 
 
-| Application Type                         | GX Cloud             | GX OSS          |
+| Integration Type                         | GX Cloud             | GX OSS          |
 |------------------------------------------|----------------------|-----------------|
-| Data Source                              | Snowflake           | - Snowflake<br/> - Generic SQL ¹               |
-| Configuration Stores                     | N/A                 | - Filesystem<br/> - AWS S3GCS Buckets<br/> - Azure Blob Store                |
-| Communication (notifications)            | N/A ²               | - Slack (local) ³<br/> - email (local)<br/> - Microsoft Teams (local)<br/> - PagerDuty (local)                 |
-| Orchestrator                              | Airflow ⁴           | Airflow ⁴       |
+| Data Source                              | Snowflake ¹          | - Snowflake<br/> - Generic SQL ²               |
+| Configuration Stores                     | N/A                  | - Filesystem<br/> - AWS S3GCS Buckets<br/> - Azure Blob Store                |
+| Notifications                            | N/A ³                | - Slack (local) ⁴<br/> - email (local)<br/> - Microsoft Teams (local)<br/> - PagerDuty (local)                 |
+| Orchestrator                              | Airflow ⁵           | Airflow ⁵       |
 
 
-¹ Connection strings for various SQL Data Sources are supported, but dialect-specific SQL commands are not.<br/>
-² Support for Slack, email, and Zapier are planned for future releases.<br/>
-³ When used with the GX OSS library.<br/>
-⁴ Although only Airflow is supported, GX Cloud and GX OSS should work with any orchestrator that executes Python code.
+¹ Support for BigQuery will be available in a future release.<br/>
+² Connection strings for various SQL Data Sources are supported, but dialect-specific SQL commands are not.<br/>
+³ Support for Zapier will be available in a future release.<br/>
+⁴ When used with the GX OSS library.<br/>
+⁵ Although only Airflow is supported, GX Cloud and GX OSS should work with any orchestrator that executes Python code.
 
 ### GX components
 
@@ -79,7 +79,7 @@ The following integrated applications, operating systems, and programming langua
 
 ### Operating systems
 
-The following table defines the operating systems supported by the community.
+The following table lists the operating systems supported by the community.
 
 | GX Cloud                       | GX OSS                        |
 |--------------------------------|-------------------------------|
@@ -89,32 +89,11 @@ The following table defines the operating systems supported by the community.
 
 ### Integrations
 
-The following table defines the GX Cloud and GX OSS integrations supported by the community.
+The following table lists the GX Cloud and GX OSS integrations supported by the community.
 
 
-| Application Type                         | GX Cloud             | GX OSS          |
+| Integration Type                         | GX Cloud             | GX OSS          |
 |------------------------------------------|----------------------|-----------------|
-| Data Source                              | Snowflake          | - Redshift<br/>- MSSQL<br/>- MySQL<br/>- SQLite<br/>- Trino<br/>- AWS S3<br/>- Google Cloud Storage<br/>- Azure Blog Storage<br/>- Clickhouse ¹<br/>- Athena ¹<br/>- Dremio ¹<br/>- Teradata ¹<br/>- Vertica ¹<br/>- EMR Spark ²<br/>- AWS Glue ²               |
-| Configuration Stores                     | N/A                | Azure Blob Store                |
-| Communication (notifications)            | N/A                | - Slack (local) ³<br/> - email (local)<br/> - Microsoft Teams (local)<br/> - PagerDuty (local)<br/>- Opsgenie<br/>- Amazon SNS<br/>- General API<br/>- DataHub ⁴                   |
-| Orchestrator                              | Airflow ⁵           | - Airflow<br/>- Prefect<br/>- Dagster ⁶<br/>- Flyte ⁶<br/>- mage.ai ⁶<br/>- Github Action ⁶        |
-
-
-² Untested and unsupported by GX.<br/>
-³ When used with the GX OSS library.<br/>
-⁴ Untested and unsupported by GX.<br/>
-⁵ Other Orchestrator applications that execute Python code are not supported.<br/>
-⁶ Untested and unsupported by GX.
-
-## Unsupported applications
-
-The following applications are not supported by GX or the community:
-
-- Acryl Datahub
-- Atlan
-- Amundsen
-- Azure Databricks
-- Meltano
-- dbt
-- Capital One Data Profiler
-- AWS Databricks
+| Data Source                              | N/A          | - Pandas<br/>- Spark<br/>- Databricks (Spark)<br/>- Databricks (SQL)<br/>- Trino<br/>- Clickhouse<br/>- Dremio<br/>- Teradata<br/>- Vertica<br/>- EMR Spark<br/>- AWS Glue<br/>- Google Cloud Storage<br/>- Azure Blog Storage<br/>- AWS S3|
+| Notifications                             | N/A            | - Opsgenie<br/>- Amazon SNS<br/>- DataHub |
+| Orchestrator                              | N/A            | - Prefect<br/>- Dagster <br/>- Flyte <br/>- mage.ai  |
