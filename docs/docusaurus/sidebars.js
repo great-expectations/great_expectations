@@ -486,7 +486,6 @@ module.exports = {
     },
   ],
   learn: [
-      { type: 'doc', id: 'conceptual_guides/learn_lp' },
       'conceptual_guides/expectation_classes',
       'conceptual_guides/metricproviders',
       {
@@ -523,7 +522,6 @@ module.exports = {
         'oss/terms/expectation_suite',
         'oss/terms/metric',
         'conceptual_guides/metricproviders',
-        'oss/terms/metric',
         {
           type: 'category',
           label: 'Stores',
