@@ -10,7 +10,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
@@ -82,8 +82,8 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         [expect_column_values_not_to_be_null](https://greatexpectations.io/expectations/expect_column_values_not_to_be_null)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameter, datetime, None] = None
+    max_value: Union[float, EvaluationParameter, datetime, None] = None
 
     library_metadata = {
         "maturity": "experimental",

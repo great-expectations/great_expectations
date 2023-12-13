@@ -7,7 +7,7 @@ from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
@@ -124,8 +124,8 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameter, datetime, None] = None
+    max_value: Union[float, EvaluationParameter, datetime, None] = None
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

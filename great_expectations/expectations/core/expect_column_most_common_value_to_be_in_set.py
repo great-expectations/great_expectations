@@ -5,7 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -67,7 +67,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
           most common value
     """
 
-    value_set: Union[list, set, EvaluationParameterDict, None]
+    value_set: Union[list, set, EvaluationParameter, None]
     ties_okay: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery

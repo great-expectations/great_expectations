@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    EvaluationParameter,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -69,12 +69,12 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
     """
 
-    like_pattern_list: Union[List[str], EvaluationParameterDict]
+    like_pattern_list: Union[List[str], EvaluationParameter]
 
     @pydantic.validator("like_pattern_list")
     def validate_like_pattern_list(
-        cls, like_pattern_list: list[str] | EvaluationParameterDict
-    ) -> list[str] | EvaluationParameterDict:
+        cls, like_pattern_list: list[str] | EvaluationParameter
+    ) -> list[str] | EvaluationParameter:
         if len(like_pattern_list) < 1:
             raise ValueError(
                 "At least one like_pattern must be supplied in the like_pattern_list."

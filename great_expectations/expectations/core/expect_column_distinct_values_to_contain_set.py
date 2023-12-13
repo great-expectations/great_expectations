@@ -5,7 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -60,7 +60,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict, None]
+    value_set: Union[list, set, EvaluationParameter, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

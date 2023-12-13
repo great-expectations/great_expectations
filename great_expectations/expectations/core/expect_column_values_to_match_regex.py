@@ -4,7 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
+from great_expectations.core.evaluation_parameters import EvaluationParameter
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -72,7 +72,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
 
-    regex: Union[str, EvaluationParameterDict] = "(?s).*"
+    regex: Union[str, EvaluationParameter] = "(?s).*"
 
     library_metadata = {
         "maturity": "production",

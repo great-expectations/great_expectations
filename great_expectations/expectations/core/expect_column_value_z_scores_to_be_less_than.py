@@ -1,7 +1,7 @@
 from typing import ClassVar, Tuple, Union
 
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -51,8 +51,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """
 
     condition_parser: Union[str, None] = "pandas"
-    threshold: Union[float, EvaluationParameterDict]
-    double_sided: Union[bool, EvaluationParameterDict]
+    threshold: Union[float, EvaluationParameter]
+    double_sided: Union[bool, EvaluationParameter]
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "column",
         "row_condition",

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    EvaluationParameter,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -65,7 +65,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
 
-    like_pattern: Union[str, EvaluationParameterDict]
+    like_pattern: Union[str, EvaluationParameter]
 
     library_metadata = {
         "maturity": "production",

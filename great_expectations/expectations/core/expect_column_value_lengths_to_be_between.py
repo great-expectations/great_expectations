@@ -6,7 +6,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
+from great_expectations.core.evaluation_parameters import EvaluationParameter
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -88,8 +88,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
     """
 
-    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, EvaluationParameter, datetime, None] = None
+    max_value: Union[int, EvaluationParameter, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

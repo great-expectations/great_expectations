@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    EvaluationParameter,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -70,8 +70,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
     """
 
-    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, EvaluationParameter, datetime, None] = None
+    max_value: Union[int, EvaluationParameter, datetime, None] = None
 
     library_metadata = {
         "maturity": "production",

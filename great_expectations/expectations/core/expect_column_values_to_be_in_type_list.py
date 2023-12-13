@@ -10,7 +10,7 @@ from packaging import version
 
 from great_expectations.compatibility import pyspark
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    EvaluationParameter,  # noqa: TCH001
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -106,7 +106,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """
 
     condition_parser: Union[str, None] = "pandas"
-    type_list: Union[List[str], EvaluationParameterDict, None]
+    type_list: Union[List[str], EvaluationParameter, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

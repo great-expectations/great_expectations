@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
+from great_expectations.core.evaluation_parameters import EvaluationParameter
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions.exceptions import (
@@ -137,8 +137,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     ]
     # </snippet>
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameter, datetime, None] = None
+    max_value: Union[float, EvaluationParameter, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

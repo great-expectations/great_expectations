@@ -6,7 +6,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -49,7 +49,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
-    column_list: Union[list, set, EvaluationParameterDict, None]
+    column_list: Union[list, set, EvaluationParameter, None]
 
     library_metadata = {
         "maturity": "production",

@@ -5,7 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -51,7 +51,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
     """
 
-    value: Union[int, EvaluationParameterDict]
+    value: Union[int, EvaluationParameter]
 
     library_metadata = {
         "maturity": "production",

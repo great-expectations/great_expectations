@@ -6,7 +6,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -98,7 +98,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field([])
+    value_set: Union[list, set, EvaluationParameter] = pydantic.Field([])
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

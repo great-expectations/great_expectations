@@ -6,7 +6,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -77,8 +77,8 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameter, datetime, None] = None
+    max_value: Union[float, EvaluationParameter, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

@@ -5,7 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameter,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -66,7 +66,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
     """
 
-    value: Union[float, EvaluationParameterDict]
+    value: Union[float, EvaluationParameter]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

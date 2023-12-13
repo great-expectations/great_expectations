@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    EvaluationParameter,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
@@ -78,8 +78,8 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameter, datetime, None] = None
+    max_value: Union[float, EvaluationParameter, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

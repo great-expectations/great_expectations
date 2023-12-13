@@ -26,7 +26,6 @@ from pyparsing import (
     delimitedList,
     dictOf,
 )
-from typing_extensions import TypedDict
 
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import convert_to_json_serializable
@@ -38,7 +37,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
 
-EvaluationParameterDict = TypedDict("EvaluationParameterDict", {"$PARAMETER": str})
+
+class EvaluationParameter:
+    def __init__(self, params: dict) -> None:
+        self._params = params
 
 
 class EvaluationParameterParser:
