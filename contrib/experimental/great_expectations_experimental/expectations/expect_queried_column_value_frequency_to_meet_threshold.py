@@ -77,11 +77,11 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
         query_result = metrics.get("query.column")

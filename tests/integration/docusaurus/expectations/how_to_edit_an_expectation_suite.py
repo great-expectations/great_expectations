@@ -40,7 +40,6 @@ my_suite.show_expectations_by_expectation_type()
 {
     "expect_column_values_to_be_between": {
         "column": "passenger_count",
-        "domain": "column",
         "max_value": 6,
         "min_value": 1,
         "mostly": 1.0,
@@ -55,7 +54,6 @@ config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
         "column": "passenger_count",
-        "domain": "column",
         "max_value": 6,
         "min_value": 1,
         "mostly": 1.0,
@@ -71,7 +69,6 @@ updated_config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
         "column": "passenger_count",
-        "domain": "column",
         "min_value": 1,
         "max_value": 4,
         #'max_value': 6,
