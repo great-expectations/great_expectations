@@ -14,7 +14,7 @@ import LinkCard from '/docs/components/LinkCard';
 
 <LinkCardGrid>
   <LinkCard topIcon label="Feature and code readiness" description="The readiness levels for GX features and code" href="/docs/oss/contributing/contributing_maturity" icon="/img/code_readiness_icon.svg" />
-  <LinkCard topIcon label="Application support policy" description="Supoort levels for integrated applications, operating systems, and programming languages" href="/docs/contributing/application_integration_support" icon="/img/integration_icon.svg" />
+  <LinkCard topIcon label="Application support policy" description="Supoort levels for integrated applications, operating systems, and programming languages" href="/docs/oss/contributing/application_integration_support" icon="/img/integration_icon.svg" />
   <LinkCard topIcon label="Customize your deployment" description="Customize your GX deployment to meet your unique business requirements" href="/docs/reference/learn/customize_your_deployment" icon="/img/configure_icon.svg" />
   <LinkCard topIcon label="Usage statistics" description="Learn what usage statistics are collected and how they are used" href="/docs/reference/learn/usage_statistics" icon="/img/statistics_icon.svg" />
   <LinkCard topIcon label="Expectation classes" description="An overview of the available Expectation classes, why they are helpful, and when they should be used" href="/docs/reference/learn/conceptual_guides/expectation_classes" icon="/img/overview_icon.svg" />

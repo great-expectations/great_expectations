@@ -9,8 +9,6 @@ title: "Glossary"
 
 [**Batch Request:**](/docs/reference/learn/terms/batch_request) Provided to a Data Source in order to create a Batch.
 
-[**CLI:**](/docs/reference/learn/terms/cli) Command Line Interface
-
 [**Checkpoint:**](/docs/reference/learn/terms/checkpoint) The primary means for validating data in a production deployment of Great Expectations.
 
 [**Checkpoint Store:**](/docs/reference/learn/terms/checkpoint_store) A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
