@@ -181,7 +181,6 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics,
         runtime_configuration=None,
         execution_engine=None,
@@ -193,6 +192,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
                 reverse=True,
             )
         )
+        configuration = self.configuration
         n_features = configuration["kwargs"].get("n_features")
         columns = configuration["kwargs"].get("important_columns")
         threshold = configuration["kwargs"].get("threshold")
