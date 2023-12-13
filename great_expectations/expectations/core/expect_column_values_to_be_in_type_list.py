@@ -422,7 +422,6 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
@@ -435,9 +434,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
             ColumnMapExpectation, self
-        ).get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )
+        ).get_validation_dependencies(execution_engine, runtime_configuration)
+
+        configuration = self.configuration
 
         # Only PandasExecutionEngine supports the column map version of the expectation.
         if isinstance(execution_engine, PandasExecutionEngine):
@@ -475,7 +474,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             ):
                 # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
                 validation_dependencies = super().get_validation_dependencies(
-                    configuration, execution_engine, runtime_configuration
+                    execution_engine, runtime_configuration
                 )
 
         # this adds table.column_types dependency for both aggregate and map versions of expectation

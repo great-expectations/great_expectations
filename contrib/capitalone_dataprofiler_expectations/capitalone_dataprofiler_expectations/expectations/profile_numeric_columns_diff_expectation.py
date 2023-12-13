@@ -17,12 +17,11 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         dependencies: ValidationDependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+            execution_engine, runtime_configuration
         )
         assert isinstance(
             self.profile_metric, str
@@ -34,7 +33,7 @@ class ProfileNumericColumnsDiffExpectation(BatchExpectation):
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.profile_metric}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
 

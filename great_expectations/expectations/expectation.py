@@ -1027,7 +1027,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         validation_dependencies: ValidationDependencies = (
             self.get_validation_dependencies(
-                configuration=configuration,
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
@@ -1099,7 +1098,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
@@ -2085,7 +2083,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             return []
 
         validation_dependencies: ValidationDependencies = (
-            self.get_validation_dependencies(configuration=expectation_config)
+            self.get_validation_dependencies()
         )
 
         metric_name: str
@@ -2277,13 +2275,11 @@ class BatchExpectation(Expectation, ABC):
     @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
             super().get_validation_dependencies(
-                configuration=configuration,
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
@@ -2293,7 +2289,7 @@ class BatchExpectation(Expectation, ABC):
         for metric_name in self.metric_dependencies:
             metric_kwargs = get_metric_kwargs(
                 metric_name=metric_name,
-                configuration=configuration,
+                configuration=self.configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
@@ -2557,14 +2553,12 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
             super().get_validation_dependencies(
-                configuration=configuration,
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
@@ -2580,7 +2574,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
@@ -2594,7 +2588,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
@@ -2608,7 +2602,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
@@ -2632,7 +2626,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
@@ -2647,7 +2641,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                configuration=configuration,
+                configuration=self.configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
@@ -2664,7 +2658,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
@@ -2677,7 +2671,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         )
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
@@ -2818,13 +2812,11 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
             super().get_validation_dependencies(
-                configuration=configuration,
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
@@ -2836,6 +2828,8 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             self.metric_dependencies == tuple()
         ), "ColumnPairMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         metric_kwargs: dict
+
+        configuration = self.configuration
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -3065,13 +3059,11 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
             super().get_validation_dependencies(
-                configuration=configuration,
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
@@ -3084,7 +3076,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         ), "MulticolumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
 
-        metric_kwargs: dict
+        configuration = self.configuration
 
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",

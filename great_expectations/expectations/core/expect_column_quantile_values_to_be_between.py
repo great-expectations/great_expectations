@@ -571,15 +571,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
+        configuration = self.configuration
         # column.quantile_values expects a "quantiles" key
         validation_dependencies.get_metric_configuration(
             metric_name="column.quantile_values"

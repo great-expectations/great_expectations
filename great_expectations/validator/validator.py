@@ -922,7 +922,6 @@ class Validator:
             validation_dependencies: ValidationDependencies = expectation_impl(
                 **evaluated_config.kwargs
             ).get_validation_dependencies(
-                configuration=evaluated_config,
                 execution_engine=self._execution_engine,
                 runtime_configuration=runtime_configuration,
             )

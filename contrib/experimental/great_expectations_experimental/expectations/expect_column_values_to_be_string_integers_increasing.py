@@ -222,18 +222,16 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         dependencies: ValidationDependencies = super().get_validation_dependencies(
-            configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         metric_kwargs = get_metric_kwargs(
             metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
 
