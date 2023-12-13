@@ -11,53 +11,30 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 )
 from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 from great_expectations.datasource.fluent.interfaces import DataAsset
-from great_expectations.datasource.fluent.sql_datasource import TableAsset
-from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 
 
 @pytest.fixture
-def mock_asset_name() -> str:
-    return "foo"
-
-
-@pytest.fixture
-def mock_asset(
-    mock_asset_name: str,
-) -> TableAsset:
-    mock_data_asset = Mock(spec=TableAsset)
-    mock_data_asset.name = mock_asset_name
+def mock_data_asset() -> DataAsset:
+    mock_data_asset = Mock(spec=DataAsset)
     return mock_data_asset
 
 
 @pytest.fixture
-def data_context(
-    fds_data_context: AbstractDataContext,
-    fds_data_context_datasource_name: str,
-    mock_asset: TableAsset,
-) -> AbstractDataContext:
-    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
-    assert isinstance(datasource, SqliteDatasource)
-    datasource.assets.append(mock_asset)
-    return fds_data_context
-
-
-@pytest.fixture
 def data_asset(
-    data_context: AbstractDataContext,
+    fds_data_context: AbstractDataContext,
 ) -> DataAsset:
-    return data_context.sources.add_pandas("my_datasource").add_csv_asset(
+    return fds_data_context.sources.add_pandas("my_datasource").add_csv_asset(
         "taxi town", "taxi.csv"
     )
 
 
 @pytest.mark.unit
 def test_data_asset(
-    data_context: AbstractDataContext,
     data_asset: DataAsset,
 ):
     batch_config = data_asset.add_batch_config("my_batch_config")
 
-    assert batch_config.data_asset == mock_asset
+    assert batch_config.data_asset == data_asset
 
 
 @pytest.mark.parametrize(
@@ -70,15 +47,12 @@ def test_data_asset(
 @pytest.mark.unit
 def test_build_batch_request(
     batch_request_options: Optional[BatchRequestOptions],
-    data_context: AbstractDataContext,
-    fds_data_context_datasource_name: str,
-    mock_asset_name: str,
+    mock_data_asset: DataAsset,
 ):
     batch_config = BatchConfig(
         name="test_batch_config",
-        context=data_context,
-        datasource_name=fds_data_context_datasource_name,
-        data_asset_name=mock_asset_name,
+        data_asset=mock_data_asset,
+        _persist=Mock(),
     )
 
     batch_config.build_batch_request(batch_request_options=batch_request_options)
