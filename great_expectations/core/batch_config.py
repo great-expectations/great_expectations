@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable, Optional
 
 from great_expectations.compatibility import pydantic
-from great_expectations.datasource.fluent.interfaces import DataAsset  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest,
         BatchRequestOptions,
     )
+    from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
 class BatchConfig(pydantic.BaseModel):

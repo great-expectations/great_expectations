@@ -39,6 +39,7 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
@@ -53,7 +54,6 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import Self, TypeAlias, TypeGuard
 
-    BatchConfig = Any
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
@@ -338,6 +338,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
+
+
+# Now that BatchAsset is defined, we need to update BatchConfig
+BatchConfig.update_forward_refs(DataAsset=DataAsset)
 
 
 def _sort_batches_with_none_metadata_values(

@@ -41,19 +41,22 @@ def data_context(
     return fds_data_context
 
 
+@pytest.fixture
+def data_asset(
+    data_context: AbstractDataContext,
+) -> DataAsset:
+    return data_context.sources.add_pandas("my_datasource").add_csv_asset(
+        "taxi town", "taxi.csv"
+    )
+
+
 @pytest.mark.unit
 def test_data_asset(
     data_context: AbstractDataContext,
-    fds_data_context_datasource_name: str,
-    mock_asset_name: str,
-    mock_asset: DataAsset,
+    data_asset: DataAsset,
 ):
-    batch_config = BatchConfig(
-        name="test_batch_config",
-        context=data_context,
-        datasource_name=fds_data_context_datasource_name,
-        data_asset_name=mock_asset_name,
-    )
+    batch_config = data_asset.add_batch_config("my_batch_config")
+
     assert batch_config.data_asset == mock_asset
 
 
