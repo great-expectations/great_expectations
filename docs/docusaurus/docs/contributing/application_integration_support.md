@@ -94,6 +94,6 @@ The following table lists the GX Cloud and GX OSS integrations supported by the 
 
 | Integration Type                         | GX Cloud             | GX OSS          |
 |------------------------------------------|----------------------|-----------------|
-| Data Source                              | N/A          | Pandas<br/>Spark<br/>Databricks (Spark)<br/>Databricks (SQL)<br/>Trino<br/>Clickhouse<br/>Dremio<br/> Teradata<br/>Vertica<br/>EMR Spark<br/>AWS Glue<br/>Google Cloud Storage<br/>Azure Blog Storage<br/>AWS S3|
+| Data Sources                              | N/A          | Pandas<br/>Spark<br/>Databricks (Spark)<br/>Databricks (SQL)<br/>Trino<br/>Clickhouse<br/>Dremio<br/> Teradata<br/>Vertica<br/>EMR Spark<br/>AWS Glue<br/>Google Cloud Storage<br/>Azure Blog Storage<br/>AWS S3|
 | Notifications                             | N/A            | Opsgenie<br/>Amazon SNS<br/>DataHub |
-| Orchestrator                              | N/A            | Prefect<br/>Dagster <br/>Flyte <br/>mage.ai  |
+| Orchestrators                             | N/A            | Prefect<br/>Dagster <br/>Flyte <br/>mage.ai  |
