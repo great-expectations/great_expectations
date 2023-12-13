@@ -477,7 +477,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ]:
                 # this calls ColumnMapMetric._validate
                 return super()._validate(
-                    configuration, metrics, runtime_configuration, execution_engine
+                    metrics, runtime_configuration, execution_engine
                 )
             return self._validate_pandas(
                 actual_column_type=actual_column_type, expected_type=expected_type
