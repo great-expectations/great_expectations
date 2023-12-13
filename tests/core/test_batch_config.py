@@ -11,8 +11,6 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 )
 from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 from great_expectations.datasource.fluent.interfaces import DataAsset
-from great_expectations.datasource.fluent.pandas_datasource import TableAsset
-from great_expectations.datasource.fluent.sql_datasource import _SQLAsset
 
 
 @pytest.fixture
