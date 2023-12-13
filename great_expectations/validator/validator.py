@@ -922,7 +922,6 @@ class Validator:
             expectation = evaluated_config.to_domain_obj()
             validation_dependencies: ValidationDependencies = (
                 expectation.get_validation_dependencies(
-                    configuration=evaluated_config,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
                 )
