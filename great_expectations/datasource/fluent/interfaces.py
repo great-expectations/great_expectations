@@ -215,12 +215,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     def add_batch_config(self, name: str) -> BatchConfig:
-        batch_config = BatchConfig(name=name, data_asset=self, _persist=self.save)
+        batch_config = BatchConfig(name=name, data_asset=self)
         self.batch_configs.append(batch_config)
         return batch_config
-
-    def save(self) -> None:
-        self._persist()
 
     def build_batch_request(
         self,

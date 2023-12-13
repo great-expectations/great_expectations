@@ -21,7 +21,6 @@ class BatchConfig(pydantic.BaseModel):
 
     name: str
     data_asset: DataAsset
-    _persist: Callable[[], None] = pydantic.PrivateAttr()
 
     def build_batch_request(
         self, batch_request_options: Optional[BatchRequestOptions] = None

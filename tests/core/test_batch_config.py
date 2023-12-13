@@ -11,17 +11,15 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 )
 from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 from great_expectations.datasource.fluent.interfaces import DataAsset
-from great_expectations.datasource.fluent.pandas_datasource import CSVAsset, TableAsset
+from great_expectations.datasource.fluent.pandas_datasource import TableAsset
+from great_expectations.datasource.fluent.sql_datasource import _SQLAsset
 
 
 @pytest.fixture
-def mock_data_asset() -> DataAsset:
-    data_asset: DataAsset = CSVAsset(
-        name="my_data_asset", type="csv", filepath_or_buffer="taxi.csv"
-    )
+def mock_data_asset(monkeypatch) -> DataAsset:
+    monkeypatch.setattr(DataAsset, "build_batch_request", Mock())
+    data_asset: DataAsset = DataAsset(name="my_data_asset", type="table")
     data_asset._save_batch_config = Mock()
-
-    # data_asset = Mock(spec=DataAsset)
 
     return data_asset
 
@@ -36,6 +34,16 @@ def data_asset(
 
 
 @pytest.mark.unit
+def test_data_asset(
+    mock_data_asset: DataAsset,
+):
+    batch_config = BatchConfig(name="foo", data_asset=mock_data_asset)
+    mock_data_asset.name = "bad name"
+
+    assert batch_config.data_asset == mock_data_asset
+
+
+@pytest.mark.unit
 def test_save(mock_data_asset):
     batch_config = BatchConfig(
         name="test_batch_config",
@@ -45,16 +53,6 @@ def test_save(mock_data_asset):
     batch_config.save()
 
     mock_data_asset._save_batch_config.assert_called_once_with(batch_config)
-
-
-@pytest.mark.unit
-def test_data_asset(
-    mock_data_asset: DataAsset,
-):
-    batch_config = BatchConfig(name="foo", data_asset=mock_data_asset)
-    mock_data_asset.name = "bad name"
-
-    assert batch_config.data_asset == mock_data_asset
 
 
 @pytest.mark.parametrize(
