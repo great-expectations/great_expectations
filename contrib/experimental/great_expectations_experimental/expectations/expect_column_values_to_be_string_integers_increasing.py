@@ -5,6 +5,7 @@ import numpy as np
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -20,9 +21,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,

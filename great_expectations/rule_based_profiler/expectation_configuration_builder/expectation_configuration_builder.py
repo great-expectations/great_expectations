@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import (

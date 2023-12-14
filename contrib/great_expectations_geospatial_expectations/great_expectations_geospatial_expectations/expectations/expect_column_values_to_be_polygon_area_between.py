@@ -4,13 +4,11 @@ import geopandas
 from shapely.geometry import mapping, shape
 
 from great_expectations.core import ExpectationValidationResult
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,

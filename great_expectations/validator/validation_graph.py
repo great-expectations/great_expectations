@@ -24,10 +24,10 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.core import IDDict
-    from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.expectations.expectation_configuration import (
+    from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.validator.computed_metric import MetricValue
     from great_expectations.validator.metrics_calculator import _MetricKey

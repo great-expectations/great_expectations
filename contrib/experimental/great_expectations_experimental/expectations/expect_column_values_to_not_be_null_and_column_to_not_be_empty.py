@@ -12,6 +12,7 @@ from great_expectations.core import (
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
+from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -20,9 +21,6 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
-)
-from great_expectations.expectations.expectation_configuration import (
-    parse_result_format,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,

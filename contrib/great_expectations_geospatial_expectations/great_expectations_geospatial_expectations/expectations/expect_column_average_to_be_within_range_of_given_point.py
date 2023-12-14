@@ -9,13 +9,11 @@ from statistics import mean
 from typing import Any, Dict, List, Union
 
 from great_expectations.core import ExpectationValidationResult
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,

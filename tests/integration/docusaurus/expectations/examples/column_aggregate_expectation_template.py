@@ -6,14 +6,12 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict, Optional
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,

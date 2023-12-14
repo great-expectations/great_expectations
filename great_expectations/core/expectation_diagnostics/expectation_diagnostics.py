@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass
 from typing import List, Sequence, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,  # noqa: TCH001
 )
@@ -25,9 +26,6 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.types import SerializableDictDot
 
 

@@ -143,6 +143,9 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.datasource_dict import DatasourceDict
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -171,9 +174,6 @@ if TYPE_CHECKING:
         BatchRequestOptions,
     )
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.expectations.expectation_configuration import (
-        ExpectationConfiguration,
-    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,

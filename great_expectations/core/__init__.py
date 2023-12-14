@@ -1,6 +1,13 @@
 import logging
 
 from .domain import Domain
+from .expectation_suite import (
+    ExpectationConfiguration,
+    ExpectationConfigurationSchema,
+    ExpectationSuite,
+    ExpectationSuiteSchema,
+    expectationSuiteSchema,
+)
 from .expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
