@@ -4,8 +4,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.compatibility.pydantic import root_validator
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
+    EvaluationParameterDict,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -122,6 +123,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -140,17 +142,19 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         params = renderer_configuration.params
 
         template_str = ""
+        at_least_str = ""
+        at_most_str = ""
         if not params.min_value and not params.max_value:
             template_str += "may have any numerical value."
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str: str = cls._get_strict_min_string(
+                at_least_str = cls._get_strict_min_string(
                     renderer_configuration=renderer_configuration
                 )
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str: str = cls._get_strict_max_string(
+                at_most_str = cls._get_strict_max_string(
                     renderer_configuration=renderer_configuration
                 )
 
@@ -178,6 +182,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -193,7 +198,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column",
                 "min_value",
@@ -242,13 +247,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]

@@ -126,12 +126,11 @@ class ExpectTableRowCountToEqual(BatchExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        expected_table_row_count = self.get_success_kwargs().get("value")
+        expected_table_row_count = self._get_success_kwargs().get("value")
         actual_table_row_count = metrics.get("table.row_count")
 
         return {

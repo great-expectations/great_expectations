@@ -113,12 +113,11 @@ class ExpectColumnKolmogorovSmirnovTestPValueToBeGreaterThan(BatchExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        threshold = configuration["kwargs"].get("p_value_threshold")
+        threshold = self.configuration["kwargs"].get("p_value_threshold")
         test_statistic, p_value = metrics.get("column.p_value_greater_than_threshold")
 
         success = p_value >= threshold
