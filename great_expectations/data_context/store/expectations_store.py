@@ -223,18 +223,17 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
 
-    def _add_ids_to_new_objects(self, value: ExpectationSuite) -> ExpectationSuite:
-        # todo: is it possible a dict will be passed instead of ExpectationSuite?
+    def _add_ids_to_new_objects(self, suite: ExpectationSuite) -> ExpectationSuite:
         if self.cloud_mode:
             # cloud backend creates IDs, and we add them after persistence
-            return value
+            return suite
         # ensure suite has an ID
-        if not value.get("ge_cloud_id"):
-            value["ge_cloud_id"] = str(uuid.uuid4())
-        for expectation_configuration in value.expectation_configurations:
+        if not suite.get("ge_cloud_id"):
+            suite["ge_cloud_id"] = str(uuid.uuid4())
+        for expectation_configuration in suite.expectation_configurations:
             if not expectation_configuration.ge_cloud_id:
                 expectation_configuration.ge_cloud_id = str(uuid.uuid4())
-        return value
+        return suite
 
     def _add_cloud_ids_to_local_suite_and_expectations(
         self, local_suite: ExpectationSuite, cloud_suite: dict

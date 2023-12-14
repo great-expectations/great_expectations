@@ -46,7 +46,6 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
-from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
@@ -207,9 +206,7 @@ class ExpectationSuite(SerializableDictDot):
     def save(self) -> None:
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
-        res = self._store.update(key=key, value=self)
-        if self.ge_cloud_id is None and isinstance(res, GXCloudResourceRef):
-            self.ge_cloud_id = res.response["data"]["id"]
+        self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a DataContext?"""
