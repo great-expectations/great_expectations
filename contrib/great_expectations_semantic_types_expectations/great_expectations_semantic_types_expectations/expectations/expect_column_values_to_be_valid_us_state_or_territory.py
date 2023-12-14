@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import us
 
 from great_expectations.execution_engine import PandasExecutionEngine

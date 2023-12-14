@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from user_agents import parse
 
 #!!! This giant block of imports should be something simpler, such as:

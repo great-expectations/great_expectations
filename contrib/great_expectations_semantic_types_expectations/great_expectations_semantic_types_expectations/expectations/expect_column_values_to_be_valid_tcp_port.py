@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from socket import getservbyport
 
 from great_expectations.execution_engine import PandasExecutionEngine

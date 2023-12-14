@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from schwifty import BIC
 from schwifty.exceptions import SchwiftyException
 

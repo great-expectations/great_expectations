@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, Tuple
 
 import scipy.stats
@@ -69,7 +71,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        execution_engine: "SparkDFExecutionEngine",
+        execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
