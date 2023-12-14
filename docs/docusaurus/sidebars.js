@@ -267,7 +267,7 @@ module.exports = {
           label: 'Get started with GX OSS',
           link: { type: 'doc', id: 'oss/guides/setup/get_started_lp' },
           items: [
-            'oss/tutorials/quickstart/quickstart',
+            'oss/tutorials/quickstart',
             {
               type: 'doc', id: 'reference/learn/conceptual_guides/gx_overview', label: 'GX Overview'
             },
