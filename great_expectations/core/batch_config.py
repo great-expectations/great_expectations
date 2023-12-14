@@ -19,6 +19,7 @@ class BatchConfig(pydantic.BaseModel):
     TODO: Add splitters and sorters?
     """
 
+    id: Optional[str] = None
     name: str
     data_asset: DataAsset
 
