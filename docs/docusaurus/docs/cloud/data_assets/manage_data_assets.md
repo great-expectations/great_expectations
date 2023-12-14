@@ -65,7 +65,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 9. Select the **Complete Asset** tab to create Expectations and run validations on the entire Data Asset, or select the **Batches** tab to create Expectations and run validations on subsets of Data Asset records and then complete the following fields:
 
-    - **Split Data Asset by** - Select **Year** to split Data Asset records by year, select **Year - Month** to split Data Asset records by year and month, or select **Year - Month - Day** to split Data Asset records by year, month, and day.
+    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
     - **Column of datetime type** - Enter the name of the column containing the date and time data.
 
