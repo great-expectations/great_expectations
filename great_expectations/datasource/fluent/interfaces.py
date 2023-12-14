@@ -42,7 +42,6 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -71,6 +70,7 @@ if TYPE_CHECKING:
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
@@ -769,7 +769,7 @@ class HeadData:
 
 
 @public_api
-class Batch(FluentBaseModel):
+class Batch:
     """This represents a batch of data.
 
     This is usually not the data itself but a hook to the data on an external datastore such as
