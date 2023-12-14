@@ -39,6 +39,7 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
@@ -171,8 +172,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
+    batch_configs: List[BatchConfig] = Field(default_factory=list)
 
     # non-field private attributes
+    _save_batch_config: Callable[[BatchConfig], None] = pydantic.PrivateAttr()
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
@@ -210,6 +213,20 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One needs to implement "batch_request_options" on a DataAsset subclass."""
         )
+
+    def add_batch_config(self, name: str) -> BatchConfig:
+        batch_config_names = {bc.name for bc in self.batch_configs}
+        if name in batch_config_names:
+            raise ValueError(
+                f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
+            )
+
+        batch_config = BatchConfig(
+            name=name,
+            data_asset=self,
+        )
+        self.batch_configs.append(batch_config)
+        return batch_config
 
     def build_batch_request(
         self,
@@ -327,6 +344,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
+
+
+# Now that BatchAsset is defined, we need to update BatchConfig
+BatchConfig.update_forward_refs(DataAsset=DataAsset)
 
 
 def _sort_batches_with_none_metadata_values(
