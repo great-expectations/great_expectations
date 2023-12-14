@@ -101,7 +101,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 3. Save your changes and close the `gx_dag.py` DAG file.
 
-## Run the DAG (Manual)
+## Run the DAG (Manually)
 
 1. Sign in to Airflow. The default username and password are `admin`.
 
