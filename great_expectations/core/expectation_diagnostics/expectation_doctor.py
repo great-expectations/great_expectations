@@ -593,9 +593,7 @@ class ExpectationDoctor:
             return []
 
         validation_dependencies: ValidationDependencies = (
-            self._expectation.get_validation_dependencies(
-                configuration=expectation_config
-            )
+            self._expectation.get_validation_dependencies()
         )
 
         metric_name: str
