@@ -4,7 +4,9 @@ title: 'Set up GX Cloud'
 description: Set up GX Cloud.
 ---
 
-To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, generate and record access tokens, set environment variables, and then install and start the GX Cloud agent. If you're using Snowflake, see [Quickstart for GX Cloud and Snowflake](/docs/cloud/quickstarts/snowflake_quickstart).
+To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, generate and record access tokens, set environment variables, and then install and start the GX Cloud agent. 
+
+If you're using Snowflake and are ready to create Expectations and run Validations, see [Quickstart for GX Cloud and Snowflake](/docs/cloud/quickstarts/snowflake_quickstart).
 
 ## Request a GX Cloud Beta account
 
@@ -55,7 +57,7 @@ You'll need your user access token and organization ID to set your environment v
 
 Environment variables securely store your GX Cloud access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
-Currently, the GX Cloud user interface is configured for Snowflake and this procedure assumes you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectations and Expectation Suites, run Validations, or create Checkpoints. 
+Currently, the GX Cloud user interface is configured for Snowflake and this procedure assumes you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. 
 
 1. Start the Docker Engine.
 
