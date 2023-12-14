@@ -16,7 +16,6 @@ class BatchConfig(pydantic.BaseModel):
     """Configuration for a batch of data.
 
     References the DataAsset to be used, and any additional parameters needed to fetch the data.
-    TODO: Add splitters and sorters?
     """
 
     id: Optional[str] = None
