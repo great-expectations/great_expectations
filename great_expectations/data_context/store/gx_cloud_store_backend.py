@@ -289,8 +289,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:  # type: ignore[override]
         pass
 
-    # TODO: GG 20220810 return the `ResponsePayload`
-    def _put(self, id: str, value: Any) -> bool:
+    def _put(self, id: str, value: Any) -> GXCloudResourceRef:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -311,6 +310,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if id:
             data["data"]["id"] = id
             url = urljoin(f"{url}/", id)
+        else:
+            url = ""
 
         try:
             response = self._session.put(url, json=data)
@@ -327,8 +328,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code = response.status_code
 
             response.raise_for_status()
-            return True
-
+            return GXCloudResourceRef(
+                resource_type=resource_type,
+                id=id,
+                url=url,
+                response_json=response.json(),
+            )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
@@ -599,6 +604,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         value: dict,
         **kwargs,
     ):
+        # todo: ID should never be optional for update - remove this additional get
         response_data = self._get(key)["data"]
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
         # by name, with length >= 0, instead of a single object (or error if not found)

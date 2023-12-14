@@ -207,12 +207,13 @@ class ExpectationSuite(SerializableDictDot):
     def save(self) -> None:
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
-        res = self._store.add_or_update(key=key, value=self)
+        res = self._store.update(key=key, value=self)
         if self.ge_cloud_id is None and isinstance(res, GXCloudResourceRef):
             self.ge_cloud_id = res.response["data"]["id"]
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a DataContext?"""
+        # todo: this should only check local keys instead of potentially querying the remote backend
         key = self._store.get_key(suite=self)
         return self._store.has_key(key=key)
 
@@ -814,7 +815,9 @@ class ExpectationSuite(SerializableDictDot):
         try:
             class_ = get_expectation_impl(expectation_configuration.expectation_type)
             expectation = class_(
-                meta=expectation_configuration.meta, **expectation_configuration.kwargs
+                meta=expectation_configuration.meta,
+                id=expectation_configuration.ge_cloud_id,
+                **expectation_configuration.kwargs,
             )  # Implicitly validates in constructor
             return expectation
         except (

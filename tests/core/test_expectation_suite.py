@@ -3,6 +3,7 @@ import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
 from unittest.mock import MagicMock, Mock
+from uuid import UUID
 
 import pytest
 
@@ -361,6 +362,48 @@ class TestCRUDMethods:
         context.expectations_store.add_or_update.assert_called_once_with(
             key=store_key, value=suite
         )
+
+    @pytest.mark.filesystem
+    def test_filesystem_context_update_suite_adds_ids(
+        self, empty_data_context, expectation
+    ):
+        context = empty_data_context
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+
+        uuid_to_test = suite.ge_cloud_id
+        assert isinstance(UUID(uuid_to_test), UUID)
+
+        suite.add(expectation)
+        expectation.column = "foo"
+        suite.add(expectation)
+        assert len(suite.expectations) == 2
+        # todo: update when expectations are source of truth
+        for expectation_configuration in suite.expectation_configurations:
+            uuid_to_test = expectation_configuration.ge_cloud_id
+            assert isinstance(UUID(uuid_to_test), UUID)
+
+    @pytest.mark.cloud
+    def test_cloud_context_update_suite_adds_ids(
+        self, empty_cloud_context_fluent, expectation
+    ):
+        context = empty_cloud_context_fluent
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+
+        uuid_to_test = suite.ge_cloud_id
+        assert isinstance(UUID(uuid_to_test), UUID)
+
+        suite.add(expectation)
+        expectation.column = "foo"
+        suite.add(expectation)
+        assert len(suite.expectations) == 2
+        # todo: update when expectations are source of truth
+        for expectation in suite.expectations:
+            uuid_to_test = expectation.id
+            assert isinstance(UUID(uuid_to_test), UUID)
 
 
 class TestAddCitation:

@@ -534,9 +534,66 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
             ).json(),
         )
     else:
-        id_ = FAKE_EXPECTATION_SUITE_ID
-        payload["data"]["id"] = id_
-        exp_suites[id_] = payload
+        suite_id = FAKE_EXPECTATION_SUITE_ID
+        payload["data"]["id"] = suite_id
+        payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
+        for expectation_configuration in payload["data"]["attributes"]["suite"][
+            "expectations"
+        ]:
+            expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
+        exp_suites[suite_id] = payload
+        exp_suite_names.add(name)
+        result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
+
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
+def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    if not request.body:
+        errors = ErrorPayloadSchema(
+            errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
+        )
+        return CallbackResult(400, headers=DEFAULT_HEADERS, body=errors.json())
+
+    payload: dict = json.loads(request.body)
+    parsed_url = urllib.parse.urlparse(request.url)
+    suite_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
+
+    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+
+    exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
+
+    old_suite = exp_suites.get(suite_id)
+
+    if not old_suite:
+        result = CallbackResult(
+            404,  # not really a 409 in prod but it's a more informative status code
+            headers=DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "404",
+                        "detail": "Suite not found",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    else:
+        payload["data"]["id"] = suite_id
+        payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
+        for expectation_configuration in payload["data"]["attributes"]["suite"][
+            "expectations"
+        ]:
+            # add IDs to new expectations
+            if not expectation_configuration.get("ge_cloud_id"):
+                expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
+        exp_suites[suite_id] = payload
         exp_suite_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 
@@ -734,7 +791,12 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base}/expectation-suites",
             post_expectation_suites_cb,
-        )
+        ),
+        resp_mocker.add_callback(
+            responses.PUT,
+            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            put_expectation_suites_cb,
+        ),
         resp_mocker.add_callback(
             responses.GET,
             f"{org_url_base}/checkpoints",

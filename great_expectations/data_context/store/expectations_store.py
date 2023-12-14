@@ -190,20 +190,73 @@ class ExpectationsStore(Store):
         return suite_dict
 
     def _add(self, key, value, **kwargs):
+        value = self._add_ids_to_new_objects(value)
         try:
-            return super()._add(key=key, value=value, **kwargs)
+            result = super()._add(key=key, value=value, **kwargs)
+            value = self._add_cloud_ids_to_local_suite_and_expectations(
+                local_suite=value,
+                cloud_suite=result.response["data"]["attributes"]["suite"],
+            )
+            return result
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
     def _update(self, key, value, **kwargs):
+        value = self._add_ids_to_new_objects(value)
         try:
-            return super()._update(key=key, value=value, **kwargs)
+            result = super()._update(key=key, value=value, **kwargs)
+            value = self._add_cloud_ids_to_local_suite_and_expectations(
+                local_suite=value,
+                cloud_suite=result.response["data"]["attributes"]["suite"],
+            )
+            return result
         except gx_exceptions.StoreBackendError:
+            # todo: this error is more precise than we can guarantee
             raise gx_exceptions.ExpectationSuiteError(
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
+
+    def _add_ids_to_new_objects(self, value: ExpectationSuite) -> ExpectationSuite:
+        # todo: is it possible a dict will be passed instead of ExpectationSuite?
+        if self.cloud_mode:
+            # cloud backend creates IDs, and we add them after persistence
+            return value
+        # ensure suite has an ID
+        if not value.get("ge_cloud_id"):
+            value["ge_cloud_id"] = str(uuid.uuid4())
+        for expectation_configuration in value.expectation_configurations:
+            if not expectation_configuration.ge_cloud_id:
+                expectation_configuration.ge_cloud_id = str(uuid.uuid4())
+        return value
+
+    def _add_cloud_ids_to_local_suite_and_expectations(
+        self, local_suite: ExpectationSuite, cloud_suite: dict
+    ) -> ExpectationSuite:
+        if not self.cloud_mode:
+            # non-cloud backends must create IDs prior to passing suite to store backend.
+            return local_suite
+        # todo: this is currently not being set by the server, but it should be
+        if not local_suite.ge_cloud_id:
+            local_suite.ge_cloud_id = cloud_suite["ge_cloud_id"]
+        # replace local expectations with those returned from the backend
+        expectations = []
+        from great_expectations.expectations.registry import get_expectation_impl
+
+        for expectation_dict in cloud_suite["expectations"]:
+            class_ = get_expectation_impl(expectation_dict["expectation_type"])
+            expectation = class_(
+                meta=expectation_dict["meta"],
+                id=expectation_dict["ge_cloud_id"],
+                **expectation_dict["kwargs"],
+            )
+            expectations.append(expectation)
+        # todo: update when configurations are no longer source of truth on suite
+        local_suite.expectation_configurations = [
+            expectation.configuration for expectation in expectations
+        ]
+        return local_suite
 
     @override
     def get(self, key) -> ExpectationSuite:
