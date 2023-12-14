@@ -33,11 +33,6 @@ from great_expectations.core._docs_decorators import (
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-    ExpectationConfigurationSchema,
-    expectationConfigurationSchema,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
@@ -48,6 +43,11 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+    ExpectationConfigurationSchema,
+    expectationConfigurationSchema,
+)
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,

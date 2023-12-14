@@ -17,7 +17,6 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
@@ -44,6 +43,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,

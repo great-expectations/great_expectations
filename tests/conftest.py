@@ -35,7 +35,6 @@ from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -89,6 +88,7 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (

@@ -4,9 +4,11 @@ import re
 import mistune
 import pytest
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.render import RenderedContent, RenderedDocumentContent
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,

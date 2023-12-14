@@ -1,7 +1,6 @@
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -12,6 +11,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
     ExpectColumnValuesToBeInSet,
 )
 from great_expectations.expectations.expectation import Expectation
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
 

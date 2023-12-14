@@ -10,7 +10,6 @@ import pytest
 from moto import mock_s3
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
@@ -35,6 +34,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import (
     gen_directory_tree_str,
