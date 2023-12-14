@@ -127,7 +127,7 @@ class ExpectationsStore(Store):
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
-    def _update(self, key, value, **kwargs) -> None:
+    def _update(self, key, value, **kwargs):
         value = self._add_ids_to_new_objects(value)
         try:
             result = super()._update(key=key, value=value, **kwargs)
