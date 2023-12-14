@@ -2506,6 +2506,15 @@ class CheckpointValidationConfig(AbstractConfig):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+    def __eq__(self, other) -> bool:
+        return (
+            self.id == other.id
+            and self.expectation_suite_name == other.expectation_suite_name
+            and self.expectation_suite_ge_cloud_id
+            == other.expectation_suite_ge_cloud_id
+            and self.batch_request == other.batch_request
+        )
+
 
 class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:

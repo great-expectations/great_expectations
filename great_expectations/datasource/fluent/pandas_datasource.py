@@ -396,7 +396,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
 
         if df is None:
             raise ValueError(
-                "Cannot build batch request for dataframe asset without a dataframe"
+                "Cannot build Batch Request for DataFrame Asset without a DataFrame"
             )
 
         self.dataframe = df

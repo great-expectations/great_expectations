@@ -28,12 +28,31 @@ LOGGER: Final = logging.getLogger("tests")
 
 
 @pytest.fixture(scope="package")
-def context() -> CloudDataContext:
+def cloud_base_url() -> str:
+    return os.environ.get("GX_CLOUD_BASE_URL")
+
+
+@pytest.fixture(scope="package")
+def cloud_organization_id() -> str:
+    return os.environ.get("GX_CLOUD_ORGANIZATION_ID")
+
+
+@pytest.fixture(scope="package")
+def cloud_access_token() -> str:
+    return os.environ.get("GX_CLOUD_ACCESS_TOKEN")
+
+
+@pytest.fixture(scope="package")
+def context(
+    cloud_base_url: str,
+    cloud_organization_id: str,
+    cloud_access_token: str,
+) -> CloudDataContext:
     context = gx.get_context(
         mode="cloud",
-        cloud_base_url=os.environ.get("GX_CLOUD_BASE_URL"),
-        cloud_organization_id=os.environ.get("GX_CLOUD_ORGANIZATION_ID"),
-        cloud_access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"),
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=cloud_organization_id,
+        cloud_access_token=cloud_access_token,
     )
     assert isinstance(context, CloudDataContext)
     return context
@@ -41,12 +60,6 @@ def context() -> CloudDataContext:
 
 @pytest.fixture(scope="function")
 def reloaded_context() -> CloudDataContext:
-    context = gx.get_context(
-        mode="cloud",
-        cloud_base_url=os.environ.get("GX_CLOUD_BASE_URL"),
-        cloud_organization_id=os.environ.get("GX_CLOUD_ORGANIZATION_ID"),
-        cloud_access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"),
-    )
     assert isinstance(context, CloudDataContext)
     return context
 

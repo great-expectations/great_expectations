@@ -183,7 +183,7 @@ class DatasourceDict(UserDict):
                     cached_data_asset = self._in_memory_data_assets.get(
                         in_memory_asset_name
                     )
-                    if cached_data_asset:
+                    if cached_data_asset and cached_data_asset.dataframe is not None:
                         asset.dataframe = cached_data_asset.dataframe
                     else:
                         # Asset is loaded into cache here (even without df) to enable loading of df at a later

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Callable, Iterator
 import pandas as pd
 import pytest
 
+import great_expectations as gx
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 
@@ -80,9 +81,7 @@ def dataframe_asset(
     datasource: SparkDatasource,
     asset_name: str,
 ) -> DataFrameAsset:
-    return datasource.add_dataframe_asset(
-        name=asset_name,
-    )
+    return datasource.add_dataframe_asset(name=asset_name)
 
 
 @pytest.fixture(scope="module", params=[dataframe_asset])
@@ -161,34 +160,83 @@ def test_interactive_validator(
 
 
 @pytest.mark.cloud
-def test_checkpoint_run(
-    checkpoint: Checkpoint,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
-):
+def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""
     checkpoint_result: CheckpointResult = checkpoint.run()
     assert checkpoint_result.success
 
 
+@pytest.fixture(scope="module", params=[dataframe_asset])
+def in_memory_asset(
+    datasource: SparkDatasource,
+    request,
+) -> DataFrameAsset:
+    asset_name = f"da_{uuid.uuid4().hex}"
+    return request.param(
+        datasource=datasource,
+        asset_name=asset_name,
+    )
+
+
 @pytest.mark.cloud
-def test_checkpoint_run_runtime_validations(
-    checkpoint: Checkpoint,
-    reloaded_context: CloudDataContext,
+def test_checkpoint_run_in_memory_runtime_validations(
+    cloud_base_url: str,
+    cloud_organization_id: str,
+    cloud_access_token: str,
+    context: CloudDataContext,
+    in_memory_asset: DataFrameAsset,
     spark_test_df: pyspark.DataFrame,
+    datasource: SparkDatasource,
+    expectation_suite: ExpectationSuite,
 ):
     """This Checkpoint only has one in-memory validation configured.
-    This means if we don't pass runtime validations we should get an error,
-    because nothing is actually going to be validated.
+    This means with a deserialized Checkpoint, if we don't pass runtime validations,
+    we should get an error because nothing is there to be validated.
     """
-    # in-memory DataFrame referenced by BatchRequest isn't serialized in Checkpoint config
+    batch_request = in_memory_asset.build_batch_request(dataframe=spark_test_df)
+    checkpoint_name = (
+        f"{batch_request.data_asset_name} | {expectation_suite.expectation_suite_name}"
+    )
+    validations = [
+        {
+            "expectation_suite_name": expectation_suite.expectation_suite_name,
+            "batch_request": batch_request,
+        },
+    ]
+    checkpoint: Checkpoint = context.add_checkpoint(
+        name=checkpoint_name,
+        validations=validations,
+    )
+
     # the Checkpoint from the fixture hasn't been round-tripped,
-    # so it will work as long as it stays in memory
+    # so it will work as long as everything stays in memory
     checkpoint_result: CheckpointResult = checkpoint.run()
     assert checkpoint_result.success
 
     # re-retrieve the Data Context, losing the in-memory DataFrame
-    checkpoint: Checkpoint = reloaded_context.get_checkpoint(name=checkpoint.name)
+    context = gx.get_context(
+        mode="cloud",
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=cloud_organization_id,
+        cloud_access_token=cloud_access_token,
+    )
+    checkpoint = context.get_checkpoint(name=checkpoint.name)
     # failure to pass runtime validations results in error
     with pytest.raises(RuntimeError):
         _ = checkpoint.run()
+
+    # now that the Data Context is unaware of the Dataframe,
+    # we pass a new Batch Request that is associated with the DataFrame at runtime
+    # the fixtures came from the old Data Context
+    # we have to get them again, because they exist in a new place in memory
+    datasource = context.get_datasource(datasource_name=datasource.name)
+    in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
+    batch_request = in_memory_asset.build_batch_request(dataframe=spark_test_df)
+    validations[0]["batch_request"] = batch_request
+
+    checkpoint_result = checkpoint.run(validations=validations)
+    assert checkpoint_result.success
+    assert len(validations) == len(checkpoint_result.run_results)
+
+    # clean up Checkpoint so associated entities can also be deleted in fixtures
+    context.delete_checkpoint(name=checkpoint_name)
