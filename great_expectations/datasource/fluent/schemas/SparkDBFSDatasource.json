@@ -131,6 +131,72 @@
                 "key"
             ]
         },
+        "DataAsset": {
+            "title": "DataAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "BatchConfig": {
+            "title": "BatchConfig",
+            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.\nTODO: Add splitters and sorters?",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "data_asset": {
+                    "$ref": "#/definitions/DataAsset"
+                }
+            },
+            "required": [
+                "name",
+                "data_asset"
+            ]
+        },
         "SplitterColumnValue": {
             "title": "SplitterColumnValue",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
@@ -373,7 +439,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -707,7 +775,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1047,7 +1117,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1205,7 +1277,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1369,7 +1443,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1510,7 +1586,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1657,7 +1735,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1962,7 +2042,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -2273,7 +2355,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -2411,7 +2495,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -2555,7 +2641,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -2648,7 +2736,9 @@
                 "batch_configs": {
                     "title": "Batch Configs",
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
