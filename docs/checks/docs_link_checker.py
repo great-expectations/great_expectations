@@ -51,7 +51,9 @@ class LinkChecker:
         self,
         docs_path: str,
         docs_root: str,
+        static_root: str,
         site_prefix: str,
+        static_prefix: str,
         skip_external: bool = False,
     ):
         """Initializes LinkChecker
@@ -60,11 +62,14 @@ class LinkChecker:
             docs_path: The directory of markdown (.md) files whose links you want to check
             docs_root: The root directory, used to resolve absolute and docroot paths
             site_prefix: The top-level folder (ex: /docs) used to resolve absolute links to local files
+            static_prefix: The top-level static folder (ex: /static) used to resolve absolute image links to local files
             skip_external: Whether or not to skip checking external (http..) links
         """
         self._docs_path = docs_path.strip(os.path.sep)
         self._docs_root = docs_root.strip(os.path.sep)
+        self._static_root = static_root.strip(os.path.sep)
         self._site_prefix = site_prefix.strip("/")
+        self._static_prefix = static_prefix.strip("/")
         self._skip_external = skip_external
 
         markdown_link_regex = r"!?\[(.*)\]\((.*?)\)"  # inline links, like [Description](link), images start with !
@@ -95,7 +100,7 @@ class LinkChecker:
         relative_link_regex = r"^(?P<path>\.\.?[\.\w\/-]+\.md)(?:#\S+)?$"
         self._relative_link_pattern = re.compile(relative_link_regex)
 
-        absolute_image_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+\.\w{3,4})$"
+        absolute_image_regex = r"^\/(?P<path>[\w\/-]+\.\w{3,4})$"
         self._absolute_image_pattern = re.compile(absolute_image_regex)
 
         # ending with a 3-4 character suffix
@@ -149,6 +154,9 @@ class LinkChecker:
     def _get_absolute_path(self, path: str) -> str:
         return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
 
+    def _get_absolute_static_path(self, path: str) -> str:
+        return os.path.join(self._static_root, self._get_os_path(path))
+
     def _get_relative_path(self, file: str, path: str) -> str:
         # link should be relative to the location of the current file
         directory = os.path.dirname(file)  # noqa: PTH120
@@ -182,7 +190,7 @@ class LinkChecker:
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
-        image_file = self._get_absolute_path(path)
+        image_file = self._get_absolute_static_path(path)
         if not os.path.isfile(image_file):  # noqa: PTH113
             logger.info(f"Absolute image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
@@ -338,15 +346,24 @@ class LinkChecker:
 )
 @click.option("--skip-external", is_flag=True)
 def scan_docs_click(
-    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+    path: str,
+    docs_root: Optional[str],
+    static_root: str,
+    site_prefix: str,
+    skip_external: bool,
 ) -> None:
-    code, message = scan_docs(path, docs_root, site_prefix, skip_external)
+    code, message = scan_docs(path, docs_root, static_root, site_prefix, skip_external)
     click.echo(message)
     exit(code)
 
 
 def scan_docs(
-    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+    path: str,
+    docs_root: Optional[str],
+    static_root: str,
+    site_prefix: str,
+    static_prefix: str,
+    skip_external: bool,
 ) -> tuple[int, str]:
     if docs_root is None:
         docs_root = path
@@ -355,7 +372,9 @@ def scan_docs(
 
     # prepare our return value
     result: List[LinkReport] = list()
-    checker = LinkChecker(path, docs_root, site_prefix, skip_external)
+    checker = LinkChecker(
+        path, docs_root, static_root, site_prefix, static_prefix, skip_external
+    )
 
     if os.path.isdir(path):  # noqa: PTH112
         # if the path is a directory, get all .md files within it
