@@ -170,30 +170,3 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies_with_qu
     # Should fully skip `nested_update` calls in method due to lacking an "expectation_suite_name" key
     dependencies = ec.get_evaluation_parameter_dependencies()
     assert dependencies == {}
-
-
-@pytest.mark.unit
-def test_expectation_configuration_patch(config4, config5, config6, config7):
-    assert not config5.isEquivalentTo(config4, match_type="runtime")
-    assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(
-        config4, match_type="runtime"
-    )
-
-    assert not config5.isEquivalentTo(config6, match_type="runtime")
-    assert config5.patch("add", "/value_set/-", 4).isEquivalentTo(
-        config6, match_type="runtime"
-    )
-
-    assert not config6.isEquivalentTo(config7, match_type="runtime")
-    assert config6.patch("remove", "/result_format", 4).isEquivalentTo(
-        config7, match_type="runtime"
-    )
-
-    with pytest.raises(ValueError):
-        config5.patch("move", "/value_set/-", 4)
-
-    with pytest.raises(IndexError):
-        config5.patch("add", "value_set", 4)
-
-    with pytest.raises(ValueError):
-        config5.patch("add", "/foo/-", 4)

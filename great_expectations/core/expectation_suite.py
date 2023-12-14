@@ -648,48 +648,6 @@ class ExpectationSuite(SerializableDictDot):
 
         self.expectation_configurations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
-    def patch_expectation(  # noqa: PLR0913
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        op: str,
-        path: str,
-        value: Any,
-        match_type: str,
-    ) -> ExpectationConfiguration:
-        """
-
-        Args:
-             expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
-                 find the expectation to patch.
-             op: A jsonpatch operation (one of 'add','update', or 'remove') (see http://jsonpatch.com/)
-             path: A jsonpatch path for the patch operation (see http://jsonpatch.com/)
-             value: The value to patch (see http://jsonpatch.com/)
-             match_type: The match type to use for find_expectation_index()
-
-        Returns: The patched ExpectationConfiguration
-
-        Raises:
-            No match
-            More than 1 match
-
-        """
-        found_expectation_indexes = self.find_expectation_indexes(
-            expectation_configuration, match_type
-        )
-
-        if len(found_expectation_indexes) < 1:
-            raise ValueError("No matching expectation was found.")
-        elif len(found_expectation_indexes) > 1:
-            raise ValueError(
-                "More than one matching expectation was found. Please be more specific with your search "
-                "criteria"
-            )
-
-        self.expectation_configurations[found_expectation_indexes[0]].patch(
-            op, path, value
-        )
-        return self.expectation_configurations[found_expectation_indexes[0]]
-
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,

@@ -195,11 +195,11 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         most_common_value = metrics.get("column.most_common_value")
         value_set = configuration.kwargs.get("value_set") or []
         expected_value_set = set(value_set)

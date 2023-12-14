@@ -500,7 +500,6 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
     # This method will utilize the computed metric to validate that your Expectation about the Table is true
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

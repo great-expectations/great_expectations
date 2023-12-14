@@ -271,6 +271,23 @@ module.exports = {
             },
           ]
         },
+        {
+          type: 'category',
+          label: 'Integration support policy',
+          link: { type: 'doc', id: 'contributing/application_integration_support' },
+          items: [
+            {
+              type: 'link',
+              label: 'GX-supported',
+              href: '/docs/contributing/application_integration_support#gx-supported',
+            },
+            {
+              type: 'link',
+              label: 'Community-supported',
+              href: '/docs/contributing/application_integration_support#community-supported',
+            },
+          ]
+        },   
       ]
     },
     {
@@ -478,6 +495,7 @@ module.exports = {
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
         'contributing/contributing_maturity',
+        'contributing/application_integration_support',
         'reference/customize_your_deployment',
         'reference/usage_statistics',
         {

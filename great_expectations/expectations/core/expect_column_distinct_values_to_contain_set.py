@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -81,6 +82,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         "value_set",
     )
 
+    @override
     @classmethod
     def _prescriptive_template(
         cls,
@@ -118,6 +120,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
 
         return renderer_configuration
 
+    @override
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
@@ -127,11 +130,13 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
+        if renderer_configuration.configuration is None:
+            raise ValueError("renderer_configuration.configuration is None.")
         params = substitute_none_for_missing(
             renderer_configuration.configuration.kwargs,
             [
@@ -171,29 +176,29 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
+    @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         observed_value_counts = metrics.get("column.value_counts")
-        value_set = self.get_success_kwargs().get("value_set")
+        value_set = self._get_success_kwargs()["value_set"]
 
         parsed_value_set = value_set
 
+        if observed_value_counts is None:
+            raise ValueError("observed_value_counts None, but is required")
         observed_value_set = set(observed_value_counts.index)
         expected_value_set = set(parsed_value_set)
 
