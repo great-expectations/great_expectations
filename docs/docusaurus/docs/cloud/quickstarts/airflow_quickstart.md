@@ -7,7 +7,7 @@ description: Connect GX Cloud to an Airflow Orchestrator.
 
 In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. You'll create a simple DAG that runs a Checkpoint that you have already set up in GX Cloud, and then trigger it through a local installation of an Airflow server.
 
-Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html). 
+Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
 
 ## Prerequisites
 
@@ -39,8 +39,8 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     ```
 
     The scheduler manages task scheduling and the web server starts the UI for Airflow.
-    
-3. Access Airflow UI: 
+
+3. Access Airflow UI:
 
     Once the web server is running, open a web browser and go to http://localhost:8080 (by default) to access the Airflow UI.
 
@@ -55,7 +55,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 2. Open the `gx_dag.py` DAG file and add the following code:
 
-    ```python 
+    ```python
     import os
     import great_expectations as gx
     from airflow import DAG
@@ -73,18 +73,18 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
     def run_gx_airflow():
 
-        context = gx.get_context()        
+        context = gx.get_context()
         checkpoint = context.get_checkpoint(name = CHECKPOINT_NAME)
         checkpoint.run()
 
     default_args = {
         'owner': 'airflow',
         'depends_on_past': False,
-        'start_date': datetime(2023, 8, 9),  
+        'start_date': datetime(2023, 8, 9),
     }
 
     gx_dag = DAG(
-        'gx_dag',  
+        'gx_dag',
         default_args=default_args,
         schedule_interval= '0 0 * * *', # This is set to run daily at midnight. Adjust as needed.
         catchup=False
