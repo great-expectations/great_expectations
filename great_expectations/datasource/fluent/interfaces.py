@@ -221,10 +221,8 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                 f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
-        batch_config = BatchConfig(
-            name=name,
-            data_asset=self,
-        )
+        batch_config = BatchConfig(name=name)
+        batch_config._data_asset = self
         self.batch_configs.append(batch_config)
         return batch_config
 
