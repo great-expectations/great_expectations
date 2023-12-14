@@ -166,7 +166,6 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         other_table_name = kwargs.get("other_table_name")
 
         # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
-
         table_row_count_metric_config_other: Optional[MetricConfiguration] = deepcopy(
             validation_dependencies.get_metric_configuration(
                 metric_name="table.row_count"
