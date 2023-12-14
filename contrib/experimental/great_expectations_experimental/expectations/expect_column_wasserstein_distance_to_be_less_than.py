@@ -5,7 +5,6 @@ from typing import Dict, Union
 
 from scipy import stats
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
@@ -143,8 +142,8 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
         [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
     """
 
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
@@ -284,14 +283,12 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.custom.wasserstein",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

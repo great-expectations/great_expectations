@@ -5,7 +5,6 @@ from typing import Dict, Union
 
 from scipy import stats
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
@@ -124,8 +123,8 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -269,14 +268,12 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.custom.normally_distributed",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

@@ -81,8 +81,8 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
     """
 
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 
@@ -251,14 +251,12 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.min",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

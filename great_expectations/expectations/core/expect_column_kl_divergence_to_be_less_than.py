@@ -164,8 +164,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
     tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
     bucketize_data: bool = True
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -196,15 +196,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
+        configuration = self.configuration
         partition_object = configuration.kwargs.get("partition_object")
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
@@ -358,11 +356,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def _validate(  # noqa: C901, PLR0912, PLR0915
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self._get_default_value("bucketize_data")
         )

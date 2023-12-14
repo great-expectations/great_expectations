@@ -70,8 +70,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
     """
 
-    min_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
 
     library_metadata = {
         "maturity": "production",
@@ -188,14 +188,12 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="table.row_count",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

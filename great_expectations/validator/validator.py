@@ -30,7 +30,9 @@ from marshmallow import ValidationError
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -519,30 +521,24 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            configuration = ExpectationConfiguration(
-                expectation_type=name,
-                kwargs=expectation_kwargs,
-                meta=meta,
-            )
-
-            exception_info: ExceptionInfo
-
-            if self.interactive_evaluation:
-                configuration.process_evaluation_parameters(
-                    self._expectation_suite.evaluation_parameters,
-                    True,
-                    self._data_context,
-                )
+            configuration: ExpectationConfiguration | None = None
 
             try:
-                expectation = expectation_impl(
-                    meta=configuration.meta, **configuration.kwargs
-                )
+                expectation = expectation_impl(**expectation_kwargs, meta=meta)
+                configuration = expectation.configuration
+
+                if self.interactive_evaluation:
+                    configuration.process_evaluation_parameters(
+                        self._expectation_suite.evaluation_parameters,
+                        True,
+                        self._data_context,
+                    )
+
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
                     validation_result = ExpectationValidationResult(
-                        expectation_config=copy.deepcopy(expectation.configuration)
+                        expectation_config=copy.deepcopy(configuration)
                     )
                 else:
                     validation_result = expectation.validate_(
@@ -576,6 +572,12 @@ class Validator:
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,
                     )
+
+                    if not configuration:
+                        configuration = ExpectationConfiguration(
+                            expectation_type=name, kwargs=expectation_kwargs, meta=meta
+                        )
+
                     validation_result = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,
@@ -863,7 +865,8 @@ class Validator:
             try:
                 runtime_configuration_default = copy.deepcopy(runtime_configuration)
 
-                result = configuration.metrics_validate(
+                expectation = configuration.to_domain_obj()
+                result = expectation.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration_default,
@@ -916,13 +919,12 @@ class Validator:
             if self.active_batch_id:
                 evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
-            expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies: ValidationDependencies = expectation_impl(
-                **evaluated_config.kwargs
-            ).get_validation_dependencies(
-                configuration=evaluated_config,
-                execution_engine=self._execution_engine,
-                runtime_configuration=runtime_configuration,
+            expectation = evaluated_config.to_domain_obj()
+            validation_dependencies: ValidationDependencies = (
+                expectation.get_validation_dependencies(
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
             )
 
             try:
