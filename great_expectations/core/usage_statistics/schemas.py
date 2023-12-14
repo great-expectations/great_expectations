@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 ###
 # These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
 # about usage statistics. Please reach out to the Great Expectations with any questions!

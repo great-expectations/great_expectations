@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 class ProfilerTypeMapping:
     """Useful backend type mapping for building profilers."""
 
