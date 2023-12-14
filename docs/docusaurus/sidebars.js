@@ -192,8 +192,8 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Run a Validation on a Data Asset containing a splitter',
-              href: '/docs/cloud/validations/manage_validations#run-a-validation-on-a-data-asset-containing-a-splitter',
+              label: 'Run a Validation on a Data Asset containing partitions',
+              href: '/docs/cloud/validations/manage_validations#run-a-validation-on-a-data-asset-containing-partitions',
             },
             {
               type: 'link',
