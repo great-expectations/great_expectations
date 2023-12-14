@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pycountry import countries
 
 from great_expectations.execution_engine import PandasExecutionEngine

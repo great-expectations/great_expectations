@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import phonenumbers
 from phonenumbers.phonenumberutil import NumberParseException
 

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pytz
 
 from great_expectations.compatibility import pyspark

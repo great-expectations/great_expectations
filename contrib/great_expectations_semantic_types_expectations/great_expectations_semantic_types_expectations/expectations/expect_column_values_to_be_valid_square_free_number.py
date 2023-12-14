@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import math
 
 from great_expectations.execution_engine import PandasExecutionEngine

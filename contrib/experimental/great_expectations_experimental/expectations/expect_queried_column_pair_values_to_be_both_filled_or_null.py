@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration

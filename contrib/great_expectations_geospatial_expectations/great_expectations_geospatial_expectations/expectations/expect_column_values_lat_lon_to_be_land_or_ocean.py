@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, List, Union
 
 from global_land_mask import globe

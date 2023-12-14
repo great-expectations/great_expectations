@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Dict, Optional
 
 from great_expectations.compatibility.pyspark import functions as F
