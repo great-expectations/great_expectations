@@ -217,7 +217,7 @@ class ExpectationsStore(Store):
                     local_suite=value,
                     cloud_suite=result.response["data"]["attributes"]["suite"],
                 )
-            return result
+            return result  # type: ignore[return-value]
         except gx_exceptions.StoreBackendError:
             # todo: this error is more precise than we can guarantee
             raise gx_exceptions.ExpectationSuiteError(
