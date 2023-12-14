@@ -34,7 +34,6 @@ from great_expectations.compatibility.pydantic import (
     Field,
     StrictBool,
     StrictInt,
-    root_validator,
     validate_arguments,
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
@@ -57,8 +56,6 @@ if TYPE_CHECKING:
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
-    # TODO: We should try to import the annotations from core.batch so we no longer need to call
-    #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core import (
         ExpectationSuite,
         ExpectationSuiteValidationResult,
@@ -776,55 +773,84 @@ class Batch:
     a spark or a sql database. An exception exists for pandas or any in-memory datastore.
     """
 
-    datasource: Datasource
-    data_asset: DataAsset
-    batch_request: BatchRequest
-    data: BatchData
-    id: str = ""
+    # Immutable Attributes
+    _datasource: Datasource
+    _data_asset: DataAsset
+    _batch_request: BatchRequest
+    _data: BatchData
+    _id: str
+
+    # Mutable Attribute
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    # metadata is "immutable" so you can't overwrite the dictionary. You can, however, do updates to it.
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Dict[str, Any]
 
-    # TODO: These legacy fields are currently required. They are only used in usage stats so we
-    #       should figure out a better way to anonymize and delete them.
-    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
-    batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
+    # Immutable Legacy Attributes
+    # TODO: These legacy fields are currently required. Further investigation needs to be done
+    #       to figure out how to delete them
+    _batch_markers: BatchMarkers
+    _batch_spec: BatchSpec
+    _batch_definition: BatchDefinition
 
-    class Config:
-        allow_mutation = False
-        arbitrary_types_allowed = True
+    def __init__(  # noqa: PLR0913
+        self,
+        datasource: Datasource,
+        data_asset: DataAsset,
+        batch_request: BatchRequest,
+        data: BatchData,
+        batch_markers: BatchMarkers,
+        batch_spec: BatchSpec,
+        batch_definition: BatchDefinition,
+        metadata: Dict[str] | None = None,
+    ):
+        self._datasource = datasource
+        self._data_asset = data_asset
+        self._batch_request = batch_request
+        self._data = data
+        self._batch_markers = batch_markers
+        self._batch_spec = batch_spec
+        self._batch_definition = batch_definition
+        self.metadata = metadata or {}
+        self._id = self._create_id()
 
-    @root_validator(pre=True)
-    def _set_id(cls, values: dict) -> dict:
-        # We need a unique identifier. This will likely change as we get more input.
+    def _create_id(self) -> str:
         options_list = []
-        for key, value in values["batch_request"].options.items():
+        for key, value in self.batch_request.options.items():
             if key != "path":
                 options_list.append(f"{key}_{value}")
+        return "-".join([self.datasource.name, self.data_asset.name, *options_list])
 
-        values["id"] = "-".join(
-            [values["datasource"].name, values["data_asset"].name, *options_list]
-        )
+    @property
+    def datasource(self) -> Datasource:
+        return self._datasource
 
-        return values
+    @property
+    def data_asset(self) -> DataAsset:
+        return self._data_asset
 
-    @classmethod
-    def update_forward_refs(cls):
-        from great_expectations.core.batch import (
-            BatchData,
-            BatchDefinition,
-            BatchMarkers,
-        )
-        from great_expectations.datasource.fluent import BatchRequest
+    @property
+    def batch_request(self) -> BatchRequest:
+        return self._batch_request
 
-        super().update_forward_refs(
-            BatchData=BatchData,
-            BatchDefinition=BatchDefinition,
-            BatchMarkers=BatchMarkers,
-            BatchRequest=BatchRequest,
-        )
+    @property
+    def data(self) -> BatchData:
+        return self._data
+
+    @property
+    def batch_markers(self) -> BatchMarkers:
+        return self._batch_markers
+
+    @property
+    def batch_spec(self) -> BatchSpec:
+        return self._batch_spec
+
+    @property
+    def batch_definition(self) -> BatchDefinition:
+        return self._batch_definition
+
+    @property
+    def id(self) -> str:
+        return self._id
 
     @public_api
     @validate_arguments
@@ -875,25 +901,14 @@ class Batch:
         )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
 
-    # Settable properties are supported in pydantic v1 and will not be backported:
-    # https://github.com/pydantic/pydantic/issues/3395
-    # https://github.com/pydantic/pydantic/issues/1577
-    # Issue 1577, does discuss a __setattr__ workaround which I've simplified for our use case.
-    # The one issue here is IDEs may think result_format is not settable so will highlight lines like
-    # `batch.result_format = "BOOLEAN_ONLY"` while the line will execute just fine.
     @property
     def result_format(self) -> ResultFormat:
         return self._validator.result_format
 
-    def _set_result_format(self, result_format: str | ResultFormat):
+    @result_format.setter
+    def result_format(self, result_format: str | ResultFormat):
         # We allow a str result_format because this is an interactive workflow
         self._validator.result_format = ResultFormat(result_format)
-
-    def __setattr__(self, key, value):
-        if key == "result_format":
-            self._set_result_format(value)
-        else:
-            super().__setattr__(key, value)
 
     @overload
     def validate(self, expect: Expectation) -> ExpectationValidationResult:
