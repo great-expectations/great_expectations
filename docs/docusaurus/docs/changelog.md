@@ -12,7 +12,7 @@ title: Changelog
 
 ### 0.18.5
 * [BUGFIX] validator head query limit ([#9071](https://github.com/great-expectations/great_expectations/pull/9071))
-* [BUGFIX] Databricks shared compute fix ([#9034](Ghttps://github.com/great-expectations/great_expectations/pull/9034))
+* [BUGFIX] Databricks shared compute fix ([#9034](https://github.com/great-expectations/great_expectations/pull/9034))
 * [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
 * [MAINTENANCE] add_or_update_checkpoint with expectation_suite_ge_cloud_id ([#9070](https://github.com/great-expectations/great_expectations/pull/9070))
 
