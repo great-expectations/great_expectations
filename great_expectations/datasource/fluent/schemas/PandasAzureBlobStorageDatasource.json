@@ -299,6 +299,11 @@
                         "$ref": "#/definitions/Sorter"
                     }
                 },
+                "batch_configs": {
+                    "items": {},
+                    "title": "Batch Configs",
+                    "type": "array"
+                },
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"

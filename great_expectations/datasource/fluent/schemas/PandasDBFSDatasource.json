@@ -299,6 +299,11 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "items": {},
+                    "title": "Batch Configs",
+                    "type": "array"
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
