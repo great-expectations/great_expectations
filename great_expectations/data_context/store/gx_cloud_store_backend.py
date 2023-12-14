@@ -310,8 +310,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if id:
             data["data"]["id"] = id
             url = urljoin(f"{url}/", id)
-        else:
-            url = ""
 
         try:
             response = self._session.put(url, json=data)
