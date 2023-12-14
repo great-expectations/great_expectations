@@ -7,10 +7,14 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import sqlalchemy as sa
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core import ExpectationValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
+from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -25,10 +29,6 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-    parse_result_format,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,

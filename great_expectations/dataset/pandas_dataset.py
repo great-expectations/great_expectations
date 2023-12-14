@@ -13,6 +13,7 @@ from dateutil.parser import parse
 from scipy import stats
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.dataset import Dataset
@@ -21,9 +22,6 @@ from great_expectations.dataset.util import (
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
     validate_mostly,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 
 logger = logging.getLogger(__name__)

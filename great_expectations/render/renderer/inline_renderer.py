@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
 from typing_extensions import TypedDict
 
-from great_expectations.core import ExpectationValidationResult
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
     RendererImpl,

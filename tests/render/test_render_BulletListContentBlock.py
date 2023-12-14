@@ -5,10 +5,8 @@ from collections import defaultdict
 
 import pytest
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.render.renderer.content_block import (
     ExpectationSuiteBulletListContentBlockRenderer,
 )

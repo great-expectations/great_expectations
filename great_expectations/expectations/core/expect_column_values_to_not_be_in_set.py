@@ -1,10 +1,15 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -23,13 +28,6 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationValidationResult
-    from great_expectations.core.evaluation_parameters import (
-        EvaluationParameterDict,
-    )
-    from great_expectations.expectations.expectation_configuration import (
-        ExpectationConfiguration,
-    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 

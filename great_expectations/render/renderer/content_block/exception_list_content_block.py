@@ -1,8 +1,8 @@
 from typing import Optional
 
-from great_expectations.core import ExpectationValidationResult
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.render import (
     RenderedBulletListContent,

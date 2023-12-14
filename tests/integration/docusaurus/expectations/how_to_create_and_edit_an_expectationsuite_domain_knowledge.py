@@ -26,9 +26,7 @@ suite = context.add_expectation_suite(expectation_suite_name="my_suite")
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 # Create an Expectation
 expectation_configuration_1 = ExpectationConfiguration(

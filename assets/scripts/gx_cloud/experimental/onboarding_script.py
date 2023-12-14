@@ -2,10 +2,10 @@ import pprint
 
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import BatchRequest, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
-from great_expectations.expectations.expectation_suite import ExpectationSuite
 
 # Make sure GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID
 # are set in your environment or config_variables.yml

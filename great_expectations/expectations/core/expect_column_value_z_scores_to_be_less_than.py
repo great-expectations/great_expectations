@@ -1,15 +1,11 @@
-from __future__ import annotations
+from typing import ClassVar, Tuple, Union
 
-from typing import TYPE_CHECKING, ClassVar, Tuple, Union
-
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.core.evaluation_parameters import (
-        EvaluationParameterDict,
-    )
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):

@@ -5,11 +5,9 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValueZScoresToBeLessThan
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration

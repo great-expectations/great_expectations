@@ -5,13 +5,13 @@ import pandas as pd
 import pytest
 
 from great_expectations.core.batch import Batch
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 

@@ -15,6 +15,9 @@ from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfigurationSchema,
+)
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
@@ -24,9 +27,6 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfigurationSchema,
-)
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -37,7 +37,7 @@ from great_expectations.render import (
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.expectation_configuration import (
+    from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig

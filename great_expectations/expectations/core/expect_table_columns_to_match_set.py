@@ -1,7 +1,13 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -15,14 +21,6 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import substitute_none_for_missing
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationValidationResult
-    from great_expectations.core.evaluation_parameters import (
-        EvaluationParameterDict,
-    )
-    from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.expectations.expectation_configuration import (
-        ExpectationConfiguration,
-    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 

@@ -1,14 +1,13 @@
 import logging
 
-from great_expectations.expectations.expectation_suite import (
+from .domain import Domain
+from .expectation_suite import (
     ExpectationConfiguration,
     ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteSchema,
     expectationSuiteSchema,
 )
-
-from .domain import Domain
 from .expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,

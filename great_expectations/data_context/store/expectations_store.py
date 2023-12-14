@@ -7,6 +7,7 @@ from typing import Dict
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
@@ -18,7 +19,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
-from great_expectations.expectations.expectation_suite import ExpectationSuiteSchema
 from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,

@@ -1,18 +1,18 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-    parse_result_format,
 )
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
@@ -29,14 +29,12 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.validator.validator import (
+    ValidationDependencies,
+)
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationValidationResult
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
-    from great_expectations.validator.validator import (
-        ValidationDependencies,
-    )
 
 
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):

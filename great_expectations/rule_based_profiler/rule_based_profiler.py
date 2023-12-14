@@ -73,11 +73,11 @@ from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:
     from great_expectations.core.domain import Domain
-    from great_expectations.data_context import AbstractDataContext
-    from great_expectations.data_context.store.profiler_store import ProfilerStore
-    from great_expectations.expectations.expectation_configuration import (
+    from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.store.profiler_store import ProfilerStore
     from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
         DomainBuilder,
     )

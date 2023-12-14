@@ -1,22 +1,18 @@
-from __future__ import annotations
+from typing import List, Optional, Union
 
-from typing import TYPE_CHECKING, List, Optional, Union
-
+from great_expectations.core import (
+    ExpectationConfiguration,
+)
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
-
-if TYPE_CHECKING:
-    from great_expectations.core import (
-        ExpectationConfiguration,
-    )
-    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
-    from great_expectations.core.expectation_validation_result import (
-        ExpectationValidationResult,
-    )
 
 try:
     import sqlalchemy as sa  # noqa: F401, TID251

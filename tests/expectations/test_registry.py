@@ -1,11 +1,9 @@
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
     ExpectColumnValuesToBeInSet,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_expectation_impl
 

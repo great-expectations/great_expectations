@@ -42,6 +42,10 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+    parse_result_format,
+)
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
@@ -81,10 +85,6 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-    parse_result_format,
 )
 from great_expectations.expectations.registry import (
     _registered_metrics,

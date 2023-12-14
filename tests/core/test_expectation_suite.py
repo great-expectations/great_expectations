@@ -9,6 +9,11 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations import set_context
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
@@ -16,13 +21,6 @@ from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.core import (
     ExpectColumnValuesToBeInSet,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
-from great_expectations.expectations.expectation_suite import (
-    ExpectationSuite,
-    expectationSuiteSchema,
 )
 from great_expectations.util import filter_properties_dict
 
