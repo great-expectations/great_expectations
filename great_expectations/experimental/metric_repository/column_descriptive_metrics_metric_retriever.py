@@ -55,10 +55,16 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         numeric_column_names = self._get_numeric_column_names(
             batch_request=batch_request, exclude_column_names=exclude_column_names
         )
+        timestamp_column_names = self._get_timestamp_column_names(
+            batch_request=batch_request, exclude_column_names=exclude_column_names
+        )
+
         numeric_column_metrics = self._get_numeric_column_metrics(
             batch_request=batch_request, column_list=numeric_column_names
         )
-
+        timestamp_column_metrics = self._get_timestamp_column_metrics(
+            batch_request=batch_request, column_list=timestamp_column_names
+        )
         all_column_names: List[str] = self._get_all_column_names(table_metrics)
         non_numeric_column_metrics = self._get_non_numeric_column_metrics(
             batch_request=batch_request, column_list=all_column_names
@@ -68,6 +74,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             chain(
                 table_metrics,
                 numeric_column_metrics,
+                timestamp_column_metrics,
                 non_numeric_column_metrics,
             )
         )
@@ -212,6 +219,49 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         return metrics
 
+    def _get_timestamp_column_metrics(
+        self, batch_request: BatchRequest, column_list: List[str]
+    ) -> Sequence[Metric]:
+        column_metric_names = [
+            "column.min",
+            "column.max",
+            "column.mean",
+            "column.median",
+        ]
+
+        column_metric_configs = self._generate_column_metric_configurations(
+            column_list, column_metric_names
+        )
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
+            batch_request, column_metric_configs
+        )
+
+        # Convert computed_metrics
+        metrics: list[Metric] = []
+        metric_lookup_key: _MetricKey
+
+        for metric_name in column_metric_names:
+            for column in column_list:
+                metric_lookup_key = (metric_name, f"column={column}", tuple())
+                value, exception = self._get_metric_from_computed_metrics(
+                    metric_name=metric_name,
+                    metric_lookup_key=metric_lookup_key,
+                    computed_metrics=computed_metrics,
+                    aborted_metrics=aborted_metrics,
+                )
+                # type is str here?
+                metrics.append(
+                    ColumnMetric[str](
+                        batch_id=batch_id,
+                        metric_name=metric_name,
+                        column=column,
+                        value=value,
+                        exception=exception,
+                    )
+                )
+
+        return metrics
+
     def _get_non_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
     ) -> Sequence[Metric]:
@@ -279,6 +329,27 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             batch_ids=[batch_id],
         )
         return numeric_column_names
+
+    def _get_timestamp_column_names(
+        self,
+        batch_request: BatchRequest,
+        exclude_column_names: List[str],
+    ) -> list[str]:
+        """Get the names of all numeric columns in the batch."""
+        validator = self.get_validator(batch_request=batch_request)
+        domain_builder = ColumnDomainBuilder(
+            include_semantic_types=[SemanticDomainTypes.DATETIME],
+            exclude_column_names=exclude_column_names,
+        )
+        assert isinstance(
+            validator.active_batch, Batch
+        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+        batch_id = validator.active_batch.id
+        column_names = domain_builder.get_effective_column_names(
+            validator=validator,
+            batch_ids=[batch_id],
+        )
+        return column_names
 
     def _generate_table_metric_configurations(
         self, table_metric_names: list[str]
