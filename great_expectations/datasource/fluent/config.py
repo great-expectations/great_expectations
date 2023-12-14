@@ -27,6 +27,9 @@ from great_expectations.compatibility.pydantic import Extra, Field, validator
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.constants import (
+    _ASSETS_KEY,
+    _BATCH_CONFIG_NAME_KEY,
+    _BATCH_CONFIGS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -390,17 +393,39 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
         datasource_config: dict
         for datasource_name, datasource_config in fluent_datasources.items():
             datasource_config[_DATASOURCE_NAME_KEY] = datasource_name
-            if "assets" in datasource_config:
-                data_assets: dict = datasource_config["assets"]
+            if _ASSETS_KEY in datasource_config:
+                data_assets: dict = datasource_config[_ASSETS_KEY]
+                print("a", type(data_assets))
                 data_asset_name: str
                 data_asset_config: dict
                 for data_asset_name, data_asset_config in data_assets.items():
                     data_asset_config[_DATA_ASSET_NAME_KEY] = data_asset_name
+                    if _BATCH_CONFIGS_KEY in data_asset_config:
+                        batch_config_list = _convert_batch_configs_from_yaml_to_internal_object_representation(
+                            data_asset_config[_BATCH_CONFIGS_KEY]
+                        )
+                        data_asset_config[_BATCH_CONFIGS_KEY] = batch_config_list
 
-                datasource_config["assets"] = list(data_assets.values())
+                datasource_config[_ASSETS_KEY] = list(data_assets.values())
 
             fluent_datasources[datasource_name] = datasource_config
 
         config[_FLUENT_DATASOURCES_KEY] = list(fluent_datasources.values())
 
     return config
+
+
+def _convert_batch_configs_from_yaml_to_internal_object_representation(
+    batch_configs: Dict[str, Dict]
+) -> List[Dict]:
+    print("ba", type(batch_configs))
+    for (
+        batch_config_name,
+        batch_config,
+    ) in batch_configs.items():
+        if not isinstance(batch_config_name, str):
+            raise ValueError("BatchConfig name must be a string")
+        if not isinstance(batch_config, dict):
+            raise ValueError("BatchConfig must be a dictionary")
+        batch_config[_BATCH_CONFIG_NAME_KEY] = batch_config_name
+    return list(batch_configs.values())

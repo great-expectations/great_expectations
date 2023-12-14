@@ -29,6 +29,8 @@ from great_expectations.datasource.fluent.config import (
 )
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
+    _BATCH_CONFIG_NAME_KEY,
+    _BATCH_CONFIGS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -114,6 +116,11 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
+                    "batch_configs": [
+                        {
+                            "name": "my_batch_config",
+                        }
+                    ],
                     "batch_metadata": {
                         "pipeline_filename": "${pipeline_filename}",
                     },
@@ -344,6 +351,31 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
 
             with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
             no_ids[ds_name]["assets"][asset_name].pop("id", None)
+
+            if _BATCH_CONFIGS_KEY in asset_config:
+                with_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
+                    batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
+                    for batch_config in with_ids[ds_name]["assets"][asset_name][
+                        _BATCH_CONFIGS_KEY
+                    ]
+                }
+                for batch_config in with_ids[ds_name]["assets"][asset_name][
+                    _BATCH_CONFIGS_KEY
+                ].values():
+                    batch_asset_id = uuid.uuid4()
+                    all_ids.append(str(batch_asset_id))
+                    batch_config["id"] = str(batch_asset_id)
+
+                no_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
+                    batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
+                    for batch_config in no_ids[ds_name]["assets"][asset_name][
+                        _BATCH_CONFIGS_KEY
+                    ]
+                }
+                for batch_config in no_ids[ds_name]["assets"][asset_name][
+                    _BATCH_CONFIGS_KEY
+                ].values():
+                    batch_config.pop("id", None)
 
     no_ids = (
         _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
