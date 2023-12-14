@@ -192,7 +192,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options not in ({}, None):
+        if options:
             raise ValueError(
                 "options is not currently supported for this DataAssets and must be None or {}."
             )
@@ -414,7 +414,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options not in ({}, None):
+        if options:
             raise ValueError(
                 "options is not currently supported for this DataAssets and must be None or {}."
             )
