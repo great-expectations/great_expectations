@@ -139,7 +139,7 @@ A session is the period of time that you’re signed in to your GX Cloud account
 
 :::note Support during the holiday season
 
-Customer support is available from December 25 to December 29, 2023. If you request support after December 29, the Developer Relations team will respond when they return the first week of January 2024.
+Customer support is not available from December 25 to December 29, 2023. If you request support after December 25, we will respond the first week of January 2024.
 
 :::
 
