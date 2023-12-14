@@ -94,8 +94,6 @@ execution_engine:
     class_name: SparkDFExecutionEngine
     spark_config:
         spark.master: local[*]
-        spark.executor.memory: 450m
-        spark.driver.memory: 6g
         spark.sql.shuffle.partitions: 2
         spark.default.parallelism: 4
 data_connectors:
@@ -240,10 +238,7 @@ def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
     # The structure of this config is dynamic based on PySpark version;
     # we deem asserting certain key-value pairs sufficient for purposes of this test
     expected_spark_config: Dict[str, Any] = {
-        "spark.app.name": "default_great_expectations_spark_application",
         "spark.default.parallelism": 4,
-        "spark.driver.memory": "6g",
-        "spark.executor.memory": "450m",
         "spark.master": "local[*]",
     }
     actual_spark_config: Dict[str, Any] = report["execution_engine"]["spark_config"]
@@ -915,8 +910,6 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
             class_name: SparkDFExecutionEngine
             spark_config:
                 spark.master: local[*]
-                spark.executor.memory: 450m
-                spark.driver.memory: 6g
                 spark.sql.shuffle.partitions: 2
                 spark.default.parallelism: 4
         data_connectors:

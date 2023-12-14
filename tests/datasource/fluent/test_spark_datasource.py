@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import json
 import logging
 import pathlib
 from typing import TYPE_CHECKING
@@ -9,6 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from great_expectations.compatibility import pydantic
+from great_expectations.datasource.fluent import TestConnectionError
 from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
     SparkConfig,
@@ -118,24 +118,22 @@ def test_spark_config_passed_to_execution_engine(
     persist,
     spark_session,
 ):
-    spark_config: SparkConfig | None = {
-        "spark.sql.catalogImplementation": "in-memory",
+    spark_config: SparkConfig = {
         "spark.app.name": "gx_spark_fluent_datasource_test",
         "spark.default.parallelism": 4,
-        "spark.driver.memory": "16g",
-        "spark.executor.memory": 471859200,
         "spark.master": "local[*]",
     }
     datasource = empty_data_context.sources.add_spark(
         name="my_spark_datasource",
         spark_config=spark_config,
-        force_reuse_spark_context=False,
         persist=persist,
     )
-    spark_config = json.loads(json.dumps(spark_config), parse_int=str, parse_float=str)
+    execution_engine_spark_config = datasource.get_execution_engine().config[
+        "spark_config"
+    ]
     assert is_candidate_subset_of_target(
         candidate=spark_config,
-        target=datasource.get_execution_engine().config["spark_config"],
+        target=execution_engine_spark_config,
     )
 
 
@@ -154,3 +152,25 @@ def test_build_batch_request_raises_if_missing_dataframe(
     assert "Cannot build batch request for dataframe asset without a dataframe" in str(
         e.value
     )
+
+
+@pytest.mark.spark
+def test_unmodifiable_config_option_warning(
+    empty_data_context: AbstractDataContext,
+    spark_session,
+):
+    spark_config = {"spark.executor.memory": "700m"}
+    with pytest.warns(RuntimeWarning):
+        _ = empty_data_context.sources.add_spark(
+            name="my_spark_datasource",
+            spark_config=spark_config,  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.unit
+def test_spark_test_connection(
+    empty_data_context: AbstractDataContext,
+):
+    # no spark marker means pyspark is not installed when this is run
+    with pytest.raises(TestConnectionError):
+        _ = empty_data_context.sources.add_spark(name="my_spark_datasource")

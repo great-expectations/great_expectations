@@ -11,9 +11,11 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 
 if TYPE_CHECKING:
     import py
@@ -168,11 +170,6 @@ def spark_session() -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:  # type: ignore[truthy-function]
-        return get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
 
     raise ValueError("spark tests are requested, but pyspark is not installed")

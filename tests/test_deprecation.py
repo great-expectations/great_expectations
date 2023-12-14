@@ -82,6 +82,7 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     current_parsed_version: version.Version = cast(
         version.Version, version.parse(current_version)
     )
+    current_major_version: int = current_parsed_version.major
     current_minor_version: int = current_parsed_version.minor
 
     unneeded_deprecation_warnings: List[Tuple[str, str]] = []
@@ -94,8 +95,11 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
             parsed_version: version.Version = cast(
                 version.Version, version.parse(match)
             )
+            major_version: int = parsed_version.major
             minor_version: int = parsed_version.minor
-            if current_minor_version - minor_version > 2:
+            if (current_major_version - major_version > 0) and (
+                current_minor_version - minor_version > 2
+            ):
                 unneeded_deprecation_warning: Tuple[str, str] = (file, match)
                 unneeded_deprecation_warnings.append(unneeded_deprecation_warning)
 

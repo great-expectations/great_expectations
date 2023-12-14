@@ -56,7 +56,6 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.util import (
-    get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.dataset import PandasDataset
@@ -512,7 +511,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             "DataType": pyspark.types.DataType,
             "NullType": pyspark.types.NullType,
         }
-        spark = get_or_create_spark_application(
+        spark = SparkDFExecutionEngine.get_or_create_spark_session(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
@@ -766,13 +765,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
-    spark = get_or_create_spark_application(
-        spark_config={
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "450m",
-            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-        }
-    )
+    spark = SparkDFExecutionEngine.get_or_create_spark_session()
     # We need to allow null values in some column types that do not support them natively, so we skip
     # use of df in this case.
     data_reshaped = list(zip(*(v for _, v in data.items())))  # create a list of rows
@@ -1308,7 +1301,6 @@ def build_spark_engine(
         batch_data_dict={
             batch_id: df,
         },
-        force_reuse_spark_context=True,
     )
     return execution_engine
 
@@ -1557,7 +1549,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if include_spark:
         from great_expectations.compatibility import pyspark
 
-        if not pyspark.SparkSession:  # type: ignore[truthy-function]
+        if not pyspark.pyspark:
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"

@@ -1,26 +1,23 @@
 from __future__ import annotations
 
-import copy
 import datetime
 import decimal
 import json
 import logging
-import os
 import pathlib
 import re
 import sys
 import uuid
+import warnings
 from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     List,
     Mapping,
     MutableMapping,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     overload,
@@ -40,6 +37,8 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
+
+# import of private class will be removed when deprecated methods are removed from this module
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
@@ -143,16 +142,6 @@ def in_jupyter_notebook():
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
-
-
-def in_databricks() -> bool:
-    """
-    Tests whether we are in a Databricks environment.
-
-    Returns:
-        bool
-    """
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
@@ -782,148 +771,55 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
-# noinspection PyPep8Naming
 def get_or_create_spark_application(
-    spark_config: Optional[Dict[str, Any]] = None,
-    force_reuse_spark_context: bool = True,
+    spark_config: Optional[dict[str, str]] = None,
+    force_reuse_spark_context: Optional[bool] = None,
 ) -> pyspark.SparkSession:
-    """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 
-    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-
-    Args:
-        spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
-        force_reuse_spark_context: Boolean flag indicating (if True) that creating new Spark context is forbidden.
-
-    Returns: SparkSession (new or existing as per "isStopped()" status).
-    """
-    if spark_config is None:
-        spark_config = {}
-    else:
-        spark_config = copy.deepcopy(spark_config)
-
-    name: Optional[str] = spark_config.get("spark.app.name")
-    if not name:
-        name = "default_great_expectations_spark_application"
-
-    spark_config.update({"spark.app.name": name})
-
-    spark_session: Optional[pyspark.SparkSession] = get_or_create_spark_session(
-        spark_config=spark_config
+    # deprecated-v1.0.0
+    warnings.warn(
+        "Utility method get_or_create_spark_application() is deprecated and will be removed in v1.0.0. "
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",
+        category=DeprecationWarning,
     )
-    if spark_session is None:
-        raise ValueError("SparkContext could not be started.")
-
-    # noinspection PyUnresolvedReferences
-    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
-    if not force_reuse_spark_context and spark_restart_required(
-        current_spark_config=spark_session.sparkContext.getConf().getAll(),
-        desired_spark_config=spark_config,
-    ):
-        if not sc_stopped:
-            try:
-                # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
-                logger.info("Stopping existing spark context to reconfigure.")
-                spark_session.sparkContext.stop()
-            except AttributeError:
-                logger.error(
-                    "Unable to load spark context; install optional spark dependency for support."
-                )
-        spark_session = get_or_create_spark_session(spark_config=spark_config)
-        if spark_session is None:
-            raise ValueError("SparkContext could not be started.")
-        # noinspection PyProtectedMember,PyUnresolvedReferences
-        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
-
-    if sc_stopped:
-        raise ValueError("SparkContext stopped unexpectedly.")
-
-    return spark_session
+    if force_reuse_spark_context is not None:
+        # deprecated-v1.0.0
+        warnings.warn(
+            "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+            "In environments that allow it, the existing Spark context will be reused, adding the "
+            "spark_config options that have been passed. If the Spark context cannot be updated with "
+            "the spark_config, the context will be stopped and restarted with the new spark_config.",
+            category=DeprecationWarning,
+        )
+    return SparkDFExecutionEngine.get_or_create_spark_session(
+        spark_config=spark_config  # type:ignore[arg-type]
+    )
 
 
-# noinspection PyPep8Naming
 def get_or_create_spark_session(
-    spark_config: Optional[Dict[str, str]] = None,
-) -> pyspark.SparkSession | None:
+    spark_config: Optional[dict[str, str]] = None,
+) -> pyspark.SparkSession:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
-
-    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
 
     Args:
         spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
 
     Returns:
-
+        SparkSession
     """
-    spark_session: Optional[pyspark.SparkSession]
-    try:
-        if spark_config is None:
-            spark_config = {}
-        else:
-            spark_config = copy.deepcopy(spark_config)
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 
-        builder = pyspark.SparkSession.builder
+    # deprecated-v1.0.0
+    warnings.warn(
+        "Utility method get_or_create_spark_session() is deprecated and will be removed in v1.0.0. "
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",
+        category=DeprecationWarning,
+    )
 
-        app_name: Optional[str] = spark_config.get("spark.app.name")
-        if app_name:
-            builder.appName(app_name)
-
-        for k, v in spark_config.items():
-            if k != "spark.app.name":
-                builder.config(k, v)
-
-        spark_session = builder.getOrCreate()
-        # noinspection PyProtectedMember,PyUnresolvedReferences
-        if spark_session.sparkContext._jsc.sc().isStopped():
-            raise ValueError("SparkContext stopped unexpectedly.")
-
-    except AttributeError:
-        logger.error(
-            "Unable to load spark context; install optional spark dependency for support."
-        )
-        spark_session = None
-
-    return spark_session
-
-
-def spark_restart_required(
-    current_spark_config: List[Tuple[str, Any]], desired_spark_config: dict
-) -> bool:
-    """Determines whether or not Spark session should be restarted, based on supplied current and desired configuration.
-
-    Either new "App" name or configuration change necessitates Spark session restart.
-
-    Args:
-        current_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
-        desired_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
-
-    Returns: Boolean flag indicating (if True) that Spark session restart is required.
-    """
-
-    # we can't change spark context config values within databricks runtimes
-    if in_databricks():
-        return False
-
-    current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
-    if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
-        "spark.app.name"
-    ):
-        return True
-
-    if not {(k, v) for k, v in desired_spark_config.items()}.issubset(
-        current_spark_config
-    ):
-        return True
-
-    return False
+    return SparkDFExecutionEngine.get_or_create_spark_session(
+        spark_config=spark_config or {},  # type: ignore[arg-type]
+    )
 
 
 def get_sql_dialect_floating_point_infinity_value(

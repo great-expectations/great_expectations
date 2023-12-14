@@ -3,8 +3,11 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
+import os
+import warnings
 from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -19,12 +22,12 @@ from typing import (
 
 from dateutil.parser import parse
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import py4j, pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -40,7 +43,6 @@ from great_expectations.core.metric_domain_types import (
 from great_expectations.core.util import (
     AzureUrl,
     convert_to_json_serializable,
-    get_or_create_spark_application,
 )
 from great_expectations.exceptions import (
     BatchSpecError,
@@ -71,10 +73,12 @@ from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
 
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.spark_datasource import SparkConfig
+
 logger = logging.getLogger(__name__)
 
 
-# noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
     assert len(column.columns) == 1, "Expected DataFrame with 1 column"
     col_name = column.columns[0]
@@ -82,6 +86,13 @@ def apply_dateutil_parse(column):
     return column.withColumn(col_name, _udf(col_name))
 
 
+@deprecated_argument(
+    argument_name="force_reuse_spark_context",
+    version="1.0",
+    message="The force_reuse_spark_context attribute is no longer part of any Spark Datasource classes. "
+    "The existing Spark context will be reused if possible. If a spark_config is passed that doesn't match "
+    "the existing config, the context will be stopped and restarted in local environments only.",
+)
 @public_api
 class SparkDFExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
@@ -93,7 +104,11 @@ class SparkDFExecutionEngine(ExecutionEngine):
     Args:
         *args: Positional arguments for configuring SparkDFExecutionEngine
         persist: If True (default), then creation of the Spark DataFrame is done outside this class
-        spark_config: Dictionary of Spark configuration options
+        spark_config: Dictionary of Spark configuration options. If there is an existing Spark context,
+          the spark_config will be used to update that context in environments that allow it. In local
+          environments the Spark context will be stopped and restarted with the new spark_config.
+        spark: A PySpark Session used to set the SparkDFExecutionEngine being configured. Will override
+          spark_config if provided.
         force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
         **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
 
@@ -188,28 +203,35 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def __init__(
         self,
         *args,
-        persist=True,
-        spark_config=None,
-        force_reuse_spark_context=True,
+        persist: bool = True,
+        spark_config: Optional[dict] = None,
+        spark: Optional[pyspark.SparkSession] = None,
+        force_reuse_spark_context: Optional[bool] = None,
         **kwargs,
     ) -> None:
         self._persist = persist
 
-        if spark_config is None:
-            spark_config = {}
-
-        spark: pyspark.SparkSession = get_or_create_spark_application(
-            spark_config=spark_config,
-            force_reuse_spark_context=force_reuse_spark_context,
-        )
-
-        spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
-
-        self.spark = spark
+        spark_config = spark_config or {}
+        self.spark: pyspark.SparkSession
+        if spark:
+            self.spark = spark
+        else:
+            self.spark = SparkDFExecutionEngine.get_or_create_spark_session(
+                spark_config=spark_config,
+            )
 
         azure_options: dict = kwargs.pop("azure_options", {})
         self._azure_options = azure_options
 
+        if force_reuse_spark_context is not None:
+            # deprecated-v1.0.0
+            warnings.warn(
+                "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+                "In environments that allow it, the existing Spark context will be reused, adding the "
+                "spark_config options that have been passed. If the Spark context cannot be updated with "
+                "the spark_config, the context will be stopped and restarted with the new spark_config.",
+                category=DeprecationWarning,
+            )
         super().__init__(*args, **kwargs)
 
         self._config.update(
@@ -232,6 +254,159 @@ class SparkDFExecutionEngine(ExecutionEngine):
             )
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
+
+    @staticmethod
+    def get_or_create_spark_session(
+        spark_config: Optional[SparkConfig] = None,
+    ) -> pyspark.SparkSession:
+        """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
+
+        Args:
+            spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
+
+        Returns:
+            SparkSession
+        """
+        spark_config = spark_config or {}
+
+        spark_session: pyspark.SparkSession
+        try:
+            spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+        except (ModuleNotFoundError, ValueError):
+            spark_session = pyspark.SparkSession.builder.getOrCreate()
+
+        return SparkDFExecutionEngine._get_session_with_spark_config(
+            spark_config=spark_config,
+            spark_session=spark_session,
+        )
+
+    @staticmethod
+    def _get_session_with_spark_config(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> pyspark.SparkSession:
+        """Attempts to apply spark_config to a SparkSession by either:
+             1. Updating the existing SparkSession with spark_config values
+             2. Restarting the existing SparkSession and applying only spark_config
+
+          If a spark_config option is unable to be set, a warning is raised.
+
+        Args:
+            spark_session: An existing pyspark.SparkSession.
+            spark_config: A dictionary of SparkSession.Builder.config objects.
+
+        Returns:
+            SparkSession
+        """
+        stopped: bool
+        (
+            spark_session,
+            stopped,
+        ) = SparkDFExecutionEngine._try_update_or_stop_misconfigured_spark_session(
+            spark_session=spark_session,
+            spark_config=spark_config,
+        )
+
+        if stopped:
+            spark_session = (
+                SparkDFExecutionEngine._start_spark_session_with_spark_config(
+                    spark_session=spark_session,
+                    spark_config=spark_config,
+                )
+            )
+
+        return spark_session
+
+    @staticmethod
+    def _start_spark_session_with_spark_config(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> pyspark.SparkSession:
+        builder = spark_session.builder
+        for key, value in spark_config.items():
+            if key == "spark.app.name":
+                builder.appName(value)
+            else:
+                builder.config(key, value)
+
+        return builder.getOrCreate()
+
+    @staticmethod
+    def _session_is_not_stoppable(
+        spark_session: pyspark.SparkSession,
+    ) -> bool:
+        return (
+            pyspark.SparkConnectSession  # type: ignore[truthy-function]  # returns false if module is not installed
+            and isinstance(spark_session, pyspark.SparkConnectSession)
+        ) or (
+            os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
+        )
+
+    @staticmethod
+    def _try_update_or_stop_misconfigured_spark_session(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> tuple[pyspark.SparkSession, bool]:
+        """Tries to update the SparkSession if it doesn't have the options specified in spark_config set.
+        If updates fail, and the SparkSession can be stopped, it will be stopped.
+        If the SparkSession cannot be stopped, it will be returned unaltered.
+
+        Warns if the SparkSession was stopped or a config option could not be set.
+
+        Returns:
+            SparkSession, Boolean specifying if SparkSession is stopped
+        """
+        stopped = False
+        warning_messages = []
+        for key, value in spark_config.items():
+            # if the user set a spark_config option that doesn't match the existing session
+            # try to update it, otherwise stop the spark session
+            try:
+                # conf.get will look first at the runtime conf and then at the sparkContext conf
+                try:
+                    current_value = spark_session.conf.get(key)
+                # Py4J Java Error can be raised if the option has not been set on the context at all
+                except py4j.protocol.Py4JJavaError:
+                    current_value = None
+                if key != "spark.app.name" and (
+                    current_value != value or current_value is None
+                ):
+                    # attempts to update the runtime config
+                    spark_session.conf.set(key, value)
+                elif (
+                    key == "spark.app.name"
+                    and spark_session.sparkContext.appName != value
+                ):
+                    spark_session.sparkContext.appName = value
+            # attribute error can be raised for connect sessions that haven't implemented a conf for sparkContext method
+            # analysis exception can be raised in environments that don't allow updating config of that option
+            except (
+                pyspark.PySparkAttributeError,
+                pyspark.AnalysisException,
+            ):
+                if SparkDFExecutionEngine._session_is_not_stoppable(
+                    spark_session=spark_session
+                ):
+                    warning_messages.append(
+                        f"Passing spark_config option `{key}` had no effect, because in this environment "
+                        "it is not modifiable and the Spark Session cannot be restarted."
+                    )
+                else:
+                    spark_session.stop()
+                    stopped = True
+                    warning_messages.append(
+                        f"Spark Session was restarted, because `{key}` "
+                        "is not modifiable in this environment."
+                    )
+                    break
+
+        for message in warning_messages:
+            warnings.warn(
+                message=message,
+                category=RuntimeWarning,
+            )
+
+        return spark_session, stopped
 
     @override
     def load_batch_data(  # type: ignore[override]
