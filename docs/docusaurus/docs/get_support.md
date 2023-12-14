@@ -4,6 +4,12 @@ title: 'Get GX OSS support'
 description: Learn what resources are available to help you resolve issues with GX OSS.
 ---
 
+:::note Support during the holiday season
+
+Customer support is available from December 25 to December 29, 2023. If you request support after December 29, the Developer Relations team will respond when they return in the first week of January 2024.
+
+:::
+
 GX is open source software (OSS) and relies on an active user community for its continued success. Input from users like you helps Great Expectations and the community build its collective knowledge and improve GX OSS. Knowing how and where to seek support will help you get the answers you need to resolve issues.
 
 ## Try solving your issue first
