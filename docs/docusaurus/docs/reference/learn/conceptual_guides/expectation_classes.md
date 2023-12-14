@@ -119,6 +119,6 @@ Now that you've learned about Expectation classes, you can use the following res
 
 - [Expectations naming conventions](/docs/oss/contributing/style_guides/code_style#expectations)
 
-- [Standard arguments for Expectations](/docs/reference/learn/expectations/standard_arguments.md)
+- [Standard arguments for Expectations](/docs/reference/learn/expectations/standard_arguments)
 
-- [Result format](/docs/reference/learn/expectations/result_format.md)
+- [Result format](/docs/reference/learn/expectations/result_format)
