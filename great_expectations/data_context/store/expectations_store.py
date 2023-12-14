@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import Dict
+from typing import Dict, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -14,6 +14,7 @@ from great_expectations.data_context.store.database_store_backend import (
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -193,24 +194,28 @@ class ExpectationsStore(Store):
         value = self._add_ids_to_new_objects(value)
         try:
             result = super()._add(key=key, value=value, **kwargs)
-            value = self._add_cloud_ids_to_local_suite_and_expectations(
-                local_suite=value,
-                cloud_suite=result.response["data"]["attributes"]["suite"],
-            )
+            if self.cloud_mode:
+                result = cast(GXCloudResourceRef, result)
+                value = self._add_cloud_ids_to_local_suite_and_expectations(
+                    local_suite=value,
+                    cloud_suite=result.response["data"]["attributes"]["suite"],
+                )
             return result
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
-    def _update(self, key, value, **kwargs):
+    def _update(self, key, value, **kwargs) -> GXCloudResourceRef | str:
         value = self._add_ids_to_new_objects(value)
         try:
             result = super()._update(key=key, value=value, **kwargs)
-            value = self._add_cloud_ids_to_local_suite_and_expectations(
-                local_suite=value,
-                cloud_suite=result.response["data"]["attributes"]["suite"],
-            )
+            if self.cloud_mode:
+                result = cast(GXCloudResourceRef, result)
+                value = self._add_cloud_ids_to_local_suite_and_expectations(
+                    local_suite=value,
+                    cloud_suite=result.response["data"]["attributes"]["suite"],
+                )
             return result
         except gx_exceptions.StoreBackendError:
             # todo: this error is more precise than we can guarantee
