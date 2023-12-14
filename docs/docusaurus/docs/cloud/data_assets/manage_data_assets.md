@@ -51,7 +51,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
 
-    - Select **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+    - Select **Test connection** if you want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
 7. Click **Continue**.
 
@@ -59,11 +59,11 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+    - **Data Asset name**: Enter a name for the Data Asset. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-9. Select the **Complete Asset** tab to create Expectations and run validations on the entire Data Asset, or select the **Batches** tab to create Expectations and run validations on subsets of Data Asset records and then complete the following fields:
+9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
     - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
