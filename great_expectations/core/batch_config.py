@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility import pydantic
 
-
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest,
@@ -19,6 +18,8 @@ class BatchConfig(pydantic.BaseModel):
     References the DataAsset to be used, and any additional parameters needed to fetch the data.
     """
 
+    id: Optional[str] = None
+    name: str
     data_asset: DataAsset
 
     def build_batch_request(
