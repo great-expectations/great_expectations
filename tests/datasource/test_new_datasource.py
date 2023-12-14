@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import pandas as pd
 import pytest
@@ -23,6 +23,7 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
 from great_expectations.datasource.new_datasource import Datasource
+from great_expectations.util import is_candidate_subset_of_target
 from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
@@ -92,8 +93,6 @@ execution_engine:
     class_name: SparkDFExecutionEngine
     spark_config:
         spark.master: local[*]
-        spark.executor.memory: 450m
-        spark.driver.memory: 6g
         spark.sql.shuffle.partitions: 2
         spark.default.parallelism: 4
 data_connectors:
@@ -183,6 +182,107 @@ data_connectors:
     )
 
     return sample_datasource
+
+
+@pytest.mark.filesystem
+def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
+    report = basic_pandas_datasource_v013.self_check()
+    assert report == {
+        "execution_engine": {
+            "caching": True,
+            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+            "class_name": "PandasExecutionEngine",
+            "discard_subset_failing_expectations": False,
+            "boto3_options": {},
+            "azure_options": {},
+            "gcs_options": {},
+        },
+        "data_connectors": {
+            "count": 2,
+            "my_filesystem_data_connector": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "data_asset_count": 1,
+                "example_data_asset_names": ["Titanic"],
+                "data_assets": {
+                    "Titanic": {
+                        "batch_definition_count": 0,
+                        "example_data_references": [],
+                    }
+                },
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
+            },
+            "test_runtime_data_connector": {
+                "class_name": "RuntimeDataConnector",
+                "data_asset_count": 0,
+                "example_data_asset_names": [],
+                "data_assets": {},
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
+            },
+        },
+    }
+
+
+@pytest.mark.spark
+def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
+    """What does this test do and why?
+
+    We are testing that the spark application referenced in the datasource
+    is the same one as the global spark application.
+    """
+    report: dict = basic_spark_datasource.self_check()
+
+    # The structure of this config is dynamic based on PySpark version;
+    # we deem asserting certain key-value pairs sufficient for purposes of this test
+    expected_spark_config: dict[str, Any] = {
+        "spark.default.parallelism": 4,
+        "spark.master": "local[*]",
+    }
+    actual_spark_config: dict[str, Any] = report["execution_engine"]["spark_config"]
+
+    assert is_candidate_subset_of_target(
+        candidate=expected_spark_config, target=actual_spark_config
+    )
+
+
+@pytest.mark.spark
+def test_basic_spark_datasource_self_check(basic_spark_datasource):
+    report: dict = basic_spark_datasource.self_check()
+
+    # Remove Spark-specific information so we can assert against the rest of the payload
+    report["execution_engine"].pop("spark_config")
+
+    assert report == {
+        "data_connectors": {
+            "count": 2,
+            "simple_filesystem_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "data_asset_count": 0,
+                "data_assets": {},
+                "example_data_asset_names": [],
+                "example_unmatched_data_references": [],
+                "unmatched_data_reference_count": 0,
+            },
+            "test_runtime_data_connector": {
+                "class_name": "RuntimeDataConnector",
+                "data_asset_count": 0,
+                "example_data_asset_names": [],
+                "data_assets": {},
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
+            },
+        },
+        "execution_engine": {
+            "caching": True,
+            "azure_options": {},
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
+            "persist": True,
+        },
+    }
 
 
 @pytest.mark.filesystem
@@ -790,8 +890,6 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
             class_name: SparkDFExecutionEngine
             spark_config:
                 spark.master: local[*]
-                spark.executor.memory: 450m
-                spark.driver.memory: 6g
                 spark.sql.shuffle.partitions: 2
                 spark.default.parallelism: 4
         data_connectors:

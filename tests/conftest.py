@@ -41,7 +41,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
@@ -86,6 +85,7 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -178,10 +178,8 @@ def spark_warehouse_session(tmp_path_factory):
     pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: pyspark.SparkSession = get_or_create_spark_application(
+    spark: pyspark.SparkSession = SparkDFExecutionEngine.get_or_create_spark_session(
         spark_config={
-            "spark.sql.catalogImplementation": "in-memory",
-            "spark.executor.memory": "450m",
             "spark.sql.warehouse.dir": spark_warehouse_path,
         }
     )
@@ -543,13 +541,7 @@ def spark_session(test_backends) -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:
-        return get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
 
     raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -645,13 +637,7 @@ def spark_session_v012(test_backends):
         import pyspark  # noqa: F401
         from pyspark.sql import SparkSession  # noqa: F401
 
-        return get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -2694,7 +2680,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
             )
         ),
     )
-    return get_context(context_root_dir=context_path)
+    return get_context(context_root_dir=context_path, cloud_mode=False)
 
 
 @pytest.fixture
