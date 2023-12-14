@@ -29,85 +29,6 @@ from great_expectations.util import (
 class ExpectationsStore(Store):
     """
     An Expectations Store provides a way to store Expectation Suites accessible to a Data Context.
-
-    --ge-feature-maturity-info--
-
-        id: expectations_store_git
-        title: Expectation Store - Git
-        icon:
-        short_description: Store Expectations in Git
-        description: Use a git repository to store expectation suites.
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html#additional-notes
-        maturity: Production
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: N/A
-            documentation_completeness: Complete
-            bug_risk: Low
-
-        id: expectations_store_filesystem
-        title: Expectation Store - Filesystem
-        icon:
-        short_description: Filesystem-based Expectations Store
-        description: Filesystem-based Expectations Store
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html
-        maturity: Production
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: N/A
-            documentation_completeness: Complete
-            bug_risk: Low
-
-        id: expectations_store_s3
-        title: Expectation Store - S3
-        icon:
-        short_description: S3
-        description: Use an Amazon Web Services S3 bucket to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html
-        maturity: Beta
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: Minimal
-            documentation_completeness: Complete
-            bug_risk: Low
-
-        id: expectations_store_gcs
-        title: Expectation Store - GCS
-        icon:
-        short_description: Cloud Storage
-        description: Use a Google Cloud Platform Cloud Storage bucket to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.html
-        maturity: Beta
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: Minimal
-            documentation_completeness: Partial
-            bug_risk: Low
-
-        id: expectations_store_azure_blob_storage
-        title: Expectation Store - Azure
-        icon:
-        short_description: Azure Blob Storage
-        description:  Use Microsoft Azure Blob Storage to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html
-        maturity: N/A
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Minimal
-            unit_test_coverage: Minimal
-            integration_infrastructure_test_coverage: Minimal
-            documentation_completeness: Minimal
-            bug_risk: Moderate
-
-    --ge-feature-maturity-info--
     """
 
     _key_class = ExpectationSuiteIdentifier
@@ -206,8 +127,7 @@ class ExpectationsStore(Store):
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
-    @override
-    def _update(self, key, value, **kwargs) -> GXCloudResourceRef | None:
+    def _update(self, key, value, **kwargs) -> None:
         value = self._add_ids_to_new_objects(value)
         try:
             result = super()._update(key=key, value=value, **kwargs)
@@ -217,7 +137,6 @@ class ExpectationsStore(Store):
                     local_suite=value,
                     cloud_suite=result.response["data"]["attributes"]["suite"],
                 )
-            return result  # type: ignore[return-value]
         except gx_exceptions.StoreBackendError:
             # todo: this error is more precise than we can guarantee
             raise gx_exceptions.ExpectationSuiteError(
