@@ -206,7 +206,8 @@ class ExpectationsStore(Store):
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
-    def _update(self, key, value, **kwargs) -> GXCloudResourceRef | str:
+    @override
+    def _update(self, key, value, **kwargs) -> GXCloudResourceRef | None:
         value = self._add_ids_to_new_objects(value)
         try:
             result = super()._update(key=key, value=value, **kwargs)
@@ -241,7 +242,6 @@ class ExpectationsStore(Store):
         if not self.cloud_mode:
             # non-cloud backends must create IDs prior to passing suite to store backend.
             return local_suite
-        # todo: this is currently not being set by the server, but it should be
         if not local_suite.ge_cloud_id:
             local_suite.ge_cloud_id = cloud_suite["ge_cloud_id"]
         # replace local expectations with those returned from the backend
