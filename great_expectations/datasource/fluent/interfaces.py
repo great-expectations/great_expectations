@@ -215,6 +215,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     def add_batch_config(self, name: str) -> BatchConfig:
+        batch_config_names = {bc.name for bc in self.batch_configs}
+        if name in batch_config_names:
+            raise ValueError(
+                f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
+            )
+
         batch_config = BatchConfig(
             name=name,
             data_asset=self,
