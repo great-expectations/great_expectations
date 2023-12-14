@@ -7,7 +7,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
     IDDict,
 )
@@ -29,6 +28,9 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMax,
     ColumnValuesNonNull,

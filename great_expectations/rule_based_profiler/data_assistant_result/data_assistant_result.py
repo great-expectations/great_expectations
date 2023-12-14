@@ -78,8 +78,10 @@ from great_expectations.types import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationSuite,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.rule_based_profiler.config import (
         RuleBasedProfilerConfig,

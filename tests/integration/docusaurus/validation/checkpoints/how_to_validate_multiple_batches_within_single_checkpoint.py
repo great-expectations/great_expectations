@@ -1,5 +1,7 @@
 import great_expectations as gx
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 context = gx.get_context()
 

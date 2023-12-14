@@ -8,7 +8,6 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationSuite,
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -16,6 +15,9 @@ from great_expectations.core import (
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.validator.validator import Validator
 

@@ -2,10 +2,7 @@ from typing import Optional
 
 import uszipcode
 
-# !!! This giant block of imports should be something simpler, such as:
-# from great_exepectations.helpers.expectation_creation import *
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import (  # SparkDFExecutionEngine,
@@ -14,6 +11,12 @@ from great_expectations.execution_engine import (  # SparkDFExecutionEngine,
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
+)
+
+# !!! This giant block of imports should be something simpler, such as:
+# from great_exepectations.helpers.expectation_creation import *
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,

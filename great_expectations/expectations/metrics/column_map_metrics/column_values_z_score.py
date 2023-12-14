@@ -24,7 +24,9 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 if TYPE_CHECKING:
     import pandas as pd
 
-    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ColumnValuesZScore(ColumnMapMetricProvider):

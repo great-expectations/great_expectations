@@ -18,13 +18,15 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import IDDict
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationConfiguration
     from great_expectations.core.metric_function_types import (
         MetricFunctionTypes,
         MetricPartialFunctionTypes,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.render import (
         AtomicDiagnosticRendererType,

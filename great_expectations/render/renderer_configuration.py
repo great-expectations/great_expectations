@@ -33,10 +33,6 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pydantic import generics as pydantic_generics
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
-)
 from great_expectations.render.exceptions import RendererConfigurationError
 
 if TYPE_CHECKING:
@@ -44,6 +40,12 @@ if TYPE_CHECKING:
         AbstractSetIntStr,
         DictStrAny,
         MappingIntStrAny,
+    )
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
 
 

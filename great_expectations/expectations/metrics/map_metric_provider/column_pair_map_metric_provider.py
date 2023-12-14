@@ -8,8 +8,10 @@ from typing import (
 )
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine

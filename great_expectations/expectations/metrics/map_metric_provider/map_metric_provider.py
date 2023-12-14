@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -21,6 +20,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
 )
 from great_expectations.expectations.metrics.map_metric_provider.column_map_condition_auxilliary_methods import (
     _pandas_column_map_condition_value_counts,
