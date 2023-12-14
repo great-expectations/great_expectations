@@ -226,7 +226,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     config_builder: DefaultExpectationConfigurationBuilder = (
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
-            value="$parameter.my_column_min.value[-1]",
+            min_value="$parameter.my_column_min.value[-1]",
             column="$domain.domain_kwargs.column",
         )
     )

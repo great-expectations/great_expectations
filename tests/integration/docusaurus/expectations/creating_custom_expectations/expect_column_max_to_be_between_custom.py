@@ -212,7 +212,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,
@@ -221,7 +220,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
         column_max = metrics["column.custom_max"]
 
         # Obtaining components needed for validation
-        success_kwargs = self.get_success_kwargs()
+        success_kwargs = self._get_success_kwargs()
         min_value = success_kwargs.get("min_value")
         max_value = success_kwargs.get("max_value")
         strict_min = success_kwargs.get("strict_min")

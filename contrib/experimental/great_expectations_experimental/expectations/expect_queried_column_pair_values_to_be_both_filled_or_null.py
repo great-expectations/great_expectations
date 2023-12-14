@@ -92,7 +92,6 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
