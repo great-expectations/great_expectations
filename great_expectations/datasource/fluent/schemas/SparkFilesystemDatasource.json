@@ -177,7 +177,7 @@
         },
         "BatchConfig": {
             "title": "BatchConfig",
-            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.\nTODO: Add splitters and sorters?",
+            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
                 "id": {
