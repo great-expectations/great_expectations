@@ -148,6 +148,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'View Expectation history',
+              href: '/docs/cloud/expectations/manage_expectations#view-expectation-history',
+            },
+            {
+              type: 'link',
               label: 'Delete an Expectation',
               href: '/docs/cloud/expectations/manage_expectations#delete-an-expectation',
             },
