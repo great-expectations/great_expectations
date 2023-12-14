@@ -154,17 +154,17 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
+
+        configuration = self.configuration
         kwargs = configuration.kwargs if configuration else {}
         other_table_name = kwargs.get("other_table_name")
+
         # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
 
         table_row_count_metric_config_other: Optional[MetricConfiguration] = deepcopy(
@@ -200,7 +200,6 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,

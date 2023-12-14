@@ -42,11 +42,11 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         metrics = convert_to_json_serializable(data=metrics)
         query_result = list(metrics.get("query.template_values")[0].values())[0]
         value = configuration["kwargs"].get("value")
