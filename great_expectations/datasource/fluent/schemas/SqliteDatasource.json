@@ -344,6 +344,11 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
+                },
                 "splitter": {
                     "title": "Splitter",
                     "anyOf": [
@@ -422,6 +427,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "splitter": {
                     "title": "Splitter",

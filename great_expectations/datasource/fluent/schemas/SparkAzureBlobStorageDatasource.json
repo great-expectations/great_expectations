@@ -374,6 +374,11 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -702,6 +707,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1038,6 +1048,11 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1190,6 +1205,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1350,6 +1370,11 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1485,6 +1510,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1627,6 +1657,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -1927,6 +1962,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -2234,6 +2274,11 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -2366,6 +2411,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
@@ -2506,6 +2556,11 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -2593,6 +2648,11 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {}
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
