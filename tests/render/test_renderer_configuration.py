@@ -5,9 +5,9 @@ import pytest
 from great_expectations.compatibility.pydantic import (
     error_wrappers as pydantic_error_wrappers,
 )
-from great_expectations.core import (
+from great_expectations.core import ExpectationValidationResult
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,

@@ -12,10 +12,7 @@ except ImportError:
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 from typing import Any, Dict, Optional, Tuple
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 #!!! This giant block of imports should be something simpler, such as:
@@ -28,6 +25,9 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (

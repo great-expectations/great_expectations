@@ -7,10 +7,7 @@ import dateutil
 import pandas as pd
 import pytest
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -18,6 +15,9 @@ from great_expectations.core.evaluation_parameters import (
     parse_evaluation_parameter,
 )
 from great_expectations.exceptions import EvaluationParameterError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 @pytest.mark.unit

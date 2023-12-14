@@ -3,9 +3,9 @@ import traceback
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 from great_expectations.alias_types import JSONValues
-from great_expectations.core import (
+from great_expectations.core import ExpectationValidationResult
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
     _registered_renderers,

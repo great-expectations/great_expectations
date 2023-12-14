@@ -1,9 +1,9 @@
 from typing import List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
+from great_expectations.core import ExpectationValidationResult
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.content_block.content_block import (

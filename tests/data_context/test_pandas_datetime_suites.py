@@ -4,8 +4,8 @@ from tempfile import TemporaryDirectory
 import pandas as pd
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import PandasDataset
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 
 
 @pytest.mark.filesystem

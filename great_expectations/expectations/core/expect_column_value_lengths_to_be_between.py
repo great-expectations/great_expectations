@@ -1,12 +1,9 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -37,6 +34,11 @@ except ImportError:
     pass
 
 if TYPE_CHECKING:
+    from great_expectations.core import ExpectationValidationResult
+    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 

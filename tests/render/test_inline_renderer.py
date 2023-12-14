@@ -2,11 +2,13 @@ from typing import List
 
 import pytest
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,

@@ -30,13 +30,6 @@ from marshmallow import ValidationError
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-)
-from great_expectations.core.expectation_suite import (
-    ExpectationSuite,
-    expectationSuiteSchema,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -53,6 +46,13 @@ from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
+from great_expectations.expectations.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,

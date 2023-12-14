@@ -3,8 +3,8 @@ import uuid
 import pytest
 
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 
 
 @pytest.fixture

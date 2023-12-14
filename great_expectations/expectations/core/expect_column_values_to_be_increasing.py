@@ -1,10 +1,8 @@
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -22,6 +20,10 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import ExpectationValidationResult
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)

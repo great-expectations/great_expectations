@@ -8,8 +8,6 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
 from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -28,6 +26,10 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 
 
 class DatasourceStoreSpy(DatasourceStore):

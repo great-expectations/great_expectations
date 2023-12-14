@@ -5,12 +5,12 @@ from unittest import mock
 import pytest
 
 from great_expectations import project_manager
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
 )
+from great_expectations.expectations.expectation_suite import ExpectationSuite
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
 from tests.core.usage_statistics.util import (
