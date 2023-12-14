@@ -9,7 +9,7 @@ import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_inst
 import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
-Use this quickstart to install GX, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](../getting_started/how_to_use_great_expectations_in_databricks.md) or [Get Started with GX and SQL](../getting_started/how_to_use_great_expectations_with_sql.md).
+Use this quickstart to install GX, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](./getting_started/how_to_use_great_expectations_in_databricks.md) or [Get Started with GX and SQL](./getting_started/how_to_use_great_expectations_with_sql.md).
 
 :::note Great Expectations Cloud
 
