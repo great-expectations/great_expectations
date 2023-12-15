@@ -98,12 +98,6 @@ data_context_init_with_dependencies: dict = {
             },
             {
                 "install_environment": "required",
-                "package_name": "colorama",
-                "installed": True,
-                "version": "0.4.4",
-            },
-            {
-                "install_environment": "required",
                 "package_name": "cryptography",
                 "installed": True,
                 "version": "3.4.8",

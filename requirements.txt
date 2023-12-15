@@ -1,5 +1,4 @@
 altair>=4.2.1,<5.0.0
-colorama>=0.4.3
 cryptography>=3.2
 Ipython>=7.16.3
 ipywidgets>=7.5.1
