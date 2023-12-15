@@ -30,7 +30,7 @@ The complete code used in the following examples is available on GitHub:
 
 <Prerequisites>
 
-- A complete Databricks setup including a running Databricks cluster with an attached notebook
+- A complete Databricks setup, including a running Databricks cluster with an attached notebook
 - Access to [DBFS](https://docs.databricks.com/dbfs/index.html)
 
 </Prerequisites>
