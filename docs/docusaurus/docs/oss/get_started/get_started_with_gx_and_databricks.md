@@ -18,7 +18,7 @@ To use GX with Databricks, you'll complete the following tasks:
 - Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
 - Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
 
-The information provided here is intended to get you up and running quickly. To validate files stored in the DBFS, select the **File** tab. If you have an existing Spark DataFrame loaded, select one of the **DataFrame** tabs. See the specific integration guides if you're using a different file store such as Amazon S3, Google Cloud Storage (GCS), or Microsoft Azure Blob Storage (ABS).
+The information provided here is intended to get you started quickly. To validate files stored in the DBFS, select the **File** tab. If you have an existing Spark DataFrame loaded, select one of the **DataFrame** tabs. See the specific integration guides if you're using a different file store, such as Amazon S3, Google Cloud Storage (GCS), or Microsoft Azure Blob Storage (ABS).
 
 The full code used in the following examples is available on GitHub:
 
