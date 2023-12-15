@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import warnings
 
 from great_expectations.dataset.util import create_multiple_expectations

@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, Final, List, Optional, Set, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Set, TypeVar, Union
 
 from pyparsing import (
     Literal,
@@ -16,9 +18,11 @@ from pyparsing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, SerializableDotDict
+
+if TYPE_CHECKING:
+    from great_expectations.core.domain import Domain
 
 FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER: Final[str] = "$"
 

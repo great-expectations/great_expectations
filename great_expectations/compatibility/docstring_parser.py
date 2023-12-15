@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.compatibility.not_imported import NotImported
 
 DOCSTRING_PARSER_NOT_IMPORTED = NotImported(
