@@ -595,7 +595,7 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
                 expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
-        result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 
     LOGGER.debug(f"Response {result.status}")
     return result

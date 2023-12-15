@@ -149,7 +149,7 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             ) from exc
 
-    def _add_ids_on_create(self, suite: ExpectationSuite | dict) -> ExpectationSuite:
+    def _add_ids_on_create(self, suite: ExpectationSuite) -> ExpectationSuite:
         """This method handles adding IDs to suites and expectations for non-cloud backends.
         In the future, this logic should be the responsibility of each non-cloud backend.
         """
@@ -163,7 +163,7 @@ class ExpectationsStore(Store):
             expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
         return suite
 
-    def _add_ids_on_update(self, suite: ExpectationSuite | dict) -> ExpectationSuite:
+    def _add_ids_on_update(self, suite: ExpectationSuite) -> ExpectationSuite:
         """This method handles adding IDs to suites and expectations for non-cloud backends.
         In the future, this logic should be the responsibility of each non-cloud backend.
         """
