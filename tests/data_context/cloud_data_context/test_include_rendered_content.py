@@ -18,6 +18,9 @@ from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 
+@pytest.mark.xfail(
+    reason="add_or_update not responsible for rendered content - rewrite test for new suites factory"
+)
 @pytest.mark.cloud
 @responses.activate
 def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rendered_content(
