@@ -112,10 +112,13 @@ class ExpectationsStore(Store):
         return suite_dict
 
     def _add(self, key, value, **kwargs):
-        value = self._add_ids_to_new_objects(value)
+        if not self.cloud_mode:
+            # this logic should move to the store backend, but is implemented here for now
+            value = self._add_ids_to_new_objects(value)
         try:
             result = super()._add(key=key, value=value, **kwargs)
             if self.cloud_mode:
+                # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
@@ -128,10 +131,13 @@ class ExpectationsStore(Store):
             )
 
     def _update(self, key, value, **kwargs):
-        value = self._add_ids_to_new_objects(value)
+        if not self.cloud_mode:
+            # this logic should move to the store backend, but is implemented here for now
+            value = self._add_ids_to_new_objects(value)
         try:
             result = super()._update(key=key, value=value, **kwargs)
             if self.cloud_mode:
+                # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
@@ -144,9 +150,9 @@ class ExpectationsStore(Store):
             ) from exc
 
     def _add_ids_to_new_objects(self, suite: ExpectationSuite) -> ExpectationSuite:
-        if self.cloud_mode:
-            # cloud backend creates IDs, and we add them after persistence
-            return suite
+        """This method handles adding IDs to suites and expectations for non-cloud backends.
+        In the future, this logic should be the responsibility of each non-cloud backend.
+        """
         # ensure suite has an ID
         if not suite.get("ge_cloud_id"):
             suite["ge_cloud_id"] = str(uuid.uuid4())
@@ -163,9 +169,6 @@ class ExpectationsStore(Store):
     def _add_cloud_ids_to_local_suite_and_expectations(
         self, local_suite: ExpectationSuite, cloud_suite: dict
     ) -> ExpectationSuite:
-        if not self.cloud_mode:
-            # non-cloud backends must create IDs prior to passing suite to store backend.
-            return local_suite
         if not local_suite.ge_cloud_id:
             local_suite.ge_cloud_id = cloud_suite["ge_cloud_id"]
         # replace local expectations with those returned from the backend
