@@ -940,7 +940,6 @@ class Batch:
 
     @functools.cached_property
     def _validator(self) -> V1Validator:
-        from great_expectations.core.batch_config import BatchConfig
         from great_expectations.validator.v1_validator import Validator as V1Validator
 
         context = self.datasource.data_context
@@ -948,11 +947,10 @@ class Batch:
             raise ValueError(
                 "We can't validate batches that are attached to datasources without a data context"
             )
-        batch_config = BatchConfig(
+        batch_config = self.data_asset.add_batch_config(
             name="-".join(
                 [self.datasource.name, self.data_asset.name, str(uuid.uuid4())]
-            ),
-            data_asset=self.data_asset,
+            )
         )
         return V1Validator(
             context=context,
