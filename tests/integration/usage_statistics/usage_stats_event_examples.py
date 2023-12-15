@@ -128,12 +128,6 @@ data_context_init_with_dependencies: dict = {
             },
             {
                 "install_environment": "required",
-                "package_name": "jsonpatch",
-                "installed": True,
-                "version": "1.32",
-            },
-            {
-                "install_environment": "required",
                 "package_name": "jsonschema",
                 "installed": True,
                 "version": "3.2.0",

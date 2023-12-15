@@ -36,7 +36,6 @@ class GXDependencies:
             "Ipython",
             "ipywidgets",
             "jinja2",
-            "jsonpatch",
             "jsonschema",
             "makefun",
             "marshmallow",
