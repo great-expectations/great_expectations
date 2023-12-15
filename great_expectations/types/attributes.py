@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 
 from great_expectations.compatibility.typing_extensions import override

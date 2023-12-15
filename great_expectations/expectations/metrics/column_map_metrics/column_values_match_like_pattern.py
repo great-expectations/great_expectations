@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (

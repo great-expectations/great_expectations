@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 class CallToActionRenderer:
     _document_defaults = {
         "header": "What would you like to do next?",

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Warnings (including deprecation).
 
 This module consolidates warnings throughout our codebase into a single place

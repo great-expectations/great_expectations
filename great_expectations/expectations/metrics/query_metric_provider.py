@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 
 from great_expectations.core._docs_decorators import public_api

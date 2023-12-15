@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import (

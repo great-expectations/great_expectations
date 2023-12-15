@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pydantic
 
 from great_expectations.compatibility.not_imported import (

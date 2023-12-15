@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from enum import Enum
 from itertools import chain
 from typing import Set

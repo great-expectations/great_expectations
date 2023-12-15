@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
@@ -8,7 +6,7 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 class BatchAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: Anonymizer,  # noqa: F821
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
@@ -17,7 +15,7 @@ class BatchAnonymizer(BaseAnonymizer):
 
     def anonymize(
         self,
-        obj: Union[Tuple[dict, str], DataAsset, Validator],  # noqa: F821
+        obj: Union[Tuple[dict, str], "DataAsset", "Validator"],  # noqa: F821
         **kwargs,
     ) -> Any:
         from great_expectations.data_asset import DataAsset

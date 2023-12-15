@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Provide GX package dependencies.
 
 This module contains static lists of GX dependencies, along with a utility for
