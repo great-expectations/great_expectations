@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABCMeta
-from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
@@ -291,6 +290,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         pass
 
     def _put(self, id: str, value: Any) -> GXCloudResourceRef | bool:
+        # This wonky signature is a sign that our abstractions are not helping us.
+        # The cloud backend returns a bool for some resources, and the updated
+        # resource for others. Since we route all update calls through this single
+        # method, we need to handle both cases.
+
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -327,13 +331,21 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code = response.status_code
 
             response.raise_for_status()
-            try:
-                response_json = response.json()
-            except JSONDecodeError:
+
+            HTTP_NO_CONTENT = 204
+            if response_status_code == HTTP_NO_CONTENT:
+                # endpoint has returned NO_CONTENT, so the caller expects a boolean
                 return True
-            return GXCloudResourceRef(
-                resource_type=resource_type, id=id, url=url, response_json=response_json
-            )
+            else:
+                # expect that there's a JSON payload associated with this response
+                response_json = response.json()
+                return GXCloudResourceRef(
+                    resource_type=resource_type,
+                    id=id,
+                    url=url,
+                    response_json=response_json,
+                )
+
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
