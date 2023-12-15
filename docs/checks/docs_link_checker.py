@@ -2,11 +2,12 @@
 """A command-line tool used to check links in docusaurus markdown documentation
 
 To check all of our markdown documentation, from the repo root run:
-python ./docs/checks/docs_link_checker.py -p docs -r docs -s docs --skip-external
+python ./docs/checks/docs_link_checker.py -p docs -r docs -t static -s docs --skip-external
 
 The above command:
     - -p docs (also --path): The path to the markdown files you want to check. For example, if you wanted to check only the tutorial files, you could specify docs/tutorials
     - -r docs (also --docs-root): The root of the docs folder, used to resolve absolute and docroot paths
+    - -sr static (also --static-root): The root of the static assets folder, used to resolve absolute paths for images
     - -s docs (also --site-prefix): The site path prefix, used to resolve abosulte paths (ex: in http://blah/docs, it is the docs part)
     - --skip-external: If present, external (http) links are not checked
 """
@@ -337,6 +338,13 @@ class LinkChecker:
     type=click.Path(exists=True, file_okay=False),
     default=None,
     help="Root to all docs for link checking",
+)
+@click.option(
+    "--static-root",
+    "-sr",
+    type=click.Path(exists=True, file_okay=False),
+    default="docs/docusaurus/static",
+    help="Root (static folder) to all images for link validating",
 )
 @click.option(
     "--site-prefix",
