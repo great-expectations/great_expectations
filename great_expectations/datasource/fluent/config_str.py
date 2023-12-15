@@ -87,7 +87,7 @@ def _check_config_substitutions_needed(
     if (
         need_config_subs
         and raise_warning_if_provider_not_present
-        and not datasource._config_provider
+        and not datasource._config_provider  # noqa: SLF001
     ):
         warnings.warn(
             f"config variables '{','.join(need_config_subs)}' need substitution but no `_ConfigurationProvider` is present"

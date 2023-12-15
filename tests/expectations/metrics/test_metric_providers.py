@@ -45,7 +45,7 @@ def mock_registry(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         registry,
         "_registered_metrics",
-        copy.deepcopy(registry._registered_metrics),
+        copy.deepcopy(registry._registered_metrics),  # noqa: SLF001
         raising=True,
     )
     yield registry
@@ -53,7 +53,9 @@ def mock_registry(monkeypatch: pytest.MonkeyPatch):
 
 def test__base_metric_provider__registration(mock_registry):
     """This tests whether the MetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    registered_metric_keys = list(
+        mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )
     for key in registered_metric_keys:
         assert "custom_metric" not in key
 
@@ -99,15 +101,17 @@ def test__base_metric_provider__registration(mock_registry):
     CustomMetricProvider()
 
     assert (
-        len(mock_registry._registered_metrics.keys())
+        len(mock_registry._registered_metrics.keys())  # noqa: SLF001
         == prev_registered_metric_key_count + 1
     )
-    assert "custom_metric" in mock_registry._registered_metrics.keys()
+    assert "custom_metric" in mock_registry._registered_metrics.keys()  # noqa: SLF001
 
 
 def test__table_metric_provider__registration(mock_registry):
     """This tests whether the TableMetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    registered_metric_keys = list(
+        mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )
     for key in registered_metric_keys:
         assert "table.custom_metric" not in key
 
@@ -152,10 +156,13 @@ def test__table_metric_provider__registration(mock_registry):
     CustomTableMetricProvider()
 
     assert (
-        len(mock_registry._registered_metrics.keys())
+        len(mock_registry._registered_metrics.keys())  # noqa: SLF001
         == prev_registered_metric_key_count + 1
     )
-    assert "table.custom_metric" in mock_registry._registered_metrics.keys()
+    assert (
+        "table.custom_metric"
+        in mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )
 
 
 def test__column_map_metric__registration(mock_registry):
@@ -165,7 +172,9 @@ def test__column_map_metric__registration(mock_registry):
 
     Since _register_metric_functions is private, we don't want to test it directly. Instead, we declare a custom ColumnMapMetricProvider, and test that the correct metrics are registered.
     """
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    registered_metric_keys = list(
+        mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )
     for key in registered_metric_keys:
         assert "column_values.equal_seven" not in key
 
@@ -190,7 +199,7 @@ def test__column_map_metric__registration(mock_registry):
     CustomColumnValuesEqualSeven()
 
     assert (
-        len(mock_registry._registered_metrics.keys())
+        len(mock_registry._registered_metrics.keys())  # noqa: SLF001
         == prev_registered_metric_key_count + 8
     )
 
@@ -205,12 +214,14 @@ def test__column_map_metric__registration(mock_registry):
         "column_values.equal_seven.unexpected_count.aggregate_fn",
     ]
     for key in new_keys:
-        assert key in mock_registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics.keys()  # noqa: SLF001
 
 
 def test__column_pair_map_metric__registration(mock_registry):
     """This tests whether the ColumnPairMapMetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    registered_metric_keys = list(
+        mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )
     for key in registered_metric_keys:
         assert "column_pair_values.equal_seven" not in key
 
@@ -234,11 +245,11 @@ def test__column_pair_map_metric__registration(mock_registry):
     CustomColumnPairValuesEqualSeven()
 
     assert (
-        len(mock_registry._registered_metrics.keys())
+        len(mock_registry._registered_metrics.keys())  # noqa: SLF001
         == prev_registered_metric_key_count + 7
     )
 
-    for key in mock_registry._registered_metrics.keys():
+    for key in mock_registry._registered_metrics.keys():  # noqa: SLF001
         if "column_pair_values.equal_seven" in key:
             print(key)
 
@@ -252,12 +263,14 @@ def test__column_pair_map_metric__registration(mock_registry):
         "column_pair_values.equal_seven.filtered_row_count",
     ]
     for key in new_keys:
-        assert key in mock_registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics.keys()  # noqa: SLF001
 
 
 def test__multicolumn_map_metric__registration(mock_registry):
     """This tests whether the MultiColumnMapMetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    registered_metric_keys = list(
+        mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )
     for key in registered_metric_keys:
         assert "multicolumn_values.equal_seven" not in key
 
@@ -291,7 +304,7 @@ def test__multicolumn_map_metric__registration(mock_registry):
     CustomMultiColumnValuesEqualSeven()
 
     assert (
-        len(mock_registry._registered_metrics.keys())
+        len(mock_registry._registered_metrics.keys())  # noqa: SLF001
         == prev_registered_metric_key_count + 7
     )
 
@@ -305,12 +318,14 @@ def test__multicolumn_map_metric__registration(mock_registry):
         "multicolumn_values.equal_seven.filtered_row_count",
     ]
     for key in new_keys:
-        assert key in mock_registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics.keys()  # noqa: SLF001
 
 
 def test__query_metric_provider__registration(mock_registry):
     """This tests whether the QueryMetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    registered_metric_keys = list(
+        mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )
     for key in registered_metric_keys:
         assert "query.custom_metric" not in key
 
@@ -344,7 +359,10 @@ def test__query_metric_provider__registration(mock_registry):
     CustomQueryMetricProvider()
 
     assert (
-        len(mock_registry._registered_metrics.keys())
+        len(mock_registry._registered_metrics.keys())  # noqa: SLF001
         == prev_registered_metric_key_count + 1
     )
-    assert "query.custom_metric" in mock_registry._registered_metrics.keys()
+    assert (
+        "query.custom_metric"
+        in mock_registry._registered_metrics.keys()  # noqa: SLF001
+    )

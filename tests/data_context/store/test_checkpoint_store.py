@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMock]:
     store = CheckpointStore(store_name="checkpoint_store")
     mock_backend = mock.MagicMock()
-    store._store_backend = mock_backend
+    store._store_backend = mock_backend  # noqa: SLF001
 
     return store, mock_backend
 
@@ -570,7 +570,7 @@ def test_add_checkpoint(
     store, mock_backend = checkpoint_store_with_mock_backend
 
     context = mock.MagicMock(spec=FileDataContext)
-    context._usage_statistics_handler = mock.MagicMock()
+    context._usage_statistics_handler = mock.MagicMock()  # noqa: SLF001
     checkpoint_name = "my_checkpoint"
     checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
 

@@ -52,7 +52,7 @@ def test_update_expectations(
     package: GreatExpectationsContribPackageManifest,
     diagnostics: List[ExpectationDiagnostics],
 ):
-    package._update_expectations(diagnostics)
+    package._update_expectations(diagnostics)  # noqa: SLF001
 
     assert package.expectation_count == 3
     assert package.expectations and all(
@@ -78,7 +78,7 @@ ruamel.yaml>=0.16,<0.17.18  # package
     """
     requirements_file.write(contents)
 
-    package._update_dependencies(str(requirements_file))
+    package._update_dependencies(str(requirements_file))  # noqa: SLF001
     assert package.dependencies == [
         Dependency(
             text="altair", link="https://pypi.org/project/altair", version="<5, >=4.0.0"
@@ -108,7 +108,7 @@ def test_update_dependencies_with_invalid_path_exits_early(
     dependencies = [Dependency(text="my_dep", link="my_link")]
     package.dependencies = dependencies
 
-    package._update_dependencies("my_fake_path.txt")
+    package._update_dependencies("my_fake_path.txt")  # noqa: SLF001
 
     # Unchanged attrs since file state is invalid
     assert package.dependencies == dependencies
@@ -122,7 +122,7 @@ def test_update_from_package_info_with_valid_path(
     """
     package_info_file.write(contents)
 
-    package._update_from_package_info(str(package_info_file))
+    package._update_from_package_info(str(package_info_file))  # noqa: SLF001
 
 
 def test_update_from_package_info_with_valid_path_with_missing_keys(
@@ -138,7 +138,7 @@ def test_update_from_package_info_with_valid_path_with_missing_keys(
     """
     package_info_file.write(contents)
 
-    package._update_from_package_info(str(package_info_file))
+    package._update_from_package_info(str(package_info_file))  # noqa: SLF001
 
     # Unchanged attrs since file state is invalid
     assert package.code_owners == code_owners
@@ -153,7 +153,7 @@ def test_update_from_package_info_with_invalid_path_exits_early(
     package.code_owners = code_owners
     package.domain_experts = domain_experts
 
-    package._update_from_package_info("my_fake_path.yml")
+    package._update_from_package_info("my_fake_path.yml")  # noqa: SLF001
 
     # Unchanged attrs since file state is invalid
     assert package.code_owners == code_owners

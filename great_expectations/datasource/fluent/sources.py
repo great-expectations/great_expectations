@@ -123,7 +123,7 @@ class _SourceFactories:
             )
 
         # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
+        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:  # noqa: SLF001
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource(
@@ -468,9 +468,11 @@ class _SourceFactories:
                 else datasource_type(**kwargs)
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
-            datasource._data_context = self._data_context
+            datasource._data_context = self._data_context  # noqa: SLF001
             datasource.test_connection()
-            datasource = self._data_context._add_fluent_datasource(datasource)
+            datasource = self._data_context._add_fluent_datasource(  # noqa: SLF001
+                datasource
+            )
 
             return datasource
 
@@ -519,9 +521,9 @@ class _SourceFactories:
             if id_:
                 updated_datasource.id = id_
 
-            updated_datasource._data_context = self._data_context
+            updated_datasource._data_context = self._data_context  # noqa: SLF001
             updated_datasource.test_connection()
-            return_obj = self._data_context._update_fluent_datasource(
+            return_obj = self._data_context._update_fluent_datasource(  # noqa: SLF001
                 datasource=updated_datasource
             )
             assert isinstance(return_obj, Datasource)
@@ -574,14 +576,16 @@ class _SourceFactories:
             if id_:
                 new_datasource.id = id_
 
-            new_datasource._data_context = self._data_context
+            new_datasource._data_context = self._data_context  # noqa: SLF001
             new_datasource.test_connection()
             if datasource_name in self._data_context.datasources:
-                return_obj = self._data_context._update_fluent_datasource(
-                    datasource=new_datasource
+                return_obj = (
+                    self._data_context._update_fluent_datasource(  # noqa: SLF001
+                        datasource=new_datasource
+                    )
                 )
             else:
-                return_obj = self._data_context._add_fluent_datasource(
+                return_obj = self._data_context._add_fluent_datasource(  # noqa: SLF001
                     datasource=new_datasource
                 )
             assert isinstance(return_obj, Datasource)
@@ -605,8 +609,10 @@ class _SourceFactories:
         def delete_datasource(name: str) -> None:
             logger.debug(f"Delete {datasource_type} with {name}")
             self._validate_current_datasource_type(name, datasource_type)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
-            self._data_context._save_project_config()
+            self._data_context._delete_fluent_datasource(  # noqa: SLF001
+                datasource_name=name
+            )
+            self._data_context._save_project_config()  # noqa: SLF001
 
         delete_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
@@ -669,6 +675,8 @@ def _iter_all_registered_types(
             yield ds_name, ds_type
 
         if include_data_asset:
-            for asset_name in ds_type._type_lookup.type_names():
-                asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
+            for asset_name in ds_type._type_lookup.type_names():  # noqa: SLF001
+                asset_type: Type[DataAsset] = ds_type._type_lookup[  # noqa: SLF001
+                    asset_name
+                ]
                 yield asset_name, asset_type

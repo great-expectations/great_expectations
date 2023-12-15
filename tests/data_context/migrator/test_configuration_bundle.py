@@ -25,7 +25,7 @@ class TestConfigurationBundleCreate:
         config_bundle = ConfigurationBundle(context)
 
         assert config_bundle.is_usage_stats_enabled()
-        assert config_bundle._data_context_variables is not None
+        assert config_bundle._data_context_variables is not None  # noqa: SLF001
         assert len(config_bundle.expectation_suites) == 1
         assert len(config_bundle.checkpoints) == 1
         assert len(config_bundle.validation_results) == 1

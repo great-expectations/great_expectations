@@ -244,7 +244,9 @@ class ValidationResultsPageRenderer(Renderer):
         collapse_content_blocks: List[RenderedTableContent],
         columns: Dict[str, list],
     ) -> List[RenderedSectionContent]:
-        ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
+        ordered_columns = Renderer._get_column_list_from_evrs(  # noqa: SLF001
+            validation_results
+        )
         sections = [
             RenderedSectionContent(
                 **{
@@ -968,9 +970,13 @@ class ProfilingResultsPageRenderer(Renderer):
         # TODO: When we implement a ValidationResultSuite class, this method will move there.
         columns = self._group_evrs_by_column(validation_results)
 
-        ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-        column_types = self._overview_section_renderer._get_column_types(
+        ordered_columns = Renderer._get_column_list_from_evrs(  # noqa: SLF001
             validation_results
+        )
+        column_types = (
+            self._overview_section_renderer._get_column_types(  # noqa: SLF001
+                validation_results
+            )
         )
 
         data_asset_name = batch_kwargs.get("data_asset_name")

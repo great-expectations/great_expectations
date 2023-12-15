@@ -14,7 +14,7 @@ from great_expectations.datasource.fluent.interfaces import DataAsset
 def mock_data_asset(monkeypatch) -> DataAsset:
     monkeypatch.setattr(DataAsset, "build_batch_request", Mock())
     data_asset: DataAsset = DataAsset(name="my_data_asset", type="table")
-    data_asset._save_batch_config = Mock()
+    data_asset._save_batch_config = Mock()  # noqa: SLF001
 
     return data_asset
 
@@ -38,7 +38,9 @@ def test_save(mock_data_asset):
 
     batch_config.save()
 
-    mock_data_asset._save_batch_config.assert_called_once_with(batch_config)
+    mock_data_asset._save_batch_config.assert_called_once_with(  # noqa: SLF001
+        batch_config
+    )
 
 
 @pytest.mark.parametrize(

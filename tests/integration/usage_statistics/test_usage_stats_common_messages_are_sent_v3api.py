@@ -91,10 +91,10 @@ def test_common_usage_stats_are_sent_no_mocking(
     context = get_context(in_memory_data_context_config_usage_stats_enabled)
 
     # Note, we lose the `data_context.__init__` event because it was emitted before closing the worker
-    context._usage_statistics_handler._close_worker()
+    context._usage_statistics_handler._close_worker()  # noqa: SLF001
 
     # Make sure usage stats are enabled
-    assert context._is_usage_stats_enabled()
+    assert context._is_usage_stats_enabled()  # noqa: SLF001
     assert context.anonymous_usage_statistics.enabled
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 
@@ -184,7 +184,9 @@ def test_common_usage_stats_are_sent_no_mocking(
 
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
 
-    message_queue = context._usage_statistics_handler._message_queue.queue
+    message_queue = (
+        context._usage_statistics_handler._message_queue.queue  # noqa: SLF001
+    )
     events = [event["event"] for event in message_queue]
 
     # Note: expected events does not contain the `data_context.__init__` event

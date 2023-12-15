@@ -379,7 +379,7 @@ def seeded_cloud_context(
     seed_cloud,  # NOTE: this fixture must be called before the CloudDataContext is created
     empty_cloud_context_fluent,
 ):
-    empty_cloud_context_fluent._init_datasources()
+    empty_cloud_context_fluent._init_datasources()  # noqa: SLF001
     return empty_cloud_context_fluent
 
 

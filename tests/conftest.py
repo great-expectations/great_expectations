@@ -512,11 +512,11 @@ def preload_latest_gx_cache():
     logger.info(
         f"Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with {current_version}"
     )
-    _VersionChecker._LATEST_GX_VERSION_CACHE = current_version
+    _VersionChecker._LATEST_GX_VERSION_CACHE = current_version  # noqa: SLF001
     yield current_version
     # teardown
     logger.info("Clearing _VersionChecker._LATEST_GX_VERSION_CACHE ")
-    _VersionChecker._LATEST_GX_VERSION_CACHE = None
+    _VersionChecker._LATEST_GX_VERSION_CACHE = None  # noqa: SLF001
 
 
 @pytest.fixture(scope="module")
@@ -1035,7 +1035,7 @@ def data_context_with_connection_to_metrics_db(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -1187,7 +1187,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -1600,7 +1600,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -1683,7 +1683,7 @@ def deterministic_asset_data_connector_context(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -1814,7 +1814,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     _ = asset.build_batch_request(dataframe=df)
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -1869,7 +1869,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -1900,7 +1900,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -2209,7 +2209,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -2264,7 +2264,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
     _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -2295,7 +2295,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     project_manager.set_project(context)
     return context
 
@@ -2854,7 +2854,7 @@ def data_context_with_fluent_datasource(
         name="my_pandas_datasource", base_directory=filesystem_csv_2
     )
     # noinspection PyProtectedMember
-    empty_data_context._save_project_config()
+    empty_data_context._save_project_config()  # noqa: SLF001
     return empty_data_context
 
 
@@ -3518,15 +3518,15 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
 
     base_url = env_vars.get(
         GXCloudEnvironmentVariable.BASE_URL,
-        env_vars.get(GXCloudEnvironmentVariable._OLD_BASE_URL),
+        env_vars.get(GXCloudEnvironmentVariable._OLD_BASE_URL),  # noqa: SLF001
     )
     organization_id = env_vars.get(
         GXCloudEnvironmentVariable.ORGANIZATION_ID,
-        env_vars.get(GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID),
+        env_vars.get(GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID),  # noqa: SLF001
     )
     access_token = env_vars.get(
         GXCloudEnvironmentVariable.ACCESS_TOKEN,
-        env_vars.get(GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN),
+        env_vars.get(GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN),  # noqa: SLF001
     )
     cloud_config = GXCloudConfig(
         base_url=base_url,
@@ -3594,7 +3594,7 @@ def empty_data_context_in_cloud_mode(
             context_root_dir=project_path_name,
         )
 
-    context._datasources = (
+    context._datasources = (  # noqa: SLF001
         {}
     )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
@@ -4067,7 +4067,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
         # _add_expectation().
-        expected_expectation_suite._add_expectation(
+        expected_expectation_suite._add_expectation(  # noqa: SLF001
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
@@ -4427,7 +4427,7 @@ def alice_columnar_table_single_batch_context(
     # We need our salt to be consistent between runs to ensure idempotent anonymized values
     # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
     # (ie. adjusted to be context._usage_statistics_handler)
-    context._usage_statistics_handler = UsageStatisticsHandler(
+    context._usage_statistics_handler = UsageStatisticsHandler(  # noqa: SLF001
         data_context=context,
         data_context_id="00000000-0000-0000-0000-00000000a004",
         usage_statistics_url="N/A",
@@ -5418,7 +5418,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
-        expected_expectation_suite_quantiles_estimator._add_expectation(
+        expected_expectation_suite_quantiles_estimator._add_expectation(  # noqa: SLF001
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
@@ -7401,7 +7401,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext._LEGACY_GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,  # noqa: SLF001
                 FileDataContext.GX_YML,
             ),
         ),
@@ -7482,7 +7482,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext._LEGACY_GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,  # noqa: SLF001
                 FileDataContext.GX_YML,
             ),
         ),
@@ -7653,7 +7653,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext._LEGACY_GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,  # noqa: SLF001
                 FileDataContext.GX_YML,
             ),
         ),
@@ -7841,7 +7841,7 @@ def quentin_columnar_table_multi_batch_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext._LEGACY_GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,  # noqa: SLF001
                 FileDataContext.GX_YML,
             ),
         ),

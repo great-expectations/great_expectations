@@ -472,9 +472,9 @@ def test_build_suite_with_semantic_types_dict(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[mock._Call]
+    expected_events: List[mock._Call]  # noqa: SLF001
     # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call]
+    actual_events: List[mock._Call]  # noqa: SLF001
 
     expected_events = [
         mock.call(
@@ -531,9 +531,9 @@ def test_build_suite_when_suite_already_exists(
     assert mock_emit.call_count == 2
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[mock._Call]
+    expected_events: List[mock._Call]  # noqa: SLF001
     # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call]
+    actual_events: List[mock._Call]  # noqa: SLF001
 
     expected_events = [
         mock.call(

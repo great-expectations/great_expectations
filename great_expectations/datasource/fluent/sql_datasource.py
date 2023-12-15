@@ -464,9 +464,9 @@ class _SQLAsset(DataAsset):
         self.test_splitter_connection()
         # persist the config changes
         context: AbstractDataContext | None
-        if context := self._datasource._data_context:
+        if context := self._datasource._data_context:  # noqa: SLF001
             context.datasources[self._datasource.name] = self._datasource
-            context._save_project_config()
+            context._save_project_config()  # noqa: SLF001
         return self
 
     @public_api
@@ -777,7 +777,7 @@ class _SQLAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
-                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]  # noqa: SLF001
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
@@ -1117,7 +1117,7 @@ class SQLDatasource(Datasource):
             ) from e
         if self.assets and test_assets:
             for asset in self.assets:
-                asset._datasource = self
+                asset._datasource = self  # noqa: SLF001
                 asset.test_connection()
 
     @public_api

@@ -120,9 +120,13 @@ class BaseYamlConfig(SerializableDictDot):
 
         if hasattr(cls.get_config_class(), "_schema_instance"):
             # noinspection PyProtectedMember
-            schema_instance: Optional[Schema] = cls.get_config_class()._schema_instance
+            schema_instance: Optional[
+                Schema
+            ] = cls.get_config_class()._schema_instance  # noqa: SLF001
             if schema_instance is None:
-                cls.get_config_class()._schema_instance = (cls.get_schema_class())()
+                cls.get_config_class()._schema_instance = (  # noqa: SLF001
+                    cls.get_schema_class()
+                )()
                 return cls.get_config_class().schema_instance
             else:
                 return schema_instance

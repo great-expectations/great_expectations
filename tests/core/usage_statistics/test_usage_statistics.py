@@ -91,7 +91,7 @@ def test_global_override_environment_variable_data_context(
         is True
     )
     context = get_context(in_memory_data_context_config_usage_stats_enabled)
-    project_config = context._project_config
+    project_config = context._project_config  # noqa: SLF001
     assert project_config.anonymous_usage_statistics.enabled is False
 
 
@@ -132,7 +132,7 @@ def test_global_override_from_config_file_in_etc(
             context = get_context(
                 deepcopy(in_memory_data_context_config_usage_stats_enabled)
             )
-            project_config = context._project_config
+            project_config = context._project_config  # noqa: SLF001
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
@@ -177,7 +177,7 @@ def test_global_override_from_config_file_in_home_folder(
             context = get_context(
                 deepcopy(in_memory_data_context_config_usage_stats_enabled)
             )
-            project_config = context._project_config
+            project_config = context._project_config  # noqa: SLF001
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
@@ -199,7 +199,7 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     )
 
     assert (
-        get_context(
+        get_context(  # noqa: SLF001
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is False
@@ -259,7 +259,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
     )
 
     assert (
-        get_context(
+        get_context(  # noqa: SLF001
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is True
@@ -270,7 +270,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
         config_dirs,
     ):
         context = get_context(context_root_dir=context_path)
-        project_config = context._project_config
+        project_config = context._project_config  # noqa: SLF001
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
@@ -325,7 +325,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
     )
 
     assert (
-        get_context(
+        get_context(  # noqa: SLF001
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is False
@@ -336,7 +336,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
         config_dirs,
     ):
         context = get_context(context_root_dir=context_path)
-        project_config = context._project_config
+        project_config = context._project_config  # noqa: SLF001
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
@@ -391,7 +391,7 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
     )
 
     assert (
-        get_context(
+        get_context(  # noqa: SLF001
             context_root_dir=context_path
         )._project_config.anonymous_usage_statistics.enabled
         is False
@@ -402,5 +402,5 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
         config_dirs,
     ):
         context = get_context(context_root_dir=context_path)
-        project_config = context._project_config
+        project_config = context._project_config  # noqa: SLF001
         assert project_config.anonymous_usage_statistics.enabled is False

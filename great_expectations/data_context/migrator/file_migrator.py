@@ -62,7 +62,9 @@ class FileMigrator:
         self._migrate_primary_stores(
             target_stores=target_context.stores,
         )
-        self._migrate_datasource_store(target_store=target_context._datasource_store)
+        self._migrate_datasource_store(
+            target_store=target_context._datasource_store  # noqa: SLF001
+        )
         self._migrate_data_docs_sites(
             target_context=target_context,
         )
@@ -130,7 +132,7 @@ class FileMigrator:
 
     def _migrate_fluent_datasources(self, target_context: FileDataContext) -> None:
         target_context.fluent_config = self._fluent_config
-        target_context._save_project_config()
+        target_context._save_project_config()  # noqa: SLF001
 
     def _migrate_data_docs_site_configs(
         self,

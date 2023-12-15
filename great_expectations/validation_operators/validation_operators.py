@@ -307,7 +307,7 @@ class ActionListValidationOperator(ValidationOperator):
                 and isinstance(item[1], str)
             ):
                 raise ValueError("Unable to build batch from item.")
-            batch = self.data_context._get_batch_v2(
+            batch = self.data_context._get_batch_v2(  # noqa: SLF001
                 batch_kwargs=item[0], expectation_suite_name=item[1]
             )
         else:
@@ -391,14 +391,14 @@ class ActionListValidationOperator(ValidationOperator):
                 if self._using_cloud_context:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                        id=batch._expectation_suite.ge_cloud_id,
+                        id=batch._expectation_suite.ge_cloud_id,  # noqa: SLF001
                     )
                     validation_result_id = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(
-                        expectation_suite_name=batch._expectation_suite.expectation_suite_name
+                        expectation_suite_name=batch._expectation_suite.expectation_suite_name  # noqa: SLF001
                     )
                     validation_result_id = ValidationResultIdentifier(
                         batch_identifier=batch_identifier,
@@ -415,7 +415,7 @@ class ActionListValidationOperator(ValidationOperator):
                 batch_actions_results = self._run_actions(
                     batch=batch,
                     expectation_suite_identifier=expectation_suite_identifier,
-                    expectation_suite=batch._expectation_suite,
+                    expectation_suite=batch._expectation_suite,  # noqa: SLF001
                     batch_validation_result=validation_result,
                     run_id=run_id,
                     validation_result_id=validation_result_id,

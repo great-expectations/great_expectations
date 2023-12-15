@@ -86,7 +86,7 @@ def test_basic_instantiation():
     }
 
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -346,7 +346,7 @@ def test_return_all_batch_definitions_unsorted():
 
     # with unnamed data_asset_name
     unsorted_batch_definition_list = (
-        my_data_connector._get_batch_definition_list_from_batch_request(
+        my_data_connector._get_batch_definition_list_from_batch_request(  # noqa: SLF001
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_s3_data_connector",
@@ -1082,7 +1082,7 @@ assets:
         },
     )
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 

@@ -64,7 +64,7 @@ def _build_spark_abs_datasource(
         name="spark_abs_datasource",
         azure_options=azure_options or {},
     )
-    spark_abs_datasource._azure_client = azure_client
+    spark_abs_datasource._azure_client = azure_client  # noqa: SLF001
     return spark_abs_datasource
 
 
@@ -116,9 +116,9 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
     data_connector: AzureBlobStorageDataConnector = cast(
-        AzureBlobStorageDataConnector, csv_asset._data_connector
+        AzureBlobStorageDataConnector, csv_asset._data_connector  # noqa: SLF001
     )
-    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""
+    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""  # noqa: SLF001
     return regex, test_connection_error_message
 
 
@@ -132,7 +132,9 @@ def test_construct_spark_abs_datasource_with_account_url_and_credential():
         },
     )
     # noinspection PyUnresolvedReferences
-    azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        spark_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
@@ -147,7 +149,9 @@ def test_construct_spark_abs_datasource_with_conn_str_and_credential():
         },
     )
     # noinspection PyUnresolvedReferences
-    azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        spark_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
@@ -162,7 +166,9 @@ def test_construct_spark_abs_datasource_with_valid_account_url_assigns_account_n
         },
     )
     # noinspection PyUnresolvedReferences
-    azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        spark_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
@@ -177,7 +183,9 @@ def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name
         },
     )
     # noinspection PyUnresolvedReferences
-    azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        spark_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
@@ -195,7 +203,7 @@ def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error(
             },
         )
         # noinspection PyUnresolvedReferences
-        _ = spark_abs_datasource._get_azure_client()
+        _ = spark_abs_datasource._get_azure_client()  # noqa: SLF001
 
 
 # noinspection PyUnusedLocal
@@ -423,20 +431,22 @@ def test_test_connection_failures(
         name="csv_asset",
         batching_regex=regex,
     )
-    csv_asset._datasource = spark_abs_datasource
+    csv_asset._datasource = spark_abs_datasource  # noqa: SLF001
     spark_abs_datasource.assets = [
         csv_asset,
     ]
-    csv_asset._data_connector = AzureBlobStorageDataConnector(
+    csv_asset._data_connector = AzureBlobStorageDataConnector(  # noqa: SLF001
         datasource_name=spark_abs_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        azure_client=spark_abs_datasource._azure_client,  # type: ignore[arg-type] # _azure_client could be None
-        account_name=csv_asset.datasource._account_name,
+        azure_client=spark_abs_datasource._azure_client,  # type: ignore[arg-type] # _azure_client could be None  # noqa: SLF001
+        account_name=csv_asset.datasource._account_name,  # noqa: SLF001
         container="my_container",
         file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
     )
-    csv_asset._test_connection_error_message = test_connection_error_message
+    csv_asset._test_connection_error_message = (  # noqa: SLF001
+        test_connection_error_message
+    )
 
     with pytest.raises(TestConnectionError) as e:
         spark_abs_datasource.test_connection()

@@ -130,7 +130,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
                 by_alias=True,
-                config_provider=self._datasource._config_provider,
+                config_provider=self._datasource._config_provider,  # noqa: SLF001
             ),
         )
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
@@ -220,7 +220,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
-                batch_slice=batch_request._batch_slice_input,
+                batch_slice=batch_request._batch_slice_input,  # noqa: SLF001
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
@@ -589,7 +589,9 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         in_cloud_context: bool = False
         if self._data_context:
-            in_cloud_context = self._data_context._datasource_store.cloud_mode
+            in_cloud_context = (
+                self._data_context._datasource_store.cloud_mode  # noqa: SLF001
+            )
 
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
             if in_cloud_context:

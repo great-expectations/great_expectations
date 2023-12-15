@@ -250,13 +250,17 @@ def test_ValidationResultsTableContentBlockRenderer_render(
 
 def test_ValidationResultsTableContentBlockRenderer_get_custom_columns(evr_success):
     assert (
-        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
+        ValidationResultsTableContentBlockRenderer._get_custom_columns(  # noqa: SLF001
+            [evr_success]
+        )
         == []
     )
 
     evr_success.expectation_config.kwargs["meta_properties_to_render"] = {}
     assert (
-        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
+        ValidationResultsTableContentBlockRenderer._get_custom_columns(  # noqa: SLF001
+            [evr_success]
+        )
         == []
     )
 
@@ -264,13 +268,16 @@ def test_ValidationResultsTableContentBlockRenderer_get_custom_columns(evr_succe
         "doesntmatterone": "doesntmatter",
         "doesntmattertwo": "doesntmatter",
     }
-    assert ValidationResultsTableContentBlockRenderer._get_custom_columns(
-        [evr_success]
-    ) == ["doesntmatterone", "doesntmattertwo"]
+    assert (
+        ValidationResultsTableContentBlockRenderer._get_custom_columns(  # noqa: SLF001
+            [evr_success]
+        )
+        == ["doesntmatterone", "doesntmattertwo"]
+    )
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
-    content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn(
+    content_block_fn = ValidationResultsTableContentBlockRenderer._get_content_block_fn(  # noqa: SLF001
         "expect_table_row_count_to_be_between"
     )
     content_block_fn_output = content_block_fn(result=evr_success)
@@ -551,7 +558,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
         ),
     )
 
-    content_block_fn = ValidationResultsTableContentBlockRendererWithV2ApiStyleCustomExpectations._get_content_block_fn(
+    content_block_fn = ValidationResultsTableContentBlockRendererWithV2ApiStyleCustomExpectations._get_content_block_fn(  # noqa: SLF001
         "expect_custom_expectation_written_in_v2_api_style"
     )
     content_block_fn_output = content_block_fn(result=evr)

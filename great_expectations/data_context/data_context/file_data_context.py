@@ -176,13 +176,11 @@ class FileDataContext(SerializableDataContext):
                     )
                     fluent_json_dict: dict[
                         str, JSONValues
-                    ] = self.fluent_config._json_dict()
-                    fluent_json_dict = (
-                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
-                            config=fluent_json_dict
-                        )
+                    ] = self.fluent_config._json_dict()  # noqa: SLF001
+                    fluent_json_dict = self.fluent_config._exclude_name_fields_from_fluent_datasources(  # noqa: SLF001
+                        config=fluent_json_dict
                     )
-                    self.config._commented_map.update(fluent_json_dict)
+                    self.config._commented_map.update(fluent_json_dict)  # noqa: SLF001
 
                 self.config.to_yaml(outfile)
         except PermissionError as e:
@@ -228,7 +226,7 @@ class FileDataContext(SerializableDataContext):
                 gx_config = GxConfig.parse_yaml(path_to_fluent_yaml, _allow_empty=True)
 
                 for datasource in gx_config.datasources:
-                    datasource._data_context = self
+                    datasource._data_context = self  # noqa: SLF001
 
                 return gx_config
             logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")

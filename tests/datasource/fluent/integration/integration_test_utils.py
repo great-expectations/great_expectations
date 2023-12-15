@@ -95,7 +95,9 @@ def run_checkpoint_and_data_doc(
     checkpoint_result = checkpoint.run()
 
     # Verify checkpoint runs successfully
-    assert checkpoint_result._success, "Running expectation suite failed"
+    assert (
+        checkpoint_result._success  # noqa: SLF001
+    ), "Running expectation suite failed"
     number_of_runs = len(checkpoint_result.run_results)
     assert (
         number_of_runs == 1

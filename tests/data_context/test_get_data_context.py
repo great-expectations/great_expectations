@@ -374,7 +374,7 @@ def test_get_context_finds_legacy_great_expectations_dir(
     working_dir = tmp_path / "a" / "b" / "c" / "d" / "working_dir"
 
     # Scaffold great_expectations
-    context_root_dir = working_dir / FileDataContext._LEGACY_GX_DIR
+    context_root_dir = working_dir / FileDataContext._LEGACY_GX_DIR  # noqa: SLF001
     context_root_dir.mkdir(parents=True)
 
     # Scaffold great_expectations.yml
@@ -392,4 +392,4 @@ def test_get_context_finds_legacy_great_expectations_dir(
     assert isinstance(context, FileDataContext)
 
     project_root_dir = pathlib.Path(context.root_directory)
-    assert project_root_dir.stem == FileDataContext._LEGACY_GX_DIR
+    assert project_root_dir.stem == FileDataContext._LEGACY_GX_DIR  # noqa: SLF001

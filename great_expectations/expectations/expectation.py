@@ -278,7 +278,7 @@ class MetaExpectation(ModelMetaclass):
             newclass.expectation_type = ""
 
         # noinspection PyUnresolvedReferences
-        newclass._register_renderer_functions()
+        newclass._register_renderer_functions()  # noqa: SLF001
         return newclass
 
 
@@ -1369,7 +1369,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         backend_test_result_counts: List[
             ExpectationBackendTestResultCounts
-        ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
+        ] = ExpectationDiagnostics._get_backends_from_test_results(  # noqa: SLF001
+            test_results
+        )
 
         renderers: List[
             ExpectationRendererDiagnostics
@@ -1865,7 +1867,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 # The ExpectationTestDiagnostics instance will error when calling it's to_dict()
                 # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')
                 validation_result.expectation_config.raw_kwargs = (
-                    validation_result.expectation_config._raw_kwargs
+                    validation_result.expectation_config._raw_kwargs  # noqa: SLF001
                 )
 
             test_results.append(
@@ -2155,32 +2157,44 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         production_checks = []
 
         experimental_checks.append(
-            ExpectationDiagnostics._check_library_metadata(library_metadata)
-        )
-        experimental_checks.append(ExpectationDiagnostics._check_docstring(description))
-        experimental_checks.append(
-            ExpectationDiagnostics._check_example_cases(examples, tests)
+            ExpectationDiagnostics._check_library_metadata(  # noqa: SLF001
+                library_metadata
+            )
         )
         experimental_checks.append(
-            ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
+            ExpectationDiagnostics._check_docstring(description)  # noqa: SLF001
+        )
+        experimental_checks.append(
+            ExpectationDiagnostics._check_example_cases(examples, tests)  # noqa: SLF001
+        )
+        experimental_checks.append(
+            ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(  # noqa: SLF001
                 backend_test_result_counts
             )
         )
         beta_checks.append(
-            ExpectationDiagnostics._check_input_validation(self, examples)
+            ExpectationDiagnostics._check_input_validation(  # noqa: SLF001
+                self, examples
+            )
         )
-        beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
         beta_checks.append(
-            ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
+            ExpectationDiagnostics._check_renderer_methods(self)  # noqa: SLF001
+        )
+        beta_checks.append(
+            ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(  # noqa: SLF001
                 backend_test_result_counts
             )
         )
 
         production_checks.append(
-            ExpectationDiagnostics._check_full_test_suite(library_metadata)
+            ExpectationDiagnostics._check_full_test_suite(  # noqa: SLF001
+                library_metadata
+            )
         )
         production_checks.append(
-            ExpectationDiagnostics._check_manual_code_review(library_metadata)
+            ExpectationDiagnostics._check_manual_code_review(  # noqa: SLF001
+                library_metadata
+            )
         )
 
         return ExpectationDiagnosticMaturityMessages(

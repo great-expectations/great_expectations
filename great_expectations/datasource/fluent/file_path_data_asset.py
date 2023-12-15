@@ -236,7 +236,7 @@ class _FilePathDataAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
-                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]  # noqa: SLF001
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
@@ -356,7 +356,7 @@ class _FilePathDataAsset(DataAsset):
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
                 by_alias=True,
-                config_provider=self._datasource._config_provider,
+                config_provider=self._datasource._config_provider,  # noqa: SLF001
             ),
         }
 

@@ -89,7 +89,7 @@ class _PowerBIAsset(DataAsset):
                 exclude_none=True,
                 exclude_unset=True,
                 by_alias=True,
-                config_provider=self._datasource._config_provider,
+                config_provider=self._datasource._config_provider,  # noqa: SLF001
             ),
         }
 
@@ -165,7 +165,7 @@ class _PowerBIAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
-                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined] # private attr does exist
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined] # private attr does exist  # noqa: SLF001
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
@@ -283,7 +283,7 @@ class FabricPowerBIDatasource(Datasource):
 
         if self.assets and test_assets:
             for asset in self.assets:
-                asset._datasource = self
+                asset._datasource = self  # noqa: SLF001
                 asset.test_connection()
 
     @public_api

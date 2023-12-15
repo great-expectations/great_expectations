@@ -711,7 +711,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             name=datasource_name, ds=datasource
         )
         assert isinstance(return_obj, FluentDatasource)
-        return_obj._data_context = self
+        return_obj._data_context = self  # noqa: SLF001
         self._save_project_config()
 
         return return_obj
@@ -735,12 +735,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             updated_datasource = datasource
 
-        updated_datasource._rebuild_asset_data_connectors()
+        updated_datasource._rebuild_asset_data_connectors()  # noqa: SLF001
 
         updated_datasource = self.datasources.set_datasource(
             name=datasource_name, ds=updated_datasource
         )
-        updated_datasource._data_context = self  # TODO: move from here?
+        updated_datasource._data_context = self  # TODO: move from here?  # noqa: SLF001
         self._save_project_config()
 
         assert isinstance(updated_datasource, FluentDatasource)
@@ -1193,7 +1193,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise ValueError(str(e)) from e
 
         if not isinstance(datasource, BaseDatasource):
-            datasource._data_context = self
+            datasource._data_context = self  # noqa: SLF001
         return datasource
 
     def _serialize_substitute_and_sanitize_datasource_config(
@@ -3832,7 +3832,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
                 datasource = self._add_fluent_datasource(**fds)
-                datasource._rebuild_asset_data_connectors()
+                datasource._rebuild_asset_data_connectors()  # noqa: SLF001
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
@@ -3940,7 +3940,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
         # This is to be removed once substitution logic is migrated from the context to the individual object level.
         raw_config_dict: dict = serializer.serialize(raw_config)
-        datasource._raw_config = raw_config_dict
+        datasource._raw_config = raw_config_dict  # noqa: SLF001
 
         return datasource
 
@@ -4583,7 +4583,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
-            datasource._rebuild_asset_data_connectors()
+            datasource._rebuild_asset_data_connectors()  # noqa: SLF001
 
             self._add_fluent_datasource(datasource=datasource)
 

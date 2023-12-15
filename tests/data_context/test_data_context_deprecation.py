@@ -38,7 +38,7 @@ ge_cloud_config = GXCloudConfig(
 def test_data_context__resolve_id_and_ge_cloud_id_success(
     id: str | None, ge_cloud_id: str | None, expected: str | None
 ):
-    resolved = AbstractDataContext._resolve_id_and_ge_cloud_id(
+    resolved = AbstractDataContext._resolve_id_and_ge_cloud_id(  # noqa: SLF001
         id=id, ge_cloud_id=ge_cloud_id
     )
     assert resolved == expected
@@ -50,7 +50,7 @@ def test_data_context__resolve_id_and_ge_cloud_id_failure():
     ge_cloud_id = "def456"
 
     with pytest.raises(ValueError) as e:
-        _ = AbstractDataContext._resolve_id_and_ge_cloud_id(
+        _ = AbstractDataContext._resolve_id_and_ge_cloud_id(  # noqa: SLF001
             id=id, ge_cloud_id=ge_cloud_id
         )
 

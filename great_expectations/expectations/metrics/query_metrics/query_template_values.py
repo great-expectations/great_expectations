@@ -94,7 +94,7 @@ class QueryTemplateValues(QueryMetricProvider):
         except Exception as e:
             if hasattr(e, "_query_id"):
                 # query_id removed because it duplicates the validation_results
-                e._query_id = None
+                e._query_id = None  # noqa: SLF001
             raise e
 
         return [element._asdict() for element in result]

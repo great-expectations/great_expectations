@@ -131,7 +131,7 @@ def test__send_configuration_bundle_sends_valid_http_request(
 ):
     migrator = migrator_with_mock_context
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        migrator._send_configuration_bundle(
+        migrator._send_configuration_bundle(  # noqa: SLF001
             serialized_bundle=serialized_configuration_bundle, test_migrate=False
         )
 
@@ -171,7 +171,7 @@ def test__send_validation_results_sends_valid_http_request(
     }
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        migrator._send_validation_results(
+        migrator._send_validation_results(  # noqa: SLF001
             serialized_validation_results=validation_results, test_migrate=False
         )
 
@@ -265,7 +265,7 @@ def test__migrate_to_cloud_outputs_warnings(
 
     caplog.set_level(logging.INFO)
     with mock.patch("requests.Session.post", autospec=True):
-        migrator._migrate_to_cloud(test_migrate=test_migrate)
+        migrator._migrate_to_cloud(test_migrate=test_migrate)  # noqa: SLF001
 
     actual_logs = [rec.message for rec in caplog.records]
     aggregated_log_output = "\n".join(log for log in actual_logs)
@@ -344,7 +344,7 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
     migrator = migrator_with_stub_base_data_context
 
     with mock.patch("requests.Session.post", autospec=True):
-        migrator._migrate_to_cloud(test_migrate=test_migrate)
+        migrator._migrate_to_cloud(test_migrate=test_migrate)  # noqa: SLF001
 
     stdout, _ = capsys.readouterr()
     assert_stdout_is_accurate_and_properly_ordered(
@@ -366,7 +366,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
         mock_post.return_value = MigrationResponse(
             message="Bad request!", status_code=400, success=False
         )
-        migrator._migrate_to_cloud(test_migrate=False)
+        migrator._migrate_to_cloud(test_migrate=False)  # noqa: SLF001
 
     stdout, _ = capsys.readouterr()
     expected_statements = [
@@ -412,7 +412,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     ) as mock_post:
         # Ensure that the first call, which is the bundle request, goes through successfully
         mock_post.side_effect = [good_response, bad_response]
-        migrator._migrate_to_cloud(test_migrate=False)
+        migrator._migrate_to_cloud(test_migrate=False)  # noqa: SLF001
 
     stdout, _ = capsys.readouterr()
     expected_statements = [

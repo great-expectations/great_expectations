@@ -203,9 +203,9 @@ class ExpectationConfiguration(SerializableDictDot):
     def get_raw_configuration(self) -> ExpectationConfiguration:
         # return configuration without substituted evaluation parameters
         raw_config = deepcopy(self)
-        if raw_config._raw_kwargs is not None:
-            raw_config._kwargs = raw_config._raw_kwargs
-            raw_config._raw_kwargs = None
+        if raw_config._raw_kwargs is not None:  # noqa: SLF001
+            raw_config._kwargs = raw_config._raw_kwargs  # noqa: SLF001
+            raw_config._raw_kwargs = None  # noqa: SLF001
 
         return raw_config
 

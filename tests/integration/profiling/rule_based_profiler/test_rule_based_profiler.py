@@ -50,7 +50,7 @@ def test_batches_are_accessible(
     )
 
     assert (
-        data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+        data_connector._get_data_reference_list_from_cache_by_data_asset_name(  # noqa: SLF001
             data_asset_name=asset_name
         )
         == file_list
@@ -182,7 +182,7 @@ def test_profile_includes_citations(
     )
 
     # noinspection PyUnresolvedReferences
-    actual_events: list[mock._Call] = mock_emit.call_args_list
+    actual_events: list[mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert actual_events[-1][0][0]["event"] == UsageStatsEvents.RULE_BASED_PROFILER_RUN
 
 
@@ -235,7 +235,7 @@ def test_profile_get_expectation_suite(
     assert mock_emit.call_count == 44
 
     # noinspection PyUnresolvedReferences
-    actual_events: list[mock._Call] = mock_emit.call_args_list
+    actual_events: list[mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert (
         actual_events[-1][0][0]["event"]
         == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE

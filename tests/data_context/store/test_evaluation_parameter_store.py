@@ -288,7 +288,7 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     evaluation_parameter_store = EvaluationParameterStore()
     run_id = RunIdentifier()
     s3_store = TupleS3StoreBackend(bucket="my_bucket")
-    evaluation_parameter_store._store_backend = s3_store
+    evaluation_parameter_store._store_backend = s3_store  # noqa: SLF001
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_s3_list_keys.called
@@ -322,7 +322,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     azure_store = TupleAzureBlobStoreBackend(
         container="my_container", connection_string="my_connection_string"
     )
-    evaluation_parameter_store._store_backend = azure_store
+    evaluation_parameter_store._store_backend = azure_store  # noqa: SLF001
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_azure_list_keys.called
@@ -354,7 +354,7 @@ def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     evaluation_parameter_store = EvaluationParameterStore()
     run_id = RunIdentifier()
     gcs_store = TupleGCSStoreBackend(bucket="my_bucket", project="my_project")
-    evaluation_parameter_store._store_backend = gcs_store
+    evaluation_parameter_store._store_backend = gcs_store  # noqa: SLF001
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_gcs_list_keys.called

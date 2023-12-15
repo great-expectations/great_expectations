@@ -18,7 +18,9 @@ def test_datasource_delete_removes_from_cache_and_config_data_context(
     assert len(context.datasources) == 1
     assert datasource_name in context.datasources
     assert datasource_name in context.config.datasources
-    assert context._datasource_store.retrieve_by_name(datasource_name=datasource_name)
+    assert context._datasource_store.retrieve_by_name(  # noqa: SLF001
+        datasource_name=datasource_name
+    )
 
     context.delete_datasource(datasource_name)
 
@@ -27,6 +29,6 @@ def test_datasource_delete_removes_from_cache_and_config_data_context(
     assert datasource_name not in context.datasources
     assert datasource_name not in context.config.datasources
     with pytest.raises(ValueError):
-        assert not context._datasource_store.retrieve_by_name(
+        assert not context._datasource_store.retrieve_by_name(  # noqa: SLF001
             datasource_name=datasource_name
         )

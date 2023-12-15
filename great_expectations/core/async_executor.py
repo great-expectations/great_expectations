@@ -143,4 +143,4 @@ def patch_https_connection_pool(
 
     # Increase the HTTP pool size to avoid the "Connection pool is full, discarding connection: bigquery.googleapis.com"
     adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
-    bq._http.mount("https://", adapter)
+    bq._http.mount("https://", adapter)  # noqa: SLF001

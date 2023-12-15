@@ -58,7 +58,7 @@ def _get_mock_response_from_pact_response_body(
     )
     mock_response = requests.Response()
     mock_response.status_code = status_code
-    mock_response._content = json.dumps(response_body).encode("utf-8")
+    mock_response._content = json.dumps(response_body).encode("utf-8")  # noqa: SLF001
     return mock_response
 
 

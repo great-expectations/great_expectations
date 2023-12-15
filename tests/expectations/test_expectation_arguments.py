@@ -812,11 +812,11 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     # manually set usage statistics handler
     handler = UsageStatisticsHandler(
         data_context=context,
-        data_context_id=context._data_context_id,
+        data_context_id=context._data_context_id,  # noqa: SLF001
         oss_id=None,
         usage_statistics_url="http://fakeendpoint.com",
     )
-    context._usage_statistics_handler = handler
+    context._usage_statistics_handler = handler  # noqa: SLF001
 
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {

@@ -270,7 +270,7 @@ def test_parse_validation_graph(
     (
         ready_metrics,
         needed_metrics,
-    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
+    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(  # noqa: SLF001
         metrics=available_metrics
     )
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
@@ -280,7 +280,7 @@ def test_parse_validation_graph(
     (
         ready_metrics,
         needed_metrics,
-    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
+    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(  # noqa: SLF001
         metrics=available_metrics
     )
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9

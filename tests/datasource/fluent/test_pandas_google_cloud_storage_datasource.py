@@ -67,7 +67,7 @@ def _build_pandas_gcs_datasource(
         bucket_or_name="test_bucket",
         gcs_options=gcs_options or {},
     )
-    pandas_gcs_datasource._gcs_client = gcs_client
+    pandas_gcs_datasource._gcs_client = gcs_client  # noqa: SLF001
     return pandas_gcs_datasource
 
 
@@ -118,9 +118,9 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
     data_connector: GoogleCloudStorageDataConnector = cast(
-        GoogleCloudStorageDataConnector, csv_asset._data_connector
+        GoogleCloudStorageDataConnector, csv_asset._data_connector  # noqa: SLF001
     )
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
+    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: SLF001
     return regex, test_connection_error_message
 
 
@@ -135,7 +135,7 @@ def test_construct_pandas_gcs_datasource_without_gcs_options():
         bucket_or_name="test_bucket",
         gcs_options={},
     )
-    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()  # noqa: SLF001
     assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
@@ -157,7 +157,7 @@ def test_construct_pandas_gcs_datasource_with_filename_in_gcs_options(
             "filename": "my_filename.csv",
         },
     )
-    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()  # noqa: SLF001
     assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
@@ -179,7 +179,7 @@ def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
             "info": "{my_csv: my_content,}",
         },
     )
-    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()  # noqa: SLF001
     assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
@@ -395,19 +395,21 @@ def test_test_connection_failures(
         name="csv_asset",
         batching_regex=regex,
     )
-    csv_asset._datasource = pandas_gcs_datasource
+    csv_asset._datasource = pandas_gcs_datasource  # noqa: SLF001
     pandas_gcs_datasource.assets = [
         csv_asset,
     ]
-    csv_asset._data_connector = GoogleCloudStorageDataConnector(
+    csv_asset._data_connector = GoogleCloudStorageDataConnector(  # noqa: SLF001
         datasource_name=pandas_gcs_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        gcs_client=pandas_gcs_datasource._gcs_client,
+        gcs_client=pandas_gcs_datasource._gcs_client,  # noqa: SLF001
         bucket_or_name=pandas_gcs_datasource.bucket_or_name,
         file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
     )
-    csv_asset._test_connection_error_message = test_connection_error_message
+    csv_asset._test_connection_error_message = (  # noqa: SLF001
+        test_connection_error_message
+    )
 
     with pytest.raises(TestConnectionError) as e:
         pandas_gcs_datasource.test_connection()

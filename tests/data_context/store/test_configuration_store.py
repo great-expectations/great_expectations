@@ -325,7 +325,9 @@ def test_self_check(capsys) -> None:
 def test_determine_key_constructs_key(
     name: Optional[str], id: Optional[str], expected_key: DataContextKey
 ) -> None:
-    actual_key = ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
+    actual_key = ConfigurationStore(store_name="test")._determine_key(  # noqa: SLF001
+        name=name, id=id
+    )
     assert actual_key == expected_key
 
 
@@ -345,7 +347,9 @@ def test_determine_key_raises_error_with_conflicting_args(
     name: Optional[str], id: Optional[str]
 ) -> None:
     with pytest.raises(AssertionError) as e:
-        ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
+        ConfigurationStore(store_name="test")._determine_key(  # noqa: SLF001
+            name=name, id=id
+        )
 
     assert "Must provide either name or id" in str(e.value)
 

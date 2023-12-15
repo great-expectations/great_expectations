@@ -97,9 +97,9 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
     context = get_context(context_root_dir=context_path)
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     context_config_commented_map = dataContextConfigSchema.dump(
-        get_context(context_root_dir=context_path)._project_config
+        get_context(context_root_dir=context_path)._project_config  # noqa: SLF001
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 

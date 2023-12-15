@@ -204,6 +204,8 @@ select = [
     "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
     # https://beta.ruff.rs/docs/rules/#pylint-pl
     "PL", # pylint
+    # https://docs.astral.sh/ruff/rules/private-member-access/
+    "SLF",
     # https://beta.ruff.rs/docs/rules/#ruff-specific-rules-ruf
     "RUF", # custom ruff rules
 ]

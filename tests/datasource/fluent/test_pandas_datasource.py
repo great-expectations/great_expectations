@@ -137,7 +137,7 @@ class TestDynamicPandasAssets:
         }
         print(asset_class_names)
 
-        assert type_name in PandasDatasource._type_lookup
+        assert type_name in PandasDatasource._type_lookup  # noqa: SLF001
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
@@ -490,7 +490,9 @@ def test_cloud_get_csv_asset_not_in_memory(valid_file_path: pathlib.Path):
     csv_asset = datasource.get_asset(asset_name=csv_asset_name)
     csv_asset.build_batch_request()
 
-    assert csv_asset_name not in context.datasources._in_memory_data_assets
+    assert (
+        csv_asset_name not in context.datasources._in_memory_data_assets  # noqa: SLF001
+    )
 
 
 @pytest.mark.filesystem

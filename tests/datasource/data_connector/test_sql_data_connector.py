@@ -107,7 +107,7 @@ def get_data_context_for_datasource_and_execution_engine(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]
+    context.datasources["my_test_datasource"]._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]  # noqa: SLF001
     return context
 
 
@@ -2180,7 +2180,7 @@ def test_introspect_db(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    assert my_data_connector._introspect_db() == [
+    assert my_data_connector._introspect_db() == [  # noqa: SLF001
         {
             "schema_name": "main",
             "table_name": "table_containing_id_spacers_for_D",
@@ -2280,7 +2280,7 @@ def test_introspect_db(
         },
     ]
 
-    assert my_data_connector._introspect_db(schema_name="main") == [
+    assert my_data_connector._introspect_db(schema_name="main") == [  # noqa: SLF001
         {
             "schema_name": "main",
             "table_name": "table_containing_id_spacers_for_D",
@@ -2380,10 +2380,10 @@ def test_introspect_db(
         },
     ]
 
-    assert my_data_connector._introspect_db(schema_name="waffle") == []
+    assert my_data_connector._introspect_db(schema_name="waffle") == []  # noqa: SLF001
 
     # This is a weak test, since this db doesn't have any additional schemas or system tables to show.
-    assert my_data_connector._introspect_db(
+    assert my_data_connector._introspect_db(  # noqa: SLF001
         ignore_information_schemas_and_system_tables=False
     ) == [
         {

@@ -69,7 +69,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
+        data_asset._data_connector = self.data_connector_type.build_data_connector(  # noqa: SLF001
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             batching_regex=data_asset.batching_regex,
@@ -80,7 +80,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         )
 
         # build a more specific `_test_connection_error_message`
-        data_asset._test_connection_error_message = (
+        data_asset._test_connection_error_message = (  # noqa: SLF001
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
                 batching_regex=data_asset.batching_regex,

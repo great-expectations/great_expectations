@@ -1168,7 +1168,9 @@ def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
         elif type_.lower() in ("fixedstring"):
             ch_type = type_module.types.String
         else:
-            ch_type = type_module.ClickHouseDialect()._get_column_type("", ch_type)
+            ch_type = type_module.ClickHouseDialect()._get_column_type(  # noqa: SLF001
+                "", ch_type
+            )
 
     if hasattr(ch_type, "nested_type"):
         ch_type = type(ch_type.nested_type)
@@ -1180,12 +1182,14 @@ def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
 def get_pyathena_potential_type(type_module, type_) -> str:
     if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
         # introduction of new column type mapping in 2.5
-        potential_type = type_module.AthenaDialect()._get_column_type(type_)
+        potential_type = type_module.AthenaDialect()._get_column_type(  # noqa: SLF001
+            type_
+        )
     else:
         if type_ == "string":
             type_ = "varchar"
         # < 2.5 column type mapping
-        potential_type = type_module._TYPE_MAPPINGS.get(type_)
+        potential_type = type_module._TYPE_MAPPINGS.get(type_)  # noqa: SLF001
 
     return potential_type
 

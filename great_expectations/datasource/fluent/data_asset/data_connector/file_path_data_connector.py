@@ -55,9 +55,11 @@ def file_get_unfiltered_batch_definition_list_fn(
     batch_definition_set = set()
     for (
         batch_definition
-    ) in data_connector._get_batch_definition_list_from_data_references_cache():
+    ) in (
+        data_connector._get_batch_definition_list_from_data_references_cache()  # noqa: SLF001
+    ):
         if (
-            data_connector._batch_definition_matches_batch_request(
+            data_connector._batch_definition_matches_batch_request(  # noqa: SLF001
                 batch_definition=batch_definition, batch_request=batch_request
             )
             and batch_definition not in batch_definition_set

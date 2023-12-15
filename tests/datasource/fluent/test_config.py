@@ -868,7 +868,7 @@ def test_config_substitution_retains_original_value_on_save(
         == my_conn_str
     )
 
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
 
     round_tripped = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
@@ -918,7 +918,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
         "new_asset", table_name="yellow_tripdata_sample_2019_01"
     )
 
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
 
     round_tripped_datasources = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())

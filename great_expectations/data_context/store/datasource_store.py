@@ -90,7 +90,7 @@ class DatasourceStore(Store):
         See parent 'Store.serialize()' for more information
         """
         if isinstance(value, FluentDatasource):
-            return value._json_dict()
+            return value._json_dict()  # noqa: SLF001
         return self._serializer.serialize(value)
 
     @overload

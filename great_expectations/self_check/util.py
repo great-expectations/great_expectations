@@ -285,22 +285,22 @@ except (ImportError, KeyError):
 
 TRINO_TYPES: Dict[str, Any] = (
     {
-        "BOOLEAN": trino.trinotypes._type_map["boolean"],
-        "TINYINT": trino.trinotypes._type_map["tinyint"],
-        "SMALLINT": trino.trinotypes._type_map["smallint"],
-        "INT": trino.trinotypes._type_map["int"],
-        "INTEGER": trino.trinotypes._type_map["integer"],
-        "BIGINT": trino.trinotypes._type_map["bigint"],
-        "REAL": trino.trinotypes._type_map["real"],
-        "DOUBLE": trino.trinotypes._type_map["double"],
-        "DECIMAL": trino.trinotypes._type_map["decimal"],
-        "VARCHAR": trino.trinotypes._type_map["varchar"],
-        "CHAR": trino.trinotypes._type_map["char"],
-        "VARBINARY": trino.trinotypes._type_map["varbinary"],
-        "JSON": trino.trinotypes._type_map["json"],
-        "DATE": trino.trinotypes._type_map["date"],
-        "TIME": trino.trinotypes._type_map["time"],
-        "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
+        "BOOLEAN": trino.trinotypes._type_map["boolean"],  # noqa: SLF001
+        "TINYINT": trino.trinotypes._type_map["tinyint"],  # noqa: SLF001
+        "SMALLINT": trino.trinotypes._type_map["smallint"],  # noqa: SLF001
+        "INT": trino.trinotypes._type_map["int"],  # noqa: SLF001
+        "INTEGER": trino.trinotypes._type_map["integer"],  # noqa: SLF001
+        "BIGINT": trino.trinotypes._type_map["bigint"],  # noqa: SLF001
+        "REAL": trino.trinotypes._type_map["real"],  # noqa: SLF001
+        "DOUBLE": trino.trinotypes._type_map["double"],  # noqa: SLF001
+        "DECIMAL": trino.trinotypes._type_map["decimal"],  # noqa: SLF001
+        "VARCHAR": trino.trinotypes._type_map["varchar"],  # noqa: SLF001
+        "CHAR": trino.trinotypes._type_map["char"],  # noqa: SLF001
+        "VARBINARY": trino.trinotypes._type_map["varbinary"],  # noqa: SLF001
+        "JSON": trino.trinotypes._type_map["json"],  # noqa: SLF001
+        "DATE": trino.trinotypes._type_map["date"],  # noqa: SLF001
+        "TIME": trino.trinotypes._type_map["time"],  # noqa: SLF001
+        "TIMESTAMP": trino.trinotypes._type_map["timestamp"],  # noqa: SLF001
     }
     if trino.trinotypes
     else {}
@@ -1126,7 +1126,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine
+    context.datasources[  # noqa: SLF001
+        "my_test_datasource"
+    ]._execution_engine = execution_engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
@@ -2269,10 +2271,12 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
         _debug = lambda x: x  # noqa: E731
 
     expectation_suite = ExpectationSuite(
-        "json_test_suite", data_context=validator._data_context
+        "json_test_suite", data_context=validator._data_context  # noqa: SLF001
     )
     # noinspection PyProtectedMember
-    validator._initialize_expectations(expectation_suite=expectation_suite)
+    validator._initialize_expectations(  # noqa: SLF001
+        expectation_suite=expectation_suite
+    )
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
 
     if "title" not in test:

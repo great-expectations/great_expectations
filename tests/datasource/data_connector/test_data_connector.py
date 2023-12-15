@@ -216,10 +216,8 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
 @pytest.mark.filesystem
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     # noinspection PyProtectedMember
-    data_references: list = (
-        basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-            data_asset_name="my_asset_name"
-        )
+    data_references: list = basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(  # noqa: SLF001
+        data_asset_name="my_asset_name"
     )
     assert len(data_references) == 0
     assert data_references == []

@@ -72,7 +72,7 @@ class DataContext:
             cls._config = GxConfig.parse_yaml(config_path)
             for ds_name, datasource in cls._config.datasources.items():
                 logger.info(f"Loaded '{ds_name}' from config")
-                cls._context._add_fluent_datasource(datasource)
+                cls._context._add_fluent_datasource(datasource)  # noqa: SLF001
                 # TODO: add assets?
 
         return cls._context
@@ -137,7 +137,9 @@ def context_sources_cleanup() -> _SourceFactories:
     """Return the sources object and reset types/factories on teardown"""
     try:
         # setup
-        sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)
+        sources_copy = copy.deepcopy(
+            _SourceFactories._SourceFactories__crud_registry  # noqa: SLF001
+        )
         type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
         sources = get_context().sources
 
@@ -147,13 +149,13 @@ def context_sources_cleanup() -> _SourceFactories:
 
         yield sources
     finally:
-        _SourceFactories._SourceFactories__crud_registry = sources_copy
+        _SourceFactories._SourceFactories__crud_registry = sources_copy  # noqa: SLF001
         _SourceFactories.type_lookup = type_lookup_copy
 
 
 @pytest.fixture(scope="function")
 def empty_sources(context_sources_cleanup) -> _SourceFactories:
-    _SourceFactories._SourceFactories__crud_registry.clear()
+    _SourceFactories._SourceFactories__crud_registry.clear()  # noqa: SLF001
     _SourceFactories.type_lookup.clear()
     assert not _SourceFactories.type_lookup
     yield context_sources_cleanup
@@ -263,12 +265,12 @@ class TestMetaDatasource:
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
-        print(f" type_lookup ->\n{pf(FooBarDatasource._type_lookup)}\n")
+        print(f" type_lookup ->\n{pf(FooBarDatasource._type_lookup)}\n")  # noqa: SLF001
         asset_types = FooBarDatasource.asset_types
         assert asset_types, "No asset types have been declared"
 
         registered_type_names = [
-            FooBarDatasource._type_lookup.get(t) for t in asset_types
+            FooBarDatasource._type_lookup.get(t) for t in asset_types  # noqa: SLF001
         ]
         for type_, name in zip(asset_types, registered_type_names):
             print(f"`{type_.__name__}` registered as '{name}'")

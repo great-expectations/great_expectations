@@ -122,7 +122,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context._get_batch_v2(
+    df = data_context._get_batch_v2(  # noqa: SLF001
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),
@@ -160,19 +160,19 @@ def parameterized_expectation_suite(empty_data_context_stats_enabled):
 def test_StoreBackendValidation():
     backend = InMemoryStoreBackend()
 
-    backend._validate_key(("I", "am", "a", "string", "tuple"))
+    backend._validate_key(("I", "am", "a", "string", "tuple"))  # noqa: SLF001
 
     with pytest.raises(TypeError):
-        backend._validate_key("nope")
+        backend._validate_key("nope")  # noqa: SLF001
 
     with pytest.raises(TypeError):
-        backend._validate_key(("I", "am", "a", "string", 100))
+        backend._validate_key(("I", "am", "a", "string", 100))  # noqa: SLF001
 
     with pytest.raises(TypeError):
-        backend._validate_key(("I", "am", "a", "string", None))
+        backend._validate_key(("I", "am", "a", "string", None))  # noqa: SLF001
 
     # zero-length tuple is allowed
-    backend._validate_key(())
+    backend._validate_key(())  # noqa: SLF001
 
 
 def check_store_backend_store_backend_id_functionality(
@@ -448,17 +448,17 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     )
 
     tuple_ = ("A__a", "B-b", "C")
-    converted_string = my_store._convert_key_to_filepath(tuple_)
+    converted_string = my_store._convert_key_to_filepath(tuple_)  # noqa: SLF001
     assert converted_string == "A__a/B-b/C/foo-C-expectations.txt"
 
-    recovered_key = my_store._convert_filepath_to_key(
+    recovered_key = my_store._convert_filepath_to_key(  # noqa: SLF001
         "A__a/B-b/C/foo-C-expectations.txt"
     )
     assert recovered_key == tuple_
 
     with pytest.raises(ValueError):
         tuple_ = ("A/a", "B-b", "C")
-        converted_string = my_store._convert_key_to_filepath(tuple_)
+        converted_string = my_store._convert_key_to_filepath(tuple_)  # noqa: SLF001
 
 
 @pytest.mark.filesystem
@@ -888,7 +888,7 @@ def test_TupleS3StoreBackend_with_empty_prefixes(aws_credentials):
     assert my_store.get(("AAA",)) == "aaa"
 
     obj = boto3.client("s3").get_object(Bucket=bucket, Key=prefix + "my_file_AAA")
-    assert my_store._build_s3_object_key(("AAA",)) == "my_file_AAA"
+    assert my_store._build_s3_object_key(("AAA",)) == "my_file_AAA"  # noqa: SLF001
     assert obj["ContentType"] == "text/html; charset=utf-8"
     assert obj["ContentEncoding"] == "utf-8"
 
@@ -1144,7 +1144,7 @@ def test_TupleAzureBlobStoreBackend_credential():
     with mock.patch(
         "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
     ):
-        mock_container_client = my_store._container_client
+        mock_container_client = my_store._container_client  # noqa: SLF001
         my_store.set(("AAA",), "aaa")
         mock_container_client.upload_blob.assert_called_once_with(
             name="this_is_a_test_prefix/AAA",
@@ -1184,7 +1184,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
     with mock.patch(
         "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
-        mock_container_client = my_store._container_client
+        mock_container_client = my_store._container_client  # noqa: SLF001
         mock_azure_blob_client.from_connection_string.assert_called_once()
 
         my_store.set(("AAA",), "aaa")
@@ -1230,7 +1230,7 @@ def test_TupleAzureBlobStoreBackend_account_url():
             "great_expectations.compatibility.azure.DefaultAzureCredential",
             autospec=True,
         ) as mock_azure_credential:
-            mock_container_client = my_store._container_client
+            mock_container_client = my_store._container_client  # noqa: SLF001
             mock_azure_blob_client.assert_called_once()
 
             my_store.get(("BBB",))
@@ -1600,7 +1600,9 @@ def test_InMemoryStoreBackend_add_or_update(previous_key_exists: bool):
 @pytest.mark.unit
 def test_store_backend_path_special_character_escape():
     path = "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-#ephemeral_pandas_asset.html"
-    escaped_path = StoreBackend._url_path_escape_special_characters(path=path)
+    escaped_path = StoreBackend._url_path_escape_special_characters(  # noqa: SLF001
+        path=path
+    )
     assert (
         escaped_path
         == "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-%23ephemeral_pandas_asset.html"

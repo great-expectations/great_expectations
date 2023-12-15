@@ -424,7 +424,9 @@ def add_datasource_usage_statistics(
             name
         ), "Guaranteed to have name from either `name` or `datasource` input args"
 
-        payload = datasource_anonymizer._anonymize_datasource_info(name, kwargs)
+        payload = datasource_anonymizer._anonymize_datasource_info(  # noqa: SLF001
+            name, kwargs
+        )
     except Exception as e:
         logger.debug(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
@@ -469,7 +471,7 @@ def get_checkpoint_run_usage_statistics(
     **kwargs,
 ) -> dict:
     usage_statistics_handler: UsageStatisticsHandler | None = (
-        checkpoint._usage_statistics_handler
+        checkpoint._usage_statistics_handler  # noqa: SLF001
     )
 
     data_context_id: str | None = None
@@ -514,12 +516,12 @@ def get_profiler_run_usage_statistics(
     **kwargs: dict,
 ) -> dict:
     usage_statistics_handler: UsageStatisticsHandler | None = (
-        profiler._usage_statistics_handler
+        profiler._usage_statistics_handler  # noqa: SLF001
     )
 
     data_context_id: str | None = None
     if usage_statistics_handler:
-        data_context_id = usage_statistics_handler._data_context_id
+        data_context_id = usage_statistics_handler._data_context_id  # noqa: SLF001
 
     anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:

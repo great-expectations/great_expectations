@@ -64,7 +64,7 @@ def test_valid_config(
     my_sf_ds_1 = SnowflakeDatasource(name="my_sf_ds_1", **config_kwargs)
     assert my_sf_ds_1
 
-    my_sf_ds_1._data_context = (
+    my_sf_ds_1._data_context = (  # noqa: SLF001
         empty_file_context  # attach to enable config substitution
     )
     sql_engine = my_sf_ds_1.get_engine()

@@ -25,9 +25,13 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     empty_data_context,
 ):
     context = empty_data_context
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={"notes": "*hi*"},
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -36,11 +40,13 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
         "*hi*",
     ]
 
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": ["*alpha*", "_bravo_", "charlie"]},
-            data_context=context,
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={"notes": ["*alpha*", "_bravo_", "charlie"]},
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -51,16 +57,18 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
         "charlie",
     ]
 
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.STRING,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
-            data_context=context,
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={
+                    "notes": {
+                        "format": MetaNotesFormat.STRING,
+                        "content": ["*alpha*", "_bravo_", "charlie"],
+                    }
+                },
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -71,11 +79,15 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
         "charlie",
     ]
 
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": "*alpha*"}},
-            data_context=context,
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={
+                    "notes": {"format": MetaNotesFormat.MARKDOWN, "content": "*alpha*"}
+                },
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -96,16 +108,18 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             "*alpha*",
         ]
 
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.MARKDOWN,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
-            data_context=context,
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={
+                    "notes": {
+                        "format": MetaNotesFormat.MARKDOWN,
+                        "content": ["*alpha*", "_bravo_", "charlie"],
+                    }
+                },
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -143,12 +157,14 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
     empty_data_context,
 ):
     context: ExpectationSuite = empty_data_context
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={},
-            expectations=None,
-            data_context=context,
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={},
+                expectations=None,
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -156,11 +172,13 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
         "This Expectation suite currently contains 0 total Expectations across 0 columns."
     ]
 
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": ["hi"]}},
-            data_context=context,
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": ["hi"]}},
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -181,23 +199,27 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             "hi",
         ]
 
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={},
-            expectations=[
-                ExpectationConfiguration(
-                    expectation_type="expect_table_row_count_to_be_between",
-                    kwargs={"min_value": 0, "max_value": None},
-                ),
-                ExpectationConfiguration(
-                    expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-                ),
-                ExpectationConfiguration(
-                    expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-                ),
-            ],
-            data_context=context,
+    result = (
+        ExpectationSuitePageRenderer._render_expectation_suite_notes(  # noqa: SLF001
+            ExpectationSuite(
+                expectation_suite_name="test",
+                meta={},
+                expectations=[
+                    ExpectationConfiguration(
+                        expectation_type="expect_table_row_count_to_be_between",
+                        kwargs={"min_value": 0, "max_value": None},
+                    ),
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_to_exist",
+                        kwargs={"column": "x"},
+                    ),
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_to_exist",
+                        kwargs={"column": "y"},
+                    ),
+                ],
+                data_context=context,
+            )
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text)[0])
@@ -216,9 +238,11 @@ def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
 def test_ValidationResultsPageRenderer_render_validation_header(
     titanic_profiled_evrs_1,
 ):
-    validation_header = ValidationResultsPageRenderer._render_validation_header(
-        titanic_profiled_evrs_1
-    ).to_json_dict()
+    validation_header = (
+        ValidationResultsPageRenderer._render_validation_header(  # noqa: SLF001
+            titanic_profiled_evrs_1
+        ).to_json_dict()
+    )
 
     expected_validation_header = {
         "content_block_type": "header",
@@ -271,9 +295,11 @@ def test_ValidationResultsPageRenderer_render_validation_header(
 
 
 def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
-    validation_info = ValidationResultsPageRenderer._render_validation_info(
-        titanic_profiled_evrs_1
-    ).to_json_dict()
+    validation_info = (
+        ValidationResultsPageRenderer._render_validation_info(  # noqa: SLF001
+            titanic_profiled_evrs_1
+        ).to_json_dict()
+    )
     print(validation_info)
 
     expected_validation_info = {
@@ -308,9 +334,11 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
 def test_ValidationResultsPageRenderer_render_validation_statistics(
     titanic_profiled_evrs_1,
 ):
-    validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(
-        titanic_profiled_evrs_1
-    ).to_json_dict()
+    validation_statistics = (
+        ValidationResultsPageRenderer._render_validation_statistics(  # noqa: SLF001
+            titanic_profiled_evrs_1
+        ).to_json_dict()
+    )
     print(validation_statistics)
     expected_validation_statistics = {
         "content_block_type": "table",
@@ -350,9 +378,11 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
         "datasource": "Titanic",
         "reader_options": {"sep": None, "engine": "python"},
     }
-    batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(
-        batch_kwargs, header="Batch Kwargs"
-    ).to_json_dict()
+    batch_kwargs_table = (
+        ValidationResultsPageRenderer._render_nested_table_from_dict(  # noqa: SLF001
+            batch_kwargs, header="Batch Kwargs"
+        ).to_json_dict()
+    )
     print(batch_kwargs_table)
 
     expected_batch_kwarg_table = {

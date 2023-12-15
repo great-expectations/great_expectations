@@ -104,7 +104,7 @@ def _create_sqlite_source(
             create_temp_table=create_temp_table,
         )
         if data_context:
-            sqlite_datasource._data_context = data_context
+            sqlite_datasource._data_context = data_context  # noqa: SLF001
         yield sqlite_datasource
     finally:
         SqliteDatasource.execution_engine_override = original_override  # type: ignore[misc]
@@ -196,4 +196,4 @@ def test_create_temp_table(empty_data_context, create_sqlite_source):
         assert source.create_temp_table is False
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
-        assert source._execution_engine._create_temp_table is False
+        assert source._execution_engine._create_temp_table is False  # noqa: SLF001

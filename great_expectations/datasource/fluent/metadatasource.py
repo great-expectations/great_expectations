@@ -38,8 +38,8 @@ class MetaDatasource(ModelMetaclass):
 
         logger.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
 
-        meta_cls.__cls_set.add(cls)
-        logger.debug(f"Datasources: {len(meta_cls.__cls_set)}")
+        meta_cls.__cls_set.add(cls)  # noqa: SLF001
+        logger.debug(f"Datasources: {len(meta_cls.__cls_set)}")  # noqa: SLF001
 
         if cls.__module__ == "__main__":
             logger.warning(

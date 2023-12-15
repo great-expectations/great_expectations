@@ -122,7 +122,7 @@ def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_n
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_statistics_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
+        bobby_statistics_data_assistant_result._batch_id_to_batch_identifier_display_name_map[  # noqa: SLF001
             batch_id
         ]
         is not None

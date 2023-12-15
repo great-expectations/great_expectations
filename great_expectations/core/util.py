@@ -819,7 +819,7 @@ def get_or_create_spark_application(
         raise ValueError("SparkContext could not be started.")
 
     # noinspection PyUnresolvedReferences
-    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
+    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()  # noqa: SLF001
     if not force_reuse_spark_context and spark_restart_required(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
         desired_spark_config=spark_config,
@@ -837,7 +837,7 @@ def get_or_create_spark_application(
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
         # noinspection PyProtectedMember,PyUnresolvedReferences
-        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
+        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()  # noqa: SLF001
 
     if sc_stopped:
         raise ValueError("SparkContext stopped unexpectedly.")
@@ -882,7 +882,7 @@ def get_or_create_spark_session(
 
         spark_session = builder.getOrCreate()
         # noinspection PyProtectedMember,PyUnresolvedReferences
-        if spark_session.sparkContext._jsc.sc().isStopped():
+        if spark_session.sparkContext._jsc.sc().isStopped():  # noqa: SLF001
             raise ValueError("SparkContext stopped unexpectedly.")
 
     except AttributeError:

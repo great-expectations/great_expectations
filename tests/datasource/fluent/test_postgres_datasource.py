@@ -94,7 +94,7 @@ def _source(
             create_temp_table=create_temp_table,
         )
         if data_context:
-            postgres_datasource._data_context = data_context
+            postgres_datasource._data_context = data_context  # noqa: SLF001
         yield postgres_datasource
     finally:
         PostgresDatasource.execution_engine_override = original_override  # type: ignore[misc]
@@ -230,7 +230,7 @@ def test_construct_table_asset_directly_with_no_splitter(create_source):
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
         asset = TableAsset(name="my_asset", table_name="my_table")
-        asset._datasource = source
+        asset._datasource = source  # noqa: SLF001
         assert_batch_request(
             asset.build_batch_request(), "my_datasource", "my_asset", {}
         )
@@ -248,7 +248,7 @@ def create_and_add_table_asset_without_testing_connection(
         splitter=splitter,
     )
     # TODO: asset custom init
-    table_asset._datasource = source
+    table_asset._datasource = source  # noqa: SLF001
     source.assets.append(table_asset)
     return source, table_asset
 
@@ -1422,7 +1422,7 @@ def test_create_temp_table(empty_data_context, create_source):
         assert source.create_temp_table is False
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
-        assert source._execution_engine._create_temp_table is False
+        assert source._execution_engine._create_temp_table is False  # noqa: SLF001
 
 
 @pytest.mark.postgresql

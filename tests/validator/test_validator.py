@@ -70,7 +70,7 @@ def yellow_trip_pandas_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext._LEGACY_GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,  # noqa: SLF001
                 FileDataContext.GX_YML,
             ),
         ),
@@ -309,7 +309,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     yellow_trip_pandas_data_context,
 ) -> Validator:
     context = yellow_trip_pandas_data_context
-    context._cloud_mode = True
+    context._cloud_mode = True  # noqa: SLF001
 
     suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",

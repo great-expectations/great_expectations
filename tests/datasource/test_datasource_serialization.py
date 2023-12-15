@@ -162,7 +162,7 @@ class TestDatasourceConfigSerialization:
     ):
         observed_dump = datasourceConfigSchema.dump(datasource_config)
 
-        round_tripped = DatasourceConfig._dict_round_trip(
+        round_tripped = DatasourceConfig._dict_round_trip(  # noqa: SLF001
             datasourceConfigSchema, observed_dump
         )
 

@@ -122,7 +122,7 @@ def test_sanitize_parameter_name(
     )
     assert sanitized_name == "table_head_444fc52627dde82ad1d5c4fe290bfa6b"
 
-    table_head_metric_config._metric_value_kwargs = IDDict({})
+    table_head_metric_config._metric_value_kwargs = IDDict({})  # noqa: SLF001
     sanitized_name = sanitize_parameter_name(
         name=table_head_metric_config.metric_name,
         suffix=table_head_metric_config.metric_value_kwargs_id,
@@ -272,7 +272,7 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
     )
     if metric_name == "my_metric_6":
         with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
-            metric_multi_batch_parameter_builder._sanitize_metric_computation(
+            metric_multi_batch_parameter_builder._sanitize_metric_computation(  # noqa: SLF001
                 parameter_builder=metric_multi_batch_parameter_builder,
                 metric_name=metric_name,
                 attributed_resolved_metrics=attributed_resolved_metrics,
@@ -289,7 +289,7 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
         )
     else:
         try:
-            metric_multi_batch_parameter_builder._sanitize_metric_computation(
+            metric_multi_batch_parameter_builder._sanitize_metric_computation(  # noqa: SLF001
                 parameter_builder=metric_multi_batch_parameter_builder,
                 metric_name=metric_name,
                 attributed_resolved_metrics=attributed_resolved_metrics,

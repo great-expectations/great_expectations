@@ -268,7 +268,7 @@ def test_instantiation_with_account_url_and_credential(
     )
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -303,7 +303,7 @@ def test_instantiation_with_conn_str_and_credential(
 
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -329,7 +329,7 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
             "credential": "my_credential",
         },
     )
-    assert my_data_connector._account_name == "my_account_url"
+    assert my_data_connector._account_name == "my_account_url"  # noqa: SLF001
 
 
 # noinspection PyUnusedLocal
@@ -353,7 +353,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
             "credential": "my_credential",
         },
     )
-    assert my_data_connector._account_name == "storagesample"
+    assert my_data_connector._account_name == "storagesample"  # noqa: SLF001
 
 
 # noinspection PyUnusedLocal
@@ -827,7 +827,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
     unsorted_batch_definition_list = (
-        my_data_connector._get_batch_definition_list_from_batch_request(
+        my_data_connector._get_batch_definition_list_from_batch_request(  # noqa: SLF001
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
@@ -1461,7 +1461,7 @@ azure_options:
         ],
     ]
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
@@ -1574,19 +1574,19 @@ azure_options:
     )
 
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
         )
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/beta_here/beta-202002.txt", "beta"
         )
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/gamma-202005.csv", "gamma"
         )
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"

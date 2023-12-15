@@ -261,7 +261,7 @@ def test_instantiation_without_args(
     )
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -298,7 +298,7 @@ def test_instantiation_with_filename_arg(
 
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -335,7 +335,7 @@ def test_instantiation_with_info_arg(
 
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -708,7 +708,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
     unsorted_batch_definition_list = (
-        my_data_connector._get_batch_definition_list_from_batch_request(
+        my_data_connector._get_batch_definition_list_from_batch_request(  # noqa: SLF001
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_gcs_data_connector",
@@ -1298,7 +1298,7 @@ assets:
         ],
     ]
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
@@ -1403,19 +1403,19 @@ assets:
     )
 
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
         )
         == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/beta_here/beta-202002.txt", "beta"
         )
         == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/gamma-202005.csv", "gamma"
         )
         == "gs://my_bucket/my_base_directory/gamma-202005.csv"

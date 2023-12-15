@@ -139,9 +139,9 @@ def test_basic_checkpoint_config_validation(  # noqa: PLR0915
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[unittest.mock._Call]  # noqa: SLF001
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[unittest.mock._Call]  # noqa: SLF001
 
     expected_events = [
         mock.call(
@@ -547,7 +547,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
+    expected_events: List[unittest.mock._Call] = [  # noqa: SLF001
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
@@ -560,7 +560,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         ),
     ]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert actual_events == expected_events
 
     assert len(data_context.list_checkpoints()) == 0
@@ -795,7 +795,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     assert mock_emit.call_count == 6
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
+    expected_events: List[unittest.mock._Call] = [  # noqa: SLF001
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
@@ -907,7 +907,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         ),
     ]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert actual_events == expected_events
 
     data_context.delete_checkpoint(name="airflow_checkpoint")
@@ -1827,7 +1827,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert mock_emit.call_count == 1
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
+    expected_events: List[unittest.mock._Call] = [  # noqa: SLF001
         mock.call(
             {
                 "event_payload": {
@@ -1911,7 +1911,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         )
     ]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert actual_events == expected_events
 
     assert len(context.validations_store.list_keys()) == 0
@@ -1931,7 +1931,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert mock_emit.call_count == 8
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
+    expected_events: List[unittest.mock._Call] = [  # noqa: SLF001
         mock.call(
             {
                 "event_payload": {
@@ -2163,7 +2163,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ),
     ]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert actual_events == expected_events
 
     # Since there are two validations, confirming there should be two "data_asset.validate" events

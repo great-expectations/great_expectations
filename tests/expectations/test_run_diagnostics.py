@@ -354,24 +354,30 @@ def test_expectation__get_renderers():
     #     expectation_name,
     #     _registered_renderers,
     # )
-    examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
+    examples = my_expectation._get_examples()  # noqa: SLF001
+    my_expectation_config = (
+        my_expectation._get_expectation_configuration_from_examples(  # noqa: SLF001
+            examples
+        )
     )
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
-        expectation_config=my_expectation_config
+    my_metric_diagnostics_list = (
+        my_expectation._get_metric_diagnostics_list(  # noqa: SLF001
+            expectation_config=my_expectation_config
+        )
     )
-    my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
-        metric_diagnostics_list=my_metric_diagnostics_list,
-        registered_metrics=_registered_metrics,
+    my_execution_engine_diagnostics = (
+        my_expectation._get_execution_engine_diagnostics(  # noqa: SLF001
+            metric_diagnostics_list=my_metric_diagnostics_list,
+            registered_metrics=_registered_metrics,
+        )
     )
-    my_test_results = my_expectation._get_test_results(
+    my_test_results = my_expectation._get_test_results(  # noqa: SLF001
         expectation_type=expectation_name,
         test_data_cases=examples,
         execution_engine_diagnostics=my_execution_engine_diagnostics,
         raise_exceptions_for_backends=False,
     )
-    renderer_diagnostics = my_expectation._get_renderer_diagnostics(
+    renderer_diagnostics = my_expectation._get_renderer_diagnostics(  # noqa: SLF001
         expectation_type=expectation_name,
         test_diagnostics=my_test_results,
         registered_renderers=_registered_renderers,
@@ -415,24 +421,30 @@ def test_expectation__get_renderers():
     #     expectation_name,
     #     _registered_renderers,
     # )
-    examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
+    examples = my_expectation._get_examples()  # noqa: SLF001
+    my_expectation_config = (
+        my_expectation._get_expectation_configuration_from_examples(  # noqa: SLF001
+            examples
+        )
     )
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
-        expectation_config=my_expectation_config
+    my_metric_diagnostics_list = (
+        my_expectation._get_metric_diagnostics_list(  # noqa: SLF001
+            expectation_config=my_expectation_config
+        )
     )
-    my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
-        metric_diagnostics_list=my_metric_diagnostics_list,
-        registered_metrics=_registered_metrics,
+    my_execution_engine_diagnostics = (
+        my_expectation._get_execution_engine_diagnostics(  # noqa: SLF001
+            metric_diagnostics_list=my_metric_diagnostics_list,
+            registered_metrics=_registered_metrics,
+        )
     )
-    my_test_results = my_expectation._get_test_results(
+    my_test_results = my_expectation._get_test_results(  # noqa: SLF001
         expectation_type=expectation_name,
         test_data_cases=examples,
         execution_engine_diagnostics=my_execution_engine_diagnostics,
         raise_exceptions_for_backends=False,
     )
-    renderer_diagnostics = my_expectation._get_renderer_diagnostics(
+    renderer_diagnostics = my_expectation._get_renderer_diagnostics(  # noqa: SLF001
         expectation_type=expectation_name,
         test_diagnostics=my_test_results,
         registered_renderers=_registered_renderers,
@@ -466,24 +478,30 @@ def test_expectation__get_renderers():
     #     expectation_name,
     #     _registered_renderers,
     # )
-    examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
+    examples = my_expectation._get_examples()  # noqa: SLF001
+    my_expectation_config = (
+        my_expectation._get_expectation_configuration_from_examples(  # noqa: SLF001
+            examples
+        )
     )
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
-        expectation_config=my_expectation_config
+    my_metric_diagnostics_list = (
+        my_expectation._get_metric_diagnostics_list(  # noqa: SLF001
+            expectation_config=my_expectation_config
+        )
     )
-    my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
-        metric_diagnostics_list=my_metric_diagnostics_list,
-        registered_metrics=_registered_metrics,
+    my_execution_engine_diagnostics = (
+        my_expectation._get_execution_engine_diagnostics(  # noqa: SLF001
+            metric_diagnostics_list=my_metric_diagnostics_list,
+            registered_metrics=_registered_metrics,
+        )
     )
-    my_test_results = my_expectation._get_test_results(
+    my_test_results = my_expectation._get_test_results(  # noqa: SLF001
         expectation_type=expectation_name,
         test_data_cases=examples,
         execution_engine_diagnostics=my_execution_engine_diagnostics,
         raise_exceptions_for_backends=False,
     )
-    renderer_diagnostics = my_expectation._get_renderer_diagnostics(
+    renderer_diagnostics = my_expectation._get_renderer_diagnostics(  # noqa: SLF001
         expectation_type=expectation_name,
         test_diagnostics=my_test_results,
         registered_renderers=_registered_renderers,

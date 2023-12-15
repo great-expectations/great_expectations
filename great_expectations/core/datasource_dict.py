@@ -169,8 +169,8 @@ class DatasourceDict(UserDict):
     def _init_fluent_datasource(
         self, name: str, ds: FluentDatasource
     ) -> FluentDatasource:
-        ds._data_context = self._context
-        ds._rebuild_asset_data_connectors()
+        ds._data_context = self._context  # noqa: SLF001
+        ds._rebuild_asset_data_connectors()  # noqa: SLF001
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
@@ -195,7 +195,7 @@ class DatasourceDict(UserDict):
     def _init_block_style_datasource(
         self, name: str, config: DatasourceConfig
     ) -> BaseDatasource:
-        return self._context._init_block_style_datasource(
+        return self._context._init_block_style_datasource(  # noqa: SLF001
             datasource_name=name, datasource_config=config
         )
 

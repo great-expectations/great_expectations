@@ -89,7 +89,7 @@ def test_sparkdf_datasource_custom_data_asset(
         name, "subdir_reader", "test"
     )
     batch_kwargs["reader_options"] = {"header": True, "inferSchema": True}
-    batch = data_context_parameterized_expectation_suite._get_batch_v2(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(  # noqa: SLF001
         batch_kwargs=batch_kwargs,
         expectation_suite_name="test_sparkdf_datasource.default",
     )
@@ -135,7 +135,7 @@ def test_force_reuse_spark_context(
     df = spark.read.format("parquet").load(tmp_parquet_filename)
     batch_kwargs = {"dataset": df, "datasource": dataset_name}
     _ = data_context_parameterized_expectation_suite.add_expectation_suite(dataset_name)
-    batch = data_context_parameterized_expectation_suite._get_batch_v2(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(  # noqa: SLF001
         batch_kwargs=batch_kwargs, expectation_suite_name=dataset_name
     )
     results = batch.expect_column_max_to_be_between("col1", min_value=1, max_value=100)
@@ -443,4 +443,4 @@ def test_spark_datasource_processes_dataset_options(
     )
     dataset = validator.get_dataset()
     assert dataset.caching is False
-    assert dataset._persist is False
+    assert dataset._persist is False  # noqa: SLF001

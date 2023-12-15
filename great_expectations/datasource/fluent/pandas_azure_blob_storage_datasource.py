@@ -150,7 +150,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 f"'{data_asset.name}' is missing required argument 'abs_container'"
             )
 
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
+        data_asset._data_connector = self.data_connector_type.build_data_connector(  # noqa: SLF001
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             azure_client=self._get_azure_client(),
@@ -164,7 +164,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         )
 
         # build a more specific `_test_connection_error_message`
-        data_asset._test_connection_error_message = (
+        data_asset._test_connection_error_message = (  # noqa: SLF001
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
                 batching_regex=data_asset.batching_regex,

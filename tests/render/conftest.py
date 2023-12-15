@@ -35,7 +35,9 @@ def titanic_profiled_name_column_evrs():
             json.load(infile)
         )
 
-    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
+    evrs_by_column = Renderer()._group_evrs_by_column(  # noqa: SLF001
+        titanic_profiled_evrs_1
+    )
     name_column_evrs = evrs_by_column["Name"]
 
     return name_column_evrs

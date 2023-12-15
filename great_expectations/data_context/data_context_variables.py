@@ -341,7 +341,7 @@ class FileDataContextVariables(DataContextVariables):
         store = DataContextStore(
             store_name="file_data_context_store",
         )
-        store._store_backend = store_backend
+        store._store_backend = store_backend  # noqa: SLF001
         return store
 
     @override
@@ -368,7 +368,7 @@ class FileDataContextVariables(DataContextVariables):
         """
         config_fluent_datasources_stash: Dict[
             str, FluentDatasource
-        ] = self.data_context._synchronize_fluent_datasources()
+        ] = self.data_context._synchronize_fluent_datasources()  # noqa: SLF001
         try:
             if config_fluent_datasources_stash:
                 logger.info(

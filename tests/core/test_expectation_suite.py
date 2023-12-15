@@ -84,7 +84,7 @@ class TestInit:
         default_meta = {"great_expectations_version": ge_version}
 
         assert suite.expectation_suite_name == fake_expectation_suite_name
-        assert suite._data_context is None
+        assert suite._data_context is None  # noqa: SLF001
         assert suite.expectations == []
         assert suite.evaluation_parameters == {}
         assert suite.data_asset_type is None
@@ -124,7 +124,7 @@ class TestInit:
             ge_cloud_id=test_id,
         )
         assert suite.expectation_suite_name == fake_expectation_suite_name
-        assert suite._data_context == dummy_data_context
+        assert suite._data_context == dummy_data_context  # noqa: SLF001
         assert suite.expectation_configurations == [
             expect_column_values_to_be_in_set_col_a_with_meta
         ]

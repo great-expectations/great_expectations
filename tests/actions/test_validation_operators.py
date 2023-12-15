@@ -76,7 +76,7 @@ def warning_failure_validation_operator_data_context(
     )
 
     data_context.add_expectation_suite(expectation_suite_name="f1.failure")
-    df = data_context._get_batch_v2(
+    df = data_context._get_batch_v2(  # noqa: SLF001
         expectation_suite_name="f1.failure",
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
@@ -89,7 +89,7 @@ def warning_failure_validation_operator_data_context(
     data_context.update_expectation_suite(expectation_suite=failure_expectations)
 
     data_context.add_expectation_suite(expectation_suite_name="f1.warning")
-    df = data_context._get_batch_v2(
+    df = data_context._get_batch_v2(  # noqa: SLF001
         expectation_suite_name="f1.warning",
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
@@ -142,7 +142,7 @@ def test_errors_warnings_validation_operator_run_slack_query(
         run_id=RunIdentifier(run_name="test_100"),
         base_expectation_suite_name="f1",
     )
-    slack_query = vo._build_slack_query(return_obj)
+    slack_query = vo._build_slack_query(return_obj)  # noqa: SLF001
     expected_slack_query = {
         "blocks": [
             {"type": "divider"},

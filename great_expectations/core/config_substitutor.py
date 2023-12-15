@@ -352,9 +352,9 @@ class _ConfigurationSubstitutor:
             secret_version = "latest"
         name = f"projects/{project_id}/secrets/{secret_id}/versions/{secret_version}"
         try:
-            secret = client.access_secret_version(name=name)._pb.payload.data.decode(
-                "utf-8"
-            )
+            secret = client.access_secret_version(  # noqa: SLF001
+                name=name
+            )._pb.payload.data.decode("utf-8")
         except AttributeError:
             secret = client.access_secret_version(name=name).payload.data.decode(
                 "utf-8"

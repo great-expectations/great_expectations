@@ -108,7 +108,7 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
     suite.add(expectation=expectation)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     return context
 
 
@@ -145,7 +145,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
     suite.add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
 
     return context
 
@@ -176,7 +176,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
     suite.add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
 
     return context
 
@@ -312,7 +312,7 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
 
     return context
 
@@ -389,7 +389,7 @@ def context_with_single_taxi_csv_spark(
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
 
     return context
 
@@ -408,5 +408,5 @@ def context_with_single_csv_spark_and_suite(
     suite.add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     return context

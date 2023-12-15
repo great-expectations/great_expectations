@@ -36,7 +36,7 @@ class CustomDatasource(Datasource):
 
 
 def test_datasource_anonymizer(datasource_anonymizer: DatasourceAnonymizer):
-    n1 = datasource_anonymizer._anonymize_datasource_info(
+    n1 = datasource_anonymizer._anonymize_datasource_info(  # noqa: SLF001
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -56,7 +56,7 @@ def test_datasource_anonymizer(datasource_anonymizer: DatasourceAnonymizer):
         "anonymized_name": "04bf89e1fb7495b0904bbd5ae478fbe0",
         "parent_class": "Datasource",
     }
-    n2 = datasource_anonymizer._anonymize_datasource_info(
+    n2 = datasource_anonymizer._anonymize_datasource_info(  # noqa: SLF001
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -69,7 +69,7 @@ def test_datasource_anonymizer(datasource_anonymizer: DatasourceAnonymizer):
         },
     )
     datasource_anonymizer_2 = DatasourceAnonymizer(aggregate_anonymizer=Anonymizer())
-    n3 = datasource_anonymizer_2._anonymize_datasource_info(
+    n3 = datasource_anonymizer_2._anonymize_datasource_info(  # noqa: SLF001
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -88,7 +88,7 @@ def test_datasource_anonymizer(datasource_anonymizer: DatasourceAnonymizer):
     assert n2["anonymized_class"] != n3["anonymized_class"]
 
     # Same anonymizer *does* produce the same result
-    n4 = datasource_anonymizer._anonymize_datasource_info(
+    n4 = datasource_anonymizer._anonymize_datasource_info(  # noqa: SLF001
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -121,8 +121,10 @@ data_connectors:
         module_name: great_expectations.datasource.data_connector
 """
     config: CommentedMap = yaml.load(yaml_config)
-    anonymized_datasource = datasource_anonymizer._anonymize_datasource_info(
-        name=name, config=config
+    anonymized_datasource = (
+        datasource_anonymizer._anonymize_datasource_info(  # noqa: SLF001
+            name=name, config=config
+        )
     )
     assert anonymized_datasource == {
         "anonymized_data_connectors": [
@@ -158,8 +160,10 @@ data_connectors:
         module_name: great_expectations.datasource.data_connector
 """
     config: CommentedMap = yaml.load(yaml_config)
-    anonymized_datasource = datasource_anonymizer._anonymize_datasource_info(
-        name=name, config=config
+    anonymized_datasource = (
+        datasource_anonymizer._anonymize_datasource_info(  # noqa: SLF001
+            name=name, config=config
+        )
     )
     assert anonymized_datasource == {
         "anonymized_name": "2642802d79d90ce6d147b0f9f61c3569",
@@ -194,7 +198,7 @@ introspection:
 """
     config: CommentedMap = yaml.load(yaml_config)
     anonymized_datasource = (
-        datasource_anonymizer._anonymize_simple_sqlalchemy_datasource(
+        datasource_anonymizer._anonymize_simple_sqlalchemy_datasource(  # noqa: SLF001
             name=name, config=config
         )
     )
@@ -226,7 +230,7 @@ introspection:
 """
     config: CommentedMap = yaml.load(yaml_config)
     anonymized_datasource = (
-        datasource_anonymizer._anonymize_simple_sqlalchemy_datasource(
+        datasource_anonymizer._anonymize_simple_sqlalchemy_datasource(  # noqa: SLF001
             name=name, config=config
         )
     )

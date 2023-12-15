@@ -50,7 +50,9 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
     )
     batch_request = asset.build_batch_request(dataframe=df)
 
-    context.assistants._register("my_data_assistant", ColumnValueMissingDataAssistant)
+    context.assistants._register(  # noqa: SLF001
+        "my_data_assistant", ColumnValueMissingDataAssistant
+    )
     result = context.assistants.my_data_assistant.run(batch_request=batch_request)
 
     assert len(result.expectation_configurations) == 3

@@ -67,7 +67,7 @@ def spark_filesystem_datasource(
         name="spark_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
-    spark_filesystem_datasource._data_context = empty_data_context
+    spark_filesystem_datasource._data_context = empty_data_context  # noqa: SLF001
     return spark_filesystem_datasource
 
 
@@ -421,7 +421,7 @@ def test__get_reader_options_include(
     """Make sure options are in fields."""
     fields = set(asset_type.__fields__.keys())
     asset = asset_type.validate(required_fields)
-    for option in asset._get_reader_options_include():
+    for option in asset._get_reader_options_include():  # noqa: SLF001
         assert option in fields
 
 
@@ -1046,18 +1046,18 @@ def datasource_test_connection_error_messages(
         name="csv_asset",
         batching_regex=batching_regex,
     )
-    csv_asset._datasource = spark_filesystem_datasource
+    csv_asset._datasource = spark_filesystem_datasource  # noqa: SLF001
     spark_filesystem_datasource.assets = [
         csv_asset,
     ]
-    csv_asset._data_connector = FilesystemDataConnector(
+    csv_asset._data_connector = FilesystemDataConnector(  # noqa: SLF001
         datasource_name=spark_filesystem_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=batching_regex,
         base_directory=spark_filesystem_datasource.base_directory,
         data_context_root_directory=spark_filesystem_datasource.data_context_root_directory,
     )
-    csv_asset._test_connection_error_message = test_connection_error
+    csv_asset._test_connection_error_message = test_connection_error  # noqa: SLF001
     return spark_filesystem_datasource, test_connection_error
 
 

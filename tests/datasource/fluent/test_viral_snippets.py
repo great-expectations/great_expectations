@@ -78,7 +78,7 @@ def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
 @pytest.mark.filesystem
 def test_save_project_does_not_break(seeded_file_context: FileDataContext):
     print(seeded_file_context.fluent_config)
-    seeded_file_context._save_project_config()
+    seeded_file_context._save_project_config()  # noqa: SLF001
 
 
 @pytest.mark.filesystem
@@ -103,7 +103,7 @@ def test_save_datacontext_persists_fluent_config(
     )
 
     context.fluent_config = fluent_only_config
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
 
     final_yaml = config_file.read_text()
     diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())

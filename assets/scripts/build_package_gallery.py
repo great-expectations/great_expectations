@@ -85,7 +85,7 @@ def _run_pip(stmt: str) -> None:
     if hasattr(pip, "main"):
         pip.main(args)
     else:
-        pip._internal.main(args)
+        pip._internal.main(args)  # noqa: SLF001
 
 
 def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:

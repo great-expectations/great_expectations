@@ -380,9 +380,11 @@ class _YamlConfigValidator:
         """
         print(f"\tInstantiating as a Store, since class_name is {class_name}")
         store_name: str = name or config.get("name") or "my_temp_store"
-        instantiated_class = self._data_context._build_store_from_config(
-            store_name=store_name,
-            store_config=config,
+        instantiated_class = (
+            self._data_context._build_store_from_config(  # noqa: SLF001
+                store_name=store_name,
+                store_config=config,
+            )
         )
         store_name = instantiated_class.store_name or store_name
         self._data_context.config["stores"][store_name] = config
@@ -404,10 +406,8 @@ class _YamlConfigValidator:
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
         datasource_config = datasourceConfigSchema.load(config)
         datasource_config.name = datasource_name
-        instantiated_class = (
-            self._data_context._instantiate_datasource_from_config_with_substitution(
-                config=datasource_config
-            )
+        instantiated_class = self._data_context._instantiate_datasource_from_config_with_substitution(  # noqa: SLF001
+            config=datasource_config
         )
 
         anonymizer = Anonymizer(self._data_context.data_context_id)

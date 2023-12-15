@@ -131,8 +131,10 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_values: List[dict] = []
         for name, config in payload.items():
-            anonymize_value: dict = anonymizer._anonymize_datasource_info(
-                name=name, config=config
+            anonymize_value: dict = (
+                anonymizer._anonymize_datasource_info(  # noqa: SLF001
+                    name=name, config=config
+                )
             )
             anonymized_values.append(anonymize_value)
 

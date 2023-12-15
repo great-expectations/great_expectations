@@ -816,7 +816,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-    introspection_output = data_connector._introspect_db()
+    introspection_output = data_connector._introspect_db()  # noqa: SLF001
 
     tables_to_drop: List[str] = []
     tables_dropped: List[str] = []

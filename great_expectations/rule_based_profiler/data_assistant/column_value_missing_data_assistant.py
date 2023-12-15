@@ -92,7 +92,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
         return ColumnValueMissingDataAssistantResult(
-            _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
+            _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,  # noqa: SLF001
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
@@ -101,7 +101,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
-            _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
+            _usage_statistics_handler=data_assistant_result._usage_statistics_handler,  # noqa: SLF001
         )
 
     def _build_column_value_missing_rule(self) -> Rule:

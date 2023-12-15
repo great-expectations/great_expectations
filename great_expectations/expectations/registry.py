@@ -66,7 +66,7 @@ def register_renderer(
     renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
     # noinspection PyUnresolvedReferences
-    renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]
+    renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]  # noqa: SLF001
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
         _registered_renderers[object_name] = {
@@ -368,7 +368,7 @@ def get_metric_kwargs(
         }
         if configuration:
             expectation_impl = get_expectation_impl(configuration.expectation_type)
-            configuration_kwargs = expectation_impl(
+            configuration_kwargs = expectation_impl(  # noqa: SLF001
                 **configuration.kwargs
             )._get_runtime_kwargs(runtime_configuration=runtime_configuration)
             if len(metric_kwargs["metric_domain_keys"]) > 0:

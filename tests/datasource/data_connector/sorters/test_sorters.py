@@ -45,7 +45,7 @@ def test_sorter_instantiation_datetime():
     assert isinstance(my_dt, DateTimeSorter)
     assert my_dt.name == "dt"
     assert my_dt.reverse is True
-    assert my_dt._datetime_format == "%Y%m%d"
+    assert my_dt._datetime_format == "%Y%m%d"  # noqa: SLF001
 
 
 def test_sorter_instantiation_numeric():
@@ -78,7 +78,7 @@ def test_sorter_instantiation_custom_list():
     assert my_custom.name == "custom"
     assert my_custom.reverse is False
     # noinspection PyProtectedMember
-    assert my_custom._reference_list == ["a", "b", "c"]
+    assert my_custom._reference_list == ["a", "b", "c"]  # noqa: SLF001
     # with incorrectly configured reference list
     sorter_params: dict = {
         "reference_list": [
@@ -108,7 +108,9 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
     }
     my_custom_sorter = CustomListSorter(name="element", orderby="asc", **sorter_params)
     # noinspection PyProtectedMember
-    assert my_custom_sorter._reference_list == periodic_table_of_elements
+    assert (
+        my_custom_sorter._reference_list == periodic_table_of_elements  # noqa: SLF001
+    )
     # This element exists : Hydrogen
     test_batch_def = BatchDefinition(
         datasource_name="test",

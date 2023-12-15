@@ -36,7 +36,7 @@ def construct_file_migrator() -> Callable:
     def _construct_file_migrator(context: AbstractDataContext):
         return FileMigrator(
             primary_stores=context.stores,
-            datasource_store=context._datasource_store,
+            datasource_store=context._datasource_store,  # noqa: SLF001
             variables=context.variables,
             fluent_config=context.fluent_config,
         )
@@ -147,7 +147,7 @@ def test_migrate_transfers_fluent_datasources(
     datasource_name = "my_experimental_datasource_awaiting_migration"
 
     context.sources.add_pandas(datasource_name)
-    context._synchronize_fluent_datasources()
+    context._synchronize_fluent_datasources()  # noqa: SLF001
 
     # Construct and run migrator
     tmp_path.mkdir(exist_ok=True)

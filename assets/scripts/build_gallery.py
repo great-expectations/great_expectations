@@ -373,25 +373,27 @@ def combine_backend_results(
                 logger.error(f"No backend_test_result_counts for {expectation_name}")
                 bad_key_names.append(expectation_name)
                 continue
-            maturity_checklist_object = expectation_instance._get_maturity_checklist(
-                library_metadata=diagnostic_object.library_metadata,
-                description=diagnostic_object.description,
-                examples=diagnostic_object.examples,
-                tests=diagnostic_object.tests,
-                backend_test_result_counts=backend_test_result_counts_object,
+            maturity_checklist_object = (
+                expectation_instance._get_maturity_checklist(  # noqa: SLF001
+                    library_metadata=diagnostic_object.library_metadata,
+                    description=diagnostic_object.description,
+                    examples=diagnostic_object.examples,
+                    tests=diagnostic_object.tests,
+                    backend_test_result_counts=backend_test_result_counts_object,
+                )
             )
             expectations_info[expectation_name][
                 "maturity_checklist"
             ] = maturity_checklist_object.to_dict()
             expectations_info[expectation_name][
                 "coverage_score"
-            ] = Expectation._get_coverage_score(
+            ] = Expectation._get_coverage_score(  # noqa: SLF001
                 backend_test_result_counts=backend_test_result_counts_object,
                 execution_engines=diagnostic_object.execution_engines,
             )
             expectations_info[expectation_name]["library_metadata"][
                 "maturity"
-            ] = Expectation._get_final_maturity_level(
+            ] = Expectation._get_final_maturity_level(  # noqa: SLF001
                 maturity_checklist=maturity_checklist_object
             )
 

@@ -73,7 +73,9 @@ def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
         cloud_mode=True,
     )
 
-    assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
+    assert isinstance(
+        context._datasource_store.store_backend, GXCloudStoreBackend  # noqa: SLF001
+    )
 
 
 @pytest.mark.filesystem
@@ -93,7 +95,9 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
         cloud_mode=False,
     )
 
-    assert isinstance(context._datasource_store.store_backend, InlineStoreBackend)
+    assert isinstance(
+        context._datasource_store.store_backend, InlineStoreBackend  # noqa: SLF001
+    )
 
 
 @pytest.mark.unit

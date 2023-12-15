@@ -55,7 +55,7 @@ def test_add_fluent_datasource_are_persisted(
     mocker: MockerFixture,
 ):
     context = empty_cloud_context_fluent
-    set_spy = mocker.spy(context._datasource_store, "set")
+    set_spy = mocker.spy(context._datasource_store, "set")  # noqa: SLF001
 
     datasource_name = "save_ds_test"
 
@@ -157,7 +157,7 @@ def test_delete_asset_with_cloud_data_context(
     mocker: MockerFixture,
 ):
     context = seeded_cloud_context
-    remove_key_spy = mocker.spy(context._data_asset_store, "remove_key")
+    remove_key_spy = mocker.spy(context._data_asset_store, "remove_key")  # noqa: SLF001
 
     datasource_name = "my_pg_ds"
     datasource = context.fluent_datasources[datasource_name]
@@ -420,7 +420,10 @@ def test_data_connectors_are_built_on_config_load(
             dc_datasources[datasource.type].append(datasource.name)
 
             for asset in datasource.assets:
-                assert isinstance(asset._data_connector, datasource.data_connector_type)
+                assert isinstance(
+                    asset._data_connector,  # noqa: SLF001
+                    datasource.data_connector_type,
+                )
             print()
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")

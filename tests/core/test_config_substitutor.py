@@ -185,9 +185,9 @@ class MockedSecretManagerServiceClient:
             pass
 
         response = Response()
-        response._pb = Response()
-        response._pb.payload = Response()
-        response._pb.payload.data = self.secret_response
+        response._pb = Response()  # noqa: SLF001
+        response._pb.payload = Response()  # noqa: SLF001
+        response._pb.payload.data = self.secret_response  # noqa: SLF001
 
         return response
 

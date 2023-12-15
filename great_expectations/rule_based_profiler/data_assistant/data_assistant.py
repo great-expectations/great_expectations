@@ -92,7 +92,9 @@ class MetaDataAssistant(ABCMeta):
                 )
 
                 # noinspection PyTypeChecker
-                DataAssistantDispatcher._register(name=alias, data_assistant=newclass)
+                DataAssistantDispatcher._register(  # noqa: SLF001
+                    name=alias, data_assistant=newclass
+                )
 
         return newclass
 
@@ -566,7 +568,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
         if self._data_context is None:
             usage_statistics_handler = None
         else:
-            usage_statistics_handler = self._data_context._usage_statistics_handler
+            usage_statistics_handler = (
+                self._data_context._usage_statistics_handler  # noqa: SLF001
+            )
 
         batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 

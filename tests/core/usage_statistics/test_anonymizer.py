@@ -49,8 +49,8 @@ def test_anonymizer_no_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1._anonymize_string(test_name)
-    anon_name_2 = anonymizer2._anonymize_string(test_name)
+    anon_name_1 = anonymizer1._anonymize_string(test_name)  # noqa: SLF001
+    anon_name_2 = anonymizer2._anonymize_string(test_name)  # noqa: SLF001
     assert anon_name_1 != anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
@@ -61,8 +61,8 @@ def test_anonymizer_no_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1._anonymize_string(test_name)
-    anon_name_2 = anonymizer2._anonymize_string(test_name)
+    anon_name_1 = anonymizer1._anonymize_string(test_name)  # noqa: SLF001
+    anon_name_2 = anonymizer2._anonymize_string(test_name)  # noqa: SLF001
     assert anon_name_1 != anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
@@ -77,8 +77,8 @@ def test_anonymizer_consistent_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1._anonymize_string(test_name)
-    anon_name_2 = anonymizer2._anonymize_string(test_name)
+    anon_name_1 = anonymizer1._anonymize_string(test_name)  # noqa: SLF001
+    anon_name_2 = anonymizer2._anonymize_string(test_name)  # noqa: SLF001
     assert anon_name_1 == anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
@@ -181,9 +181,11 @@ def test_anonymizer_get_parent_class():
 def test_anonymize_object_info_with_core_ge_object(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
-        anonymized_info_dict={},
-        object_=ExpectationSuite(expectation_suite_name="my_suite"),
+    anonymized_result: dict = (
+        anonymizer_with_consistent_salt._anonymize_object_info(  # noqa: SLF001
+            anonymized_info_dict={},
+            object_=ExpectationSuite(expectation_suite_name="my_suite"),
+        )
     )
 
     assert anonymized_result == {"parent_class": "ExpectationSuite"}
@@ -193,9 +195,11 @@ def test_anonymize_object_info_with_core_ge_object(
 def test_anonymize_object_info_with_custom_user_defined_object_with_single_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
-        anonymized_info_dict={},
-        object_=MyCustomExpectationSuite(expectation_suite_name="my_suite"),
+    anonymized_result: dict = (
+        anonymizer_with_consistent_salt._anonymize_object_info(  # noqa: SLF001
+            anonymized_info_dict={},
+            object_=MyCustomExpectationSuite(expectation_suite_name="my_suite"),
+        )
     )
 
     assert anonymized_result == {
@@ -208,8 +212,10 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_single_paren
 def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
-        anonymized_info_dict={}, object_=BaseTestClass()
+    anonymized_result: dict = (
+        anonymizer_with_consistent_salt._anonymize_object_info(  # noqa: SLF001
+            anonymized_info_dict={}, object_=BaseTestClass()
+        )
     )
 
     assert anonymized_result == {
@@ -222,9 +228,11 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
 def test_anonymize_object_info_with_custom_user_defined_object_with_multiple_parents(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
-        anonymized_info_dict={},
-        object_=MyCustomMultipleInheritanceClass(expectation_suite_name="my_name"),
+    anonymized_result: dict = (
+        anonymizer_with_consistent_salt._anonymize_object_info(  # noqa: SLF001
+            anonymized_info_dict={},
+            object_=MyCustomMultipleInheritanceClass(expectation_suite_name="my_name"),
+        )
     )
 
     assert anonymized_result == {
@@ -238,7 +246,7 @@ def test_anonymize_object_info_with_missing_args_raises_error(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
     with pytest.raises(AssertionError) as e:
-        anonymizer_with_consistent_salt._anonymize_object_info(
+        anonymizer_with_consistent_salt._anonymize_object_info(  # noqa: SLF001
             anonymized_info_dict={},
             object_=None,
             object_class=None,

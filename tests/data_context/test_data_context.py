@@ -299,12 +299,12 @@ def test_compile_evaluation_parameter_dependencies(
     data_context_parameterized_expectation_suite,
 ):
     assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies  # noqa: SLF001
         == {}
     )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()  # noqa: SLF001
     assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies  # noqa: SLF001
         == {
             "source_diabetes_data.default": [
                 {
@@ -437,12 +437,18 @@ def test__normalize_absolute_or_relative_path(
         config_path,
     )
 
-    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+    assert context._normalize_absolute_or_relative_path(  # noqa: SLF001
+        "yikes"
+    ).endswith(
         os.path.join(test_dir, "yikes")  # noqa: PTH118
     )
 
-    assert test_dir not in context._normalize_absolute_or_relative_path("/yikes")
-    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
+    assert test_dir not in context._normalize_absolute_or_relative_path(  # noqa: SLF001
+        "/yikes"
+    )
+    assert "/yikes" == context._normalize_absolute_or_relative_path(  # noqa: SLF001
+        "/yikes"
+    )
 
 
 @pytest.mark.filesystem
@@ -616,7 +622,10 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
     ge_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is True
+        FileDataContext._does_project_have_a_datasource_in_config_file(  # noqa: SLF001
+            ge_dir
+        )
+        is True
     )
 
 
@@ -626,7 +635,10 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(  # noqa: SLF001
+            ge_dir
+        )
+        is False
     )
 
 
@@ -637,7 +649,10 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(  # noqa: SLF001
+            ge_dir
+        )
+        is False
     )
 
 
@@ -648,7 +663,10 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir))  # noqa: PTH118
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(  # noqa: SLF001
+            ge_dir
+        )
+        is False
     )
 
 
@@ -660,7 +678,10 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:  # noqa: PTH118
         yml.write("this file: is not a valid ge config")
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(  # noqa: SLF001
+            ge_dir
+        )
+        is False
     )
 
 
@@ -946,7 +967,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 def test_scaffold_directories(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
     empty_directory = pathlib.Path(empty_directory)
-    FileDataContext._scaffold_directories(empty_directory)
+    FileDataContext._scaffold_directories(empty_directory)  # noqa: SLF001
 
     assert set(os.listdir(empty_directory)) == {
         "plugins",
@@ -2514,7 +2535,9 @@ def test_check_for_usage_stats_sync_finds_diff(
     context = empty_data_context_stats_enabled
     project_config = data_context_config_with_datasources
 
-    res = context._check_for_usage_stats_sync(project_config=project_config)
+    res = context._check_for_usage_stats_sync(  # noqa: SLF001
+        project_config=project_config
+    )
     assert res is True
 
 
@@ -2532,7 +2555,9 @@ def test_check_for_usage_stats_sync_does_not_find_diff(
     context = empty_data_context_stats_enabled
     project_config = copy.deepcopy(context.config)  # Using same exact config
 
-    res = context._check_for_usage_stats_sync(project_config=project_config)
+    res = context._check_for_usage_stats_sync(  # noqa: SLF001
+        project_config=project_config
+    )
     assert res is False
 
 
@@ -2545,7 +2570,9 @@ def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
     project_config = data_context_config_with_datasources
     project_config.anonymous_usage_statistics.enabled = False
 
-    res = context._check_for_usage_stats_sync(project_config=project_config)
+    res = context._check_for_usage_stats_sync(  # noqa: SLF001
+        project_config=project_config
+    )
     assert res is False
 
 
@@ -2782,7 +2809,7 @@ def test_set_oss_id_with_empty_config(in_memory_runtime_context: EphemeralDataCo
     context = in_memory_runtime_context
     config = configparser.ConfigParser()
 
-    oss_id = context._set_oss_id(config)
+    oss_id = context._set_oss_id(config)  # noqa: SLF001
 
     assert config.sections() == ["anonymous_usage_statistics"]
     assert list(config["anonymous_usage_statistics"]) == ["oss_id"]
@@ -2805,7 +2832,7 @@ def test_set_oss_id_with_existing_config(
     )
     config["anonymous_usage_statistics"]["usage_statistics_url"] = usage_statistics_url
 
-    oss_id = context._set_oss_id(config)
+    oss_id = context._set_oss_id(config)  # noqa: SLF001
 
     assert config.sections() == ["anonymous_usage_statistics"]
     assert list(config["anonymous_usage_statistics"]) == [

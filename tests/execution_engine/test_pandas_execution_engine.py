@@ -40,19 +40,19 @@ def test_reader_fn():
     engine = PandasExecutionEngine()
 
     # Testing that can recognize basic excel file
-    fn = engine._get_reader_fn(path="myfile.xlsx")
+    fn = engine._get_reader_fn(path="myfile.xlsx")  # noqa: SLF001
     assert "<function read_excel" in str(fn)
 
     # Testing that can recognize basic sas7bdat file
-    fn_read_sas7bdat = engine._get_reader_fn(path="myfile.sas7bdat")
+    fn_read_sas7bdat = engine._get_reader_fn(path="myfile.sas7bdat")  # noqa: SLF001
     assert "<function read_sas" in str(fn_read_sas7bdat)
 
     # Testing that can recognize basic SAS xpt file
-    fn_read_xpt = engine._get_reader_fn(path="myfile.xpt")
+    fn_read_xpt = engine._get_reader_fn(path="myfile.xpt")  # noqa: SLF001
     assert "<function read_sas" in str(fn_read_xpt)
 
     # Ensuring that other way around works as well - reader_method should always override path
-    fn_new = engine._get_reader_fn(reader_method="read_csv")
+    fn_new = engine._get_reader_fn(reader_method="read_csv")  # noqa: SLF001
     assert "<function" in str(fn_new)
 
 
@@ -598,7 +598,7 @@ def test_get_batch_data_with_azure_batch_spec(
 def test_get_batch_with_no_azure_configured(azure_batch_spec):
     # if Azure BlobServiceClient was not configured
     execution_engine_no_azure = PandasExecutionEngine()
-    execution_engine_no_azure._azure = None
+    execution_engine_no_azure._azure = None  # noqa: SLF001
 
     # Raises error due the connection object not being set
     with pytest.raises(gx_exceptions.ExecutionEngineError):

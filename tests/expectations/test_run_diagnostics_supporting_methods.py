@@ -21,7 +21,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 
 @pytest.mark.unit
 def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_object():
-    augmented_library_metadata = ExpectColumnValuesToEqualThree(
+    augmented_library_metadata = ExpectColumnValuesToEqualThree(  # noqa: SLF001
         column="values"
     )._get_augmented_library_metadata()
     assert augmented_library_metadata == AugmentedLibraryMetadata(
@@ -38,9 +38,11 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
 
 @pytest.mark.unit
 def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadata_object():
-    augmented_library_metadata = ExpectColumnValuesToEqualThree__SecondIteration(
-        column="values"
-    )._get_augmented_library_metadata()
+    augmented_library_metadata = (
+        ExpectColumnValuesToEqualThree__SecondIteration(  # noqa: SLF001
+            column="values"
+        )._get_augmented_library_metadata()
+    )
     assert augmented_library_metadata == AugmentedLibraryMetadata(
         maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
@@ -57,12 +59,14 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
 
 @pytest.mark.unit
 def test__get_examples_from_a_class_with_no_examples():
-    assert ExpectColumnValuesToEqualThree(column="values")._get_examples() == []
+    expectation = ExpectColumnValuesToEqualThree(column="values")
+    examples = expectation._get_examples()  # noqa: SLF001
+    assert examples == []
 
 
 @pytest.mark.unit
 def test__get_examples_from_a_class_with_some_examples():
-    examples = ExpectColumnValuesToEqualThree__SecondIteration(
+    examples = ExpectColumnValuesToEqualThree__SecondIteration(  # noqa: SLF001
         column="values"
     )._get_examples()
     assert len(examples) == 1
@@ -77,7 +81,7 @@ def test__get_examples_from_a_class_with_some_examples():
 
 @pytest.mark.unit
 def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_false():
-    examples = ExpectColumnValuesToEqualThree__SecondIteration(
+    examples = ExpectColumnValuesToEqualThree__SecondIteration(  # noqa: SLF001
         column="values"
     )._get_examples(return_only_gallery_examples=False)
     assert len(examples) == 1
@@ -101,7 +105,7 @@ def test__get_description_diagnostics():
         It has more to it.
         """
 
-    description_diagnostics = ExpectColumnValuesToBeAwesome(
+    description_diagnostics = ExpectColumnValuesToBeAwesome(  # noqa: SLF001
         column="values"
     )._get_description_diagnostics()
     assert description_diagnostics == ExpectationDescriptionDiagnostics(
@@ -119,7 +123,7 @@ def test__get_description_diagnostics():
 @pytest.mark.unit
 def test__get_metric_diagnostics_list_on_a_class_without_metrics():
     _config = None
-    metric_diagnostics_list = ExpectColumnValuesToEqualThree(
+    metric_diagnostics_list = ExpectColumnValuesToEqualThree(  # noqa: SLF001
         column="values"
     )._get_metric_diagnostics_list(expectation_config=_config)
     assert len(metric_diagnostics_list) == 0
@@ -132,9 +136,11 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
 @pytest.mark.unit
 def test__get_metric_diagnostics_list_on_a_class_with_metrics():
     _config = None
-    metric_diagnostics_list = ExpectColumnValuesToEqualThree__ThirdIteration(
-        column="values"
-    )._get_metric_diagnostics_list(expectation_config=_config)
+    metric_diagnostics_list = (
+        ExpectColumnValuesToEqualThree__ThirdIteration(  # noqa: SLF001
+            column="values"
+        )._get_metric_diagnostics_list(expectation_config=_config)
+    )
     assert len(metric_diagnostics_list) == 0
     ExpectationMetricDiagnostics(
         name="column_values.something",
@@ -152,7 +158,7 @@ Metrics could be used to make inferences, but they'd never provide comparably co
 )
 @pytest.mark.unit
 def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
-    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(  # noqa: SLF001
         metric_diagnostics_list=[],
         registered_metrics={},
     ) == ExpectationExecutionEngineDiagnostics(
@@ -180,7 +186,7 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
     registered_metrics = {
         "colum_values.something": {"providers": ["PandasExecutionEngine"]}
     }
-    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(  # noqa: SLF001
         metric_diagnostics_list=metrics_diagnostics_list,
         registered_metrics=registered_metrics,
     ) == ExpectationExecutionEngineDiagnostics(
@@ -196,11 +202,11 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
 )
 @pytest.mark.all_backends
 def test__get_test_results():
-    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(
+    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(  # noqa: SLF001
         column="values"
     )._get_test_results(
         expectation_type="expect_column_values_to_equal_three",
-        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(  # noqa: SLF001
             column="values"
         )._get_examples(return_only_gallery_examples=False),
         execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(
@@ -213,11 +219,11 @@ def test__get_test_results():
     for result in test_results:
         assert result.test_passed
 
-    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(
+    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(  # noqa: SLF001
         column="values"
     )._get_test_results(
         expectation_type="expect_column_values_to_equal_three",
-        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(  # noqa: SLF001
             column="values"
         )._get_examples(return_only_gallery_examples=False),
         execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(

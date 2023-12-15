@@ -97,7 +97,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
             False
         ), "Validate configuration threw an error when testing default mostly value"
     assert (
-        fake_expectation._get_success_kwargs().get("mostly") == 1
+        fake_expectation._get_success_kwargs().get("mostly") == 1  # noqa: SLF001
     ), "Default mostly success ratio is not 1"
 
 
@@ -140,7 +140,8 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
 def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     fake_expectation = fake_expectation_cls(**config.kwargs)
     assert (
-        fake_expectation._get_success_kwargs().get("mostly") == config.kwargs["mostly"]
+        fake_expectation._get_success_kwargs().get("mostly")  # noqa: SLF001
+        == config.kwargs["mostly"]
     ), "Default mostly success ratio is not 1"
 
 
@@ -185,7 +186,7 @@ def test_validate_dependencies_against_available_metrics_success(metrics_dict):
             "column": "i_exist",
         },
     )
-    expectation._validate_dependencies_against_available_metrics(
+    expectation._validate_dependencies_against_available_metrics(  # noqa: SLF001
         validation_dependencies=metric_config_list,
         metrics=metrics_dict,
     )
@@ -201,7 +202,7 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
         },
     )
     with pytest.raises(InvalidExpectationConfigurationError):
-        expectation._validate_dependencies_against_available_metrics(
+        expectation._validate_dependencies_against_available_metrics(  # noqa: SLF001
             validation_dependencies=metric_config_list,
             metrics=metrics_dict,
         )

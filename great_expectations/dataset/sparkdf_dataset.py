@@ -1399,7 +1399,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         )
 
         value_set_df = (
-            pyspark.SQLContext(self.spark_df._sc)
+            pyspark.SQLContext(self.spark_df._sc)  # noqa: SLF001
             .createDataFrame(value_pairs_set, ["col_A", "col_B"])
             .select(F.array("col_A", "col_B").alias("set_AB"))
         )

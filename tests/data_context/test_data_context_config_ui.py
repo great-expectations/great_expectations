@@ -1493,7 +1493,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     data_context = get_context(project_config=data_context_config)
     assert (
-        data_context.datasources["my_pandas_datasource"]
+        data_context.datasources["my_pandas_datasource"]  # noqa: SLF001
         .get_batch_kwargs_generator("subdir_reader")
         ._base_directory
         == "../data/"

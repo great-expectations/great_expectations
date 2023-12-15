@@ -199,8 +199,8 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
             GXCloudEnvironmentVariable.BASE_URL: base_url,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
             # <GX_RENAME> Deprecated as of 0.15.37
-            GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
-            GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
+            GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,  # noqa: SLF001
+            GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,  # noqa: SLF001
         }
 
         # organization_id is nullable so we conditionally include it in the output
@@ -209,7 +209,7 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
                 {
                     GXCloudEnvironmentVariable.ORGANIZATION_ID: organization_id,
                     # <GX_RENAME> Deprecated as of 0.15.37
-                    GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,
+                    GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,  # noqa: SLF001
                 }
             )
 

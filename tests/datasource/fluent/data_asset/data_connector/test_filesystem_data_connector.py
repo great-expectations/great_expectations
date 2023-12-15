@@ -825,7 +825,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert (
-        my_data_connector._get_full_file_path(path="bigfile_1.csv")
+        my_data_connector._get_full_file_path(path="bigfile_1.csv")  # noqa: SLF001
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
 

@@ -19,8 +19,8 @@ def test_build_init_payload(
     """This test is for a happy path only but will fail if there is an exception thrown in init_payload"""
 
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    usage_statistics_handler = context._usage_statistics_handler
-    builder = usage_statistics_handler._builder
+    usage_statistics_handler = context._usage_statistics_handler  # noqa: SLF001
+    builder = usage_statistics_handler._builder  # noqa: SLF001
     init_payload = builder.build_init_payload()
     assert list(init_payload.keys()) == [
         "platform.system",
@@ -59,11 +59,11 @@ def test_usage_statistics_handler_build_envelope(
     )
 
     assert (
-        usage_statistics_handler._data_context_id
+        usage_statistics_handler._data_context_id  # noqa: SLF001
         == "00000000-0000-0000-0000-000000000001"
     )
 
-    builder = usage_statistics_handler._builder
+    builder = usage_statistics_handler._builder  # noqa: SLF001
     envelope = builder.build_envelope(sample_partial_message)
 
     expected_keys = [
@@ -97,7 +97,7 @@ def test_determine_hashed_mac_address():
 
     # Picking an arbitrary 48-bit positive integer as a mock MAC addr
     with mock.patch("uuid.getnode", return_value=170040650683345) as mock_node:
-        hashed_mac_address = builder._determine_hashed_mac_address()
+        hashed_mac_address = builder._determine_hashed_mac_address()  # noqa: SLF001
 
     mock_node.assert_called_once()
     assert (

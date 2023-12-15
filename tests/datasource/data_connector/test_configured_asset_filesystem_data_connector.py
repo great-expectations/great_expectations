@@ -73,7 +73,7 @@ def test_basic_instantiation(tmp_path_factory):
     }
 
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -323,7 +323,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 
     # with unnamed data_asset_name
     unsorted_batch_definition_list = (
-        my_data_connector._get_batch_definition_list_from_batch_request(
+        my_data_connector._get_batch_definition_list_from_batch_request(  # noqa: SLF001
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
@@ -709,7 +709,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
 
     # with unnamed data_asset_name
     unsorted_batch_definition_list = (
-        my_data_connector._get_batch_definition_list_from_batch_request(
+        my_data_connector._get_batch_definition_list_from_batch_request(  # noqa: SLF001
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
@@ -977,7 +977,7 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
     my_data_connector.data_context_root_directory = base_directory
 
     assert (
-        my_data_connector._get_full_file_path_for_asset(
+        my_data_connector._get_full_file_path_for_asset(  # noqa: SLF001
             path="bigfile_1.csv", asset=my_data_connector.assets["A"]
         )
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
@@ -1068,7 +1068,7 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
 
     assert my_data_connector.base_directory == f"{base_directory}/test_dir_0/A"
     assert (
-        my_data_connector._get_full_file_path_for_asset(
+        my_data_connector._get_full_file_path_for_asset(  # noqa: SLF001
             path="bigfile_1.csv", asset=my_data_connector.assets["A"]
         )
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
@@ -1288,7 +1288,7 @@ assets:
         },
     )
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
@@ -1603,7 +1603,7 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
     assert my_data_connector.get_data_reference_count() == 4

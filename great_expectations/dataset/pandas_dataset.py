@@ -394,7 +394,7 @@ Notes:
     # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
-    _internal_names = pd.DataFrame._internal_names + [  # type: ignore[attr-defined]
+    _internal_names = pd.DataFrame._internal_names + [  # type: ignore[attr-defined]  # noqa: SLF001
         "_batch_kwargs",
         "_batch_markers",
         "_batch_parameters",
@@ -423,7 +423,7 @@ Notes:
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataset):
-            self._initialize_expectations(other._expectation_suite)
+            self._initialize_expectations(other._expectation_suite)  # noqa: SLF001
             # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value
             self.discard_subset_failing_expectations = getattr(

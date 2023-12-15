@@ -29,4 +29,4 @@ class BatchConfig(pydantic.BaseModel):
         return self.data_asset.build_batch_request(options=batch_request_options)
 
     def save(self) -> None:
-        self.data_asset._save_batch_config(self)
+        self.data_asset._save_batch_config(self)  # noqa: SLF001

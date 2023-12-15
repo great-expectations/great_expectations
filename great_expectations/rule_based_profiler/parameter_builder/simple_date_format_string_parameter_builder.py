@@ -306,12 +306,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         (
             best_format_string,
             best_ratio,
-        ) = ParameterBuilder._get_best_candidate_above_threshold(
+        ) = ParameterBuilder._get_best_candidate_above_threshold(  # noqa: SLF001
             format_string_success_ratios, threshold
         )
         # dict of sorted datetime and ratios for all evaluated candidates
         sorted_format_strings_and_ratios: dict = (
-            ParameterBuilder._get_sorted_candidates_and_ratios(
+            ParameterBuilder._get_sorted_candidates_and_ratios(  # noqa: SLF001
                 format_string_success_ratios
             )
         )

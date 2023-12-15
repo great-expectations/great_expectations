@@ -75,7 +75,7 @@ def test_instantiation_without_args(
     )
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -115,7 +115,7 @@ def test_instantiation_with_filename_arg(
     )
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -155,7 +155,7 @@ def test_instantiation_with_info_arg(
     )
     assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -236,7 +236,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
         prefix="",
     )
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name
     with pytest.raises(ValueError):
@@ -284,7 +284,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
         prefix="",
     )
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     self_check_report_object = my_data_connector.self_check()
 
@@ -341,7 +341,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
         prefix="",
     )
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     assert (
         len(
@@ -423,7 +423,7 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
         prefix="",
     )
 
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
     self_check_report_object = my_data_connector.self_check()
 
     assert self_check_report_object == {
@@ -1222,19 +1222,19 @@ default_regex:
     )
 
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
         )
         == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/beta_here/beta-202002.txt", "beta"
         )
         == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
+        my_data_connector._get_full_file_path(  # noqa: SLF001
             "my_base_directory/gamma-202005.csv", "gamma"
         )
         == "gs://my_bucket/my_base_directory/gamma-202005.csv"

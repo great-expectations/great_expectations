@@ -334,7 +334,7 @@ class CloudDataContext(SerializableDataContext):
             cloud_base_url
             or cls._get_cloud_env_var(
                 primary_environment_variable=GXCloudEnvironmentVariable.BASE_URL,
-                deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_BASE_URL,
+                deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_BASE_URL,  # noqa: SLF001
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
@@ -342,13 +342,13 @@ class CloudDataContext(SerializableDataContext):
         )
         cloud_organization_id = cloud_organization_id or cls._get_cloud_env_var(
             primary_environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID,
+            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID,  # noqa: SLF001
             conf_file_section="ge_cloud_config",
             conf_file_option="organization_id",
         )
         cloud_access_token = cloud_access_token or cls._get_cloud_env_var(
             primary_environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN,
+            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN,  # noqa: SLF001
             conf_file_section="ge_cloud_config",
             conf_file_option="access_token",
         )

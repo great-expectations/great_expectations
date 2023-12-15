@@ -547,7 +547,7 @@ class Datasource(
             found_asset: _DataAssetT = list(
                 filter(lambda asset: asset.name == asset_name, self.assets)
             )[0]
-            found_asset._datasource = self
+            found_asset._datasource = self  # noqa: SLF001
             return found_asset
         except IndexError as exc:
             raise LookupError(
@@ -566,7 +566,7 @@ class Datasource(
         asset = self.get_asset(asset_name=asset_name)
 
         if self._data_context and isinstance(self._data_context, CloudDataContext):
-            self._data_context._delete_asset(id=str(asset.id))
+            self._data_context._delete_asset(id=str(asset.id))  # noqa: SLF001
 
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
         self._save_context_project_config()
@@ -581,7 +581,7 @@ class Datasource(
         """
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
-        asset._datasource = self
+        asset._datasource = self  # noqa: SLF001
 
         if not connect_options:
             connect_options = {}
@@ -600,8 +600,10 @@ class Datasource(
         # if asset was added to a cloud FDS, _update_fluent_datasource will return FDS fetched from cloud,
         # which will contain the new asset populated with an id
         if self._data_context:
-            updated_datasource = self._data_context._update_fluent_datasource(
-                datasource=self
+            updated_datasource = (
+                self._data_context._update_fluent_datasource(  # noqa: SLF001
+                    datasource=self
+                )
             )
             assert isinstance(updated_datasource, Datasource)
             if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
@@ -613,7 +615,7 @@ class Datasource(
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
-                self._data_context._save_project_config()
+                self._data_context._save_project_config()  # noqa: SLF001
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
 

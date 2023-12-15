@@ -107,8 +107,8 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
 
     # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
     assert (
-        instantiated_datasource._raw_config["data_connectors"][data_connector_name][
-            "base_directory"
-        ]
+        instantiated_datasource._raw_config["data_connectors"][  # noqa: SLF001
+            data_connector_name
+        ]["base_directory"]
         == f"${variable}"
     )

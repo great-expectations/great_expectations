@@ -56,10 +56,10 @@ def assert_how_to_buttons(
     }
 
     data_docs_site_dir = os.path.join(  # noqa: PTH118
-        context._context_root_directory,
-        context._project_config.data_docs_sites["local_site"]["store_backend"][
-            "base_directory"
-        ],
+        context._context_root_directory,  # noqa: SLF001
+        context._project_config.data_docs_sites["local_site"][  # noqa: SLF001
+            "store_backend"
+        ]["base_directory"],
     )
 
     page_paths_dict = {
@@ -103,7 +103,9 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
         str(os.path.join(project_dir, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     context = get_context(context_root_dir=project_dir)
-    local_site_config = context._project_config.data_docs_sites.get("local_site")
+    local_site_config = context._project_config.data_docs_sites.get(  # noqa: SLF001
+        "local_site"
+    )
 
     module_name = "great_expectations.render.renderer.site_builder"
     site_builder = instantiate_class_from_config(

@@ -344,12 +344,18 @@ def test_SlackRenderer_get_report_element():
     slack_renderer = SlackRenderer()
 
     # these should all be caught
-    assert slack_renderer._get_report_element(docs_link=None) is None
-    assert slack_renderer._get_report_element(docs_link=1) is None
-    assert slack_renderer._get_report_element(docs_link=slack_renderer) is None
+    assert slack_renderer._get_report_element(docs_link=None) is None  # noqa: SLF001
+    assert slack_renderer._get_report_element(docs_link=1) is None  # noqa: SLF001
+    assert (
+        slack_renderer._get_report_element(docs_link=slack_renderer)  # noqa: SLF001
+        is None
+    )
 
     # this should work
-    assert slack_renderer._get_report_element(docs_link="i_should_work") is not None
+    assert (
+        slack_renderer._get_report_element(docs_link="i_should_work")  # noqa: SLF001
+        is not None
+    )
 
 
 def test_SlackRenderer_get_failed_expectation_domain_table():

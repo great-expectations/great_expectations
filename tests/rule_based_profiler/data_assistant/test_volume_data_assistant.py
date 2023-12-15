@@ -1351,7 +1351,7 @@ def quentin_expected_expectation_suite(
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expected_expectation_configurations:
-            expected_expectation_suite._add_expectation(
+            expected_expectation_suite._add_expectation(  # noqa: SLF001
                 expectation_configuration=expectation_configuration,
                 send_usage_event=False,
             )
@@ -1699,7 +1699,7 @@ def test_volume_data_assistant_result_get_expectation_suite(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call] = mock_emit.call_args_list
+    actual_events: List[mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert (
         actual_events[-1][0][0]["event"]
         == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
@@ -1717,7 +1717,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_volume_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
+        bobby_volume_data_assistant_result._batch_id_to_batch_identifier_display_name_map[  # noqa: SLF001
             batch_id
         ]
         is not None

@@ -265,9 +265,11 @@ class DataAsset:
                     stored_config = expectation_config
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite._add_expectation(
-                        expectation_configuration=expectation_config,
-                        send_usage_event=False,
+                    stored_config = (
+                        self._expectation_suite._add_expectation(  # noqa: SLF001
+                            expectation_configuration=expectation_config,
+                            send_usage_event=False,
+                        )
                     )
 
                 if include_config:
@@ -734,7 +736,7 @@ class DataAsset:
                     "loaded from a dictionary?"
                 )
                 if getattr(data_context, "_usage_statistics_handler", None):
-                    handler = data_context._usage_statistics_handler
+                    handler = data_context._usage_statistics_handler  # noqa: SLF001
                     handler.send_usage_message(
                         event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                         event_payload=handler.anonymizer.anonymize(obj=self),

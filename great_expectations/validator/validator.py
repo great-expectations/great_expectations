@@ -554,7 +554,7 @@ class Validator:
                     stored_config = configuration.get_raw_configuration()
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite._add_expectation(
+                    stored_config = self._expectation_suite._add_expectation(  # noqa: SLF001
                         expectation_configuration=configuration.get_raw_configuration(),
                         send_usage_event=False,
                     )

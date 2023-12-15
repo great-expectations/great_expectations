@@ -1140,7 +1140,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
             # TODO: Raise a warning if kwargs exist
             pass
 
-        RuntimeBatchRequest._validate_runtime_batch_request_specific_init_parameters(
+        RuntimeBatchRequest._validate_runtime_batch_request_specific_init_parameters(  # noqa: SLF001
             runtime_parameters=runtime_parameters,
             batch_identifiers=batch_identifiers,
             batch_spec_passthrough=batch_spec_passthrough,

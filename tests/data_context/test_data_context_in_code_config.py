@@ -241,7 +241,9 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
         in_code_data_context.stores["expectations_S3_store"].store_backend_id
     )
     in_code_data_context_data_context_id = in_code_data_context.data_context_id
-    constructed_data_context_id = in_code_data_context._construct_data_context_id()
+    constructed_data_context_id = (
+        in_code_data_context._construct_data_context_id()  # noqa: SLF001
+    )
     assert (
         in_code_data_context_expectations_store_store_backend_id
         == in_code_data_context_data_context_id
@@ -431,38 +433,38 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
     # Check here that suppress_store_backend_id == True for inactive stores
     # and False for active stores
     assert (
-        in_code_data_context.stores.get(
+        in_code_data_context.stores.get(  # noqa: SLF001
             "inactive_expectations_S3_store"
         ).store_backend._suppress_store_backend_id
         is True
     )
     assert (
-        in_code_data_context.stores.get(
+        in_code_data_context.stores.get(  # noqa: SLF001
             "inactive_validations_S3_store"
         ).store_backend._suppress_store_backend_id
         is True
     )
     assert (
-        in_code_data_context.stores.get(
+        in_code_data_context.stores.get(  # noqa: SLF001
             "expectations_S3_store"
         ).store_backend._suppress_store_backend_id
         is False
     )
     assert (
-        in_code_data_context.stores.get(
+        in_code_data_context.stores.get(  # noqa: SLF001
             "validations_S3_store"
         ).store_backend._suppress_store_backend_id
         is False
     )
     # InMemoryStoreBackend created for evaluation_parameters_store & inactive_evaluation_parameters_store
     assert (
-        in_code_data_context.stores.get(
+        in_code_data_context.stores.get(  # noqa: SLF001
             "inactive_evaluation_parameter_store"
         ).store_backend._suppress_store_backend_id
         is False
     )
     assert (
-        in_code_data_context.stores.get(
+        in_code_data_context.stores.get(  # noqa: SLF001
             "evaluation_parameter_store"
         ).store_backend._suppress_store_backend_id
         is False

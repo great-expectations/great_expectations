@@ -94,7 +94,7 @@ def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     my_data_connector.data_context_root_directory = base_directory
 
     assert (
-        my_data_connector._get_full_file_path_for_asset(
+        my_data_connector._get_full_file_path_for_asset(  # noqa: SLF001
             path="bigfile_1.csv", asset=my_data_connector.assets["A"]
         )
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
@@ -199,7 +199,7 @@ def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs
     my_data_connector.data_context_root_directory = base_directory
 
     assert (
-        my_data_connector._get_full_file_path_for_asset(
+        my_data_connector._get_full_file_path_for_asset(  # noqa: SLF001
             path="bigfile_1.csv", asset=my_data_connector.assets["A"]
         )
         == f"{base_directory_colon}/test_dir_0/A/B/C/bigfile_1.csv"

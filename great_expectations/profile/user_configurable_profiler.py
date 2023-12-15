@@ -238,9 +238,9 @@ class UserConfigurableProfiler:
             # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
-                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]
+                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]  # noqa: SLF001
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]
+            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]  # noqa: SLF001
                 expectation_suite_name=suite_name, data_context=None
             )
 
@@ -290,7 +290,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
             and len(self.value_set_threshold) > 0,
         }
         send_usage_message(
-            data_context=self.profile_dataset._data_context,
+            data_context=self.profile_dataset._data_context,  # noqa: SLF001
             event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE,
             event_payload=event_payload,
             api_version="v2",
@@ -581,7 +581,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
             )
 
-        profile_dataset._expectation_suite.remove_expectation(
+        profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs={"column": column},
@@ -611,13 +611,13 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
             )
             column_info_entry["cardinality"] = column_cardinality
             # remove the expectations
-            profile_dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                 ExpectationConfiguration(
                     expectation_type="expect_column_unique_value_count_to_be_between",
                     kwargs={"column": column_name},
                 )
             )
-            profile_dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                 ExpectationConfiguration(
                     expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                     kwargs={"column": column_name},
@@ -817,7 +817,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 column, value_set=None, result_format="SUMMARY"
             ).result["observed_value"]
 
-            profile_dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                 ExpectationConfiguration(
                     expectation_type="expect_column_distinct_values_to_be_in_set",
                     kwargs={"column": column},
@@ -857,7 +857,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 )
 
             else:
-                profile_dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                     ExpectationConfiguration(
                         expectation_type="expect_column_min_to_be_between",
                         kwargs={"column": column},
@@ -881,7 +881,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 )
 
             else:
-                profile_dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                     ExpectationConfiguration(
                         expectation_type="expect_column_max_to_be_between",
                         kwargs={"column": column},
@@ -905,7 +905,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 )
 
             else:
-                profile_dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                     ExpectationConfiguration(
                         expectation_type="expect_column_mean_to_be_between",
                         kwargs={"column": column},
@@ -929,7 +929,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 )
 
             else:
-                profile_dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                     ExpectationConfiguration(
                         expectation_type="expect_column_median_to_be_between",
                         kwargs={"column": column},
@@ -988,7 +988,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 quantile_result.exception_info["exception_traceback"]
                 or quantile_result.exception_info["exception_message"]
             ):
-                profile_dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                     ExpectationConfiguration(
                         expectation_type="expect_column_quantile_values_to_be_between",
                         kwargs={"column": column},
@@ -1089,7 +1089,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 except TypeError:
                     pass
 
-            profile_dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                 ExpectationConfiguration(
                     expectation_type="expect_column_min_to_be_between",
                     kwargs={"column": column},
@@ -1110,7 +1110,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 except TypeError:
                     pass
 
-            profile_dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                 ExpectationConfiguration(
                     expectation_type="expect_column_max_to_be_between",
                     kwargs={"column": column},
@@ -1151,7 +1151,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                     # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
                     # value of 0 when we round
                     safe_mostly_value = max(0.001, potential_mostly_value)
-                    profile_dataset._expectation_suite.remove_expectation(
+                    profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                         ExpectationConfiguration(
                             expectation_type="expect_column_values_to_not_be_null",
                             kwargs={"column": column},
@@ -1192,7 +1192,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                 )
             else:
                 # noinspection PyProtectedMember
-                profile_dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(  # noqa: SLF001
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                         kwargs={"column": column},

@@ -145,7 +145,7 @@ edr = ExpectationDiagnostics(
 
 def test__convert_checks_into_output_message():
     assert (
-        edr._convert_checks_into_output_message(
+        edr._convert_checks_into_output_message(  # noqa: SLF001
             class_name="ExpectColumnValuesToEqualThree",
             maturity_level="EXPERIMENTAL",
             maturity_messages=edr.maturity_checklist,
@@ -188,7 +188,7 @@ def test__count_unexpected_test_cases___with_everything_passing():
             error_diagnostics=None,
         ),
     ]
-    assert edr._count_unexpected_test_cases(tests) == 0
+    assert edr._count_unexpected_test_cases(tests) == 0  # noqa: SLF001
 
 
 def test__count_unexpected_test_cases__with_one_failure():
@@ -218,7 +218,7 @@ def test__count_unexpected_test_cases__with_one_failure():
             error_diagnostics=None,
         ),
     ]
-    assert edr._count_unexpected_test_cases(tests) == 1
+    assert edr._count_unexpected_test_cases(tests) == 1  # noqa: SLF001
 
 
 def test__count_unexpected_test_cases__with_an_error():
@@ -264,17 +264,17 @@ def test__count_unexpected_test_cases__with_an_error():
             error_diagnostics=None,
         ),
     ]
-    assert edr._count_unexpected_test_cases(tests) == 3
+    assert edr._count_unexpected_test_cases(tests) == 3  # noqa: SLF001
 
 
 def test__count_positive_and_negative_example_cases():
-    assert edr._count_positive_and_negative_example_cases(
+    assert edr._count_positive_and_negative_example_cases(  # noqa: SLF001
         [expectation_test_data_case]
     ) == (1, 1)
 
 
 def test__check_example_cases__with_enough_test_cases_but_all_failing():
-    assert ExpectationDiagnostics._check_example_cases(
+    assert ExpectationDiagnostics._check_example_cases(  # noqa: SLF001
         examples=[expectation_test_data_case],
         tests=[
             ExpectationTestDiagnostics(
@@ -303,7 +303,7 @@ def test__check_example_cases__with_enough_test_cases_but_all_failing():
 
 
 def test__check_example_cases__with_enough_test_cases_but_some_failing():
-    assert ExpectationDiagnostics._check_example_cases(
+    assert ExpectationDiagnostics._check_example_cases(  # noqa: SLF001
         examples=[expectation_test_data_case],
         tests=[
             ExpectationTestDiagnostics(
@@ -332,7 +332,7 @@ def test__check_example_cases__with_enough_test_cases_but_some_failing():
 
 
 def test__check_example_cases__with_enough_test_cases_and_no_failing():
-    assert ExpectationDiagnostics._check_example_cases(
+    assert ExpectationDiagnostics._check_example_cases(  # noqa: SLF001
         examples=[expectation_test_data_case],
         tests=[
             ExpectationTestDiagnostics(
@@ -387,7 +387,7 @@ def test__check_example_cases__with_enough_not_enough_test_cases_but_no_failing(
         ],
     )
 
-    assert ExpectationDiagnostics._check_example_cases(
+    assert ExpectationDiagnostics._check_example_cases(  # noqa: SLF001
         examples=[expectation_test_data_case],
         tests=[
             ExpectationTestDiagnostics(

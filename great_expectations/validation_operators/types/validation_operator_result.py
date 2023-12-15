@@ -285,7 +285,9 @@ class ValidationOperatorResultSchema(Schema):
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        data._run_results = convert_to_json_serializable(data.run_results)
+        data._run_results = convert_to_json_serializable(  # noqa: SLF001
+            data.run_results
+        )
         return data
 
     # noinspection PyUnusedLocal

@@ -130,9 +130,15 @@ def test_EmailRenderer_get_report_element():
     email_renderer = EmailRenderer()
 
     # these should all be caught
-    assert email_renderer._get_report_element(docs_link=None) is None
-    assert email_renderer._get_report_element(docs_link=1) is None
-    assert email_renderer._get_report_element(docs_link=email_renderer) is None
+    assert email_renderer._get_report_element(docs_link=None) is None  # noqa: SLF001
+    assert email_renderer._get_report_element(docs_link=1) is None  # noqa: SLF001
+    assert (
+        email_renderer._get_report_element(docs_link=email_renderer)  # noqa: SLF001
+        is None
+    )
 
     # this should work
-    assert email_renderer._get_report_element(docs_link="i_should_work") is not None
+    assert (
+        email_renderer._get_report_element(docs_link="i_should_work")  # noqa: SLF001
+        is not None
+    )

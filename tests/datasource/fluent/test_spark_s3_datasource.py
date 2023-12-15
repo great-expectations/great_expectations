@@ -111,8 +111,10 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
-    data_connector: S3DataConnector = cast(S3DataConnector, csv_asset._data_connector)
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
+    data_connector: S3DataConnector = cast(
+        S3DataConnector, csv_asset._data_connector  # noqa: SLF001
+    )
+    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: SLF001
     return regex, test_connection_error_message
 
 
@@ -285,11 +287,11 @@ def test_test_connection_failures(
         name="csv_asset",
         batching_regex=regex,
     )
-    csv_asset._datasource = spark_s3_datasource
+    csv_asset._datasource = spark_s3_datasource  # noqa: SLF001
     spark_s3_datasource.assets = [
         csv_asset,
     ]
-    csv_asset._data_connector = S3DataConnector(
+    csv_asset._data_connector = S3DataConnector(  # noqa: SLF001
         datasource_name=spark_s3_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
@@ -297,7 +299,9 @@ def test_test_connection_failures(
         bucket=spark_s3_datasource.bucket,
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
-    csv_asset._test_connection_error_message = test_connection_error_message
+    csv_asset._test_connection_error_message = (  # noqa: SLF001
+        test_connection_error_message
+    )
 
     with pytest.raises(TestConnectionError) as e:
         spark_s3_datasource.test_connection()

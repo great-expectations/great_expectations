@@ -143,7 +143,7 @@ def test_open_docs_with_two_local_sites_specify_open_one(
 @pytest.fixture
 def context_with_no_sites(empty_data_context):
     context = empty_data_context
-    context._project_config["data_docs_sites"] = None
+    context._project_config["data_docs_sites"] = None  # noqa: SLF001
     return context
 
 
@@ -265,7 +265,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
     context = get_context(context_root_dir=ge_dir)
 
-    context._project_config["data_docs_sites"] = {
+    context._project_config["data_docs_sites"] = {  # noqa: SLF001
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
@@ -277,7 +277,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
 
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     context = get_context(context_root_dir=ge_dir)
     context.build_data_docs()
 
@@ -299,7 +299,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
     context = get_context(context_root_dir=ge_dir)
 
-    context._project_config["data_docs_sites"] = {
+    context._project_config["data_docs_sites"] = {  # noqa: SLF001
         "my_rad_site": {
             "class_name": "SiteBuilder",
             "store_backend": {
@@ -318,7 +318,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
 
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     context = get_context(context_root_dir=ge_dir)
     context.build_data_docs()
     data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")  # noqa: PTH118
@@ -360,10 +360,10 @@ def test_build_data_docs_skipping_index_does_not_build_index(
             },
         },
     }
-    context._project_config = config
+    context._project_config = config  # noqa: SLF001
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     del context
     context = get_context(context_root_dir=ge_dir)
     data_docs_dir = os.path.join(ge_dir, "uncommitted", "data_docs")  # noqa: PTH118

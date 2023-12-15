@@ -152,7 +152,7 @@ def test_growth_numeric_data_assistant_result_get_expectation_suite(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert (
         actual_events[-1][0][0]["event"]
         == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
@@ -203,7 +203,7 @@ def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_displ
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_growth_numeric_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
+        bobby_growth_numeric_data_assistant_result._batch_id_to_batch_identifier_display_name_map[  # noqa: SLF001
             batch_id
         ]
         is not None

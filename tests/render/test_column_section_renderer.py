@@ -151,7 +151,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(
     titanic_profiled_name_column_evrs,
 ):
     content_block = (
-        ProfilingResultsColumnSectionRenderer()
+        ProfilingResultsColumnSectionRenderer()  # noqa: SLF001
         ._render_header(evrs=titanic_profiled_name_column_evrs, column_type=None)
         .to_json_dict()
     )
@@ -213,10 +213,12 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
         ),
     )
 
-    content_block = ProfilingResultsColumnSectionRenderer._render_header(
-        [evr_with_unescaped_dollar_sign],
-        column_type=[],
-    ).to_json_dict()
+    content_block = (
+        ProfilingResultsColumnSectionRenderer._render_header(  # noqa: SLF001
+            [evr_with_unescaped_dollar_sign],
+            column_type=[],
+        ).to_json_dict()
+    )
     print(content_block)
     assert content_block == {
         "content_block_type": "header",
@@ -285,7 +287,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     content_blocks = []
     for evr in distinct_values_evrs:
         content_blocks.append(
-            ProfilingResultsColumnSectionRenderer()
+            ProfilingResultsColumnSectionRenderer()  # noqa: SLF001
             ._render_value_counts_bar_chart(distinct_values_evrs)
             .to_json_dict()
         )
@@ -310,7 +312,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
     (
         remaining_expectations,
         content_blocks,
-    ) = ExpectationSuiteColumnSectionRenderer._render_header(
+    ) = ExpectationSuiteColumnSectionRenderer._render_header(  # noqa: SLF001
         titanic_profiled_name_column_expectations,
     )
 
@@ -353,7 +355,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
     (
         remaining_expectations,
         content_blocks,
-    ) = ExpectationSuiteColumnSectionRenderer._render_header(
+    ) = ExpectationSuiteColumnSectionRenderer._render_header(  # noqa: SLF001
         [expectation_with_unescaped_dollar_sign],
     )
 
@@ -1178,7 +1180,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(
     (
         remaining_expectations,
         content_block,
-    ) = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(
+    ) = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(  # noqa: SLF001
         titanic_profiled_name_column_expectations,
     )
 
@@ -1202,7 +1204,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header(
     (
         remaining_evrs,
         content_block,
-    ) = ValidationResultsColumnSectionRenderer._render_header(
+    ) = ValidationResultsColumnSectionRenderer._render_header(  # noqa: SLF001
         validation_results=titanic_profiled_name_column_evrs,
     )
     print(content_block.to_json_dict())
@@ -1258,7 +1260,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
     (
         remaining_evrs,
         content_block,
-    ) = ValidationResultsColumnSectionRenderer._render_header(
+    ) = ValidationResultsColumnSectionRenderer._render_header(  # noqa: SLF001
         validation_results=[evr_with_unescaped_dollar_sign],
     )
     print(content_block.to_json_dict())
@@ -1288,7 +1290,7 @@ def test_ValidationResultsColumnSectionRenderer_render_table(
     (
         remaining_evrs,
         content_block,
-    ) = ValidationResultsColumnSectionRenderer()._render_table(
+    ) = ValidationResultsColumnSectionRenderer()._render_table(  # noqa: SLF001
         validation_results=titanic_profiled_name_column_evrs,
     )
 

@@ -375,7 +375,7 @@ def test_get_batch_with_split_on_whole_table_s3(
         return mocked_reader_function
 
     spark_engine = basic_spark_df_execution_engine
-    spark_engine._get_reader_fn = mocked_get_reader_function
+    spark_engine._get_reader_fn = mocked_get_reader_function  # noqa: SLF001
 
     test_sparkdf = spark_engine.get_batch_data(
         S3BatchSpec(
@@ -412,7 +412,7 @@ def test_get_batch_with_split_on_whole_table_azure(
         return mocked_reader_function
 
     spark_engine = basic_spark_df_execution_engine
-    spark_engine._get_reader_fn = mocked_get_reader_function
+    spark_engine._get_reader_fn = mocked_get_reader_function  # noqa: SLF001
 
     test_sparkdf = spark_engine.get_batch_data(
         AzureBatchSpec(
@@ -449,7 +449,7 @@ def test_get_batch_with_split_on_whole_table_gcs(
         return mocked_reader_function
 
     spark_engine = basic_spark_df_execution_engine
-    spark_engine._get_reader_fn = mocked_get_reader_function
+    spark_engine._get_reader_fn = mocked_get_reader_function  # noqa: SLF001
 
     test_sparkdf = spark_engine.get_batch_data(
         GCSBatchSpec(

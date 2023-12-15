@@ -49,7 +49,9 @@ def test__get_dependency_names():
         "-",
     ]
     ge_dependencies = GXDependencies()
-    observed_dependencies = ge_dependencies._get_dependency_names(mock_dependencies)
+    observed_dependencies = ge_dependencies._get_dependency_names(  # noqa: SLF001
+        mock_dependencies
+    )
     assert observed_dependencies == expected_dependendencies
 
 

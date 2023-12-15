@@ -119,4 +119,6 @@ def get_registered_data_assistant_names() -> Set[str]:
     """
     This method returns names (registered data_assistant_type and alias name) of registered "DataAssistant" classes.
     """
-    return set(DataAssistantDispatcher._registered_data_assistants.keys())
+    return set(
+        DataAssistantDispatcher._registered_data_assistants.keys()  # noqa: SLF001
+    )

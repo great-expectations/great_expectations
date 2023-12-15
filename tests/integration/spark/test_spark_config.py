@@ -43,7 +43,7 @@ def test_spark_config_datasource(spark_session_v012):
     )
     spark_session: pyspark.SparkSession = source.spark
     # noinspection PyProtectedMember
-    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
+    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()  # noqa: SLF001
     assert not sc_stopped
 
     # Test that our values were set
@@ -66,7 +66,9 @@ def test_spark_config_execution_engine(spark_session):
     new_spark_session: pyspark.SparkSession = execution_engine.spark
 
     # noinspection PyProtectedMember
-    sc_stopped: bool = new_spark_session.sparkContext._jsc.sc().isStopped()
+    sc_stopped: bool = (
+        new_spark_session.sparkContext._jsc.sc().isStopped()  # noqa: SLF001
+    )
 
     assert not sc_stopped
 

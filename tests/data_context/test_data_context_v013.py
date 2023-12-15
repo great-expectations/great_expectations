@@ -105,7 +105,7 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     return context
 
 
@@ -155,14 +155,16 @@ def test__normalize_absolute_or_relative_path(
         config_path,
     )
 
-    assert context._normalize_absolute_or_relative_path("yikes").endswith(
-        f"{test_dir}/yikes"
-    )
+    assert context._normalize_absolute_or_relative_path(  # noqa: SLF001
+        "yikes"
+    ).endswith(f"{test_dir}/yikes")
     assert (
         "test__normalize_absolute_or_relative_path__dir"
-        not in context._normalize_absolute_or_relative_path("/yikes")
+        not in context._normalize_absolute_or_relative_path("/yikes")  # noqa: SLF001
     )
-    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
+    assert "/yikes" == context._normalize_absolute_or_relative_path(  # noqa: SLF001
+        "/yikes"
+    )
 
 
 @pytest.mark.filesystem
@@ -410,7 +412,7 @@ data_connectors:
         == f"{context.root_directory}/test_dir_0/A"
     )
     assert (
-        my_datasource.data_connectors[
+        my_datasource.data_connectors[  # noqa: SLF001
             "my_filesystem_data_connector"
         ]._get_full_file_path_for_asset(
             path="bigfile_1.csv",

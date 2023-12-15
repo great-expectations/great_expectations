@@ -127,7 +127,7 @@ class CloudMigrator:
                 cloud_access_token=cloud_access_token,
                 cloud_organization_id=cloud_organization_id,
             )
-            cloud_migrator._migrate_to_cloud(test_migrate)
+            cloud_migrator._migrate_to_cloud(test_migrate)  # noqa: SLF001
             if not test_migrate:  # Only send an event if this is not a test run.
                 send_usage_message(
                     data_context=context,

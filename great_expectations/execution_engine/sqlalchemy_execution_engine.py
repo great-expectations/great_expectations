@@ -452,7 +452,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if data_context is not None and getattr(
             data_context, "_usage_statistics_handler", None
         ):
-            handler = data_context._usage_statistics_handler
+            handler = data_context._usage_statistics_handler  # noqa: SLF001
             handler.send_usage_message(
                 event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT,
                 event_payload={
@@ -686,7 +686,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
-                    schema=data_object._schema_name,
+                    schema=data_object._schema_name,  # noqa: SLF001
                 )
             else:
                 selectable = data_object.selectable

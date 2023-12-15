@@ -36,7 +36,7 @@ def test_usage_statistics_handler_validate_message_failure(
     )
 
     assert (
-        usage_statistics_handler._data_context_id
+        usage_statistics_handler._data_context_id  # noqa: SLF001
         == "00000000-0000-0000-0000-000000000001"
     )
 
@@ -86,7 +86,7 @@ def test_usage_statistics_handler_validate_message_success(
     )
 
     assert (
-        usage_statistics_handler._data_context_id
+        usage_statistics_handler._data_context_id  # noqa: SLF001
         == "00000000-0000-0000-0000-000000000001"
     )
 

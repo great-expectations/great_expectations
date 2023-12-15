@@ -173,7 +173,7 @@ def test_add_batch_identifiers_correct(basic_datasource_with_assets):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    assert test_runtime_data_connector._batch_identifiers == {
+    assert test_runtime_data_connector._batch_identifiers == {  # noqa: SLF001
         "runtime": ["hour", "minute"],
         "asset_a": ["day", "month"],
         "asset_b": ["day", "month", "year"],
@@ -728,7 +728,7 @@ def test_data_references_cache_updating_after_batch_request(
         batch_request=batch_request
     )
 
-    assert test_runtime_data_connector._data_references_cache == {
+    assert test_runtime_data_connector._data_references_cache == {  # noqa: SLF001
         "my_data_asset_1": {
             "1234567890": [
                 BatchDefinition(
@@ -763,7 +763,7 @@ def test_data_references_cache_updating_after_batch_request(
         batch_request=batch_request
     )
 
-    assert test_runtime_data_connector._data_references_cache == {
+    assert test_runtime_data_connector._data_references_cache == {  # noqa: SLF001
         "my_data_asset_1": {
             "1234567890": [
                 BatchDefinition(
@@ -808,7 +808,7 @@ def test_data_references_cache_updating_after_batch_request(
         batch_request=batch_request
     )
 
-    assert test_runtime_data_connector._data_references_cache == {
+    assert test_runtime_data_connector._data_references_cache == {  # noqa: SLF001
         "my_data_asset_1": {
             "1234567890": [
                 BatchDefinition(
@@ -890,7 +890,7 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
             batch_identifiers=IDDict({"month": 1, "day": 1}),
         )
     ]
-    assert runtime_data_connector._data_references_cache == {
+    assert runtime_data_connector._data_references_cache == {  # noqa: SLF001
         "asset_a": {
             "1-1": [
                 BatchDefinition(
@@ -928,7 +928,7 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
             batch_identifiers=IDDict({"month": 2, "day": 1}),
         ),
     ]
-    assert runtime_data_connector._data_references_cache == {
+    assert runtime_data_connector._data_references_cache == {  # noqa: SLF001
         "asset_a": {
             "1-1": [
                 BatchDefinition(
@@ -1050,7 +1050,7 @@ def test__get_data_reference_list(basic_datasource):
     # noinspection PyProtectedMember
     data_reference_list: List[
         str
-    ] = test_runtime_data_connector._get_data_reference_list()
+    ] = test_runtime_data_connector._get_data_reference_list()  # noqa: SLF001
 
     assert data_reference_list == expected_data_reference_list
 
@@ -1060,7 +1060,7 @@ def test_refresh_data_references_cache(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
-    assert len(test_runtime_data_connector._data_references_cache) == 0
+    assert len(test_runtime_data_connector._data_references_cache) == 0  # noqa: SLF001
 
 
 @pytest.mark.unit
@@ -1079,7 +1079,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
     expected_batch_spec_parameters: dict = {"data_asset_name": "my_data_asset"}
 
     # noinspection PyProtectedMember
-    batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(
+    batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(  # noqa: SLF001
         batch_definition=BatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="test_runtime_data_connector",
@@ -1159,7 +1159,9 @@ def test__get_data_reference_name(basic_datasource):
     )
 
     assert (
-        test_runtime_data_connector._get_data_reference_name(batch_identifiers)
+        test_runtime_data_connector._get_data_reference_name(  # noqa: SLF001
+            batch_identifiers
+        )
         == "1234567890"
     )
 
@@ -1176,7 +1178,9 @@ def test__get_data_reference_name(basic_datasource):
     )
 
     assert (
-        test_runtime_data_connector._get_data_reference_name(batch_identifiers)
+        test_runtime_data_connector._get_data_reference_name(  # noqa: SLF001
+            batch_identifiers
+        )
         == "1234567890-1111111111"
     )
 

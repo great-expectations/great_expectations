@@ -678,7 +678,7 @@ def column_reflection_fallback(  # noqa: PLR0915
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
-            col_names: List[str] = result_object._metadata.keys
+            col_names: List[str] = result_object._metadata.keys  # noqa: SLF001
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
 

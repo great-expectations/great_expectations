@@ -620,7 +620,7 @@ def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
     key = GXCloudIdentifier(resource_type=GXCloudRESTResource.EXPECTATION_SUITE)
 
     with pytest.raises(ValueError):
-        context.expectations_store._validate_key(key=key)
+        context.expectations_store._validate_key(key=key)  # noqa: SLF001
 
 
 @pytest.mark.cloud

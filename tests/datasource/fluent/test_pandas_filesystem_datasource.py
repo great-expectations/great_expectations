@@ -61,7 +61,7 @@ def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasour
         name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
-    pandas_filesystem_datasource._data_context = empty_data_context
+    pandas_filesystem_datasource._data_context = empty_data_context  # noqa: SLF001
     return pandas_filesystem_datasource
 
 
@@ -730,18 +730,18 @@ def datasource_test_connection_error_messages(
         name="csv_asset",
         batching_regex=batching_regex,
     )
-    csv_asset._datasource = pandas_filesystem_datasource
+    csv_asset._datasource = pandas_filesystem_datasource  # noqa: SLF001
     pandas_filesystem_datasource.assets = [
         csv_asset,
     ]
-    csv_asset._data_connector = FilesystemDataConnector(
+    csv_asset._data_connector = FilesystemDataConnector(  # noqa: SLF001
         datasource_name=pandas_filesystem_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=batching_regex,
         base_directory=pandas_filesystem_datasource.base_directory,
         data_context_root_directory=pandas_filesystem_datasource.data_context_root_directory,
     )
-    csv_asset._test_connection_error_message = test_connection_error
+    csv_asset._test_connection_error_message = test_connection_error  # noqa: SLF001
     return pandas_filesystem_datasource, test_connection_error
 
 
@@ -769,7 +769,7 @@ def test_csv_asset_batch_metadata(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     my_config_variables = {"pipeline_filename": __file__}
-    pandas_filesystem_datasource._data_context.config_variables.update(  # type: ignore[union-attr] # `_data_context`
+    pandas_filesystem_datasource._data_context.config_variables.update(  # type: ignore[union-attr] # `_data_context`  # noqa: SLF001
         my_config_variables
     )
 

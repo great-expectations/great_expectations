@@ -199,7 +199,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     ]
 
     assert (
-        data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+        data_connector._get_data_reference_list_from_cache_by_data_asset_name(  # noqa: SLF001
             data_asset_name=data_asset_name
         )
         == file_list
@@ -291,7 +291,7 @@ def test_alice_profiler_user_workflow_single_batch(
     )
 
     # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
+    expected_profiler_run_event: mock._Call = mock.call(  # noqa: SLF001
         {
             "event_payload": {
                 "anonymized_name": "0481bcf98600fd04aa24df03d05cdcf5",
@@ -442,7 +442,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     ]
 
     assert (
-        data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+        data_connector._get_data_reference_list_from_cache_by_data_asset_name(  # noqa: SLF001
             data_asset_name=data_asset_name
         )
         == file_list
@@ -642,7 +642,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
+    expected_profiler_run_event: mock._Call = mock.call(  # noqa: SLF001
         {
             "event_payload": {
                 "anonymized_name": "43c8704c864dd10feed13219062f0228",
@@ -884,7 +884,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     )
 
     # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
+    expected_profiler_run_event: mock._Call = mock.call(  # noqa: SLF001
         {
             "event_payload": {
                 "anonymized_name": "510b23dfd19c492f33d114b184f245e8",
@@ -1035,7 +1035,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     )
 
     # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
+    expected_profiler_run_event: mock._Call = mock.call(  # noqa: SLF001
         {
             "event_payload": {
                 "anonymized_name": "0592a9cacfa4ce642536161869d1ba19",

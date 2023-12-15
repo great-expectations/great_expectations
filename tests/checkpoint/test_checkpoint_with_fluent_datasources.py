@@ -148,7 +148,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
+    expected_events: List[unittest.mock._Call] = [  # noqa: SLF001
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
@@ -161,7 +161,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         ),
     ]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list  # noqa: SLF001
     assert actual_events == expected_events
 
     assert len(data_context.list_checkpoints()) == 0
@@ -1132,7 +1132,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert mock_emit.call_count == 13
 
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list  # noqa: SLF001
 
     # Since there are two validations, confirming there should be two "data_asset.validate" events
     num_data_asset_validate_events = 0

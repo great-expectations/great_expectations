@@ -120,7 +120,9 @@ class BaseCheckpoint(ConfigPeer):
         checkpoint_config: CheckpointConfig,
         data_context: AbstractDataContext,
     ) -> None:
-        self._usage_statistics_handler = data_context._usage_statistics_handler
+        self._usage_statistics_handler = (
+            data_context._usage_statistics_handler  # noqa: SLF001
+        )
 
         self._data_context = data_context
 
@@ -473,7 +475,7 @@ class BaseCheckpoint(ConfigPeer):
             )
             if include_rendered_content is None:
                 include_rendered_content = (
-                    self._data_context._determine_if_expectation_validation_result_include_rendered_content()
+                    self._data_context._determine_if_expectation_validation_result_include_rendered_content()  # noqa: SLF001
                 )
 
             validator: Validator = self._validator or self.data_context.get_validator(

@@ -76,7 +76,7 @@ class _VersionChecker:
 
         pypi_version = version.Version(pkg_version)
         # update the _LATEST_GX_VERSION_CACHE
-        self.__class__._LATEST_GX_VERSION_CACHE = pypi_version
+        self.__class__._LATEST_GX_VERSION_CACHE = pypi_version  # noqa: SLF001
         return pypi_version
 
     def _is_using_outdated_release(self, pypi_version: version.Version) -> bool:

@@ -357,7 +357,7 @@ def _to_pydantic_fields(
         if substitution:
             fields_dict.update(substitution)
         else:
-            no_annotation: bool = param.annotation is inspect._empty
+            no_annotation: bool = param.annotation is inspect._empty  # noqa: SLF001
             if no_annotation:
                 logger.debug(f"`{param_name}` has no type annotation")
                 FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
@@ -407,8 +407,8 @@ def _create_pandas_asset_model(  # noqa: PLR0913
     def _get_reader_options_include(self) -> set[str]:
         return set()
 
-    model._get_reader_method = _get_reader_method
-    model._get_reader_options_include = _get_reader_options_include
+    model._get_reader_method = _get_reader_method  # noqa: SLF001
+    model._get_reader_options_include = _get_reader_options_include  # noqa: SLF001
 
     return model
 

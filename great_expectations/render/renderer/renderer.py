@@ -23,8 +23,8 @@ def renderer(
         def inner_func(*args: P.args, **kwargs: P.kwargs):
             return renderer_fn(*args, **kwargs)
 
-        inner_func._renderer_type = renderer_type  # type: ignore[attr-defined]
-        inner_func._renderer_definition_kwargs = kwargs  # type: ignore[attr-defined]
+        inner_func._renderer_type = renderer_type  # type: ignore[attr-defined]  # noqa: SLF001
+        inner_func._renderer_definition_kwargs = kwargs  # type: ignore[attr-defined]  # noqa: SLF001
         return inner_func
 
     return wrapper

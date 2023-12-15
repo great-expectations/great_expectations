@@ -79,7 +79,7 @@ def _build_pandas_abs_datasource(
         name="pandas_abs_datasource",
         azure_options=azure_options or {},
     )
-    pandas_abs_datasource._azure_client = azure_client
+    pandas_abs_datasource._azure_client = azure_client  # noqa: SLF001
     return pandas_abs_datasource
 
 
@@ -131,9 +131,9 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
     data_connector: AzureBlobStorageDataConnector = cast(
-        AzureBlobStorageDataConnector, csv_asset._data_connector
+        AzureBlobStorageDataConnector, csv_asset._data_connector  # noqa: SLF001
     )
-    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""
+    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""  # noqa: SLF001
     return regex, test_connection_error_message
 
 
@@ -146,7 +146,9 @@ def test_construct_pandas_abs_datasource_with_account_url_and_credential():
             "credential": "my_credential",
         },
     )
-    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        pandas_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
@@ -166,7 +168,7 @@ def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
     )
 
     # attach data_context to enable config substitution
-    pandas_abs_datasource._data_context = empty_file_context
+    pandas_abs_datasource._data_context = empty_file_context  # noqa: SLF001
 
     credential = pandas_abs_datasource.azure_options["credential"]
     assert isinstance(credential, ConfigStr)
@@ -175,7 +177,9 @@ def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
         == "my_secret_credential"
     )
 
-    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        pandas_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
@@ -189,7 +193,9 @@ def test_construct_pandas_abs_datasource_with_conn_str_and_credential():
             "credential": "my_credential",
         },
     )
-    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        pandas_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
@@ -203,7 +209,9 @@ def test_construct_pandas_abs_datasource_with_valid_account_url_assigns_account_
             "credential": "my_credential",
         },
     )
-    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        pandas_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
@@ -217,7 +225,9 @@ def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_nam
             "credential": "my_credential",
         },
     )
-    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = (
+        pandas_abs_datasource._get_azure_client()  # noqa: SLF001
+    )
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
@@ -234,7 +244,7 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
                 "credential": "my_credential",
             },
         )
-        _ = pandas_abs_datasource._get_azure_client()
+        _ = pandas_abs_datasource._get_azure_client()  # noqa: SLF001
 
 
 # noinspection PyUnusedLocal
@@ -456,20 +466,22 @@ def test_test_connection_failures(
         name="csv_asset",
         batching_regex=regex,
     )
-    csv_asset._datasource = pandas_abs_datasource
+    csv_asset._datasource = pandas_abs_datasource  # noqa: SLF001
     pandas_abs_datasource.assets = [
         csv_asset,
     ]
-    csv_asset._data_connector = AzureBlobStorageDataConnector(
+    csv_asset._data_connector = AzureBlobStorageDataConnector(  # noqa: SLF001
         datasource_name=pandas_abs_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        azure_client=pandas_abs_datasource._azure_client,
-        account_name=csv_asset.datasource._account_name,
+        azure_client=pandas_abs_datasource._azure_client,  # noqa: SLF001
+        account_name=csv_asset.datasource._account_name,  # noqa: SLF001
         container="my_container",
         file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
     )
-    csv_asset._test_connection_error_message = test_connection_error_message
+    csv_asset._test_connection_error_message = (  # noqa: SLF001
+        test_connection_error_message
+    )
 
     with pytest.raises(TestConnectionError) as e:
         pandas_abs_datasource.test_connection()

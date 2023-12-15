@@ -74,7 +74,7 @@ def print_add_asset_method_signatures(
     Prints out all of the asset methods for a given datasource in a format that be used
     for defining methods in stub files.
     """
-    type_lookup: TypeLookup = datasource_class._type_lookup
+    type_lookup: TypeLookup = datasource_class._type_lookup  # noqa: SLF001
 
     for asset_type_name in type_lookup.type_names():
         asset_type = type_lookup[asset_type_name]

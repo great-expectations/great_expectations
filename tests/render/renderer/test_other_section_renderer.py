@@ -27,7 +27,7 @@ def test_ProfilingResultsOverviewSectionRenderer_render_variable_types(
     for datetime. Other types would be useful to test for as well."""
 
     content_blocks = []
-    ProfilingResultsOverviewSectionRenderer._render_variable_types(
+    ProfilingResultsOverviewSectionRenderer._render_variable_types(  # noqa: SLF001
         datetime_column_evrs, content_blocks
     )
     assert len(content_blocks) == 1

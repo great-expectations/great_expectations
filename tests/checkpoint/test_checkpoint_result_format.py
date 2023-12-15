@@ -345,7 +345,7 @@ def _add_expectations_and_checkpoint(
         ),
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config()  # noqa: SLF001
     return context
 
 

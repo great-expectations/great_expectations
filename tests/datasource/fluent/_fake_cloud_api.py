@@ -130,7 +130,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
     datasource_config: dict[str, dict | str] = {}
     datasources_by_id: dict[str, dict] = {}
 
-    for ds in fds_config._json_dict()["fluent_datasources"]:
+    for ds in fds_config._json_dict()["fluent_datasources"]:  # noqa: SLF001
         name: str = ds["name"]
         datasource_names.add(name)
 

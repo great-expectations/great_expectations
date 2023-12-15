@@ -61,7 +61,7 @@ def test_basic_instantiation():
     )
 
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
@@ -117,7 +117,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check():
     )
 
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     self_check_report_object = my_data_connector.self_check()
 
@@ -179,7 +179,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
     )
 
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     # Test for an unknown execution environment
     with pytest.raises(ValueError):
@@ -292,7 +292,7 @@ def test_self_check():
     )
 
     # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
+    my_data_connector._refresh_data_references_cache()  # noqa: SLF001
 
     self_check_report_object = my_data_connector.self_check()
 

@@ -200,9 +200,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         # Instantiate variables and builder attributes
         variables: Dict[str, Any] = rule_config.get("variables", {})
-        domain_builder: DomainBuilder = RuleBasedProfiler._init_rule_domain_builder(
-            domain_builder_config=rule_config.get("domain_builder"),
-            data_context=self._data_context,
+        domain_builder: DomainBuilder = (
+            RuleBasedProfiler._init_rule_domain_builder(  # noqa: SLF001
+                domain_builder_config=rule_config.get("domain_builder"),
+                data_context=self._data_context,
+            )
         )
         parameter_builders: Optional[
             List[ParameterBuilder]
@@ -594,7 +596,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule_config: dict
 
         override_rule_configs: Dict[str, Dict[str, Any]] = {
-            rule_name: RuleBasedProfiler._reconcile_rule_config(
+            rule_name: RuleBasedProfiler._reconcile_rule_config(  # noqa: SLF001
                 existing_rules=effective_rules,
                 rule_name=rule_name,
                 rule_config=rule_config,
@@ -772,7 +774,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         current_parameter_builders: Dict[
             str, ParameterBuilder
-        ] = rule._get_parameter_builders_as_dict()
+        ] = rule._get_parameter_builders_as_dict()  # noqa: SLF001
 
         parameter_builder_name: str
         parameter_builder: ParameterBuilder
@@ -854,7 +856,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         current_expectation_configuration_builders: Dict[
             str, ExpectationConfigurationBuilder
-        ] = rule._get_expectation_configuration_builders_as_dict()
+        ] = rule._get_expectation_configuration_builders_as_dict()  # noqa: SLF001
 
         expectation_configuration_builder_name: str
         expectation_configuration_builder: ExpectationConfigurationBuilder
@@ -1238,7 +1240,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables: dict | None = None,
         profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
-        config = RuleBasedProfiler._resolve_profiler_config_for_store(
+        config = RuleBasedProfiler._resolve_profiler_config_for_store(  # noqa: SLF001
             name=name,
             id=id,
             config_version=config_version,
@@ -1247,7 +1249,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             profiler=profiler,
         )
 
-        if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
+        if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(  # noqa: SLF001
             config=config
         ):
             raise gx_exceptions.InvalidConfigError(

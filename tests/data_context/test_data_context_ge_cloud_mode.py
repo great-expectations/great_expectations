@@ -101,20 +101,28 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
 
     # The DatasourceStore should not have the default base_url or commonly used test base urls
     assert (
-        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        not context._datasource_store.store_backend.config[  # noqa: SLF001
+            "ge_cloud_base_url"
+        ]
         == CLOUD_DEFAULT_BASE_URL
     )
     assert (
-        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        not context._datasource_store.store_backend.config[  # noqa: SLF001
+            "ge_cloud_base_url"
+        ]
         == ge_cloud_base_url
     )
     assert (
-        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        not context._datasource_store.store_backend.config[  # noqa: SLF001
+            "ge_cloud_base_url"
+        ]
         == "https://app.test.greatexpectations.io"
     )
 
     # The DatasourceStore should have the custom base url set
     assert (
-        context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        context._datasource_store.store_backend.config[  # noqa: SLF001
+            "ge_cloud_base_url"
+        ]
         == custom_base_url
     )

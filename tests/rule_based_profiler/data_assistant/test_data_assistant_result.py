@@ -26,13 +26,15 @@ def test_get_chart_titles():
     assert layer_b.title == title_text
     assert layered_chart.title == alt.Undefined
 
-    chart_titles: List[str] = DataAssistantResult._get_chart_titles(
+    chart_titles: List[str] = DataAssistantResult._get_chart_titles(  # noqa: SLF001
         charts=[layered_chart]
     )
     assert len(chart_titles) == 1
     assert chart_titles[0] == title_text
 
-    chart_title: Optional[str] = DataAssistantResult._get_chart_layer_title(
+    chart_title: Optional[
+        str
+    ] = DataAssistantResult._get_chart_layer_title(  # noqa: SLF001
         layer=layered_chart
     )
     assert chart_title == title_text
@@ -41,20 +43,22 @@ def test_get_chart_titles():
     layer_b: alt.Chart = alt.Chart(data=df, title=alt.TitleParams(text=title_text))
     assert layer_b.title.text == title_text
 
-    chart_titles: List[str] = DataAssistantResult._get_chart_titles(
+    chart_titles: List[str] = DataAssistantResult._get_chart_titles(  # noqa: SLF001
         charts=[layered_chart]
     )
     assert len(chart_titles) == 1
     assert chart_titles[0] == title_text
 
-    chart_title: Optional[str] = DataAssistantResult._get_chart_layer_title(
+    chart_title: Optional[
+        str
+    ] = DataAssistantResult._get_chart_layer_title(  # noqa: SLF001
         layer=layered_chart
     )
     assert chart_title == title_text
 
     # case where no title exists
     with pytest.raises(gx_exceptions.DataAssistantResultExecutionError) as e:
-        DataAssistantResult._get_chart_titles(charts=[layer_a])
+        DataAssistantResult._get_chart_titles(charts=[layer_a])  # noqa: SLF001
 
     assert e.value.message == "All DataAssistantResult charts must have a title."
 

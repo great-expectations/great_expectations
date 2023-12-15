@@ -99,7 +99,7 @@ def test_simple_date_format_parameter_builder_alice(
     )
 
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
-    assert date_format_string_parameter._threshold == 1.0
+    assert date_format_string_parameter._threshold == 1.0  # noqa: SLF001
 
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -230,8 +230,10 @@ def test_simple_date_format_parameter_builder_bobby(
         )
     )
 
-    assert date_format_string_parameter._candidate_strings == set(candidate_strings)
-    assert date_format_string_parameter._threshold == 0.9
+    assert date_format_string_parameter._candidate_strings == set(  # noqa: SLF001
+        candidate_strings
+    )
+    assert date_format_string_parameter._threshold == 0.9  # noqa: SLF001
 
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,

@@ -84,7 +84,7 @@ class DataAssetStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
-        return value._json_dict()
+        return value._json_dict()  # noqa: SLF001
 
     @override
     def deserialize(self, value: dict) -> FluentDataAsset:

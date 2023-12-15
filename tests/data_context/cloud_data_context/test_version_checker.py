@@ -9,10 +9,10 @@ _MOCK_PYPI_VERSION = "0.16.8"
 
 @pytest.fixture
 def enable_pypi_version_check():
-    stashed_version = _VersionChecker._LATEST_GX_VERSION_CACHE
-    _VersionChecker._LATEST_GX_VERSION_CACHE = None
+    stashed_version = _VersionChecker._LATEST_GX_VERSION_CACHE  # noqa: SLF001
+    _VersionChecker._LATEST_GX_VERSION_CACHE = None  # noqa: SLF001
     yield
-    _VersionChecker._LATEST_GX_VERSION_CACHE = stashed_version
+    _VersionChecker._LATEST_GX_VERSION_CACHE = stashed_version  # noqa: SLF001
 
 
 @pytest.mark.parametrize(
@@ -39,7 +39,7 @@ def test_check_if_using_latest_gx(
     pypi_payload = {"info": {"version": _MOCK_PYPI_VERSION}}
     responses.add(
         responses.GET,
-        _VersionChecker._PYPI_GX_ENDPOINT,
+        _VersionChecker._PYPI_GX_ENDPOINT,  # noqa: SLF001
         json=pypi_payload,
         status=status,
     )

@@ -152,7 +152,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         compound_columns_count_query = (
             sa.select(
                 original_table_clause,
-                group_count_query.c._num_rows.label("_num_rows"),
+                group_count_query.c._num_rows.label("_num_rows"),  # noqa: SLF001
             )
             .select_from(
                 original_table_clause.join(
@@ -185,7 +185,9 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         ]
 
         # noinspection PyProtectedMember
-        row_wise_cond = compound_columns_count_query.c._num_rows < 2  # noqa: PLR2004
+        row_wise_cond = (
+            compound_columns_count_query.c._num_rows < 2  # noqa: SLF001, PLR2004
+        )
 
         return row_wise_cond
 

@@ -220,7 +220,7 @@ class GxConfig(FluentBaseModel):
                 # TODO: move this to a different 'validator' method
                 # attach the datasource to the nested assets, avoiding recursion errors
                 for asset in datasource.assets:
-                    asset._datasource = datasource
+                    asset._datasource = datasource  # noqa: SLF001
 
         logger.debug(f"Loaded 'datasources' ->\n{loaded_datasources!r}")
 

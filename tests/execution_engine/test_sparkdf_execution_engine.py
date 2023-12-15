@@ -35,11 +35,15 @@ pytestmark = pytest.mark.spark
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     engine = basic_spark_df_execution_engine
     # Testing that can recognize basic csv file
-    fn = engine._get_reader_fn(reader=spark_session.read, path="myfile.csv")
+    fn = engine._get_reader_fn(  # noqa: SLF001
+        reader=spark_session.read, path="myfile.csv"
+    )
     assert "<bound method DataFrameReader.csv" in str(fn)
 
     # Ensuring that other way around works as well - reader_method should always override path
-    fn_new = engine._get_reader_fn(reader=spark_session.read, reader_method="csv")
+    fn_new = engine._get_reader_fn(  # noqa: SLF001
+        reader=spark_session.read, reader_method="csv"
+    )
     assert "<bound method DataFrameReader.csv" in str(fn_new)
 
 
@@ -55,7 +59,9 @@ def test_reader_fn_parameters(
     )
     test_df_small_csv_path = base_directory + "/test-A.csv"
     engine = basic_spark_df_execution_engine
-    fn = engine._get_reader_fn(reader=spark_session.read, path=test_df_small_csv_path)
+    fn = engine._get_reader_fn(  # noqa: SLF001
+        reader=spark_session.read, path=test_df_small_csv_path
+    )
     assert "<bound method DataFrameReader.csv" in str(fn)
 
     test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(

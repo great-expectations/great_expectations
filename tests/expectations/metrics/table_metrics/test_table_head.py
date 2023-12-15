@@ -147,7 +147,7 @@ def test_table_head_sqlite(
 ):
     engine = request.getfixturevalue(execution_engine)
     table_head = TableHead()
-    res = table_head._sqlalchemy(
+    res = table_head._sqlalchemy(  # noqa: SLF001
         execution_engine=engine,
         metric_domain_kwargs={},
         metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
@@ -193,7 +193,7 @@ def test_limit_included_in_head_query(
     with mock.patch(
         "great_expectations.compatibility.sqlalchemy_and_pandas.pd.read_sql"
     ) as mock_node:
-        table_head._sqlalchemy(
+        table_head._sqlalchemy(  # noqa: SLF001
             execution_engine=engine,
             metric_domain_kwargs={},
             metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
