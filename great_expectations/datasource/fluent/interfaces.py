@@ -801,7 +801,7 @@ class Batch:
         batch_markers: BatchMarkers,
         batch_spec: BatchSpec,
         batch_definition: BatchDefinition,
-        metadata: Dict[str] | None = None,
+        metadata: Dict[str, Any] | None = None,
     ):
         self._datasource = datasource
         self._data_asset = data_asset
@@ -902,7 +902,12 @@ class Batch:
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
 
     @property
-    def result_format(self) -> ResultFormat:
+    def result_format(self) -> str | ResultFormat:
+        # We always `return a ResultFormat`. However to prevent having to do #ignore[assignment] we return
+        # `str | ResultFormat`. When the getter/setter have different types mypy gets confused on lines like:
+        # batch.result_format = "SUMMARY"
+        # See:
+        # https://github.com/python/mypy/issues/3004
         return self._validator.result_format
 
     @result_format.setter
@@ -954,8 +959,14 @@ class Batch:
             raise ValueError(
                 "We can't validate batches that are attached to datasources without a data context"
             )
+        batch_config = BatchConfig(
+            name="-".join(
+                [self.datasource.name, self.data_asset.name, str(uuid.uuid4())]
+            ),
+            data_asset=self.data_asset,
+        )
         return V1Validator(
             context=context,
-            batch_config=BatchConfig(data_asset=self.data_asset),
+            batch_config=batch_config,
             batch_request_options=self.batch_request.options,
         )
