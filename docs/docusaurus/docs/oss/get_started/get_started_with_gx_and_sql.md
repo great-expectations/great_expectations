@@ -61,7 +61,7 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
   PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/taxi_db"
   ```
 
-  Replace the connection string with the connection string for your database. For additional information about other connection methods, see [How to configure credentials](https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials/). In this example, existing New York City taxi cab data is being used.
+  Replace the connection string with the connection string for your database. For additional information about other connection methods, see [How to configure credentials](https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials/). This example uses existing New York City taxi cab data.
 
 2. Run the following command to create a <TechnicalTag tag='datasource' text='Data Source' /> to represent the data available in your PostgreSQL database:
 
