@@ -102,7 +102,7 @@ Every time you evaluate an Expectation with `validator.expect_*`, it is immediat
   ```
 ## Validate your data
 
-You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for your batch, which you can use to validate and run post-validation actions.
+You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for your Batch, which you can use to validate and run post-validation actions.
 
 1. Run the following command to create the Checkpoint configuration that uses your Data Context:
 
