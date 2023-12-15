@@ -4,7 +4,7 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_configuration import (
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_renderer_impl
