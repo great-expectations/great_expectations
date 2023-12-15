@@ -22,7 +22,6 @@ from freezegun import freeze_time
 from packaging import version
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationSuite,
 )
 from great_expectations.core.batch import BatchRequest
@@ -35,6 +34,9 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
