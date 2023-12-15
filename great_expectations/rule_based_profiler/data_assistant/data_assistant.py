@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
 from great_expectations.core.metric_function_types import (
@@ -32,10 +33,6 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
 )
-from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-    RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentVariablesDirectives,
-)
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
     HistogramSingleBatchParameterBuilder,
@@ -62,7 +59,14 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
-from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import Batch, BatchRequestBase
+    from great_expectations.rule_based_profiler.helpers.runtime_environment import (
+        RuntimeEnvironmentDomainTypeDirectives,
+        RuntimeEnvironmentVariablesDirectives,
+    )
+    from great_expectations.validator.validator import Validator
 
 # noinspection PyMethodParameters
 

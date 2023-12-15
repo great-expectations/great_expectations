@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import hashlib
 import logging
+from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.id_dict import BatchSpec
 
 logger = logging.getLogger(__name__)
 
