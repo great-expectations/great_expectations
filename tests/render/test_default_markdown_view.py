@@ -5,12 +5,14 @@ from collections import OrderedDict
 import pytest
 
 import great_expectations as gx
+from great_expectations.core import (
+    ExpectationSuite,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
-    ExpectationSuite,
 )
 from great_expectations.render import (
     RenderedDocumentContent,

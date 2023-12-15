@@ -3,6 +3,9 @@ from collections import OrderedDict
 
 import pytest
 
+from great_expectations.core import (
+    ExpectationSuite,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -10,7 +13,6 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
-    ExpectationSuite,
 )
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,

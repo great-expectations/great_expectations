@@ -10,6 +10,9 @@ import nbformat
 import pytest
 from freezegun import freeze_time
 
+from great_expectations.core import (
+    ExpectationSuite,
+)
 from great_expectations.core.batch import Batch
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -20,7 +23,6 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
-    ExpectationSuite,
 )
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
