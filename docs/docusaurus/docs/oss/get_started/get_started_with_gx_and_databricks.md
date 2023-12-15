@@ -55,7 +55,7 @@ The complete code used in the following examples is available on GitHub:
 
 To avoid configuring external resources, you'll use the [Databricks File System (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store.
 
-DBFS is a distributed file system mounted in a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster. See the Databricks documentation for best practices including mounting object stores.
+DBFS is a distributed file system mounted in a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It also persists in object storage, so you won’t lose data after terminating a cluster. See the Databricks documentation for best practices, including mounting object stores.
 
 1. Run the following code to set up a <TechnicalTag tag="data_context" text="Data Context"/> with the default settings:
 
