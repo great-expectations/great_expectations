@@ -290,7 +290,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:  # type: ignore[override]
         pass
 
-    def _put(self, id: str, value: Any) -> GXCloudResourceRef:
+    def _put(self, id: str, value: Any) -> GXCloudResourceRef | bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -330,7 +330,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             try:
                 response_json = response.json()
             except JSONDecodeError:
-                response_json = {}
+                return True
             return GXCloudResourceRef(
                 resource_type=resource_type, id=id, url=url, response_json=response_json
             )

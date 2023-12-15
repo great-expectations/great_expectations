@@ -150,7 +150,12 @@ class ExpectationsStore(Store):
         # ensure suite has an ID
         if not suite.get("ge_cloud_id"):
             suite["ge_cloud_id"] = str(uuid.uuid4())
-        for expectation_configuration in suite["expectation_configurations"]:
+        if isinstance(suite, ExpectationSuite):
+            key = "expectation_configurations"
+        else:
+            # this will be true if a serialized suite is provided
+            key = "expectations"
+        for expectation_configuration in suite[key]:
             if not expectation_configuration["ge_cloud_id"]:
                 expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
         return suite
