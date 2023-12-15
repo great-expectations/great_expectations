@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from isbnlib import is_isbn13
 
 from great_expectations.execution_engine import PandasExecutionEngine

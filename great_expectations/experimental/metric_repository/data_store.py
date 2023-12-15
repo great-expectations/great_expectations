@@ -1,11 +1,8 @@
-from __future__ import annotations
-
 import abc
 import uuid
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import Generic, TypeVar
 
-if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
+from great_expectations.data_context import CloudDataContext
 
 T = TypeVar("T")
 

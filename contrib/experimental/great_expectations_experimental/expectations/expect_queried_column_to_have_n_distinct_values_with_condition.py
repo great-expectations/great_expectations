@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Union
 
 from great_expectations.execution_engine import ExecutionEngine

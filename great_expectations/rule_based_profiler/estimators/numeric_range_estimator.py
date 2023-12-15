@@ -1,24 +1,20 @@
-from __future__ import annotations
-
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, Optional
+
+import numpy as np
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NumericRangeEstimationResult,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 from great_expectations.types import SerializableDictDot
-
-if TYPE_CHECKING:
-    import numpy as np
-
-    from great_expectations.core.domain import Domain
-    from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-        NumericRangeEstimationResult,
-    )
-    from great_expectations.rule_based_profiler.parameter_container import (
-        ParameterContainer,
-    )
-    from great_expectations.types.attributes import Attributes
+from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

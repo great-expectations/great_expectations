@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import logging
-from typing import TYPE_CHECKING, Iterator, List, Optional
+from typing import Iterator, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
@@ -9,9 +7,7 @@ from great_expectations.datasource.data_connector.configured_asset_aws_glue_data
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.exceptions import DataConnectorError
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from great_expectations.compatibility.sqlalchemy import (

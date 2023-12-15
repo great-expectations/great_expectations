@@ -1,23 +1,19 @@
-from __future__ import annotations
-
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import PathBatchSpec
+from great_expectations.datasource.data_connector.asset.asset import (
+    Asset,
+)
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-
-if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
-    from great_expectations.core.batch_spec import PathBatchSpec
-    from great_expectations.datasource.data_connector.asset.asset import (
-        Asset,
-    )
-    from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

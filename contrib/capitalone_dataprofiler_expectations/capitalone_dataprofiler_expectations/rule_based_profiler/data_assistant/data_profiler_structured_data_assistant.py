@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Dict, List, Optional
 
 from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (

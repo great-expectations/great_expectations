@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from cryptoaddress import EthereumAddress
 
 from great_expectations.execution_engine import PandasExecutionEngine

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import yahoo_fin.stock_info as si
 
 from great_expectations.execution_engine import PandasExecutionEngine

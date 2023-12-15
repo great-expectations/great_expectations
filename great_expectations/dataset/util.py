@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 # Utility methods for dealing with Dataset objects
+
 import logging
 from typing import Any, List, Optional, Union
 

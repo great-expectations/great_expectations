@@ -1,7 +1,8 @@
-from __future__ import annotations
+from typing import Any, Dict, List, Optional, Set
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+import pandas as pd
 
+from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
@@ -14,6 +15,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_partial,
@@ -21,14 +25,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
-
-if TYPE_CHECKING:
-    import pandas as pd
-
-    from great_expectations.compatibility import pyspark, sqlalchemy
-    from great_expectations.expectations.expectation_configuration import (
-        ExpectationConfiguration,
-    )
 
 
 class ColumnDistinctValues(ColumnAggregateMetricProvider):

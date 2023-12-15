@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, Dict, Iterator, List, Optional, Tuple, cast
+from typing import Callable, Dict, Iterator, List, Optional, Tuple, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -27,9 +25,7 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

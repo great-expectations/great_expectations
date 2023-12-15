@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
@@ -31,10 +29,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-    from great_expectations.validator.validator import Validator
 
 
 class VolumeDataAssistant(DataAssistant):

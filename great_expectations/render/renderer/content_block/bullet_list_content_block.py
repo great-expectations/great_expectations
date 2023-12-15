@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from great_expectations.render import RenderedBulletListContent
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from time_series_expectations.expectations.expect_batch_row_count_to_match_prophet_date_model import (
     ExpectBatchRowCountToMatchProphetDateModel,
 )

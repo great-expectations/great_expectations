@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from great_expectations.exceptions import GreatExpectationsTypeError
 
 

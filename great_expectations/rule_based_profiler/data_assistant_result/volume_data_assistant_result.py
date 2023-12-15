@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Dict, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override

@@ -1,20 +1,16 @@
-from __future__ import annotations
-
 import logging
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 from great_expectations.compatibility import google
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
-
-if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
-    from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

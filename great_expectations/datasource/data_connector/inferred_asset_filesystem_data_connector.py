@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
@@ -13,9 +11,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

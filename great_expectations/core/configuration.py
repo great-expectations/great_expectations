@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Contains general abstract or base classes used across configuration objects."""
 from abc import ABC
 from pprint import pformat as pf

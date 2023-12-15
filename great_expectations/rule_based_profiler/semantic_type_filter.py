@@ -1,10 +1,7 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
-if TYPE_CHECKING:
-    from great_expectations.core.domain import SemanticDomainTypes
+from great_expectations.core.domain import SemanticDomainTypes
 
 
 class SemanticTypeFilter(ABC):

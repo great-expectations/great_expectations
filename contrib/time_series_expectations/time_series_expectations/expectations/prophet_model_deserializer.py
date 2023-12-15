@@ -1,15 +1,10 @@
-from __future__ import annotations
-
 # Suppress an annoying warning from Prophet.
 import logging
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from prophet import Prophet
 
 logger = logging.getLogger("prophet.plot")
 logger.setLevel(logging.CRITICAL)
 try:
+    from prophet import Prophet
     from prophet.serialize import model_from_json
 except ImportError:
     logger.warning(

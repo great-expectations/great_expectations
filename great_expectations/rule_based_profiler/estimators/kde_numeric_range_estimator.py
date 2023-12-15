@@ -1,9 +1,13 @@
-from __future__ import annotations
-
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, Optional, Union
+from typing import Callable, Dict, Optional, Union
+
+import numpy as np
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NumericRangeEstimationResult,
+)
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
@@ -13,19 +17,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
     get_quantile_statistic_interpolation_method_from_rule_state,
 )
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
+from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_ndarray_datetime_dtype
-
-if TYPE_CHECKING:
-    import numpy as np
-
-    from great_expectations.core.domain import Domain
-    from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-        NumericRangeEstimationResult,
-    )
-    from great_expectations.rule_based_profiler.parameter_container import (
-        ParameterContainer,
-    )
-    from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

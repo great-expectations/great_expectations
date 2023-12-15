@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
+import pandas as pd
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -14,9 +12,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-
-if TYPE_CHECKING:
-    import pandas as pd
 
 
 class ColumnValuesLengthMax(ColumnAggregateMetricProvider):

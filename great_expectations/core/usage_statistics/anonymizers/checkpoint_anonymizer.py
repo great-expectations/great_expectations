@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import datetime
 import logging
 from numbers import Number
@@ -25,7 +23,7 @@ logger = logging.getLogger(__name__)
 class CheckpointAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: Anonymizer,  # noqa: F821
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)

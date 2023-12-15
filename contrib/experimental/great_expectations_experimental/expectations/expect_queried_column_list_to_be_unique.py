@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Union
 
 from great_expectations.core.util import convert_to_json_serializable

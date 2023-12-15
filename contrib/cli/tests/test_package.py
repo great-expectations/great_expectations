@@ -1,7 +1,6 @@
-from __future__ import annotations
+from typing import List
 
-from typing import TYPE_CHECKING, List
-
+import py
 import pytest
 from great_expectations_contrib.package import (
     Dependency,
@@ -23,9 +22,6 @@ from great_expectations.expectations.core.expect_column_most_common_value_to_be_
 from great_expectations.expectations.core.expect_column_stdev_to_be_between import (
     ExpectColumnStdevToBeBetween,
 )
-
-if TYPE_CHECKING:
-    import py
 
 
 @pytest.fixture

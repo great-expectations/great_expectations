@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from great_expectations.data_context.util import file_relative_path
 from time_series_expectations.expectations.column_aggregate_time_series_expectation import (
     ColumnAggregateTimeSeriesExpectation,

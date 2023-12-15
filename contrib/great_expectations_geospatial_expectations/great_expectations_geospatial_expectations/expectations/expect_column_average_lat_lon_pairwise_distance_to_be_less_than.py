@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from math import radians
 from typing import Dict
 

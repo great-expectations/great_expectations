@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import copy
 import logging
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
@@ -11,9 +9,7 @@ from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import numpy as np
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa

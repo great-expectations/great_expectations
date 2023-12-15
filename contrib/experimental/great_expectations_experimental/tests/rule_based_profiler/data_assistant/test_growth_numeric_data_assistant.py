@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import unittest
 from typing import Dict, List, Optional, cast

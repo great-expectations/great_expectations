@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 #!!! This giant block of imports should be something simpler, such as:
 # from great_expectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import PandasExecutionEngine

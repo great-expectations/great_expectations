@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def is_value_greater_than_threshold(value, threshold):
     return value > threshold
 

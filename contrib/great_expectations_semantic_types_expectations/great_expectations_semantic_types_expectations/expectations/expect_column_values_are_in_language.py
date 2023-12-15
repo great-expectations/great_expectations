@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import langid  # version 1.1.6
 
 #!!! This giant block of imports should be something simpler, such as:

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from functools import reduce
 
 import numpy as np

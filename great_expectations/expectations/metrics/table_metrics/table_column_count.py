@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import Any, Dict, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import (
@@ -9,16 +7,14 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-
-if TYPE_CHECKING:
-    from great_expectations.expectations.expectation_configuration import (
-        ExpectationConfiguration,
-    )
 
 
 class TableColumnCount(TableMetricProvider):
@@ -27,7 +23,7 @@ class TableColumnCount(TableMetricProvider):
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(  # noqa: PLR0913
         cls,
-        execution_engine: ExecutionEngine,
+        execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
@@ -39,7 +35,7 @@ class TableColumnCount(TableMetricProvider):
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(  # noqa: PLR0913
         cls,
-        execution_engine: ExecutionEngine,
+        execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
@@ -51,7 +47,7 @@ class TableColumnCount(TableMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(  # noqa: PLR0913
         cls,
-        execution_engine: ExecutionEngine,
+        execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],

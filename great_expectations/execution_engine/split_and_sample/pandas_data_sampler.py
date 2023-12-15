@@ -1,18 +1,13 @@
-from __future__ import annotations
-
 import hashlib
 import random
-from typing import TYPE_CHECKING
+
+import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
-
-if TYPE_CHECKING:
-    import pandas as pd
-
-    from great_expectations.core.id_dict import BatchSpec
 
 
 class PandasDataSampler(DataSampler):

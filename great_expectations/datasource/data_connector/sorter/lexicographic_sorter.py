@@ -1,14 +1,10 @@
-from __future__ import annotations
-
 import json
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
-
-if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
 
 logger = logging.getLogger(__name__)
 

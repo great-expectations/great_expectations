@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, List, Union
 
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon, mapping, shape

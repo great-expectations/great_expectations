@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Optional
 
 from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (

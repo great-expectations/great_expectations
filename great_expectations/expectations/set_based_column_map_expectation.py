@@ -1,9 +1,10 @@
-from __future__ import annotations
-
 import logging
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
+from great_expectations.core import (
+    ExpectationValidationResult,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -16,6 +17,9 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
@@ -35,12 +39,6 @@ from great_expectations.render.util import (
 from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
-        ExpectationValidationResult,
-    )
-    from great_expectations.expectations.expectation_configuration import (
-        ExpectationConfiguration,
-    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pyparsing import Combine, LineEnd, Literal, Optional, Suppress, Word, alphanums
 
 urn_word = Word(f"{alphanums}_$?=%.&,")

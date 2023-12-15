@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Dict
 
 from great_expectations.compatibility.pyspark import functions as F
@@ -26,7 +24,7 @@ class TableRowCount(TableMetricProvider):
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(  # noqa: PLR0913
         cls,
-        execution_engine: PandasExecutionEngine,
+        execution_engine: "PandasExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
@@ -44,7 +42,7 @@ class TableRowCount(TableMetricProvider):
     )
     def _sqlalchemy(  # noqa: PLR0913
         cls,
-        execution_engine: SqlAlchemyExecutionEngine,
+        execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
@@ -59,7 +57,7 @@ class TableRowCount(TableMetricProvider):
     )
     def _spark(  # noqa: PLR0913
         cls,
-        execution_engine: SqlAlchemyExecutionEngine,
+        execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],

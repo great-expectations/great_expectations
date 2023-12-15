@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from great_expectations.compatibility.typing_extensions import override
 
 """Serializer class interface definition.
@@ -18,11 +16,11 @@ serialized_value = serializer.serialize(datasource_config)
 import abc
 from typing import TYPE_CHECKING
 
+from marshmallow import Schema
+
 from great_expectations.core.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
-    from marshmallow import Schema
-
     from great_expectations.core.configuration import AbstractConfig
 
 
@@ -40,7 +38,7 @@ class AbstractConfigSerializer(abc.ABC):
         self.schema = schema
 
     @abc.abstractmethod
-    def serialize(self, obj: AbstractConfig) -> dict:
+    def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize to serializer specific data type.
 
         Note, specific return type to be implemented in subclasses.
@@ -56,7 +54,7 @@ class AbstractConfigSerializer(abc.ABC):
 
 class DictConfigSerializer(AbstractConfigSerializer):
     @override
-    def serialize(self, obj: AbstractConfig) -> dict:
+    def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize to Python dictionary.
 
         This is typically the default implementation used in can be overridden in subclasses.
@@ -72,7 +70,7 @@ class DictConfigSerializer(AbstractConfigSerializer):
 
 class JsonConfigSerializer(AbstractConfigSerializer):
     @override
-    def serialize(self, obj: AbstractConfig) -> dict:
+    def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize config to json dict.
 
         Args:

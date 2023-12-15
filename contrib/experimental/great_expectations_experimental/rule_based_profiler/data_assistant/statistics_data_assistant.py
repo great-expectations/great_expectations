@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Dict, List, Optional
 
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (

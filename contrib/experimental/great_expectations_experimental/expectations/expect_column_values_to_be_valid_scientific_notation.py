@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
 )
