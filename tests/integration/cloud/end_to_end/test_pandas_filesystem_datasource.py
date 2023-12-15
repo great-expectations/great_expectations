@@ -137,6 +137,9 @@ def expectation_suite(
     return expectation_suite
 
 
+@pytest.mark.xfail(
+    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
+)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
