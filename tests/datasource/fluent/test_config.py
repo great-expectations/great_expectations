@@ -21,6 +21,7 @@ from typing import (  # TODO: revert use of cast
 import pytest
 
 from great_expectations.compatibility import pydantic
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -35,7 +36,7 @@ from great_expectations.datasource.fluent.constants import (
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
 )
-from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
@@ -433,6 +434,33 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
     assert loaded.datasources
     for datasource in loaded.datasources:
         assert isinstance(datasource, Datasource)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["load_method", "input_"],
+    [
+        p(GxConfig.parse_obj, COMPLEX_CONFIG_DICT, id="complex dict"),
+        p(GxConfig.parse_raw, COMPLEX_CONFIG_JSON, id="complex json"),
+        p(GxConfig.parse_yaml, PG_CONFIG_YAML_FILE, id="pg_config.yaml file"),
+        p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
+    ],
+)
+def test_batch_configs_are_assigned_data_assets(
+    inject_engine_lookup_double, load_method: Callable, input_
+):
+    loaded: GxConfig = load_method(input_)
+    assert loaded
+
+    batch_configs: List[BatchConfig] = []
+    assert loaded.datasources
+    for datasource in loaded.datasources:
+        for data_asset in datasource.assets:
+            batch_configs.extend(data_asset.batch_configs)
+    assert len(batch_configs) > 0
+    for batch_config in batch_configs:
+        assert batch_config.data_asset is not None
+        assert batch_config in batch_config.data_asset.batch_configs
 
 
 @pytest.mark.unit

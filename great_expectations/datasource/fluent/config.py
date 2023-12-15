@@ -258,6 +258,10 @@ class GxConfig(FluentBaseModel):
             return cls(fluent_datasources=[])
 
         config = cls(**loaded)
+        for datasource in config.fluent_datasources:
+            for asset in datasource.assets:
+                for batch_config in asset.batch_configs:
+                    batch_config._data_asset = asset
         return config
 
     @overload
