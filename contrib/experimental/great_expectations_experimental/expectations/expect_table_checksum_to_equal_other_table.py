@@ -13,7 +13,6 @@ except ImportError:
 from typing import Any, Dict, Optional, Tuple
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -28,6 +27,9 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (

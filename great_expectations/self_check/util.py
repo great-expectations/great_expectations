@@ -47,7 +47,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core import (
-    ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
@@ -75,6 +74,9 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfigurationSchema,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (

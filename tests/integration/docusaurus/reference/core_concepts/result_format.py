@@ -6,8 +6,10 @@ import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationSuiteValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 # Snippet: example data frame for result_format
