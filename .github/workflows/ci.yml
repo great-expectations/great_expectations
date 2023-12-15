@@ -234,7 +234,7 @@ jobs:
       - name: public_api_report
         run: invoke public-api
       - name: link_checker
-        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
+        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs --skip-external
 
   docs-build:
     needs: [doc-checks, docs-changes]
