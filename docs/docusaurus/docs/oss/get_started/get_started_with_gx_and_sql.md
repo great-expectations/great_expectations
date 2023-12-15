@@ -55,7 +55,7 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
 
 ## Connect to your data
 
-1. Use a `connection_string` to securely connect to your PostgreSQL instance. For example
+1. Use a `connection_string` to securely connect to your PostgreSQL instance. For example:
 
   ```python
   PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/taxi_db"
