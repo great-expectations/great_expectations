@@ -36,7 +36,7 @@ from great_expectations.datasource.fluent.constants import (
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
 )
-from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
