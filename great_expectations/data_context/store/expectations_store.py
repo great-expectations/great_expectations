@@ -137,11 +137,11 @@ class ExpectationsStore(Store):
                     local_suite=value,
                     cloud_suite=result.response["data"]["attributes"]["suite"],
                 )
-        except gx_exceptions.StoreBackendError:
-            # todo: this error is more precise than we can guarantee
+        except gx_exceptions.StoreBackendError as exc:
+            # todo: this generic error clobbers more informative errors coming from the store
             raise gx_exceptions.ExpectationSuiteError(
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
-            )
+            ) from exc
 
     def _add_ids_to_new_objects(self, suite: ExpectationSuite) -> ExpectationSuite:
         if self.cloud_mode:
@@ -150,9 +150,9 @@ class ExpectationsStore(Store):
         # ensure suite has an ID
         if not suite.get("ge_cloud_id"):
             suite["ge_cloud_id"] = str(uuid.uuid4())
-        for expectation_configuration in suite.expectation_configurations:
-            if not expectation_configuration.ge_cloud_id:
-                expectation_configuration.ge_cloud_id = str(uuid.uuid4())
+        for expectation_configuration in suite["expectation_configurations"]:
+            if not expectation_configuration["ge_cloud_id"]:
+                expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
         return suite
 
     def _add_cloud_ids_to_local_suite_and_expectations(
