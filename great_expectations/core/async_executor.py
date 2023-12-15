@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Light weight wrappers to facilitate single code path
 for both when concurrency is enabled and disabled.
