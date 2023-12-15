@@ -2,13 +2,14 @@
 """A command-line tool used to check links in docusaurus markdown documentation
 
 To check all of our markdown documentation, from the repo root run:
-python ./docs/checks/docs_link_checker.py -p docs -r docs -t static -s docs --skip-external
+python ./docs/checks/docs_link_checker.py -p docs -r docs -sr static -s docs -sp static --skip-external
 
 The above command:
     - -p docs (also --path): The path to the markdown files you want to check. For example, if you wanted to check only the tutorial files, you could specify docs/tutorials
     - -r docs (also --docs-root): The root of the docs folder, used to resolve absolute and docroot paths
     - -sr static (also --static-root): The root of the static assets folder, used to resolve absolute paths for images
     - -s docs (also --site-prefix): The site path prefix, used to resolve abosulte paths (ex: in http://blah/docs, it is the docs part)
+    - -sp static (also --static-prefix): The site static folder prefix, used to resolve abosulte image paths
     - --skip-external: If present, external (http) links are not checked
 """
 from __future__ import annotations
@@ -352,15 +353,24 @@ class LinkChecker:
     default="docs",
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
+@click.option(
+    "--static-prefix",
+    "-sp",
+    default="static",
+    help="Top-most folder in the site URL for resolving absolute image paths",
+)
 @click.option("--skip-external", is_flag=True)
 def scan_docs_click(
     path: str,
     docs_root: Optional[str],
     static_root: str,
     site_prefix: str,
+    static_prefix: str,
     skip_external: bool,
 ) -> None:
-    code, message = scan_docs(path, docs_root, static_root, site_prefix, skip_external)
+    code, message = scan_docs(
+        path, docs_root, static_root, site_prefix, static_prefix, skip_external
+    )
     click.echo(message)
     exit(code)
 
