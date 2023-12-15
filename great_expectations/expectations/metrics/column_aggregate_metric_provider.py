@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
@@ -13,9 +15,6 @@ from great_expectations.execution_engine.sparkdf_execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import DeprecatedMetaMetricProvider
 from great_expectations.expectations.metrics.metric_provider import (
@@ -34,6 +33,9 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 @public_api
