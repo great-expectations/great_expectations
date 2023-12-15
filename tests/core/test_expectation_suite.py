@@ -375,9 +375,10 @@ class TestCRUDMethods:
         uuid_to_test = suite.ge_cloud_id
         assert isinstance(UUID(uuid_to_test), UUID)
 
-        assert len(suite.expectations) == 0
+        expectation.id = None
         suite.add(expectation)
         expectation.column = "foo"
+        expectation.id = None
         suite.add(expectation)
         assert len(suite.expectations) == 2
         # todo: update when expectations are source of truth
@@ -397,8 +398,9 @@ class TestCRUDMethods:
         uuid_to_test = suite.ge_cloud_id
         assert isinstance(UUID(uuid_to_test), UUID)
 
-        assert len(suite.expectations) == 0
+        expectation.ge_cloud_id = None
         suite.add(expectation)
+        expectation.ge_cloud_id = None
         expectation.column = "foo"
         suite.add(expectation)
         assert len(suite.expectations) == 2
@@ -406,6 +408,25 @@ class TestCRUDMethods:
         for expectation in suite.expectations:
             uuid_to_test = expectation.id
             assert isinstance(UUID(uuid_to_test), UUID)
+
+    @pytest.mark.filesystem
+    def test_filesystem_context_doesnt_allow_duplicate_ids(
+        self, empty_data_context, expectation
+    ):
+        # cloud doesnt have a parallel test because its the responsibility of the cloud backend.
+        context = empty_data_context
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+        provided_id = "6b3f003d-d97b-4649-ba23-3f4e30986297"
+
+        expectation.id = provided_id
+        suite.add(expectation)
+        expectation.column = "foo"
+        with pytest.raises(
+            RuntimeError, match="Expectation IDs must be unique within a suite."
+        ):
+            suite.add(expectation)
 
 
 class TestAddCitation:

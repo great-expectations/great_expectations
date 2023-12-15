@@ -114,7 +114,7 @@ class ExpectationsStore(Store):
     def _add(self, key, value, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
-            value = self._add_ids_to_new_objects(value)
+            value = self._add_ids_on_create(value)
         try:
             result = super()._add(key=key, value=value, **kwargs)
             if self.cloud_mode:
@@ -133,7 +133,7 @@ class ExpectationsStore(Store):
     def _update(self, key, value, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
-            value = self._add_ids_to_new_objects(value)
+            value = self._add_ids_on_update(value)
         try:
             result = super()._update(key=key, value=value, **kwargs)
             if self.cloud_mode:
@@ -149,18 +149,39 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             ) from exc
 
-    def _add_ids_to_new_objects(self, suite: ExpectationSuite) -> ExpectationSuite:
+    def _add_ids_on_create(self, suite: ExpectationSuite | dict) -> ExpectationSuite:
         """This method handles adding IDs to suites and expectations for non-cloud backends.
         In the future, this logic should be the responsibility of each non-cloud backend.
         """
-        # ensure suite has an ID
-        if not suite.get("ge_cloud_id"):
+        suite["ge_cloud_id"] = str(uuid.uuid4())
+        if isinstance(suite, ExpectationSuite):
+            key = "expectation_configurations"
+        else:
+            # this will be true if a serialized suite is provided
+            key = "expectations"
+        for expectation_configuration in suite[key]:
+            expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
+        return suite
+
+    def _add_ids_on_update(self, suite: ExpectationSuite | dict) -> ExpectationSuite:
+        """This method handles adding IDs to suites and expectations for non-cloud backends.
+        In the future, this logic should be the responsibility of each non-cloud backend.
+        """
+        if not suite["ge_cloud_id"]:
             suite["ge_cloud_id"] = str(uuid.uuid4())
         if isinstance(suite, ExpectationSuite):
             key = "expectation_configurations"
         else:
             # this will be true if a serialized suite is provided
             key = "expectations"
+
+        # enforce that every ID in this suite is unique
+        expectation_ids = [
+            exp["ge_cloud_id"] for exp in suite[key] if exp["ge_cloud_id"]
+        ]
+        if len(expectation_ids) != len(set(expectation_ids)):
+            raise RuntimeError("Expectation IDs must be unique within a suite.")
+
         for expectation_configuration in suite[key]:
             if not expectation_configuration["ge_cloud_id"]:
                 expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
