@@ -138,4 +138,4 @@ context.open_data_docs()
 ## Next steps
 
 Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data with Expectations and Checkpoints](https://docs.greatexpectations.io/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint) 
-to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations.
+to create a script to run the Checkpoint without recreating your Data Assets and Expectations.
