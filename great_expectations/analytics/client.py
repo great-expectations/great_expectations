@@ -1,10 +1,14 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 import posthog
 
-from great_expectations.analytics.base_event import Event
 from great_expectations.analytics.config import ENV_CONFIG, Config, update_config
+
+if TYPE_CHECKING:
+    from great_expectations.analytics.base_event import Event
 
 
 def submit(event: Event) -> None:
