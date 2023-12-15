@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABCMeta
+from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
@@ -326,11 +327,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code = response.status_code
 
             response.raise_for_status()
+            try:
+                response_json = response.json()
+            except JSONDecodeError:
+                response_json = {}
             return GXCloudResourceRef(
-                resource_type=resource_type,
-                id=id,
-                url=url,
-                response_json=response.json(),
+                resource_type=resource_type, id=id, url=url, response_json=response_json
             )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
