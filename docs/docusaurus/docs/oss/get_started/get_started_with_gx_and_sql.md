@@ -127,7 +127,7 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
 ## Build and view Data Docs
 
-Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="data_docs" text="Data Docs" /> have already been built from the validation you ran and your Data Docs store contains a new rendered validation result.
+Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="data_docs" text="Data Docs" /> are created from the validation you ran, and your Data Docs store contains a new rendered validation result.
 
 Run the following command to open your Data Docs and review the results of your Checkpoint run:
 
