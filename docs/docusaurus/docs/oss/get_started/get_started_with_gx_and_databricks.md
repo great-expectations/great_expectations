@@ -20,7 +20,7 @@ To use GX with Databricks, you'll complete the following tasks:
 
 The information provided here is intended to get you started quickly. To validate files stored in the DBFS, select the **File** tab. If you have an existing Spark DataFrame loaded, select one of the **DataFrame** tabs. See the specific integration guides if you're using a different file store, such as Amazon S3, Google Cloud Storage (GCS), or Microsoft Azure Blob Storage (ABS).
 
-The full code used in the following examples is available on GitHub:
+The complete code used in the following examples is available on GitHub:
 
 - [databricks_deployment_patterns_file_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py)
 
