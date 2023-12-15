@@ -504,11 +504,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         column_name = configuration.kwargs.get("column")
         expected_types_list = configuration.kwargs.get("type_list")
         actual_column_types_list = metrics.get("table.column_types")
-        actual_column_type = [
-            type_dict["type"]
-            for type_dict in actual_column_types_list
-            if type_dict["name"] == column_name
-        ][0]
+        try:
+            actual_column_type = next(
+                type_dict["type"]
+                for type_dict in actual_column_types_list
+                if type_dict["name"] == column_name
+            )
+        except StopIteration as e:
+            raise ValueError(f'No column named "{column_name}"') from e
 
         if isinstance(execution_engine, PandasExecutionEngine):
             # only PandasExecutionEngine supports map version of expectation and
