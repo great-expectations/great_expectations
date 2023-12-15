@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from primefac import primefac
 
 from great_expectations.execution_engine import PandasExecutionEngine

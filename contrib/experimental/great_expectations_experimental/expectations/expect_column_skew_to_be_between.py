@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import traceback
 from typing import Any, Dict, Tuple
@@ -49,7 +51,7 @@ class ColumnSkew(ColumnAggregateMetricProvider):
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],

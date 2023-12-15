@@ -1,13 +1,14 @@
+from __future__ import annotations
+
 """
 This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import dataprofiler as dp
-import numpy as np
 
 # remove extra tf loggin
 import tensorflow as tf
@@ -20,6 +21,9 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
 class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(

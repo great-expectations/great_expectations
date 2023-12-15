@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 This is an example of a Custom QueryExpectation.
 For detailed information on QueryExpectations, please see:

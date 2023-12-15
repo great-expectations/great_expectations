@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataprofiler as dp
 from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,

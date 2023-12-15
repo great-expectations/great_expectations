@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 import click
 from great_expectations_contrib.commands import (
@@ -8,7 +11,11 @@ from great_expectations_contrib.commands import (
     read_package_from_file,
     sync_package,
 )
-from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
+
+if TYPE_CHECKING:
+    from great_expectations_contrib.package import (
+        GreatExpectationsContribPackageManifest,
+    )
 
 # The following link points to the repo where the Cookiecutter template is hosted
 URL = "https://github.com/great-expectations/great-expectations-contrib-cookiecutter"

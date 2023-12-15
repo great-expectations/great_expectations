@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit

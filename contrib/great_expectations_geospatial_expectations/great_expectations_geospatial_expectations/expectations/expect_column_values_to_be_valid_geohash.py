@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 This is a template for creating custom RegexBasedColumnMapExpectations.
 For detailed instructions on how to use it, please see:

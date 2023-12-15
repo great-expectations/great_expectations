@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 
 #!!! This giant block of imports should be something simpler, such as:

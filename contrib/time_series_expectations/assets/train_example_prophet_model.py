@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """ This script trains a Prophet model and saves it to a JSON file.
 
 This model is used in example tests for Expectations in this library.
