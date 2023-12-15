@@ -375,6 +375,7 @@ class TestCRUDMethods:
         uuid_to_test = suite.ge_cloud_id
         assert isinstance(UUID(uuid_to_test), UUID)
 
+        assert len(suite.expectations) == 0
         suite.add(expectation)
         expectation.column = "foo"
         suite.add(expectation)
@@ -396,6 +397,7 @@ class TestCRUDMethods:
         uuid_to_test = suite.ge_cloud_id
         assert isinstance(UUID(uuid_to_test), UUID)
 
+        assert len(suite.expectations) == 0
         suite.add(expectation)
         expectation.column = "foo"
         suite.add(expectation)
