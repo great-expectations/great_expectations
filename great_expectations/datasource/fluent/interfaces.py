@@ -773,25 +773,6 @@ class Batch:
     a spark or a sql database. An exception exists for pandas or any in-memory datastore.
     """
 
-    # Immutable Attributes
-    _datasource: Datasource
-    _data_asset: DataAsset
-    _batch_request: BatchRequest
-    _data: BatchData
-    _id: str
-
-    # Mutable Attribute
-    # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
-    # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any]
-
-    # Immutable Legacy Attributes
-    # TODO: These legacy fields are currently required. Further investigation needs to be done
-    #       to figure out how to delete them
-    _batch_markers: BatchMarkers
-    _batch_spec: BatchSpec
-    _batch_definition: BatchDefinition
-
     def __init__(  # noqa: PLR0913
         self,
         datasource: Datasource,
@@ -803,14 +784,24 @@ class Batch:
         batch_definition: BatchDefinition,
         metadata: Dict[str, Any] | None = None,
     ):
+        # Immutable attributes
         self._datasource = datasource
         self._data_asset = data_asset
         self._batch_request = batch_request
         self._data = data
+
+        # Immutable legacy attributes
+        # TODO: These legacy fields are required but we should figure out how to delete them
         self._batch_markers = batch_markers
         self._batch_spec = batch_spec
         self._batch_definition = batch_definition
+
+        # Mutable Attribute
+        # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
+        # to a batch so developers may want to namespace any custom metadata they add.
         self.metadata = metadata or {}
+
+        # Immutable generated attribute
         self._id = self._create_id()
 
     def _create_id(self) -> str:
