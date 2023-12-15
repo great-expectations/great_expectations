@@ -157,10 +157,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
         batch_list.append(
             Batch(
                 datasource=self.datasource,
@@ -168,9 +164,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         )
         return batch_list
@@ -469,11 +465,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
-
         return [
             Batch(
                 datasource=self.datasource,
@@ -481,9 +472,9 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         ]
 
