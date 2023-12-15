@@ -96,6 +96,10 @@ class GxConfig(FluentBaseModel):
         _DATA_ASSET_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
     }
 
+    _EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION: ClassVar[Set[str]] = {
+        _BATCH_CONFIG_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+    }
+
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
         json_encoders = JSON_ENCODERS
@@ -361,6 +365,17 @@ class GxConfig(FluentBaseModel):
                         )
                         for data_asset_config in data_assets
                     }
+                    for data_asset in data_assets_config_as_dict.values():
+                        if _BATCH_CONFIGS_KEY in data_asset:
+                            data_asset[_BATCH_CONFIGS_KEY] = {
+                                batch_config[
+                                    _BATCH_CONFIG_NAME_KEY
+                                ]: _exclude_fields_from_serialization(
+                                    source_dict=batch_config,
+                                    exclusions=self._EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION,
+                                )
+                                for batch_config in data_asset[_BATCH_CONFIGS_KEY]
+                            }
                     datasource_config["assets"] = data_assets_config_as_dict
 
                 fluent_datasources_config_as_dict[datasource_name] = datasource_config
