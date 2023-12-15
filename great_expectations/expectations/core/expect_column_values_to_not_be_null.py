@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -11,6 +10,9 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    parse_result_format,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -31,10 +33,12 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -258,15 +262,14 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+        result_format = self._get_result_format(
+            runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get("mostly")
+        mostly = self._get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"

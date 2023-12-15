@@ -1,8 +1,10 @@
 import logging
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import MetricProvider
 from great_expectations.validator.metric_configuration import MetricConfiguration
 

@@ -1,4 +1,6 @@
-from typing import Any, List, Literal, Tuple
+from __future__ import annotations
+
+from typing import Any, ClassVar, List, Literal, Tuple
 
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
@@ -95,7 +97,11 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     }
 
     map_metric = "column_pair_values.in_set"
-    success_keys = ("value_pairs_set", "ignore_row_if", "mostly")
+    success_keys: ClassVar[Tuple[str, ...]] = (
+        "value_pairs_set",
+        "ignore_row_if",
+        "mostly",
+    )
     args_keys = (
         "column_A",
         "column_B",

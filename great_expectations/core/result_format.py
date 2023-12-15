@@ -1,6 +1,6 @@
-import enum
+from __future__ import annotations
 
-from typing_extensions import TypedDict
+import enum
 
 
 class ResultFormat(str, enum.Enum):
@@ -8,7 +8,3 @@ class ResultFormat(str, enum.Enum):
     BASIC = "BASIC"
     COMPLETE = "COMPLETE"
     SUMMARY = "SUMMARY"
-
-
-class ResultFormatDict(TypedDict):
-    result_format: ResultFormat

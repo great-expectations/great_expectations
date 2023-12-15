@@ -8,13 +8,11 @@ import sqlalchemy as sa
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
-from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -29,6 +27,10 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+    parse_result_format,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
@@ -395,15 +397,14 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+        result_format = self._get_result_format(
+            runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
+        mostly = self._get_success_kwargs().get(
             "mostly", self._get_default_value("mostly")
         )
         total_count = metrics.get("table.row_count")

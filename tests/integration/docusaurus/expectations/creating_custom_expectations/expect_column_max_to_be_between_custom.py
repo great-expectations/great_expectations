@@ -3,8 +3,9 @@ from typing import Dict, Optional, Union
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -19,6 +20,9 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     ExpectationValidationResult,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
@@ -212,7 +216,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,
@@ -221,10 +224,11 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
         column_max = metrics["column.custom_max"]
 
         # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
+        success_kwargs = self._get_success_kwargs()
+        min_value = success_kwargs.get("min_value")
+        max_value = success_kwargs.get("max_value")
+        strict_min = success_kwargs.get("strict_min")
+        strict_max = success_kwargs.get("strict_max")
 
         # Checking if mean lies between thresholds
         if min_value is not None:
