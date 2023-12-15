@@ -37,7 +37,6 @@ files = [
     "tests/integration/docusaurus",
     "tests/core/test_batch_config.py",
     "tests/validator/test_v1_validator.py",
-    "tests/datasource/fluent/test_batch.py",
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
