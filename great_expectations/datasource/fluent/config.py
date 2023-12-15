@@ -238,6 +238,34 @@ class GxConfig(FluentBaseModel):
 
     @classmethod
     @override
+    def parse_raw(  # noqa: PLR0913
+        cls,
+        b,
+        *,
+        content_type=None,
+        encoding="utf8",
+        proto=None,
+        allow_pickle=False,
+    ) -> GxConfig:
+        config = super().parse_raw(
+            b,
+            content_type=content_type,
+            encoding=encoding,
+            proto=proto,
+            allow_pickle=allow_pickle,
+        )
+        config._link_batch_configs_to_their_data_assets()
+        return config
+
+    @classmethod
+    @override
+    def parse_obj(cls, obj: Any) -> GxConfig:
+        config = super().parse_obj(obj)
+        config._link_batch_configs_to_their_data_assets()
+        return config
+
+    @classmethod
+    @override
     def parse_yaml(
         cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
     ) -> GxConfig:
@@ -258,10 +286,7 @@ class GxConfig(FluentBaseModel):
             return cls(fluent_datasources=[])
 
         config = cls(**loaded)
-        for datasource in config.fluent_datasources:
-            for asset in datasource.assets:
-                for batch_config in asset.batch_configs:
-                    batch_config._data_asset = asset
+        config._link_batch_configs_to_their_data_assets()
         return config
 
     @overload
@@ -340,6 +365,12 @@ class GxConfig(FluentBaseModel):
             return stream_or_path
 
         return stream_or_path.getvalue()
+
+    def _link_batch_configs_to_their_data_assets(self) -> None:
+        for datasource in self.fluent_datasources:
+            for asset in datasource.assets:
+                for batch_config in asset.batch_configs:
+                    batch_config._data_asset = asset
 
     def _exclude_name_fields_from_fluent_datasources(
         self, config: Dict[str, Any]
