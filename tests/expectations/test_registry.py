@@ -23,7 +23,10 @@ def test_registry_from_configuration():
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "PClass", "value_set": [1, 2, 3]},
     )
-    assert configuration._get_expectation_impl() == ExpectColumnValuesToBeInSet
+    assert (
+        configuration._get_expectation_impl()  # noqa: SLF001
+        == ExpectColumnValuesToBeInSet
+    )
 
 
 def test_registry_raises_error_when_invalid_expectation_requested():
