@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import numpy as np
@@ -11,9 +13,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -23,6 +22,10 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     import pandas as pd
+
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ColumnMedian(ColumnAggregateMetricProvider):

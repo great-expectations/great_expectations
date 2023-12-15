@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDescriptiveRendererType,

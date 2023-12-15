@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -8,8 +10,10 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
-from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.types import SerializableDictDot
+
+if TYPE_CHECKING:
+    from great_expectations.rule_based_profiler.rule import Rule
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

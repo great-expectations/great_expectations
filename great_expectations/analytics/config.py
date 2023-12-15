@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from great_expectations.compatibility.pydantic import (
