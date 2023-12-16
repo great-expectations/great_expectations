@@ -9,8 +9,9 @@ import pandas as pd
 from packaging import version
 
 from great_expectations.compatibility import pyspark
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
+    EvaluationParameterDict,
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -47,13 +48,13 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
-    from great_expectations.render.renderer_configuration import AddParamArgs
-    from great_expectations.validator.validator import (
-        ValidationDependencies,
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
+    from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +136,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -187,6 +189,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -202,7 +205,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "type_list", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -257,14 +260,12 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -413,13 +414,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in expected_types_list")
-            types = tuple(types)
-            success = isinstance(actual_column_type, types)
+            success = isinstance(actual_column_type, tuple(types))
         return {
             "success": success,
             "result": {"observed_value": type(actual_column_type).__name__},
         }
 
+    @override
     def get_validation_dependencies(
         self,
         execution_engine: Optional[ExecutionEngine] = None,
@@ -440,15 +441,17 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         # Only PandasExecutionEngine supports the column map version of the expectation.
         if isinstance(execution_engine, PandasExecutionEngine):
-            column_name = configuration.kwargs.get("column")
-            expected_types_list = configuration.kwargs.get("type_list")
+            column_name = configuration.kwargs.get("column") if configuration else None
+            expected_types_list = (
+                configuration.kwargs.get("type_list") if configuration else None
+            )
             metric_kwargs = get_metric_kwargs(
                 metric_name="table.column_types",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
-            metric_value_kwargs = metric_kwargs.get("metric_value_kwargs")
+            metric_domain_kwargs: dict = metric_kwargs.get("metric_domain_kwargs") or {}
+            metric_value_kwargs = metric_kwargs.get("metric_value_kwargs") or {}
             table_column_types_configuration = MetricConfiguration(
                 "table.column_types",
                 metric_domain_kwargs=metric_domain_kwargs,
@@ -494,6 +497,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         metrics: Dict,
@@ -504,11 +508,15 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         column_name = configuration.kwargs.get("column")
         expected_types_list = configuration.kwargs.get("type_list")
         actual_column_types_list = metrics.get("table.column_types")
-        actual_column_type = [
-            type_dict["type"]
-            for type_dict in actual_column_types_list
-            if type_dict["name"] == column_name
-        ][0]
+        actual_column_type = (
+            [
+                type_dict["type"]
+                for type_dict in actual_column_types_list
+                if type_dict["name"] == column_name
+            ][0]
+            if actual_column_types_list
+            else []
+        )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             # only PandasExecutionEngine supports map version of expectation and

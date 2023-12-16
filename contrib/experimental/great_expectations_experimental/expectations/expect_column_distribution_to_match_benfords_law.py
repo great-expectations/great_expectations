@@ -1,12 +1,14 @@
 import math
 from typing import Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,

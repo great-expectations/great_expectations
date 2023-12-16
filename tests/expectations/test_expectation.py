@@ -4,10 +4,12 @@ from typing import Any, Dict, List
 import pytest
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
 from great_expectations.expectations.core import ExpectColumnMaxToBeBetween
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 

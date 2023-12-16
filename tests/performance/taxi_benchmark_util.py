@@ -10,12 +10,14 @@ from typing import List, Optional
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import AbstractDataContext, get_context
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 

@@ -1,7 +1,7 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.domain import Domain
+from typing import TYPE_CHECKING, Dict, List, Optional
+
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,  # noqa: TCH001
 )
@@ -10,9 +10,15 @@ from great_expectations.rule_based_profiler.parameter_container import (
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
 )
-from great_expectations.rule_based_profiler.rule.rule_state import (
-    RuleState,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.core.domain import Domain
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.rule_based_profiler.rule.rule_state import (
+        RuleState,
+    )
 
 
 class RuleOutput:

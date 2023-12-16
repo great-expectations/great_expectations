@@ -27,7 +27,7 @@ from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import numpy
-from great_expectations.core import ExpectationSuite
+from great_expectations.core import Domain, ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
@@ -49,7 +49,6 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     VARIABLES_PREFIX,
-    Domain,
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,

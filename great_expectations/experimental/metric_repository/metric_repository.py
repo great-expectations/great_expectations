@@ -1,7 +1,11 @@
-import uuid
+from __future__ import annotations
 
-from great_expectations.experimental.metric_repository.data_store import DataStore
-from great_expectations.experimental.metric_repository.metrics import MetricRun
+import uuid
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.metric_repository.data_store import DataStore
+    from great_expectations.experimental.metric_repository.metrics import MetricRun
 
 
 class MetricRepository:

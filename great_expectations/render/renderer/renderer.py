@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 from functools import wraps
 from typing import Any, Callable, TypeVar
 
 from typing_extensions import ParamSpec
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 P = ParamSpec("P")

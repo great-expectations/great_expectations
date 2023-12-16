@@ -5,7 +5,6 @@ from typing import Dict, List
 import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
@@ -14,6 +13,9 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 from great_expectations.expectations.core import ExpectColumnValuesToBeBetween
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 @pytest.fixture

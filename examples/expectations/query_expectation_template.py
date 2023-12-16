@@ -6,7 +6,9 @@ For detailed instructions on how to use it, please see:
 
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,

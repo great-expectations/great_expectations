@@ -7,10 +7,12 @@ from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,

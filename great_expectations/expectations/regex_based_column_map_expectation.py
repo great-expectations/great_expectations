@@ -1,11 +1,10 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -38,6 +37,12 @@ from great_expectations.render.util import (
 from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
@@ -151,6 +156,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return map_metric
 
+    @override
     @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -170,10 +176,10 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 getattr(self, "regex", None) is not None
             ), "regex is required for RegexBasedColumnMap Expectations"
             assert (
-                "column" in configuration.kwargs
+                "column" in configuration.kwargs  # type: ignore[union-attr] # This method is being removed
             ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
+            if "mostly" in configuration.kwargs:  # type: ignore[union-attr] # This method is being removed
+                mostly = configuration.kwargs["mostly"]  # type: ignore[union-attr] # This method is being removed
                 assert isinstance(
                     mostly, (int, float)
                 ), "'mostly' parameter must be an integer or float"
@@ -230,6 +236,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
 
+    @override
     @classmethod
     def _prescriptive_template(
         cls,
@@ -267,6 +274,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return renderer_configuration
 
+    @override
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
@@ -282,8 +290,9 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
+        kwargs = configuration.kwargs if configuration else {}
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -333,13 +342,11 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
