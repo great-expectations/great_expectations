@@ -9,6 +9,28 @@ from great_expectations.expectations.metrics.query_metrics.query_template_values
 
 
 @pytest.mark.unit
+def test_query_template_get_query_function_with_str():
+    """Simple test to ensure that `ger_query()` method for QueryTemplateValue can handle strings"""
+    query: str = """
+        SELECT {column_name}
+        FROM {active_batch}
+        WHERE {condition}
+    """
+    selectable = sa.Table("gx_temp_aaa", sa.MetaData(), schema=None)
+    template_dict: dict = {"column_name": "aaa", "condition": "is_open"}
+    metric_ob: QueryTemplateValues = QueryTemplateValues()
+    formatted_query: str = metric_ob.get_query(query, template_dict, selectable)
+    assert (
+        formatted_query
+        == """
+        SELECT aaa
+        FROM gx_temp_aaa
+        WHERE is_open
+    """
+    )
+
+
+@pytest.mark.unit
 def test_query_template_get_query_function_with_int():
     """Simple test to ensure that the `get_query()` method for QueryTemplateValue can handle integer value"""
     query: str = """
