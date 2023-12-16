@@ -10,7 +10,7 @@ from great_expectations.expectations.metrics.query_metrics.query_template_values
 
 @pytest.mark.unit
 def test_query_template_get_query_function_with_str():
-    """Simple test to ensure that `ger_query()` method for QueryTemplateValue can handle strings"""
+    """Simple test to ensure that `get_query()` method for QueryTemplateValue can handle strings"""
     query: str = """
         SELECT {column_name}
         FROM {active_batch}
