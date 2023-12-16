@@ -120,19 +120,48 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         {
             "data": [
                 {
-                    "order_table_1": {
+                    "dataset_name": "order_table_1",
+                    "data": {
                         "ORDER_ID": ["aaa", "bbb", "ccc"],
                         "CUSTOMER_ID": [1, 1, 3],
                     },
                 },
                 {
-                    "order_table_2": {
+                    "dataset_name": "customer_table",
+                    "data": {
+                        "CUSTOMER_ID": [1, 2, 3],
+                    },
+                },
+            ],
+            "only_for": ["snowflake", "sqlite"],
+            "tests": [
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "template_dict": {
+                            "foreign_key_column": "CUSTOMER_ID",
+                            "foreign_table": "customer_table",
+                            "primary_key_column_in_foreign_table": "CUSTOMER_ID",
+                        }
+                    },
+                    "out": {"success": True},
+                },
+            ],
+        },
+        {
+            "data": [
+                {
+                    "dataset_name": "order_table_2",
+                    "data": {
                         "ORDER_ID": ["aaa", "bbb", "ccc"],
                         "CUSTOMER_ID": [1, 5, 6],
-                    }
+                    },
                 },
                 {
-                    "customer_table": {
+                    "dataset_name": "customer_table",
+                    "data": {
                         "CUSTOMER_ID": [1, 2, 3],
                     },
                 },
@@ -151,19 +180,6 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                         },
                     },
                     "out": {"success": False},
-                },
-                {
-                    "title": "basic_positive_test",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "template_dict": {
-                            "foreign_key_column": "CUSTOMER_ID",
-                            "foreign_table": "customer_table",
-                            "primary_key_column_in_foreign_table": "CUSTOMER_ID",
-                        }
-                    },
-                    "out": {"success": True},
                 },
             ],
         },
