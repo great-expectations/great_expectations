@@ -90,6 +90,7 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
         execution_engine:
             class_name: SqlAlchemyExecutionEngine
             connection_string: sqlite:///{db_file_path}
+            create_temp_table: True
 
         data_connectors:
             my_runtime_data_connector:

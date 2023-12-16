@@ -1145,7 +1145,8 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
 @pytest.mark.sqlite
 def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
+        engine=sqlite_view_engine,
+        create_temp_table=True,
     )
     add_dataframe_to_db(df=test_df, name="test_table_0", con=my_execution_engine.engine)
 
