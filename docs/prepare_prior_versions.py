@@ -4,7 +4,6 @@ There are changes to paths that need to be made to prior versions of docs.
 """
 from __future__ import annotations
 
-import glob
 import pathlib
 import re
 
@@ -21,7 +20,7 @@ def change_paths_for_docs_file_references(verbose: bool = False) -> None:
     snippets only for v0.15.50 and later.
     """
     path = _docs_dir() / "docusaurus/versioned_docs/version-0.14.13/"
-    files = glob.glob(f"{path}/**/*.md", recursive=True)
+    files = list(path.rglob("*.md"))
     pattern = re.compile(r"((.*)(file *= *)((../)*))(.*)")
     path_to_insert = "versioned_code/version-0.14.13/"
 
@@ -88,9 +87,9 @@ def prepend_version_info_to_name_for_snippet_by_name_references(
     )
     for path in paths:
         version = path.name
-        files = []
+        files: list[pathlib.Path] = []
         for extension in (".md", ".mdx", ".py", ".yml", ".yaml"):
-            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+            files.extend(path.rglob(f"*{extension}"))
         print(
             f"    Processing {len(files)} files for path {path} in prepend_version_info_to_name_for_snippet_by_name_references..."
         )
@@ -129,9 +128,9 @@ def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) 
         if not version_only:
             raise ValueError("Path does not contain a version number")
 
-        files = []
+        files: list[pathlib.Path] = []
         for extension in (".md", ".mdx"):
-            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+            files.extend(path.rglob(f"**/*{extension}"))
         print(
             f"    Processing {len(files)} files for path {path} in prepend_version_info_to_name_for_href_absolute_links..."
         )
@@ -345,9 +344,9 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
         if not version_only:
             raise ValueError("Path does not contain a version number")
 
-        files = []
+        files: list[pathlib.Path] = []
         for extension in (".md", ".mdx"):
-            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+            path.rglob(f"**/*{extension}")
         print(
             f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
         )
@@ -357,7 +356,7 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
             "_data_docs_build_and_view.md",
             "_checkpoint_create_and_run.md",
         ]
-        files = [file for file in files if file.split("/")[-1] in files_to_process]
+        files = [file for file in files if file.name in files_to_process]
         for file_path in files:
             with open(file_path, "r+") as f:
                 contents = f.read()

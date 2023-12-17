@@ -1,0 +1,12 @@
+# docs/ specific ruff linter overrides
+
+# root linter settings are defined in the file below
+extend = "../pyproject.toml"
+
+extend-ignore = [
+    # https://docs.astral.sh/ruff/rules/magic-value-comparison/
+    "PLR2004", # can be tedious and overly verbose in docs
+]
+
+[isort]
+known-first-party = ["great_expectations", "tests"]

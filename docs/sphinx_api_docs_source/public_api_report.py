@@ -52,21 +52,24 @@ Typical usage example:
 from __future__ import annotations
 
 import ast
-import glob
 import logging
 import operator
 import pathlib
 import re
 import sys
 from dataclasses import dataclass
-from typing import List, Set, Union, cast
+from typing import TYPE_CHECKING, List, Set, Union, cast
 
-from docs.sphinx_api_docs_source.include_exclude_definition import (
-    IncludeExcludeDefinition,
+from docs.sphinx_api_docs_source import (
+    public_api_excludes,
+    public_api_includes,
+    public_api_missing_threshold,
 )
-from docs.sphinx_api_docs_source import public_api_excludes
-from docs.sphinx_api_docs_source import public_api_includes
-from docs.sphinx_api_docs_source import public_api_missing_threshold
+
+if TYPE_CHECKING:
+    from docs.sphinx_api_docs_source.include_exclude_definition import (
+        IncludeExcludeDefinition,
+    )
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -513,7 +516,7 @@ class PublicAPIChecker:
 
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
-                return f"{str(flatten_attr(node.value))}.{node.attr}"
+                return f"{flatten_attr(node.value)!s}.{node.attr}"
             elif isinstance(node, ast.Name):
                 return str(node.id)
             else:
@@ -538,7 +541,7 @@ class CodeReferenceFilter:
     DEFAULT_INCLUDES = public_api_includes.DEFAULT_INCLUDES
     DEFAULT_EXCLUDES = public_api_excludes.DEFAULT_EXCLUDES
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         repo_root: pathlib.Path,
         docs_example_parser: DocsExampleParser,
@@ -829,14 +832,14 @@ def _repo_root() -> pathlib.Path:
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
+    paths = base_directory.rglob("**/*.py")
     return {pathlib.Path(p) for p in paths}
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:
     """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
+    paths = base_directory.rglob("**/*.py")
     return {pathlib.Path(p) for p in paths}
 
 
@@ -845,7 +848,7 @@ def _default_docs_absolute_paths() -> Set[pathlib.Path]:
     base_directory = _repo_root() / "docs"
     paths = []
     for extension in ("md", "mdx", "yml", "yaml"):
-        paths.extend(glob.glob(f"{base_directory}/**/*.{extension}", recursive=True))
+        paths.extend(base_directory.rglob(f"**/*.{extension}"))
     return {pathlib.Path(p) for p in paths}
 
 
