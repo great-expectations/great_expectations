@@ -228,6 +228,8 @@ class GxConfig(FluentBaseModel):
                 # attach the datasource to the nested assets, avoiding recursion errors
                 for asset in datasource.assets:
                     asset._datasource = datasource
+                    for batch_config in asset.batch_configs:
+                        batch_config._data_asset = asset
 
         logger.debug(f"Loaded 'datasources' ->\n{loaded_datasources!r}")
 
@@ -235,34 +237,6 @@ class GxConfig(FluentBaseModel):
             logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")
 
         return loaded_datasources
-
-    @classmethod
-    @override
-    def parse_raw(  # noqa: PLR0913
-        cls,
-        b,
-        *,
-        content_type=None,
-        encoding="utf8",
-        proto=None,
-        allow_pickle=False,
-    ) -> GxConfig:
-        config = super().parse_raw(
-            b,
-            content_type=content_type,
-            encoding=encoding,
-            proto=proto,
-            allow_pickle=allow_pickle,
-        )
-        config._link_batch_configs_to_their_data_assets()
-        return config
-
-    @classmethod
-    @override
-    def parse_obj(cls, obj: Any) -> GxConfig:
-        config = super().parse_obj(obj)
-        config._link_batch_configs_to_their_data_assets()
-        return config
 
     @classmethod
     @override
@@ -286,7 +260,6 @@ class GxConfig(FluentBaseModel):
             return cls(fluent_datasources=[])
 
         config = cls(**loaded)
-        config._link_batch_configs_to_their_data_assets()
         return config
 
     @overload
@@ -366,12 +339,6 @@ class GxConfig(FluentBaseModel):
 
         return stream_or_path.getvalue()
 
-    def _link_batch_configs_to_their_data_assets(self) -> None:
-        for datasource in self.fluent_datasources:
-            for asset in datasource.assets:
-                for batch_config in asset.batch_configs:
-                    batch_config._data_asset = asset
-
     def _exclude_name_fields_from_fluent_datasources(
         self, config: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -445,7 +412,6 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
             datasource_config[_DATASOURCE_NAME_KEY] = datasource_name
             if _ASSETS_KEY in datasource_config:
                 data_assets: dict = datasource_config[_ASSETS_KEY]
-                print("a", type(data_assets))
                 data_asset_name: str
                 data_asset_config: dict
                 for data_asset_name, data_asset_config in data_assets.items():
@@ -468,7 +434,6 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
 def _convert_batch_configs_from_yaml_to_internal_object_representation(
     batch_configs: Dict[str, Dict]
 ) -> List[Dict]:
-    print("ba", type(batch_configs))
     for (
         batch_config_name,
         batch_config,
