@@ -1,7 +1,9 @@
 [report]
-exclude_lines =
-    raise NotImplementedError
+
+# This option defines lines of code that should be excluded from the code coverage report.
+exclude_lines = raise NotImplementedError
 
 [coverage:run]
-omit =
-    docker/build.py
+
+# This option defines files or directories that should be completely ignored when calculating code coverage.
+omit = docker/build.py

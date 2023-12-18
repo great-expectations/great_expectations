@@ -35,7 +35,7 @@ from great_expectations.core._docs_decorators import (
     public_api,
 )
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
-from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -66,9 +66,11 @@ if TYPE_CHECKING:
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
+
 
 logger = logging.getLogger(__name__)
 
@@ -155,10 +157,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
         batch_list.append(
             Batch(
                 datasource=self.datasource,
@@ -166,22 +164,40 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         )
         return batch_list
 
     @public_api
     @override
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options:
+            raise ValueError(
+                "options is not currently supported for this DataAssets and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise ValueError(
+                "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -378,17 +394,32 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     )
     @override
     def build_batch_request(  # type: ignore[override]
-        self, dataframe: Optional[pd.DataFrame] = None
+        self,
+        dataframe: Optional[pd.DataFrame] = None,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options:
+            raise ValueError(
+                "options is not currently supported for this DataAssets and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise ValueError(
+                "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
         if dataframe is None:
             df = self.dataframe
         else:
@@ -441,11 +472,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
-
         return [
             Batch(
                 datasource=self.datasource,
@@ -453,9 +479,9 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         ]
 

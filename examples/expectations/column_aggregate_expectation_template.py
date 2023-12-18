@@ -6,18 +6,16 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
 
@@ -89,7 +87,6 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnAggregateExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

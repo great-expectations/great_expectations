@@ -6,7 +6,6 @@ For detailed information on QueryExpectations, please see:
 
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -16,10 +15,15 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
+
+    value: int
 
     metric_dependencies = ("query.table",)
 
@@ -59,11 +63,11 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         metrics = convert_to_json_serializable(data=metrics)
         query_result = list(metrics.get("query.table")[0].values())[0]
         value = configuration["kwargs"].get("value")

@@ -2,7 +2,6 @@ import geopandas
 import numpy as np
 from shapely.geometry import Point, Polygon
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
@@ -97,7 +96,6 @@ class ExpectColumnValuesGeometryNotToOverlap(ColumnAggregateExpectation):
     # This object contains metadata for display in the public Gallery
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics,
         runtime_configuration: dict = None,
         execution_engine=None,

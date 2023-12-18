@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from typing import ClassVar, Tuple, Union
 
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,

@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import json
 import logging
-from typing import Any, List, Union, ValuesView
+from typing import TYPE_CHECKING, Any, List, Union, ValuesView
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchDefinition
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
 
 logger = logging.getLogger(__name__)
 
