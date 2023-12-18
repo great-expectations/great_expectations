@@ -36,7 +36,15 @@ def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, 
 def gx_sqlalchemy_execution_engine_spy(
     mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
 ) -> Generator[mock.MagicMock, None, None]:
-    spy = mocker.Mock(spec=SqlAlchemyExecutionEngine)
+    """
+    Mock the SQLDatasource.execution_engine_type property to return a spy so that what would be passed to
+    the GX SqlAlchemyExecutionEngine constructor can be inspected.
+
+    NOTE: This is not exactly what gets passed to the sqlalchemy.engine.create_engine() function, but it is close.
+    """
+    spy = mocker.Mock(
+        spec=SqlAlchemyExecutionEngine
+    )
     monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
     yield spy
     if not spy.call_count:
