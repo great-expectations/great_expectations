@@ -405,10 +405,9 @@ class ExpectationConfiguration(SerializableDictDot):
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                         "dict other could not be instantiated as an ExpectationConfiguration"
                     )
-                    return NotImplemented
+                    return False
             else:
-                # Delegate comparison to the other instance
-                return NotImplemented
+                return False
 
         if match_type == "domain":
             return all(

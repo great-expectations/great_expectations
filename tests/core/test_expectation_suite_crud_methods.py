@@ -309,7 +309,7 @@ def test_find_expectation_indexes(
 
     assert single_expectation_suite.find_expectation_indexes(exp4, "runtime") == []
 
-    with pytest.raises(InvalidExpectationConfigurationError):
+    with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(
             "not an expectation", match_type="runtime"
         )
@@ -343,12 +343,13 @@ def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
 
 
 @pytest.mark.cloud
-def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
-    with pytest.raises(InvalidExpectationConfigurationError) as err:
-        ge_cloud_suite.find_expectation_indexes(
-            expectation_configuration={"foo": "bar"}
-        )
-    assert str(err.value) == "Ensure that expectation configuration is valid."
+def test_find_expectation_indexes_with_invalid_config_returns_empty_list(
+    ge_cloud_suite,
+):
+    idxs = ge_cloud_suite.find_expectation_indexes(
+        expectation_configuration={"foo": "bar"},
+    )
+    assert idxs == []
 
 
 @pytest.mark.filesystem
