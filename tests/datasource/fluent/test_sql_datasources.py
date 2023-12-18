@@ -68,6 +68,12 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
         param(
             dict(
                 connection_string="sqlite:///",
+            ),
+            id="connection_string only",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
                 kwargs={"isolation_level": "SERIALIZABLE"},
             ),
             id="no subs + kwargs",
