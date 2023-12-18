@@ -3,10 +3,10 @@ from collections import OrderedDict
 
 import pytest
 
-from great_expectations.core import (
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectation_suite import (
     ExpectationSuite,
 )
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectation_validation_result.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,

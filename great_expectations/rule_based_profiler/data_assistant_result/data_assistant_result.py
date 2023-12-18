@@ -77,7 +77,7 @@ from great_expectations.types import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
+    from great_expectations.expectation_suite import (
         ExpectationSuite,
     )
     from great_expectations.expectations.expectation_configuration import (

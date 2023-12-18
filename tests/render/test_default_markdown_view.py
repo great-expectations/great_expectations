@@ -5,7 +5,7 @@ from collections import OrderedDict
 import pytest
 
 import great_expectations as gx
-from great_expectations.core import (
+from great_expectations.expectation_suite import (
     ExpectationSuite,
 )
 from great_expectations.expectation_validation_result.expectation_validation_result import (

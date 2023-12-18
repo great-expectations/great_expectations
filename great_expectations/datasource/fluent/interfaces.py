@@ -56,11 +56,6 @@ if TYPE_CHECKING:
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
-    from great_expectations.core import (
-        ExpectationSuite,
-        ExpectationSuiteValidationResult,
-        ExpectationValidationResult,
-    )
     from great_expectations.core.batch import (
         BatchData,
         BatchDefinition,
@@ -81,6 +76,13 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
+    )
+    from great_expectations.expectation_suite import (
+        ExpectationSuite,
+    )
+    from great_expectations.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+        ExpectationValidationResult,
     )
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.validator.v1_validator import (
