@@ -624,7 +624,9 @@ class ExpectationSuite(SerializableDictDot):
         elif len(found_expectation_indexes) == 0:
             raise ValueError("No matching Expectation was found.")
 
-        self.expectation_configurations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
+        self.expectation_configurations[
+            found_expectation_indexes[0]
+        ] = new_expectation_configuration
 
     def _add_expectation(
         self,
