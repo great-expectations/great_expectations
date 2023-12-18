@@ -137,6 +137,9 @@ def expectation_suite(
     return expectation_suite
 
 
+@pytest.mark.xfail(
+    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
+)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
@@ -155,6 +158,9 @@ def test_interactive_validator(
     assert expectation_validation_result.success
 
 
+@pytest.mark.xfail(
+    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
+)
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""
