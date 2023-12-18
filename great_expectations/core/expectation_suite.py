@@ -33,11 +33,6 @@ from great_expectations.core._docs_decorators import (
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-    ExpectationConfigurationSchema,
-    expectationConfigurationSchema,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
@@ -46,8 +41,12 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
-from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+    ExpectationConfigurationSchema,
+    expectationConfigurationSchema,
+)
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -207,12 +206,11 @@ class ExpectationSuite(SerializableDictDot):
     def save(self) -> None:
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
-        res = self._store.add_or_update(key=key, value=self)
-        if self.ge_cloud_id is None and isinstance(res, GXCloudResourceRef):
-            self.ge_cloud_id = res.response["data"]["id"]
+        self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a DataContext?"""
+        # todo: this should only check local keys instead of potentially querying the remote backend
         key = self._store.get_key(suite=self)
         return self._store.has_key(key=key)
 
@@ -814,7 +812,9 @@ class ExpectationSuite(SerializableDictDot):
         try:
             class_ = get_expectation_impl(expectation_configuration.expectation_type)
             expectation = class_(
-                meta=expectation_configuration.meta, **expectation_configuration.kwargs
+                meta=expectation_configuration.meta,
+                id=expectation_configuration.ge_cloud_id,
+                **expectation_configuration.kwargs,
             )  # Implicitly validates in constructor
             return expectation
         except (

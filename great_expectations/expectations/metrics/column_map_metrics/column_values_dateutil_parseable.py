@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import PandasExecutionEngine

@@ -284,20 +284,15 @@ class _FilePathDataAsset(DataAsset):
                 batch_request=fully_specified_batch_request
             )
 
-            # Some pydantic annotations are postponed due to circular imports.
-            # Batch.update_forward_refs() will set the annotations before we
-            # instantiate the Batch class since we can import them in this scope.
-            Batch.update_forward_refs()
-
             batch = Batch(
                 datasource=self.datasource,
                 data_asset=self,
                 batch_request=fully_specified_batch_request,
                 data=batch_data,
                 metadata=batch_metadata,
-                legacy_batch_markers=batch_markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=batch_markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
             batch_list.append(batch)
 
