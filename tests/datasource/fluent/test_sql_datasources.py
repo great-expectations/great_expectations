@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Generator
 from unittest import mock
 
 import pytest
+from pytest import param
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -45,22 +46,22 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.parametrize(
     "ds_kwargs",
     [
-        dict(
+        param(dict(
             connection_string="sqlite:///",
             kwargs={"isolation_level": "SERIALIZABLE"},
-        ),
-        dict(
+        ), id="no subs + kwargs"),
+        param(dict(
             connection_string="${MY_CONN_STR}",
             kwargs={"isolation_level": "SERIALIZABLE"},
-        ),
-        dict(
+        ),id="subs + kwargs"),
+        param(dict(
             connection_string="sqlite:///",
             create_temp_table=True,
-        ),
-        dict(
+        ), id="create_temp_table=True"),
+        param(dict(
             connection_string="sqlite:///",
             create_temp_table=False,
-        ),
+        ), id="create_temp_table=False"),
     ],
 )
 def test_kwargs_are_passed_to_create_engine(
@@ -81,6 +82,7 @@ def test_kwargs_are_passed_to_create_engine(
         "sqlite:///",
         **{
             **ds_kwargs.get("kwargs", {}),
+            **ds.dict(exclude_unset=False, exclude={*ds_kwargs.keys(), *ds._get_exec_engine_excludes()}),
             **{
                 k: v
                 for k, v in ds_kwargs.items()
