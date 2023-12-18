@@ -1,6 +1,7 @@
 """
 This example shows how to configure an assets for a variety of scenarios in Great Expectations.
 """
+import datetime
 
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
@@ -28,4 +29,5 @@ range = asset.add_batch_config(
 )
 batch = range.get_batch(options={"min_date": "2023-01-20", "max_date": "2023-01-29"})
 batch = daily.get_batch(options={"date": "2023-01-23"})
+batches = [daily.get_batch(options={"date": f"2023-01-{day}"}) for day in range(1, 5)]
 # </snippet>
