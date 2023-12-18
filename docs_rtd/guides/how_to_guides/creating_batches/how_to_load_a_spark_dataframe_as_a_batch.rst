@@ -112,7 +112,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
             import great_expectations as gx
             from great_expectations import DataContext
-            from great_expectations.expectation_suite import ExpectationSuite
+            from great_expectations.core import ExpectationSuite
             from great_expectations.core.batch import RuntimeBatchRequest
             from great_expectations.core.util import get_or_create_spark_application
             from great_expectations.validator.validator import Validator

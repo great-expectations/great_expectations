@@ -111,7 +111,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             import great_expectations as gx
             from great_expectations import DataContext
-            from great_expectations.expectation_suite import ExpectationSuite
+            from great_expectations.core import ExpectationSuite
             from great_expectations.core.batch import RuntimeBatchRequest
             from great_expectations.validator.validator import Validator
 
