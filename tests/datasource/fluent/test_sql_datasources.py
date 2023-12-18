@@ -8,7 +8,7 @@ from unittest import mock
 import pytest
 from pytest import param
 
-import great_expectations as gx
+import great_expectations.execution_engine.sqlalchemy_execution_engine
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from great_expectations.data_context import EphemeralDataContext
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 LOGGER = logging.getLogger(__name__)
@@ -31,8 +32,9 @@ def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, 
         LOGGER.warning("SQLAlchemy create_engine was not called")
 
 @pytest.fixture
-def gx_sqlalchemy_execution_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, None]:
-    spy = mocker.spy(gx, "execution_engine.sqlalchemy_execution_engine.SQLAlchemyExecutionEngine")
+def gx_sqlalchemy_execution_engine_spy(mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch) -> Generator[mock.MagicMock, None, None]:
+    spy = mocker.Mock(spec=great_expectations.execution_engine.sqlalchemy_execution_engine.SqlAlchemyExecutionEngine)
+    monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
     yield spy
     if not spy.call_count:
         LOGGER.warning("SQLAlchemyEngine.__init__() was not called")
@@ -108,7 +110,8 @@ class TestConfigPasstrough:
         context = ephemeral_context_with_defaults
         ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
         print(ds)
-        ds.test_connection()
+        gx_execution_engine: SqlAlchemyExecutionEngine = ds.get_execution_engine()
+        print(f"{gx_execution_engine=}")
 
         gx_sqlalchemy_execution_engine_spy.assert_called_once_with(
             "sqlite:///",
