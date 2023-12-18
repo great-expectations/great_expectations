@@ -3,6 +3,11 @@ from typing import Dict, Tuple
 import pandas as pd
 import pytest
 
+from great_expectations.core.expectation_diagnostics.self_check import (
+    build_pandas_engine,
+    build_sa_execution_engine,
+    build_spark_engine,
+)
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
@@ -11,11 +16,6 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.self_check.util import (
-    build_pandas_engine,
-    build_sa_execution_engine,
-    build_spark_engine,
 )
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration

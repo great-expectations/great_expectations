@@ -11,6 +11,9 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.expectation_diagnostics.self_check import (
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -23,9 +26,6 @@ from great_expectations.profile.base import (
 )
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
-)
-from great_expectations.self_check.util import (
-    get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite

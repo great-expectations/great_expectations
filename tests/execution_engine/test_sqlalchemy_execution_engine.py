@@ -15,6 +15,9 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.core.expectation_diagnostics.self_check import (
+    build_sa_execution_engine,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -36,7 +39,6 @@ from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import get_sqlalchemy_domain_data
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration

@@ -6,6 +6,10 @@ import pytest
 from great_expectations.core import (
     ExpectationSuite,
 )
+from great_expectations.core.expectation_diagnostics.self_check import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -25,10 +29,6 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
-from great_expectations.self_check.util import (
-    expectationSuiteSchema,
-    expectationSuiteValidationResultSchema,
-)
 
 
 @pytest.fixture(scope="module")

@@ -4,6 +4,10 @@ from collections import OrderedDict
 import pytest
 
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_diagnostics.self_check import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
@@ -17,10 +21,6 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.self_check.util import (
-    expectationSuiteSchema,
-    expectationSuiteValidationResultSchema,
-)
 
 # module level markers
 pytestmark = pytest.mark.big

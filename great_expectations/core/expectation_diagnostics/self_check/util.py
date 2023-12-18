@@ -54,6 +54,9 @@ from great_expectations.core import (
     IDDict,
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
+from great_expectations.core.expectation_diagnostics.self_check.sqlalchemy_connection_manager import (
+    LockingConnectionCheck,
+)
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
@@ -79,9 +82,6 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
 from great_expectations.profile import ColumnsExistProfiler
-from great_expectations.self_check.sqlalchemy_connection_manager import (
-    LockingConnectionCheck,
-)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
