@@ -19,8 +19,8 @@ from typing import (
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
-from great_expectations._docs_decorators import new_argument, public_api
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     build_evaluation_parameters,
@@ -405,9 +405,10 @@ class ExpectationConfiguration(SerializableDictDot):
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                         "dict other could not be instantiated as an ExpectationConfiguration"
                     )
-                    return False
+                    return NotImplemented
             else:
-                return False
+                # Delegate comparison to the other instance
+                return NotImplemented
 
         if match_type == "domain":
             return all(

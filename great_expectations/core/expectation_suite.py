@@ -88,7 +88,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        expectations: Optional[Sequence[ExpectationConfiguration]] = None,
+        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
         evaluation_parameters: Optional[dict] = None,
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
@@ -98,6 +98,10 @@ class ExpectationSuite(SerializableDictDot):
             str
         ] = None,  # for backwards compatibility - remove
     ) -> None:
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
         if name:
             assert isinstance(name, str), "Name is a required field."
             self.expectation_suite_name = name
@@ -109,7 +113,12 @@ class ExpectationSuite(SerializableDictDot):
 
         if expectations is None:
             expectations = []
-        self.expectation_configurations = list(expectations)
+        self.expectation_configurations = [
+            ExpectationConfiguration(**expectation)
+            if isinstance(expectation, dict)
+            else expectation
+            for expectation in expectations
+        ]
         if evaluation_parameters is None:
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
@@ -531,6 +540,13 @@ class ExpectationSuite(SerializableDictDot):
                 "Must provide either expectation_configuration or ge_cloud_id"
             )
 
+        if expectation_configuration and not isinstance(
+            expectation_configuration, ExpectationConfiguration
+        ):
+            raise gx_exceptions.InvalidExpectationConfigurationError(
+                "Ensure that expectation configuration is valid."
+            )
+
         match_indexes = []
         for idx, expectation in enumerate(self.expectation_configurations):
             if ge_cloud_id is not None:
@@ -587,7 +603,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def replace_expectation(
         self,
-        new_expectation_configuration: ExpectationConfiguration,
+        new_expectation_configuration: Union[ExpectationConfiguration, dict],
         existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
         ge_cloud_id: Optional[str] = None,
@@ -608,9 +624,18 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns: A list of matching ExpectationConfigurations
         """
+        from great_expectations.expectations.expectation_configuration import (
+            expectationConfigurationSchema,
+        )
+
         if existing_expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either existing_expectation_configuration or ge_cloud_id"
+            )
+
+        if isinstance(new_expectation_configuration, dict):
+            new_expectation_configuration = expectationConfigurationSchema.load(
+                new_expectation_configuration
             )
 
         found_expectation_indexes = self.find_expectation_indexes(
@@ -624,9 +649,7 @@ class ExpectationSuite(SerializableDictDot):
         elif len(found_expectation_indexes) == 0:
             raise ValueError("No matching Expectation was found.")
 
-        self.expectation_configurations[
-            found_expectation_indexes[0]
-        ] = new_expectation_configuration
+        self.expectation_configurations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
     def _add_expectation(
         self,
