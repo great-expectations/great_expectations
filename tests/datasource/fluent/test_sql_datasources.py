@@ -9,17 +9,16 @@ from unittest import mock
 import pytest
 from pytest import param
 
-import great_expectations.execution_engine.sqlalchemy_execution_engine
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from great_expectations.data_context import EphemeralDataContext
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 LOGGER = logging.getLogger(__name__)
@@ -38,12 +37,12 @@ def gx_sqlalchemy_execution_engine_spy(
     mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
 ) -> Generator[mock.MagicMock, None, None]:
     spy = mocker.Mock(
-        spec=great_expectations.execution_engine.sqlalchemy_execution_engine.SqlAlchemyExecutionEngine
+        spec=SqlAlchemyExecutionEngine
     )
     monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
     yield spy
     if not spy.call_count:
-        LOGGER.warning("SQLAlchemyEngine.__init__() was not called")
+        LOGGER.warning("SqlAlchemyExecutionEngine.__init__() was not called")
 
 
 @pytest.fixture
@@ -133,8 +132,8 @@ class TestConfigPasstrough:
         print(f"{gx_execution_engine=}")
 
         expected_args: dict[str, Any] = {
-            # this is testing that kwargs that we expect to be passed to create_engine are passed
-            # it should include defaults from the datasource class
+            # kwargs that we expect are passed to SqlAlchemyExecutionEngine
+            # including datasource field default values
             **ds.dict(
                 exclude_unset=False,
                 exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()},
@@ -146,6 +145,8 @@ class TestConfigPasstrough:
                 include={"connection_string"}, config_provider=ds._config_provider
             ),
         }
+        assert "create_temp_table" in expected_args
+
         print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args)}")
         gx_sqlalchemy_execution_engine_spy.assert_called_once_with(**expected_args)
 
