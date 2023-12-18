@@ -324,6 +324,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     ) -> None:
         self._save_callback = save_callback
 
+    @public_api
     def save(self):
         """Save the current state of this Expectation."""
         if not self._save_callback:
