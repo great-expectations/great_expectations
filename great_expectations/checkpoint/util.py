@@ -419,7 +419,7 @@ def _update_dest_config_with_runtime_kwargs(
         dest_config["validations"] = validations
     if runtime_kwargs.get("profilers") is not None:
         profilers = dest_config.get("profilers") or []
-        runtime_profilers = runtime_kwargs.get("profilers")
+        runtime_profilers = runtime_kwargs.get("profilers") or []
         for profiler in runtime_profilers:
             if profiler not in profilers:
                 profilers.append(profiler)
