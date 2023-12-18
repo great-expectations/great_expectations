@@ -7,7 +7,7 @@ import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
 :::caution
 
-Missingness Data Assistant functionality is [Experimental](/docs/oss/contributing/contributing_maturity).
+Missingness Data Assistant functionality is [Experimental](/docs/reference/learn/conceptual_guides/contributing_maturity).
 
 :::
 

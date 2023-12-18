@@ -95,7 +95,7 @@ Completeness checklist for ExpectQueryToMatchSomeCriteria:
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) at an Experimental level.
 
 ## Change the Expectation class name and add a docstring
 
@@ -373,7 +373,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) at an Experimental level.
 
 ## Change the Expectation class name and add a docstring
 
@@ -622,7 +622,7 @@ would become
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
 - [expect_queried_table_row_count_to_be.py](https://github.com/great-expectations/great_expectations/blob/develop/contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py)

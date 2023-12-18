@@ -476,7 +476,7 @@ module.exports = {
   learn: [
       'reference/learn/conceptual_guides/expectation_classes',
       'reference/learn/conceptual_guides/metricproviders',
-      'oss/contributing/contributing_maturity',
+      'reference/learn/conceptual_guides/contributing_maturity',
       'reference/learn/usage_statistics',
       {
       type: 'category',

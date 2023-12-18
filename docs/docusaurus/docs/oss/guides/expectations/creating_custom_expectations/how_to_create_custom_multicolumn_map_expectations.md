@@ -287,7 +287,7 @@ would become
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
 - [expect_multicolumn_values_to_be_multiples_of_three.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py)
