@@ -1069,8 +1069,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             DataAsset
         """
-        from great_expectations.core import ExpectationSuite
-
         if isinstance(batch_kwargs, dict):
             batch_kwargs = BatchKwargs(batch_kwargs)
 
