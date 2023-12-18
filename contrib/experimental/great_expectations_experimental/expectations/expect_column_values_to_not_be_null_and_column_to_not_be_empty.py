@@ -5,9 +5,6 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import numpy as np
 
-from great_expectations.core import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
@@ -15,6 +12,9 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,

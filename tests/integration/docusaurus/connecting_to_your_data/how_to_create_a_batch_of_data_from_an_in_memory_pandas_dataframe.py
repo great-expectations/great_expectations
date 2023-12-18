@@ -2,9 +2,9 @@
 import pandas as pd
 
 import great_expectations as gx
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.validator.validator import Validator
 
 yaml: YAMLHandler = YAMLHandler()

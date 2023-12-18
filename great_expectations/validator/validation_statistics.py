@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
-    from great_expectations.core.expectation_validation_result import (
+    from great_expectations.expectation_validation_result.expectation_validation_result import (
         ExpectationValidationResult,
     )
 

@@ -3,11 +3,11 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.expectation_suite.expectation_suite import ExpectationSuite
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

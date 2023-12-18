@@ -16,9 +16,6 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import (
@@ -31,6 +28,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest as FluentBatchRequest,
+)
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.core.expect_column_values_to_be_between import (
     ExpectColumnValuesToBeBetween,

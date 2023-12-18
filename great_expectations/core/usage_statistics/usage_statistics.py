@@ -16,7 +16,6 @@ import jsonschema
 import requests
 
 from great_expectations import __version__ as gx_version
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.payload_builder import (
     UsageStatisticsPayloadBuilder,
@@ -26,6 +25,7 @@ from great_expectations.core.usage_statistics.schemas import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 if TYPE_CHECKING:

@@ -7,14 +7,16 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
-from great_expectations.core import (
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+)
+from great_expectations.expectation_suite import (
+    ExpectationSuite,
+)
+from great_expectations.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,

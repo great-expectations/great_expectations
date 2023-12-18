@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.expectation_validation_result.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation_configuration import (

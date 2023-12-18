@@ -17,12 +17,8 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_batch_request
-from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
@@ -34,6 +30,10 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
+)
+from great_expectations.expectation_suite import ExpectationSuiteValidationResult
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import deep_filter_properties_iterable

@@ -7,7 +7,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core import (
-    ExpectationValidationResult,
     IDDict,
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
@@ -26,6 +25,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.expectation_configuration import (

@@ -1,9 +1,9 @@
 from typing import Optional
 
-from great_expectations.core import (
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,

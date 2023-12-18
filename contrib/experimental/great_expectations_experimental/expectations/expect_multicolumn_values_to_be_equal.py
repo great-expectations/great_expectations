@@ -7,9 +7,6 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import sqlalchemy as sa
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
@@ -22,6 +19,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,

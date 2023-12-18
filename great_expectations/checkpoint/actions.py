@@ -39,10 +39,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.core.expectation_validation_result import (
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.expectation_validation_result.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 

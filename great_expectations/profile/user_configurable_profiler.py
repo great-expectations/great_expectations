@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, cast
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
@@ -21,6 +20,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

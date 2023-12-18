@@ -33,7 +33,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pydantic import generics as pydantic_generics
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
+from great_expectations.expectation_validation_result import (
     ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation_configuration import (

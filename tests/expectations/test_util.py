@@ -8,9 +8,6 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.core import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestCase,
     ExpectationTestDataCases,
@@ -24,6 +21,9 @@ from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,

@@ -27,7 +27,7 @@ from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import numpy
-from great_expectations.core import Domain, ExpectationSuite
+from great_expectations.core import Domain
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
@@ -42,6 +42,7 @@ from great_expectations.core.domain import (
 from great_expectations.core.metric_domain_types import (
     MetricDomainTypes,  # noqa: TCH001
 )
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,

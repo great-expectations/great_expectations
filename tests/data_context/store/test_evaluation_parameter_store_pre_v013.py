@@ -4,15 +4,15 @@ import os
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationMetricIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

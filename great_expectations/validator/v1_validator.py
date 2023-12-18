@@ -4,7 +4,7 @@ from enum import Enum
 from functools import cached_property
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.expectation_validation_result.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
@@ -12,10 +12,10 @@ from great_expectations.validator.validator import Validator as OldValidator
 from great_expectations.validator.validator import calc_validation_statistics
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationSuite
     from great_expectations.core.batch_config import BatchConfig
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.expectation_suite import ExpectationSuite
     from great_expectations.expectations.expectation import (
         Expectation,
         ExpectationConfiguration,

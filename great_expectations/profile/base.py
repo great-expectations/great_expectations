@@ -17,7 +17,7 @@ from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.core.expectation_suite import ExpectationSuite
+    from great_expectations.expectation_suite.expectation_suite import ExpectationSuite
 
 logger = logging.getLogger(__name__)
 

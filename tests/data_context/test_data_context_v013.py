@@ -4,7 +4,6 @@ import re
 
 import pytest
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -19,6 +18,7 @@ from great_expectations.execution_engine.pandas_batch_data import PandasBatchDat
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.validator.validator import Validator
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,

@@ -4,7 +4,7 @@ from typing import Callable, Dict, Union
 
 import pytest
 
-from great_expectations.core import ExpectationValidationResult
+from great_expectations.expectation_validation_result import ExpectationValidationResult
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

@@ -18,7 +18,7 @@ from great_expectations.data_context import get_context, project_manager, set_co
 #
 # Both of the following import paths will trigger this file, causing the registration to occur:
 #   import great_expectations as gx
-#   from great_expectations.core import ExpectationSuite, ExpectationConfiguration
+#   from great_expectations.expectation_suite import ExpectationSuite, ExpectationConfiguration
 register_core_metrics()
 register_core_expectations()
 

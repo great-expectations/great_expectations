@@ -18,14 +18,6 @@ from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import build_evaluation_parameters
-from great_expectations.core.expectation_suite import (
-    ExpectationSuite,
-    expectationSuiteSchema,
-)
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -34,6 +26,14 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.expectation_suite.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

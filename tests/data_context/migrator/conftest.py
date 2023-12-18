@@ -2,7 +2,6 @@ from typing import Dict, Final, List, Optional, Tuple, Union
 
 import pytest
 
-from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,
     EphemeralDataContextVariables,
@@ -14,6 +13,10 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
 )
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
+from great_expectations.expectation_suite import (
+    ExpectationSuite,
+    ExpectationSuiteValidationResult,
+)
 
 
 class StubUsageStats:

@@ -66,13 +66,13 @@ from great_expectations.validation_operators import ActionListValidationOperator
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.configurator import ActionDict
-    from great_expectations.core.expectation_validation_result import (
-        ExpectationSuiteValidationResult,
-        ExpectationSuiteValidationResultMeta,
-    )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.expectation_validation_result.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+        ExpectationSuiteValidationResultMeta,
     )
     from great_expectations.validation_operators.types.validation_operator_result import (
         ValidationOperatorResult,

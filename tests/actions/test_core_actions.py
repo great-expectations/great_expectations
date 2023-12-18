@@ -11,14 +11,14 @@ from great_expectations.checkpoint.actions import (
     SNSNotificationAction,
 )
 from great_expectations.checkpoint.util import smtplib
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
+)
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
 )
 from great_expectations.util import is_library_loadable
 from great_expectations.validation_operators import (

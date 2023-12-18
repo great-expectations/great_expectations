@@ -12,11 +12,11 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot
 
 if TYPE_CHECKING:
-    from great_expectations.core.expectation_validation_result import (
-        ExpectationSuiteValidationResult,
-    )
     from great_expectations.data_context.types.resource_identifiers import (
         ValidationResultIdentifier,
+    )
+    from great_expectations.expectation_validation_result.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
     )
 
 

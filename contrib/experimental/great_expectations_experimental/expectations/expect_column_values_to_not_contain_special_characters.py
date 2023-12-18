@@ -3,12 +3,12 @@ from typing import Optional
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types
-from great_expectations.core import (
-    ExpectationValidationResult,
-)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
+)
+from great_expectations.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,

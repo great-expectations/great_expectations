@@ -4,7 +4,7 @@ import logging
 import traceback
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
-from great_expectations.core import (
+from great_expectations.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation_configuration import (

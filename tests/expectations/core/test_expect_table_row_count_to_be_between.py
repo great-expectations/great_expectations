@@ -1,7 +1,7 @@
 import pytest
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.expectation_validation_result.expectation_validation_result import (
     ExpectationValidationResult,
 )
 

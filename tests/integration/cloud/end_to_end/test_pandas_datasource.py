@@ -14,12 +14,15 @@ from great_expectations.expectations.expectation_configuration import (
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
         PandasDatasource,
+    )
+    from great_expectations.expectation_suite import (
+        ExpectationSuite,
+        ExpectationValidationResult,
     )
     from great_expectations.validator.validator import Validator
 

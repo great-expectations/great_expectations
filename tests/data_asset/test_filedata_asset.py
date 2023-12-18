@@ -3,12 +3,6 @@ import warnings
 import pytest
 
 import great_expectations as gx
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
 from great_expectations.data_context.util import file_relative_path
 
 

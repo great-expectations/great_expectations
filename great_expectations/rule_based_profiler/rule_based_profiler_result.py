@@ -4,9 +4,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
-    ExpectationSuite,  # noqa: TCH001
-)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -16,6 +13,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.expectation_suite import (
+    ExpectationSuite,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )

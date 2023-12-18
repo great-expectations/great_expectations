@@ -9,7 +9,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.expectation_suite.expectation_suite import ExpectationSuite
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.util import file_relative_path
 

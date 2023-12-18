@@ -9,7 +9,6 @@ from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
 from great_expectations import exceptions
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.html_site_store import (
@@ -23,6 +22,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.render.util import resource_key_passes_run_name_filter
 
 logger = logging.getLogger(__name__)

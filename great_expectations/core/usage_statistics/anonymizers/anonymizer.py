@@ -7,8 +7,8 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationSuite
     from great_expectations.data_context.store import Store
+    from great_expectations.expectation_suite import ExpectationSuite
     from great_expectations.validation_operators import ValidationOperator
 
 logger = logging.getLogger(__name__)

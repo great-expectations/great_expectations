@@ -14,8 +14,8 @@ from great_expectations.core.usage_statistics.execution_environment import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.expectation_suite import ExpectationSuite
 
 
 class UsageStatisticsPayloadBuilder:

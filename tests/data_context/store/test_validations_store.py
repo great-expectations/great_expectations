@@ -6,12 +6,12 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_s3
 
-from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.expectation_suite import ExpectationSuiteValidationResult
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
 from tests.core.usage_statistics.util import (

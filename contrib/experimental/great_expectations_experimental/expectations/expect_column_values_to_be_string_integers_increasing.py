@@ -5,9 +5,6 @@ import numpy as np
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -18,6 +15,9 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
+)
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.expectation_configuration import (

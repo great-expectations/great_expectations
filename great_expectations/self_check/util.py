@@ -47,10 +47,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core import (
-    ExpectationSuite,
-    ExpectationSuiteSchema,
-    ExpectationSuiteValidationResultSchema,
-    ExpectationValidationResultSchema,
     IDDict,
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
@@ -74,6 +70,14 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.expectation_suite import (
+    ExpectationSuite,
+    ExpectationSuiteSchema,
+)
+from great_expectations.expectation_validation_result import (
+    ExpectationSuiteValidationResultSchema,
+    ExpectationValidationResultSchema,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfigurationSchema,

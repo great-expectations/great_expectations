@@ -14,10 +14,10 @@ from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_res
     DataProfilerStructuredDataAssistantResult,
 )
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )

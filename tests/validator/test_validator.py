@@ -10,15 +10,11 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
     RuntimeBatchRequest,
-)
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
 )
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
@@ -31,6 +27,10 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectation_suite import ExpectationSuite
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,

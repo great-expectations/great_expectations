@@ -39,9 +39,6 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_diagnostics.expectation_doctor import (
     ExpectationDoctor,
 )
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -55,6 +52,9 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,

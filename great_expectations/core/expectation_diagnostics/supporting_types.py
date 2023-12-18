@@ -8,7 +8,7 @@ from typing import List, Optional, Sequence, Union
 
 from typing_extensions import TypedDict
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.expectation_validation_result.expectation_validation_result import (
     ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.types import SerializableDictDot

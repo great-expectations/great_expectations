@@ -20,7 +20,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
@@ -63,6 +62,7 @@ from great_expectations.data_context.types.resource_identifiers import GXCloudId
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
+from great_expectations.expectation_suite import ExpectationSuite
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr

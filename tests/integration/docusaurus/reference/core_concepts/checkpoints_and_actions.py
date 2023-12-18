@@ -1,9 +1,6 @@
 import os
 
 import great_expectations as gx
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -12,6 +9,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.datasource.fluent import (
     BatchRequest as FluentBatchRequest,
+)
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
 )
 
 yaml = YAMLHandler()

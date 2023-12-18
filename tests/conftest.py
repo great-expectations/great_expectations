@@ -34,10 +34,6 @@ from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -88,6 +84,10 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.expectation_suite.expectation_suite import ExpectationSuite
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

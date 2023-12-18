@@ -16,9 +16,6 @@ import requests
 
 import great_expectations as gx
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
@@ -39,6 +36,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )

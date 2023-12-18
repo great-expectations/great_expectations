@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 from great_expectations.core.batch import Batch, BatchMarkers
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
@@ -24,6 +23,7 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.expectation_suite.expectation_suite import ExpectationSuite
 from great_expectations.validator.validator import BridgeValidator
 
 yaml = YAMLHandler()

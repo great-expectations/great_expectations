@@ -1,10 +1,10 @@
 import pandas as pd
 import pytest
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.expectation_validation_result.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
-from great_expectations.dataset.pandas_dataset import PandasDataset
 
 
 @pytest.fixture

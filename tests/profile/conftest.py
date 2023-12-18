@@ -5,11 +5,11 @@ from typing import Set, Tuple
 import pytest
 
 import great_expectations as gx
-from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectation_suite import ExpectationSuite
 from great_expectations.self_check.util import get_dataset
 
 

@@ -2,9 +2,6 @@ from typing import Any, Dict, Optional, Tuple
 
 import scipy.stats
 
-from great_expectations.core import (
-    ExpectationValidationResult,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -13,6 +10,9 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectation_validation_result import (
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,

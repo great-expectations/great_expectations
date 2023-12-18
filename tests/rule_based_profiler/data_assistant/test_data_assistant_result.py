@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.expectation_suite.expectation_suite import ExpectationSuite
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )

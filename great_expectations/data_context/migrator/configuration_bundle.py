@@ -5,14 +5,6 @@ from typing import TYPE_CHECKING, Dict, List, cast
 
 from marshmallow import Schema, fields, post_dump
 
-from great_expectations.core.expectation_suite import (
-    ExpectationSuite,
-    ExpectationSuiteSchema,
-)
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationSuiteValidationResultSchema,
-)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,  # noqa: TCH001
@@ -23,6 +15,14 @@ from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
     DatasourceConfigSchema,
+)
+from great_expectations.expectation_suite.expectation_suite import (
+    ExpectationSuite,
+    ExpectationSuiteSchema,
+)
+from great_expectations.expectation_validation_result.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResultSchema,
 )
 
 if TYPE_CHECKING:
