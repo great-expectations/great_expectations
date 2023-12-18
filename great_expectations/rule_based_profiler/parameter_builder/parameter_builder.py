@@ -61,13 +61,13 @@ from great_expectations.util import is_parseable_date
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validation_graph import (
-    ValidationGraph,  # noqa: TCH001
-)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
+    )
+    from great_expectations.validator.validation_graph import (
+        ValidationGraph,
     )
     from great_expectations.validator.validator import Validator
 

@@ -36,9 +36,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_diagnostics.expectation_doctor import (
-    ExpectationDoctor,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -93,7 +90,6 @@ from great_expectations.render.util import (
 from great_expectations.util import camel_to_snake
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies, Validator
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
@@ -101,6 +97,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.render.renderer_configuration import MetaNotes
+    from great_expectations.validator.validator import ValidationDependencies, Validator
 
 logger = logging.getLogger(__name__)
 
@@ -1068,6 +1065,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
+        from great_expectations.validator.validator import ValidationDependencies
+
         runtime_configuration = self._get_runtime_kwargs(
             runtime_configuration=runtime_configuration,
         )
@@ -1257,6 +1256,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Returns:
             An Expectation Diagnostics report object
         """
+        from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+            ExpectationDoctor,
+        )
+
         return ExpectationDoctor(self).run_diagnostics(
             raise_exceptions_for_backends=raise_exceptions_for_backends,
             ignore_suppress=ignore_suppress,
@@ -1286,6 +1289,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             backends: list of backends to pass to run_diagnostics
             show_debug_messages (bool): If true, create a logger and pass to run_diagnostics
         """
+        from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+            ExpectationDoctor,
+        )
+
         return ExpectationDoctor(self).print_diagnostic_checklist(
             diagnostics=diagnostics,
             show_failed_tests=show_failed_tests,

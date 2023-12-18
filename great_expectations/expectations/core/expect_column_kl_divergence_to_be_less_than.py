@@ -46,10 +46,6 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import (
-    MetricsCalculator,
-    _MetricsDict,
-)
 
 if TYPE_CHECKING:
     from great_expectations.core import (
@@ -63,6 +59,7 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import (
         ValidationDependencies,
     )
+
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -201,6 +198,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
+        from great_expectations.validator.metrics_calculator import (
+            MetricsCalculator,
+        )
+
         validation_dependencies: ValidationDependencies = (
             super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
@@ -230,7 +231,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                     execution_engine=execution_engine,
                     show_progress_bars=True,
                 )
-                resolved_metrics: _MetricsDict
                 resolved_metrics, _ = metrics_calculator.compute_metrics(
                     metric_configurations=[partition_metric_configuration],
                     runtime_configuration=None,
