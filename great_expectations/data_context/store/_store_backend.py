@@ -139,13 +139,13 @@ class StoreBackend(metaclass=ABCMeta):
             logger.debug(str(e))
             raise StoreBackendError("ValueError while calling _set on store backend.")
 
-    def add(self, key, value, **kwargs):
+    def add(self, key, value, **kwargs) -> bool | GXCloudResourceRef | None:
         """
         Essentially `set` but validates that a given key-value pair does not already exist.
         """
         return self._add(key=key, value=value, **kwargs)
 
-    def _add(self, key, value, **kwargs) -> None:
+    def _add(self, key, value, **kwargs) -> bool | GXCloudResourceRef | None:
         if self.has_key(key):
             raise StoreBackendError(f"Store already has the following key: {key}.")
         return self.set(key=key, value=value, **kwargs)
@@ -156,7 +156,7 @@ class StoreBackend(metaclass=ABCMeta):
         """
         return self._update(key=key, value=value, **kwargs)
 
-    def _update(self, key, value, **kwargs) -> None:
+    def _update(self, key, value, **kwargs) -> bool | GXCloudResourceRef | None:
         if not self.has_key(key):
             raise StoreBackendError(
                 f"Store does not have a value associated the following key: {key}."

@@ -240,7 +240,9 @@ class Store:
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
 
-    def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def update(
+        self, key: DataContextKey, value: Any, **kwargs
+    ) -> bool | GXCloudResourceRef | None:
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """
