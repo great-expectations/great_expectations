@@ -17,15 +17,6 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
     TestBackend,
     TestData,
 )
-from great_expectations.core.expectation_diagnostics.self_check import (
-    build_sa_validator_with_data,
-    generate_expectation_tests,
-    generate_test_table_name,
-    should_we_generate_this_test,
-)
-from great_expectations.core.expectation_diagnostics.self_check import (
-    build_test_backends_list as build_test_backends_list_v3,
-)
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationExecutionEngineDiagnostics,
 )
@@ -42,6 +33,15 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.self_check.util import (
+    build_sa_validator_with_data,
+    generate_expectation_tests,
+    generate_test_table_name,
+    should_we_generate_this_test,
+)
+from great_expectations.self_check.util import (
+    build_test_backends_list as build_test_backends_list_v3,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 

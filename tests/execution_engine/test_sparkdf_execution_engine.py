@@ -11,9 +11,6 @@ from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
-from great_expectations.core.expectation_diagnostics.self_check import (
-    build_spark_engine,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context import get_context
@@ -26,6 +23,7 @@ from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
+from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric

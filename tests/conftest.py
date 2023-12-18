@@ -34,13 +34,6 @@ from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
-from great_expectations.core.expectation_diagnostics.self_check import (
-    build_test_backends_list as build_test_backends_list_v3,
-)
-from great_expectations.core.expectation_diagnostics.self_check import (
-    expectationSuiteValidationResultSchema,
-    get_dataset,
-)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -107,6 +100,13 @@ from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_ran
     NumericMetricRangeMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import ParameterNode
+from great_expectations.self_check.util import (
+    build_test_backends_list as build_test_backends_list_v3,
+)
+from great_expectations.self_check.util import (
+    expectationSuiteValidationResultSchema,
+    get_dataset,
+)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     is_library_loadable,

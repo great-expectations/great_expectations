@@ -18,11 +18,6 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
     ExpectationTestDataCases,
     TestBackend,
 )
-from great_expectations.core.expectation_diagnostics.self_check.util import (
-    evaluate_json_test_v3_api,
-    generate_dataset_name_from_expectation_name,
-    generate_expectation_tests,
-)
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExpectationBackendTestResultCounts,
@@ -53,6 +48,11 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
     RenderedTableContent,
     ValueListContent,
+)
+from great_expectations.self_check.util import (
+    evaluate_json_test_v3_api,
+    generate_dataset_name_from_expectation_name,
+    generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake
 

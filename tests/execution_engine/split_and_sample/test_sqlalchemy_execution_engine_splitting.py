@@ -10,9 +10,6 @@ import pytest
 from dateutil.parser import parse
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.expectation_diagnostics.self_check import (
-    build_sa_execution_engine,
-)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
@@ -22,6 +19,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.self_check.util import build_sa_execution_engine
 from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,

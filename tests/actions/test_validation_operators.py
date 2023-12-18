@@ -5,12 +5,12 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
-from great_expectations.core.expectation_diagnostics.self_check import modify_locale
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.self_check.util import modify_locale
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )

@@ -9,9 +9,7 @@ import numpy as np
 import pytest
 
 import great_expectations as gx
-from great_expectations.core.expectation_diagnostics.self_check import (
-    expectationSuiteSchema,
-)
+from great_expectations.self_check.util import expectationSuiteSchema
 
 
 @pytest.mark.big

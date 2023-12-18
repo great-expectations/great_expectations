@@ -14,11 +14,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core.batch import Batch
-from great_expectations.core.expectation_diagnostics.self_check import (
-    build_pandas_engine,
-    build_sa_execution_engine,
-    build_spark_engine,
-)
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
@@ -36,6 +31,11 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.self_check.util import (
+    build_pandas_engine,
+    build_sa_execution_engine,
+    build_spark_engine,
+)
 from great_expectations.util import isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
