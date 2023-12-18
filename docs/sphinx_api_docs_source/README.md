@@ -15,7 +15,7 @@ To add a new class or module level function to the docs, add the @public_api
 decorator e.g.:
 
 ```python
-    from great_expectations.core._docs_decorators import public_api
+    from great_expectations._docs_decorators import public_api
     
     @public_api
     class ExamplePublicAPIClass:
