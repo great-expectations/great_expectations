@@ -347,7 +347,6 @@ def _replace_dest_config_with_runtime_kwargs(
     dest_config: dict,
     runtime_kwargs: dict,
 ) -> dict:
-    # replace
     if runtime_kwargs.get("template_name") is not None:
         dest_config["template_name"] = runtime_kwargs["template_name"]
     if runtime_kwargs.get("run_name_template") is not None:
@@ -365,7 +364,6 @@ def _update_dest_config_with_runtime_kwargs(
     dest_config: dict,
     runtime_kwargs: dict,
 ) -> dict:
-    # update
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
         batch_request_from_runtime_kwargs = runtime_kwargs["batch_request"]
