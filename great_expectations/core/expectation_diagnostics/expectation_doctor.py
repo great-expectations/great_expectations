@@ -10,7 +10,6 @@ import traceback
 from collections import defaultdict
 from typing import TYPE_CHECKING, Final, List, Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
@@ -31,6 +30,9 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationTestDiagnostics,
     Maturity,
     RendererTestDiagnostics,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import (
     _registered_metrics,
