@@ -1065,9 +1065,6 @@ class SQLDatasource(Datasource):
         model_dict = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
-            # by default we exclude unset values to prevent lots of extra values in the yaml files
-            # but we want to include them here
-            exclude_unset=False,
         )
         _check_config_substitutions_needed(
             self, model_dict, raise_warning_if_provider_not_present=True
@@ -1087,6 +1084,9 @@ class SQLDatasource(Datasource):
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+            # by default we exclude unset values to prevent lots of extra values in the yaml files
+            # but we want to include them here
+            exclude_unset=False,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
