@@ -86,7 +86,6 @@ from great_expectations.render.util import (
 from great_expectations.util import camel_to_snake
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies, Validator
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
@@ -97,6 +96,7 @@ if TYPE_CHECKING:
         ExecutionEngine,
     )
     from great_expectations.render.renderer_configuration import MetaNotes
+    from great_expectations.validator.validator import ValidationDependencies, Validator
 
 logger = logging.getLogger(__name__)
 
@@ -1064,6 +1064,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
+        from great_expectations.validator.validator import ValidationDependencies
+
         runtime_configuration = self._get_runtime_kwargs(
             runtime_configuration=runtime_configuration,
         )

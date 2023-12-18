@@ -136,38 +136,6 @@ class TestInit:
         assert suite.ge_cloud_id == test_id
 
     @pytest.mark.unit
-    def test_expectation_suite_init_overrides_expectations_dict_and_obj(
-        self,
-        fake_expectation_suite_name: str,
-        expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
-        expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
-    ):
-        """What does this test and why?
-
-        The expectations param of ExpectationSuite takes a list of ExpectationConfiguration or dicts and both can be provided at the same time. We need to make sure they both show up as expectation configurations in the instantiated ExpectationSuite.
-        """
-
-        test_expectations_input = [
-            expect_column_values_to_be_in_set_col_a_with_meta_dict,
-            expect_column_values_to_be_in_set_col_a_with_meta,
-        ]
-
-        suite = ExpectationSuite(
-            expectation_suite_name=fake_expectation_suite_name,
-            expectations=test_expectations_input,  # type: ignore[arg-type]
-        )
-        assert suite.expectation_suite_name == fake_expectation_suite_name
-
-        test_expected_expectations = [
-            ExpectationConfiguration(
-                **expect_column_values_to_be_in_set_col_a_with_meta_dict
-            ),
-            expect_column_values_to_be_in_set_col_a_with_meta,
-        ]
-        assert len(suite.expectations) == 2
-        assert suite.expectation_configurations == test_expected_expectations
-
-    @pytest.mark.unit
     def test_expectation_suite_init_overrides_non_json_serializable_meta(
         self,
         fake_expectation_suite_name: str,

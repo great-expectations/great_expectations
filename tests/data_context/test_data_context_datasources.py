@@ -132,7 +132,7 @@ def test_get_datasource_cache_miss(in_memory_runtime_context) -> None:
 
     # Initial GET will miss the cache, necessitating store retrieval
     with mock.patch(
-        "great_expectations.core.datasource_dict.DatasourceDict.__getitem__"
+        "great_expectations.datasource.datasource_dict.DatasourceDict.__getitem__"
     ) as mock_get:
         context.get_datasource(name)
 
