@@ -709,10 +709,6 @@ class _SQLAsset(DataAsset):
                 batch_spec_passthrough=None,
             )
 
-            # Some pydantic annotations are postponed due to circular imports.
-            # Batch.update_forward_refs() will set the annotations before we
-            # instantiate the Batch class since we can import them in this scope.
-            Batch.update_forward_refs()
             batch_list.append(
                 Batch(
                     datasource=self.datasource,
@@ -720,9 +716,9 @@ class _SQLAsset(DataAsset):
                     batch_request=request,
                     data=data,
                     metadata=batch_metadata,
-                    legacy_batch_markers=markers,
-                    legacy_batch_spec=batch_spec,
-                    legacy_batch_definition=batch_definition,
+                    batch_markers=markers,
+                    batch_spec=batch_spec,
+                    batch_definition=batch_definition,
                 )
             )
         self.sort_batches(batch_list)
@@ -1025,7 +1021,7 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
-    create_temp_table: bool = True
+    create_temp_table: bool = False
     kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
         default={},
         description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
@@ -1088,6 +1084,9 @@ class SQLDatasource(Datasource):
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+            # by default we exclude unset values to prevent lots of extra values in the yaml files
+            # but we want to include them here
+            exclude_unset=False,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs

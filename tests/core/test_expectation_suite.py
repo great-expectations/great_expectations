@@ -3,13 +3,13 @@ import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
 from unittest.mock import MagicMock, Mock
+from uuid import UUID
 
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations import set_context
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -21,6 +21,9 @@ from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.core import (
     ExpectColumnValuesToBeInSet,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.util import filter_properties_dict
 
@@ -216,7 +219,7 @@ class TestCRUDMethods:
         assert created_expectation == expectation
 
         # expect that the data context is kept in sync with the mutation
-        context.expectations_store.add_or_update.assert_called_once_with(
+        context.expectations_store.update.assert_called_once_with(
             key=store_key, value=suite
         )
 
@@ -252,14 +255,12 @@ class TestCRUDMethods:
         assert len(suite.expectations) == 1
 
         # expect that the data context is kept in sync with the mutation
-        context.expectations_store.add_or_update.assert_called_with(
-            key=store_key, value=suite
-        )
+        context.expectations_store.update.assert_called_with(key=store_key, value=suite)
 
     @pytest.mark.unit
     def test_add_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
-        context.expectations_store.add_or_update.side_effect = (
+        context.expectations_store.update.side_effect = (
             ConnectionError()
         )  # arbitrary exception
         context.expectations_store.has_key.return_value = True
@@ -290,7 +291,7 @@ class TestCRUDMethods:
         assert suite.expectations == []
 
         # expect that the data context is kept in sync with the mutation
-        context.expectations_store.add_or_update.assert_called_once_with(
+        context.expectations_store.update.assert_called_once_with(
             key=store_key, value=suite
         )
 
@@ -310,7 +311,7 @@ class TestCRUDMethods:
         assert suite.expectations == []
         # expect that deleting an expectation from this suite doesnt have the side effect of
         # persisting the suite to the data context
-        context.expectations_store.add_or_update.assert_not_called()
+        context.expectations_store.update.assert_not_called()
 
     @pytest.mark.unit
     def test_delete_fails_when_expectation_is_not_found(self, expectation):
@@ -329,7 +330,7 @@ class TestCRUDMethods:
     def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
         context.expectations_store.has_key.return_value = True
-        context.expectations_store.add_or_update.side_effect = (
+        context.expectations_store.update.side_effect = (
             ConnectionError()
         )  # arbitrary exception
         set_context(project=context)
@@ -358,9 +359,74 @@ class TestCRUDMethods:
         suite.save()
 
         # expect that the data context is kept in sync
-        context.expectations_store.add_or_update.assert_called_once_with(
+        context.expectations_store.update.assert_called_once_with(
             key=store_key, value=suite
         )
+
+    @pytest.mark.filesystem
+    def test_filesystem_context_update_suite_adds_ids(
+        self, empty_data_context, expectation
+    ):
+        context = empty_data_context
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+
+        uuid_to_test = suite.ge_cloud_id
+        assert isinstance(UUID(uuid_to_test), UUID)
+
+        expectation.id = None
+        suite.add(expectation)
+        expectation.column = "foo"
+        expectation.id = None
+        suite.add(expectation)
+        assert len(suite.expectations) == 2
+        # todo: update when expectations are source of truth
+        for expectation_configuration in suite.expectation_configurations:
+            uuid_to_test = expectation_configuration.ge_cloud_id
+            assert isinstance(UUID(uuid_to_test), UUID)
+
+    @pytest.mark.cloud
+    def test_cloud_context_update_suite_adds_ids(
+        self, empty_cloud_context_fluent, expectation
+    ):
+        context = empty_cloud_context_fluent
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+
+        uuid_to_test = suite.ge_cloud_id
+        assert isinstance(UUID(uuid_to_test), UUID)
+
+        expectation.id = None
+        suite.add(expectation)
+        expectation.id = None
+        expectation.column = "foo"
+        suite.add(expectation)
+        assert len(suite.expectations) == 2
+        # todo: update when expectations are source of truth
+        for expectation in suite.expectations:
+            uuid_to_test = expectation.id
+            assert isinstance(UUID(uuid_to_test), UUID)
+
+    @pytest.mark.filesystem
+    def test_filesystem_context_doesnt_allow_duplicate_ids(
+        self, empty_data_context, expectation
+    ):
+        # cloud doesnt have a parallel test because its the responsibility of the cloud backend.
+        context = empty_data_context
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+        provided_id = "6b3f003d-d97b-4649-ba23-3f4e30986297"
+
+        expectation.id = provided_id
+        suite.add(expectation)
+        expectation.column = "foo"
+        with pytest.raises(
+            RuntimeError, match="Expectation IDs must be unique within a suite."
+        ):
+            suite.add(expectation)
 
 
 class TestAddCitation:

@@ -49,6 +49,7 @@ LOGGER = logging.getLogger(__name__)
 SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 
 _REQUIRED_FABRIC_SERVICE: Final[str] = "Microsoft.ProjectArcadia"
+Mode: TypeAlias = Literal["xmla", "rest", "onelake"]
 
 
 class _PowerBIAsset(DataAsset):
@@ -120,11 +121,6 @@ class _PowerBIAsset(DataAsset):
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        # TODO: update Batch legacy_batch_spec types
-        Batch.update_forward_refs()
         batch_list.append(
             Batch(
                 datasource=self.datasource,
@@ -132,9 +128,9 @@ class _PowerBIAsset(DataAsset):
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec.to_json_dict(),  # type: ignore[arg-type] # will be coerced to BatchSpec
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec.to_json_dict(),  # type: ignore[arg-type] # will be coerced to BatchSpec
+                batch_definition=batch_definition,
             )
         )
         return batch_list
@@ -186,7 +182,6 @@ class PowerBIDax(_PowerBIAsset):
 
     type: Literal["powerbi_dax"] = "powerbi_dax"
     dax_string: str
-    pandas_convert_dtypes: bool = True
 
 
 @public_api
@@ -201,7 +196,6 @@ class PowerBIMeasure(_PowerBIAsset):
     filters: Optional[Dict[str, List[str]]] = None
     fully_qualified_columns: Optional[bool] = None
     num_rows: Optional[int] = None
-    pandas_convert_dtypes: bool = True
     use_xmla: bool = False
 
 
@@ -216,7 +210,7 @@ class PowerBITable(_PowerBIAsset):
     fully_qualified_columns: bool = False
     num_rows: Optional[int] = None
     multiindex_hierarchies: bool = False
-    pandas_convert_dtypes: bool = True
+    mode: Mode = "xmla"
 
 
 # This improves our error messages by providing a more specific type for pydantic to validate against
@@ -293,13 +287,12 @@ class FabricPowerBIDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_powerbi_dax_asset(  # noqa: PLR0913
+    def add_powerbi_dax_asset(
         self,
         name: str,
         dax_string: str,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
-        pandas_convert_dtypes: bool = True,
     ) -> PowerBIDax:
         """Adds a PowerBIDax asset to this datasource.
 
@@ -318,7 +311,6 @@ class FabricPowerBIDatasource(Datasource):
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
             dax_string=dax_string,
-            pandas_convert_dtypes=pandas_convert_dtypes,
         )
         return self._add_asset(asset)
 
@@ -333,7 +325,6 @@ class FabricPowerBIDatasource(Datasource):
         filters: Optional[Dict[str, List[str]]] = None,
         fully_qualified_columns: Optional[bool] = None,
         num_rows: Optional[int] = None,
-        pandas_convert_dtypes: bool = True,
         use_xmla: bool = False,
     ) -> PowerBIMeasure:
         """Adds a PowerBIMeasure asset to this datasource.
@@ -357,7 +348,6 @@ class FabricPowerBIDatasource(Datasource):
             filters=filters,
             fully_qualified_columns=fully_qualified_columns,
             num_rows=num_rows,
-            pandas_convert_dtypes=pandas_convert_dtypes,
             use_xmla=use_xmla,
         )
         return self._add_asset(asset)
@@ -372,7 +362,7 @@ class FabricPowerBIDatasource(Datasource):
         fully_qualified_columns: bool = False,
         num_rows: Optional[int] = None,
         multiindex_hierarchies: bool = False,
-        pandas_convert_dtypes: bool = True,
+        mode: Mode = "xmla",
     ) -> PowerBITable:
         """Adds a PowerBITable asset to this datasource.
 
@@ -395,7 +385,7 @@ class FabricPowerBIDatasource(Datasource):
             fully_qualified_columns=fully_qualified_columns,
             num_rows=num_rows,
             multiindex_hierarchies=multiindex_hierarchies,
-            pandas_convert_dtypes=pandas_convert_dtypes,
+            mode=mode,
         )
         return self._add_asset(asset)
 

@@ -21,7 +21,9 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 if TYPE_CHECKING:
     import numpy.typing as npt
 
-    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ColumnPartition(ColumnAggregateMetricProvider):

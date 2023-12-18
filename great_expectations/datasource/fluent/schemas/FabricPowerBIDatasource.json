@@ -96,6 +96,24 @@
                 "key"
             ]
         },
+        "BatchConfig": {
+            "title": "BatchConfig",
+            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ]
+        },
         "PowerBITable": {
             "title": "PowerBITable",
             "description": "--Public API--Microsoft PowerBI Table.",
@@ -130,6 +148,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
+                },
                 "table": {
                     "title": "Table",
                     "type": "string"
@@ -148,10 +173,15 @@
                     "default": false,
                     "type": "boolean"
                 },
-                "pandas_convert_dtypes": {
-                    "title": "Pandas Convert Dtypes",
-                    "default": true,
-                    "type": "boolean"
+                "mode": {
+                    "title": "Mode",
+                    "default": "xmla",
+                    "enum": [
+                        "xmla",
+                        "rest",
+                        "onelake"
+                    ],
+                    "type": "string"
                 }
             },
             "required": [
@@ -194,6 +224,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
+                },
                 "measure": {
                     "title": "Measure",
                     "anyOf": [
@@ -232,11 +269,6 @@
                 "num_rows": {
                     "title": "Num Rows",
                     "type": "integer"
-                },
-                "pandas_convert_dtypes": {
-                    "title": "Pandas Convert Dtypes",
-                    "default": true,
-                    "type": "boolean"
                 },
                 "use_xmla": {
                     "title": "Use Xmla",
@@ -284,14 +316,16 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_configs": {
+                    "title": "Batch Configs",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchConfig"
+                    }
+                },
                 "dax_string": {
                     "title": "Dax String",
                     "type": "string"
-                },
-                "pandas_convert_dtypes": {
-                    "title": "Pandas Convert Dtypes",
-                    "default": true,
-                    "type": "boolean"
                 }
             },
             "required": [

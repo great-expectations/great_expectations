@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from numbers import Number
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
@@ -5,12 +7,7 @@ import numpy as np
 from typing_extensions import TypedDict
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -38,12 +35,19 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.util import isclose
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 
 class QuantileRange(TypedDict):

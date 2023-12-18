@@ -32,6 +32,13 @@
             "title": "Batch Metadata",
             "type": "object"
         },
+        "batch_configs": {
+            "title": "Batch Configs",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchConfig"
+            }
+        },
         "batching_regex": {
             "title": "Batching Regex",
             "default": ".*",
@@ -150,6 +157,24 @@
             },
             "required": [
                 "key"
+            ]
+        },
+        "BatchConfig": {
+            "title": "BatchConfig",
+            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
             ]
         },
         "SplitterColumnValue": {
