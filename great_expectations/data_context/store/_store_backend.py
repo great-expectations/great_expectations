@@ -126,7 +126,7 @@ class StoreBackend(metaclass=ABCMeta):
     def get_all(self):
         return self._get_all()
 
-    def set(self, key, value, **kwargs):
+    def set(self, key, value, **kwargs) -> None:
         self._validate_key(key)
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
@@ -142,18 +142,18 @@ class StoreBackend(metaclass=ABCMeta):
         """
         return self._add(key=key, value=value, **kwargs)
 
-    def _add(self, key, value, **kwargs):
+    def _add(self, key, value, **kwargs) -> None:
         if self.has_key(key):
             raise StoreBackendError(f"Store already has the following key: {key}.")
         return self.set(key=key, value=value, **kwargs)
 
-    def update(self, key, value, **kwargs):
+    def update(self, key, value, **kwargs) -> None:
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """
         return self._update(key=key, value=value, **kwargs)
 
-    def _update(self, key, value, **kwargs):
+    def _update(self, key, value, **kwargs) -> None:
         if not self.has_key(key):
             raise StoreBackendError(
                 f"Store does not have a value associated the following key: {key}."

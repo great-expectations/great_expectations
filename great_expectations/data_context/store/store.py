@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from great_expectations.core.configuration import AbstractConfig
+    from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 logger = logging.getLogger(__name__)
 
@@ -239,13 +240,17 @@ class Store:
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
 
-    def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def update(
+        self, key: DataContextKey, value: Any, **kwargs
+    ) -> bool | GXCloudResourceRef:
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """
         return self._update(key=key, value=value, **kwargs)
 
-    def _update(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def _update(
+        self, key: DataContextKey, value: Any, **kwargs
+    ) -> bool | GXCloudResourceRef:
         self._validate_key(key)
         return self._store_backend.update(
             self.key_to_tuple(key), self.serialize(value), **kwargs
