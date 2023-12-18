@@ -45,6 +45,7 @@ from great_expectations._docs_decorators import (
 from great_expectations.analytics.events import DataContextInitializedEvent
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -141,7 +142,6 @@ if TYPE_CHECKING:
 
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core import ExpectationSuite
     from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -2593,8 +2593,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: ExpectationSuite | None = None,
         **kwargs,
     ) -> ExpectationSuite:
-        from great_expectations.core import ExpectationSuite
-
         if not isinstance(overwrite_existing, bool):
             raise ValueError("overwrite_existing must be of type bool.")
 
@@ -2756,8 +2754,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted `ExpectationSuite`.
         """
-        from great_expectations.core import ExpectationSuite
-
         self._validate_expectation_suite_xor_expectation_suite_name(
             expectation_suite, expectation_suite_name
         )
@@ -2842,8 +2838,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: There is no expectation suite with the name provided
         """
-        from great_expectations.core import ExpectationSuite
-
         if ge_cloud_id is not None:
             # deprecated-v0.15.45
             warnings.warn(
@@ -4075,8 +4069,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
-        from great_expectations.core import ExpectationSuite
-
         self._evaluation_parameter_dependencies = {}
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
         # https://github.com/great-expectations/great_expectations/pull/3377
