@@ -22,6 +22,7 @@ import LinkCard from '/docs/components/LinkCard';
   <LinkCard topIcon label="Get started with GX OSS" description="This is a great place to start if you're unfamiliar with GX OSS, or you want to use GX OSS with Databricks or a SQL Data Source in a production environment." href="/docs/oss/guides/setup/get_started_lp" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Configure your GX OSS environment" description="Set up GX OSS in your specific environment." href="/docs/oss/guides/setup/setup_overview_lp" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Connect to source data" description="Connect to source data stored on databases and local filesystems, request data from a Data Source, organize Batches in a file-based Data Asset, and connect GX OSS to SQL tables and data returned by SQL database queries." href="/docs/oss/guides/connecting_to_your_data/connect_to_data_lp" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Review the changelog" description="View a summary of all changes released to GX Cloud and GX OSS." href="/docs/oss/changelog" icon="/img/release_notes_icon.svg" />
 </LinkCardGrid>
 
 ### Identify, validate, and integrate
@@ -32,9 +33,8 @@ import LinkCard from '/docs/components/LinkCard';
   <LinkCard topIcon label="Integrations" description="Integrate GX OSS with commonly used data engineering tools." href="/docs/category/integrate" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
-### Learn and contribute
+### Contribute
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Reference" description="Supplemental information that will help you get the most out of GX OSS." href="/docs/reference/learn" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Contribute" description="Contribute to GX OSS documentation or code." href="/docs/oss/contributing/contributing" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>

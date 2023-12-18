@@ -69,7 +69,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Securely manage GX API Data Source connection strings',
+              label: 'Secure your GX API Data Source connection strings',
               href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
             },
           ]
@@ -127,8 +127,8 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Available Expectation types',
-              href: '/docs/cloud/expectations/manage_expectations#available-expectation-types',
+              label: 'Available Expectations',
+              href: '/docs/cloud/expectations/manage_expectations#available-expectations',
             },
             {
               type: 'link',
@@ -262,6 +262,7 @@ module.exports = {
         },
       ],
   gx_oss: [
+        {type: 'doc', id: 'oss/intro', label: 'About GX'},
         {
           type: 'category',
           label: 'Get started with GX OSS',
@@ -448,16 +449,6 @@ module.exports = {
             'oss/integrations/integration_zenml',
           ]
         },
-        {
-          type: 'category',
-          label: 'Reference',
-          link: { type: 'doc', id: 'reference/learn/reference_overview' },
-          items: [
-            'oss/contributing/contributing_maturity',
-            'reference/learn/customize_your_deployment',
-            'reference/learn/usage_statistics',
-          ]
-        },
         { type: 'doc', id: 'oss/guides/miscellaneous/migration_guide' },
         { type: 'doc', id: 'oss/troubleshooting' },
         'oss/contributing/contributing',
@@ -467,11 +458,11 @@ module.exports = {
   gx_apis: [
       {
       type: 'category',
-      label: 'GX OSS API',
+      label: 'GX API',
       link: {
         type: 'generated-index',
-        title: 'GX OSS API',
-        description: 'GX OSS API reference content is generated from classes and methods docstrings.',
+        title: 'GX API',
+        description: 'GX API reference content is generated from classes and methods docstrings.',
         slug: '/reference/api/'
       },
       items: [
@@ -485,6 +476,8 @@ module.exports = {
   learn: [
       'reference/learn/conceptual_guides/expectation_classes',
       'reference/learn/conceptual_guides/metricproviders',
+      'oss/contributing/contributing_maturity',
+      'reference/learn/usage_statistics',
       {
       type: 'category',
       label: 'Glossary',

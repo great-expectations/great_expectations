@@ -36,4 +36,4 @@ To create and run a Checkpoint in code, see [How to create a new Checkpoint](/do
 
 ## Use Data Docs
 
-To build and view Data Docs in your environment, see [Options for hosting Data Docs](/docs/reference/learn/customize_your_deployment#options-for-hosting-data-docs).
+To build and view Data Docs in your environment, see [Options for hosting Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs).

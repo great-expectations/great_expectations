@@ -153,6 +153,10 @@ module.exports = {
               label: 'GX OSS',
               to: 'https://greatexpectations.io/gx-oss',
             },
+            {
+              label: 'Integration support policy',
+              to: '/docs/oss/contributing/application_integration_support'
+            }
           ],
         },
         {
