@@ -138,14 +138,13 @@ class ExpectationsStore(Store):
             result: GXCloudResourceRef | bool | None = super()._update(
                 key=key, value=value, **kwargs
             )
-            if self.cloud_mode:
+            if self.cloud_mode and isinstance(result, GXCloudResourceRef):
                 # if we already had an id, a boolean is returned by _update
                 # otherwise cloud backend has added IDs, and we update our local state to be in sync
-                if isinstance(result, GXCloudResourceRef):
-                    value = self._add_cloud_ids_to_local_suite_and_expectations(
-                        local_suite=value,
-                        cloud_suite=result.response["data"]["attributes"]["suite"],
-                    )
+                value = self._add_cloud_ids_to_local_suite_and_expectations(
+                    local_suite=value,
+                    cloud_suite=result.response["data"]["attributes"]["suite"],
+                )
         except gx_exceptions.StoreBackendError as exc:
             # todo: this generic error clobbers more informative errors coming from the store
             raise gx_exceptions.ExpectationSuiteError(
