@@ -56,5 +56,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 Additionally, you will need to implement some basic examples and test cases before your contribution can be accepted. For guidance on examples and testing, see our [guide on implementing examples and test cases](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
 :::

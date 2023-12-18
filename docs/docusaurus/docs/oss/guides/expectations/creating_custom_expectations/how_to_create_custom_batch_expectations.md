@@ -55,7 +55,7 @@ python expect_batch_columns_to_be_unique.py
 ```
 
 The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/oss/contributing/contributing_maturity#expectation-contributions) at an Experimental level.
 
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
@@ -306,7 +306,7 @@ would become
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
 - [expect_batch_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py)

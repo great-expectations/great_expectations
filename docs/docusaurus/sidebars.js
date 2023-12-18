@@ -133,7 +133,7 @@ module.exports = {
             {
               type: 'link',
               label: 'Add an Expectation',
-              href: '/docs/cloud/expectations/manage_expectations#create-an-expectation',
+              href: '/docs/cloud/expectations/manage_expectations#add-an-expectation',
             },
             {
               type: 'link',
@@ -160,7 +160,7 @@ module.exports = {
             {
               type: 'link',
               label: 'Create an empty Expectation Suite ',
-              href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-empty-expectation-suite',
             },
             {
               type: 'link',
@@ -262,7 +262,7 @@ module.exports = {
         },
       ],
   gx_oss: [
-        {type: 'doc', id: 'oss/intro', label: 'About GX'},
+        {type: 'doc', id: 'oss/intro', label: 'About GX OSS'},
         {
           type: 'category',
           label: 'Get started with GX OSS',
@@ -377,6 +377,7 @@ module.exports = {
               ]
             },
             'oss/guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
+            'oss/contributing/contributing_maturity',
           ]
         },
         {
@@ -476,7 +477,6 @@ module.exports = {
   learn: [
       'reference/learn/conceptual_guides/expectation_classes',
       'reference/learn/conceptual_guides/metricproviders',
-      'reference/learn/conceptual_guides/contributing_maturity',
       'reference/learn/usage_statistics',
       {
       type: 'category',

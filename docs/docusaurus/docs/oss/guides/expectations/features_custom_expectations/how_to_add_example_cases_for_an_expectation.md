@@ -63,7 +63,7 @@ These tests can include examples intended to pass, fail, or error out, and expec
 
 At a minimum, we want to create tests that show what our Custom Expectation will and will *not* do. 
 
-These basic positive and negative example cases are the minimum amount of test coverage required for a Custom Expectation to be accepted into the Great Expectations codebase at an [Experimental level](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions).
+These basic positive and negative example cases are the minimum amount of test coverage required for a Custom Expectation to be accepted into the Great Expectations codebase at an [Experimental level](/docs/oss/contributing/contributing_maturity#expectation-contributions).
 
 To begin with, let's implement those two basic tests: one positive example case, and one negative example case. 
 
@@ -186,7 +186,7 @@ For full acceptance into the Great Expectations codebase at a Production level, 
 If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure adequate testing.
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/reference/learn/conceptual_guides/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
 - [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)

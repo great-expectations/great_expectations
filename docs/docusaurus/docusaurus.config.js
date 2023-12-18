@@ -155,7 +155,7 @@ module.exports = {
             },
             {
               label: 'Integration support policy',
-              to: '/docs/oss/contributing/application_integration_support'
+              to: '/docs/application_integration_support'
             }
           ],
         },

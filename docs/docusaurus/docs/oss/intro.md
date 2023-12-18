@@ -1,5 +1,5 @@
 ---
-title: About Great Expectations
+title: About Great Expectations OSS
 slug: /oss/about/
 ---
 
