@@ -4,11 +4,14 @@ import logging
 import urllib
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import pyparsing as pp
 
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +129,7 @@ class StoreBackend(metaclass=ABCMeta):
     def get_all(self):
         return self._get_all()
 
-    def set(self, key, value, **kwargs) -> None:
+    def set(self, key, value, **kwargs) -> bool | GXCloudResourceRef | None:
         self._validate_key(key)
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
@@ -147,7 +150,7 @@ class StoreBackend(metaclass=ABCMeta):
             raise StoreBackendError(f"Store already has the following key: {key}.")
         return self.set(key=key, value=value, **kwargs)
 
-    def update(self, key, value, **kwargs) -> None:
+    def update(self, key, value, **kwargs) -> bool | GXCloudResourceRef | None:
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """

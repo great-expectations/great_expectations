@@ -615,7 +615,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         key: tuple[GXCloudRESTResource, str | None, str | None],
         value: dict,
         **kwargs,
-    ) -> None:
+    ) -> bool | GXCloudResourceRef | None:
         # todo: ID should never be optional for update - remove this additional get
         response_data = self._get(key)["data"]
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
