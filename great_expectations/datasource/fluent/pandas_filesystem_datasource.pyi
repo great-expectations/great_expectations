@@ -12,8 +12,12 @@ from typing import (
     Union,
 )
 
+from great_expectations._docs_decorators import public_api as public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
+from great_expectations.datasource.fluent.data_asset.data_connector import (
+    FilesystemDataConnector as FilesystemDataConnector,
+)
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
     CSVEngine,
@@ -24,6 +28,9 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 from great_expectations.datasource.fluent.interfaces import BatchMetadata
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
+)
+from great_expectations.datasource.fluent.interfaces import (
+    TestConnectionError as TestConnectionError,
 )
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,

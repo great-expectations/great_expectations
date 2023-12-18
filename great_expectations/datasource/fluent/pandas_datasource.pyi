@@ -29,6 +29,9 @@ from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
 )
+from great_expectations._docs_decorators import (
+    public_api as public_api,
+)
 from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
