@@ -53,6 +53,14 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
             connection_string="${MY_CONN_STR}",
             kwargs={"isolation_level": "SERIALIZABLE"},
         ),
+        dict(
+            connection_string="sqlite:///",
+            create_temp_table=True,
+        ),
+        dict(
+            connection_string="sqlite:///",
+            create_temp_table=False,
+        ),
     ],
 )
 def test_kwargs_are_passed_to_create_engine(
@@ -70,7 +78,15 @@ def test_kwargs_are_passed_to_create_engine(
     ds.test_connection()
 
     create_engine_spy.assert_called_once_with(
-        "sqlite:///", **{"isolation_level": "SERIALIZABLE"}
+        "sqlite:///",
+        **{
+            **ds_kwargs.get("kwargs", {}),
+            **{
+                k: v
+                for k, v in ds_kwargs.items()
+                if k not in ["connection_string", "kwargs"]
+            },
+        },
     )
 
 
