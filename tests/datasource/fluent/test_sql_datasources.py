@@ -81,13 +81,15 @@ def test_kwargs_are_passed_to_create_engine(
     create_engine_spy.assert_called_once_with(
         "sqlite:///",
         **{
-            **ds_kwargs.get("kwargs", {}),
-            **ds.dict(exclude_unset=False, exclude={*ds_kwargs.keys(), *ds._get_exec_engine_excludes()}),
+            # this is testing that kwargs that we expect to be passed to create_engine are passed
+            # it should include defaults from the datasource class
+            **ds.dict(exclude_unset=False, exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()}),
             **{
                 k: v
                 for k, v in ds_kwargs.items()
                 if k not in ["connection_string", "kwargs"]
             },
+            **ds_kwargs.get("kwargs", {}),
         },
     )
 
