@@ -35,7 +35,7 @@ def get_batch(request: pytest.FixtureRequest) -> Callable[[AbstractDataContext],
     return request.param
 
 
-def test_csv_batch_validate(get_batch: Callable[[AbstractDataContext], Batch]):
+def test_batch_validate(get_batch: Callable[[AbstractDataContext], Batch]):
     context = gx.get_context()
     batch = get_batch(context)
     expectation = gxe.ExpectColumnValuesToNotBeNull(
