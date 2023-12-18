@@ -220,25 +220,30 @@ def test_checkpoint_run_in_memory_runtime_validations(
     # now that the Data Context is unaware of the Dataframe,
     # we need to re-associate the DataFrame with the DataFrameAsset
     # one way to do this is to assign to the attribute directly
+    # and update the datasource
     # the fixtures came from the old Data Context
     # we have to get them again, because they exist in a new place in memory
     datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
     in_memory_asset.dataframe = pandas_test_df
-    checkpoint_result = checkpoint.run(validations=validations)
+    context.update_datasource(datasource=datasource)
+    checkpoint_result = checkpoint.run()
     assert checkpoint_result.success
 
     # building a new Batch Request also associates the DataFrame with the DataFrameAsset again
     # users might choose to pass this Batch Request as a runtime validation
-    # although that step is not required
     datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
-    assert in_memory_asset.dataframe is None
+    # remove the dataframe instead of getting a new Data Context
+    in_memory_asset.dataframe = None
     batch_request = in_memory_asset.build_batch_request(dataframe=pandas_test_df)
     validations[0]["batch_request"] = batch_request
+    # runtime validations actually don't need to be passed,
+    # but it's confusing for users if they built a batch request and never used it
     checkpoint_result = checkpoint.run(validations=validations)
     assert checkpoint_result.success
     # ensure the runtime validation wasn't additive since it
+    # is identical to the configured Batch Request
     assert len(validations) == len(checkpoint_result.run_results)
 
     # clean up Checkpoint so associated entities can also be deleted in fixtures

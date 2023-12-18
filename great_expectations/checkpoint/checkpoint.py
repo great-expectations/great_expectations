@@ -191,10 +191,10 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
-        converted_validations = (
-            self._convert_runtime_validations_list_to_checkpoint_validation_configs(
-                runtime_validations=validations or []
-            )
+        converted_validations: list[
+            CheckpointValidationConfig
+        ] = self._convert_runtime_validations_list_to_checkpoint_validation_configs(
+            runtime_validations=validations or []
         )
 
         if (
