@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Generator
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Any, Generator
 from unittest import mock
 
 import pytest
+from pytest import param
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -30,6 +33,23 @@ def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, 
 
 
 @pytest.fixture
+def gx_sqlalchemy_execution_engine_spy(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
+) -> Generator[mock.MagicMock, None, None]:
+    """
+    Mock the SQLDatasource.execution_engine_type property to return a spy so that what would be passed to
+    the GX SqlAlchemyExecutionEngine constructor can be inspected.
+
+    NOTE: This is not exactly what gets passed to the sqlalchemy.engine.create_engine() function, but it is close.
+    """
+    spy = mocker.Mock(spec=SqlAlchemyExecutionEngine)
+    monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
+    yield spy
+    if not spy.call_count:
+        LOGGER.warning("SqlAlchemyExecutionEngine.__init__() was not called")
+
+
+@pytest.fixture
 def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
     """Monkeypatch sqlalchemy.create_engine to always return a in-memory sqlite engine."""
     in_memory_sqlite_engine = sa.create_engine("sqlite:///")
@@ -45,33 +65,100 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.parametrize(
     "ds_kwargs",
     [
-        dict(
-            connection_string="sqlite:///",
-            kwargs={"isolation_level": "SERIALIZABLE"},
+        param(
+            dict(
+                connection_string="sqlite:///",
+            ),
+            id="connection_string only",
         ),
-        dict(
-            connection_string="${MY_CONN_STR}",
-            kwargs={"isolation_level": "SERIALIZABLE"},
+        param(
+            dict(
+                connection_string="sqlite:///",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="no subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="${MY_CONN_STR}",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=True,
+            ),
+            id="create_temp_table=True",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=False,
+            ),
+            id="create_temp_table=False",
         ),
     ],
 )
-def test_kwargs_are_passed_to_create_engine(
-    create_engine_spy: mock.MagicMock,
-    monkeypatch: pytest.MonkeyPatch,
-    ephemeral_context_with_defaults: EphemeralDataContext,
-    ds_kwargs: dict,
-    filter_gx_datasource_warnings: None,
-):
-    monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
+class TestConfigPasstrough:
+    def test_kwargs_passed_to_create_engine(
+        self,
+        create_engine_spy: mock.MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+        ephemeral_context_with_defaults: EphemeralDataContext,
+        ds_kwargs: dict,
+        filter_gx_datasource_warnings: None,
+    ):
+        monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
-    context = ephemeral_context_with_defaults
-    ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
-    print(ds)
-    ds.test_connection()
+        context = ephemeral_context_with_defaults
+        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        print(ds)
+        ds.test_connection()
 
-    create_engine_spy.assert_called_once_with(
-        "sqlite:///", **{"isolation_level": "SERIALIZABLE"}
-    )
+        create_engine_spy.assert_called_once_with(
+            "sqlite:///",
+            **{
+                **ds.dict(include={"kwargs"}, exclude_unset=False)["kwargs"],
+                **ds_kwargs.get("kwargs", {}),
+            },
+        )
+
+    def test_ds_config_passed_to_gx_sqlalchemy_execution_engine(
+        self,
+        gx_sqlalchemy_execution_engine_spy: mock.MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+        ephemeral_context_with_defaults: EphemeralDataContext,
+        ds_kwargs: dict,
+        filter_gx_datasource_warnings: None,
+    ):
+        monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
+
+        context = ephemeral_context_with_defaults
+        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        print(ds)
+        gx_execution_engine: SqlAlchemyExecutionEngine = ds.get_execution_engine()
+        print(f"{gx_execution_engine=}")
+
+        expected_args: dict[str, Any] = {
+            # kwargs that we expect are passed to SqlAlchemyExecutionEngine
+            # including datasource field default values
+            **ds.dict(
+                exclude_unset=False,
+                exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()},
+            ),
+            **{k: v for k, v in ds_kwargs.items() if k not in ["kwargs"]},
+            **ds_kwargs.get("kwargs", {}),
+            # config substitution should have been performed
+            **ds.dict(
+                include={"connection_string"}, config_provider=ds._config_provider
+            ),
+        }
+        assert "create_temp_table" in expected_args
+
+        print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args)}")
+        gx_sqlalchemy_execution_engine_spy.assert_called_once_with(**expected_args)
 
 
 @pytest.mark.unit
