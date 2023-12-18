@@ -27,6 +27,9 @@ from great_expectations.compatibility.pydantic import Extra, Field, validator
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.constants import (
+    _ASSETS_KEY,
+    _BATCH_CONFIG_NAME_KEY,
+    _BATCH_CONFIGS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -91,6 +94,10 @@ class GxConfig(FluentBaseModel):
 
     _EXCLUDE_FROM_DATA_ASSET_SERIALIZATION: ClassVar[Set[str]] = {
         _DATA_ASSET_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+    }
+
+    _EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION: ClassVar[Set[str]] = {
+        _BATCH_CONFIG_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
     }
 
     class Config:
@@ -221,6 +228,8 @@ class GxConfig(FluentBaseModel):
                 # attach the datasource to the nested assets, avoiding recursion errors
                 for asset in datasource.assets:
                     asset._datasource = datasource
+                    for batch_config in asset.batch_configs:
+                        batch_config._data_asset = asset
 
         logger.debug(f"Loaded 'datasources' ->\n{loaded_datasources!r}")
 
@@ -358,6 +367,17 @@ class GxConfig(FluentBaseModel):
                         )
                         for data_asset_config in data_assets
                     }
+                    for data_asset in data_assets_config_as_dict.values():
+                        if _BATCH_CONFIGS_KEY in data_asset:
+                            data_asset[_BATCH_CONFIGS_KEY] = {
+                                batch_config[
+                                    _BATCH_CONFIG_NAME_KEY
+                                ]: _exclude_fields_from_serialization(
+                                    source_dict=batch_config,
+                                    exclusions=self._EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION,
+                                )
+                                for batch_config in data_asset[_BATCH_CONFIGS_KEY]
+                            }
                     datasource_config["assets"] = data_assets_config_as_dict
 
                 fluent_datasources_config_as_dict[datasource_name] = datasource_config
@@ -390,17 +410,33 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
         datasource_config: dict
         for datasource_name, datasource_config in fluent_datasources.items():
             datasource_config[_DATASOURCE_NAME_KEY] = datasource_name
-            if "assets" in datasource_config:
-                data_assets: dict = datasource_config["assets"]
+            if _ASSETS_KEY in datasource_config:
+                data_assets: dict = datasource_config[_ASSETS_KEY]
                 data_asset_name: str
                 data_asset_config: dict
                 for data_asset_name, data_asset_config in data_assets.items():
                     data_asset_config[_DATA_ASSET_NAME_KEY] = data_asset_name
+                    if _BATCH_CONFIGS_KEY in data_asset_config:
+                        batch_config_list = _convert_batch_configs_from_yaml_to_internal_object_representation(
+                            data_asset_config[_BATCH_CONFIGS_KEY]
+                        )
+                        data_asset_config[_BATCH_CONFIGS_KEY] = batch_config_list
 
-                datasource_config["assets"] = list(data_assets.values())
+                datasource_config[_ASSETS_KEY] = list(data_assets.values())
 
             fluent_datasources[datasource_name] = datasource_config
 
         config[_FLUENT_DATASOURCES_KEY] = list(fluent_datasources.values())
 
     return config
+
+
+def _convert_batch_configs_from_yaml_to_internal_object_representation(
+    batch_configs: Dict[str, Dict]
+) -> List[Dict]:
+    for (
+        batch_config_name,
+        batch_config,
+    ) in batch_configs.items():
+        batch_config[_BATCH_CONFIG_NAME_KEY] = batch_config_name
+    return list(batch_configs.values())
