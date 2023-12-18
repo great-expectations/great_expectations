@@ -229,7 +229,7 @@ def test_checkpoint_run_in_memory_runtime_validations(
     # we pass a new Batch Request that is associated with the DataFrame at runtime
     # the fixtures came from the old Data Context
     # we have to get them again, because they exist in a new place in memory
-    datasource = context.get_datasource(datasource_name=datasource.name)
+    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
     batch_request = in_memory_asset.build_batch_request(dataframe=spark_test_df)
     validations[0]["batch_request"] = batch_request

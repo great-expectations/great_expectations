@@ -2442,7 +2442,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
-        batch_request = get_batch_request_from_acceptable_arguments(
+        result = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -2465,7 +2465,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_request_options=batch_request_options,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
+        datasource_name = result.datasource_name
 
         datasource = self.datasources.get(datasource_name)
         if not datasource:
@@ -2475,7 +2475,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "please confirm that your configuration is accurate.",
             )
 
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+        return datasource.get_batch_list_from_batch_request(batch_request=result)
 
     @overload
     def add_expectation_suite(  # noqa: PLR0913

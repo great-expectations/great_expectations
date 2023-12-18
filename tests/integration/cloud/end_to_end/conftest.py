@@ -28,17 +28,17 @@ LOGGER: Final = logging.getLogger("tests")
 
 
 @pytest.fixture(scope="package")
-def cloud_base_url() -> str:
+def cloud_base_url() -> str | None:
     return os.environ.get("GX_CLOUD_BASE_URL")
 
 
 @pytest.fixture(scope="package")
-def cloud_organization_id() -> str:
+def cloud_organization_id() -> str | None:
     return os.environ.get("GX_CLOUD_ORGANIZATION_ID")
 
 
 @pytest.fixture(scope="package")
-def cloud_access_token() -> str:
+def cloud_access_token() -> str | None:
     return os.environ.get("GX_CLOUD_ACCESS_TOKEN")
 
 

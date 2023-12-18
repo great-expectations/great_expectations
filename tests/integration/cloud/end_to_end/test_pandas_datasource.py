@@ -220,7 +220,7 @@ def test_checkpoint_run_in_memory_runtime_validations(
     # one way to do this is to assign to the attribute directly
     # the fixtures came from the old Data Context
     # we have to get them again, because they exist in a new place in memory
-    datasource = context.get_datasource(datasource_name=datasource.name)
+    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
     in_memory_asset.dataframe = pandas_test_df
     checkpoint_result = checkpoint.run(validations=validations)
@@ -229,7 +229,7 @@ def test_checkpoint_run_in_memory_runtime_validations(
     # building a new Batch Request also associates the DataFrame with the DataFrameAsset again
     # users might choose to pass this Batch Request as a runtime validation
     # although that step is not required
-    datasource = context.get_datasource(datasource_name=datasource.name)
+    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
     assert in_memory_asset.dataframe is None
     batch_request = in_memory_asset.build_batch_request(dataframe=pandas_test_df)

@@ -191,13 +191,11 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
-        validations = validations or []
-        if validations:
-            validations = (
-                self._convert_runtime_validations_list_to_checkpoint_validation_configs(
-                    runtime_validations=validations
-                )
+        converted_validations = (
+            self._convert_runtime_validations_list_to_checkpoint_validation_configs(
+                runtime_validations=validations or []
             )
+        )
 
         if (
             sum(bool(x) for x in [self._validator is not None, validator is not None])
@@ -210,7 +208,7 @@ class BaseCheckpoint(ConfigPeer):
         if validator:
             self._validator = validator
             if batch_request or _does_validation_contain_batch_request(
-                validations=validations
+                validations=converted_validations
             ):
                 raise gx_exceptions.CheckpointError(
                     f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying a batch_request and/or validations with a batch_request to run() is not allowed.'
@@ -219,7 +217,7 @@ class BaseCheckpoint(ConfigPeer):
             if (
                 expectation_suite_name
                 or _does_validation_contain_expectation_suite_name(
-                    validations=validations
+                    validations=converted_validations
                 )
             ):
                 raise gx_exceptions.CheckpointError(

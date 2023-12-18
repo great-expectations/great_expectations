@@ -2506,6 +2506,7 @@ class CheckpointValidationConfig(AbstractConfig):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+    @override
     def __eq__(self, other) -> bool:
         return (
             self.id == other.id
