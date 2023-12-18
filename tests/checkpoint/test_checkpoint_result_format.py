@@ -8,9 +8,6 @@ import pytest
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core import (
-    ExpectationConfiguration,
-)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
@@ -27,6 +24,9 @@ from great_expectations.expectations.core.expect_multicolumn_sum_to_equal import
     ExpectMulticolumnSumToEqual,
 )
 from great_expectations.expectations.expectation import Expectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:

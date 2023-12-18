@@ -67,20 +67,18 @@ def fds_data_asset_with_event_type_splitter(
 def batch_config(
     fds_data_asset: DataAsset,
 ) -> BatchConfig:
-    return BatchConfig(
-        name="test_batch_config",
-        data_asset=fds_data_asset,
-    )
+    batch_config = BatchConfig(name="test_batch_config")
+    batch_config._data_asset = fds_data_asset
+    return batch_config
 
 
 @pytest.fixture
 def batch_config_with_event_type_splitter(
     fds_data_asset_with_event_type_splitter: DataAsset,
 ) -> BatchConfig:
-    return BatchConfig(
-        name="test_batch_config",
-        data_asset=fds_data_asset_with_event_type_splitter,
-    )
+    batch_config = BatchConfig(name="test_batch_config")
+    batch_config._data_asset = fds_data_asset_with_event_type_splitter
+    return batch_config
 
 
 @pytest.fixture
