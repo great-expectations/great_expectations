@@ -32,9 +32,14 @@ def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, 
     if not spy.call_count:
         LOGGER.warning("SQLAlchemy create_engine was not called")
 
+
 @pytest.fixture
-def gx_sqlalchemy_execution_engine_spy(mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch) -> Generator[mock.MagicMock, None, None]:
-    spy = mocker.Mock(spec=great_expectations.execution_engine.sqlalchemy_execution_engine.SqlAlchemyExecutionEngine)
+def gx_sqlalchemy_execution_engine_spy(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
+) -> Generator[mock.MagicMock, None, None]:
+    spy = mocker.Mock(
+        spec=great_expectations.execution_engine.sqlalchemy_execution_engine.SqlAlchemyExecutionEngine
+    )
     monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
     yield spy
     if not spy.call_count:
@@ -57,22 +62,34 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.parametrize(
     "ds_kwargs",
     [
-        param(dict(
-            connection_string="sqlite:///",
-            kwargs={"isolation_level": "SERIALIZABLE"},
-        ), id="no subs + kwargs"),
-        param(dict(
-            connection_string="${MY_CONN_STR}",
-            kwargs={"isolation_level": "SERIALIZABLE"},
-        ),id="subs + kwargs"),
-        param(dict(
-            connection_string="sqlite:///",
-            create_temp_table=True,
-        ), id="create_temp_table=True"),
-        param(dict(
-            connection_string="sqlite:///",
-            create_temp_table=False,
-        ), id="create_temp_table=False"),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="no subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="${MY_CONN_STR}",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=True,
+            ),
+            id="create_temp_table=True",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=False,
+            ),
+            id="create_temp_table=False",
+        ),
     ],
 )
 class TestConfigPasstrough:
@@ -105,7 +122,8 @@ class TestConfigPasstrough:
         monkeypatch: pytest.MonkeyPatch,
         ephemeral_context_with_defaults: EphemeralDataContext,
         ds_kwargs: dict,
-        filter_gx_datasource_warnings: None,):
+        filter_gx_datasource_warnings: None,
+    ):
         monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
         context = ephemeral_context_with_defaults
@@ -121,15 +139,13 @@ class TestConfigPasstrough:
                 exclude_unset=False,
                 exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()},
             ),
-            **{
-                k: v
-                for k, v in ds_kwargs.items()
-                if k not in ["kwargs"]
-            },
+            **{k: v for k, v in ds_kwargs.items() if k not in ["kwargs"]},
             **ds_kwargs.get("kwargs", {}),
             # config substitution should have been performed
-            **ds.dict(include={"connection_string"}, config_provider=ds._config_provider),
-            }
+            **ds.dict(
+                include={"connection_string"}, config_provider=ds._config_provider
+            ),
+        }
         print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args)}")
         gx_sqlalchemy_execution_engine_spy.assert_called_once_with(**expected_args)
 
