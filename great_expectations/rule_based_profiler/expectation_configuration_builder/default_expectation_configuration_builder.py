@@ -19,7 +19,9 @@ from pyparsing import Optional as ppOptional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )

@@ -4,9 +4,8 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Optional, Union
+from typing import List, Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -15,10 +14,17 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
+
+    column: str
+    threshold: Union[float, List[float]]
+    value: Union[str, List[str]]
 
     metric_dependencies = ("query.column",)
 
@@ -73,11 +79,11 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
         query_result = metrics.get("query.column")

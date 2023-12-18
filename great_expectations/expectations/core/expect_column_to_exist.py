@@ -20,10 +20,12 @@ from great_expectations.render.util import ordinal, substitute_none_for_missing
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -57,6 +59,7 @@ class ExpectColumnToExist(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
+    column: str
     column_index: Union[int, EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
@@ -162,14 +165,13 @@ class ExpectColumnToExist(BatchExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         actual_columns = metrics["table.columns"]
-        expected_column_name = self.get_success_kwargs().get("column")
-        expected_column_index = self.get_success_kwargs().get("column_index")
+        expected_column_name = self._get_success_kwargs().get("column")
+        expected_column_index = self._get_success_kwargs().get("column_index")
 
         if expected_column_index:
             try:

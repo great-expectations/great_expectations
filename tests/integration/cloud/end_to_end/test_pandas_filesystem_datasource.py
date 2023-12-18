@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING, Iterator
 import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint

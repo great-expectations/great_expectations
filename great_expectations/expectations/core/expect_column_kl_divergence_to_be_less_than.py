@@ -53,10 +53,12 @@ from great_expectations.validator.metrics_calculator import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
     from great_expectations.validator.validator import (
         ValidationDependencies,
@@ -196,15 +198,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
+        configuration = self.configuration
         partition_object = configuration.kwargs.get("partition_object")
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
@@ -358,11 +358,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def _validate(  # noqa: C901, PLR0912, PLR0915
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self._get_default_value("bucketize_data")
         )

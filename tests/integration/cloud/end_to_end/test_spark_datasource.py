@@ -7,8 +7,10 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint

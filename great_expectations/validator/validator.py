@@ -30,9 +30,6 @@ from marshmallow import ValidationError
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -53,6 +50,9 @@ from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
@@ -865,7 +865,8 @@ class Validator:
             try:
                 runtime_configuration_default = copy.deepcopy(runtime_configuration)
 
-                result = configuration.metrics_validate(
+                expectation = configuration.to_domain_obj()
+                result = expectation.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration_default,
@@ -918,13 +919,12 @@ class Validator:
             if self.active_batch_id:
                 evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
-            expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies: ValidationDependencies = expectation_impl(
-                **evaluated_config.kwargs
-            ).get_validation_dependencies(
-                configuration=evaluated_config,
-                execution_engine=self._execution_engine,
-                runtime_configuration=runtime_configuration,
+            expectation = evaluated_config.to_domain_obj()
+            validation_dependencies: ValidationDependencies = (
+                expectation.get_validation_dependencies(
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
             )
 
             try:
