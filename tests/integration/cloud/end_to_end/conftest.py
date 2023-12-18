@@ -58,12 +58,6 @@ def context(
     return context
 
 
-@pytest.fixture(scope="function")
-def reloaded_context() -> CloudDataContext:
-    assert isinstance(context, CloudDataContext)
-    return context
-
-
 @pytest.fixture(scope="module")
 def datasource_name(
     context: CloudDataContext,

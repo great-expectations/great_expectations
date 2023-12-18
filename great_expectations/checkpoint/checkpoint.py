@@ -555,6 +555,9 @@ class BaseCheckpoint(ConfigPeer):
         self,
         runtime_validations: list[dict] | list[CheckpointValidationConfig],
     ) -> list[CheckpointValidationConfig]:
+        """This method ensures that validations passed at runtime do not get added to the
+        complete validations list, if runtime validations are identical to configured validations.
+        """
         for runtime_validation in runtime_validations:
             if isinstance(runtime_validation, dict) and (
                 "id" not in runtime_validation.keys()

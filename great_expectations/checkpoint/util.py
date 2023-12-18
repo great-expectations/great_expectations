@@ -343,14 +343,10 @@ def substitute_template_config(  # noqa: PLR0912
     return dest_config
 
 
-def substitute_runtime_config(  # noqa: PLR0912
-    source_config: dict, runtime_kwargs: dict
+def _replace_dest_config_with_runtime_kwargs(
+    dest_config: dict,
+    runtime_kwargs: dict,
 ) -> dict:
-    if not (runtime_kwargs and any(runtime_kwargs.values())):
-        return source_config
-
-    dest_config: dict = copy.deepcopy(source_config)
-
     # replace
     if runtime_kwargs.get("template_name") is not None:
         dest_config["template_name"] = runtime_kwargs["template_name"]
@@ -362,6 +358,13 @@ def substitute_runtime_config(  # noqa: PLR0912
         dest_config["expectation_suite_ge_cloud_id"] = runtime_kwargs[
             "expectation_suite_ge_cloud_id"
         ]
+    return dest_config
+
+
+def _update_dest_config_with_runtime_kwargs(
+    dest_config: dict,
+    runtime_kwargs: dict,
+) -> dict:
     # update
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
@@ -405,6 +408,7 @@ def substitute_runtime_config(  # noqa: PLR0912
         dest_config["runtime_configuration"] = updated_runtime_configuration
     if runtime_kwargs.get("validations") is not None:
         validations = dest_config.get("validations") or []
+        # convert to ensure we are comparing CheckpointValidationConfig objects
         validations = convert_validations_list_to_checkpoint_validation_configs(
             validations=validations
         )
@@ -417,11 +421,30 @@ def substitute_runtime_config(  # noqa: PLR0912
         dest_config["validations"] = validations
     if runtime_kwargs.get("profilers") is not None:
         profilers = dest_config.get("profilers") or []
-        existing_profilers = source_config.get("profilers") or []
-        profilers.extend(
-            filter(lambda v: v not in existing_profilers, runtime_kwargs["profilers"])
-        )
+        runtime_profilers = runtime_kwargs.get("profilers")
+        for profiler in runtime_profilers:
+            if profiler not in profilers:
+                profilers.append(profiler)
         dest_config["profilers"] = profilers
+
+    return dest_config
+
+
+def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict:
+    if not (runtime_kwargs and any(runtime_kwargs.values())):
+        return source_config
+
+    dest_config: dict = copy.deepcopy(source_config)
+
+    dest_config = _replace_dest_config_with_runtime_kwargs(
+        dest_config=dest_config,
+        runtime_kwargs=runtime_kwargs,
+    )
+
+    dest_config = _update_dest_config_with_runtime_kwargs(
+        dest_config=dest_config,
+        runtime_kwargs=runtime_kwargs,
+    )
 
     return dest_config
 
