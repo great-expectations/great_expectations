@@ -34,10 +34,10 @@ from great_expectations.expectations.expectation import ColumnAggregateExpectati
 from great_expectations.render.renderer.renderer import renderer
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectation_validation_result import (
         ExpectationValidationResult,
     )
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )

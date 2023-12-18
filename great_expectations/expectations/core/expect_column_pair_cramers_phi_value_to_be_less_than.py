@@ -20,7 +20,7 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
+    from great_expectations.expectation_validation_result import (
         ExpectationValidationResult,
     )
     from great_expectations.expectations.expectation_configuration import (

@@ -10,7 +10,7 @@ from great_expectations.render.renderer.content_block.content_block import (
 from great_expectations.render.renderer_configuration import RendererConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
+    from great_expectations.expectation_validation_result import (
         ExpectationValidationResult,
     )
     from great_expectations.expectations.expectation_configuration import (

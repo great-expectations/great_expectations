@@ -11,7 +11,7 @@ from great_expectations.render.renderer.content_block.content_block import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
+    from great_expectations.expectation_validation_result import (
         ExpectationValidationResult,
     )
     from great_expectations.expectations.expectation_configuration import (

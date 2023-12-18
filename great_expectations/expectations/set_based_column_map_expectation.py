@@ -35,7 +35,7 @@ from great_expectations.render.util import (
 from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
+    from great_expectations.expectation_validation_result import (
         ExpectationValidationResult,
     )
     from great_expectations.expectations.expectation_configuration import (

@@ -24,10 +24,10 @@ from great_expectations.validator.metric_configuration import (  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectation_validation_result import (
         ExpectationValidationResult,
     )
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
