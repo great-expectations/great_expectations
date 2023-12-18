@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Generator
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Any, Generator
 from unittest import mock
 
 import pytest
@@ -113,13 +114,24 @@ class TestConfigPasstrough:
         gx_execution_engine: SqlAlchemyExecutionEngine = ds.get_execution_engine()
         print(f"{gx_execution_engine=}")
 
-        gx_sqlalchemy_execution_engine_spy.assert_called_once_with(
-            "sqlite:///",
+        expected_args: dict[str, Any] = {
+            # this is testing that kwargs that we expect to be passed to create_engine are passed
+            # it should include defaults from the datasource class
+            **ds.dict(
+                exclude_unset=False,
+                exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()},
+            ),
             **{
-                **ds.dict(include={"kwargs"}, exclude_unset=False)["kwargs"],
-                **ds_kwargs.get("kwargs", {}),
+                k: v
+                for k, v in ds_kwargs.items()
+                if k not in ["kwargs"]
             },
-        )
+            **ds_kwargs.get("kwargs", {}),
+            # config substitution should have been performed
+            **ds.dict(include={"connection_string"}, config_provider=ds._config_provider),
+            }
+        print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args)}")
+        gx_sqlalchemy_execution_engine_spy.assert_called_once_with(**expected_args)
 
 
 @pytest.mark.unit
