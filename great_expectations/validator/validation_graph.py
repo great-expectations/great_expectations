@@ -18,6 +18,7 @@ from tqdm.auto import tqdm
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -168,8 +169,6 @@ class ValidationGraph:
         """
         Updates "metric_domain_kwargs" and/or "metric_value_kwargs" of "MetricConfiguration" with defualts (if needed).
         """
-        from great_expectations.expectations.registry import get_metric_provider
-
         metric_impl_klass: MetricProvider
         metric_provider: Callable
         metric_impl_klass, metric_provider = get_metric_provider(
