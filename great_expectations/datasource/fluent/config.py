@@ -438,9 +438,5 @@ def _convert_batch_configs_from_yaml_to_internal_object_representation(
         batch_config_name,
         batch_config,
     ) in batch_configs.items():
-        if not isinstance(batch_config_name, str):
-            raise ValueError("BatchConfig name must be a string")
-        if not isinstance(batch_config, dict):
-            raise ValueError("BatchConfig must be a dictionary")
         batch_config[_BATCH_CONFIG_NAME_KEY] = batch_config_name
     return list(batch_configs.values())
