@@ -25,7 +25,7 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
-from tests.self_check import (
+from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
 )

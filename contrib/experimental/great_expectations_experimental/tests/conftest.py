@@ -1,4 +1,4 @@
-from tests.self_check import build_test_backends_list
+from great_expectations.self_check.util import build_test_backends_list
 
 
 def pytest_addoption(parser):

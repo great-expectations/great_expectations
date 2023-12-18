@@ -8,9 +8,9 @@ import dataprofiler as dp
 import pandas as pd
 from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
 
+from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-from tests.self_check import build_pandas_engine
 
 if TYPE_CHECKING:
     from capitalone_dataprofiler_expectations.tests.conftest import (

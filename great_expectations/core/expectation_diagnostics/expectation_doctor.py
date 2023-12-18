@@ -49,12 +49,12 @@ from great_expectations.render import (
     RenderedTableContent,
     ValueListContent,
 )
-from great_expectations.util import camel_to_snake
-from tests.self_check import (
+from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
     generate_dataset_name_from_expectation_name,
     generate_expectation_tests,
 )
+from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

@@ -31,15 +31,15 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.util import isclose
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from tests.expectations.test_util import get_table_columns_metric
-from tests.self_check import (
+from great_expectations.self_check.util import (
     build_pandas_engine,
     build_sa_execution_engine,
     build_spark_engine,
 )
+from great_expectations.util import isclose
+from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from tests.expectations.test_util import get_table_columns_metric
 
 
 @pytest.mark.unit

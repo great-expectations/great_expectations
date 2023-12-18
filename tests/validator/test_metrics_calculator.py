@@ -5,11 +5,11 @@ from unittest import mock
 import pytest
 
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import isclose
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import Validator
-from tests.self_check import get_test_validator_with_data
 
 if TYPE_CHECKING:
     import pandas as pd

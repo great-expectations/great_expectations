@@ -100,6 +100,13 @@ from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_ran
     NumericMetricRangeMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import ParameterNode
+from great_expectations.self_check.util import (
+    build_test_backends_list as build_test_backends_list_v3,
+)
+from great_expectations.self_check.util import (
+    expectationSuiteValidationResultSchema,
+    get_dataset,
+)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     is_library_loadable,
@@ -116,13 +123,6 @@ from tests.datasource.fluent._fake_cloud_api import (
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
-)
-from tests.self_check import (
-    build_test_backends_list as build_test_backends_list_v3,
-)
-from tests.self_check import (
-    expectationSuiteValidationResultSchema,
-    get_dataset,
 )
 
 if TYPE_CHECKING:

@@ -22,8 +22,8 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import import_library_module
-from tests.self_check import build_sa_execution_engine
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")

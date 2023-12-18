@@ -1,16 +1,19 @@
 from typing import TYPE_CHECKING
 
 import pytest
+from contrib.experimental.great_expectations_experimental.expectations.expect_queried_column_value_frequency_to_meet_threshold import (
+    ExpectQueriedColumnValueFrequencyToMeetThreshold,  # noqa: F401 # needed for expectation registration
+)
 
 # noinspection PyUnresolvedReferences
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.self_check.util import (
+    get_test_validator_with_data,
+)
 from great_expectations.util import build_in_memory_runtime_context
 from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
-)
-from tests.self_check import (
-    get_test_validator_with_data,
 )
 
 if TYPE_CHECKING:

@@ -33,17 +33,17 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
-from tests.self_check import (
+from great_expectations.self_check.util import (
     build_sa_validator_with_data,
     generate_expectation_tests,
     generate_test_table_name,
     should_we_generate_this_test,
 )
-from tests.self_check import (
+from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 

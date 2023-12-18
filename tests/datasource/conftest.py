@@ -19,7 +19,7 @@ from great_expectations.execution_engine.sparkdf_execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from tests.self_check import get_sqlite_connection_url
+from great_expectations.self_check.util import get_sqlite_connection_url
 
 
 def create_partitions_for_table(

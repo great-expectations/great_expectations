@@ -10,10 +10,10 @@ from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.self_check.util import modify_locale
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )
-from tests.self_check import modify_locale
 
 
 @pytest.fixture
