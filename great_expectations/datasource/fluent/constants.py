@@ -14,6 +14,8 @@ _FLUENT_DATASOURCES_KEY: Final[str] = "fluent_datasources"
 _DATASOURCE_NAME_KEY: Final[str] = "name"
 _ASSETS_KEY: Final[str] = "assets"
 _DATA_ASSET_NAME_KEY: Final[str] = "name"
+_BATCH_CONFIGS_KEY: Final[str] = "batch_configs"
+_BATCH_CONFIG_NAME_KEY: Final[str] = "name"
 
 _DATA_CONNECTOR_NAME: Final[str] = "fluent"
 
