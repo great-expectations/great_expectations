@@ -406,13 +406,7 @@ def _update_dest_config_with_runtime_kwargs(
         dest_config["runtime_configuration"] = updated_runtime_configuration
     if runtime_kwargs.get("validations") is not None:
         validations = dest_config.get("validations") or []
-        # convert to ensure we are comparing CheckpointValidationConfig objects
-        validations = convert_validations_list_to_checkpoint_validation_configs(
-            validations=validations
-        )
-        runtime_validations = convert_validations_list_to_checkpoint_validation_configs(
-            validations=runtime_kwargs.get("validations")
-        )
+        runtime_validations = runtime_kwargs.get("validations") or []
         for validation in runtime_validations:
             if validation not in validations:
                 validations.append(validation)

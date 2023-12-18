@@ -2510,6 +2510,15 @@ class CheckpointValidationConfig(AbstractConfig):
     def __eq__(self, other) -> bool:
         """This override allows us to compare configured to runtime validations,
         even if they aren't the same object."""
+        if isinstance(other, dict):
+            return (
+                self.id == other.get("id")
+                and self.expectation_suite_name == other.get("expectation_suite_name")
+                and self.expectation_suite_ge_cloud_id
+                == other.get("expectation_suite_ge_cloud_id")
+                and self.batch_request == other.get("batch_request")
+            )
+
         return (
             self.id == other.id
             and self.expectation_suite_name == other.expectation_suite_name
