@@ -23,7 +23,9 @@ from great_expectations.expectations.registry import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 

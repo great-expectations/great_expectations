@@ -7,13 +7,13 @@ description: Connect GX Cloud to an Airflow Orchestrator.
 
 In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. You'll create a simple DAG that runs a Checkpoint that you have already set up in GX Cloud, and then trigger it through a local installation of an Airflow server.
 
-Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html). 
+Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
 
 ## Prerequisites
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have the [Astro CLI](https://docs.astronomer.io/astro/cli/overview) installed.
+- You have installed Apache Airflow and initialized the database (__airflow db init__).
 
 - You have [connected GX Cloud to a Data Asset on a Data Source](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
@@ -28,28 +28,22 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
     ```bash title="Terminal input"
     mkdir gx-cloud-airflow && cd gx-cloud-airflow
-    astro dev init
     ```
-    After running the code, a new directory is created, you're taken to that directory, and a new Airflow project is initialized.
+    After running the CLI, a new directory is created and you're taken to that directory.
 
-2. Browse to the directory where you created your Airflow project, open the `requirements.txt` file, and then add the following text as a new line: 
-
-    ```
-    airflow-provider-great-expectations==0.2.7
-    ```
-
-    This text adds the GX Airflow Provider to the Airflow project.
-    
-3. Save your changes and close the `requirements.txt` file.
-
-4. Open the `packages.txt` file and add the following text as a new line:
+2. Start the Airflow Scheduler and Web Server
 
     ```
-    libgeos-c1v5
+    airflow scheduler
+    airflow webserver
     ```
-    This text adds the `libgeos-c1v5` library to the Airflow project.
 
-5. Save your changes and close the `packages.txt` file.
+    The scheduler manages task scheduling and the web server starts the UI for Airflow.
+
+3. Access Airflow UI:
+
+    Once the web server is running, open a web browser and go to http://localhost:8080 (by default) to access the Airflow UI.
+
 
 ## Create a DAG file for your GX Cloud Checkpoint
 
@@ -61,35 +55,36 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 2. Open the `gx_dag.py` DAG file and add the following code:
 
-    ```python 
+    ```python
     import os
     import great_expectations as gx
     from airflow import DAG
     from airflow.operators.python import PythonOperator
     from datetime import datetime
 
-    def run_gx_airflow():
-        os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<YOUR_ACCESS_TOKEN>"
-        os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<YOUR_CLOUD_ORGANIZATION_ID>"
-
     # Replace <YOUR_ACCESS_TOKEN> and <YOUR_CLOUD_ORGANIZATION_ID> with your credentials.
     # To get your user access token and organization ID, see:
     # (https://docs.greatexpectations.io/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
 
+    GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
+    GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"
+
+    CHECKPOINT_NAME = "<YOUR_CHECKPOINT>"
+
+    def run_gx_airflow():
+
         context = gx.get_context()
-        checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
-    # Replace <YOUR_CHECKPOINT_NAME> with the name of the Checkpoint you'd like to run.
-        checkpoint = context.get_checkpoint(name = checkpoint_name)
+        checkpoint = context.get_checkpoint(name = CHECKPOINT_NAME)
         checkpoint.run()
 
     default_args = {
         'owner': 'airflow',
         'depends_on_past': False,
-        'start_date': datetime(2023, 8, 9),  
+        'start_date': datetime(2023, 8, 9),
     }
 
     gx_dag = DAG(
-        'gx_dag',  
+        'gx_dag',
         default_args=default_args,
         schedule_interval= '0 0 * * *', # This is set to run daily at midnight. Adjust as needed.
         catchup=False
@@ -106,14 +101,8 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 3. Save your changes and close the `gx_dag.py` DAG file.
 
-## Run the DAG
+## Run the DAG (Manually)
 
-1. Run the following command in the root directory of your Airflow project to start the server:
+1. Sign in to Airflow. The default username and password are `admin`.
 
-    ```bash title="Terminal input"
-    astro dev start
-    ```
-
-2. Sign in to Airflow. The default username and password are `admin`.
-
-3. In the **Actions** column, click **Trigger DAG** for `gx_airflow` and confirm your DAG runs as expected.
+2. In the **Actions** column, click **Trigger DAG** for `gx_airflow` and confirm your DAG runs as expected.
