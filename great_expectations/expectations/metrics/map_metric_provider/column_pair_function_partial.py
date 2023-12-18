@@ -9,8 +9,8 @@ from typing import (
     Type,
 )
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,

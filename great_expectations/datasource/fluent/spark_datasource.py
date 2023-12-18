@@ -16,6 +16,11 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import (
     StrictBool,
@@ -25,11 +30,6 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import (
-    deprecated_argument,
-    new_argument,
-    public_api,
-)
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
 from great_expectations.datasource.fluent.constants import (

@@ -32,13 +32,10 @@ from dateutil.parser import parse
 from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_diagnostics.expectation_doctor import (
-    ExpectationDoctor,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -51,10 +48,6 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
-)
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -100,6 +93,9 @@ if TYPE_CHECKING:
         ExpectationDiagnostics,
     )
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+    )
     from great_expectations.render.renderer_configuration import MetaNotes
 
 logger = logging.getLogger(__name__)
@@ -1257,6 +1253,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Returns:
             An Expectation Diagnostics report object
         """
+        from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+            ExpectationDoctor,
+        )
+
         return ExpectationDoctor(self).run_diagnostics(
             raise_exceptions_for_backends=raise_exceptions_for_backends,
             ignore_suppress=ignore_suppress,
@@ -1286,6 +1286,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             backends: list of backends to pass to run_diagnostics
             show_debug_messages (bool): If true, create a logger and pass to run_diagnostics
         """
+        from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+            ExpectationDoctor,
+        )
+
         return ExpectationDoctor(self).print_diagnostic_checklist(
             diagnostics=diagnostics,
             show_failed_tests=show_failed_tests,
@@ -2336,6 +2340,10 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+
+        from great_expectations.execution_engine import (
+            SqlAlchemyExecutionEngine,
+        )
 
         # ID/PK currently doesn't work for ExpectCompoundColumnsToBeUnique in SQL
         if self.map_metric == "compound_columns.unique" and isinstance(

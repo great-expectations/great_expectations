@@ -35,17 +35,16 @@ from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.analytics.events import DataContextInitializedEvent
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
     new_argument,
     new_method_or_class,
     public_api,
 )
+from great_expectations.analytics.events import DataContextInitializedEvent
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -59,7 +58,6 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.datasource_dict import CacheableDatasourceDict
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
@@ -101,6 +99,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     parse_substitution_variable,
 )
+from great_expectations.datasource.datasource_dict import CacheableDatasourceDict
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
@@ -142,7 +141,7 @@ if TYPE_CHECKING:
 
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.datasource_dict import DatasourceDict
+    from great_expectations.core import ExpectationSuite
     from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -164,6 +163,7 @@ if TYPE_CHECKING:
         GXCloudIdentifier,
     )
     from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
@@ -1069,6 +1069,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             DataAsset
         """
+        from great_expectations.core import ExpectationSuite
+
         if isinstance(batch_kwargs, dict):
             batch_kwargs = BatchKwargs(batch_kwargs)
 
@@ -2591,6 +2593,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: ExpectationSuite | None = None,
         **kwargs,
     ) -> ExpectationSuite:
+        from great_expectations.core import ExpectationSuite
+
         if not isinstance(overwrite_existing, bool):
             raise ValueError("overwrite_existing must be of type bool.")
 
@@ -2752,6 +2756,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted `ExpectationSuite`.
         """
+        from great_expectations.core import ExpectationSuite
 
         self._validate_expectation_suite_xor_expectation_suite_name(
             expectation_suite, expectation_suite_name
@@ -2837,6 +2842,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: There is no expectation suite with the name provided
         """
+        from great_expectations.core import ExpectationSuite
+
         if ge_cloud_id is not None:
             # deprecated-v0.15.45
             warnings.warn(
@@ -4068,6 +4075,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
+        from great_expectations.core import ExpectationSuite
+
         self._evaluation_parameter_dependencies = {}
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
         # https://github.com/great-expectations/great_expectations/pull/3377

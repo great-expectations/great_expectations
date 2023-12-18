@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Optional, Tuple
 
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes

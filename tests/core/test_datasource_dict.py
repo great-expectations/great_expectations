@@ -4,15 +4,15 @@ from typing import TYPE_CHECKING, Callable
 
 import pytest
 
-from great_expectations.core.datasource_dict import (
-    CacheableDatasourceDict,
-    DatasourceDict,
-)
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.store import DatasourceStore
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
+)
+from great_expectations.datasource.datasource_dict import (
+    CacheableDatasourceDict,
+    DatasourceDict,
 )
 from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.new_datasource import Datasource

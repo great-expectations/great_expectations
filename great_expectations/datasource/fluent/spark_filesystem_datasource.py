@@ -4,8 +4,8 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,

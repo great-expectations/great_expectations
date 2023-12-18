@@ -9,7 +9,7 @@ from typing import Any, Sequence
 
 import pandas as pd
 
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )

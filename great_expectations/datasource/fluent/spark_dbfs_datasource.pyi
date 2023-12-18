@@ -6,19 +6,12 @@ from great_expectations.compatibility.pyspark import (
     types as pyspark_types,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import SparkFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    DBFSDataConnector as DBFSDataConnector,
-)
 from great_expectations.datasource.fluent.interfaces import (
     BatchMetadata,
 )
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
-)
-from great_expectations.datasource.fluent.interfaces import (
-    TestConnectionError as TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,

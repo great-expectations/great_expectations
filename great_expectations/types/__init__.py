@@ -8,7 +8,6 @@ import pandas as pd
 from great_expectations.compatibility import pydantic, pyspark
 
 from ..alias_types import JSONValues
-from ..core._docs_decorators import public_api
 from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig

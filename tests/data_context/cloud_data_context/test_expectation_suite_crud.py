@@ -4,7 +4,6 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.expectation_suite import (
-    ExpectationConfiguration,
     ExpectationSuite,
 )
 from great_expectations.data_context import get_context
@@ -18,6 +17,9 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from tests.data_context.conftest import MockResponse
 

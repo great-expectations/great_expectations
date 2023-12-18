@@ -15,21 +15,23 @@ To add a new class or module level function to the docs, add the @public_api
 decorator e.g.:
 
 ```python
-    from great_expectations.core._docs_decorators import public_api
-    
-    @public_api
-    class ExamplePublicAPIClass:
-        """My public API class."""
+    from great_expectations._docs_decorators import public_api
 
-        @public_api
-        def example_public_api_method(self):
-            """My public API method."""
-            pass
+
+@public_api
+class ExamplePublicAPIClass:
+    """My public API class."""
 
     @public_api
-    def example_public_api_module_level_function():
-        """My public API module level function."""
+    def example_public_api_method(self):
+        """My public API method."""
         pass
+
+
+@public_api
+def example_public_api_module_level_function():
+    """My public API module level function."""
+    pass
 ```
 
 Once a class or method is marked as part of the public API, its docstring will

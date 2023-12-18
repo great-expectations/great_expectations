@@ -24,12 +24,12 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load, p
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
     public_api,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
@@ -42,12 +42,6 @@ from great_expectations.core.util import (
     parse_string_to_datetime,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-    ExpectationConfigurationSchema,
-    expectationConfigurationSchema,
-)
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -60,6 +54,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
@@ -91,7 +88,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
+        expectations: Optional[Sequence[ExpectationConfiguration]] = None,
         evaluation_parameters: Optional[dict] = None,
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
@@ -112,12 +109,7 @@ class ExpectationSuite(SerializableDictDot):
 
         if expectations is None:
             expectations = []
-        self.expectation_configurations = [
-            ExpectationConfiguration(**expectation)
-            if isinstance(expectation, dict)
-            else expectation
-            for expectation in expectations
-        ]
+        self.expectation_configurations = list(expectations)
         if evaluation_parameters is None:
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
@@ -539,13 +531,6 @@ class ExpectationSuite(SerializableDictDot):
                 "Must provide either expectation_configuration or ge_cloud_id"
             )
 
-        if expectation_configuration and not isinstance(
-            expectation_configuration, ExpectationConfiguration
-        ):
-            raise gx_exceptions.InvalidExpectationConfigurationError(
-                "Ensure that expectation configuration is valid."
-            )
-
         match_indexes = []
         for idx, expectation in enumerate(self.expectation_configurations):
             if ge_cloud_id is not None:
@@ -602,7 +587,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def replace_expectation(
         self,
-        new_expectation_configuration: Union[ExpectationConfiguration, dict],
+        new_expectation_configuration: ExpectationConfiguration,
         existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
         ge_cloud_id: Optional[str] = None,
@@ -626,11 +611,6 @@ class ExpectationSuite(SerializableDictDot):
         if existing_expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either existing_expectation_configuration or ge_cloud_id"
-            )
-
-        if isinstance(new_expectation_configuration, dict):
-            new_expectation_configuration = expectationConfigurationSchema.load(
-                new_expectation_configuration
             )
 
         found_expectation_indexes = self.find_expectation_indexes(
@@ -810,13 +790,7 @@ class ExpectationSuite(SerializableDictDot):
         self, expectation_configuration: ExpectationConfiguration
     ) -> Expectation:
         try:
-            class_ = get_expectation_impl(expectation_configuration.expectation_type)
-            expectation = class_(
-                meta=expectation_configuration.meta,
-                id=expectation_configuration.ge_cloud_id,
-                **expectation_configuration.kwargs,
-            )  # Implicitly validates in constructor
-            return expectation
+            return expectation_configuration.to_domain_obj()
         except (
             gx_exceptions.ExpectationNotFoundError,
             gx_exceptions.InvalidExpectationConfigurationError,
@@ -1133,7 +1107,7 @@ class ExpectationSuite(SerializableDictDot):
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
-    expectations = fields.List(fields.Nested(ExpectationConfigurationSchema))
+    expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
