@@ -10,6 +10,12 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.5
+* [BUGFIX] validator head query limit ([#9071](https://github.com/great-expectations/great_expectations/pull/9071))
+* [BUGFIX] Databricks shared compute fix ([#9034](https://github.com/great-expectations/great_expectations/pull/9034))
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+* [MAINTENANCE] add_or_update_checkpoint with expectation_suite_ge_cloud_id ([#9070](https://github.com/great-expectations/great_expectations/pull/9070))
+
 ### 0.18.4
 * [BUGFIX] 0.18.4 - Fix Snowflake error when using alternative connection details format. ([#9056](https://github.com/great-expectations/great_expectations/pull/9056))
 * [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068) via [#9061](https://github.com/great-expectations/great_expectations/pull/9061)) (thanks @matveykortsev)
