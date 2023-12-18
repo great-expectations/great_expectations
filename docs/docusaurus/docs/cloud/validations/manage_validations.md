@@ -44,11 +44,7 @@ To make the identification of Data Assets containing partitions easier, a label 
 
 3. Click the **Expectations** tab and then select an Expectation Suite in the **Expectation Suites** list.
 
-4. Select one of the following options:
-
-    - To run a Validation on a specific column, click the column name in the **Columns** pane, and then click **Validate**.
-
-    - To run a Validation on all columns, click **Validate**.
+4. Click **Validate**.
 
 5. Select one of the following options:
 
