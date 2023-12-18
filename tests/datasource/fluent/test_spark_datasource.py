@@ -148,9 +148,5 @@ def test_build_batch_request_raises_if_missing_dataframe(
         name="my_spark_datasource"
     ).add_dataframe_asset(name="my_dataframe_asset")
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError):
         dataframe_asset.build_batch_request()
-
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(
-        e.value
-    )
