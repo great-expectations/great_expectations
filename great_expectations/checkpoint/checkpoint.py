@@ -207,6 +207,8 @@ class BaseCheckpoint(ConfigPeer):
 
         if validator:
             self._validator = validator
+
+        if self._validator:
             if batch_request or _does_validation_contain_batch_request(
                 validations=converted_validations
             ):
