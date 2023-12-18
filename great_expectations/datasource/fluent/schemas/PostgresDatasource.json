@@ -61,7 +61,7 @@
         },
         "create_temp_table": {
             "title": "Create Temp Table",
-            "default": true,
+            "default": false,
             "type": "boolean"
         },
         "kwargs": {
