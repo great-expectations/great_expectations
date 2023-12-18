@@ -360,7 +360,7 @@ module.exports = {
                 'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
                 'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
                 'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
+                'oss/contributing/contributing_maturity',
               ]
             },
             {
@@ -374,10 +374,10 @@ module.exports = {
                 'oss/guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
                 'oss/guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
                 'oss/guides/expectations/creating_custom_expectations/add_custom_parameters',
+                'oss/guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
               ]
             },
             'oss/guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
-            'oss/contributing/contributing_maturity',
           ]
         },
         {
