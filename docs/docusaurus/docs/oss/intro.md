@@ -1,6 +1,6 @@
 ---
 title: Welcome
-slug: /
+slug: /oss/welcome/
 ---
 
 Great Expectations is the leading tool for [validating](/docs/reference/learn/terms/validation) and [documenting](/docs/reference/learn/terms/data_docs) your data. If you're ready to get started, see the [Quickstart](/docs/oss/tutorials/quickstart).
