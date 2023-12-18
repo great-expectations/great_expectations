@@ -45,8 +45,7 @@ def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
         connection_string = "postgresql://postgres:postgres@localhost:5432/postgres"
         # <snippet name="tutorials/quickstart/quickstart.py connect_to_data sql_query">
         batch = context.sources.pandas_default.read_sql(
-            "SELECT * FROM yellow_tripdata_sample_2019_01",
-            connection_string
+            "SELECT * FROM yellow_tripdata_sample_2019_01", connection_string
         )
         # </snippet>
         return batch
@@ -60,7 +59,6 @@ def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
         batch = context.sources.pandas_default.from_dataframe(df)
         # </snippet>
         return batch
-
 
 
 for tab_name in QuickstartDatasourceTabs:
