@@ -444,8 +444,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
         else:
             raise RuntimeError(
-                "DataFrame is missing from DataFrameAsset. If you are running an existing Checkpoint, "
-                "the Batch Request used should be passed to Checkpoint.run()."
+                "DataFrame is missing from DataFrameAsset. Update your DataFrameAsset or "
+                "build a new Batch Request from your DataFrameAsset."
             )
 
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
