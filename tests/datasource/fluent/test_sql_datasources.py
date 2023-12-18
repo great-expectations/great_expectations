@@ -42,9 +42,7 @@ def gx_sqlalchemy_execution_engine_spy(
 
     NOTE: This is not exactly what gets passed to the sqlalchemy.engine.create_engine() function, but it is close.
     """
-    spy = mocker.Mock(
-        spec=SqlAlchemyExecutionEngine
-    )
+    spy = mocker.Mock(spec=SqlAlchemyExecutionEngine)
     monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
     yield spy
     if not spy.call_count:
