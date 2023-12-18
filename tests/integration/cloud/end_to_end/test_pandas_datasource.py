@@ -171,7 +171,7 @@ def in_memory_asset(
 
 
 @pytest.mark.cloud
-def test_checkpoint_run_in_memory_runtime_validations(
+def test_checkpoint_run_in_memory(
     cloud_base_url: str,
     cloud_organization_id: str,
     cloud_access_token: str,
@@ -182,7 +182,7 @@ def test_checkpoint_run_in_memory_runtime_validations(
     expectation_suite: ExpectationSuite,
 ):
     """This Checkpoint only has one in-memory validation configured.
-    This means with a deserialized Checkpoint, if we don't pass runtime validations,
+    This means with a deserialized Checkpoint, if we don't update with the latest DataFrame,
     we should get an error because nothing is there to be validated.
     """
     batch_request = in_memory_asset.build_batch_request(dataframe=pandas_test_df)
@@ -246,5 +246,5 @@ def test_checkpoint_run_in_memory_runtime_validations(
     # is identical to the configured Batch Request
     assert len(validations) == len(checkpoint_result.run_results)
 
-    # clean up Checkpoint so associated entities can also be deleted in fixtures
+    # clean up Checkpoint used only in this test, so associated entities can also be deleted in fixtures
     context.delete_checkpoint(name=checkpoint_name)
