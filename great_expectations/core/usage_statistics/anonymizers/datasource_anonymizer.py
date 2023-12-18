@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
@@ -18,7 +20,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,  # noqa: F821
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)

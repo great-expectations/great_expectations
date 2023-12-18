@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, ClassVar, List, Literal, Tuple
 
 from great_expectations.expectations.expectation import (

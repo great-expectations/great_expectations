@@ -1,11 +1,14 @@
-from dataclasses import asdict, dataclass
-from typing import List, Union
+from __future__ import annotations
 
-import numpy as np
+from dataclasses import asdict, dataclass
+from typing import TYPE_CHECKING, List, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot
+
+if TYPE_CHECKING:
+    import numpy as np
 
 NUM_HISTOGRAM_BINS: int = 10  # Equal to "numpy.histogram()" default (can be turned into configurable argument).
 
