@@ -144,31 +144,40 @@ class ExpectationSuite(SerializableDictDot):
 
     @property
     def expectations(self) -> list[Expectation]:
-        return [
+        expectations = [
             self._build_expectation(expectation_configuration=expectation_configuration)
             for expectation_configuration in self.expectation_configurations
         ]
+        for expectation in expectations:
+            expectation.register_save_callback(save_callback=self._save_expectation)
+        return expectations
 
     @public_api
     def add(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
-        if not any(
-            expectation.configuration == existing_config
+        if expectation.id:
+            raise RuntimeError(
+                "Cannot add Expectation because it already belongs to an ExpectationSuite. "
+                + "Please make a copy of your Expectation with `copy(expectation)` and try again."
+            )
+        should_save_expectation = self._has_been_saved()
+        expectation_is_unique = all(
+            expectation.configuration != existing_config
             for existing_config in self.expectation_configurations
-        ):
+        )
+        if expectation_is_unique:
+            if (
+                should_save_expectation
+            ):  # persist the Expectation first so it gets an ID
+                expectation = self._store.add_expectation(
+                    suite=self, expectation=expectation
+                )
+            # add it to our in memory suite
             self.expectation_configurations.append(expectation.configuration)
         else:
-            pass  # suite is a set-like collection
+            pass  # suite is a set-like collection, so don't add if it not unique
 
-        if self._has_been_saved():
-            # only persist on add if the suite has already been saved
-            try:
-                self.save()
-            except Exception as exc:
-                # rollback this change
-                self.expectation_configurations.pop()
-                raise exc
-
+        expectation.register_save_callback(save_callback=self._save_expectation)
         return expectation
 
     @public_api
@@ -213,6 +222,9 @@ class ExpectationSuite(SerializableDictDot):
         # todo: this should only check local keys instead of potentially querying the remote backend
         key = self._store.get_key(suite=self)
         return self._store.has_key(key=key)
+
+    def _save_expectation(self, expectation) -> Expectation:
+        return self._store.update_expectation(suite=self, expectation=expectation)
 
     def add_citation(  # noqa: PLR0913
         self,

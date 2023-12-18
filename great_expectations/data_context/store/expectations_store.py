@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import Dict, cast
+from typing import TYPE_CHECKING, Dict, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -24,6 +24,9 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.expectations.expectation import Expectation
 
 
 class ExpectationsStore(Store):
@@ -111,6 +114,38 @@ class ExpectationsStore(Store):
 
         return suite_dict
 
+    def add_expectation(
+        self, suite: ExpectationSuite, expectation: Expectation
+    ) -> Expectation:
+        suite_identifier = self.get_key(suite=suite)
+        suite_dict = self.get(key=suite_identifier)
+        suite = ExpectationSuite(**suite_dict)
+
+        expectation.id = str(uuid.uuid4())
+        suite.expectation_configurations.append(expectation.configuration)
+
+        self.update(key=suite_identifier, value=suite)
+        return expectation
+
+    def update_expectation(
+        self, suite: ExpectationSuite, expectation: Expectation
+    ) -> Expectation:
+        suite_identifier = self.get_key(suite=suite)
+        suite_dict = self.get(key=suite_identifier)
+        suite = ExpectationSuite(**suite_dict)
+
+        if expectation.id not in {exp.id for exp in suite.expectations}:
+            raise KeyError("Cannot update Expectation because it was not found.")
+
+        for i, old_expectation in enumerate(suite.expectations):
+            if old_expectation.id == expectation.id:
+                # todo: update when expectations are source of truth
+                suite.expectation_configurations[i] = expectation.configuration
+                break
+
+        self.update(key=suite_identifier, value=suite)
+        return expectation
+
     def _add(self, key, value, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
@@ -190,7 +225,7 @@ class ExpectationsStore(Store):
     def _add_cloud_ids_to_local_suite_and_expectations(
         self, local_suite: ExpectationSuite, cloud_suite: dict
     ) -> ExpectationSuite:
-        if not local_suite.ge_cloud_id:
+        if not local_suite["ge_cloud_id"]:
             local_suite.ge_cloud_id = cloud_suite["ge_cloud_id"]
         # replace local expectations with those returned from the backend
         expectations = []

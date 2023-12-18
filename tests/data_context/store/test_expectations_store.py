@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 from unittest import mock
+from uuid import UUID
 
 import pytest
 
-from great_expectations import project_manager
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
 )
+from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
 from tests.core.usage_statistics.util import (
@@ -300,7 +301,6 @@ def test_gx_cloud_response_json_to_object_dict(
 
 @pytest.mark.unit
 def test_get_key_in_non_cloud_mode(empty_data_context):
-    project_manager.set_project(empty_data_context)
     name = "test-name"
     suite = ExpectationSuite(expectation_suite_name=name)
     key = empty_data_context.expectations_store.get_key(suite)
@@ -310,8 +310,177 @@ def test_get_key_in_non_cloud_mode(empty_data_context):
 @pytest.mark.unit
 def test_get_key_in_cloud_mode(empty_data_context_in_cloud_mode):
     cloud_data_context = empty_data_context_in_cloud_mode
-    project_manager.set_project(cloud_data_context)
     name = "test-name"
     suite = ExpectationSuite(expectation_suite_name=name)
     key = cloud_data_context.expectations_store.get_key(suite)
     assert isinstance(key, GXCloudIdentifier)
+
+
+@pytest.mark.cloud
+def test_add_expectation_success_cloud_backend(empty_cloud_data_context):
+    # Arrange
+    context = empty_cloud_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    suite = context.add_expectation_suite(suite_name)
+    key = store.get_key(suite)
+    expectation = ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+
+    # Act
+    store.add_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=key)
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    added_expectation = updated_suite.expectations[0]
+    assert UUID(added_expectation.id)
+    assert expectation.column == added_expectation.column
+    assert expectation.value_set == added_expectation.value_set
+    assert expectation.result_format == added_expectation.result_format
+
+
+@pytest.mark.filesystem
+def test_add_expectation_success_file_backend(empty_data_context):
+    # Arrange
+    context = empty_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    suite = context.add_expectation_suite(suite_name)
+    key = store.get_key(suite)
+    expectation = ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+
+    # Act
+    store.add_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=key)
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    added_expectation = updated_suite.expectations[0]
+    assert UUID(added_expectation.id)
+    assert expectation.column == added_expectation.column
+    assert expectation.value_set == added_expectation.value_set
+    assert expectation.result_format == added_expectation.result_format
+
+
+@pytest.mark.filesystem
+def test_add_expectation_disregards_provided_id(empty_data_context):
+    # Arrange
+    context = empty_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    suite = context.add_expectation_suite(suite_name)
+    key = store.get_key(suite)
+    provided_id = "e86bb8a8-b75f-4efb-a3bb-210b6440661e"
+    expectation = ExpectColumnValuesToBeInSet(
+        id=provided_id,
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+
+    # Act
+    store.add_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=key)
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    added_expectation = updated_suite.expectations[0]
+    assert UUID(added_expectation.id)
+    assert added_expectation.id != provided_id
+
+
+@pytest.mark.cloud
+def test_update_expectation_success_cloud_backend(empty_cloud_data_context):
+    # Arrange
+    context = empty_cloud_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    expectation = ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite = context.add_expectation_suite(
+        suite_name, expectations=[expectation.configuration]
+    )
+    key = store.get_key(suite)
+    expectation = suite.expectations[0]
+    updated_column_name = "foo"
+    expectation.column = updated_column_name
+
+    # Act
+    store.update_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=key)
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    updated_expectation = updated_suite.expectations[0]
+    assert updated_expectation.id == expectation.id
+    assert updated_expectation.column == updated_column_name
+
+
+@pytest.mark.filesystem
+def test_update_expectation_success_file_backend(empty_data_context):
+    # Arrange
+    context = empty_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    expectation = ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite = context.add_expectation_suite(
+        suite_name, expectations=[expectation.configuration]
+    )
+    key = store.get_key(suite)
+    expectation = suite.expectations[0]
+    updated_column_name = "foo"
+    expectation.column = updated_column_name
+
+    # Act
+    store.update_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=key)
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    updated_expectation = updated_suite.expectations[0]
+    assert updated_expectation.id == expectation.id
+    assert updated_expectation.column == updated_column_name
+
+
+@pytest.mark.filesystem
+def test_update_expectation_raises_error_for_missing_expectation(empty_data_context):
+    # Arrange
+    context = empty_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    expectation = ExpectColumnValuesToBeInSet(
+        id="2b284004-0e0e-455d-a7f4-11e162fd06c9",
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite = context.add_expectation_suite(
+        suite_name, expectations=[expectation.configuration]
+    )
+    key = store.get_key(suite)
+
+    # Act
+    with pytest.raises(
+        KeyError, match="Cannot update Expectation because it was not found."
+    ):
+        store.update_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=key)
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    assert suite == updated_suite

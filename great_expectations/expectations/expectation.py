@@ -337,6 +337,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
+    _save_callback: Union[Callable[[Expectation], Expectation]] = pydantic.PrivateAttr(
+        default=None
+    )
+
     @pydantic.validator("result_format")
     def _validate_result_format(
         cls, result_format: ResultFormat | dict
@@ -350,6 +354,21 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @classmethod
     def is_abstract(cls) -> bool:
         return isabstract(cls)
+
+    def register_save_callback(
+        self, save_callback: Callable[[Expectation], Expectation]
+    ) -> None:
+        self._save_callback = save_callback
+
+    @public_api
+    def save(self):
+        """Save the current state of this Expectation."""
+        if not self._save_callback:
+            raise RuntimeError(
+                "Expectation must be added to ExpectationSuite before it can be saved."
+            )
+        updated_self = self._save_callback(self)
+        self.id = updated_self.id
 
     @classmethod
     def _register_renderer_functions(cls) -> None:
