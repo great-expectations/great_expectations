@@ -1025,7 +1025,7 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
-    create_temp_table: bool = True
+    create_temp_table: bool = False
     kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
         default={},
         description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"

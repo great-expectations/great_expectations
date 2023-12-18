@@ -122,6 +122,7 @@ def sqlite_datasource(
     datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
+        create_temp_table=True,
     )
     return datasource
 
