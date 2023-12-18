@@ -29,7 +29,6 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
     execution_engine:
         class_name: SqlAlchemyExecutionEngine
         connection_string: sqlite:///{db_file}
-        create_temp_table: True
 
     data_connectors:
         test_runtime_data_connector:
