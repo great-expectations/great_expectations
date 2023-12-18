@@ -8,7 +8,7 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.self_check.util import expectationSuiteValidationResultSchema
+from tests.self_check import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture(scope="module")

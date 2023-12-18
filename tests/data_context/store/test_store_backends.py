@@ -35,12 +35,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
-from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import (
     gen_directory_tree_str,
     is_library_loadable,
 )
 from tests import test_utils
+from tests.self_check import expectationSuiteSchema
 
 yaml = YAMLHandler()
 

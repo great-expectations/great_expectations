@@ -19,7 +19,6 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.self_check.util import build_sa_execution_engine
 from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,
@@ -41,6 +40,7 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
     TaxiSplittingTestCasesWholeTable,
     TaxiTestData,
 )
+from tests.self_check import build_sa_execution_engine
 from tests.test_utils import convert_string_columns_to_datetime
 
 SINGLE_DATE_PART_DATE_PARTS += [

@@ -79,14 +79,14 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
 from great_expectations.profile import ColumnsExistProfiler
-from great_expectations.self_check.sqlalchemy_connection_manager import (
-    LockingConnectionCheck,
-)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
 )
 from great_expectations.validator.validator import Validator
+from tests.self_check.sqlalchemy_connection_manager import (
+    LockingConnectionCheck,
+)
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
@@ -139,10 +139,10 @@ if GEOGRAPHY:
     BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
 
 try:
-    import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
+    import sqlalchemy.dialects.postgresql as postgresqltypes
 
     # noinspection PyPep8Naming
-    from sqlalchemy.dialects.postgresql import dialect as pgDialect  # noqa: TID251
+    from sqlalchemy.dialects.postgresql import dialect as pgDialect
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -162,10 +162,10 @@ except (ImportError, KeyError):
     POSTGRESQL_TYPES = {}
 
 try:
-    import sqlalchemy.dialects.mysql as mysqltypes  # noqa: TID251
+    import sqlalchemy.dialects.mysql as mysqltypes
 
     # noinspection PyPep8Naming
-    from sqlalchemy.dialects.mysql import dialect as mysqlDialect  # noqa: TID251
+    from sqlalchemy.dialects.mysql import dialect as mysqlDialect
 
     MYSQL_TYPES = {
         "TEXT": mysqltypes.TEXT,
@@ -189,10 +189,10 @@ except (ImportError, KeyError):
 try:
     # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
     # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
-    import sqlalchemy.dialects.mssql as mssqltypes  # noqa: TID251
+    import sqlalchemy.dialects.mssql as mssqltypes
 
     # noinspection PyPep8Naming
-    from sqlalchemy.dialects.mssql import dialect as mssqlDialect  # noqa: TID251
+    from sqlalchemy.dialects.mssql import dialect as mssqlDialect
 
     try:
         mssqltypes.INT  # noqa: B018 # reassigning if attr not found
@@ -461,7 +461,7 @@ def get_sqlite_connection_url(sqlite_db_path):
     return url
 
 
-def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
+def get_dataset(  # noqa: C901, PLR0912, PLR0915
     dataset_type,
     data,
     schemas=None,
@@ -608,7 +608,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
         warnings.warn(f"Unknown dataset_type {dataset_type!s}")
 
 
-def get_test_validator_with_data(  # noqa: PLR0913
+def get_test_validator_with_data(
     execution_engine: str,
     data: dict,
     table_name: str | None = None,
@@ -713,7 +713,7 @@ def _get_test_validator_with_data_pandas(
     )
 
 
-def _get_test_validator_with_data_sqlalchemy(  # noqa: PLR0913
+def _get_test_validator_with_data_sqlalchemy(
     df: pd.DataFrame,
     execution_engine: str,
     schemas: dict | None,
@@ -897,7 +897,7 @@ def build_pandas_validator_with_data(
     )
 
 
-def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
+def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0915
     df,
     sa_engine_name,
     table_name,
@@ -1225,7 +1225,7 @@ def build_pandas_engine(
     return execution_engine
 
 
-def build_sa_execution_engine(  # noqa: PLR0913
+def build_sa_execution_engine(
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
@@ -1533,7 +1533,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
     return False
 
 
-def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
+def build_test_backends_list(  # noqa: C901, PLR0912, PLR0915
     include_pandas=True,
     include_spark=False,
     include_sqlalchemy=True,
@@ -1817,7 +1817,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     return test_backends
 
 
-def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
+def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0915
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
@@ -2123,7 +2123,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     return parametrized_tests
 
 
-def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
+def should_we_generate_this_test(  # noqa: PLR0911, PLR0912
     backend: str,
     expectation_test_case: ExpectationTestCase,
     ignore_suppress: bool = False,
@@ -2185,9 +2185,7 @@ def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
                     if major == "0" and minor in ["22", "23"]:
                         return True
                 elif "pandas>=024" in expectation_test_case.only_for:
-                    if (major == "0" and int(minor) >= 24) or int(  # noqa: PLR2004
-                        major
-                    ) >= 1:
+                    if (major == "0" and int(minor) >= 24) or int(major) >= 1:
                         return True
 
             if ignore_only_for:
@@ -2228,7 +2226,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: PLR0912
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2734,7 +2732,7 @@ def _create_clickhouse_engine(
         _get_clickhouse_connection_string(hostname=hostname, schema_name=schema_name)
     )
     from clickhouse_sqlalchemy.exceptions import DatabaseException
-    from sqlalchemy import text  # noqa: TID251
+    from sqlalchemy import text
 
     with engine.begin() as conn:
         try:
@@ -2810,12 +2808,12 @@ def _get_redshift_connection_string() -> str:
     """
     Copied get_redshift_connection_url func from tests/test_utils.py
     """
-    host = os.environ.get("REDSHIFT_HOST")  # noqa: TID251
-    port = os.environ.get("REDSHIFT_PORT")  # noqa: TID251
-    user = os.environ.get("REDSHIFT_USERNAME")  # noqa: TID251
-    pswd = os.environ.get("REDSHIFT_PASSWORD")  # noqa: TID251
-    db = os.environ.get("REDSHIFT_DATABASE")  # noqa: TID251
-    ssl = os.environ.get("REDSHIFT_SSLMODE")  # noqa: TID251
+    host = os.environ.get("REDSHIFT_HOST")
+    port = os.environ.get("REDSHIFT_PORT")
+    user = os.environ.get("REDSHIFT_USERNAME")
+    pswd = os.environ.get("REDSHIFT_PASSWORD")
+    db = os.environ.get("REDSHIFT_DATABASE")
+    ssl = os.environ.get("REDSHIFT_SSLMODE")
 
     if not host:
         raise ValueError(
@@ -2886,13 +2884,13 @@ def _get_snowflake_connection_string() -> str:
     """
     Copied get_snowflake_connection_url func from tests/test_utils.py
     """
-    sfUser = os.environ.get("SNOWFLAKE_USER")  # noqa: TID251
-    sfPswd = os.environ.get("SNOWFLAKE_PW")  # noqa: TID251
-    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")  # noqa: TID251
-    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")  # noqa: TID251
-    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA", "")  # noqa: TID251
-    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")  # noqa: TID251
-    sfRole = os.environ.get("SNOWFLAKE_ROLE", "PUBLIC")  # noqa: TID251
+    sfUser = os.environ.get("SNOWFLAKE_USER")
+    sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA", "")
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+    sfRole = os.environ.get("SNOWFLAKE_ROLE", "PUBLIC")
 
     url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
 

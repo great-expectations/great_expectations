@@ -5,7 +5,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from great_expectations.exceptions import ExecutionEngineError
-from great_expectations.self_check.util import (
+from tests.self_check import (
     _check_if_valid_dataset_name,
     generate_dataset_name_from_expectation_name,
 )

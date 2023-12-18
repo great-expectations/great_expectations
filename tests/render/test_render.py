@@ -17,7 +17,7 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.self_check.util import (
+from tests.self_check import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
 )

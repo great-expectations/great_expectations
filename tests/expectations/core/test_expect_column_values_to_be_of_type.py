@@ -5,8 +5,8 @@ from great_expectations.compatibility import aws
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.util import is_library_loadable
+from tests.self_check import build_sa_validator_with_data
 
 
 @pytest.mark.skipif(

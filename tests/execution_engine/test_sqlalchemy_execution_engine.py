@@ -36,12 +36,12 @@ from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import get_sqlalchemy_domain_data
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
+from tests.self_check import build_sa_execution_engine
 from tests.test_utils import (
     get_sqlite_table_names,
     get_sqlite_temp_table_names,

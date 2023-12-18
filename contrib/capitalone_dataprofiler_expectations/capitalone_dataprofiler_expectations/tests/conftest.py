@@ -10,10 +10,10 @@ from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.self_check.util import build_test_backends_list
 from tests.conftest import (  # noqa: F401  # registers implicitly used fixture and prevents removal of "unused" import
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 )
+from tests.self_check import build_test_backends_list
 
 sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 

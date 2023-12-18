@@ -15,7 +15,9 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.self_check.util import (
+from great_expectations.util import build_in_memory_runtime_context
+from tests.conftest import build_test_backends_list_v3_api
+from tests.self_check import (
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
     generate_dataset_name_from_expectation_name,
@@ -25,8 +27,6 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     pgDialect,
 )
-from great_expectations.util import build_in_memory_runtime_context
-from tests.conftest import build_test_backends_list_v3_api
 
 pytestmark = pytest.mark.all_backends
 

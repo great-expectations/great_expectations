@@ -24,11 +24,11 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
-from great_expectations.self_check.util import (
-    get_sql_dialect_floating_point_infinity_value,
-)
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
+from tests.self_check import (
+    get_sql_dialect_floating_point_infinity_value,
+)
 
 try:
     postgresqltypes = sqlalchemy.dialects.postgresql
