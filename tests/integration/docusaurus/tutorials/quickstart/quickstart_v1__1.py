@@ -26,13 +26,14 @@ context = gx.get_context()
 
 
 class QuickstartDatasourceTabs(Enum):
-    PANDAS_DEFAULT = "pandas_default"
+    PANDAS_CSV = "pandas_csv"
+    PANDAS_DATAFRAME = "pandas_dataframe"
     SQL_QUERY = "sql_query"
 
 
 # TODO: Where in the GX namespace does Batch live?
 def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
-    if datasource_type == QuickstartDatasourceTabs.PANDAS_DEFAULT:
+    if datasource_type == QuickstartDatasourceTabs.PANDAS_CSV:
         # <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas_csv">
         batch = context.sources.pandas_default.read_csv(
             "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
@@ -41,16 +42,25 @@ def get_quickstart_batch(datasource_type: QuickstartDatasourceTabs) -> Batch:
         return batch
 
     elif datasource_type == QuickstartDatasourceTabs.SQL_QUERY:
-        # TODO: add local postgresql db to quickstart? or add public snowflake?
         connection_string = "postgresql://postgres:postgres@localhost:5432/postgres"
         # <snippet name="tutorials/quickstart/quickstart.py connect_to_data sql_query">
-        datasource = context.sources.add_postgresql_datasource(
-            name="quickstart_db",
-            connection_string=connection_string,
+        batch = context.sources.pandas_default.read_sql(
+            "SELECT * FROM yellow_tripdata_sample_2019_01",
+            connection_string
         )
-        batch = datasource.read_query("SELECT * FROM yellow_tripdata_sample_2019_01")
         # </snippet>
         return batch
+    elif datasource_type == QuickstartDatasourceTabs.PANDAS_DATAFRAME:
+        import pandas as pd
+
+        df = pd.read_csv(
+            "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+        )
+        # <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas_dataframe">
+        batch = context.sources.pandas_default.from_dataframe(df)
+        # </snippet>
+        return batch
+
 
 
 for tab_name in QuickstartDatasourceTabs:
