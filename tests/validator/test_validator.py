@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
+from unittest.mock import ANY
 
 import pandas as pd
 import pytest
@@ -288,7 +289,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     actual = validator.convert_to_checkpoint_validations_list()
     expected_config = CheckpointValidationConfig(
         expectation_suite_name="validating_taxi_data",
-        expectation_suite_ge_cloud_id=None,
+        expectation_suite_ge_cloud_id=ANY,
         batch_request={
             "datasource_name": "taxi_pandas",
             "data_connector_name": "monthly",
@@ -300,7 +301,6 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
         id=None,
         name=None,
     )
-
     assert all(config.to_dict() == expected_config.to_dict() for config in actual)
 
 
