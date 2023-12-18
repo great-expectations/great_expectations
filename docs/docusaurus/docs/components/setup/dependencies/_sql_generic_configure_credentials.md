@@ -15,4 +15,4 @@ my_connection_string = "${credentials}"
 ```
 
 
-For additional options on configuring the `config_variables.yml` file or additional environment variables, please see our guide on [how to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials).
+For additional options on configuring the `config_variables.yml` file or additional environment variables, please see our guide on [how to configure credentials(/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials).
