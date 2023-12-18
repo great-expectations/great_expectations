@@ -535,6 +535,10 @@ class ExpectationSuite(SerializableDictDot):
             InvalidExpectationConfigurationError
 
         """
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
