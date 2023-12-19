@@ -42,9 +42,7 @@ class SuiteFactory:
         """
         key = self._store.get_key_by_name(name=name)
         if not self._store.has_key(key=key):
-            raise DataContextError(
-                f"ExpectationSuite with name `{name}` was not found."
-            )
+            raise DataContextError(f"ExpectationSuite with name {name} was not found.")
         suite_dict = self._store.get(key=key)
         suite = ExpectationSuite(**suite_dict)
         if self._include_rendered_content:

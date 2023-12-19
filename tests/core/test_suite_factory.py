@@ -45,7 +45,7 @@ def test_suite_factory_get_raises_error_on_missing_key():
 
     # Act
     with pytest.raises(
-        DataContextError, match=f"ExpectationSuite `{name}` was not found."
+        DataContextError, match=f"ExpectationSuite with name {name} was not found."
     ):
         factory.get(name=name)
 
