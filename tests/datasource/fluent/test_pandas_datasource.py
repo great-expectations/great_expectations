@@ -357,14 +357,14 @@ class TestDynamicPandasAssets:
         read_method: Callable = getattr(
             empty_data_context.sources.pandas_default, read_method_name
         )
-        # BDIRKS, this is causing the issue. We are running all readers vs all data sets
-        # That is: read_json is reading a csv data file. Because we have mocked this out, it all works fine
-        # in this test but it really doesn't.
-        # mocker.patch(
-        #    "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext.get_validator"
-        # )
+        # This is not a an ideal mock.
+        # In this test we are validating that the read_method for a particular pandas datasource
+        # has the correct positional arguments.
+        # We don't care about the actual data being read in and the batch that will be produced from that data.
+        # In fact, we call all our read methods on a path which might not be readable by the reader (eg calling
+        # read_json on a csv file). We patch the internal call that actually tries to read and create the batch.
+        # Ideally, we would rewrite this test so we wouldn't need to mock like this.
         mocker.patch(
-            # "great_expectations.datasource.fluent.pandas_datasource.PandasDatasource._get_batch"
             "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
         )
         _ = read_method(*positional_args.values())
