@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.exceptions import DataContextError
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store import ExpectationsStore
 
 
 class SuiteFactory:
