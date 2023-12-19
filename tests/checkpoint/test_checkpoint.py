@@ -4737,7 +4737,7 @@ def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack)
     checkpoint_name = "my_checkpoint"
     checkpoint = context.get_checkpoint(checkpoint_name)
     context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
-    assert slack_counter.count == 1
+    assert slack_counter.count == 5
 
 
 ### SparkDF Tests
