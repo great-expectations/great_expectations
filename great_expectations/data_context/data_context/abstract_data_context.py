@@ -310,6 +310,10 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._sources: _SourceFactories = _SourceFactories(self)
 
+        if not self.expectations_store:
+            raise gx_exceptions.DataContextError(
+                "DataContext cannot be initialized without an ExpectationsStore configuration."
+            )
         self.suites = SuiteFactory(
             store=self.expectations_store,
             include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
