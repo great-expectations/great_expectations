@@ -84,7 +84,7 @@ View the Expectation history to determine when an Expectation was changed and wh
 
 4. Optional. Select an Expectation in the **Table of contents** pane to view the change history for a specific Expectation.
 
-    The date, time, and email address of the users who changed the Expectation appear below the Expectation name.
+    The date, time, and email address of the users who changed the Expectation appear below the Expectation name. Strikethrough text indicates an Expectation was deleted.
 
 ## Delete an Expectation
 
