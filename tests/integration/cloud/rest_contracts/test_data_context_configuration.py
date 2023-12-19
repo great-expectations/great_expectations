@@ -37,6 +37,7 @@ def test_data_context_configuration(
     cloud_access_token: str,
     pact_test: pact.Pact,
 ) -> None:
+    # arrange
     provider_state = "the Data Context exists"
     scenario = "a request for a Data Context"
     method = "GET"
@@ -59,9 +60,13 @@ def test_data_context_configuration(
     )
 
     with pact_test:
-        _ = gx.get_context(
+        # act
+        ctx = gx.get_context(
             mode="cloud",
             cloud_base_url=PACT_MOCK_SERVICE_URL,
             cloud_organization_id=EXISTING_ORGANIZATION_ID,
             cloud_access_token=cloud_access_token,
         )
+
+    # assert
+    assert ctx.datasources is not None

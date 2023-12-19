@@ -23,11 +23,11 @@ from typing import (
 from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
@@ -1021,7 +1021,7 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
-    create_temp_table: bool = True
+    create_temp_table: bool = False
     kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
         default={},
         description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
@@ -1084,6 +1084,9 @@ class SQLDatasource(Datasource):
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+            # by default we exclude unset values to prevent lots of extra values in the yaml files
+            # but we want to include them here
+            exclude_unset=False,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs

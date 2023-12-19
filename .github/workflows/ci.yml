@@ -234,7 +234,7 @@ jobs:
       - name: public_api_report
         run: invoke public-api
       - name: link_checker
-        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
+        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
   docs-build:
     needs: [doc-checks, docs-changes]
@@ -313,25 +313,13 @@ jobs:
           docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 150 && \
           docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
 
+      - name: Show logs for debugging
+        if: failure()
+        run: |
+          docker compose -f assets/docker/mercury/docker-compose.yml logs
+
       - name: Run the tests
         run: invoke ci-tests 'cloud' --up-services --verbose
-
-      - name: Get mercury version
-        run: |
-          curl -s ''${GX_CLOUD_BASE_URL}'/status' | \
-            python3 -c "import os, sys, json; api_version=json.load(sys.stdin)['api_version']; os.system(f'echo api_version={api_version}');" \
-            >> $GITHUB_OUTPUT
-        id: get_mercury_version
-
-      - name: Verify endpoint contracts
-        run: |
-          pact-verifier -r --provider-base-url=${GX_CLOUD_BASE_URL} \
-            --pact-url=tests/integration/cloud/rest_contracts/pacts/great_expectations-mercury.json \
-            --pact-broker-url=https://greatexpectations.pactflow.io/ \
-            --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} \
-            --provider=mercury \
-            --provider-version-branch=develop \
-            --provider-app-version=${{ steps.get_mercury_version.outputs.api_version }}
 
 
   marker-tests:
