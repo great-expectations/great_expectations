@@ -515,7 +515,6 @@ module.exports = {
         },
         'reference/learn/terms/expectation_suite',
         'reference/learn/terms/metric',
-        'reference/learn/conceptual_guides/metricproviders',
         {
           type: 'category',
           label: 'Stores',
