@@ -4,6 +4,8 @@ import copy
 import logging
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
+from great_expectations.core.batch_config import BatchConfig
+from great_expectations.data_asset.data_asset import DataAsset
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -17,6 +19,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.datasource.fluent import DataAsset as FluentDataAsset
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
@@ -320,3 +323,27 @@ class DatasourceStore(Store):
             resource_name=datasource_name,
         )
         return datasource_key
+
+    def add_batch_config(
+        self, data_asset: FluentDataAsset, batch_config: BatchConfig
+    ) -> BatchConfig:
+        key = DataContextVariableKey(resource_name=data_asset.datasource.name)
+
+        loaded_datasource = self.get(key)
+        assert isinstance(loaded_datasource, FluentDatasource)
+
+        loaded_datasource.get_asset(data_asset.name).batch_configs.append(batch_config)
+        updated_datasource = self._persist_datasource(key=key, config=loaded_datasource)
+        assert isinstance(updated_datasource, FluentDatasource)
+
+        updated_batch_configs = updated_datasource.get_asset(
+            data_asset.name
+        ).batch_configs
+
+        return next(bc for bc in updated_batch_configs if bc.name == batch_config.name)
+
+    def update_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        return BatchConfig(name="foo")
+
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        return None

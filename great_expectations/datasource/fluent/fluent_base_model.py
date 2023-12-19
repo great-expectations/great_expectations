@@ -26,6 +26,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
+    _BATCH_CONFIGS_KEY,
     _FIELDS_ALWAYS_SET,
 )
 
@@ -180,6 +181,7 @@ class FluentBaseModel(pydantic.BaseModel):
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         _update__fields_set__on_truthyness(self, _ASSETS_KEY)
+        _update__fields_set__on_truthyness(self, _BATCH_CONFIGS_KEY)
 
         return super().json(
             include=include,
@@ -251,6 +253,7 @@ class FluentBaseModel(pydantic.BaseModel):
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         _update__fields_set__on_truthyness(self, _ASSETS_KEY)
+        _update__fields_set__on_truthyness(self, _BATCH_CONFIGS_KEY)
 
         result = super().dict(
             include=include,

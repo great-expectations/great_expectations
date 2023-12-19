@@ -6,6 +6,12 @@ from typing import Callable, List, Optional, cast
 from unittest import mock
 
 import pytest
+from great_expectations.core.batch_config import BatchConfig
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
+from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextVariableKey
@@ -196,6 +202,30 @@ def test_datasource_store_retrieval(
         [block_config_datasource_config, res],
         [set_config_serializer, retrieved_config_serializer],
     )
+
+
+@pytest.mark.unit
+def test_datasource_store__add_batch_config__success(
+    empty_datasource_store: DatasourceStore,
+) -> None:
+    # Arrange
+    store = empty_datasource_store
+    datasource = PandasDatasource(name="foo")
+    asset = datasource.add_csv_asset("cool new asset", "taxi.csv")
+    key = DataContextVariableKey(resource_name=datasource.name)
+    store.set(key=key, value=datasource)
+
+    # Act
+    batch_config = BatchConfig(name="my cool batch config")
+    updated_batch_config = store.add_batch_config(asset, batch_config)
+
+    # Assert
+    assert updated_batch_config.name == batch_config.name
+
+    updated_datasource = store.get(key=key)
+    assert isinstance(updated_datasource, Datasource)
+    updated_batch_configs = updated_datasource.get_asset(asset.name).batch_configs
+    assert any(bc.name == batch_config.name for bc in updated_batch_configs)
 
 
 @pytest.mark.cloud
