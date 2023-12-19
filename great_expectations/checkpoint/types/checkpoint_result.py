@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional
 
 from marshmallow import Schema, fields, post_load, pre_dump
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable

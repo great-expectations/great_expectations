@@ -11,6 +11,7 @@ from typing import (
     Union,
 )
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.compatibility.pydantic import json as pydantic_json
@@ -20,7 +21,6 @@ from great_expectations.compatibility.pydantic import (
 
 # default_ref_template
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,

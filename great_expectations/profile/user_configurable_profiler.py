@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, cast
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.usage_statistics.events import UsageStatsEvents

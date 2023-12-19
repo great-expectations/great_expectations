@@ -11,9 +11,9 @@ from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
+from great_expectations._docs_decorators import public_api
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
@@ -24,9 +24,6 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfigurationSchema,
-)
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -392,7 +389,7 @@ class ExpectationValidationResult(SerializableDictDot):
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
     expectation_config = fields.Nested(
-        lambda: ExpectationConfigurationSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
+        lambda: "ExpectationConfigurationSchema", required=False, allow_none=True  # type: ignore[arg-type,return-value]
     )
     result = fields.Dict(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)
@@ -419,6 +416,10 @@ class ExpectationValidationResultSchema(Schema):
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
         """Removes the attributes in ExpectationValidationResultSchema.REMOVE_KEYS_IF_NONE during serialization if
         their values are None."""
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfigurationSchema,
+        )
+
         data = deepcopy(data)
         for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:

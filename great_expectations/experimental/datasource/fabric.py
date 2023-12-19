@@ -23,9 +23,9 @@ from typing import (
 from typing_extensions import Annotated, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME

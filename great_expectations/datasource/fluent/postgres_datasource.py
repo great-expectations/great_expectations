@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Literal, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import PostgresDsn
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 

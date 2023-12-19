@@ -19,6 +19,7 @@ except ImportError:
     pypd = None
 
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.util import (
     send_email,
     send_microsoft_teams_notifications,
@@ -26,7 +27,6 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
