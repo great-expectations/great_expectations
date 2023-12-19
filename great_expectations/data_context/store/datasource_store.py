@@ -331,17 +331,16 @@ class DatasourceStore(Store):
         loaded_datasource = self.get(key)
         assert isinstance(loaded_datasource, FluentDatasource)
 
-        loaded_batch_configs = loaded_datasource.get_asset(
-            data_asset.name
-        ).batch_configs
-        batch_config_names = {bc.name for bc in loaded_batch_configs}
+        loaded_asset = loaded_datasource.get_asset(data_asset.name)
+        batch_config_names = {bc.name for bc in loaded_asset.batch_configs}
 
         if batch_config.name in batch_config_names:
             raise ValueError(
                 f'"{batch_config.name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
-        loaded_batch_configs.append(batch_config)
+        # This MUST be reassigned for it to be picked up during serialization
+        loaded_asset.batch_configs = [*loaded_asset.batch_configs, batch_config]
         updated_datasource = self._persist_datasource(key=key, config=loaded_datasource)
         assert isinstance(updated_datasource, FluentDatasource)
 
@@ -350,9 +349,3 @@ class DatasourceStore(Store):
         ).batch_configs
 
         return next(bc for bc in updated_batch_configs if bc.name == batch_config.name)
-
-    def update_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
-        return BatchConfig(name="foo")
-
-    def delete_batch_config(self, batch_config: BatchConfig) -> None:
-        return None

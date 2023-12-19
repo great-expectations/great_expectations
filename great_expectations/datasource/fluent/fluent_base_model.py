@@ -181,7 +181,6 @@ class FluentBaseModel(pydantic.BaseModel):
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         _update__fields_set__on_truthyness(self, _ASSETS_KEY)
-        _update__fields_set__on_truthyness(self, _BATCH_CONFIGS_KEY)
 
         return super().json(
             include=include,
@@ -253,7 +252,6 @@ class FluentBaseModel(pydantic.BaseModel):
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         _update__fields_set__on_truthyness(self, _ASSETS_KEY)
-        _update__fields_set__on_truthyness(self, _BATCH_CONFIGS_KEY)
 
         result = super().dict(
             include=include,
