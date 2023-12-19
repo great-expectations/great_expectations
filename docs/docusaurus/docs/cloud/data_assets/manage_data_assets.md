@@ -195,7 +195,6 @@ Currently, you can only edit Snowflake Data Assets.
     - **Data Asset name**: Enter a new name for the Data Asset. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
 3. Click **Save**.
-    ```
 
 ## Delete a Data Asset
 
