@@ -754,9 +754,4 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="BatchConfig",
         filepath=pathlib.Path("great_expectations/core/batch_config.py"),
     ),
-    IncludeExcludeDefinition(
-        reason="Not yet part of the public API, under active development",
-        name="build_batch_request",
-        filepath=pathlib.Path("great_expectations/core/batch_config.py"),
-    ),
 ]
