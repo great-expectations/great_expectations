@@ -346,7 +346,7 @@ class DatasourceStore(Store):
                 f'"{batch_config.name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
-        # This must be added for it to be picked up during serialization
+        # This must be set for it to be picked up during serialization
         loaded_asset.__fields_set__.add("batch_configs")
 
         loaded_asset.batch_configs.append(batch_config)
@@ -382,7 +382,7 @@ class DatasourceStore(Store):
             bc for bc in loaded_asset.batch_configs if bc.name != batch_config.name
         ]
 
-        # This must be added for it to be picked up during serialization
+        # This must be set for it to be picked up during serialization
         has_batch_configs = len(loaded_asset.batch_configs) > 0
         if not has_batch_configs and "batch_configs" in loaded_asset.__fields_set__:
             loaded_asset.__fields_set__.remove("batch_configs")
