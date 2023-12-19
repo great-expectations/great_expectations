@@ -17,7 +17,6 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.datasource.fluent import DataAsset as FluentDataAsset
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
