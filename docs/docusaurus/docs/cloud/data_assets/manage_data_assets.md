@@ -8,7 +8,7 @@ toc_max_heading_level: 2
 
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
 
-To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
+To learn more about Data Assets, see [Data Asset](/docs/reference/learn/terms/data_asset).
 
 ## Prerequisites
 
@@ -21,23 +21,23 @@ To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
 2. Click the **New Data Source** tab and then select **Snowflake**.
 
-3. Complete the following mandatory fields:
+3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
 
-    - **Data Source name**: Enter a meaningful name for the Data Asset.
+4. Optional. To use a connection string to connect to a Data Source, click the **Use connection string** selector, enter a connection string, and then move to step 6. 
+
+5. Complete the following fields:
 
     - **Username**: Enter your Snowflake username.
 
-    - **Password variable**: Enter `GX_CLOUD_SNOWFLAKE_PASSWORD`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+    - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Account or locator**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
-
-4. Optional. Complete the following fields:
+    - **Password/environment variable**: Enter `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
  
@@ -47,27 +47,29 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Role**: Enter your Snowflake role.
 
-    - **Authenticator**: Enter the Snowflake database authenticator that you want to use to verify your Snowflake connection. 
-
-5. Optional. Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
-
-6. Optional. Clear **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+6. Optional. Select **Test connection** if you want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
 7. Click **Continue**.
 
 8. Select **Table Asset** or **Query Asset** and complete the following fields:
 
-    - **Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
-
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    
+    - **Data Asset name**: Enter a name for the Data Asset. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-9. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat step 7.
+9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
-10. Click **Finish**.
+    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
-11. Add an Expectation. See [Add an Expectation](/docs/cloud/expectations/manage_expectations#add-an-expectation).
+    - **Column of datetime type** - Enter the name of the column containing the date and time data.
+
+10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+
+11. Click **Finish**.
+
+12. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
 
 ## View Data Asset metrics
 
