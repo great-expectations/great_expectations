@@ -670,8 +670,7 @@ class PandasDatasource(_PandasDatasource):
         else:
             batch_request = asset.build_batch_request()
 
-        # BDIRKS, should only grab the last one, maybe do something better than this implementation
-        return asset.get_batch_list_from_batch_request(batch_request)[0]
+        return asset.get_batch_list_from_batch_request(batch_request)[-1]
 
     @public_api
     @deprecated_argument(
