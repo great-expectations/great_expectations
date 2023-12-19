@@ -6,14 +6,9 @@ from typing import Callable, List, Optional, cast
 from unittest import mock
 
 import pytest
-from great_expectations.core.batch_config import BatchConfig
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
-from great_expectations.datasource.fluent.interfaces import Datasource
-from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -41,6 +36,8 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
     YAMLReadyDictDatasourceConfigSerializer,
 )
+from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from tests.data_context.conftest import MockResponse
 
 yaml = YAMLHandler()

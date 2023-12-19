@@ -4,11 +4,10 @@ import copy
 import logging
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
-from great_expectations.core.batch_config import BatchConfig
-from great_expectations.data_asset.data_asset import DataAsset
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.data_context_key import (
     DataContextKey,
     DataContextVariableKey,
