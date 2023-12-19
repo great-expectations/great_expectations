@@ -16,7 +16,7 @@ def test_suite_factory_get_uses_store_get():
     name = "test-suite"
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = True
-    key = store.get_key_from_name.return_value
+    key = store.get_key_by_name.return_value
     suite_dict = {"name": name, "ge_cloud_id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
     store.get.return_value = suite_dict
     factory = SuiteFactory(store=store, include_rendered_content=False)
