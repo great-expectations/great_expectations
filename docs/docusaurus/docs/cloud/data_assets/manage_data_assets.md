@@ -152,34 +152,49 @@ Additional Data Assets can only be added to an existing Snowflake Data Source.
 6. Click **Finish**.
 
 
+## Edit Data Source settings
+
+Currently, you can only edit Snowflake Data Source settings.
+
+1. In GX Cloud, click **Data Assets**.
+
+2. Click **Manage Data Sources**.
+
+3. Click **Edit Data Source** for the Snowflake Data Source you want to edit.
+
+4. If you used a connection string to connect to the Data Source, edit the Data Source connection string, or click the **Use connection string** selector and edit the following fields:
+
+     - **Data Source name**: Enter a new name for the Data Asset.
+     
+     - **Username**: Enter a new Snowflake username.
+
+    - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
+
+    - **Password/environment variable**: Enter a Snowflake password or `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+
+    - **Database**: Enter a new Snowflake database name.
+ 
+    - **Schema**: Enter a new schema name.
+
+    - **Warehouse**: Enter a new Snowflake database warehouse name.
+
+    - **Role**: Enter a new Snowflake role.
+
+5. Click **Save**.
+
 ## Edit a Data Asset
 
-1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
+Currently, you can only edit Snowflake Data Assets.
 
-    ```python title="Jupyter Notebook"
-    import great_expectations as gx
-    context = gx.get_context()
-    ```
+1. In GX Cloud, click **Data Assets** and in the Data Assets list click **Edit Data Asset** for the Data Asset you want to edit.
 
-2. Run the following code to retrieve the Data Source:
+2. Edit the following fields:
 
-    ```python title="Jupyter Notebook"
-    datasource = context.get_datasource("<data_source_name>")
-    ```
+    - **Table name**: Enter a new name for the Data Asset table.
 
-3. Edit the Data Asset settings. For example, run the following code to change the name of the Data Source:
+    - **Data Asset name**: Enter a new name for the Data Asset. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
-    ```python title="Jupyter Notebook"
-    datasource.name = "<new_data_source_name>"
-    ```
-
-    To review the Data Asset parameters that you can add or edit, see the [GX API documentation](https://deploy-preview-8760.docs.greatexpectations.io/docs/reference/api_reference).
-
- 4. Run the following code to save your changes:
-
-    ```python title="Jupyter Notebook"
-    context.sources.update_snowflake(datasource)
-    ```
+3. Click **Save**.
 
 ## Delete a Data Asset
 

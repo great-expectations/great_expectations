@@ -110,6 +110,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Edit Data Source settings',
+              href: '/docs/cloud/data_assets/manage_data_assets#edit-data-source-settings',
+            },
+            {
+              type: 'link',
               label: 'Edit a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
             },
@@ -515,7 +520,6 @@ module.exports = {
         },
         'reference/learn/terms/expectation_suite',
         'reference/learn/terms/metric',
-        'reference/learn/conceptual_guides/metricproviders',
         {
           type: 'category',
           label: 'Stores',
