@@ -143,8 +143,7 @@ Customer support is not available from December 25 to December 29, 2023. If you 
 
 :::
 
-Use the following resources when you have questions or encounter issues with GX Cloud:
+If you can't find what you need in the documentation, we're here to help! You can 
+email us at [support@greatexpectations.io](mailto:support@greatexpectations.io) or create a ticket on our [support portal](https://support.greatexpectations.io).
 
-- [GX Cloud support on Discourse](https://discourse.greatexpectations.io/c/cloud-support/17)
-
-- [Discuss your issue with GX community members on Slack](https://greatexpectationstalk.slack.com/archives/C051D941XAL)
+Additionally, we have a community to support you.  You can start a thread about your topic in the community [discourse forum](https://discourse.greatexpectations.io/c/cloud-support/) or [discuss your issue with GX community members on Slack](https://greatexpectationstalk.slack.com/).

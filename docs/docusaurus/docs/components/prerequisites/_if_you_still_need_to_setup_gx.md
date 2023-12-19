@@ -1,1 +1,1 @@
-See [Install Great Expectations with Data Source dependencies](/docs/guides/setup/installation/install_gx).
+See [Install Great Expectations with Data Source dependencies](/docs/oss/guides/setup/installation/install_gx).
