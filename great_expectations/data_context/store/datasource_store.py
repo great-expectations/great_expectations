@@ -332,7 +332,17 @@ class DatasourceStore(Store):
         loaded_datasource = self.get(key)
         assert isinstance(loaded_datasource, FluentDatasource)
 
-        loaded_datasource.get_asset(data_asset.name).batch_configs.append(batch_config)
+        loaded_batch_configs = loaded_datasource.get_asset(
+            data_asset.name
+        ).batch_configs
+        batch_config_names = {bc.name for bc in loaded_batch_configs}
+
+        if batch_config.name in batch_config_names:
+            raise ValueError(
+                f'"{batch_config.name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
+            )
+
+        loaded_batch_configs.append(batch_config)
         updated_datasource = self._persist_datasource(key=key, config=loaded_datasource)
         assert isinstance(updated_datasource, FluentDatasource)
 

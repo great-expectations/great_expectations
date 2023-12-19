@@ -220,12 +220,33 @@ def test_datasource_store__add_batch_config__success(
     updated_batch_config = store.add_batch_config(asset, batch_config)
 
     # Assert
-    assert updated_batch_config.name == batch_config.name
-
     updated_datasource = store.get(key=key)
+    assert updated_batch_config.name == batch_config.name
     assert isinstance(updated_datasource, Datasource)
     updated_batch_configs = updated_datasource.get_asset(asset.name).batch_configs
     assert any(bc.name == batch_config.name for bc in updated_batch_configs)
+
+
+@pytest.mark.unit
+def test_datasource_store__add_batch_config__duplicate_name(
+    empty_datasource_store: DatasourceStore,
+) -> None:
+    # Arrange
+    name = "whatever"
+    store = empty_datasource_store
+    datasource = PandasDatasource(name="foo")
+    asset = datasource.add_csv_asset("cool new asset", "taxi.csv")
+    key = DataContextVariableKey(resource_name=datasource.name)
+    store.set(key=key, value=datasource)
+
+    batch_config = BatchConfig(name=name)
+    store.add_batch_config(asset, batch_config)
+
+    # Act + Assert
+    new_batch_config = BatchConfig(name=name)
+    with pytest.raises(ValueError) as e:
+        store.add_batch_config(asset, new_batch_config)
+    assert "already exists" in str(e.value)
 
 
 @pytest.mark.cloud
