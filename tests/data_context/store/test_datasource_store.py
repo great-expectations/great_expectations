@@ -214,7 +214,8 @@ def test_datasource_store__add_batch_config__success(
 
     # Act
     batch_config = BatchConfig(name="my cool batch config")
-    updated_batch_config = store.add_batch_config(asset, batch_config)
+    batch_config._data_asset = asset
+    updated_batch_config = store.add_batch_config(batch_config)
 
     # Assert
     updated_datasource = store.get(key=key)
@@ -237,12 +238,15 @@ def test_datasource_store__add_batch_config__duplicate_name(
     store.set(key=key, value=datasource)
 
     batch_config = BatchConfig(name=name)
-    store.add_batch_config(asset, batch_config)
+    batch_config._data_asset = asset
+    store.add_batch_config(batch_config)
 
     # Act + Assert
     new_batch_config = BatchConfig(name=name)
+    new_batch_config._data_asset = asset
+
     with pytest.raises(ValueError) as e:
-        store.add_batch_config(asset, new_batch_config)
+        store.add_batch_config(new_batch_config)
     assert "already exists" in str(e.value)
 
 

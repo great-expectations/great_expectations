@@ -323,9 +323,8 @@ class DatasourceStore(Store):
         )
         return datasource_key
 
-    def add_batch_config(
-        self, data_asset: FluentDataAsset, batch_config: BatchConfig
-    ) -> BatchConfig:
+    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        data_asset = batch_config.data_asset
         key = DataContextVariableKey(resource_name=data_asset.datasource.name)
 
         loaded_datasource = self.get(key)
@@ -339,13 +338,20 @@ class DatasourceStore(Store):
                 f'"{batch_config.name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
-        # This MUST be reassigned for it to be picked up during serialization
-        loaded_asset.batch_configs = [*loaded_asset.batch_configs, batch_config]
+        # This must be added for it to be picked up during serialization
+        loaded_asset.__fields_set__.add("batch_configs")
+
+        loaded_asset.batch_configs.append(batch_config)
         updated_datasource = self._persist_datasource(key=key, config=loaded_datasource)
         assert isinstance(updated_datasource, FluentDatasource)
 
-        updated_batch_configs = updated_datasource.get_asset(
-            data_asset.name
-        ).batch_configs
+        updated_asset = updated_datasource.get_asset(data_asset.name)
 
-        return next(bc for bc in updated_batch_configs if bc.name == batch_config.name)
+        updated_batch_config_as_list = [
+            bc for bc in updated_asset.batch_configs if bc.name == batch_config.name
+        ]
+        assert len(updated_batch_config_as_list) == 1
+        updated_batch_config = updated_batch_config_as_list[0]
+
+        updated_batch_config._data_asset = updated_asset
+        return updated_batch_config
