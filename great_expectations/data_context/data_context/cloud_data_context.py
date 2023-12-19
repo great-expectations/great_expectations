@@ -18,15 +18,14 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
+from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
 )
-from great_expectations.core.datasource_dict import DatasourceDict
 from great_expectations.core.http import create_session
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context._version_checker import _VersionChecker
@@ -61,6 +60,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.datasource_dict import DatasourceDict
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 

@@ -22,15 +22,37 @@ To learn more about Validations, see [Validator](/docs/reference/learn/terms/val
 
 3. Click the **Expectations** tab and then select an Expectation Suite in the **Expectation Suites** list.
 
-4. Select one of the following options:
+4. Click **Validate**.
 
-    - To run a Validation on a specific column, click the column name in the **Columns** pane, and then click **Validate**.
+5. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Batches & run History** pane.
 
-    - To run a Validation on all columns, click **Validate**.
+6. Optional. Click **Share** to copy the URL for the Validation Results and share them with another GX Cloud user.
 
-5. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Run History** pane.
+## Run a Validation on a Data Asset containing partitions
 
-6. Optional. Click **Share** to copy the URL for the Validation Results that you can share with another GX Cloud user.
+When you connect to a Data Asset, you can add a partition to create Expectations and run validations on subsets of Data Asset records. If you've added a partition, you can run a Validation on the latest Batch of data, or you can select a specific year, year and month, or year, month, and day period for the Validation. 
+
+To make the identification of Data Assets containing partitions easier, partition information appears in the Data Asset **Overview** page and in the **Batches & run history** pane on the **Validations** page.
+
+1. In GX Cloud, click **Data Assets**.
+
+2. Click a Data Asset in the **Data Assets** list.
+
+3. Click the **Expectations** tab and then select an Expectation Suite in the **Expectation Suites** list.
+
+4. Click **Validate**.
+
+5. Select one of the following options:
+
+    - **Latest Batch** - Run the Validation on the latest Batch of data.
+
+    - **Custom Batch** - Enter the **Year**, **Month/Year**, or the **Year/Month/Day** value to run the Validation on a Batch of data for a specific period.
+
+6. Click **Validate**.
+
+7. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Batches & run History** pane.
+
+8. Optional. Click **Share** to copy the URL for the Validation Results and share them with another GX Cloud user.
 
 ## View Validation run history
 

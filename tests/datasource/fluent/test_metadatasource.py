@@ -36,7 +36,7 @@ yaml = YAMLHandler()
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.core.datasource_dict import DatasourceDict
+    from great_expectations.datasource.datasource_dict import DatasourceDict
 
 
 logger = logging.getLogger(__name__)

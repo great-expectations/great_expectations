@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
 from great_expectations.core.metric_function_types import (
