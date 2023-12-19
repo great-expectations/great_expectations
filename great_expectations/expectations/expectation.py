@@ -1083,8 +1083,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if field is not None:
             return field.default if not field.required else None
         else:
-            logger.warning(
-                f"_get_default_value called with key {key}, but it is not a known field"
+            logger.info(
+                f'_get_default_value called with key "{key}", but it is not a known field'
             )
             return None
 
