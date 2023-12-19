@@ -1058,8 +1058,7 @@ class SQLDatasource(Datasource):
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
-                    "Unable to create a SQLAlchemy engine from "
-                    f"connection_string: {self.connection_string} due to the "
+                    "Unable to create a SQLAlchemy engine due to the "
                     f"following exception: {e!s}"
                 ) from e
             self._cached_connection_string = self.connection_string
