@@ -88,11 +88,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Role**: Enter your Snowflake role.
 
-6. Optional. Make the following changes:
-
-    - Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
-
-    - Select **Test connection** if you want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+6. Optional. Select **Test connection** if you want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
 7. Click **Continue**.
 
