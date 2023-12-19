@@ -8,7 +8,7 @@ toc_max_heading_level: 2
 
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
 
-To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
+To learn more about Data Assets, see [Data Asset](/docs/reference/learn/terms/data_asset).
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 

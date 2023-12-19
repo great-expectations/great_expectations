@@ -20,7 +20,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
-from great_expectations import project_manager
+from great_expectations import project_manager, set_context
 from great_expectations.checkpoint.configurator import (
     ActionDetails,
     ActionDict,
@@ -3172,6 +3172,7 @@ def fds_data_context(
     datasource = context.sources.add_sqlite(
         name=fds_data_context_datasource_name,
         connection_string=sqlite_connection_string,
+        create_temp_table=True,
     )
 
     datasource.add_query_asset(
@@ -3618,7 +3619,7 @@ def empty_cloud_data_context(
         cloud_access_token=ge_cloud_config.access_token,
         cloud_organization_id=ge_cloud_config.organization_id,
     )
-
+    set_context(context)
     return context
 
 
@@ -3649,7 +3650,7 @@ def empty_cloud_context_fluent(
         cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
-
+    set_context(context)
     return context
 
 
