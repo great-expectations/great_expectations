@@ -39,7 +39,7 @@ module.exports = {
       description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
       buttons: {
         primary: {
-          label: "Sign up for Cloud",
+          label: "Sign up for GX Cloud",
           href: "https://greatexpectations.io/cloud"
         },
         secondary: {
