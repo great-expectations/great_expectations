@@ -109,14 +109,10 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         configuration = self.configuration
         self._validate_template_dict(configuration)
-        as_dict_as_template = metrics.get("query.template_values")[0]
-        final_value = list(as_dict_as_template.values())[0]
-        return {
-            "success": final_value == 0,
-            "result": {
-                "Rows with IDs that are not present in foreign table": final_value
-            },
-        }
+        final_value = metrics.get("query.template_values")[0]["COUNT(1)"]
+        return ExpectationValidationResult(
+            success=(final_value == 0), result={"unexpected_count": final_value}
+        )
 
     examples = [
         {
@@ -181,7 +177,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                             "primary_key_column_in_foreign_table": "CUSTOMER_ID",
                         },
                     },
-                    "out": {"success": False},
+                    "out": {"success": False, "unexpected_count": 2},
                 },
             ],
         },
