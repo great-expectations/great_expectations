@@ -252,9 +252,9 @@ def test_get_expectation_suites(
 )
 def test_post_expectation_suite_request(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    run_rest_api_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
-    run_pact_test(contract_interaction)
+    run_rest_api_pact_test(contract_interaction)
 
 
 @pytest.mark.cloud
@@ -297,9 +297,9 @@ def test_post_expectation_suite_request(
 )
 def test_put_expectation_suite_request(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    run_rest_api_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
-    run_pact_test(contract_interaction)
+    run_rest_api_pact_test(contract_interaction)
 
 
 @pytest.mark.cloud
@@ -342,9 +342,9 @@ def test_put_expectation_suite_request(
 )
 def test_put_non_existent_expectation_suite(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    run_rest_api_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
-    run_pact_test(contract_interaction)
+    run_rest_api_pact_test(contract_interaction)
 
 
 @pytest.mark.cloud
