@@ -305,6 +305,7 @@ def test_get_key_in_non_cloud_mode(empty_data_context):
     suite = ExpectationSuite(expectation_suite_name=name)
     key = empty_data_context.expectations_store.get_key(suite)
     assert isinstance(key, ExpectationSuiteIdentifier)
+    assert key.expectation_suite_name == name
 
 
 @pytest.mark.unit
@@ -315,3 +316,23 @@ def test_get_key_in_cloud_mode(empty_data_context_in_cloud_mode):
     suite = ExpectationSuite(expectation_suite_name=name)
     key = cloud_data_context.expectations_store.get_key(suite)
     assert isinstance(key, GXCloudIdentifier)
+    assert key.resource_name == name
+
+
+@pytest.mark.unit
+def test_get_key_by_name_in_non_cloud_mode(empty_data_context):
+    project_manager.set_project(empty_data_context)
+    name = "test-name"
+    key = empty_data_context.expectations_store.get_key_by_name(name=name)
+    assert isinstance(key, ExpectationSuiteIdentifier)
+    assert key.expectation_suite_name == name
+
+
+@pytest.mark.unit
+def test_get_key_by_name_in_cloud_mode(empty_data_context_in_cloud_mode):
+    cloud_data_context = empty_data_context_in_cloud_mode
+    project_manager.set_project(cloud_data_context)
+    name = "test-name"
+    key = empty_data_context_in_cloud_mode.expectations_store.get_key_by_name(name=name)
+    assert isinstance(key, GXCloudIdentifier)
+    assert key.resource_name == name

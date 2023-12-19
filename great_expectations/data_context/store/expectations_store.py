@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import Dict, cast
+from typing import Dict, Optional, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -244,17 +244,28 @@ class ExpectationsStore(Store):
         self, suite: ExpectationSuite
     ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
         """Given an ExpectationSuite, build the correct key for use in the ExpectationsStore."""
+        return self._get_key(name=suite.name, id=suite.ge_cloud_id)
+
+    def get_key_by_name(
+        self, name: str
+    ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
+        """Given a name, obtain the correct key."""
+        # Workaround to allow callers to obtain a key from name without needing to be
+        #    aware of the StoreBackend implementation.
+        return self._get_key(name=name)
+
+    def _get_key(
+        self, name: str, id: Optional[str] = None
+    ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
         key: GXCloudIdentifier | ExpectationSuiteIdentifier
         if self.cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                id=suite.ge_cloud_id,
-                resource_name=suite.expectation_suite_name,
+                id=id,
+                resource_name=name,
             )
         else:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=suite.expectation_suite_name
-            )
+            key = ExpectationSuiteIdentifier(expectation_suite_name=name)
         return key
 
     def self_check(self, pretty_print):  # noqa: PLR0912

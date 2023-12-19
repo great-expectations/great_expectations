@@ -66,6 +66,7 @@ from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
+from great_expectations.core.suite_factory import SuiteFactory
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -308,6 +309,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._sources: _SourceFactories = _SourceFactories(self)
+
+        self.suites = SuiteFactory(
+            store=self.expectations_store,
+            include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
+        )
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
