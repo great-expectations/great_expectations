@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypedDict
 
+    from great_expectations.core.batch_config import BatchConfig
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -320,3 +321,36 @@ class DatasourceStore(Store):
             resource_name=datasource_name,
         )
         return datasource_key
+
+    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        data_asset = batch_config.data_asset
+        key = DataContextVariableKey(resource_name=data_asset.datasource.name)
+
+        loaded_datasource = self.get(key)
+        assert isinstance(loaded_datasource, FluentDatasource)
+
+        loaded_asset = loaded_datasource.get_asset(data_asset.name)
+        batch_config_names = {bc.name for bc in loaded_asset.batch_configs}
+
+        if batch_config.name in batch_config_names:
+            raise ValueError(
+                f'"{batch_config.name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
+            )
+
+        # This must be added for it to be picked up during serialization
+        loaded_asset.__fields_set__.add("batch_configs")
+
+        loaded_asset.batch_configs.append(batch_config)
+        updated_datasource = self._persist_datasource(key=key, config=loaded_datasource)
+        assert isinstance(updated_datasource, FluentDatasource)
+
+        updated_asset = updated_datasource.get_asset(data_asset.name)
+
+        updated_batch_config_as_list = [
+            bc for bc in updated_asset.batch_configs if bc.name == batch_config.name
+        ]
+        assert len(updated_batch_config_as_list) == 1
+        updated_batch_config = updated_batch_config_as_list[0]
+
+        updated_batch_config._data_asset = updated_asset
+        return updated_batch_config

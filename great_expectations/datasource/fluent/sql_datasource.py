@@ -23,11 +23,11 @@ from typing import (
 from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,

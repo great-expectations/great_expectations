@@ -4,9 +4,9 @@ import logging
 import re
 from typing import TYPE_CHECKING, List, Optional
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import azure
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
