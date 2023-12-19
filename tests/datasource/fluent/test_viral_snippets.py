@@ -14,6 +14,10 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.expectations.core import (
+    ExpectColumnValuesToBeBetween,
+    ExpectColumnValuesToNotBeNull,
+)
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -288,6 +292,7 @@ def test_quickstart_workflow(
     In particular, this test covers the file-backend and cloud-backed usecases with this script.
     The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
     """
+    # TODO: The quickstart link in the docstring doesn't exist
     # Slight deviation from the Quickstart here:
     #   1. Using existing contexts instead of `get_context`
     #   2. Using `read_csv` on a local file instead of making a network request
@@ -300,27 +305,28 @@ def test_quickstart_workflow(
     filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
     assert filepath.exists()
 
-    validator = context.sources.pandas_default.read_csv(filepath)
+    batch = context.sources.pandas_default.read_csv(filepath)
 
     # Create Expectations
-    validator.expect_column_values_to_not_be_null("pickup_datetime")
-    validator.expect_column_values_to_be_between(
-        "passenger_count", min_value=1, max_value=6
+    suite = context.add_expectation_suite("my_suite")
+    suite.add(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+    suite.add(
+        ExpectColumnValuesToBeBetween(
+            column="passenger_count", min_value=1, max_value=6
+        )
     )
-    validator.save_expectation_suite()
 
     # Validate data
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_quickstart_checkpoint",
-        validator=validator,
-    )
-    checkpoint_result = checkpoint.run()
+    result = batch.validate(suite)
 
+    assert result.success
+
+    # TODO: Add mechanism to view results.
     # View results
-    mock_open = mocker.patch("webbrowser.open")
-    context.view_validation_result(checkpoint_result)
+    # mock_open = mocker.patch("webbrowser.open")
+    # context.view_validation_result(checkpoint_result)
 
-    mock_open.assert_called_once()
+    # mock_open.assert_called_once()
 
 
 if __name__ == "__main__":
