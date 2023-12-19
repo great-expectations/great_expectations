@@ -5,6 +5,7 @@ id: reference_overview
 description: Supplemental information that will help you get the most out of Great Expectations.
 slug: '/reference/learn/'
 displayed_sidebar: 'learn'
+hide_table_of_contents: true
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';
