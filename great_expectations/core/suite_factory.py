@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from great_expectations.core import ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
@@ -14,8 +15,16 @@ class SuiteFactory:
         self._store = store
         self._include_rendered_content = include_rendered_content
 
+    @public_api
     def add(self, suite: ExpectationSuite) -> ExpectationSuite:
-        """Add an ExpectationSuite to the collection."""
+        """Add an ExpectationSuite to the collection.
+
+        Parameters:
+            suite: ExpectationSuite to add
+
+        Raises:
+            DataContextError if ExpectationSuite already exists
+        """
         key = self._store.get_key(suite=suite)
         if self._store.has_key(key=key):
             raise DataContextError(
@@ -24,8 +33,16 @@ class SuiteFactory:
         self._store.add(key=key, value=suite)
         return suite
 
+    @public_api
     def delete(self, suite: ExpectationSuite) -> ExpectationSuite:
-        """Delete an ExpectationSuite from the collection."""
+        """Delete an ExpectationSuite from the collection.
+
+        Parameters:
+            suite: ExpectationSuite to delete
+
+        Raises:
+            DataContextError if ExpectationSuite doesn't exist
+        """
         key = self._store.get_key(suite=suite)
         if not self._store.has_key(key=key):
             raise DataContextError(
@@ -34,8 +51,12 @@ class SuiteFactory:
         self._store.remove_key(key=key)
         return suite
 
+    @public_api
     def get(self, name: str) -> ExpectationSuite:
         """Get an ExpectationSuite from the collection by name.
+
+        Parameters:
+            name: Name of ExpectationSuite to get
 
         Raises:
             DataContextError when ExpectationSuite is not found.
