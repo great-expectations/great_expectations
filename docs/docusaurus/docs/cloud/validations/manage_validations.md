@@ -32,6 +32,8 @@ To learn more about Validations, see [Validator](/docs/reference/learn/terms/val
 
 When you connect to a Data Asset, you can add a partition to create Expectations and run validations on subsets of Data Asset records. If you've added a partition, you can run a Validation on the latest Batch of data, or you can select a specific year, year and month, or year, month, and day period for the Validation. 
 
+To make the identification of Data Assets containing partitions easier, partition information appears in Data Asset **Overview** page and in the **Batches & run history** pane on the Data Asset **Validations** page.
+
 1. In GX Cloud, click **Data Assets**.
 
 2. Click a Data Asset in the **Data Assets** list.
