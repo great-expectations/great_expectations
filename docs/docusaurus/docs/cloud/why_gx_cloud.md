@@ -20,11 +20,13 @@ An Expectation is a simple, verifiable assertion about the way your data should 
 
 Expectations offer deeper insights than schema validations, and they’re more resilient to changes in business and technical requirements. With Expectations, you can intuitively create data quality tests with unparalleled flexibility and control and make them accessible to technical and nontechnical users alike.
 
+<img width="50%" align="left" src="/docs/docusaurus/docs/cloud/why_gx_cloud_images/expectations_plain_language.png">
+
 Plus, [Expectations are reusable](/docs/cloud/checkpoints/manage_checkpoints) and [create their own documentation](/docs/cloud/validations/manage_validations#view-validation-run-history), making it easy to deploy them across large numbers of datasets and then keep everyone on the same page about what they’re doing.
 
 Expectations in GX Cloud tell you exactly what they’re for **using plain language, start to finish**. Self-explanatory names and results expressed in full sentences mean anyone can understand an Expectation and Expectation Suite on first look.
 
-![expectations plain language](https://github.com/great-expectations/great_expectations/assets/118856238/1bd62263-f15e-4f3c-9509-f0371cd85f24)
+<br clear="left" />
 
 # Collaboration upgrades
 
@@ -55,15 +57,17 @@ Whether you prefer to see **results as numbers or visualizations**, GX Cloud pro
 
 Historical results are displayed with **trend visualizations** accessible to technical and nontechnical teams alike.
 
-![trend visualizations](https://github.com/great-expectations/great_expectations/assets/118856238/2b1d75f2-cd11-49d0-8959-a8b51e960f42)
+<img width ="50%" align="left" src="/docs/docusaurus/docs/cloud/why_gx_cloud_images/trend_visualizations.png">
 
-Effective communication is easier when everyone shares a single source of reliable information. GX Cloud’s **clear visual UI organically fosters standardized processes**. Your team members will naturally build similar perspectives even before they directly interact—making communication smoother from the start.
+Effective communication is easier when everyone shares a single source of reliable information. GX Cloud’s **clear visual UI organically fosters standardized processes**. Your team members will naturally build similar perspectives even before they directly interact—making communication smoother from the start. 
+
+<br clear="left" />
 
 # Sustainable growth
 
 A cornerstone of growing an effective data quality framework is to **embrace iteration**. GX Cloud is built to support that.
 
-<img align ="left" src="https://images.ctfassets.net/ycwst8v1r2x5/4vizycJDExpfjBm7EnI51C/f8aa827ad34782aaba10bf8f96afa304/cloud-collaborate.png">
+<img align ="left" width="35%" src="/docs/docusaurus/docs/cloud/why_gx_cloud_images/edit_expectations.png">
 
 There’s nowhere the need for iteration is more constant than when it comes to creating and configuring your data quality tests: as you uncover more nuances of your data, your operational needs change, or your data stack evolves, you’ll need to continue updating your Expectations. 
 
@@ -71,6 +75,10 @@ Your testing feedback loop stays short and responsive in GX Cloud. Its visual GU
 
 And you can make those changes with confidence that you won’t disrupt your view of your historical results: **GX Cloud captures every change to an Expectation** within your test result’s historical charts and visualizations, so you can see your Validation Results in context with your evolving understanding of your data. 
 
+<br clear="left" />
+
 # But you don't have to take our word for it
 
 GX Cloud’s free tier has plenty of power. Give it a try and see for yourself how GX Cloud can help you build a proactive, collaboration-ready data quality framework.
+
+- [Sign up for GX Cloud](https://greatexpectations.io/cloud)
