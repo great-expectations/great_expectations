@@ -357,8 +357,15 @@ class TestDynamicPandasAssets:
         read_method: Callable = getattr(
             empty_data_context.sources.pandas_default, read_method_name
         )
+        # BDIRKS, this is causing the issue. We are running all readers vs all data sets
+        # That is: read_json is reading a csv data file. Because we have mocked this out, it all works fine
+        # in this test but it really doesn't.
+        # mocker.patch(
+        #    "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext.get_validator"
+        # )
         mocker.patch(
-            "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext.get_validator"
+            # "great_expectations.datasource.fluent.pandas_datasource.PandasDatasource._get_batch"
+            "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
         )
         _ = read_method(*positional_args.values())
         # read_* returns a validator, but we just want to inspect the asset
