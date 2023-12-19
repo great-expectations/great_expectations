@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
     new_argument,

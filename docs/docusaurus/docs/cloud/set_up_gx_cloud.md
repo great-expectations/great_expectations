@@ -33,7 +33,7 @@ You'll need your user access token and organization ID to set your environment v
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
-2. In the **Access tokens** pane, click **Create user access token**.
+2. In the **User access tokens** pane, click **Create user access token**.
 
 3. Complete the following fields:
 
