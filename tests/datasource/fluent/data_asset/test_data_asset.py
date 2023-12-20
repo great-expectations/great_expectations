@@ -32,7 +32,7 @@ def store(
     """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
     store = context._datasource_store
     datasource = context.sources.add_pandas(datasource_name)
-    datasource.add_csv_asset(data_asset_name, "taxi.csv")
+    datasource.add_csv_asset(data_asset_name, "taxi.csv")  # type: ignore [arg-type]
 
     key = DataContextVariableKey(resource_name=datasource_name)
     store.set(key=key, value=datasource)
