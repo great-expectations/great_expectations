@@ -310,6 +310,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._sources: _SourceFactories = _SourceFactories(self)
 
+        self._suites: Union[SuiteFactory, None]
         if self.expectations_store:
             self._suites = SuiteFactory(
                 store=self.expectations_store,
