@@ -251,12 +251,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_config = BatchConfig(name=name)
         batch_config._data_asset = self
         self.__fields_set__.add("batch_configs")
-        if self.datasource.data_context:
-            store = self.datasource.data_context._datasource_store
-            key = DataContextVariableKey(resource_name=self.datasource.name)
-            if store.has_key(key=key):
-                batch_config = store.add_batch_config(batch_config)
-                batch_config._data_asset = self
+        if self.datasource.is_persisted():
+            batch_config = self.datasource.add_batch_config(batch_config)
+            batch_config._data_asset = self
 
         batch_config._data_asset = self
         self.batch_configs.append(batch_config)
@@ -511,6 +508,17 @@ class Datasource(
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
+
+    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        return self._data_context._datasource_store.add_batch_config(batch_config)
+
+    def is_persisted(self) -> bool:
+        if self._data_context:
+            store = self._data_context._datasource_store
+            key = DataContextVariableKey(resource_name=self.name)
+            return store.has_key(key=key)
+        else:
+            return False
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
