@@ -310,14 +310,13 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._sources: _SourceFactories = _SourceFactories(self)
 
-        if not self.expectations_store:
-            raise gx_exceptions.DataContextError(
-                "DataContext cannot be initialized without an ExpectationsStore configuration."
+        if self.expectations_store:
+            self._suites = SuiteFactory(
+                store=self.expectations_store,
+                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
             )
-        self.suites = SuiteFactory(
-            store=self.expectations_store,
-            include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
-        )
+        else:
+            self._suites = None
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
@@ -548,6 +547,14 @@ class AbstractDataContext(ConfigPeer, ABC):
     def stores(self) -> dict:
         """A single holder for all Stores in this context"""
         return self._stores
+
+    @property
+    def suites(self) -> SuiteFactory:
+        if not self._suites:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured ExpectationsStore to persist ExpectationSuites."
+            )
+        return self._suites
 
     @property
     def expectations_store_name(self) -> Optional[str]:
