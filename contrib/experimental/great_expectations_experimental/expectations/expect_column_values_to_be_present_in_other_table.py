@@ -1,5 +1,6 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -8,6 +9,8 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
@@ -100,6 +103,41 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
             raise KeyError(
                 "The following keys have to be in the template dict: id, foreign_table, foreign_key_column"
             )
+
+    @classmethod
+    @override
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+    ) -> List[RenderedStringTemplateContent]:
+        runtime_configuration = runtime_configuration or {}
+        styling = runtime_configuration.get("styling")
+
+        template_dict = configuration.kwargs.get("template_dict")
+        # think about the rendering message
+        template_str = "Values in the column $foreign_key_column should be present in table $foreign_table 's $primary_key_column_in_foreign_table column."
+
+        params = {
+            "foreign_key_column": template_dict["foreign_key_column"],
+            "foreign_table": template_dict["foreign_table"],
+            "primary_key_column_in_foreign_table": template_dict[
+                "primary_key_column_in_foreign_table"
+            ],
+        }
+
+        return [
+            RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
+            )
+        ]
 
     def _validate(
         self,
