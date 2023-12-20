@@ -1360,11 +1360,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-        query: Optional[str] = batch_spec.get("query")
+        # TODO: clean this up
+        # fix this when building the batch spec or stop doing instance checks at all
+        # and check for the presence of the query key
+        query: Optional[str] = batch_spec.get(
+            "query", getattr(batch_spec, "query", None)
+        )
         if isinstance(batch_spec, RuntimeQueryBatchSpec) or query:
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
-            query: str = query or batch_spec.query
-
+            assert query
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 query=query,
