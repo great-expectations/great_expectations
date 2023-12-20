@@ -540,6 +540,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._stores
 
     @property
+    def datasource_store(self) -> DatasourceStore:
+        return self._datasource_store
+
+    @property
     def expectations_store_name(self) -> Optional[str]:
         return self.variables.expectations_store_name
 

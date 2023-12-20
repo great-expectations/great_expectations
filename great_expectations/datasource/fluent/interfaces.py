@@ -510,7 +510,7 @@ class Datasource(
         return self.execution_engine_override or self.execution_engine_type
 
     def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
-        return self._data_context._datasource_store.add_batch_config(batch_config)
+        return self.data_context.datasource_store.add_batch_config(batch_config)
 
     def is_persisted(self) -> bool:
         if self._data_context:
