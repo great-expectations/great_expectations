@@ -41,6 +41,9 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
+from great_expectations.datasource.fluent.constants import (
+    _ASSETS_KEY,
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -229,6 +232,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                 f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
+        self.__fields_set__.add("batch_configs")
         batch_config = BatchConfig(name=name)
         batch_config._data_asset = self
         self.batch_configs.append(batch_config)
@@ -473,6 +477,12 @@ class Datasource(
         asset_of_intended_type = asset_type(**kwargs)
         logger.debug(f"{asset_type_name} - {asset_of_intended_type!r}")
         return asset_of_intended_type
+
+    @pydantic.validator(_ASSETS_KEY, each_item=True)
+    def _update_batch_configs(cls, data_asset: DataAsset) -> DataAsset:
+        for batch_config in data_asset.batch_configs:
+            batch_config._data_asset = data_asset
+        return data_asset
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""

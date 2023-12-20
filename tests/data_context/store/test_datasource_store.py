@@ -49,6 +49,42 @@ def fake_datasource_name() -> str:
 
 
 @pytest.fixture
+def empty_asset_name() -> str:
+    return "empty asset"
+
+
+@pytest.fixture
+def asset_with_batch_config_name() -> str:
+    return "i have a batch config"
+
+
+@pytest.fixture
+def batch_config_name() -> str:
+    return "my cool batch config"
+
+
+@pytest.fixture
+def datasource_store_with_fds_datasource(
+    empty_datasource_store: DatasourceStore,
+    fake_datasource_name: str,
+    empty_asset_name: str,
+    asset_with_batch_config_name: str,
+    batch_config_name: str,
+) -> DatasourceStore:
+    """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
+    datasource = PandasDatasource(name=fake_datasource_name)
+    datasource.add_csv_asset(empty_asset_name, "taxi.csv")
+    asset = datasource.add_csv_asset(asset_with_batch_config_name, "taxi.csv")
+    asset.add_batch_config(batch_config_name)
+
+    key = DataContextVariableKey(
+        resource_name=fake_datasource_name,
+    )
+    empty_datasource_store.set(key=key, value=datasource)
+    return empty_datasource_store
+
+
+@pytest.fixture
 def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
     return DatasourceStore(
         store_name=datasource_store_name,
@@ -78,13 +114,12 @@ def test_datasource_store_with_bad_key_raises_error(
 
     error_msg: str = "key must be an instance of DataContextVariableKey"
 
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError, match=error_msg) as e:
         store.set(key="my_bad_key", value=block_config_datasource_config)  # type: ignore[arg-type]
     assert error_msg in str(e.value)
 
     with pytest.raises(TypeError) as e:
         store.get(key="my_bad_key")  # type: ignore[arg-type]
-    assert error_msg in str(e.value)
 
 
 def _assert_serialized_datasource_configs_are_equal(
@@ -203,14 +238,15 @@ def test_datasource_store_retrieval(
 
 @pytest.mark.unit
 def test_datasource_store__add_batch_config__success(
-    empty_datasource_store: DatasourceStore,
+    datasource_store_with_fds_datasource: DatasourceStore,
+    empty_asset_name: str,
+    fake_datasource_name: str,
 ) -> None:
     # Arrange
-    store = empty_datasource_store
-    datasource = PandasDatasource(name="foo")
-    asset = datasource.add_csv_asset("cool new asset", "taxi.csv")
-    key = DataContextVariableKey(resource_name=datasource.name)
-    store.set(key=key, value=datasource)
+    store = datasource_store_with_fds_datasource
+    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
+        empty_asset_name
+    )
 
     # Act
     batch_config = BatchConfig(name="my cool batch config")
@@ -218,7 +254,7 @@ def test_datasource_store__add_batch_config__success(
     updated_batch_config = store.add_batch_config(batch_config)
 
     # Assert
-    updated_datasource = store.get(key=key)
+    updated_datasource = store.get_fluent_datasource_by_name(fake_datasource_name)
     assert updated_batch_config.name == batch_config.name
     assert isinstance(updated_datasource, Datasource)
     updated_batch_configs = updated_datasource.get_asset(asset.name).batch_configs
@@ -227,27 +263,67 @@ def test_datasource_store__add_batch_config__success(
 
 @pytest.mark.unit
 def test_datasource_store__add_batch_config__duplicate_name(
-    empty_datasource_store: DatasourceStore,
+    datasource_store_with_fds_datasource: DatasourceStore,
+    asset_with_batch_config_name: str,
+    fake_datasource_name: str,
+    batch_config_name: str,
 ) -> None:
     # Arrange
-    name = "whatever"
-    store = empty_datasource_store
-    datasource = PandasDatasource(name="foo")
-    asset = datasource.add_csv_asset("cool new asset", "taxi.csv")
-    key = DataContextVariableKey(resource_name=datasource.name)
-    store.set(key=key, value=datasource)
-
-    batch_config = BatchConfig(name=name)
-    batch_config._data_asset = asset
-    store.add_batch_config(batch_config)
+    store = datasource_store_with_fds_datasource
+    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
+        asset_with_batch_config_name
+    )
 
     # Act + Assert
-    new_batch_config = BatchConfig(name=name)
+    new_batch_config = BatchConfig(name=batch_config_name)
     new_batch_config._data_asset = asset
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="already exists"):
         store.add_batch_config(new_batch_config)
-    assert "already exists" in str(e.value)
+
+
+@pytest.mark.unit
+def test_datasource_store__delete_batch_config__success(
+    datasource_store_with_fds_datasource: DatasourceStore,
+    asset_with_batch_config_name: str,
+    fake_datasource_name: str,
+) -> None:
+    # Arrange
+    store = datasource_store_with_fds_datasource
+    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
+        asset_with_batch_config_name
+    )
+    assert len(asset.batch_configs) == 1
+
+    # Act
+    store.delete_batch_config(asset.batch_configs[0])
+
+    # Assert
+    updated_asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
+        asset_with_batch_config_name
+    )
+    assert len(updated_asset.batch_configs) == 0
+
+
+@pytest.mark.unit
+def test_datasource_store__delete_batch_config__does_not_exist(
+    datasource_store_with_fds_datasource: DatasourceStore,
+    empty_asset_name: str,
+    fake_datasource_name: str,
+    batch_config_name: str,
+) -> None:
+    # Arrange
+    store = datasource_store_with_fds_datasource
+    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
+        empty_asset_name
+    )
+
+    # Act + Assert
+    new_batch_config = BatchConfig(name=batch_config_name)
+    new_batch_config._data_asset = asset
+
+    with pytest.raises(ValueError, match="does not exist"):
+        store.delete_batch_config(new_batch_config)
 
 
 @pytest.mark.cloud
@@ -471,16 +547,14 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     empty_datasource_store: DatasourceStore,
 ) -> None:
     updated_datasource_config = DatasourceConfig()
-    with pytest.raises(gx_exceptions.DatasourceNotFoundError) as e:
+    with pytest.raises(
+        gx_exceptions.DatasourceNotFoundError,
+        match=f"Could not find an existing Datasource named {fake_datasource_name}.",
+    ):
         empty_datasource_store.update_by_name(
             datasource_name=fake_datasource_name,
             datasource_config=updated_datasource_config,
         )
-
-    assert (
-        f"Could not find an existing Datasource named {fake_datasource_name}."
-        in str(e.value)
-    )
 
 
 @pytest.mark.unit
