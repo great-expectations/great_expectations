@@ -235,9 +235,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_config = BatchConfig(name=name)
         batch_config._data_asset = self
         self.__fields_set__.add("batch_configs")
-        if self._datasource._data_context:
+        if self.datasource.data_context:
             batch_config = (
-                self._datasource._data_context._datasource_store.add_batch_config(
+                self.datasource.data_context._datasource_store.add_batch_config(
                     batch_config
                 )
             )
