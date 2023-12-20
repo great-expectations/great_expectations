@@ -279,7 +279,6 @@ class TestCRUDMethods:
             expectation_suite_name=self.expectation_suite_name,
             expectations=[expectation.configuration],
         )
-        store_key = context.expectations_store.get_key.return_value
 
         deleted_expectation = suite.delete(expectation=expectation)
 
@@ -287,8 +286,8 @@ class TestCRUDMethods:
         assert suite.expectations == []
 
         # expect that the data context is kept in sync with the mutation
-        context.expectations_store.update.assert_called_once_with(
-            key=store_key, value=suite
+        context.expectations_store.delete_expectation.assert_called_once_with(
+            suite=suite, expectation=expectation
         )
 
     @pytest.mark.unit
@@ -307,7 +306,7 @@ class TestCRUDMethods:
         assert suite.expectations == []
         # expect that deleting an expectation from this suite doesnt have the side effect of
         # persisting the suite to the data context
-        context.expectations_store.update.assert_not_called()
+        context.expectations_store.delete_expectation.assert_not_called()
 
     @pytest.mark.unit
     def test_delete_fails_when_expectation_is_not_found(self, expectation):
@@ -320,13 +319,13 @@ class TestCRUDMethods:
         with pytest.raises(KeyError, match="No matching expectation was found."):
             suite.delete(expectation=expectation)
 
-        context.expectations_store.set.assert_not_called()
+        context.expectations_store.delete_expectation.assert_not_called()
 
     @pytest.mark.unit
     def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
         context.expectations_store.has_key.return_value = True
-        context.expectations_store.update.side_effect = (
+        context.expectations_store.delete_expectation.side_effect = (
             ConnectionError()
         )  # arbitrary exception
         set_context(project=context)

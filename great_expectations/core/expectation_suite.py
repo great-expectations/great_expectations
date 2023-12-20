@@ -203,7 +203,7 @@ class ExpectationSuite(SerializableDictDot):
         if self._has_been_saved():
             # only persist on delete if the suite has already been saved
             try:
-                self.save()
+                self._store.delete_expectation(suite=self, expectation=expectation)
             except Exception as exc:
                 # rollback this change
                 # expectation suite is set-like so order of expectations doesn't matter

@@ -142,6 +142,23 @@ class ExpectationsStore(Store):
         self.update(key=suite_identifier, value=suite)
         return expectation
 
+    def delete_expectation(
+        self, suite: ExpectationSuite, expectation: Expectation
+    ) -> Expectation:
+        suite_identifier, suite = self._refresh_suite(suite)
+
+        if expectation.id not in {exp.id for exp in suite.expectations}:
+            raise KeyError("Cannot delete Expectation because it was not found.")
+
+        for i, old_expectation in enumerate(suite.expectations):
+            if old_expectation.id == expectation.id:
+                # todo: update when expectations are source of truth
+                del suite.expectation_configurations[i]
+                break
+
+        self.update(key=suite_identifier, value=suite)
+        return expectation
+
     def _refresh_suite(
         self, suite
     ) -> tuple[Union[GXCloudIdentifier, ExpectationSuiteIdentifier], ExpectationSuite]:

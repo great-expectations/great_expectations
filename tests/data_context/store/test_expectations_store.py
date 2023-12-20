@@ -483,3 +483,89 @@ def test_update_expectation_raises_error_for_missing_expectation(empty_data_cont
     updated_suite_dict = store.get(key=key)
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
+
+
+@pytest.mark.cloud
+def test_delete_expectation_success_cloud_backend(empty_cloud_data_context):
+    # Arrange
+    context = empty_cloud_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    expectation = ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite = context.add_expectation_suite(
+        suite_name, expectations=[expectation.configuration]
+    )
+
+    # Act
+    expectation = suite.expectations[0]
+    store.delete_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=store.get_key(suite))
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    assert len(updated_suite.expectations) == 0
+
+
+@pytest.mark.filesystem
+def test_delete_expectation_success_filesystem_backend(empty_data_context):
+    # Arrange
+    context = empty_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    expectation = ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite = context.add_expectation_suite(
+        suite_name, expectations=[expectation.configuration]
+    )
+
+    # Act
+    expectation = suite.expectations[0]
+    store.delete_expectation(suite=suite, expectation=expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=store.get_key(suite))
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    assert len(updated_suite.expectations) == 0
+
+
+@pytest.mark.filesystem
+def test_delete_expectation_raises_error_for_missing_expectation(empty_data_context):
+    # Arrange
+    context = empty_data_context
+    store = context.expectations_store
+    suite_name = "test-suite"
+    existing_expectation = ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite = context.add_expectation_suite(
+        suite_name, expectations=[existing_expectation.configuration]
+    )
+    key = store.get_key(suite)
+
+    # Act
+    nonexistent_expectation = ExpectColumnValuesToBeInSet(
+        # this ID will be different from the ID created by the Suite
+        id="1296c5c8-6f7b-4cee-a09c-9037c7e40df7",
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    with pytest.raises(
+        KeyError, match="Cannot delete Expectation because it was not found."
+    ):
+        store.delete_expectation(suite=suite, expectation=nonexistent_expectation)
+
+    # Assert
+    updated_suite_dict = store.get(key=key)
+    updated_suite = ExpectationSuite(**updated_suite_dict)
+    assert suite == updated_suite
+    assert len(updated_suite.expectations) == 1
