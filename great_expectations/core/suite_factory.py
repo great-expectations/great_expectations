@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core import ExpectationSuite
 from great_expectations.exceptions import DataContextError
 
@@ -14,6 +15,7 @@ class SuiteFactory:
         self._store = store
         self._include_rendered_content = include_rendered_content
 
+    @public_api
     def add(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Add an ExpectationSuite to the collection.
 
@@ -31,6 +33,7 @@ class SuiteFactory:
         self._store.add(key=key, value=suite)
         return suite
 
+    @public_api
     def delete(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Delete an ExpectationSuite from the collection.
 
@@ -48,6 +51,7 @@ class SuiteFactory:
         self._store.remove_key(key=key)
         return suite
 
+    @public_api
     def get(self, name: str) -> ExpectationSuite:
         """Get an ExpectationSuite from the collection by name.
 
