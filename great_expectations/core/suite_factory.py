@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core import ExpectationSuite
+from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationSuite
     from great_expectations.data_context.store import ExpectationsStore
 
 
@@ -14,7 +14,6 @@ class SuiteFactory:
         self._store = store
         self._include_rendered_content = include_rendered_content
 
-    @public_api
     def add(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Add an ExpectationSuite to the collection.
 
@@ -26,15 +25,12 @@ class SuiteFactory:
         """
         key = self._store.get_key(suite=suite)
         if self._store.has_key(key=key):
-            from great_expectations.exceptions import DataContextError
-
             raise DataContextError(
                 f"Cannot add ExpectationSuite with name {suite.name} because it already exists."
             )
         self._store.add(key=key, value=suite)
         return suite
 
-    @public_api
     def delete(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Delete an ExpectationSuite from the collection.
 
@@ -46,15 +42,12 @@ class SuiteFactory:
         """
         key = self._store.get_key(suite=suite)
         if not self._store.has_key(key=key):
-            from great_expectations.exceptions import DataContextError
-
             raise DataContextError(
                 f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
             )
         self._store.remove_key(key=key)
         return suite
 
-    @public_api
     def get(self, name: str) -> ExpectationSuite:
         """Get an ExpectationSuite from the collection by name.
 
@@ -64,12 +57,9 @@ class SuiteFactory:
         Raises:
             DataContextError when ExpectationSuite is not found.
         """
-        from great_expectations.core import ExpectationSuite
 
         key = self._store.get_key_by_name(name=name)
         if not self._store.has_key(key=key):
-            from great_expectations.exceptions import DataContextError
-
             raise DataContextError(f"ExpectationSuite with name {name} was not found.")
         suite_dict = self._store.get(key=key)
         suite = ExpectationSuite(**suite_dict)
