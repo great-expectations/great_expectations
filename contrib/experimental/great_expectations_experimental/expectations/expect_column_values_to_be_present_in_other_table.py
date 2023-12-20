@@ -1,12 +1,12 @@
 from typing import Optional, Union
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 
 
@@ -103,6 +103,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
     def _validate(
         self,
+        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
