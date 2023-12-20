@@ -1,11 +1,11 @@
 import pytest
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.core.serializer import DictConfigSerializer
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.data_context.store.datasource_store import DatasourceStore
-from great_expectations.data_context.types.base import datasourceConfigSchema
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
-from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 
 @pytest.fixture
@@ -19,13 +19,15 @@ def data_asset_name() -> str:
 
 
 @pytest.fixture
-def store(datasource_name: str) -> DatasourceStore:
+def store(
+    empty_data_context: AbstractDataContext,
+    datasource_name: str,
+    data_asset_name: str,
+) -> DatasourceStore:
     """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
-    store = DatasourceStore(
-        store_name="datasources",
-        serializer=DictConfigSerializer(schema=datasourceConfigSchema),
-    )
-    datasource = PandasDatasource(name=datasource_name)
+    store = empty_data_context._datasource_store
+    datasource = empty_data_context.sources.add_pandas(datasource_name)
+    datasource.add_csv_asset(data_asset_name, "taxi.csv")
 
     key = DataContextVariableKey(resource_name=datasource_name)
     store.set(key=key, value=datasource)
@@ -38,12 +40,11 @@ def empty_data_asset(
     datasource_name: str,
     data_asset_name: str,
 ) -> DataAsset:
-    key = DataContextVariableKey(
-        resource_name=datasource_name,
-    )
+    key = DataContextVariableKey(resource_name=datasource_name)
     datasource = store.get(key)
+
     assert isinstance(datasource, Datasource)
-    return datasource.add_csv_asset(data_asset_name, "taxi.csv")
+    return datasource.get_asset(data_asset_name)
 
 
 def test_add_batch_config__success(empty_data_asset: DataAsset):
@@ -52,16 +53,24 @@ def test_add_batch_config__success(empty_data_asset: DataAsset):
 
     assert batch_config.name == name
     assert batch_config.data_asset == empty_data_asset
+    assert empty_data_asset.batch_configs == [batch_config]
 
 
-def test_add_batch_config__persists(empty_data_asset: DataAsset):
+def test_add_batch_config__persists(
+    store: DatasourceStore,
+    empty_data_asset: DataAsset,
+    datasource_name: str,
+    data_asset_name: str,
+):
+    key = DataContextVariableKey(resource_name=datasource_name)
     name = "my batch config"
     batch_config = empty_data_asset.add_batch_config(name)
 
-    assert False, "Actually do the assertion!"
+    loaded_datasource = store.get(key)
+    assert isinstance(loaded_datasource, Datasource)
+    loaded_asset = loaded_datasource.get_asset(data_asset_name)
 
-    assert batch_config.name == name
-    assert batch_config.data_asset == empty_data_asset
+    assert loaded_asset.batch_configs == [batch_config]
 
 
 def test_add_batch_config__multiple(empty_data_asset: DataAsset):
