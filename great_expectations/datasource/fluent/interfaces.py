@@ -49,6 +49,7 @@ from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.v1_validator import ResultFormat
 
@@ -510,6 +511,8 @@ class Datasource(
         return self.execution_engine_override or self.execution_engine_type
 
     def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        if not self.data_context:
+            raise DataContextError("Datasource is not attached to a DataContext")
         return self.data_context.datasource_store.add_batch_config(batch_config)
 
     def is_persisted(self) -> bool:
