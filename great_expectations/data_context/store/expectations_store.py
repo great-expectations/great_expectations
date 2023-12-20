@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import TYPE_CHECKING, Dict, cast
+from typing import TYPE_CHECKING, Dict, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -117,9 +117,7 @@ class ExpectationsStore(Store):
     def add_expectation(
         self, suite: ExpectationSuite, expectation: Expectation
     ) -> Expectation:
-        suite_identifier = self.get_key(suite=suite)
-        suite_dict = self.get(key=suite_identifier)
-        suite = ExpectationSuite(**suite_dict)
+        suite_identifier, suite = self._refresh_suite(suite)
 
         expectation.id = str(uuid.uuid4())
         suite.expectation_configurations.append(expectation.configuration)
@@ -130,9 +128,7 @@ class ExpectationsStore(Store):
     def update_expectation(
         self, suite: ExpectationSuite, expectation: Expectation
     ) -> Expectation:
-        suite_identifier = self.get_key(suite=suite)
-        suite_dict = self.get(key=suite_identifier)
-        suite = ExpectationSuite(**suite_dict)
+        suite_identifier, suite = self._refresh_suite(suite)
 
         if expectation.id not in {exp.id for exp in suite.expectations}:
             raise KeyError("Cannot update Expectation because it was not found.")
@@ -145,6 +141,15 @@ class ExpectationsStore(Store):
 
         self.update(key=suite_identifier, value=suite)
         return expectation
+
+    def _refresh_suite(
+        self, suite
+    ) -> tuple[Union[GXCloudIdentifier, ExpectationSuiteIdentifier], ExpectationSuite]:
+        """Get the latest state of an ExpectationSuite from the backend."""
+        suite_identifier = self.get_key(suite=suite)
+        suite_dict = self.get(key=suite_identifier)
+        suite = ExpectationSuite(**suite_dict)
+        return suite_identifier, suite
 
     def _add(self, key, value, **kwargs):
         if not self.cloud_mode:
