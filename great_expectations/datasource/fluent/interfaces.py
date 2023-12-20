@@ -232,6 +232,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                 f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
+        self.__fields_set__.add("batch_configs")
         batch_config = BatchConfig(name=name)
         self.__fields_set__.add("batch_configs")
         if self._datasource._data_context:
