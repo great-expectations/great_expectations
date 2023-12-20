@@ -29,9 +29,7 @@ connection_string = f"sqlite:///{sqlite_database_path}"
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=GxDatasourceWarning)
     datasource = context.sources.add_sql(
-        name="my_datasource",
-        connection_string=connection_string,
-        create_temp_table=True,
+        name="my_datasource", connection_string=connection_string
     )
 
 # Python

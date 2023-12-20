@@ -65,7 +65,6 @@ my_connection_string = PG_CONNECTION_STRING
 datasource = context.sources.add_postgres(
     name=datasource_name,
     connection_string=my_connection_string,
-    create_temp_table=True,
 )
 # </snippet>
 
