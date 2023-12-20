@@ -368,7 +368,12 @@ class TestCRUDMethods:
         suite = context.add_expectation_suite(suite_name)
 
         uuid_to_test = suite.ge_cloud_id
-        assert isinstance(UUID(uuid_to_test), UUID)
+        try:
+            UUID(uuid_to_test)
+        except TypeError:
+            pytest.fail(
+                f"Expected UUID in ExpectationSuite.ge_cloud_id, found {uuid_to_test}"
+            )
 
         expectation.id = None
         suite.add(expectation)
@@ -379,7 +384,12 @@ class TestCRUDMethods:
         # todo: update when expectations are source of truth
         for expectation_configuration in suite.expectation_configurations:
             uuid_to_test = expectation_configuration.ge_cloud_id
-            assert isinstance(UUID(uuid_to_test), UUID)
+            try:
+                UUID(uuid_to_test)
+            except TypeError:
+                pytest.fail(
+                    f"Expected UUID in ExpectationConfiguration.ge_cloud_id, found {uuid_to_test}"
+                )
 
     @pytest.mark.cloud
     def test_cloud_context_update_suite_adds_ids(

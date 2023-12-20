@@ -119,6 +119,9 @@ class ExpectationsStore(Store):
     ) -> Expectation:
         suite_identifier, fetched_suite = self._refresh_suite(suite)
 
+        # we need to find which ID has been added by the backend
+        old_ids = {exp.id for exp in fetched_suite.expectations}
+
         if self.cloud_mode:
             expectation.id = None  # flag this expectation as new for the backend
         else:
@@ -127,27 +130,29 @@ class ExpectationsStore(Store):
 
         self.update(key=suite_identifier, value=fetched_suite)
         if self.cloud_mode:
+            # since update doesn't return the object we need (here), refetch
             suite_identifier, fetched_suite = self._refresh_suite(suite)
-            self._add_cloud_ids_to_local_suite_and_expectations(
-                local_suite=suite, cloud_suite=fetched_suite
+            new_id = next(
+                exp.id for exp in fetched_suite.expectations if exp.id not in old_ids
             )
+            expectation.id = new_id
         return expectation
 
     def update_expectation(
         self, suite: ExpectationSuite, expectation: Expectation
     ) -> Expectation:
-        suite_identifier, suite = self._refresh_suite(suite)
+        suite_identifier, fetched_suite = self._refresh_suite(suite)
 
-        if expectation.id not in {exp.id for exp in suite.expectations}:
+        if expectation.id not in {exp.id for exp in fetched_suite.expectations}:
             raise KeyError("Cannot update Expectation because it was not found.")
 
-        for i, old_expectation in enumerate(suite.expectations):
+        for i, old_expectation in enumerate(fetched_suite.expectations):
             if old_expectation.id == expectation.id:
                 # todo: update when expectations are source of truth
-                suite.expectation_configurations[i] = expectation.configuration
+                fetched_suite.expectation_configurations[i] = expectation.configuration
                 break
 
-        self.update(key=suite_identifier, value=suite)
+        self.update(key=suite_identifier, value=fetched_suite)
         return expectation
 
     def delete_expectation(

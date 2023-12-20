@@ -171,14 +171,16 @@ class ExpectationSuite(SerializableDictDot):
         )
         if expectation_is_unique:
             # suite is a set-like collection, so don't add if it not unique
-            if (
-                should_save_expectation
-            ):  # persist the Expectation first so it gets an ID
-                expectation = self._store.add_expectation(
-                    suite=self, expectation=expectation
-                )
-            # add it to our in memory suite
             self.expectation_configurations.append(expectation.configuration)
+            if should_save_expectation:
+                try:
+                    expectation = self._store.add_expectation(
+                        suite=self, expectation=expectation
+                    )
+                    self.expectation_configurations[-1].ge_cloud_id = expectation.id
+                except Exception as exc:
+                    self.expectation_configurations.pop()
+                    raise exc
 
         expectation.register_save_callback(save_callback=self._save_expectation)
         return expectation
