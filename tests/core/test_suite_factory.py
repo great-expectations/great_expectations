@@ -148,7 +148,7 @@ def test_suite_factory_add_success_filesystem(empty_data_context):
     name = "test-suite"
     suite = ExpectationSuite(name=name)
     with pytest.raises(
-        DataContextError, match=f"ExpectationSuite `{name}` was not found."
+        DataContextError, match=f"ExpectationSuite with name {name} was not found."
     ):
         empty_data_context.suites.get(name)
 
@@ -165,7 +165,7 @@ def test_suite_factory_add_success_cloud(empty_cloud_context_fluent):
     name = "test-suite"
     suite = ExpectationSuite(name=name)
     with pytest.raises(
-        DataContextError, match=f"ExpectationSuite `{name}` was not found."
+        DataContextError, match=f"ExpectationSuite with name {name} was not found."
     ):
         empty_cloud_context_fluent.suites.get(name)
 
@@ -188,7 +188,8 @@ def test_suite_factory_delete_success_filesystem(empty_data_context):
 
     # Assert
     with pytest.raises(
-        DataContextError, match=f"ExpectationSuite `{name}` was not found."
+        DataContextError,
+        match=f"ExpectationSuite with name {name} was not found.",
     ):
         empty_data_context.suites.get(name)
 
@@ -205,6 +206,7 @@ def test_suite_factory_delete_success_cloud(empty_cloud_context_fluent):
 
     # Assert
     with pytest.raises(
-        DataContextError, match=f"ExpectationSuite `{name}` was not found."
+        DataContextError,
+        match=f"ExpectationSuite with name {name} was not found.",
     ):
         empty_cloud_context_fluent.suites.get(name)
