@@ -226,6 +226,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "batch_request_options" on a DataAsset subclass."""
         )
 
+    @public_api
     def add_batch_config(self, name: str) -> BatchConfig:
         """Add a BatchConfig to this DataAsset.
         BatchConfig names must be unique within a DataAsset.
