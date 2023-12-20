@@ -98,7 +98,5 @@ def test_add_batch_config__duplicate_key(empty_data_asset: DataAsset):
     name = "my batch config"
     empty_data_asset.add_batch_config(name)
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="already exists"):
         empty_data_asset.add_batch_config(name)
-
-    assert "already exists" in str(e.value)
