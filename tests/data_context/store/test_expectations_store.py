@@ -442,11 +442,12 @@ def test_update_expectation_success_file_backend(empty_data_context):
         suite_name, expectations=[expectation.configuration]
     )
     key = store.get_key(suite)
-    expectation = suite.expectations[0]
-    updated_column_name = "foo"
-    expectation.column = updated_column_name
 
     # Act
+    expectation = suite.expectations[0]
+    assert expectation.column == "a"
+    updated_column_name = "foo"
+    expectation.column = updated_column_name
     store.update_expectation(suite=suite, expectation=expectation)
 
     # Assert
