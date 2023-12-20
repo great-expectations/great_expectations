@@ -19,14 +19,19 @@ def data_asset_name() -> str:
 
 
 @pytest.fixture
+def context(empty_data_context: AbstractDataContext) -> AbstractDataContext:
+    return empty_data_context
+
+
+@pytest.fixture
 def store(
-    empty_data_context: AbstractDataContext,
+    context: AbstractDataContext,
     datasource_name: str,
     data_asset_name: str,
 ) -> DatasourceStore:
     """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
-    store = empty_data_context._datasource_store
-    datasource = empty_data_context.sources.add_pandas(datasource_name)
+    store = context._datasource_store
+    datasource = context.sources.add_pandas(datasource_name)
     datasource.add_csv_asset(data_asset_name, "taxi.csv")
 
     key = DataContextVariableKey(resource_name=datasource_name)
@@ -56,7 +61,8 @@ def test_add_batch_config__success(empty_data_asset: DataAsset):
     assert empty_data_asset.batch_configs == [batch_config]
 
 
-def test_add_batch_config__persists(
+def test_add_batch_config__persists_when_context_present(
+    context: AbstractDataContext,
     store: DatasourceStore,
     empty_data_asset: DataAsset,
     datasource_name: str,
@@ -64,6 +70,10 @@ def test_add_batch_config__persists(
 ):
     key = DataContextVariableKey(resource_name=datasource_name)
     name = "my batch config"
+
+    # depending on how a datasource is created, it may or may not have a context
+    empty_data_asset._datasource._data_context = context
+
     batch_config = empty_data_asset.add_batch_config(name)
 
     loaded_datasource = store.get(key)
