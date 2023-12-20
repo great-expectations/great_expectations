@@ -690,8 +690,6 @@ class _SQLAsset(DataAsset):
                     )
                 )
             # Creating the batch_spec is our hook into the execution engine.
-            # TODO: if it's a QueryAsset use RuntimeQueryBatchSpec? or...
-            # change how we get batch data inside of SqlAlchemyExecutionEngine.get_batch_data_and_markers()
             batch_spec = self._create_batch_spec(batch_spec_kwargs)
             execution_engine: SqlAlchemyExecutionEngine = (
                 self.datasource.get_execution_engine()
