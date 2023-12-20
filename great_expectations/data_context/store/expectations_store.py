@@ -225,7 +225,7 @@ class ExpectationsStore(Store):
     def _add_cloud_ids_to_local_suite_and_expectations(
         self, local_suite: ExpectationSuite, cloud_suite: dict
     ) -> ExpectationSuite:
-        if not local_suite["ge_cloud_id"]:
+        if not local_suite.ge_cloud_id:
             local_suite.ge_cloud_id = cloud_suite["ge_cloud_id"]
         # replace local expectations with those returned from the backend
         expectations = []
