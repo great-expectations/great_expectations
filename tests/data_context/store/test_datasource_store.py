@@ -114,13 +114,12 @@ def test_datasource_store_with_bad_key_raises_error(
 
     error_msg: str = "key must be an instance of DataContextVariableKey"
 
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError, match=error_msg) as e:
         store.set(key="my_bad_key", value=block_config_datasource_config)  # type: ignore[arg-type]
     assert error_msg in str(e.value)
 
     with pytest.raises(TypeError) as e:
         store.get(key="my_bad_key")  # type: ignore[arg-type]
-    assert error_msg in str(e.value)
 
 
 def _assert_serialized_datasource_configs_are_equal(
@@ -279,9 +278,8 @@ def test_datasource_store__add_batch_config__duplicate_name(
     new_batch_config = BatchConfig(name=batch_config_name)
     new_batch_config._data_asset = asset
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="already exists"):
         store.add_batch_config(new_batch_config)
-    assert "already exists" in str(e.value)
 
 
 @pytest.mark.unit
@@ -324,9 +322,8 @@ def test_datasource_store__delete_batch_config__does_not_exist(
     new_batch_config = BatchConfig(name=batch_config_name)
     new_batch_config._data_asset = asset
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="does not exist"):
         store.delete_batch_config(new_batch_config)
-    assert "does not exist" in str(e.value)
 
 
 @pytest.mark.cloud
@@ -550,16 +547,14 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     empty_datasource_store: DatasourceStore,
 ) -> None:
     updated_datasource_config = DatasourceConfig()
-    with pytest.raises(gx_exceptions.DatasourceNotFoundError) as e:
+    with pytest.raises(
+        gx_exceptions.DatasourceNotFoundError,
+        match=f"Could not find an existing Datasource named {fake_datasource_name}.",
+    ):
         empty_datasource_store.update_by_name(
             datasource_name=fake_datasource_name,
             datasource_config=updated_datasource_config,
         )
-
-    assert (
-        f"Could not find an existing Datasource named {fake_datasource_name}."
-        in str(e.value)
-    )
 
 
 @pytest.mark.unit
