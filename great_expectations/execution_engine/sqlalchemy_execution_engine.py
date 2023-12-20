@@ -1363,9 +1363,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # TODO: clean this up
         # fix this when building the batch spec or stop doing instance checks at all
         # and check for the presence of the query key
-        query: Optional[str] = batch_spec.get(
-            "query", getattr(batch_spec, "query", None)
-        )
+        query: Optional[str] = getattr(batch_spec, "query", batch_spec.get("query"))
         if isinstance(batch_spec, RuntimeQueryBatchSpec) or query:
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             assert query
