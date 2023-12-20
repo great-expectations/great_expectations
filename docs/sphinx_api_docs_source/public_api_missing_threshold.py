@@ -38,6 +38,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/data_context/store/validations_store.py Name: ValidationsStore",
     "File: great_expectations/data_context/types/base.py Name: update",
     "File: great_expectations/datasource/data_connector/asset/asset.py Name: Asset",
+    "File: great_expectations/datasource/datasource_dict.py Name: add_dataframe_asset",
     "File: great_expectations/datasource/fluent/config.py Name: get_datasource",
     "File: great_expectations/datasource/fluent/config.py Name: pop",
     "File: great_expectations/datasource/fluent/config.py Name: yaml",

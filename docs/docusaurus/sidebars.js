@@ -110,6 +110,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Edit Data Source settings',
+              href: '/docs/cloud/data_assets/manage_data_assets#edit-data-source-settings',
+            },
+            {
+              type: 'link',
               label: 'Edit a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
             },
@@ -139,6 +144,11 @@ module.exports = {
               type: 'link',
               label: 'Edit an Expectation',
               href: '/docs/cloud/expectations/manage_expectations#edit-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'View Expectation history',
+              href: '/docs/cloud/expectations/manage_expectations#view-expectation-history',
             },
             {
               type: 'link',
@@ -183,6 +193,11 @@ module.exports = {
               type: 'link',
               label: 'Run a Validation',
               href: '/docs/cloud/validations/manage_validations#run-a-validation',
+            },
+            {
+              type: 'link',
+              label: 'Run a Validation on a Data Asset containing partitions',
+              href: '/docs/cloud/validations/manage_validations#run-a-validation-on-a-data-asset-containing-partitions',
             },
             {
               type: 'link',
@@ -510,7 +525,6 @@ module.exports = {
         },
         'reference/learn/terms/expectation_suite',
         'reference/learn/terms/metric',
-        'reference/learn/conceptual_guides/metricproviders',
         {
           type: 'category',
           label: 'Stores',
