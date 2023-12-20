@@ -215,6 +215,16 @@ class DatasourceStore(Store):
         )
         return self.store_backend.build_key(name=datasource_config.name, id=id_)
 
+    def get_fluent_datasource_by_name(self, name: str) -> FluentDatasource:
+        # TODO: Delete this when we remove block style datasource configs
+        key = DataContextVariableKey(
+            resource_name=name,
+        )
+        datasource = self.get(key)
+        if not isinstance(datasource, FluentDatasource):
+            raise ValueError("Datasource is not a FluentDatasource")
+        return datasource
+
     @overload  # type: ignore[override]
     def set(
         self,
@@ -325,19 +335,18 @@ class DatasourceStore(Store):
     def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
         data_asset = batch_config.data_asset
         key = DataContextVariableKey(resource_name=data_asset.datasource.name)
-
-        loaded_datasource = self.get(key)
-        assert isinstance(loaded_datasource, FluentDatasource)
-
+        loaded_datasource = self.get_fluent_datasource_by_name(
+            data_asset.datasource.name
+        )
         loaded_asset = loaded_datasource.get_asset(data_asset.name)
-        batch_config_names = {bc.name for bc in loaded_asset.batch_configs}
 
+        batch_config_names = {bc.name for bc in loaded_asset.batch_configs}
         if batch_config.name in batch_config_names:
             raise ValueError(
                 f'"{batch_config.name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
-        # This must be added for it to be picked up during serialization
+        # This must be set for it to be picked up during serialization
         loaded_asset.__fields_set__.add("batch_configs")
 
         loaded_asset.batch_configs.append(batch_config)
@@ -354,3 +363,28 @@ class DatasourceStore(Store):
 
         updated_batch_config._data_asset = updated_asset
         return updated_batch_config
+
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        data_asset = batch_config.data_asset
+        key = DataContextVariableKey(resource_name=data_asset.datasource.name)
+        loaded_datasource = self.get_fluent_datasource_by_name(
+            data_asset.datasource.name
+        )
+        loaded_asset = loaded_datasource.get_asset(data_asset.name)
+
+        batch_config_names = {bc.name for bc in loaded_asset.batch_configs}
+        if batch_config.name not in batch_config_names:
+            raise ValueError(
+                f'"{batch_config.name}" does not exist (all existing batch_config names are {", ".join(batch_config_names)})'
+            )
+
+        loaded_asset.batch_configs = [
+            bc for bc in loaded_asset.batch_configs if bc.name != batch_config.name
+        ]
+
+        # This must be set for it to be picked up during serialization
+        has_batch_configs = len(loaded_asset.batch_configs) > 0
+        if not has_batch_configs and "batch_configs" in loaded_asset.__fields_set__:
+            loaded_asset.__fields_set__.remove("batch_configs")
+
+        self._persist_datasource(key=key, config=loaded_datasource)
