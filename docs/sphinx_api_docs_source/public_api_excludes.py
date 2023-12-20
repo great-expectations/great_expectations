@@ -749,4 +749,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="ResultFormat",
         filepath=pathlib.Path("great_expectations/core/result_format.py"),
     ),
+    IncludeExcludeDefinition(
+        reason="Not part of the public API",
+        name="add_expectation",
+        filepath=pathlib.Path(
+            "great_expectations/data_context/store/expectations_store.py"
+        ),
+    ),
 ]
