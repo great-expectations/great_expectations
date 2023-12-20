@@ -1360,7 +1360,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-        # TODO: what's being checked here is the presence of a `query` attribute, we could check this directly
+        # NOTE: what's being checked here is the presence of a `query` attribute, we could check this directly
         # instead of doing an instance check
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
