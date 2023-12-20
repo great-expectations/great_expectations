@@ -226,6 +226,17 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     def add_batch_config(self, name: str) -> BatchConfig:
+        """Add a BatchConfig to this DataAsset.
+        BatchConfig names must be unique within a DataAsset.
+
+        If the DataAsset is tied to a DataContext, the BatchConfig will be persisted.
+
+        Args:
+            name (str): Name of the new batch config.
+
+        Returns:
+            BatchConfig: The new batch config.
+        """
         batch_config_names = {bc.name for bc in self.batch_configs}
         if name in batch_config_names:
             raise ValueError(
