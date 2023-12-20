@@ -41,6 +41,7 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -250,12 +251,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_config._data_asset = self
         self.__fields_set__.add("batch_configs")
         if self.datasource.data_context:
-            batch_config = (
-                self.datasource.data_context._datasource_store.add_batch_config(
-                    batch_config
-                )
-            )
-            batch_config._data_asset = self
+            store = self.datasource.data_context._datasource_store
+            key = DataContextVariableKey(resource_name=self.datasource.name)
+            if store.has_key(key=key):
+                batch_config = store.add_batch_config(batch_config)
+                batch_config._data_asset = self
 
         batch_config._data_asset = self
         self.batch_configs.append(batch_config)
