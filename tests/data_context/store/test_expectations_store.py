@@ -469,9 +469,7 @@ def test_update_expectation_raises_error_for_missing_expectation(empty_data_cont
         value_set=[1, 2, 3],
         result_format="BASIC",
     )
-    suite = context.add_expectation_suite(
-        suite_name, expectations=[expectation.configuration]
-    )
+    suite = context.add_expectation_suite(suite_name, expectations=[])
     key = store.get_key(suite)
 
     # Act
