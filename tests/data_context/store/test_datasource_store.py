@@ -8,6 +8,7 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -35,6 +36,8 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
     YAMLReadyDictDatasourceConfigSerializer,
 )
+from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from tests.data_context.conftest import MockResponse
 
 yaml = YAMLHandler()
@@ -196,6 +199,55 @@ def test_datasource_store_retrieval(
         [block_config_datasource_config, res],
         [set_config_serializer, retrieved_config_serializer],
     )
+
+
+@pytest.mark.unit
+def test_datasource_store__add_batch_config__success(
+    empty_datasource_store: DatasourceStore,
+) -> None:
+    # Arrange
+    store = empty_datasource_store
+    datasource = PandasDatasource(name="foo")
+    asset = datasource.add_csv_asset("cool new asset", "taxi.csv")
+    key = DataContextVariableKey(resource_name=datasource.name)
+    store.set(key=key, value=datasource)
+
+    # Act
+    batch_config = BatchConfig(name="my cool batch config")
+    batch_config._data_asset = asset
+    updated_batch_config = store.add_batch_config(batch_config)
+
+    # Assert
+    updated_datasource = store.get(key=key)
+    assert updated_batch_config.name == batch_config.name
+    assert isinstance(updated_datasource, Datasource)
+    updated_batch_configs = updated_datasource.get_asset(asset.name).batch_configs
+    assert any(bc.name == batch_config.name for bc in updated_batch_configs)
+
+
+@pytest.mark.unit
+def test_datasource_store__add_batch_config__duplicate_name(
+    empty_datasource_store: DatasourceStore,
+) -> None:
+    # Arrange
+    name = "whatever"
+    store = empty_datasource_store
+    datasource = PandasDatasource(name="foo")
+    asset = datasource.add_csv_asset("cool new asset", "taxi.csv")
+    key = DataContextVariableKey(resource_name=datasource.name)
+    store.set(key=key, value=datasource)
+
+    batch_config = BatchConfig(name=name)
+    batch_config._data_asset = asset
+    store.add_batch_config(batch_config)
+
+    # Act + Assert
+    new_batch_config = BatchConfig(name=name)
+    new_batch_config._data_asset = asset
+
+    with pytest.raises(ValueError) as e:
+        store.add_batch_config(new_batch_config)
+    assert "already exists" in str(e.value)
 
 
 @pytest.mark.cloud
