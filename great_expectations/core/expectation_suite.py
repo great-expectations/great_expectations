@@ -159,7 +159,10 @@ class ExpectationSuite(SerializableDictDot):
         if expectation.id:
             raise RuntimeError(
                 "Cannot add Expectation because it already belongs to an ExpectationSuite. "
-                + "Please make a copy of your Expectation with `copy(expectation)` and try again."
+                "If you want to update an existing Expectation, please call Expectation.save(). "
+                "If you are copying this Expectation to a new ExpectationSuite, please copy "
+                "it first (the core expectations and some others support copy(expectation)) "
+                "and set `Expectation.id = None`."
             )
         should_save_expectation = self._has_been_saved()
         expectation_is_unique = all(
