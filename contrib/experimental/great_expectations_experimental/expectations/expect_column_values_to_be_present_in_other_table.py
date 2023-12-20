@@ -16,22 +16,23 @@ from great_expectations.render.renderer.renderer import renderer
 class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     """Expect the values in a column to be present in another table.
 
-     This is an Expectation that allows for the validation of referential integrity, that a foreign key exists in another table.
+    This is an Expectation that allows for the validation of referential integrity, that a foreign key exists in
+    another table.
 
-     In the following example, order table has a foreign key to customer table, and referential integrity is preserved, because all of
-     the values of CUSTOMER_ID in order_table_1 are present in the CUSTOMER_ID column of customer_table.
+    In the following example, order table has a foreign key to customer table, and referential integrity is preserved,
+    because all the values of CUSTOMER_ID in order_table_1 are present in the CUSTOMER_ID column of customer_table.
 
     "order_table_1": {
          "ORDER_ID": ["aaa", "bbb", "ccc"],
          "CUSTOMER_ID": [1, 1, 3],
-     }
-     "customer_table": {
-         "CUSTOMER_ID": [1, 2, 3],
+    }
+    "customer_table": {
+        "CUSTOMER_ID": [1, 2, 3],
 
-     }
+    }
 
-     However, in the second example, referential integrity is not preserved, because there are two values (4 and 5) in the CUSTOMER_ID
-     column of order_table_2 that are not present in the CUSTOMER_ID column of customer_table.
+    However, in the second example, referential integrity is not preserved, because there are two values (4 and 5) in
+    the CUSTOMER_ID column of order_table_2 that are not present in the CUSTOMER_ID column of customer_table.
 
      "order_table_2": {
          "ORDER_ID": ["ddd", "eee", "fff"],
@@ -41,7 +42,16 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
          "CUSTOMER_ID": [1, 2, 3],
 
      }
-     ExpectColumnValuesToBePresentInAnotherTable will PASS for example 1 and FAIL for example 2.
+    ExpectColumnValuesToBePresentInAnotherTable will PASS for example 1 and FAIL for example 2.
+
+    Also, the `template_dict` parameter we would use for the Expectation on `order_table_1` and `order_table_2` would
+    look like the following:
+
+    "template_dict" = {
+        "foreign_key_column": "CUSTOMER_ID",
+        "foreign_table": "customer_table",
+        "primary_key_column_in_foreign_table": "CUSTOMER_ID",
+    }
 
      Args:
          template_dict: dict containing the following keys:
@@ -68,12 +78,12 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     metric_dependencies = ("query.template_values",)
     template_dict: dict
     query = """
-        SELECT count(1) FROM (
+        SELECT COUNT(1) FROM (
         SELECT a.{foreign_key_column}
         FROM {active_batch} a
         LEFT JOIN {foreign_table} b
             ON a.{foreign_key_column} = b.{primary_key_column_in_foreign_table}
-        WHERE b.{primary_key_column_in_foreign_table} is NULL)
+        WHERE b.{primary_key_column_in_foreign_table} IS NULL)
         """
     success_keys = (
         "template_dict",
@@ -136,7 +146,10 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
             ]
         ):
             raise KeyError(
-                "The following keys have to be in the template dict: id, foreign_table, foreign_key_column"
+                f"The following keys are missing from the template dict: "
+                f"{'foreign_key_column ' if 'foreign_key_column' not in template_dict else ''} "
+                f"{'foreign_table ' if 'foreign_table' not in template_dict else ''} "
+                f"{'primary_key_column_in_foreign_table ' if 'primary_key_column_in_foreign_table' not in template_dict else ''}"
             )
 
     def _validate(
