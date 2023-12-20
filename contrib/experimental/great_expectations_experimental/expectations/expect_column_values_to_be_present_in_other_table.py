@@ -163,7 +163,8 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         self._validate_template_dict(configuration)
         final_value = metrics.get("query.template_values")[0]["COUNT(1)"]
         return ExpectationValidationResult(
-            success=(final_value == 0), result={"observed_value": final_value}
+            success=(final_value == 0),
+            result={"observed_value": f"{final_value} missing items."},
         )
 
     examples = [
