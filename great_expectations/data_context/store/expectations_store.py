@@ -117,12 +117,20 @@ class ExpectationsStore(Store):
     def add_expectation(
         self, suite: ExpectationSuite, expectation: Expectation
     ) -> Expectation:
-        suite_identifier, suite = self._refresh_suite(suite)
+        suite_identifier, fetched_suite = self._refresh_suite(suite)
 
-        expectation.id = str(uuid.uuid4())
-        suite.expectation_configurations.append(expectation.configuration)
+        if self.cloud_mode:
+            expectation.id = None  # flag this expectation as new for the backend
+        else:
+            expectation.id = str(uuid.uuid4())
+        fetched_suite.expectation_configurations.append(expectation.configuration)
 
-        self.update(key=suite_identifier, value=suite)
+        self.update(key=suite_identifier, value=fetched_suite)
+        if self.cloud_mode:
+            suite_identifier, fetched_suite = self._refresh_suite(suite)
+            self._add_cloud_ids_to_local_suite_and_expectations(
+                local_suite=suite, cloud_suite=fetched_suite
+            )
         return expectation
 
     def update_expectation(
@@ -177,9 +185,12 @@ class ExpectationsStore(Store):
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
+                cloud_suite = ExpectationSuite(
+                    **result.response["data"]["attributes"]["suite"]
+                )
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
-                    cloud_suite=result.response["data"]["attributes"]["suite"],
+                    cloud_suite=cloud_suite,
                 )
             return result
         except gx_exceptions.StoreBackendError:
@@ -196,9 +207,12 @@ class ExpectationsStore(Store):
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
+                cloud_suite = ExpectationSuite(
+                    **result.response["data"]["attributes"]["suite"]
+                )
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
-                    cloud_suite=result.response["data"]["attributes"]["suite"],
+                    cloud_suite=cloud_suite,
                 )
         except gx_exceptions.StoreBackendError as exc:
             # todo: this generic error clobbers more informative errors coming from the store
@@ -245,25 +259,14 @@ class ExpectationsStore(Store):
         return suite
 
     def _add_cloud_ids_to_local_suite_and_expectations(
-        self, local_suite: ExpectationSuite, cloud_suite: dict
+        self, local_suite: ExpectationSuite, cloud_suite: ExpectationSuite
     ) -> ExpectationSuite:
         if not local_suite.ge_cloud_id:
-            local_suite.ge_cloud_id = cloud_suite["ge_cloud_id"]
+            local_suite.ge_cloud_id = cloud_suite.ge_cloud_id
         # replace local expectations with those returned from the backend
-        expectations = []
-        from great_expectations.expectations.registry import get_expectation_impl
-
-        for expectation_dict in cloud_suite["expectations"]:
-            class_ = get_expectation_impl(expectation_dict["expectation_type"])
-            expectation = class_(
-                meta=expectation_dict["meta"],
-                id=expectation_dict["ge_cloud_id"],
-                **expectation_dict["kwargs"],
-            )
-            expectations.append(expectation)
         # todo: update when configurations are no longer source of truth on suite
         local_suite.expectation_configurations = [
-            expectation.configuration for expectation in expectations
+            expectation.configuration for expectation in cloud_suite.expectations
         ]
         return local_suite
 
