@@ -17,6 +17,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
+    BatchIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
@@ -155,6 +156,20 @@ def test_SlackNotificationAction(
         slack_channel=slack_channel,
         notify_on=notify_on,
     )
+
+    assert slack_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"slack_notification_result": "Slack notification succeeded."}
+
+    # test for long text message - should be split into multiple messages
+    long_text = "a" * 10000
+    validation_result_suite.meta = {
+        "active_batch_definition": BatchIdentifier(
+            batch_identifier="1234", data_asset_name=long_text
+        ),
+    }
 
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,

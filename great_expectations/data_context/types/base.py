@@ -42,9 +42,9 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier

@@ -16,6 +16,11 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.checkpoint.configurator import (
     ActionDicts,
 )
@@ -31,11 +36,6 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import RunIdentifier
-from great_expectations.core._docs_decorators import (
-    deprecated_argument,
-    new_argument,
-    public_api,
-)
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import (
     BatchRequest,
