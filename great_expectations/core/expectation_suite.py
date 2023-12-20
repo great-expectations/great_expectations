@@ -170,6 +170,7 @@ class ExpectationSuite(SerializableDictDot):
             for existing_config in self.expectation_configurations
         )
         if expectation_is_unique:
+            # suite is a set-like collection, so don't add if it not unique
             if (
                 should_save_expectation
             ):  # persist the Expectation first so it gets an ID
@@ -178,8 +179,6 @@ class ExpectationSuite(SerializableDictDot):
                 )
             # add it to our in memory suite
             self.expectation_configurations.append(expectation.configuration)
-        else:
-            pass  # suite is a set-like collection, so don't add if it not unique
 
         expectation.register_save_callback(save_callback=self._save_expectation)
         return expectation
