@@ -52,6 +52,7 @@ def empty_data_asset(
     return datasource.get_asset(data_asset_name)
 
 
+@pytest.mark.unit
 def test_add_batch_config__success(empty_data_asset: DataAsset):
     name = "my batch config"
     batch_config = empty_data_asset.add_batch_config(name)
@@ -61,6 +62,7 @@ def test_add_batch_config__success(empty_data_asset: DataAsset):
     assert empty_data_asset.batch_configs == [batch_config]
 
 
+@pytest.mark.unit
 def test_add_batch_config__persists_when_context_present(
     context: AbstractDataContext,
     store: DatasourceStore,
@@ -83,6 +85,7 @@ def test_add_batch_config__persists_when_context_present(
     assert loaded_asset.batch_configs == [batch_config]
 
 
+@pytest.mark.unit
 def test_add_batch_config__multiple(empty_data_asset: DataAsset):
     empty_data_asset.add_batch_config("foo")
     empty_data_asset.add_batch_config("bar")
@@ -90,6 +93,7 @@ def test_add_batch_config__multiple(empty_data_asset: DataAsset):
     assert len(empty_data_asset.batch_configs) == 2
 
 
+@pytest.mark.unit
 def test_add_batch_config__duplicate_key(empty_data_asset: DataAsset):
     name = "my batch config"
     empty_data_asset.add_batch_config(name)
