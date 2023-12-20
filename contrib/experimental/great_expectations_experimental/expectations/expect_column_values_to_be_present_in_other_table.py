@@ -1,5 +1,6 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
 )
@@ -8,6 +9,8 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
+from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
@@ -84,6 +87,41 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         "query": query,
     }
 
+    @classmethod
+    @override
+    @renderer(renderer_type="renderer.prescriptive")
+    def _prescriptive_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+    ) -> List[RenderedStringTemplateContent]:
+        runtime_configuration = runtime_configuration or {}
+        styling = runtime_configuration.get("styling")
+
+        template_dict = configuration.kwargs.get("template_dict")
+
+        template_str = "No values in the column $foreign_key_column are expected to be missing in table $foreign_table 's $primary_key_column_in_foreign_table column."
+
+        params = {
+            "foreign_key_column": template_dict["foreign_key_column"],
+            "foreign_table": template_dict["foreign_table"],
+            "primary_key_column_in_foreign_table": template_dict[
+                "primary_key_column_in_foreign_table"
+            ],
+        }
+
+        return [
+            RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
+            )
+        ]
+
     def _validate_template_dict(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -112,7 +150,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         self._validate_template_dict(configuration)
         final_value = metrics.get("query.template_values")[0]["COUNT(1)"]
         return ExpectationValidationResult(
-            success=(final_value == 0), result={"unexpected_count": final_value}
+            success=(final_value == 0), result={"observed_value": final_value}
         )
 
     examples = [
@@ -178,7 +216,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                             "primary_key_column_in_foreign_table": "CUSTOMER_ID",
                         },
                     },
-                    "out": {"success": False, "unexpected_count": 2},
+                    "out": {"success": False, "observed_value": 2},
                 },
             ],
         },
