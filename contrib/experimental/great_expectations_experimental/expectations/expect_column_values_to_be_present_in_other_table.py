@@ -101,7 +101,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
         template_dict = configuration.kwargs.get("template_dict")
 
-        template_str = "No values in the column $foreign_key_column are expected to be missing in table $foreign_table 's $primary_key_column_in_foreign_table column."
+        template_str = "$foreign_key_column values exist in table $foreign_table 's $primary_key_column_in_foreign_table column."
 
         params = {
             "foreign_key_column": template_dict["foreign_key_column"],
