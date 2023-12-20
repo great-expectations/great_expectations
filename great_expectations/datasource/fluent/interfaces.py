@@ -243,12 +243,15 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                 f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
+        # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)
+        assert isinstance(self.datasource, Datasource)
+
         batch_config = BatchConfig(name=name)
         batch_config._data_asset = self
         self.__fields_set__.add("batch_configs")
-        if self.datasource._data_context:
+        if self.datasource.data_context:
             batch_config = (
-                self.datasource._data_context._datasource_store.add_batch_config(
+                self.datasource.data_context._datasource_store.add_batch_config(
                     batch_config
                 )
             )
