@@ -581,7 +581,7 @@ class ExpectationSuite(SerializableDictDot):
 
         if len(found_expectation_indexes) > 0:
             return [
-                self.expectation_configurations[idx]
+                self.expectations[idx].configuration
                 for idx in found_expectation_indexes
             ]
 
