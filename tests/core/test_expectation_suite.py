@@ -661,8 +661,12 @@ class TestIsEquivalentTo:
         """Only expectation equivalence is considered for suite equivalence, and the same number of expectations in the suite is required for equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
         # Add a copy of the existing expectation, using list .append() to bypass add_expectation logic to handle overwrite
-        different_and_not_equivalent_suite.expectation_configurations.append(
-            different_and_not_equivalent_suite.expectation_configurations[0]
+        different_and_not_equivalent_suite.expectations.append(
+            different_and_not_equivalent_suite._build_expectation(
+                expectation_configuration=different_and_not_equivalent_suite.expectation_configurations[
+                    0
+                ]
+            )
         )
         assert len(suite_with_single_expectation.expectations) == 1
         assert len(different_and_not_equivalent_suite.expectations) == 2

@@ -297,7 +297,9 @@ class ExpectationSuite(SerializableDictDot):
 
         exp_configs_are_equal = all(
             mine.isEquivalentTo(theirs)
-            for (mine, theirs) in zip(self.expectations, other.expectations)
+            for (mine, theirs) in zip(
+                self.expectation_configurations, other.expectation_configurations
+            )
         )
 
         return exp_count_is_equal and exp_configs_are_equal
