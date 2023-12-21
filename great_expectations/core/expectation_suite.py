@@ -884,10 +884,11 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_table_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of table expectations."""
+        _expectation_configurations = [exp.configuration for exp in self.expectations]
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.TABLE,
-                self.expectation_configurations,
+                _expectation_configurations,
             )
         )
 
@@ -901,10 +902,11 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_column_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column map expectations."""
+        _expectation_configurations = [exp.configuration for exp in self.expectations]
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN,
-                self.expectation_configurations,
+                _expectation_configurations,
             )
         )
 
@@ -923,11 +925,13 @@ class ExpectationSuite(SerializableDictDot):
     # noinspection PyPep8Naming
     def get_column_pair_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column_pair map expectations."""
+        _expectation_configurations = [exp.configuration for exp in self.expectations]
+
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.COLUMN_PAIR,
-                self.expectation_configurations,
+                _expectation_configurations,
             )
         )
 
@@ -951,11 +955,13 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_multicolumn_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of multicolumn map expectations."""
+        _expectation_configurations = [exp.configuration for exp in self.expectations]
+
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.MULTICOLUMN,
-                self.expectation_configurations,
+                _expectation_configurations,
             )
         )
 
@@ -979,7 +985,8 @@ class ExpectationSuite(SerializableDictDot):
 
         column: str
         expectation: ExpectationConfiguration
-        for expectation in self.expectation_configurations:
+        _expectation_configurations = [exp.configuration for exp in self.expectations]
+        for expectation in _expectation_configurations:
             if "column" in expectation.kwargs:
                 column = expectation.kwargs["column"]
             else:
@@ -1042,10 +1049,11 @@ class ExpectationSuite(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for each expectation configuration associated with
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
-        for expectation_configuration in self.expectation_configurations:
+
+        for expectation in self.expectations:
             inline_renderer_config: InlineRendererConfig = {
                 "class_name": "InlineRenderer",
-                "render_object": expectation_configuration,
+                "render_object": expectation.configuration,
             }
             module_name = "great_expectations.render.renderer.inline_renderer"
             inline_renderer = instantiate_class_from_config(
@@ -1064,8 +1072,8 @@ class ExpectationSuite(SerializableDictDot):
                 RenderedAtomicContent
             ] = inline_renderer.get_rendered_content()
 
-            expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
-                existing_rendered_content=expectation_configuration.rendered_content,
+            expectation.configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=expectation.configuration.rendered_content,
                 new_rendered_content=rendered_content,
                 failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
             )
