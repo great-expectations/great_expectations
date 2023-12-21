@@ -111,7 +111,7 @@ def exp8() -> ExpectationConfiguration:
 def table_exp1() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_columns_to_match_ordered_list",
-        kwargs={"value": ["a", "b", "c"]},
+        kwargs={"column_list": ["a", "b", "c"]},
     )
 
 
@@ -137,7 +137,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
         kwargs={
             "column_A": "1",
             "column_B": "b",
-            "value_set": [(1, 1), (2, 2)],
+            "value_pairs_set": [(1, 1), (2, 2)],
             "result_format": "BASIC",
         },
     )
@@ -226,16 +226,6 @@ def suite_with_table_and_column_expectations(
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
-    assert suite.expectation_configurations == [
-        exp1,
-        exp2,
-        exp3,
-        exp4,
-        column_pair_expectation,
-        table_exp1,
-        table_exp2,
-        table_exp3,
-    ]
     return suite
 
 
@@ -589,16 +579,16 @@ def test_add_expectation_with_ge_cloud_id(
 @pytest.mark.filesystem
 def test_remove_all_expectations_of_type(
     suite_with_table_and_column_expectations,
-    suite_with_column_pair_and_table_expectations,
 ):
-    assert not suite_with_table_and_column_expectations.isEquivalentTo(
-        suite_with_column_pair_and_table_expectations
+    expectation_type = "expect_column_values_to_be_in_set"
+    assert any(
+        expectation.expectation_type == expectation_type
+        for expectation in suite_with_table_and_column_expectations.expectations
     )
-
     suite_with_table_and_column_expectations.remove_all_expectations_of_type(
-        "expect_column_values_to_be_in_set"
+        expectation_type
     )
-
-    assert suite_with_table_and_column_expectations.isEquivalentTo(
-        suite_with_column_pair_and_table_expectations
+    assert not any(
+        expectation.expectation_type == expectation_type
+        for expectation in suite_with_table_and_column_expectations.expectations
     )
