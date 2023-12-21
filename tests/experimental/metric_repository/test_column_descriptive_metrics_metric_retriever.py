@@ -58,8 +58,11 @@ def test_get_metrics():
     mock_batch_request = Mock(spec=BatchRequest)
 
     with mock.patch(
-        f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
+    ), mock.patch(
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_timestamp_column_names",
+        return_value=[],
     ):
         metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
 
@@ -195,8 +198,11 @@ def test_get_metrics_metrics_missing():
     mock_batch_request = Mock(spec=BatchRequest)
 
     with mock.patch(
-        f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
+    ), mock.patch(
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_timestamp_column_names",
+        return_value=[],
     ):
         metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
 
@@ -357,8 +363,11 @@ def test_get_metrics_with_exception():
     mock_batch_request = Mock(spec=BatchRequest)
 
     with mock.patch(
-        f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
+    ), mock.patch(
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_timestamp_column_names",
+        return_value=[],
     ):
         metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
 
@@ -515,8 +524,11 @@ def test_get_metrics_with_column_type_missing():
     mock_batch_request = Mock(spec=BatchRequest)
 
     with mock.patch(
-        f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
+    ), mock.patch(
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_timestamp_column_names",
+        return_value=[],
     ):
         metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
 
@@ -615,6 +627,10 @@ def test_get_metrics_with_column_type_missing():
             column="col2",
         ),
     ]
+
+
+def test_get_metrics_with_timestamp_columns():
+    raise NotImplementedError
 
 
 def test_get_metrics_only_gets_a_validator_once():
