@@ -630,7 +630,82 @@ def test_get_metrics_with_column_type_missing():
 
 
 def test_get_metrics_with_timestamp_columns():
-    raise NotImplementedError
+    mock_context = Mock(spec=CloudDataContext)
+    mock_validator = Mock(spec=Validator)
+    mock_context.get_validator.return_value = mock_validator
+    computed_metrics = {
+        ("table.row_count", (), ()): 2,
+        ("table.columns", (), ()): ["timestamp_col"],
+        ("table.column_types", (), "include_nested=True"): [
+            {"name": "timestamp_col", "type": "TIMESTAMP_NTZ"},
+        ],
+        ("column.min", "column=timestamp_col", ()): "2023-01-01T00:00:00",
+        ("column.max", "column=timestamp_col", ()): "2023-12-31T00:00:00",
+        ("column_values.null.count", "column=timestamp_col", ()): 1,
+    }
+    aborted_metrics = {}
+    mock_validator.compute_metrics.return_value = (
+        computed_metrics,
+        aborted_metrics,
+    )
+    mock_batch = Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    mock_validator.active_batch = mock_batch
+
+    metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
+
+    mock_batch_request = Mock(spec=BatchRequest)
+
+    with mock.patch(
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_numeric_column_names",
+        return_value=[],
+    ), mock.patch(
+        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_timestamp_column_names",
+        return_value=["timestamp_col"],
+    ):
+        metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
+
+    assert metrics == [
+        TableMetric[int](
+            batch_id="batch_id",
+            metric_name="table.row_count",
+            value=2,
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.columns",
+            value=["timestamp_col"],
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.column_types",
+            value=[{"name": "timestamp_col", "type": "TIMESTAMP_NTZ"}],
+            exception=None,
+        ),
+        ColumnMetric[str](
+            batch_id="batch_id",
+            metric_name="column.min",
+            value="2023-01-01T00:00:00",
+            exception=None,
+            column="timestamp_col",
+        ),
+        ColumnMetric[str](
+            batch_id="batch_id",
+            metric_name="column.max",
+            value="2023-12-31T00:00:00",
+            exception=None,
+            column="timestamp_col",
+        ),
+        ColumnMetric[int](
+            batch_id="batch_id",
+            metric_name="column_values.null.count",
+            value=1,
+            exception=None,
+            column="timestamp_col",
+        ),
+    ]
 
 
 def test_get_metrics_only_gets_a_validator_once():

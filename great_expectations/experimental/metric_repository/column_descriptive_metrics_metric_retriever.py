@@ -249,7 +249,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                     computed_metrics=computed_metrics,
                     aborted_metrics=aborted_metrics,
                 )
-                # type is str here?
                 metrics.append(
                     ColumnMetric[str](
                         batch_id=batch_id,
