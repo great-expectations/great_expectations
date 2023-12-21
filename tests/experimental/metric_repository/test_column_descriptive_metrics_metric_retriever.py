@@ -67,8 +67,23 @@ def construct_mock_context(construct_mock_validator: Callable):
     return _construct_mock_context
 
 
+@pytest.fixture
+def construct_mock_metric_retriever(construct_mock_context: Callable):
+    def _construct_mock_metric_retriever(
+        computed_metrics: _MetricsDict,
+        aborted_metrics: _AbortedMetricsInfoDict,
+    ):
+        mock_context = construct_mock_context(
+            computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
+        )
+        return ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
+
+    return _construct_mock_metric_retriever
+
+
 def test_get_metrics(
-    construct_mock_context: Callable, construct_mock_validator: Callable
+    construct_mock_metric_retriever: Callable,
 ):
     computed_metrics = {
         ("table.row_count", (), ()): 2,
@@ -90,14 +105,10 @@ def test_get_metrics(
     }
     aborted_metrics = {}
 
-    mock_context = construct_mock_context(
+    metric_retriever = construct_mock_metric_retriever(
         computed_metrics=computed_metrics,
         aborted_metrics=aborted_metrics,
     )
-
-    metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
-
-    mock_batch_request = Mock(spec=BatchRequest)
 
     with mock.patch(
         f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_numeric_column_names",
@@ -106,7 +117,7 @@ def test_get_metrics(
         f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=[],
     ):
-        metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
+        metrics = metric_retriever.get_metrics(batch_request=Mock(spec=BatchRequest))
 
     assert metrics == [
         TableMetric[int](
