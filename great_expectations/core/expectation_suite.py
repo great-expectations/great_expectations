@@ -41,7 +41,6 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -57,7 +56,6 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
-    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
 
@@ -1064,24 +1062,10 @@ class ExpectationSuite(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for each expectation configuration associated with
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
+        from great_expectations.render.renderer.inline_renderer import InlineRenderer
 
         for expectation in self.expectations:
-            inline_renderer_config: InlineRendererConfig = {
-                "class_name": "InlineRenderer",
-                "render_object": expectation.configuration,
-            }
-            module_name = "great_expectations.render.renderer.inline_renderer"
-            inline_renderer = instantiate_class_from_config(
-                config=inline_renderer_config,
-                runtime_environment={},
-                config_defaults={"module_name": module_name},
-            )
-            if not inline_renderer:
-                raise gx_exceptions.ClassInstantiationError(
-                    module_name=module_name,
-                    package_name=None,
-                    class_name=inline_renderer_config["class_name"],
-                )
+            inline_renderer = InlineRenderer(render_object=expectation.configuration)
 
             rendered_content: List[
                 RenderedAtomicContent
