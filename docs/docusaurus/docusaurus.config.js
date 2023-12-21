@@ -125,7 +125,7 @@ module.exports = {
         },
         {
           to: 'https://greatexpectations.io/cloud',
-          label: 'Try GX Cloud',
+          label: 'Sign up for GX Cloud',
           position: 'right',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
