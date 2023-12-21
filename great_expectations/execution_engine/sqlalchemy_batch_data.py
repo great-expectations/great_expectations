@@ -377,11 +377,11 @@ class SqlAlchemyBatchData(BatchData):
         Args:
             query (str): query passed in as RuntimeBatchRequest.
             dialect (GXSqlDialect): Needed for _create_temporary_table, since different backends name temp_tables differently.
-            create_temp_table (bool): Should we create a temp_table?
+            create_temp_table (bool): Should we create a temp_table? If not a `TextClause` will be returned instead of a Table.
             temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema.  Defaults to None.
 
         Returns:
-            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable or a TextClause.
         """
         if not create_temp_table:
             return sa.text(query)
