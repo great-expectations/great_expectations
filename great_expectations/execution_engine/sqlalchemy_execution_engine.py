@@ -1360,22 +1360,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
+        selectable: Union[
+            sqlalchemy.Selectable, str
+        ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
         # NOTE: what's being checked here is the presence of a `query` attribute, we could check this directly
         # instead of doing an instance check
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
-            query: str = batch_spec.query
 
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
-                query=query,
+                selectable=selectable,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            selectable: Union[
-                sqlalchemy.Selectable, str
-            ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
