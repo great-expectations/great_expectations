@@ -51,13 +51,24 @@ def construct_mock_validator(mock_batch: Batch):
 
 
 @pytest.fixture
-def mock_context():
-    mock_context = Mock(spec=CloudDataContext)
-    return mock_context
+def construct_mock_context(construct_mock_validator: Callable):
+    def _construct_mock_context(
+        computed_metrics: _MetricsDict,
+        aborted_metrics: _AbortedMetricsInfoDict,
+    ):
+        mock_context = Mock(spec=CloudDataContext)
+        mock_validator = construct_mock_validator(
+            computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
+        )
+        mock_context.get_validator.return_value = mock_validator
+        return mock_context
+
+    return _construct_mock_context
 
 
 def test_get_metrics(
-    mock_context: CloudDataContext, construct_mock_validator: Callable
+    construct_mock_context: Callable, construct_mock_validator: Callable
 ):
     computed_metrics = {
         ("table.row_count", (), ()): 2,
@@ -79,11 +90,10 @@ def test_get_metrics(
     }
     aborted_metrics = {}
 
-    mock_validator = construct_mock_validator(
+    mock_context = construct_mock_context(
         computed_metrics=computed_metrics,
         aborted_metrics=aborted_metrics,
     )
-    mock_context.get_validator.return_value = mock_validator
 
     metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
 
