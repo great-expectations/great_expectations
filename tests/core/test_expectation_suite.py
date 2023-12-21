@@ -589,7 +589,7 @@ class TestIsEquivalentTo:
         self, suite_with_single_expectation: ExpectationSuite
     ):
         modified_suite = deepcopy(suite_with_single_expectation)
-        modified_suite.expectation_configurations[0]["kwargs"]["value_set"][0] = -1
+        modified_suite.expectations[0].value_set[0] = -1
 
         modified_suite_dict: dict = expectationSuiteSchema.dump(modified_suite)
 
@@ -641,11 +641,9 @@ class TestIsEquivalentTo:
         """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
         # Set different column in expectation kwargs
-        different_and_not_equivalent_suite.expectation_configurations[0].kwargs = {
-            "column": "b",
-            "value_set": [1, 2, 3],
-            "result_format": "BASIC",
-        }
+        expectation = different_and_not_equivalent_suite.expectations[0]
+        expectation.column = "b"
+        expectation.value_set = [1, 2, 3]
 
         assert not suite_with_single_expectation.isEquivalentTo(
             different_and_not_equivalent_suite
