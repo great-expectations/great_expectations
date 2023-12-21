@@ -1071,10 +1071,12 @@ class ExpectationSuite(SerializableDictDot):
                 RenderedAtomicContent
             ] = inline_renderer.get_rendered_content()
 
-            expectation.configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
-                existing_rendered_content=expectation.configuration.rendered_content,
-                new_rendered_content=rendered_content,
-                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+            expectation.rendered_content = (
+                inline_renderer.replace_or_keep_existing_rendered_content(
+                    existing_rendered_content=expectation.rendered_content,
+                    new_rendered_content=rendered_content,
+                    failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+                )
             )
 
 

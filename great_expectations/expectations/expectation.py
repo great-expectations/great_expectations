@@ -284,6 +284,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
 
     catch_exceptions: bool = False
+    rendered_content: Optional[List[RenderedAtomicContent]] = None
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
@@ -1210,6 +1211,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             ge_cloud_id=id,
+            rendered_content=self.rendered_content,
         )
 
     def __copy__(self):
