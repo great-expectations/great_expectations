@@ -96,7 +96,7 @@ class SqlAlchemyBatchData(BatchData):
         source_table_name: Optional[str] = None,
     ) -> None:
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
-        parameters have been provided. If a Query is given, also builds a temporary table for this query
+        parameters have been provided. Builds a temporary table for the `query` if `create_temp_table=True`.
 
             Args:
                 engine (SqlAlchemy Engine): \
