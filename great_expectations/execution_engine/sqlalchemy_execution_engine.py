@@ -1248,7 +1248,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
-    ) -> Union[sqlalchemy.Selectable, str]:
+    ) -> sqlalchemy.Selectable:
         if (
             batch_spec.get("query") is not None
             and batch_spec.get("sampling_method") is not None
@@ -1363,9 +1363,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-        selectable: Union[
-            sqlalchemy.Selectable, str
-        ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+        selectable: sqlalchemy.Selectable = self._build_selectable_from_batch_spec(
+            batch_spec=batch_spec
+        )
         # NOTE: what's being checked here is the presence of a `query` attribute, we could check this directly
         # instead of doing an instance check
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
