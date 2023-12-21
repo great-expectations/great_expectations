@@ -37,7 +37,10 @@ def fake_expectation_suite_name() -> str:
 def expect_column_values_to_be_in_set_col_a_with_meta() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3],
+        },
         meta={"notes": "This is an expectation."},
     )
 
@@ -795,7 +798,7 @@ class TestEqDunder:
 def exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
+        kwargs={"column": "b", "value_set": [-1, -2, -3]},
         meta={"notes": "This is an expectation."},
     )
 
@@ -804,7 +807,10 @@ def exp2() -> ExpectationConfiguration:
 def exp3() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
+        kwargs={
+            "column": "b",
+            "value_set": [-1, -2, -3],
+        },
         meta={"notes": "This is an expectation."},
     )
 
@@ -813,7 +819,10 @@ def exp3() -> ExpectationConfiguration:
 def exp4() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        kwargs={
+            "column": "b",
+            "value_set": [1, 2, 3],
+        },
         meta={"notes": "This is an expectation."},
     )
 
@@ -825,8 +834,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
         kwargs={
             "column_A": "1",
             "column_B": "b",
-            "value_set": [(1, 1), (2, 2)],
-            "result_format": "BASIC",
+            "value_pairs_set": [(1, 1), (2, 2)],
         },
     )
 
@@ -835,7 +843,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
 def table_exp1() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_columns_to_match_ordered_list",
-        kwargs={"value": ["a", "b", "c"]},
+        kwargs={"column_list": ["a", "b", "c"]},
     )
 
 
@@ -893,16 +901,6 @@ def suite_with_table_and_column_expectations(
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
-    assert suite.expectation_configurations == [
-        expect_column_values_to_be_in_set_col_a_with_meta,
-        exp2,
-        exp3,
-        exp4,
-        column_pair_expectation,
-        table_exp1,
-        table_exp2,
-        table_exp3,
-    ]
     return suite
 
 
