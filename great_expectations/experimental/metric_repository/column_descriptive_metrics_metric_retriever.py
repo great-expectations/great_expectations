@@ -225,8 +225,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         column_metric_names = [
             "column.min",
             "column.max",
-            "column.mean",
-            "column.median",
+            # "column.mean",  # Currently not supported for timestamp in Snowflake
+            # "column.median",  # Currently not supported for timestamp in Snowflake
         ]
 
         column_metric_configs = self._generate_column_metric_configurations(
