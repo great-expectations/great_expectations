@@ -111,7 +111,6 @@ class ExpectationSuite(SerializableDictDot):
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
 
-        self.expectation_configurations: None  # typecheck for refactor
         if expectations is None:
             expectations = []
         expectation_configurations = [
@@ -206,6 +205,17 @@ class ExpectationSuite(SerializableDictDot):
         # todo: this should only check local keys instead of potentially querying the remote backend
         key = self._store.get_key(suite=self)
         return self._store.has_key(key=key)
+
+    @property
+    def expectation_configurations(self) -> list[ExpectationConfiguration]:
+        return [exp.configuration for exp in self.expectations]
+
+    @expectation_configurations.setter
+    def expectation_configurations(self, value):
+        raise RuntimeError(
+            "Cannot set ExpectationSuite.expectation_configurations. "
+            "Please use ExpectationSuite.expectations instead."
+        )
 
     def add_citation(  # noqa: PLR0913
         self,
