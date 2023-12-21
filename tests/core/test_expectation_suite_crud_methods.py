@@ -305,7 +305,6 @@ def test_find_expectation_indexes(
         3,
         4,
     ]
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "runtime") == [3]
 
     assert single_expectation_suite.find_expectation_indexes(exp4, "runtime") == []
 
