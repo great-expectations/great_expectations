@@ -174,6 +174,9 @@ class SqlAlchemyBatchData(BatchData):
                 )
             )
         elif query:
+            # NOTE: we could go down this path for query but there's logic in here that relies on `Selectable`
+            # implementing __bool__ which it doesn't.
+            # This should be easy to deal with though if it fixes the other query issues.
             self._selectable = self._generate_selectable_from_query(
                 query, dialect, create_temp_table, temp_table_schema_name
             )
