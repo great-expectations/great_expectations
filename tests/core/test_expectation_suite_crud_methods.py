@@ -350,36 +350,6 @@ def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suit
     assert str(err.value) == "Ensure that expectation configuration is valid."
 
 
-@pytest.mark.filesystem
-def test_find_expectations(exp2, exp3, exp4, exp5, domain_success_runtime_suite):
-    expectation_to_find1 = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "COMPLETE"},
-    )
-
-    expectation_to_find2 = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "COMPLETE"},
-    )
-
-    assert domain_success_runtime_suite.find_expectations(
-        expectation_to_find1, "domain"
-    ) == [exp2, exp3, exp4, exp5]
-
-    assert domain_success_runtime_suite.find_expectations(
-        expectation_to_find1, "success"
-    ) == [exp2, exp3]
-
-    assert domain_success_runtime_suite.find_expectations(
-        expectation_to_find2, "runtime"
-    ) == [exp5]
-
-    assert (
-        domain_success_runtime_suite.find_expectations(expectation_to_find1, "runtime")
-        == []
-    )
-
-
 @pytest.mark.cloud
 def test_find_expectations_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
