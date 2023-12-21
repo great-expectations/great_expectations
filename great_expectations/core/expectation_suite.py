@@ -281,15 +281,11 @@ class ExpectationSuite(SerializableDictDot):
                 # Delegate comparison to the other instance
                 return NotImplemented
 
-        exp_count_is_equal = len(self.expectation_configurations) == len(
-            other.expectation_configurations
-        )
+        exp_count_is_equal = len(self.expectations) == len(other.expectations)
 
         exp_configs_are_equal = all(
             mine.isEquivalentTo(theirs)
-            for (mine, theirs) in zip(
-                self.expectation_configurations, other.expectation_configurations
-            )
+            for (mine, theirs) in zip(self.expectations, other.expectations)
         )
 
         return exp_count_is_equal and exp_configs_are_equal
@@ -302,7 +298,7 @@ class ExpectationSuite(SerializableDictDot):
         return all(
             (
                 self.expectation_suite_name == other.expectation_suite_name,
-                self.expectation_configurations == other.expectation_configurations,
+                self.expectations == other.expectations,
                 self.evaluation_parameters == other.evaluation_parameters,
                 self.data_asset_type == other.data_asset_type,
                 self.meta == other.meta,
@@ -327,8 +323,8 @@ class ExpectationSuite(SerializableDictDot):
 
         attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
         # map expectations to expectation_configurations
-        attributes_to_copy.remove("expectations")
-        attributes_to_copy.add("expectation_configurations")
+        # attributes_to_copy.remove("expectations")
+        # attributes_to_copy.add("expectation_configurations")
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
@@ -407,20 +403,6 @@ class ExpectationSuite(SerializableDictDot):
     def _sort_citations(citations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         return sorted(citations, key=lambda x: x["citation_date"])
 
-    # CRUD methods #
-
-    def append_expectation(self, expectation_config) -> None:
-        """Appends an expectation.
-
-           Args:
-               expectation_config (ExpectationConfiguration): \
-                   The expectation to be added to the list.
-
-           Notes:
-               May want to add type-checking in the future.
-        """
-        self.expectation_configurations.append(expectation_config)
-
     @public_api
     @new_argument(
         argument_name="ge_cloud_id",
@@ -452,6 +434,7 @@ class ExpectationSuite(SerializableDictDot):
             TypeError: Must provide either expectation_configuration or ge_cloud_id.
             ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
+        _expectation_configurations = [exp.configuration for exp in self.expectations]
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
@@ -469,9 +452,11 @@ class ExpectationSuite(SerializableDictDot):
             if remove_multiple_matches:
                 removed_expectations = []
                 for index in sorted(found_expectation_indexes, reverse=True):
-                    removed_expectations.append(
-                        self.expectation_configurations.pop(index)
-                    )
+                    removed_expectations.append(_expectation_configurations.pop(index))
+                self.expectations = [
+                    self._build_expectation(config)
+                    for config in _expectation_configurations
+                ]
                 return removed_expectations
             else:
                 raise ValueError(
@@ -480,7 +465,12 @@ class ExpectationSuite(SerializableDictDot):
                 )
 
         else:
-            return [self.expectation_configurations.pop(found_expectation_indexes[0])]
+            result = [_expectation_configurations.pop(found_expectation_indexes[0])]
+            self.expectations = [
+                self._build_expectation(config)
+                for config in _expectation_configurations
+            ]
+            return result
 
     def remove_all_expectations_of_type(
         self, expectation_types: Union[List[str], str]
