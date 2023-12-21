@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List
 from unittest import mock
 from unittest.mock import Mock
 
@@ -17,15 +17,48 @@ from great_expectations.experimental.metric_repository.metrics import (
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.metrics_calculator import (
+    _AbortedMetricsInfoDict,
+    _MetricsDict,
+)
 from great_expectations.validator.validator import Validator
 
 pytestmark = pytest.mark.unit
 
 
-def test_get_metrics():
+@pytest.fixture
+def mock_batch():
+    mock_batch = Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    return mock_batch
+
+
+@pytest.fixture
+def construct_mock_validator(mock_batch: Batch):
+    def _construct_mock_validator(
+        computed_metrics: _MetricsDict,
+        aborted_metrics: _AbortedMetricsInfoDict,
+    ):
+        mock_validator = Mock(spec=Validator)
+        mock_validator.compute_metrics.return_value = (
+            computed_metrics,
+            aborted_metrics,
+        )
+        mock_validator.active_batch = mock_batch
+        return mock_validator
+
+    return _construct_mock_validator
+
+
+@pytest.fixture
+def mock_context():
     mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
-    mock_context.get_validator.return_value = mock_validator
+    return mock_context
+
+
+def test_get_metrics(
+    mock_context: CloudDataContext, construct_mock_validator: Callable
+):
     computed_metrics = {
         ("table.row_count", (), ()): 2,
         ("table.columns", (), ()): ["col1", "col2"],
@@ -45,13 +78,12 @@ def test_get_metrics():
         ("column_values.null.count", "column=col2", ()): 1,
     }
     aborted_metrics = {}
-    mock_validator.compute_metrics.return_value = (
-        computed_metrics,
-        aborted_metrics,
+
+    mock_validator = construct_mock_validator(
+        computed_metrics=computed_metrics,
+        aborted_metrics=aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
-    mock_batch.id = "batch_id"
-    mock_validator.active_batch = mock_batch
+    mock_context.get_validator.return_value = mock_validator
 
     metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
 
