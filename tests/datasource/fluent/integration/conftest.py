@@ -100,18 +100,24 @@ def pandas_data(
 
 
 def sqlite_datasource(
-    context: AbstractDataContext, db_filename: str
+    context: AbstractDataContext, db_filename: str | pathlib.Path
 ) -> SqliteDatasource:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        db_filename,
-    )
-    db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    db_file_path = pathlib.Path(db_filename)
+    if db_file_path.is_absolute():
+        db_file = db_file_path.resolve(strict=True)
+    else:
+        relative_path = pathlib.Path(
+            "..",
+            "..",
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "sqlite",
+            db_filename,
+        )
+        db_file = (
+            pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+        )
     datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
