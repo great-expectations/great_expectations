@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Literal, Optional, Tuple, overload
+from typing import Literal, Optional, Tuple, overload
 
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import Selectable
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import generate_temporary_table_name
-
-if TYPE_CHECKING:
-    from great_expectations.compatibility.sqlalchemy import Selectable
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +84,7 @@ class SqlAlchemyBatchData(BatchData):
         schema_name: Optional[str] = None,
         table_name: Optional[str] = None,
         # Option 2
-        query: Optional[str] = None,
+        query: str | Selectable | None = None,
         # Option 3
         selectable: Optional[Selectable] = None,
         create_temp_table: bool = True,
@@ -146,11 +144,19 @@ class SqlAlchemyBatchData(BatchData):
         self._source_table_name = source_table_name
         self._source_schema_name = source_schema_name
 
-        if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
+        # Selectable does not implement __bool__ so we need to check for None explicitly
+        query_is_present: bool = query is not None
+
+        if (
+            sum(bool(x) for x in [table_name, query_is_present, selectable is not None])
+            != 1
+        ):
             raise ValueError(
                 "Exactly one of table_name, query, or selectable must be specified"
             )
-        elif (query and schema_name) or (selectable is not None and schema_name):
+        elif (query_is_present and schema_name) or (
+            selectable is not None and schema_name
+        ):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
@@ -173,7 +179,7 @@ class SqlAlchemyBatchData(BatchData):
                     schema_name=schema_name,
                 )
             )
-        elif query:
+        elif query_is_present:
             # NOTE: we could go down this path for query but there's logic in here that relies on `Selectable`
             # implementing __bool__ which it doesn't.
             # This should be easy to deal with though if it fixes the other query issues.
@@ -358,8 +364,8 @@ class SqlAlchemyBatchData(BatchData):
     @overload
     def _generate_selectable_from_query(
         self,
-        query: str,
-        dialect: GXSqlDialect,
+        query: Selectable,
+        dialect: GXSqlDialect | None,
         create_temp_table: Literal[False],
         temp_table_schema_name: Optional[str] = ...,
     ) -> sqlalchemy.TextClause:
@@ -367,11 +373,11 @@ class SqlAlchemyBatchData(BatchData):
 
     def _generate_selectable_from_query(
         self,
-        query: str,
-        dialect: GXSqlDialect,
+        query: str | Selectable,
+        dialect: GXSqlDialect | None,
         create_temp_table: bool,
         temp_table_schema_name: Optional[str] = None,
-    ) -> sqlalchemy.Table | sqlalchemy.TextClause:
+    ) -> sqlalchemy.Table | sqlalchemy.TextClause | Selectable:
         """Helper method to generate Selectable from query string.
 
         Args:
@@ -384,6 +390,13 @@ class SqlAlchemyBatchData(BatchData):
             sqlalchemy.Table: SqlAlchemy Table that is Selectable or a TextClause.
         """
         if not create_temp_table:
+            if isinstance(query, Selectable):
+                compiled_query = query.compile(
+                    dialect=self.sql_engine_dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+                text_query = str(compiled_query)
+                return sa.text(text_query)
             return sa.text(query)
         _, temp_table_name = self._create_temporary_table(
             dialect=dialect,

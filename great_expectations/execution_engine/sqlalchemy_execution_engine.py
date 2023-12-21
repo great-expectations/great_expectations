@@ -1373,7 +1373,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
-                selectable=selectable,
+                query=selectable,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
             )
