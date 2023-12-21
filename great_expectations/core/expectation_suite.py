@@ -479,13 +479,13 @@ class ExpectationSuite(SerializableDictDot):
             expectation_types = [expectation_types]
 
         removed_expectations = [
-            expectation
-            for expectation in self.expectation_configurations
+            expectation.configuration
+            for expectation in self.expectations
             if expectation.expectation_type in expectation_types
         ]
-        self.expectation_configurations = [
+        self.expectations = [
             expectation
-            for expectation in self.expectation_configurations
+            for expectation in self.expectations
             if expectation.expectation_type not in expectation_types
         ]
 
