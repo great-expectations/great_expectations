@@ -111,13 +111,17 @@ class ExpectationSuite(SerializableDictDot):
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
 
+        self.expectation_configurations: None  # typecheck for refactor
         if expectations is None:
             expectations = []
-        self.expectation_configurations = [
+        expectation_configurations = [
             ExpectationConfiguration(**expectation)
             if isinstance(expectation, dict)
             else expectation
             for expectation in expectations
+        ]
+        self.expectations: list[Expectation] = [
+            self._build_expectation(config) for config in expectation_configurations
         ]
         if evaluation_parameters is None:
             evaluation_parameters = {}
@@ -143,21 +147,14 @@ class ExpectationSuite(SerializableDictDot):
     def name(self) -> str:
         return self.expectation_suite_name
 
-    @property
-    def expectations(self) -> list[Expectation]:
-        return [
-            self._build_expectation(expectation_configuration=expectation_configuration)
-            for expectation_configuration in self.expectation_configurations
-        ]
-
     @public_api
     def add(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
         if not any(
-            expectation.configuration == existing_config
-            for existing_config in self.expectation_configurations
+            expectation == existing_expectation
+            for existing_expectation in self.expectations
         ):
-            self.expectation_configurations.append(expectation.configuration)
+            self.expectations.append(expectation)
         else:
             pass  # suite is a set-like collection
 
@@ -167,7 +164,7 @@ class ExpectationSuite(SerializableDictDot):
                 self.save()
             except Exception as exc:
                 # rollback this change
-                self.expectation_configurations.pop()
+                self.expectations.pop()
                 raise exc
 
         return expectation
@@ -179,17 +176,12 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             KeyError: Expectation not found in suite.
         """
-        remaining_expectation_configs = [
-            exp_config
-            for exp_config in self.expectation_configurations
-            if exp_config != expectation.configuration
+        remaining_expectations = [
+            exp for exp in self.expectations if exp != expectation
         ]
-        if (
-            len(remaining_expectation_configs)
-            != len(self.expectation_configurations) - 1
-        ):
+        if len(remaining_expectations) != len(self.expectation_configurations) - 1:
             raise KeyError("No matching expectation was found.")
-        self.expectation_configurations = remaining_expectation_configs
+        self.expectations = remaining_expectations
 
         if self._has_been_saved():
             # only persist on delete if the suite has already been saved
@@ -198,7 +190,7 @@ class ExpectationSuite(SerializableDictDot):
             except Exception as exc:
                 # rollback this change
                 # expectation suite is set-like so order of expectations doesn't matter
-                self.expectation_configurations.append(expectation.configuration)
+                self.expectations.append(expectation)
                 raise exc
 
         return expectation
