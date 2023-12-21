@@ -15,6 +15,8 @@ from tests.integration.cloud.rest_contracts.conftest import (
 )
 
 if TYPE_CHECKING:
+    from requests import Session
+
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
 
@@ -127,6 +129,7 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
 def test_get_expectation_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
+    gx_cloud_session: Session,
 ) -> None:
     provider_state = "the Expectation Suite does exist"
     scenario = "a request to get an Expectation Suite"
@@ -141,6 +144,7 @@ def test_get_expectation_suite(
         .with_request(
             method=method,
             path=path,
+            headers=dict(gx_cloud_session.headers),
         )
         .will_respond_with(
             status=status,
@@ -158,6 +162,7 @@ def test_get_expectation_suite(
 def test_get_non_existent_expectation_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
+    gx_cloud_session: Session,
 ) -> None:
     provider_state = "the Expectation Suite does not exist"
     scenario = "a request to get an Expectation Suite"
@@ -171,6 +176,7 @@ def test_get_non_existent_expectation_suite(
         .with_request(
             method=method,
             path=path,
+            headers=dict(gx_cloud_session.headers),
         )
         .will_respond_with(
             status=status,
@@ -188,6 +194,7 @@ def test_get_non_existent_expectation_suite(
 def test_get_expectation_suites(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
+    gx_cloud_session: Session,
 ) -> None:
     provider_state = "Expectation Suite exist"
     scenario = "a request to get Expectation Suites"
@@ -202,6 +209,7 @@ def test_get_expectation_suites(
         .with_request(
             method=method,
             path=path,
+            headers=dict(gx_cloud_session.headers),
         )
         .will_respond_with(
             status=status,
