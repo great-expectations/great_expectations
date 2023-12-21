@@ -314,30 +314,34 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         exclude_column_names: List[str],
     ) -> list[str]:
         """Get the names of all numeric columns in the batch."""
-        validator = self.get_validator(batch_request=batch_request)
-        domain_builder = ColumnDomainBuilder(
+        return self._get_column_names_for_semantic_types(
+            batch_request=batch_request,
             include_semantic_types=[SemanticDomainTypes.NUMERIC],
             exclude_column_names=exclude_column_names,
         )
-        assert isinstance(
-            validator.active_batch, Batch
-        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
-        batch_id = validator.active_batch.id
-        numeric_column_names = domain_builder.get_effective_column_names(
-            validator=validator,
-            batch_ids=[batch_id],
-        )
-        return numeric_column_names
 
     def _get_timestamp_column_names(
         self,
         batch_request: BatchRequest,
         exclude_column_names: List[str],
     ) -> list[str]:
-        """Get the names of all numeric columns in the batch."""
+        """Get the names of all timestamp columns in the batch."""
+        return self._get_column_names_for_semantic_types(
+            batch_request=batch_request,
+            include_semantic_types=[SemanticDomainTypes.DATETIME],
+            exclude_column_names=exclude_column_names,
+        )
+
+    def _get_column_names_for_semantic_types(
+        self,
+        batch_request: BatchRequest,
+        include_semantic_types: List[SemanticDomainTypes],
+        exclude_column_names: List[str],
+    ) -> list[str]:
+        """Get the names of all columns matching semantic types in the batch."""
         validator = self.get_validator(batch_request=batch_request)
         domain_builder = ColumnDomainBuilder(
-            include_semantic_types=[SemanticDomainTypes.DATETIME],
+            include_semantic_types=include_semantic_types,
             exclude_column_names=exclude_column_names,
         )
         assert isinstance(
