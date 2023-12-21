@@ -177,16 +177,13 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 columns_to_skip.append(column_type["name"])
         return columns_to_skip
 
-    def _get_numeric_column_metrics(
-        self, batch_request: BatchRequest, column_list: List[str]
+    def _get_column_metrics(
+        self,
+        batch_request: BatchRequest,
+        column_list: List[str],
+        column_metric_names: List[str],
+        column_metric_type: type[Metric],
     ) -> Sequence[Metric]:
-        column_metric_names = [
-            "column.min",
-            "column.max",
-            "column.mean",
-            "column.median",
-        ]
-
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, column_metric_names
         )
@@ -208,7 +205,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                     aborted_metrics=aborted_metrics,
                 )
                 metrics.append(
-                    ColumnMetric[float](
+                    column_metric_type(
                         batch_id=batch_id,
                         metric_name=metric_name,
                         column=column,
@@ -218,6 +215,22 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 )
 
         return metrics
+
+    def _get_numeric_column_metrics(
+        self, batch_request: BatchRequest, column_list: List[str]
+    ) -> Sequence[Metric]:
+        column_metric_names = [
+            "column.min",
+            "column.max",
+            "column.mean",
+            "column.median",
+        ]
+        return self._get_column_metrics(
+            batch_request=batch_request,
+            column_list=column_list,
+            column_metric_names=column_metric_names,
+            column_metric_type=ColumnMetric[float],
+        )
 
     def _get_timestamp_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
@@ -228,38 +241,12 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             # "column.mean",  # Currently not supported for timestamp in Snowflake
             # "column.median",  # Currently not supported for timestamp in Snowflake
         ]
-
-        column_metric_configs = self._generate_column_metric_configurations(
-            column_list, column_metric_names
+        return self._get_column_metrics(
+            batch_request=batch_request,
+            column_list=column_list,
+            column_metric_names=column_metric_names,
+            column_metric_type=ColumnMetric[str],
         )
-        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
-            batch_request, column_metric_configs
-        )
-
-        # Convert computed_metrics
-        metrics: list[Metric] = []
-        metric_lookup_key: _MetricKey
-
-        for metric_name in column_metric_names:
-            for column in column_list:
-                metric_lookup_key = (metric_name, f"column={column}", tuple())
-                value, exception = self._get_metric_from_computed_metrics(
-                    metric_name=metric_name,
-                    metric_lookup_key=metric_lookup_key,
-                    computed_metrics=computed_metrics,
-                    aborted_metrics=aborted_metrics,
-                )
-                metrics.append(
-                    ColumnMetric[str](
-                        batch_id=batch_id,
-                        metric_name=metric_name,
-                        column=column,
-                        value=value,
-                        exception=exception,
-                    )
-                )
-
-        return metrics
 
     def _get_non_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
