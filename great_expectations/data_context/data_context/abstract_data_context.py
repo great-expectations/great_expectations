@@ -311,7 +311,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._sources: _SourceFactories = _SourceFactories(self)
 
         self._suites: Union[SuiteFactory, None]
-        if self.expectations_store:
+        if self.stores.get(self.expectations_store_name):
             self._suites = SuiteFactory(
                 store=self.expectations_store,
                 include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
