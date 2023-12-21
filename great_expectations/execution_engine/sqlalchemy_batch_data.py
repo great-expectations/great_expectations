@@ -357,7 +357,7 @@ class SqlAlchemyBatchData(BatchData):
     def _generate_selectable_from_query(
         self,
         query: str,
-        dialect: GXSqlDialect | None,
+        dialect: GXSqlDialect,
         create_temp_table: Literal[False],
         temp_table_schema_name: Optional[str] = ...,
     ) -> sqlalchemy.TextClause:
@@ -366,7 +366,7 @@ class SqlAlchemyBatchData(BatchData):
     def _generate_selectable_from_query(
         self,
         query: str,
-        dialect: GXSqlDialect | None,
+        dialect: GXSqlDialect,
         create_temp_table: bool,
         temp_table_schema_name: Optional[str] = None,
     ) -> sqlalchemy.Table | sqlalchemy.TextClause:
