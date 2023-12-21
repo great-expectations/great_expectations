@@ -68,22 +68,42 @@ def construct_mock_context(construct_mock_validator: Callable):
 
 
 @pytest.fixture
-def construct_mock_metric_retriever(construct_mock_context: Callable):
+def construct_patched_metric_retriever(construct_mock_context: Callable):
+    """Patch methods that are not relevant to the tests."""
+
     def _construct_mock_metric_retriever(
         computed_metrics: _MetricsDict,
         aborted_metrics: _AbortedMetricsInfoDict,
+        numeric_column_names: List[str],
+        timestamp_column_names: List[str],
     ):
         mock_context = construct_mock_context(
             computed_metrics=computed_metrics,
             aborted_metrics=aborted_metrics,
         )
-        return ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
+
+        def mock__get_numeric_column_names(
+            batch_request: BatchRequest,
+            exclude_column_names: List[str],
+        ):
+            return numeric_column_names
+
+        def mock__get_timestamp_column_names(
+            batch_request: BatchRequest,
+            exclude_column_names: List[str],
+        ):
+            return timestamp_column_names
+
+        metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
+        metric_retriever._get_numeric_column_names = mock__get_numeric_column_names
+        metric_retriever._get_timestamp_column_names = mock__get_timestamp_column_names
+        return metric_retriever
 
     return _construct_mock_metric_retriever
 
 
 def test_get_metrics(
-    construct_mock_metric_retriever: Callable,
+    construct_patched_metric_retriever: Callable,
 ):
     computed_metrics = {
         ("table.row_count", (), ()): 2,
@@ -105,19 +125,13 @@ def test_get_metrics(
     }
     aborted_metrics = {}
 
-    metric_retriever = construct_mock_metric_retriever(
+    mock_metric_retriever = construct_patched_metric_retriever(
         computed_metrics=computed_metrics,
         aborted_metrics=aborted_metrics,
+        numeric_column_names=["col1", "col2"],
+        timestamp_column_names=[],  # No timestamp columns
     )
-
-    with mock.patch(
-        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_numeric_column_names",
-        return_value=["col1", "col2"],
-    ), mock.patch(
-        f"{ColumnDescriptiveMetricsMetricRetriever.__module__}.{ColumnDescriptiveMetricsMetricRetriever.__name__}._get_timestamp_column_names",
-        return_value=[],
-    ):
-        metrics = metric_retriever.get_metrics(batch_request=Mock(spec=BatchRequest))
+    metrics = mock_metric_retriever.get_metrics(batch_request=Mock(spec=BatchRequest))
 
     assert metrics == [
         TableMetric[int](
