@@ -179,7 +179,7 @@ class ExpectationSuite(SerializableDictDot):
         remaining_expectations = [
             exp for exp in self.expectations if exp != expectation
         ]
-        if len(remaining_expectations) != len(self.expectation_configurations) - 1:
+        if len(remaining_expectations) != len(self.expectations) - 1:
             raise KeyError("No matching expectation was found.")
         self.expectations = remaining_expectations
 
@@ -343,8 +343,9 @@ class ExpectationSuite(SerializableDictDot):
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
+        _expectation_configurations = [exp.configuration for exp in self.expectations]
         myself["expectations"] = convert_to_json_serializable(
-            self.expectation_configurations
+            _expectation_configurations
         )
         try:
             myself["evaluation_parameters"] = convert_to_json_serializable(
@@ -357,8 +358,8 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_evaluation_parameter_dependencies(self) -> dict:
         dependencies: dict = {}
-        for expectation in self.expectation_configurations:
-            t = expectation.get_evaluation_parameter_dependencies()
+        for expectation in self.expectations:
+            t = expectation.configuration.get_evaluation_parameter_dependencies()
             nested_update(dependencies, t)
 
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
@@ -1134,7 +1135,7 @@ class ExpectationSuiteSchema(Schema):
         if isinstance(original_data, dict):
             expectations = original_data.get("expectations", [])
         else:
-            expectations = original_data.expectation_configurations
+            expectations = original_data.expectations
         data["expectations"] = convert_to_json_serializable(expectations)
         return data
 
