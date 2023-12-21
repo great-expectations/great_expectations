@@ -1317,7 +1317,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Query is a valid SELECT query that begins with r"\w+select\w"
             # TODO:? strip `;` from the end of the query??
             selectable = sa.select(
-                sa.text(query.lstrip()[6:].lstrip().rstrip(";"))
+                sa.text(query.lstrip()[6:].strip().rstrip(";").rstrip())
             ).subquery()
 
         return selectable
