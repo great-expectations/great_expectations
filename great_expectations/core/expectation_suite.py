@@ -534,12 +534,12 @@ class ExpectationSuite(SerializableDictDot):
             )
 
         match_indexes = []
-        for idx, expectation in enumerate(self.expectation_configurations):
+        for idx, expectation in enumerate(self.expectations):
             if ge_cloud_id is not None:
-                if expectation.ge_cloud_id == ge_cloud_id:
+                if expectation.id == ge_cloud_id:
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
-                if expectation.isEquivalentTo(
+                if expectation.configuration.isEquivalentTo(
                     other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)
