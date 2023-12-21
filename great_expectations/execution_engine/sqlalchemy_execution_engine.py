@@ -1324,7 +1324,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     @override
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
-    ) -> Tuple[Any, BatchMarkers]:
+    ) -> Tuple[SqlAlchemyBatchData | None, BatchMarkers]:
         if not isinstance(
             batch_spec, (SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec)
         ):
