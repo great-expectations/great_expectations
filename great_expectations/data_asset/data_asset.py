@@ -534,7 +534,7 @@ class DataAsset:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.expectation_configurations = expectations
+        expectation_suite.add_expectation_configurations(expectations)
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
