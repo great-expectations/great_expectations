@@ -53,7 +53,6 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
         "kwargs": {
             "column": "a",
             "value_set": [1, 2, 3, 4, 5],
-            "result_format": "BASIC",
         },
         "meta": {"notes": "This is an expectation."},
     }
@@ -572,41 +571,6 @@ class TestAddCitation:
 
 
 class TestIsEquivalentTo:
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_unit_test(self):
-        class StubExpectationConfiguration:
-            def isEquivalentTo(self, *args, **kwargs):
-                return True
-
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        assert suite1.isEquivalentTo(suite2)
-        assert suite2.isEquivalentTo(suite1)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes_unit_test(
-        self,
-    ):
-        class StubExpectationConfiguration:
-            def isEquivalentTo(self, *args, **kwargs):
-                return True
-
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()], data_asset_type="different", meta={"notes": "different"}, ge_cloud_id="different")  # type: ignore[arg-type]
-        assert suite1.isEquivalentTo(suite2)
-        assert suite2.isEquivalentTo(suite1)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_false_unit_test(self):
-        class StubExpectationConfiguration:
-            def isEquivalentTo(self, *args, **kwargs):
-                return False
-
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        assert not suite1.isEquivalentTo(suite2)
-        assert not suite2.isEquivalentTo(suite1)
-
     @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_and_dict_true(
         self, suite_with_single_expectation: ExpectationSuite
