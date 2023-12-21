@@ -172,7 +172,7 @@ class SqlAlchemyBatchData(BatchData):
                 )
             )
         elif query:
-            self._selectable = self._generate_selectable_from_query(
+            self._selectable = self._generate_selectable_from_query(  # type: ignore[call-overload] # https://github.com/python/mypy/issues/14764
                 query, dialect, create_temp_table, temp_table_schema_name
             )
         else:
