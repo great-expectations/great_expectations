@@ -550,6 +550,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._stores
 
     @property
+    def datasource_store(self) -> DatasourceStore:
+        return self._datasource_store
+
+    @property
     def suites(self) -> SuiteFactory:
         if not self._suites:
             raise gx_exceptions.DataContextError(

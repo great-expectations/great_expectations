@@ -72,6 +72,20 @@ The following table lists the available GX Cloud Expectations.
 
 6. Click **Save**.
 
+## View Expectation history
+
+View the Expectation history to determine when an Expectation was changed and who made the change. 
+
+1. In GX Cloud, click **Expectation Suites**.
+
+2. In the **Expectation Suites** list, click the Expectation Suite name.
+
+3. Click the **Change Log** tab.
+
+4. Optional. Select an Expectation in the **Table of contents** pane to view the change history for a specific Expectation.
+
+    The date, time, and email address of the users who changed the Expectation appear below the Expectation name. Strikethrough text indicates an Expectation was deleted.
+
 ## Delete an Expectation
 
 1. In GX Cloud, click **Data Assets**.
