@@ -150,7 +150,7 @@ class ExpectationSuite(SerializableDictDot):
     def add(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
         if not any(
-            expectation == existing_expectation
+            expectation.configuration == existing_expectation.configuration
             for existing_expectation in self.expectations
         ):
             self.expectations.append(expectation)
@@ -176,7 +176,9 @@ class ExpectationSuite(SerializableDictDot):
             KeyError: Expectation not found in suite.
         """
         remaining_expectations = [
-            exp for exp in self.expectations if exp != expectation
+            exp
+            for exp in self.expectations
+            if exp.configuration != expectation.configuration
         ]
         if len(remaining_expectations) != len(self.expectations) - 1:
             raise KeyError("No matching expectation was found.")
@@ -1145,7 +1147,7 @@ class ExpectationSuiteSchema(Schema):
         if isinstance(original_data, dict):
             expectations = original_data.get("expectations", [])
         else:
-            expectations = original_data.expectations
+            expectations = original_data.expectation_configurations
         data["expectations"] = convert_to_json_serializable(expectations)
         return data
 

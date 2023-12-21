@@ -167,24 +167,18 @@ class ExpectationsStore(Store):
         """This method handles adding IDs to suites and expectations for non-cloud backends.
         In the future, this logic should be the responsibility of each non-cloud backend.
         """
-        if not suite["ge_cloud_id"]:
-            suite["ge_cloud_id"] = str(uuid.uuid4())
-        if isinstance(suite, ExpectationSuite):
-            key = "expectation_configurations"
-        else:
-            # this will be true if a serialized suite is provided
-            key = "expectations"
+
+        if not suite.ge_cloud_id:
+            suite.ge_cloud_id = str(uuid.uuid4())
 
         # enforce that every ID in this suite is unique
-        expectation_ids = [
-            exp["ge_cloud_id"] for exp in suite[key] if exp["ge_cloud_id"]
-        ]
+        expectation_ids = [exp.id for exp in suite.expectations if exp.id]
         if len(expectation_ids) != len(set(expectation_ids)):
             raise RuntimeError("Expectation IDs must be unique within a suite.")
 
-        for expectation_configuration in suite[key]:
-            if not expectation_configuration["ge_cloud_id"]:
-                expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
+        for expectation in suite.expectations:
+            if not expectation.id:
+                expectation.id = str(uuid.uuid4())
         return suite
 
     def _add_cloud_ids_to_local_suite_and_expectations(
@@ -204,10 +198,7 @@ class ExpectationsStore(Store):
                 **expectation_dict["kwargs"],
             )
             expectations.append(expectation)
-        # todo: update when configurations are no longer source of truth on suite
-        local_suite.expectation_configurations = [
-            expectation.configuration for expectation in expectations
-        ]
+        local_suite.expectations = [expectation for expectation in expectations]
         return local_suite
 
     @override

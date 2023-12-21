@@ -377,13 +377,12 @@ class TestCRUDMethods:
 
         expectation.id = None
         suite.add(expectation)
+        expectation = copy(expectation)
         expectation.column = "foo"
-        expectation.id = None
         suite.add(expectation)
         assert len(suite.expectations) == 2
-        # todo: update when expectations are source of truth
-        for expectation_configuration in suite.expectation_configurations:
-            uuid_to_test = expectation_configuration.ge_cloud_id
+        for expectation in suite.expectations:
+            uuid_to_test = expectation.id
             assert isinstance(UUID(uuid_to_test), UUID)
 
     @pytest.mark.cloud
@@ -400,11 +399,10 @@ class TestCRUDMethods:
 
         expectation.id = None
         suite.add(expectation)
-        expectation.id = None
+        expectation = copy(expectation)
         expectation.column = "foo"
         suite.add(expectation)
         assert len(suite.expectations) == 2
-        # todo: update when expectations are source of truth
         for expectation in suite.expectations:
             uuid_to_test = expectation.id
             assert isinstance(UUID(uuid_to_test), UUID)
@@ -422,7 +420,7 @@ class TestCRUDMethods:
 
         expectation.id = provided_id
         suite.add(expectation)
-        expectation.column = "foo"
+        expectation = expectation.copy(update={"id": provided_id, "column": "foo"})
         with pytest.raises(
             RuntimeError, match="Expectation IDs must be unique within a suite."
         ):

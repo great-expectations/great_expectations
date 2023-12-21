@@ -1212,6 +1212,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             ge_cloud_id=id,
         )
 
+    def __copy__(self):
+        return self.copy(update={"id": None})
+
     @public_api
     def run_diagnostics(  # noqa: PLR0913
         self,
