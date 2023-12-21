@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,

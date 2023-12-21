@@ -20,7 +20,13 @@ class BatchConfig(pydantic.BaseModel):
 
     id: Optional[str] = None
     name: str
-    data_asset: DataAsset
+
+    # private attributes that must be set immediately after instantiation
+    _data_asset: DataAsset = pydantic.PrivateAttr()
+
+    @property
+    def data_asset(self) -> DataAsset:
+        return self._data_asset
 
     def build_batch_request(
         self, batch_request_options: Optional[BatchRequestOptions] = None

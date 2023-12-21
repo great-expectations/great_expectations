@@ -1,6 +1,11 @@
-import pandas as pd
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from great_expectations.core.batch import BatchData
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class PandasBatchData(BatchData):

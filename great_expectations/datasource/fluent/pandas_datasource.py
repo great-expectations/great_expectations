@@ -26,14 +26,14 @@ from typing import (
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import pydantic, sqlalchemy
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
     public_api,
 )
+from great_expectations.compatibility import pydantic, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
 from great_expectations.datasource.fluent.constants import (
@@ -85,6 +85,7 @@ class PandasDatasourceError(Exception):
 
 class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_configs",
         "batch_metadata",
         "name",
         "order_by",
@@ -157,10 +158,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
         batch_list.append(
             Batch(
                 datasource=self.datasource,
@@ -168,9 +165,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         )
         return batch_list
@@ -469,11 +466,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
-
         return [
             Batch(
                 datasource=self.datasource,
@@ -481,9 +473,9 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         ]
 

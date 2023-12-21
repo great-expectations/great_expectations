@@ -24,19 +24,14 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load, p
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
     public_api,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
-)
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-    ExpectationConfigurationSchema,
-    expectationConfigurationSchema,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -46,9 +41,7 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
-from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -61,6 +54,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
@@ -102,6 +98,10 @@ class ExpectationSuite(SerializableDictDot):
             str
         ] = None,  # for backwards compatibility - remove
     ) -> None:
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
         if name:
             assert isinstance(name, str), "Name is a required field."
             self.expectation_suite_name = name
@@ -207,12 +207,11 @@ class ExpectationSuite(SerializableDictDot):
     def save(self) -> None:
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
-        res = self._store.add_or_update(key=key, value=self)
-        if self.ge_cloud_id is None and isinstance(res, GXCloudResourceRef):
-            self.ge_cloud_id = res.response["data"]["id"]
+        self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a DataContext?"""
+        # todo: this should only check local keys instead of potentially querying the remote backend
         key = self._store.get_key(suite=self)
         return self._store.has_key(key=key)
 
@@ -536,6 +535,10 @@ class ExpectationSuite(SerializableDictDot):
             InvalidExpectationConfigurationError
 
         """
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
@@ -625,6 +628,10 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns: A list of matching ExpectationConfigurations
         """
+        from great_expectations.expectations.expectation_configuration import (
+            expectationConfigurationSchema,
+        )
+
         if existing_expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either existing_expectation_configuration or ge_cloud_id"
@@ -812,11 +819,7 @@ class ExpectationSuite(SerializableDictDot):
         self, expectation_configuration: ExpectationConfiguration
     ) -> Expectation:
         try:
-            class_ = get_expectation_impl(expectation_configuration.expectation_type)
-            expectation = class_(
-                meta=expectation_configuration.meta, **expectation_configuration.kwargs
-            )  # Implicitly validates in constructor
-            return expectation
+            return expectation_configuration.to_domain_obj()
         except (
             gx_exceptions.ExpectationNotFoundError,
             gx_exceptions.InvalidExpectationConfigurationError,
@@ -1133,7 +1136,7 @@ class ExpectationSuite(SerializableDictDot):
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
-    expectations = fields.List(fields.Nested(ExpectationConfigurationSchema))
+    expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()

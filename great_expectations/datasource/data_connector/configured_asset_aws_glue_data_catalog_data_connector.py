@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, cast
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequestBase,

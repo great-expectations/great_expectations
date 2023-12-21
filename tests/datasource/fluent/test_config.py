@@ -21,6 +21,7 @@ from typing import (  # TODO: revert use of cast
 import pytest
 
 from great_expectations.compatibility import pydantic
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -29,6 +30,8 @@ from great_expectations.datasource.fluent.config import (
 )
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
+    _BATCH_CONFIG_NAME_KEY,
+    _BATCH_CONFIGS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -114,6 +117,11 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
+                    "batch_configs": [
+                        {
+                            "name": "my_batch_config",
+                        }
+                    ],
                     "batch_metadata": {
                         "pipeline_filename": "${pipeline_filename}",
                     },
@@ -345,6 +353,31 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
             with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
             no_ids[ds_name]["assets"][asset_name].pop("id", None)
 
+            if _BATCH_CONFIGS_KEY in asset_config:
+                with_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
+                    batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
+                    for batch_config in with_ids[ds_name]["assets"][asset_name][
+                        _BATCH_CONFIGS_KEY
+                    ]
+                }
+                for batch_config in with_ids[ds_name]["assets"][asset_name][
+                    _BATCH_CONFIGS_KEY
+                ].values():
+                    batch_asset_id = uuid.uuid4()
+                    all_ids.append(str(batch_asset_id))
+                    batch_config["id"] = str(batch_asset_id)
+
+                no_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
+                    batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
+                    for batch_config in no_ids[ds_name]["assets"][asset_name][
+                        _BATCH_CONFIGS_KEY
+                    ]
+                }
+                for batch_config in no_ids[ds_name]["assets"][asset_name][
+                    _BATCH_CONFIGS_KEY
+                ].values():
+                    batch_config.pop("id", None)
+
     no_ids = (
         _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
             config={
@@ -401,6 +434,33 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
     assert loaded.datasources
     for datasource in loaded.datasources:
         assert isinstance(datasource, Datasource)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["load_method", "input_"],
+    [
+        p(GxConfig.parse_obj, COMPLEX_CONFIG_DICT, id="complex dict"),
+        p(GxConfig.parse_raw, COMPLEX_CONFIG_JSON, id="complex json"),
+        p(GxConfig.parse_yaml, PG_CONFIG_YAML_FILE, id="pg_config.yaml file"),
+        p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
+    ],
+)
+def test_batch_configs_are_assigned_data_assets(
+    inject_engine_lookup_double, load_method: Callable, input_
+):
+    loaded: GxConfig = load_method(input_)
+    assert loaded
+
+    batch_configs: List[BatchConfig] = []
+    assert loaded.datasources
+    for datasource in loaded.datasources:
+        for data_asset in datasource.assets:
+            batch_configs.extend(data_asset.batch_configs)
+    assert len(batch_configs) > 0
+    for batch_config in batch_configs:
+        assert batch_config.data_asset is not None
+        assert batch_config in batch_config.data_asset.batch_configs
 
 
 @pytest.mark.unit

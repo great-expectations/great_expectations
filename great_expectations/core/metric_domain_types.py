@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import enum
 import logging
 
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 
 logger = logging.getLogger(__name__)
 

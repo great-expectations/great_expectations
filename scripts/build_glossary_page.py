@@ -31,6 +31,6 @@ def all_together_now(source_json_path, glossary_file_path):
 
 if __name__ == "__main__":
     all_together_now(
-        source_json_path="../docs/docusaurus/docs/term_tags/terms.json",
-        glossary_file_path="../docs/docusaurus/docs/glossary.md",
+        source_json_path="../docs/docusaurus/docs/reference/learn/term_tags/terms.json",
+        glossary_file_path="../docs/docusaurus/docs/reference/learn/glossary.md",
     )

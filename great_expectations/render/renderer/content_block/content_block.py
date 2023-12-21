@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import logging
 import traceback
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
-from great_expectations.alias_types import JSONValues
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import (
     _registered_renderers,
@@ -20,6 +23,9 @@ from great_expectations.render import (
     TextContent,
 )
 from great_expectations.render.renderer.renderer import Renderer
+
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
 
 logger = logging.getLogger(__name__)
 

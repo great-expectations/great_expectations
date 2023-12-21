@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import TYPE_CHECKING, List
 
-import altair as alt
+if TYPE_CHECKING:
+    import altair as alt
 
 
 class PlotMode(Enum):
