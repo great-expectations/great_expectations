@@ -260,6 +260,29 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self.batch_configs.append(batch_config)
         return batch_config
 
+    @public_api
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        """Delete
+
+        Args:
+            name (batch_config): BatchConfig to delete.
+        """
+        batch_config_names = {bc.name for bc in self.batch_configs}
+        if batch_config not in self.batch_configs:
+            raise ValueError(
+                f'"{batch_config.name}" does not exist (all existing batch_config names are {batch_config_names})'
+            )
+
+        # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)
+        assert isinstance(self.datasource, Datasource)
+
+        if self.datasource.is_persisted():
+            self.datasource.delete_batch_config(batch_config)
+
+        self.batch_configs.remove(batch_config)
+        if not self.batch_configs:
+            self.__fields_set__.add("batch_configs")
+
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
@@ -514,6 +537,11 @@ class Datasource(
         if not self.data_context:
             raise DataContextError("Datasource is not attached to a DataContext")
         return self.data_context.datasource_store.add_batch_config(batch_config)
+
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        if not self.data_context:
+            raise DataContextError("Datasource is not attached to a DataContext")
+        self.data_context.datasource_store.delete_batch_config(batch_config)
 
     def is_persisted(self) -> bool:
         if self._data_context:
