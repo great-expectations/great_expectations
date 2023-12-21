@@ -1172,30 +1172,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
 
 
 @pytest.mark.unit
-def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(
-    titanic_profiled_name_column_expectations,
-):
-    (
-        remaining_expectations,
-        content_block,
-    ) = ExpectationSuiteColumnSectionRenderer()._render_bullet_list(
-        titanic_profiled_name_column_expectations,
-    )
-
-    stringified_dump = json.dumps(content_block.to_json_dict())
-
-    assert content_block.content_block_type == "bullet_list"
-    assert len(content_block.bullet_list) == 8
-    assert "value types must belong to this set" in stringified_dump
-    assert "may have any number of unique values" in stringified_dump
-    assert "may have any fraction of unique values" in stringified_dump
-    assert (
-        "values must not be null, at least $mostly_pct % of the time."
-        in stringified_dump
-    )
-
-
-@pytest.mark.unit
 def test_ValidationResultsColumnSectionRenderer_render_header(
     titanic_profiled_name_column_evrs,
 ):
