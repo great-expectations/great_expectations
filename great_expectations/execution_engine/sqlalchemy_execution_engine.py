@@ -1363,6 +1363,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
+        # this is where splitter components are added to the selectable
         selectable: sqlalchemy.Selectable = self._build_selectable_from_batch_spec(
             batch_spec=batch_spec
         )
@@ -1370,10 +1371,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # instead of doing an instance check
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
-
+            # re-compile the query to include any new parameters
+            compiled_query = selectable.compile(
+                dialect=self.engine.dialect,
+                compile_kwargs={"literal_binds": True},
+            )
+            query_str = str(compiled_query)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
-                query=selectable,
+                query=query_str,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
             )

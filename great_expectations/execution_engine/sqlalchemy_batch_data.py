@@ -84,7 +84,7 @@ class SqlAlchemyBatchData(BatchData):
         schema_name: Optional[str] = None,
         table_name: Optional[str] = None,
         # Option 2
-        query: str | Selectable | None = None,
+        query: Optional[str] = None,
         # Option 3
         selectable: Optional[Selectable] = None,
         create_temp_table: bool = True,
@@ -144,19 +144,11 @@ class SqlAlchemyBatchData(BatchData):
         self._source_table_name = source_table_name
         self._source_schema_name = source_schema_name
 
-        # Selectable does not implement __bool__ so we need to check for None explicitly
-        query_is_present: bool = query is not None
-
-        if (
-            sum(bool(x) for x in [table_name, query_is_present, selectable is not None])
-            != 1
-        ):
+        if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
                 "Exactly one of table_name, query, or selectable must be specified"
             )
-        elif (query_is_present and schema_name) or (
-            selectable is not None and schema_name
-        ):
+        elif (query and schema_name) or (selectable is not None and schema_name):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
@@ -179,7 +171,7 @@ class SqlAlchemyBatchData(BatchData):
                     schema_name=schema_name,
                 )
             )
-        elif query_is_present:
+        elif query:
             self._selectable = self._generate_selectable_from_query(
                 query, dialect, create_temp_table, temp_table_schema_name
             )
@@ -214,7 +206,10 @@ class SqlAlchemyBatchData(BatchData):
         return self._use_quoted_name
 
     def _create_temporary_table(  # noqa: C901, PLR0912, PLR0915
-        self, dialect, query, temp_table_schema_name=None
+        self,
+        dialect: GXSqlDialect,
+        query: str,
+        temp_table_schema_name: str | None = None,
     ) -> Tuple[str, str]:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
@@ -361,7 +356,7 @@ class SqlAlchemyBatchData(BatchData):
     @overload
     def _generate_selectable_from_query(
         self,
-        query: Selectable,
+        query: str,
         dialect: GXSqlDialect | None,
         create_temp_table: Literal[False],
         temp_table_schema_name: Optional[str] = ...,
@@ -370,11 +365,11 @@ class SqlAlchemyBatchData(BatchData):
 
     def _generate_selectable_from_query(
         self,
-        query: str | Selectable,
+        query: str,
         dialect: GXSqlDialect | None,
         create_temp_table: bool,
         temp_table_schema_name: Optional[str] = None,
-    ) -> sqlalchemy.Table | sqlalchemy.TextClause | Selectable:
+    ) -> sqlalchemy.Table | sqlalchemy.TextClause:
         """Helper method to generate Selectable from query string.
 
         Args:
@@ -387,13 +382,6 @@ class SqlAlchemyBatchData(BatchData):
             sqlalchemy.Table: SqlAlchemy Table that is Selectable or a TextClause.
         """
         if not create_temp_table:
-            if isinstance(query, Selectable):
-                compiled_query = query.compile(
-                    dialect=self.sql_engine_dialect,
-                    compile_kwargs={"literal_binds": True},
-                )
-                text_query = str(compiled_query)
-                return sa.text(text_query)
             return sa.text(query)
         _, temp_table_name = self._create_temporary_table(
             dialect=dialect,
