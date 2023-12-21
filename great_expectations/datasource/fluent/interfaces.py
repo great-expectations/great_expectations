@@ -250,13 +250,13 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         assert isinstance(self.datasource, Datasource)
 
         batch_config = BatchConfig(name=name)
-        batch_config._data_asset = self
+        batch_config.set_data_asset(self)
         self.__fields_set__.add("batch_configs")
         if self.datasource.is_persisted():
             batch_config = self.datasource.add_batch_config(batch_config)
-            batch_config._data_asset = self
+            batch_config.set_data_asset(self)
 
-        batch_config._data_asset = self
+        batch_config.set_data_asset(self)
         self.batch_configs.append(batch_config)
         return batch_config
 
@@ -503,7 +503,7 @@ class Datasource(
     @pydantic.validator(_ASSETS_KEY, each_item=True)
     def _update_batch_configs(cls, data_asset: DataAsset) -> DataAsset:
         for batch_config in data_asset.batch_configs:
-            batch_config._data_asset = data_asset
+            batch_config.set_data_asset(data_asset)
         return data_asset
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
