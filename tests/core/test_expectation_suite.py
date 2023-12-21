@@ -716,7 +716,7 @@ class TestEqDunder:
                     reason="Currently data_context is not considered in ExpectationSuite equality",
                 ),
             ),
-            pytest.param("expectation_configurations", []),
+            pytest.param("expectations", []),
             pytest.param(
                 "evaluation_parameters", {"different": "evaluation_parameters"}
             ),
@@ -937,10 +937,6 @@ def test_expectation_suite_copy(baseline_suite):
     assert (
         baseline_suite.data_asset_type != "blarg"
     )  # copy on primitive properties shouldn't propagate
-    suite_copy.expectation_configurations[0].meta["notes"] = "a different note"
-    assert (
-        baseline_suite.expectation_configurations[0].meta["notes"] == "a different note"
-    )  # copy on deep attributes does propagate
 
 
 @pytest.mark.unit

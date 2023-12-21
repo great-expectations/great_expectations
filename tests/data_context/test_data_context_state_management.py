@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import project_manager
+from great_expectations import project_manager, set_context
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.serializer import DictConfigSerializer
@@ -142,6 +142,7 @@ def in_memory_data_context(
         fluent_datasource_config["name"]: ds_type(**fluent_datasource_config),
     }
     context.datasources.update(fluent_datasources)
+    set_context(context)
     return context
 
 
@@ -551,29 +552,6 @@ def test_add_expectation_suite_conflicting_args_failure(
         )
 
     assert context.expectations_store.save_count == 0
-
-
-@pytest.mark.unit
-def test_update_expectation_suite_success(
-    in_memory_data_context: EphemeralDataContextSpy,
-):
-    context = in_memory_data_context
-
-    suite_name = "default"
-    suite = context.add_expectation_suite(suite_name)
-
-    assert context.expectations_store.save_count == 1
-
-    suite.expectation_configurations = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
-            kwargs={"column": "x", "value_set": [1, 2, 4]},
-        ),
-    ]
-    updated_suite = context.update_expectation_suite(suite)
-
-    assert updated_suite.expectation_configurations == suite.expectation_configurations
-    assert context.expectations_store.save_count == 2
 
 
 @pytest.mark.unit
