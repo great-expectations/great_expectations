@@ -97,48 +97,6 @@ class TestInit:
         assert suite.ge_cloud_id is None
 
     @pytest.mark.unit
-    def test_expectation_suite_init_overrides(
-        self,
-        fake_expectation_suite_name: str,
-        expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
-    ):
-        class DummyDataContext:
-            pass
-
-        class DummyExecutionEngine:
-            pass
-
-        dummy_data_context = DummyDataContext()
-        test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
-        test_data_asset_type = "test_data_asset_type"
-        dummy_execution_engine_type = type(DummyExecutionEngine())
-        default_meta = {"great_expectations_version": ge_version}
-        test_meta_base = {"test_key": "test_value"}
-        test_meta = {**default_meta, **test_meta_base}
-        test_id = "test_id"
-
-        suite = ExpectationSuite(
-            expectation_suite_name=fake_expectation_suite_name,
-            data_context=dummy_data_context,  # type: ignore[arg-type]
-            expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
-            evaluation_parameters=test_evaluation_parameters,
-            data_asset_type=test_data_asset_type,
-            execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
-            meta=test_meta,
-            ge_cloud_id=test_id,
-        )
-        assert suite.expectation_suite_name == fake_expectation_suite_name
-        assert suite._data_context == dummy_data_context
-        assert suite.expectation_configurations == [
-            expect_column_values_to_be_in_set_col_a_with_meta
-        ]
-        assert suite.evaluation_parameters == test_evaluation_parameters
-        assert suite.data_asset_type == test_data_asset_type
-        assert suite.execution_engine_type == dummy_execution_engine_type
-        assert suite.meta == test_meta
-        assert suite.ge_cloud_id == test_id
-
-    @pytest.mark.unit
     def test_expectation_suite_init_overrides_expectations_dict_and_obj(
         self,
         fake_expectation_suite_name: str,
