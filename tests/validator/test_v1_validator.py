@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from pprint import pformat as pf
+
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
@@ -176,7 +180,7 @@ def test_validate_expectation_with_batch_asset_options(
             value_set=[desired_event_type],
         )
     )
-
+    print(f"Result dict ->\n{pf(result)}")
     assert result.success
 
 
