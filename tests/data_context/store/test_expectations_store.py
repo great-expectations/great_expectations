@@ -334,7 +334,6 @@ def _test_add_expectation_success(context):
     store = context.expectations_store
     suite_name = "test-suite"
     suite = context.add_expectation_suite(suite_name)
-    key = store.get_key(suite)
     expectation = ExpectColumnValuesToBeInSet(
         column="a",
         value_set=[1, 2, 3],
@@ -343,7 +342,7 @@ def _test_add_expectation_success(context):
     # Act
     store.add_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=key)
+    updated_suite_dict = store.get(key=store.get_key(suite))
     updated_suite = ExpectationSuite(**updated_suite_dict)
     added_expectation = updated_suite.expectations[0]
     assert UUID(added_expectation.id)
@@ -369,7 +368,6 @@ def _test_add_expectation_disregards_provided_id(context):
     store = context.expectations_store
     suite_name = "test-suite"
     suite = context.add_expectation_suite(suite_name)
-    key = store.get_key(suite)
     provided_id = "e86bb8a8-b75f-4efb-a3bb-210b6440661e"
     expectation = ExpectColumnValuesToBeInSet(
         id=provided_id,
@@ -380,7 +378,7 @@ def _test_add_expectation_disregards_provided_id(context):
     # Act
     store.add_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=key)
+    updated_suite_dict = store.get(key=store.get_key(suite))
     updated_suite = ExpectationSuite(**updated_suite_dict)
     added_expectation = updated_suite.expectations[0]
     assert UUID(added_expectation.id)
@@ -411,7 +409,6 @@ def _test_update_expectation_success(context):
     suite = context.add_expectation_suite(
         suite_name, expectations=[expectation.configuration]
     )
-    key = store.get_key(suite)
     # Act
     expectation = suite.expectations[0]
     assert expectation.column == "a"
@@ -419,7 +416,7 @@ def _test_update_expectation_success(context):
     expectation.column = updated_column_name
     store.update_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=key)
+    updated_suite_dict = store.get(key=store.get_key(suite))
     updated_suite = ExpectationSuite(**updated_suite_dict)
     updated_expectation = updated_suite.expectations[0]
     assert updated_expectation.id == expectation.id
@@ -454,14 +451,13 @@ def _test_update_expectation_raises_error_for_missing_expectation(context):
         result_format="BASIC",
     )
     suite = context.add_expectation_suite(suite_name, expectations=[])
-    key = store.get_key(suite)
     # Act
     with pytest.raises(
         KeyError, match="Cannot update Expectation because it was not found."
     ):
         store.update_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=key)
+    updated_suite_dict = store.get(key=store.get_key(suite))
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
 
@@ -528,7 +524,6 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     suite = context.add_expectation_suite(
         suite_name, expectations=[existing_expectation.configuration]
     )
-    key = store.get_key(suite)
     # Act
     nonexistent_expectation = ExpectColumnValuesToBeInSet(
         # this ID will be different from the ID created by the Suite
@@ -542,7 +537,7 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     ):
         store.delete_expectation(suite=suite, expectation=nonexistent_expectation)
     # Assert
-    updated_suite_dict = store.get(key=key)
+    updated_suite_dict = store.get(key=store.get_key(suite))
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
     assert len(updated_suite.expectations) == 1
