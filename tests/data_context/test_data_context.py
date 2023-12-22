@@ -2576,7 +2576,9 @@ class ExpectSkyToBeColor(BatchExpectation):
         }
 
 
-@pytest.mark.xfail("Uses unsupported expectation - fix this test as part of V1-117")
+@pytest.mark.xfail(
+    reason="Uses unsupported expectation - fix this test as part of V1-117"
+)
 @pytest.mark.filesystem
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
     empty_data_context,
