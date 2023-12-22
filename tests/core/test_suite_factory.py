@@ -138,75 +138,59 @@ def test_suite_factory_delete_raises_for_missing_suite():
 
 
 @pytest.mark.filesystem
-def test_suite_factory_is_initialized_with_context(empty_data_context):
+def test_suite_factory_is_initialized_with_context_filesystem(empty_data_context):
     assert isinstance(empty_data_context.suites, SuiteFactory)
+
+
+@pytest.mark.cloud
+def test_suite_factory_is_initialized_with_context_cloud(empty_cloud_data_context):
+    assert isinstance(empty_cloud_data_context.suites, SuiteFactory)
 
 
 @pytest.mark.filesystem
 def test_suite_factory_add_success_filesystem(empty_data_context):
-    # Arrange
-    name = "test-suite"
-    suite = ExpectationSuite(name=name)
-    with pytest.raises(
-        DataContextError, match=f"ExpectationSuite with name {name} was not found."
-    ):
-        empty_data_context.suites.get(name)
-
-    # Act
-    created_suite = empty_data_context.suites.add(suite=suite)
-
-    # Assert
-    assert empty_data_context.suites.get(name=name) == created_suite
+    _test_suite_factory_add_success(empty_data_context)
 
 
 @pytest.mark.filesystem
 def test_suite_factory_add_success_cloud(empty_cloud_context_fluent):
+    _test_suite_factory_add_success(empty_cloud_context_fluent)
+
+
+def _test_suite_factory_add_success(context):
     # Arrange
     name = "test-suite"
     suite = ExpectationSuite(name=name)
     with pytest.raises(
         DataContextError, match=f"ExpectationSuite with name {name} was not found."
     ):
-        empty_cloud_context_fluent.suites.get(name)
-
+        context.suites.get(name)
     # Act
-    created_suite = empty_cloud_context_fluent.suites.add(suite=suite)
-
+    created_suite = context.suites.add(suite=suite)
     # Assert
-    assert empty_cloud_context_fluent.suites.get(name=name) == created_suite
+    assert context.suites.get(name=name) == created_suite
 
 
 @pytest.mark.filesystem
 def test_suite_factory_delete_success_filesystem(empty_data_context):
-    # Arrange
-    name = "test-suite"
-    suite = ExpectationSuite(name=name)
-    suite = empty_data_context.suites.add(suite=suite)
-
-    # Act
-    empty_data_context.suites.delete(suite)
-
-    # Assert
-    with pytest.raises(
-        DataContextError,
-        match=f"ExpectationSuite with name {name} was not found.",
-    ):
-        empty_data_context.suites.get(name)
+    _test_suite_factory_delete_success(empty_data_context)
 
 
 @pytest.mark.cloud
 def test_suite_factory_delete_success_cloud(empty_cloud_context_fluent):
+    _test_suite_factory_delete_success(empty_cloud_context_fluent)
+
+
+def _test_suite_factory_delete_success(context):
     # Arrange
     name = "test-suite"
     suite = ExpectationSuite(name=name)
-    suite = empty_cloud_context_fluent.suites.add(suite=suite)
-
+    suite = context.suites.add(suite=suite)
     # Act
-    empty_cloud_context_fluent.suites.delete(suite)
-
+    context.suites.delete(suite)
     # Assert
     with pytest.raises(
         DataContextError,
         match=f"ExpectationSuite with name {name} was not found.",
     ):
-        empty_cloud_context_fluent.suites.get(name)
+        context.suites.get(name)
