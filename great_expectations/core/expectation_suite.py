@@ -1018,6 +1018,7 @@ class ExpectationSuite(SerializableDictDot):
             if (
                 expectation.expectation_type
                 == "expect_table_columns_to_match_ordered_list"
+                and expectation.kwargs.get("column_list")
             ):
                 exp_column_list: List[str] = expectation.kwargs["column_list"]
                 if exp_column_list and len(exp_column_list) > 0:
