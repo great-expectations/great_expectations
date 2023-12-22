@@ -321,11 +321,15 @@ def test_quickstart_workflow(
     assert result.success
 
     # TODO: Add mechanism to view results.
-    # View results
-    # mock_open = mocker.patch("webbrowser.open")
-    # context.view_validation_result(checkpoint_result)
-
-    # mock_open.assert_called_once()
+    #       See: https://greatexpectations.atlassian.net/browse/V1-119
+    # Previously we did:
+    #     mock_open = mocker.patch("webbrowser.open")
+    #     context.view_validation_result(result)
+    #     mock_open.assert_called_once()
+    # Our goal is to have:
+    #     1. Setup mocks if necessary
+    #     2. result.open_docs()
+    #     3. assert docs opened.
 
 
 if __name__ == "__main__":

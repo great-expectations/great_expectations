@@ -367,13 +367,14 @@ class TestDynamicPandasAssets:
         mocker.patch(
             "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
         )
+        # read_* normally returns batch but, since we've added a mock in the line above, we get a mock object returned.
+        # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.
         _ = read_method(*positional_args.values())
-        # read_* returns a validator, but we just want to inspect the asset
-        asset = empty_data_context.sources.pandas_default.get_asset(
+        default_asset = empty_data_context.sources.pandas_default.get_asset(
             asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
         )
         for positional_arg_name, positional_arg in positional_args.items():
-            assert getattr(asset, positional_arg_name) == positional_arg
+            assert getattr(default_asset, positional_arg_name) == positional_arg
 
 
 @pytest.mark.filesystem
