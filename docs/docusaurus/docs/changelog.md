@@ -10,6 +10,15 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.6
+* [BUGFIX] 0.18.x: Microsoft Fabric Semantic Link API update ([#9102](https://github.com/great-expectations/great_expectations/pull/9102))
+* [BUGFIX] `0.18.x` cherrypick `create_temp_tables` fixes from `develop` ([#9124](https://github.com/great-expectations/great_expectations/pull/9124))
+* [BUGFIX] B/remove connection log v0.18 ([#9136](https://github.com/great-expectations/great_expectations/pull/9136))
+* [BUGFIX] Fix QueryAsset with `create_temp_table=False` ([#9148](https://github.com/great-expectations/great_expectations/pull/9148))
+* [DOCS] Fix doc test to use `create_temp_table=True` with QueryAsset ([#9137](https://github.com/great-expectations/great_expectations/pull/9137))
+* [DOCS] `how_to_connect_to_postgresql_data` uses `create_temp_table=True` ([#9140](https://github.com/great-expectations/great_expectations/pull/9140))
+* [MAINTENANCE] Delete `test_run_multibatch_data_assistant_and_checkpoint` ([#9128](https://github.com/great-expectations/great_expectations/pull/9128))
+
 ### 0.18.5
 * [BUGFIX] validator head query limit ([#9071](https://github.com/great-expectations/great_expectations/pull/9071))
 * [BUGFIX] Databricks shared compute fix ([#9034](https://github.com/great-expectations/great_expectations/pull/9034))
