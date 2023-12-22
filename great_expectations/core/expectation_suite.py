@@ -1135,7 +1135,7 @@ class ExpectationSuiteSchema(Schema):
         if isinstance(original_data, dict):
             expectations = original_data.get("expectations", [])
         else:
-            expectations = original_data.expectation_configurations
+            expectations = original_data.expectations
         data["expectations"] = convert_to_json_serializable(expectations)
         return data
 
