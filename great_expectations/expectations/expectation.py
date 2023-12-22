@@ -297,9 +297,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    _save_callback: Union[Callable[[Expectation], Expectation]] = pydantic.PrivateAttr(
-        default=None
-    )
+    _save_callback: Union[
+        Callable[[Expectation], Expectation], None
+    ] = pydantic.PrivateAttr(default=None)
 
     @pydantic.validator("result_format")
     def _validate_result_format(
