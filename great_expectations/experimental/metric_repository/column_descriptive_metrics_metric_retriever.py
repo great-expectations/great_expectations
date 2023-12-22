@@ -182,7 +182,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         batch_request: BatchRequest,
         column_list: List[str],
         column_metric_names: List[str],
-        column_metric_type: type[Metric],
+        column_metric_type: type[ColumnMetric[Any]],
     ) -> Sequence[Metric]:
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, column_metric_names
@@ -328,7 +328,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         """Get the names of all columns matching semantic types in the batch."""
         validator = self.get_validator(batch_request=batch_request)
         domain_builder = ColumnDomainBuilder(
-            include_semantic_types=include_semantic_types,
+            include_semantic_types=include_semantic_types,  # type: ignore[arg-type]  # ColumnDomainBuilder supports other ways of specifying semantic types
             exclude_column_names=exclude_column_names,
         )
         assert isinstance(
