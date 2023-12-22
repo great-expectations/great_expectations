@@ -10,6 +10,11 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.7
+* [BUGFIX] 0.18.x - Apply `QueryAsset` splitting fix ([#9160](https://github.com/great-expectations/great_expectations/pull/9160))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Referential Integrity (0.18 branch) ([#9145](https://github.com/great-expectations/great_expectations/pull/9145))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Wording update ([#9151](https://github.com/great-expectations/great_expectations/pull/9151))
+
 ### 0.18.6
 * [BUGFIX] 0.18.x: Microsoft Fabric Semantic Link API update ([#9102](https://github.com/great-expectations/great_expectations/pull/9102))
 * [BUGFIX] `0.18.x` cherrypick `create_temp_tables` fixes from `develop` ([#9124](https://github.com/great-expectations/great_expectations/pull/9124))

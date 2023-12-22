@@ -4,6 +4,12 @@
 Changelog
 #########
 
+0.18.7
+-----------------
+* [BUGFIX] 0.18.x - Apply `QueryAsset` splitting fix ([#9160](https://github.com/great-expectations/great_expectations/pull/9160))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Referential Integrity (0.18 branch) ([#9145](https://github.com/great-expectations/great_expectations/pull/9145))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Wording update ([#9151](https://github.com/great-expectations/great_expectations/pull/9151))
+
 0.18.6
 -----------------
 * [BUGFIX] 0.18.x: Microsoft Fabric Semantic Link API update ([#9102](https://github.com/great-expectations/great_expectations/pull/9102))
