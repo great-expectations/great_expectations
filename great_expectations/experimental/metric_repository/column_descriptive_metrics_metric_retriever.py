@@ -241,6 +241,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             # "column.mean",  # Currently not supported for timestamp in Snowflake
             # "column.median",  # Currently not supported for timestamp in Snowflake
         ]
+        # Note: Timestamps are returned as strings for Snowflake, this may need to be adjusted
+        # when we support other datasources. For example in Pandas, timestamps can be returned as Timestamp().
         return self._get_column_metrics(
             batch_request=batch_request,
             column_list=column_list,
