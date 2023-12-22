@@ -28,7 +28,11 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.batch_spec import (
+    BatchSpec,
+    RuntimeQueryBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -686,7 +690,7 @@ class _SQLAsset(DataAsset):
                     )
                 )
             # Creating the batch_spec is our hook into the execution engine.
-            batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+            batch_spec = self._create_batch_spec(batch_spec_kwargs)
             execution_engine: SqlAlchemyExecutionEngine = (
                 self.datasource.get_execution_engine()
             )
@@ -786,12 +790,18 @@ class _SQLAsset(DataAsset):
             )
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
-        """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec
+        """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec
 
         This is called by get_batch_list_from_batch_request to generate the batches.
 
         Returns:
-            A dictionary that will be passed to SqlAlchemyDatasourceBatchSpec(**returned_dict)
+            A dictionary that will be passed to self._create_batch_spec(**returned_dict)
+        """
+        raise NotImplementedError
+
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> BatchSpec:
+        """
+        Instantiates a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec.
         """
         raise NotImplementedError
 
@@ -833,6 +843,10 @@ class QueryAsset(_SQLAsset):
             "temp_table_schema_name": None,
             "batch_identifiers": {},
         }
+
+    @override
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> RuntimeQueryBatchSpec:
+        return RuntimeQueryBatchSpec(**batch_spec_kwargs)
 
 
 @public_api
@@ -946,6 +960,12 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+    @override
+    def _create_batch_spec(
+        self, batch_spec_kwargs: dict
+    ) -> SqlAlchemyDatasourceBatchSpec:
+        return SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
 
     @staticmethod
     def _is_bracketed_by_quotes(target: str) -> bool:

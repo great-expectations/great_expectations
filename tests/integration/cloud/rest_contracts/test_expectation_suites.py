@@ -21,11 +21,8 @@ if TYPE_CHECKING:
 
 
 NON_EXISTENT_EXPECTATION_SUITE_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
-
-EXISTING_EXPECTATION_SUITE_ID: Final[str] = "9390c24d-e8d6-4944-9411-4d0aaed14915"
-
-EXISTING_EXPECTATION_SUITE_NAME: Final[str] = "david_expectation_suite"
-
+GET_EXPECTATION_SUITE_ID: Final[str] = "c138767f-1d62-4312-bfff-1167891ab76f"
+PUT_EXPECTATION_SUITE_ID: Final[str] = "9390c24d-e8d6-4944-9411-4d0aaed14915"
 
 POST_EXPECTATION_SUITE_MIN_REQUEST_BODY: Final[PactBody] = {
     "data": {
@@ -79,28 +76,26 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
             "created_by_id": pact.Format().uuid,
             "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             "suite": {
-                "expectation_suite_name": pact.Like("raw_health.critical_1a"),
-                "expectations": pact.EachLike(
+                "data_asset_type": None,
+                "expectation_suite_name": pact.Like("no_checkpoint_suite"),
+                "expectations": [
                     {
-                        "expectation_type": "expect_table_row_count_to_be_between",
+                        "expectation_type": "expect_column_values_to_be_between",
                         "ge_cloud_id": pact.Format().uuid,
-                        "kwargs": {},
+                        "kwargs": {
+                            "column": "passenger_count",
+                            "max_value": 5,
+                            "min_value": 0,
+                            "mostly": 0.97,
+                        },
                         "meta": {},
-                        "rendered_content": pact.EachLike(
-                            {
-                                "name": "atomic.prescriptive.summary",
-                                "value": {},
-                                "value_type": "StringValueType",
-                            }
-                        ),
-                    },
-                    minimum=1,
-                ),
-                "ge_cloud_id": "3705d38a-0eec-4bd8-9956-fdb34df924b6",
-                "meta": {"great_expectations_version": pact.Like("0.13.23")},
+                    }
+                ],
+                "ge_cloud_id": GET_EXPECTATION_SUITE_ID,
+                "meta": {"great_expectations_version": "0.18.3"},
             },
         },
-        "id": "3705d38a-0eec-4bd8-9956-fdb34df924b6",
+        "id": GET_EXPECTATION_SUITE_ID,
         "type": "expectation_suite",
     },
 }
@@ -134,7 +129,7 @@ def test_get_expectation_suite(
     provider_state = "the Expectation Suite does exist"
     scenario = "a request to get an Expectation Suite"
     method = "GET"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{EXISTING_EXPECTATION_SUITE_ID}"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{GET_EXPECTATION_SUITE_ID}"
     status = 200
     response_body = GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY
 
@@ -153,9 +148,7 @@ def test_get_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.get_expectation_suite(
-            ge_cloud_id=EXISTING_EXPECTATION_SUITE_ID
-        )
+        cloud_data_context.get_expectation_suite(ge_cloud_id=GET_EXPECTATION_SUITE_ID)
 
 
 @pytest.mark.cloud
@@ -276,7 +269,7 @@ def test_post_expectation_suite_request(
                 "organizations",
                 EXISTING_ORGANIZATION_ID,
                 "expectation-suites",
-                EXISTING_EXPECTATION_SUITE_ID,
+                PUT_EXPECTATION_SUITE_ID,
             ),
             upon_receiving="a request to put an Expectation Suite",
             given="the Expectation Suite does exist",
