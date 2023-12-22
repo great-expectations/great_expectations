@@ -102,6 +102,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             computed_metrics=computed_metrics,
             aborted_metrics=aborted_metrics,
         )
+        if value is None:
+            self._raise_on_missing_metric(metric_name, exception)
         return TableMetric[int](
             batch_id=batch_id,
             metric_name=metric_name,
@@ -121,6 +123,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             computed_metrics=computed_metrics,
             aborted_metrics=aborted_metrics,
         )
+        if value is None:
+            self._raise_on_missing_metric(metric_name, exception)
         return TableMetric[List[str]](
             batch_id=batch_id,
             metric_name=metric_name,
@@ -142,6 +146,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             computed_metrics=computed_metrics,
             aborted_metrics=aborted_metrics,
         )
+        if value is None:
+            self._raise_on_missing_metric(metric_name, exception)
         raw_column_types: list[dict[str, Any]] = value
         # If type is not found, don't add empty type field. This can happen if our db introspection fails.
         column_types_converted_to_str: list[dict[str, str]] = []
@@ -161,6 +167,13 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             metric_name=metric_name,
             value=column_types_converted_to_str,
             exception=exception,
+        )
+
+    def _raise_on_missing_metric(
+        self, metric_name: str, exception: MetricException
+    ) -> None:
+        raise ValueError(
+            f"Metric {metric_name} was not computed. This should not happen. It could be an issue with your connection to the database or your permissions. Please see the exception logs for details: {exception}"
         )
 
     def _get_columns_to_exclude(self, table_column_types: Metric) -> List[str]:
