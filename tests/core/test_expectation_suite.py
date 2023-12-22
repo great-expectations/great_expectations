@@ -363,10 +363,19 @@ class TestCRUDMethods:
         self, empty_data_context, expectation
     ):
         context = empty_data_context
+        self._test_update_suite_adds_ids(context, expectation)
+
+    @pytest.mark.cloud
+    def test_cloud_context_update_suite_adds_ids(
+        self, empty_cloud_context_fluent, expectation
+    ):
+        context = empty_cloud_context_fluent
+        self._test_update_suite_adds_ids(context, expectation)
+
+    def _test_update_suite_adds_ids(self, context, expectation):
         suite_name = "test-suite"
         # todo: update to new api
         suite = context.add_expectation_suite(suite_name)
-
         uuid_to_test = suite.ge_cloud_id
         try:
             UUID(uuid_to_test)
@@ -374,7 +383,6 @@ class TestCRUDMethods:
             pytest.fail(
                 f"Expected UUID in ExpectationSuite.ge_cloud_id, found {uuid_to_test}"
             )
-
         expectation.id = None
         suite.add(expectation)
         expectation.column = "foo"
@@ -390,29 +398,6 @@ class TestCRUDMethods:
                 pytest.fail(
                     f"Expected UUID in ExpectationConfiguration.ge_cloud_id, found {uuid_to_test}"
                 )
-
-    @pytest.mark.cloud
-    def test_cloud_context_update_suite_adds_ids(
-        self, empty_cloud_context_fluent, expectation
-    ):
-        context = empty_cloud_context_fluent
-        suite_name = "test-suite"
-        # todo: update to new api
-        suite = context.add_expectation_suite(suite_name)
-
-        uuid_to_test = suite.ge_cloud_id
-        assert isinstance(UUID(uuid_to_test), UUID)
-
-        expectation.id = None
-        suite.add(expectation)
-        expectation.id = None
-        expectation.column = "foo"
-        suite.add(expectation)
-        assert len(suite.expectations) == 2
-        # todo: update when expectations are source of truth
-        for expectation in suite.expectations:
-            uuid_to_test = expectation.id
-            assert isinstance(UUID(uuid_to_test), UUID)
 
     @pytest.mark.unit
     def test_suite_add_expectation_doesnt_allow_adding_an_expectation_with_id(
@@ -433,33 +418,24 @@ class TestCRUDMethods:
         self, empty_cloud_context_fluent, expectation
     ):
         context = empty_cloud_context_fluent
-        suite_name = "test-suite"
-        # todo: update to new api
-        suite = context.add_expectation_suite(suite_name)
-        suite.add(expectation)
-
-        updated_column_name = "foo"
-        expectation.column = updated_column_name
-        expectation.save()
-
-        suite = context.get_expectation_suite(suite_name)
-        assert len(suite.expectations) == 1
-        assert suite.expectations[0].column == updated_column_name
+        self._test_expectation_can_be_saved_after_added(context, expectation)
 
     @pytest.mark.filesystem
     def test_filesystem_expectation_can_be_saved_after_added(
         self, empty_data_context, expectation
     ):
         context = empty_data_context
+        self._test_expectation_can_be_saved_after_added(context, expectation)
+
+    def _test_expectation_can_be_saved_after_added(self, context, expectation):
         suite_name = "test-suite"
         # todo: update to new api
         suite = context.add_expectation_suite(suite_name)
         suite.add(expectation)
-
         updated_column_name = "foo"
+        assert expectation.column != updated_column_name
         expectation.column = updated_column_name
         expectation.save()
-
         suite = context.get_expectation_suite(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
@@ -469,25 +445,16 @@ class TestCRUDMethods:
         self, empty_cloud_context_fluent, expectation
     ):
         context = empty_cloud_context_fluent
-        suite_name = "test-suite"
-        # todo: update to new api
-        suite = context.add_expectation_suite(
-            suite_name, expectations=[expectation.configuration]
-        )
-        expectation = suite.expectations[0]
-        updated_column_name = "foo"
-        expectation.column = updated_column_name
-        expectation.save()
-
-        suite = context.get_expectation_suite(suite_name)
-        assert len(suite.expectations) == 1
-        assert suite.expectations[0].column == updated_column_name
+        self._test_expectation_can_be_saved_after_update(context, expectation)
 
     @pytest.mark.filesystem
     def test_filesystem_expectation_can_be_saved_after_update(
         self, empty_data_context, expectation
     ):
         context = empty_data_context
+        self._test_expectation_can_be_saved_after_update(context, expectation)
+
+    def _test_expectation_can_be_saved_after_update(self, context, expectation):
         suite_name = "test-suite"
         # todo: update to new api
         suite = context.add_expectation_suite(
@@ -497,7 +464,6 @@ class TestCRUDMethods:
         updated_column_name = "foo"
         expectation.column = updated_column_name
         expectation.save()
-
         suite = context.get_expectation_suite(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
