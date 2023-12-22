@@ -106,8 +106,7 @@ def pandas_data(
 
 
 def sqlite_datasource(
-    context: AbstractDataContext,
-    db_filename: str,
+    context: AbstractDataContext, db_filename: str | pathlib.Path
 ) -> SqliteDatasource:
     relative_path = pathlib.Path(
         "..",
