@@ -45,7 +45,7 @@ def cloud_context_and_batch_request_with_simple_dataframe(
     return context, batch_request
 
 
-# @pytest.mark.cloud
+@pytest.mark.cloud
 def test_get_metrics(
     cloud_context_and_batch_request_with_simple_dataframe: tuple[
         CloudDataContext, BatchRequest
@@ -206,7 +206,7 @@ def test_get_metrics(
     ]
 
     # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
-    # assert len(metrics) == len(expected_metrics)
+    assert len(metrics) == len(expected_metrics)
     for metric in metrics:
         assert metric.dict() in [
             expected_metric.dict() for expected_metric in expected_metrics
