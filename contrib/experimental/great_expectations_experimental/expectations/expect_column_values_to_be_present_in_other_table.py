@@ -104,7 +104,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     ) -> None:
         super().__init__(configuration)
 
-        # override the template_dict using existing kwargs.
+        # build the template_dict using existing kwargs passed in as parameters to the Expectation.
         # this allows us to build the template_dict, which is required by the query.template_values metric.
         template_dict: dict = {
             "foreign_key_column": configuration["kwargs"]["foreign_key_column"],
@@ -206,9 +206,9 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         unexpected_index_df: pd.DataFrame = pd.DataFrame(
             unexpected_index_list, dtype="string"
         )
+
         # extract column name from unexpected values
         column_name: str = list(unexpected_index_list[0].keys())[0].upper()
-
         header_row = [f"Missing Values for {column_name} Column"]
 
         row_list = []
@@ -241,8 +241,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         return ExpectationValidationResult(
             success=(final_value == 0),
             result={
-                "observed_value": f"{final_value} missing value {'s' if final_value != 1 else ''}.",
-                "unexpected_count": final_value,
+                "observed_value": f"{final_value} missing value{'s' if final_value != 1 else ''}.",
                 "unexpected_index_list": unexpected_values,
             },
         )
@@ -279,7 +278,6 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                         "success": True,
                         "result": {
                             "observed_value": "0 missing values.",
-                            "unexpected_count": 0,
                             "unexpected_index_list": [],
                         },
                     },
