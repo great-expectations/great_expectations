@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Tuple, overload
+from typing import Literal, Optional, Tuple, overload
 
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import Selectable
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import generate_temporary_table_name
-
-if TYPE_CHECKING:
-    from great_expectations.compatibility.sqlalchemy import Selectable
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +94,7 @@ class SqlAlchemyBatchData(BatchData):
         source_table_name: Optional[str] = None,
     ) -> None:
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
-        parameters have been provided. If a Query is given, also builds a temporary table for this query
+        parameters have been provided. Builds a temporary table for the `query` if `create_temp_table=True`.
 
             Args:
                 engine (SqlAlchemy Engine): \
@@ -174,7 +172,7 @@ class SqlAlchemyBatchData(BatchData):
                 )
             )
         elif query:
-            self._selectable = self._generate_selectable_from_query(
+            self._selectable = self._generate_selectable_from_query(  # type: ignore[call-overload] # https://github.com/python/mypy/issues/14764
                 query, dialect, create_temp_table, temp_table_schema_name
             )
         else:
@@ -208,7 +206,10 @@ class SqlAlchemyBatchData(BatchData):
         return self._use_quoted_name
 
     def _create_temporary_table(  # noqa: C901, PLR0912, PLR0915
-        self, dialect, query, temp_table_schema_name=None
+        self,
+        dialect: GXSqlDialect,
+        query: str,
+        temp_table_schema_name: str | None = None,
     ) -> Tuple[str, str]:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
@@ -342,23 +343,43 @@ class SqlAlchemyBatchData(BatchData):
             schema=schema_name,
         )
 
+    @overload
+    def _generate_selectable_from_query(
+        self,
+        query: str,
+        dialect: GXSqlDialect,
+        create_temp_table: Literal[True],
+        temp_table_schema_name: Optional[str] = ...,
+    ) -> sqlalchemy.Table:
+        ...
+
+    @overload
+    def _generate_selectable_from_query(
+        self,
+        query: str,
+        dialect: GXSqlDialect,
+        create_temp_table: Literal[False],
+        temp_table_schema_name: Optional[str] = ...,
+    ) -> sqlalchemy.TextClause:
+        ...
+
     def _generate_selectable_from_query(
         self,
         query: str,
         dialect: GXSqlDialect,
         create_temp_table: bool,
         temp_table_schema_name: Optional[str] = None,
-    ) -> sqlalchemy.Table:
+    ) -> sqlalchemy.Table | sqlalchemy.TextClause:
         """Helper method to generate Selectable from query string.
 
         Args:
             query (str): query passed in as RuntimeBatchRequest.
             dialect (GXSqlDialect): Needed for _create_temporary_table, since different backends name temp_tables differently.
-            create_temp_table (bool): Should we create a temp_table?
+            create_temp_table (bool): Should we create a temp_table? If not a `TextClause` will be returned instead of a Table.
             temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema.  Defaults to None.
 
         Returns:
-            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable or a TextClause.
         """
         if not create_temp_table:
             return sa.text(query)
