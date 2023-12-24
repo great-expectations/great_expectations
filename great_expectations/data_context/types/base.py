@@ -1399,20 +1399,21 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
 
 class ProgressBarsConfig(DictDot):
     def __init__(
-        self,
-        globally: bool = True,
-        profilers: bool = True,
-        metric_calculations: bool = True,
+            self,
+            globally: Optional[bool] = None,
+            profilers: Optional[bool] = None,
+            metric_calculations: Optional[bool] = None,
     ) -> None:
-        self.globally = globally
-        self.profilers = profilers
-        self.metric_calculations = metric_calculations
+        self.globally: bool = True if globally is None else globally
+        self.profilers: bool = profilers if profilers is not None else self.globally
+        self.metric_calculations: bool = metric_calculations if metric_calculations is not None else self.globally
 
 
 class ProgressBarsConfigSchema(Schema):
-    globally = fields.Boolean(default=True)
-    profilers = fields.Boolean(default=True)
-    metric_calculations = fields.Boolean(default=True)
+    globally = fields.Boolean()
+    profilers = fields.Boolean()
+    metric_calculations = fields.Boolean()
+
 
 
 class IncludeRenderedContentConfig(DictDot):
