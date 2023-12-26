@@ -48,6 +48,7 @@ click 7 "#validate-data"
 - <PrereqPython />
 - pip
 - An internet browser
+- A GX Cloud Beta Account
 
 
 ## Prepare your environment
@@ -67,20 +68,57 @@ click 7 "#validate-data"
 
     It can take several minutes for the installation to complete.
 
-2. Configure your GX Cloud environment variables
-3. Run the following Python code to import the `great_expectations` module:
+## Get your user access token and organization ID
 
-    ```python name="tutorials/quickstart/quickstart.py import_gx"
+You'll need your user access token and organization ID to set your environment variables. Don't commit your access tokens to your version control software.
+
+1. In GX Cloud, click **Settings** > **Tokens**.
+
+2. In the **User access tokens** pane, click **Create user access token**.
+
+3. Complete the following fields:
+
+    - **Token name** - Enter a name for the token that will help you quickly identify it.
+
+    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?) .
+
+4. Click **Create**.
+
+5. Copy and then paste the user access token into a temporary file. The token can't be retrieved after you close the dialog.
+
+6. Click **Close**.
+
+7. Copy the value in the **Organization ID** field into the temporary file with your user access token and then save the file. 
+
+    GX recommends deleting the temporary file after you set the environment variables.
+
+## Set the GX Cloud Organization ID and user access token as environment variables
+
+Environment variables securely store your GX Cloud access credentials. To use GX Cloud in Python scripts: 
+
+1. Save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZATION_ID** as environment variables by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
+
+    ```bash title="Terminal input"
+    export GX_CLOUD_ACCESS_TOKEN=<user_access_token>
+    export GX_CLOUD_ORGANIZATION_ID=<organization_id>
     ```
+
+    :::note
+    Once you have saved your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID** you will be able to access your GX Cloud account in Python scripts and environments while following the [GX OSS guides](/docs/oss/) or using the [GX API documentation](/docs/reference/api).
+    :::
+
+2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+
 ## Create a Data Context
 
-- Run the following command to create a <TechnicalTag tag="data_context" text="Data Context"/> object:
+- Use the following command in Python to create a <TechnicalTag tag="data_context" text="Data Context"/> object:
 
     ```python name="tutorials/quickstart/quickstart.py get_context"
     ```
+
 ## Connect to data
 
-- Run the following command to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a <TechnicalTag tag="validator" text="Validator"/> object:
+- Use the following command in Python to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a <TechnicalTag tag="validator" text="Validator"/> object:
 
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
@@ -89,7 +127,7 @@ click 7 "#validate-data"
 
 ## Create Expectations
 
-- Run the following commands to create two <TechnicalTag tag="expectation" text="Expectations"/> and save them to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
+- Use the following commands to create two <TechnicalTag tag="expectation" text="Expectations"/> and save them to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
@@ -100,17 +138,17 @@ click 7 "#validate-data"
 
 ## Validate data
 
-1. Run the following command to define a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and examine the data to determine if it matches the defined <TechnicalTag tag="expectation" text="Expectations"/>:
+1. Use the following command to define a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and examine the data to determine if it matches the defined <TechnicalTag tag="expectation" text="Expectations"/>:
 
     ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
-2. Run the following command to return the <TechnicalTag tag="validation_result" text="Validation Results"/>:
+2. Use the following command to return the <TechnicalTag tag="validation_result" text="Validation Results"/>:
 
     ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
-3. Run the following command to view an HTML representation of the <TechnicalTag tag="validation_result" text="Validation Results"/> in the generated <TechnicalTag tag="data_docs" text="Data Docs"/>:
+3. Use the following command to view an HTML representation of the <TechnicalTag tag="validation_result" text="Validation Results"/> in the generated <TechnicalTag tag="data_docs" text="Data Docs"/>:
 
     ```python name="tutorials/quickstart/quickstart.py view_results"
     ```
