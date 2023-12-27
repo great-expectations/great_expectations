@@ -68,7 +68,7 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
     ```      
     Replace `user_access_token` and `organization_id` with the values you copied previously, and `snowflake_password` with your own value.
 
-3. Optional. To use GX Cloud in Python scripts: save your GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID as environment variables outside of the Docker Engine by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
+3. Optional. To use GX Cloud in Python scripts: save your `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` as environment variables outside of the Docker Engine by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the commands to your `~/.bashrc` or `~/.zshrc` file. For example:
 
     ```bash title="Terminal input"
     export GX_CLOUD_ACCESS_TOKEN=<user_access_token>
