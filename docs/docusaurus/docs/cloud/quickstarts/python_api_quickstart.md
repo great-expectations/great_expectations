@@ -104,7 +104,7 @@ Environment variables securely store your GX Cloud access credentials. To use GX
     ```
 
     :::note
-    Once you have saved your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID** you will be able to access your GX Cloud account in Python scripts and environments while following the [GX OSS guides](/docs/oss/) or using the [GX API documentation](/docs/reference/api).
+    Once you have saved your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID** you will be able to access your GX Cloud account in Python scripts and environments while following the [GX OSS guides](/docs/oss/).
     :::
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
