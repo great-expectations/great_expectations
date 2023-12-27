@@ -111,44 +111,44 @@ Environment variables securely store your GX Cloud access credentials. To use GX
 
 ## Create a Data Context
 
-- Use the following command in Python to create a <TechnicalTag tag="data_context" text="Data Context"/> object:
+- Use the following command in Python to create a Data Context object:
 
     ```python name="tutorials/quickstart/quickstart.py get_context"
     ```
 
 ## Connect to data
 
-- Use the following command in Python to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a <TechnicalTag tag="validator" text="Validator"/> object:
+- Use the following command in Python to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a Validator object:
 
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
-    The code example uses the default <TechnicalTag tag="data_context" text="Data Context"/> <TechnicalTag tag="datasource" text="Data Source"/> for Pandas to access the `.csv` data from the file at the specified URL path.
+    The code example uses the default Data Source for Pandas to access the `.csv` data from the file at the specified URL path.
 
 ## Create Expectations
 
-- Use the following commands to create two <TechnicalTag tag="expectation" text="Expectations"/> and save them to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
+- Use the following commands to create two Expectations and save them to the Expectation Suite:
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
 
-  The first <TechnicalTag tag="expectation" text="Expectation"/> uses domain knowledge (the `pickup_datetime` shouldn't be null).
+  The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null).
 
-  The second <TechnicalTag tag="expectation" text="Expectation"/> uses explicit kwargs along with the `passenger_count` column.
+  The second Expectation uses explicit kwargs along with the `passenger_count` column.
 
 ## Validate data
 
-1. Use the following command to define a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and examine the data to determine if it matches the defined <TechnicalTag tag="expectation" text="Expectations"/>:
+1. Use the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations:
 
     ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
-2. Use the following command to return the <TechnicalTag tag="validation_result" text="Validation Results"/>:
+2. Use the following command to return the Validation Results:
 
     ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
-3. Use the following command to view an HTML representation of the <TechnicalTag tag="validation_result" text="Validation Results"/> in the generated <TechnicalTag tag="data_docs" text="Data Docs"/>:
+3. Use the following command to view an HTML representation of the Validation Results in the generated Data Docs:
 
     ```python name="tutorials/quickstart/quickstart.py view_results"
     ```
