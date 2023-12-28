@@ -2,7 +2,7 @@
 sidebar_label: 'Quickstart for GX Cloud and Python'
 title: 'Quickstart for GX Cloud and Python'
 id: python_quickstart
-description: Connect to a GX Cloud account from a Python script.
+description: Connect to a GX Cloud account and validate data from a Python script.
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import PrereqPython from '/docs/components/prerequisites/_python_version.md'
@@ -11,45 +11,10 @@ import DataContextInitializeInstantiateSave from '/docs/components/setup/link_li
 
 In this quickstart, you'll learn how to use GX Cloud from a Python script or interpreter, such as a Jupyter Notebook. You'll install Great Expectations, configure your GX Cloud environment variables, connect to sample data, build your first Expectation, validate data, and review the validation results through Python code.
 
-## Data validation workflow
-
-The following diagram illustrates the end-to-end GX data validation workflow that you'll implement with this quickstart. Click a workflow step to view the related content.
-
-```mermaid
-flowchart LR
-%%{init: {"themeVariables": {"fontSize" : "24px"}}}%%
-
-    1(Install\n<b>GX</b>) --> 2("Create a\n<b>Data Context</b>")
-
-    2 --> 3
-
-    3("Connect\nto data</b>")
-
-    3 --> 4
-
-    4("Create a\n<b>Validator</b>") --> 5("Create\n<b>Expectations</b>")
-
-    5 --> 6
-
-    6("Run a\n<b>Checkpoint</b>") --> 7("View\n<b>Validation Results</b>")
-
-%% Link each workflow step to section on page.
-click 1 "#install-gx"
-click 2 "#create-a-data-context"
-click 3 "#connect-to-data"
-click 4 "#connect-to-data"
-click 5 "#create-expectations"
-click 6 "#validate-data"
-click 7 "#validate-data"
-```
-
 ## Prerequisites
 
-- <PrereqPython />
-- pip
-- An internet browser
-- A GX Cloud Beta Account
-
+- You have internet access and download permissions.
+- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
 ## Prepare your environment
 
@@ -111,12 +76,14 @@ Environment variables securely store your GX Cloud access credentials.
 
 ## Create a Data Context
 
-- Use the following command in Python to create a Data Context object:
+- Run the following Python code to create a Data Context object:
 
     ```python name="tutorials/quickstart/quickstart.py get_context"
     ```
+  
+    The Data Context will detect the previously set environment variables and connect to your GX Cloud account.
 
-## Connect to data
+## Connect to a Data Asset
 
 - Run the following Python code to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a Validator object:
 
@@ -127,7 +94,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 ## Create Expectations
 
-- Use the following commands to create two Expectations and save them to the Expectation Suite:
+- Run the following Python code to create two Expectations and save them to the Expectation Suite:
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
@@ -138,7 +105,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 ## Validate data
 
-1. Use the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations:
+1. Run the following Python code to define a Checkpoint and examine the data to determine if it matches the defined Expectations:
 
     ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
     ```
@@ -148,7 +115,7 @@ Environment variables securely store your GX Cloud access credentials.
     ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
-3. Use the following command to view an HTML representation of the Validation Results in the generated Data Docs:
+3. Run the following Python code to view an HTML representation of the Validation Results in the generated Data Docs:
 
     ```python name="tutorials/quickstart/quickstart.py view_results"
     ```
