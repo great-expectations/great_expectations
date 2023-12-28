@@ -75,7 +75,7 @@ IndexLabel = Union[str, Sequence[str]]
 # https://github.com/pandas-dev/pandas/blob/965ceca9fd796940050d6fc817707bba1c4f9bff/pandas/_typing.py#LL373C1-L373C52
 DtypeBackend = Literal["pyarrow", "numpy_nullable"]
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 PANDAS_VERSION: float = float(
     f"{Version(pd.__version__).major}.{Version(pd.__version__).minor}"
