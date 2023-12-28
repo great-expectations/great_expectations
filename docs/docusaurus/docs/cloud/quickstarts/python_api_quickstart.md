@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Quickstart for GX Cloud and Python scripts'
-title: 'Quickstart for GX Cloud and Python scripts'
+sidebar_label: 'Quickstart for GX Cloud and Python'
+title: 'Quickstart for GX Cloud and Python'
 id: python_quickstart
 description: Connect to a GX Cloud account from a Python script.
 ---
@@ -94,7 +94,7 @@ You'll need your user access token and organization ID to set your environment v
 
 ## Set the GX Cloud Organization ID and user access token as environment variables
 
-Environment variables securely store your GX Cloud access credentials. To use GX Cloud in Python scripts: 
+Environment variables securely store your GX Cloud access credentials.
 
 1. Save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZATION_ID** as environment variables by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
 
@@ -104,7 +104,7 @@ Environment variables securely store your GX Cloud access credentials. To use GX
     ```
 
     :::note
-    Once you have saved your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID** you will be able to access your GX Cloud account in Python scripts and environments while following the [GX OSS guides](../../oss/oss.md).
+   After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX OSS guides](../../oss/oss.md).
     :::
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
@@ -118,7 +118,7 @@ Environment variables securely store your GX Cloud access credentials. To use GX
 
 ## Connect to data
 
-- Use the following command in Python to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a Validator object:
+- Run the following Python code to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a Validator object:
 
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
@@ -155,10 +155,9 @@ Environment variables securely store your GX Cloud access credentials. To use GX
 
 ## Related documentation
 
-If you're ready to continue your GX journey, the following topics can help you implement a solution for your specific environment and business requirements:
 
-- [Install GX in a specific environment with support for a specific Data Source](/docs/oss/guides/setup/installation/install_gx).
-- [Initialize, instantiate, and save a Data Context](/docs/oss/guides/setup/configure_data_contexts_lp).
-- [Connect to Data Sources](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp).
-- [Create and manage Expectations and Expectation Suites](/docs/oss/guides/expectations/expectations_lp/).
-- [Create, manage, and run Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp/).
+- [Install GX in a specific environment with a specific Data Source](/docs/oss/guides/setup/installation/install_gx)
+- [Initialize, instantiate, and save a Data Context](/docs/oss/guides/setup/configure_data_contexts_lp)
+- [Connect to Data Sources](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp)
+- [Create and manage Expectations and Expectation Suites](/docs/oss/guides/expectations/expectations_lp/)
+- [Create, manage, and run Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp/)
