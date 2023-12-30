@@ -4,7 +4,9 @@ title: 'Get started with GX Cloud'
 description: Get started with GX Cloud.
 ---
 
-The GX Cloud user interface is configured for Snowflake, and it is assumed that you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. Additional Data Sources will be available soon.
+The GX Cloud user interface is configured for Snowflake Data Sources. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. Additional Data Sources will be available soon.
+
+To connect to Data Assets on another Data Source, see [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
 
 ## Prerequisites
 
