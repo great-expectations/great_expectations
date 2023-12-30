@@ -45,14 +45,9 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Set up GX Cloud',
+          label: 'Get started with GX Cloud',
           link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
           items: [
-            {
-              type: 'link',
-              label: 'Request a GX Cloud Beta account',
-              href: '/docs/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account',
-            },
             {
               type: 'link',
               label: 'Prepare your environment',
@@ -60,8 +55,8 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Get your user access token and organization ID',
-              href: '/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id',
+              label: 'Generate your user access token and copy your organization ID',
+              href: '/docs/cloud/set_up_gx_cloud#generate-your-user-access-token-and-copy-your-organization-id',
             },
             {
               type: 'link',
@@ -70,8 +65,18 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Secure your GX API Data Source connection strings',
-              href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
+              label: 'Create the Snowflake Data Asset',
+              href: '/docs/cloud/set_up_gx_cloud#create-the-snowflake-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Add an Expectation',
+              href: '/docs/cloud/set_up_gx_cloud#add-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Validate Expectations',
+              href: '/docs/cloud/set_up_gx_cloud#validate-expectations',
             },
           ]
         },
@@ -118,6 +123,11 @@ module.exports = {
               type: 'link',
               label: 'Edit a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Secure your GX API Data Source connection strings',
+              href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
             },
             {
               type: 'link',

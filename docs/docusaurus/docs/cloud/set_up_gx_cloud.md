@@ -1,25 +1,20 @@
 ---
-sidebar_label: 'Set up GX Cloud'
-title: 'Set up GX Cloud'
-description: Set up GX Cloud.
+sidebar_label: 'Get started with GX Cloud'
+title: 'Get started with GX Cloud'
+description: Get started with GX Cloud.
 ---
 
-To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, generate and record access tokens, set environment variables, and then install and start the GX Cloud agent. 
+To get the most out of GX Cloud, you'll need to generate and record access tokens, set environment variables, and then install and start the GX Cloud agent. 
 
-If you're using Snowflake and are ready to create Expectations and run Validations, see [Quickstart for GX Cloud and Snowflake](/docs/cloud/quickstarts/snowflake_quickstart).
+Currently, the GX Cloud user interface is configured for Snowflake, and it is assumed that you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. Additional Data Sources will be added soon.
 
-## Request a GX Cloud Beta account
+## Prerequisites
 
-1. Go to the GX Cloud Beta [sign-up page](https://greatexpectations.io/cloud).
+- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-2. Complete the sign-up form and then click **Submit**.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password.
 
-3. If you're invited to view a GX Cloud demonstration, click **Schedule a time to connect here** in the confirmation email to schedule a time to meet with a Great Expectations (GX) representative. After your meeting you'll be sent an email invitation to join your GX Cloud organization.
-
-4. In your GX Cloud email invitation, click **click here** to set your password and sign in.
-
-5. Enter your email address and password, and then click **Continue to GX Cloud**. Alternatively, click **Log in with Google** and use your Google credentials to access GX Cloud.
-
+- You have a [Docker instance](https://docs.docker.com/get-docker/).
 
 ## Prepare your environment
 
@@ -29,19 +24,19 @@ If you're using Snowflake and are ready to create Expectations and run Validatio
 
 3. Download and install Docker. See [Get Docker](https://docs.docker.com/get-docker/).
 
-## Get your user access token and organization ID
+## Generate your user access token and copy your organization ID
 
-You'll need your user access token and organization ID to set your environment variables. Don't commit your access tokens to your version control software.
+You'll need your user access token and organization ID to set your environment variables. Access tokens shouldn't be committed to version control software.
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
-2. In the **User access tokens** pane, click **Create user access token**.
+2. In the **Access tokens** pane, click **Create user access token**.
 
 3. Complete the following fields:
 
     - **Token name** - Enter a name for the token that will help you quickly identify it.
 
-    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?) .
+    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?).
 
 4. Click **Create**.
 
@@ -55,9 +50,7 @@ You'll need your user access token and organization ID to set your environment v
 
 ## Set the environment variables and start the GX Cloud agent
 
-Environment variables securely store your GX Cloud access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
-
-Currently, the GX Cloud user interface is configured for Snowflake and this procedure assumes you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. 
+Environment variables securely store your GX Cloud and Snowflake access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
 1. Start the Docker Engine.
 
@@ -65,8 +58,8 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
 
     ```bash title="Terminal input"
     docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" greatexpectations/agent
-    ```      
-    Replace `user_access_token` and `organization_id` with the values you copied previously, and `snowflake_password` with your own value.
+    ```
+    Replace `user_access_token`, `organization_id`, and `snowflake_password` with your own values. 
 
 3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
@@ -76,30 +69,75 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
 
     To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
 
-## Secure your GX API Data Source connection strings
+## Create the Snowflake Data Asset
 
-When you use the GX API and not GX Cloud to connect to Data Sources, you must obfuscate your sensitive Data Source credentials in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
+Create a Data Asset to define the data you want GX Cloud to access within Snowflake. 
 
-1. Store your credential value as an environment variable by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
+1. In GX Cloud, click **Data Assets** > **New Asset**.
 
-    ```bash title="Terminal input"
-    export GX_CLOUD_SNOWFLAKE_PASSWORD=<password-string>
+2. Click the **New Data Source** tab and then select **Snowflake**.
+
+3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
+
+4. Optional. To use a connection string to connect to a Data Source, click the **Use connection string** selector, enter a connection string, and then move to step 6. 
+
+5. Complete the following fields:
+
+    - **Username**: Enter your Snowflake username.
+
+    - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
+
+    - **Password/environment variable**: Enter `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+
+    - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
+ 
+    - **Schema**: Enter the name of the schema for the Snowflake database where the data you want to validate is stored.
+
+    - **Warehouse**: Enter the name of the Snowflake database warehouse.
+
+    - **Role**: Enter your Snowflake role.
+
+6. Optional. Select **Test connection** if you want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+
+7. Click **Continue**.
+
+8. Select **Table Asset** or **Query Asset** and complete the following fields:
+
+    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+
+    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
+
+9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+
+    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
+
+    - **Column of datetime type** - Enter the name of the column containing the date and time data.
+
+10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+
+11. Click **Finish**.
+
+## Add an Expectation
+
+An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit.
+
+1. In the **Data Assets** list, click the Snowflake Data Asset name.
+
+2. Click **New Expectation**.
+
+3. Select an Expectation type, enter the column name, and then complete the optional fields.
+
+    If you prefer to work in a code editor, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
+
+4. Click **Save**.
+
+5. Optional. Repeat steps 1 to 4 to add additional Expectations.
+
+## Validate Expectations
+
+1. Click **Validate**.
+
+2. When the confirmation message appears, click **See results**, or click the **Validations** tab
     ```
-    Prefix environment variable names with `GX_CLOUD_`.
-
-2. Create a Data Source connection string using the environment variable name instead of the credential value. For example:
-
-    ```python title="Example Data Source connection string"
-    snowflake://<user-name>:${GX_CLOUD_SNOWFLAKE_PASSWORD}@<account-name>/<database-name>/<schema-name>?warehouse=<warehouse-name>&role=<role-name>
-    ```
-    Environment variable names must be enclosed by curly braces and be preceded by a dollar sign. For example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. Do not use interpolation to add credential values to connection strings.
-
-3. Use the environment variable to supply the credential value when you run the GX Agent. For example:
-
-    ```bash title="Terminal input"
-    docker run --rm -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
-    ```
-
-## Next steps
-
- - [Create a Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset)
