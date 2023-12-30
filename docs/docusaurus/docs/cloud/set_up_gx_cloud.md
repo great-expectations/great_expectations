@@ -4,9 +4,7 @@ title: 'Get started with GX Cloud'
 description: Get started with GX Cloud.
 ---
 
-To get the most out of GX Cloud, you'll need to generate and record access tokens, set environment variables, and then install and start the GX Cloud agent. 
-
-Currently, the GX Cloud user interface is configured for Snowflake, and it is assumed that you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. Additional Data Sources will be added soon.
+The GX Cloud user interface is configured for Snowflake, and it is assumed that you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. Additional Data Sources will be available soon.
 
 ## Prerequisites
 
@@ -16,13 +14,6 @@ Currently, the GX Cloud user interface is configured for Snowflake, and it is as
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
-## Prepare your environment
-
-1. Download and install Python. See [Active Python Releases](https://www.python.org/downloads/).
-
-2. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
-
-3. Download and install Docker. See [Get Docker](https://docs.docker.com/get-docker/).
 
 ## Generate your user access token and copy your organization ID
 
@@ -139,5 +130,4 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 1. Click **Validate**.
 
-2. When the confirmation message appears, click **See results**, or click the **Validations** tab
-    ```
+2. When the confirmation message appears, click **See results**, or click the **Validations** tab.

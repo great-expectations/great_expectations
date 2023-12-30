@@ -50,11 +50,6 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Prepare your environment',
-              href: '/docs/cloud/set_up_gx_cloud#prepare-your-environment',
-            },
-            {
-              type: 'link',
               label: 'Generate your user access token and copy your organization ID',
               href: '/docs/cloud/set_up_gx_cloud#generate-your-user-access-token-and-copy-your-organization-id',
             },
@@ -126,7 +121,7 @@ module.exports = {
             {
               type: 'link',
               label: 'Secure your GX API Data Source connection strings',
-              href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
+              href: '/docs/cloud/data_assets/manage_data_assets#secure-your-gx-api-data-source-connection-strings',
             },
             {
               type: 'link',
