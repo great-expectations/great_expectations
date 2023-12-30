@@ -87,7 +87,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password/environment variable**: Enter `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+    - **Password/environment variable**: Enter `${GX_CLOUD_SNOWFLAKE_PASSWORD}`.
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
  
