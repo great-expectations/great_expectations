@@ -132,9 +132,27 @@ class ExpectationsStore(Store):
         if self.cloud_mode:
             # since update doesn't return the object we need (here), refetch
             suite_identifier, fetched_suite = self._refresh_suite(suite)
-            new_id = next(
+            new_ids = [
                 exp.id for exp in fetched_suite.expectations if exp.id not in old_ids
-            )
+            ]
+            if len(new_ids) > 1:
+                # edge case: suite has been changed remotely, and one or more new expectations
+                #            have been added. Since the store doesn't return the updated object,
+                #            we have no reliable way to know which new ID belongs to this expectation,
+                #            so we raise an exception and ask the user to refresh their suite.
+                #            The Expectation should have been successfully added to the suite.
+                raise RuntimeError(
+                    "Expectation was added, however this ExpectationSuite is out of sync with the Cloud backend. "
+                    f'Please fetch the latest state of this suite by calling `context.suites.get(name="{suite.name}")`.'
+                )
+            elif len(new_ids) == 0:
+                # edge case: this is an unexpected state - if the cloud backend failed to add the expectation,
+                #            it should have already raised an exception.
+                raise RuntimeError(
+                    "Unknown error occurred and Expectation was not added."
+                )
+            else:
+                new_id = new_ids[0]
             expectation.id = new_id
         return expectation
 
