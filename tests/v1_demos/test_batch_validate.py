@@ -40,18 +40,32 @@ def test_batch_validate(get_batch: Callable[[AbstractDataContext], Batch]):
     context = gx.get_context()
     batch = get_batch(context)
     expectation = gxe.ExpectColumnValuesToNotBeNull(
-        column="pu_datetime",
-        notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
+        column="pickup_datetime",
+        notes="These are filtered out upstream, because the entire record is garbage if there is no pickup_datetime",
     )
     result = batch.validate(expectation)
-    assert not result.success
+    assert result.success
+
+    # While there are no null entries in this data set (We should use a different data set)
+    # we still want to show we can update expectation parameters
     expectation.mostly = 0.8
+    # Show old result doesn't have this set
+    assert (
+        "mostly" not in result.expectation_config.kwargs
+        or result.expectation_config.kwargs["mostly"] == 1
+    )
+    # rerun validation with mostly set and verify it shows up in result
     result = batch.validate(expectation)
     assert result.success
+    assert result.expectation_config.kwargs["mostly"] == 0.8
+
+    # Verify we can validate a suite
     suite = context.add_expectation_suite("quickstart")
     suite.add(expectation)
     suite.add(
-        gxe.ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6)
+        gxe.ExpectColumnValuesToBeBetween(
+            column="passenger_count", min_value=1, max_value=6
+        )
     )
     suite_result = batch.validate(suite)
-    assert suite_result
+    assert suite_result.success
