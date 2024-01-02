@@ -94,8 +94,8 @@ def construct_patched_metric_retriever(construct_mock_context: Callable):
             return timestamp_column_names
 
         metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
-        metric_retriever._get_numeric_column_names = mock__get_numeric_column_names
-        metric_retriever._get_timestamp_column_names = mock__get_timestamp_column_names
+        metric_retriever._get_numeric_column_names = mock__get_numeric_column_names  # type: ignore[method-assign]  # overriding method with mock method
+        metric_retriever._get_timestamp_column_names = mock__get_timestamp_column_names  # type: ignore[method-assign]  # overriding method with mock method
         if return_mock_context:
             return metric_retriever, mock_context
         else:
@@ -125,7 +125,7 @@ def test_get_metrics(
         ("column_values.null.count", "column=col1", ()): 1,
         ("column_values.null.count", "column=col2", ()): 1,
     }
-    mock_aborted_metrics = {}
+    mock_aborted_metrics: _MetricsDict = {}
 
     mock_metric_retriever = construct_patched_metric_retriever(
         computed_metrics=mock_computed_metrics,
@@ -252,7 +252,7 @@ def test_get_metrics_metrics_missing(
         ("column_values.null.count", "column=col1", ()): 1,
         ("column_values.null.count", "column=col2", ()): 1,
     }
-    mock_aborted_metrics = {}
+    mock_aborted_metrics: _MetricsDict = {}
     mock_metric_retriever = construct_patched_metric_retriever(
         computed_metrics=mock_computed_metrics,
         aborted_metrics=mock_aborted_metrics,
@@ -672,7 +672,7 @@ def test_get_metrics_with_timestamp_columns(
         ("column.max", "column=timestamp_col", ()): "2023-12-31T00:00:00",
         ("column_values.null.count", "column=timestamp_col", ()): 1,
     }
-    mock_aborted_metrics = {}
+    mock_aborted_metrics: _MetricsDict = {}
     mock_metric_retriever = construct_patched_metric_retriever(
         computed_metrics=mock_computed_metrics,
         aborted_metrics=mock_aborted_metrics,
@@ -727,7 +727,7 @@ def test_get_metrics_with_timestamp_columns(
 def test_get_metrics_only_gets_a_validator_once(
     construct_patched_metric_retriever: Callable,
 ):
-    mock_aborted_metrics = {}
+    mock_aborted_metrics: _MetricsDict = {}
 
     mock_computed_metrics = {
         ("table.row_count", (), ()): 2,
@@ -760,9 +760,9 @@ def test_get_metrics_only_gets_a_validator_once(
     mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
 
 
-TABLE_ROW_COUNT = {("table.row_count", (), ()): 2}
-TABLE_COLUMNS = {("table.columns", (), ()): ["col1", "col2"]}
-TABLE_COLUMN_TYPES = {
+TABLE_ROW_COUNT: _MetricsDict = {("table.row_count", (), ()): 2}
+TABLE_COLUMNS: _MetricsDict = {("table.columns", (), ()): ["col1", "col2"]}
+TABLE_COLUMN_TYPES: _MetricsDict = {
     ("table.column_types", (), "include_nested=True"): [
         {"name": "col1", "type": "float"},
         {"name": "col2", "type": "float"},
