@@ -262,10 +262,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     @public_api
     def delete_batch_config(self, batch_config: BatchConfig) -> None:
-        """Delete
+        """Delete a batch config.
 
         Args:
-            name (batch_config): BatchConfig to delete.
+            batch_config (BatchConfig): BatchConfig to delete.
         """
         batch_config_names = {bc.name for bc in self.batch_configs}
         if batch_config not in self.batch_configs:
@@ -280,6 +280,8 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             self.datasource.delete_batch_config(batch_config)
 
         self.batch_configs.remove(batch_config)
+        # If we removed the last of our batch configs, ensure we don't serialize an empty collection
+        # per our serialization conventions.
         if not self.batch_configs:
             self.__fields_set__.add("batch_configs")
 
