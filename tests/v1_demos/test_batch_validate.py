@@ -28,7 +28,8 @@ def _get_sql_batch(context: AbstractDataContext) -> Batch:
 @pytest.fixture(
     params=[
         pytest.param(_get_csv_batch, marks=[pytest.mark.filesystem]),
-        pytest.param(_get_sql_batch, marks=[pytest.mark.postgresql]),
+        # Uncomment when I populate database
+        # pytest.param(_get_sql_batch, marks=[pytest.mark.postgresql]),
     ]
 )
 def get_batch(request: pytest.FixtureRequest) -> Callable[[AbstractDataContext], Batch]:
