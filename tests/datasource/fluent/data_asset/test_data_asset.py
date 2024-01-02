@@ -179,3 +179,29 @@ def test_delete_batch_config__unsaved_batch_config(empty_data_asset: DataAsset):
 
     with pytest.raises(ValueError, match="does not exist"):
         empty_data_asset.delete_batch_config(batch_config)
+
+
+@pytest.mark.unit
+def test_fields_set(empty_data_asset: DataAsset):
+    """We mess with pydantic's internal __fields_set__ to determine
+    if certain fields (batch_configs in this case) should get serialized.
+
+    This test is essentially a proxy for whether we serialize that field
+    """
+    asset = empty_data_asset
+
+    # when we don't have batch configs, it shouldn't be in the set
+    assert "batch_configs" not in asset.__fields_set__
+
+    # add some batch configs and ensure we have it in the set
+    batch_config_a = asset.add_batch_config("a")
+    batch_config_b = asset.add_batch_config("b")
+    assert "batch_configs" in asset.__fields_set__
+
+    # delete one of the batch configs and ensure we still have it in the set
+    asset.delete_batch_config(batch_config_a)
+    assert "batch_configs" in asset.__fields_set__
+
+    # delete the remaining batch config and ensure we don't have it in the set
+    asset.delete_batch_config(batch_config_b)
+    assert "batch_configs" not in asset.__fields_set__

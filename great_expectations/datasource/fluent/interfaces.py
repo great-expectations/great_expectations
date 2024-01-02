@@ -282,8 +282,8 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self.batch_configs.remove(batch_config)
         # If we removed the last of our batch configs, ensure we don't serialize an empty collection
         # per our serialization conventions.
-        if not self.batch_configs:
-            self.__fields_set__.add("batch_configs")
+        if not self.batch_configs and "batch_configs" in self.__fields_set__:
+            self.__fields_set__.remove("batch_configs")
 
     def build_batch_request(
         self,
