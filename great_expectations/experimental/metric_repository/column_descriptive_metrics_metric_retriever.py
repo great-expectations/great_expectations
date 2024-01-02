@@ -180,7 +180,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         self, metric_name: str, exception: MetricException
     ) -> None:
         raise ValueError(
-            f"Metric {metric_name} was not computed. This should not happen. It could be an issue with your connection to the database or your permissions. Please see the exception logs for details: {exception}"
+            f"Metric {metric_name} was not computed."
+            f" It could be an issue with your connection to the database or your permissions."
+            f" Please see the exception logs for details: {exception}"
         )
 
     def _get_columns_to_exclude(self, table_column_types: Metric) -> List[str]:
