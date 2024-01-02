@@ -361,7 +361,7 @@ class DatasourceStore(Store):
         assert len(updated_batch_config_as_list) == 1
         updated_batch_config = updated_batch_config_as_list[0]
 
-        updated_batch_config._data_asset = updated_asset
+        updated_batch_config.set_data_asset(updated_asset)
         return updated_batch_config
 
     def delete_batch_config(self, batch_config: BatchConfig) -> None:
