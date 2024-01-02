@@ -41,6 +41,7 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -48,6 +49,7 @@ from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.v1_validator import ResultFormat
 
@@ -225,15 +227,35 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "batch_request_options" on a DataAsset subclass."""
         )
 
+    @public_api
     def add_batch_config(self, name: str) -> BatchConfig:
+        """Add a BatchConfig to this DataAsset.
+        BatchConfig names must be unique within a DataAsset.
+
+        If the DataAsset is tied to a DataContext, the BatchConfig will be persisted.
+
+        Args:
+            name (str): Name of the new batch config.
+
+        Returns:
+            BatchConfig: The new batch config.
+        """
         batch_config_names = {bc.name for bc in self.batch_configs}
         if name in batch_config_names:
             raise ValueError(
                 f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
             )
 
-        self.__fields_set__.add("batch_configs")
+        # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)
+        assert isinstance(self.datasource, Datasource)
+
         batch_config = BatchConfig(name=name)
+        batch_config._data_asset = self
+        self.__fields_set__.add("batch_configs")
+        if self.datasource.is_persisted():
+            batch_config = self.datasource.add_batch_config(batch_config)
+            batch_config._data_asset = self
+
         batch_config._data_asset = self
         self.batch_configs.append(batch_config)
         return batch_config
@@ -487,6 +509,19 @@ class Datasource(
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
+
+    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        if not self.data_context:
+            raise DataContextError("Datasource is not attached to a DataContext")
+        return self.data_context.datasource_store.add_batch_config(batch_config)
+
+    def is_persisted(self) -> bool:
+        if self._data_context:
+            store = self._data_context._datasource_store
+            key = DataContextVariableKey(resource_name=self.name)
+            return store.has_key(key=key)
+        else:
+            return False
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(

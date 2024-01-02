@@ -100,7 +100,7 @@ def pandas_data(
 
 
 def sqlite_datasource(
-    context: AbstractDataContext, db_filename: str
+    context: AbstractDataContext, db_filename: str | pathlib.Path
 ) -> SqliteDatasource:
     relative_path = pathlib.Path(
         "..",
@@ -115,7 +115,7 @@ def sqlite_datasource(
     datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
-        create_temp_table=True,
+        # don't set `create_temp_table` so that we can test the default behavior
     )
     return datasource
 
