@@ -177,7 +177,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
 
     def _raise_on_missing_metric(
-        self, metric_name: str, exception: MetricException
+        self, metric_name: str, exception: MetricException | None
     ) -> None:
         raise ValueError(
             f"Metric {metric_name} was not computed."
