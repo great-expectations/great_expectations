@@ -51,7 +51,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     ExpectColumnValuesToBePresentInAnotherTable will PASS for example 1 and FAIL for example 2.
 
     Args:
-        foreign_key_column: foreign key-column of current table that we want to validate.
+        foreign_key_column: foreign key column of current table that we want to validate.
         foreign_table: foreign table name.
         primary_key_column_in_foreign_table: key column for primary key in foreign table.
     """
@@ -314,7 +314,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                     "out": {
                         "success": False,
                         "result": {
-                            "observed_value": "2 missing valuess.",
+                            "observed_value": "2 missing values.",
                             "unexpected_count": 2,
                             "unexpected_index_list": [
                                 {"customer_id": "5"},
