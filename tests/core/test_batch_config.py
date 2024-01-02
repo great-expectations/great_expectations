@@ -22,7 +22,7 @@ def mock_data_asset(monkeypatch) -> DataAsset:
 @pytest.mark.unit
 def test_save(mock_data_asset):
     batch_config = BatchConfig(name="test_batch_config")
-    batch_config._data_asset = mock_data_asset
+    batch_config.set_data_asset(mock_data_asset)
 
     batch_config.save()
 
@@ -42,7 +42,7 @@ def test_build_batch_request(
     mock_data_asset: DataAsset,
 ):
     batch_config = BatchConfig(name="test_batch_config")
-    batch_config._data_asset = mock_data_asset
+    batch_config.set_data_asset(mock_data_asset)
 
     batch_config.build_batch_request(batch_request_options=batch_request_options)
 

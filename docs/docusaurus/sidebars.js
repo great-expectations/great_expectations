@@ -1,5 +1,6 @@
 module.exports = {
   gx_cloud: [
+    {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
           type: 'category',
           label: 'About GX Cloud',
