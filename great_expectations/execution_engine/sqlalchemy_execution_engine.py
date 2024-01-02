@@ -1248,7 +1248,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
-    ) -> Union[sqlalchemy.Selectable, str]:
+    ) -> sqlalchemy.Selectable:
         if (
             batch_spec.get("query") is not None
             and batch_spec.get("sampling_method") is not None
@@ -1315,14 +1315,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if not isinstance(query, str):
                 raise ValueError(f"SQL query should be a str but got {query}")
             # Query is a valid SELECT query that begins with r"\w+select\w"
-            selectable = sa.select(sa.text(query.lstrip()[6:].lstrip())).subquery()
+            selectable = sa.select(
+                sa.text(query.lstrip()[6:].strip().rstrip(";").rstrip())
+            ).subquery()
 
         return selectable
 
     @override
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
-    ) -> Tuple[Any, BatchMarkers]:
+    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
         if not isinstance(
             batch_spec, (SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec)
         ):
@@ -1360,20 +1362,27 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
+        # this is where splitter components are added to the selectable
+        selectable: sqlalchemy.Selectable = self._build_selectable_from_batch_spec(
+            batch_spec=batch_spec
+        )
+        # NOTE: what's being checked here is the presence of a `query` attribute, we could check this directly
+        # instead of doing an instance check
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
-            query: str = batch_spec.query
-
+            # re-compile the query to include any new parameters
+            compiled_query = selectable.compile(
+                dialect=self.engine.dialect,
+                compile_kwargs={"literal_binds": True},
+            )
+            query_str = str(compiled_query)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
-                query=query,
+                query=query_str,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            selectable: Union[
-                sqlalchemy.Selectable, str
-            ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
