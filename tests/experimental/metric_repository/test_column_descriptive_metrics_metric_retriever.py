@@ -775,15 +775,27 @@ TABLE_COLUMN_TYPES: _MetricsDict = {
     [
         pytest.param(
             "table.row_count",
-            {**TABLE_COLUMNS, **TABLE_COLUMN_TYPES},
+            {
+                # **TABLE_ROW_COUNT,  # Metric aborted
+                **TABLE_COLUMNS,
+                **TABLE_COLUMN_TYPES,
+            },
         ),
         pytest.param(
             "table.columns",
-            {**TABLE_ROW_COUNT, **TABLE_COLUMN_TYPES},
+            {
+                **TABLE_ROW_COUNT,
+                # **TABLE_COLUMNS,  # Metric aborted
+                **TABLE_COLUMN_TYPES,
+            },
         ),
         pytest.param(
             "table.column_types",
-            {**TABLE_ROW_COUNT, **TABLE_COLUMNS},
+            {
+                **TABLE_ROW_COUNT,
+                **TABLE_COLUMNS,
+                # **TABLE_COLUMN_TYPES,  # Metric aborted
+            },
         ),
     ],
 )
