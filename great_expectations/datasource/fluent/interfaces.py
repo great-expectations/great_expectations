@@ -261,15 +261,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return batch_config
 
     @public_api
-    def delete_batch_config(self, batch_config: BatchConfig | str) -> None:
-        """Delete a batch config from this DataAsset.
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        """Delete
 
         Args:
-            batch_config: BatchConfig or its name name.
+            name (batch_config): BatchConfig to delete.
         """
-        if isinstance(batch_config, str):
-            batch_config = self._get_batch_config_by_name(batch_config)
-
         batch_config_names = {bc.name for bc in self.batch_configs}
         if batch_config not in self.batch_configs:
             raise ValueError(
@@ -285,25 +282,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self.batch_configs.remove(batch_config)
         if not self.batch_configs:
             self.__fields_set__.add("batch_configs")
-
-    @property
-    def batch_config_names(self) -> Set[str]:
-        return {bc.name for bc in self.batch_configs}
-
-    def _get_batch_config_by_name(self, batch_config_name: str) -> BatchConfig:
-        batch_configs = [
-            bc for bc in self.batch_configs if bc.name == batch_config_name
-        ]
-        if len(batch_configs) == 0:
-            raise ValueError(
-                f'"{batch_config_name}" does not exist (all existing batch_config names are {self.batch_config_names})'
-            )
-        elif len(batch_configs) > 1:
-            raise ValueError(
-                f'Found multiple batch configs with name "{batch_config_name}"'
-            )
-        else:
-            return batch_configs[0]
 
     def build_batch_request(
         self,

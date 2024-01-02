@@ -152,18 +152,6 @@ def test_delete_batch_config__success(
 
 
 @pytest.mark.unit
-def test_delete_batch_config_by_name__success(
-    data_asset_with_batch_config: DataAsset,
-    persisted_batch_config: BatchConfig,
-):
-    assert persisted_batch_config in data_asset_with_batch_config.batch_configs
-
-    data_asset_with_batch_config.delete_batch_config(persisted_batch_config.name)
-
-    assert data_asset_with_batch_config.batch_configs == []
-
-
-@pytest.mark.unit
 def test_delete_batch_config__persists(
     store: DatasourceStore,
     context: AbstractDataContext,
@@ -177,28 +165,6 @@ def test_delete_batch_config__persists(
     # depending on how a datasource is created, it may or may not have a context
     data_asset_with_batch_config._datasource._data_context = context
     data_asset_with_batch_config.delete_batch_config(persisted_batch_config)
-
-    loaded_datasource = store.get(key)
-    assert isinstance(loaded_datasource, Datasource)
-    loaded_asset = loaded_datasource.get_asset(empty_data_asset_name)
-
-    assert loaded_asset.batch_configs == []
-
-
-@pytest.mark.unit
-def test_delete_batch_config_by_name__persists(
-    store: DatasourceStore,
-    context: AbstractDataContext,
-    datasource_name: str,
-    empty_data_asset_name: str,
-    data_asset_with_batch_config: DataAsset,
-    persisted_batch_config: BatchConfig,
-):
-    key = DataContextVariableKey(resource_name=datasource_name)
-
-    # depending on how a datasource is created, it may or may not have a context
-    data_asset_with_batch_config._datasource._data_context = context
-    data_asset_with_batch_config.delete_batch_config(persisted_batch_config.name)
 
     loaded_datasource = store.get(key)
     assert isinstance(loaded_datasource, Datasource)
