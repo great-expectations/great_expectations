@@ -39,7 +39,7 @@ def test_batch_validate(get_batch: Callable[[AbstractDataContext], Batch]):
     context = gx.get_context()
     batch = get_batch(context)
     expectation = gxe.ExpectColumnValuesToNotBeNull(
-        "pu_datetime",
+        column="pu_datetime",
         notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
     )
     result = batch.validate(expectation)
