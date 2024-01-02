@@ -758,3 +758,65 @@ def test_get_metrics_only_gets_a_validator_once(
     mock_metric_retriever.get_metrics(batch_request=mock_batch_request)
 
     mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
+
+
+TABLE_ROW_COUNT = {("table.row_count", (), ()): 2}
+TABLE_COLUMNS = {("table.columns", (), ()): ["col1", "col2"]}
+TABLE_COLUMN_TYPES = {
+    ("table.column_types", (), "include_nested=True"): [
+        {"name": "col1", "type": "float"},
+        {"name": "col2", "type": "float"},
+    ]
+}
+
+
+@pytest.mark.parametrize(
+    "missing_metric_name,mock_computed_metrics",
+    [
+        pytest.param(
+            "table.row_count",
+            {**TABLE_COLUMNS, **TABLE_COLUMN_TYPES},
+        ),
+        pytest.param(
+            "table.columns",
+            {**TABLE_ROW_COUNT, **TABLE_COLUMN_TYPES},
+        ),
+        pytest.param(
+            "table.column_types",
+            {**TABLE_ROW_COUNT, **TABLE_COLUMNS},
+        ),
+    ],
+)
+def test_raise_on_missing_table_metric(
+    construct_patched_metric_retriever: Callable,
+    missing_metric_name: str,
+    mock_computed_metrics: dict,
+):
+    # Call get_metrics and make sure one of the table metrics is missing
+    exception_info = ExceptionInfo(
+        exception_traceback="test exception traceback",
+        exception_message="test exception message",
+        raised_exception=True,
+    )
+    mock_aborted_metrics = {
+        (missing_metric_name, (), ()): {
+            "metric_configuration": {},  # Leaving out for brevity
+            "num_failures": 3,
+            "exception_info": {exception_info},
+        },
+    }
+
+    mock_metric_retriever = construct_patched_metric_retriever(
+        computed_metrics=mock_computed_metrics,
+        aborted_metrics=mock_aborted_metrics,
+        numeric_column_names=["col1", "col2"],
+        timestamp_column_names=[],
+    )
+
+    mock_batch_request = Mock(spec=BatchRequest)
+
+    # Check that the expected exception is raised
+    with pytest.raises(ValueError) as e:
+        mock_metric_retriever.get_metrics(batch_request=mock_batch_request)
+
+    assert f"Metric {missing_metric_name} was not computed." in str(e.value)
