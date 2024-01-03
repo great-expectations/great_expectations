@@ -415,3 +415,14 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs /docs/home
 
 /docs/terms/*   /docs/reference/learn/terms/:splat
+/docs/conceptual_guides/*   /docs/reference/learn/conceptual_guides/:splat
+/docs/expectations/*    /docs/reference/learn/expectations/:splat
+
+/docs/contributing/*    /docs/reference/oss/contributing/:splat
+/docs/deployment_patterns/* /docs/reference/oss/deployment_patterns/:splat
+/docs/get_started/* /docs/reference/oss/get_started/:splat
+/docs/guides/*  /docs/reference/oss/guides/:splat
+/docs/integrations/*    /docs/reference/oss/integrations/:splat
+/docs/team_templates/*  /docs/reference/oss/team_templates/:splat
+/docs/templates/*   /docs/reference/oss/templates/:splat
+/docs/tutorials/*   /docs/reference/oss/tutorials/:splat
