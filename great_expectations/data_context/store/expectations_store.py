@@ -168,12 +168,11 @@ class ExpectationsStore(Store):
             if old_expectation.id == expectation.id:
                 # todo: update when expectations are source of truth
                 fetched_suite.expectation_configurations[i] = expectation.configuration
+                # Ensure that state of local suite is in sync with persisted suite
+                suite.expectation_configurations[i] = expectation.configuration
                 break
 
         self.update(key=suite_identifier, value=fetched_suite)
-
-        # Ensure that state of local suite is in sync with cloud backend
-        suite.expectation_configurations = fetched_suite.expectation_configurations
         return expectation
 
     def delete_expectation(
