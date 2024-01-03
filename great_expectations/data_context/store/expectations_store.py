@@ -281,18 +281,9 @@ class ExpectationsStore(Store):
         if not local_suite.ge_cloud_id:
             local_suite.ge_cloud_id = cloud_suite.ge_cloud_id
         # replace local expectations with those returned from the backend
-        expectations = []
-        from great_expectations.expectations.registry import get_expectation_impl
-
-        for expectation_dict in cloud_suite["expectations"]:
-            class_ = get_expectation_impl(expectation_dict["expectation_type"])
-            expectation = class_(
-                meta=expectation_dict["meta"],
-                id=expectation_dict["ge_cloud_id"],
-                **expectation_dict["kwargs"],
-            )
-            expectations.append(expectation)
-        local_suite.expectations = [expectation for expectation in expectations]
+        local_suite.expectations = [
+            expectation for expectation in cloud_suite.expectations
+        ]
         return local_suite
 
     @override
