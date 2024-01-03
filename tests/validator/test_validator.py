@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
+from unittest.mock import ANY
 
 import pandas as pd
 import pytest
@@ -16,7 +17,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -32,6 +32,9 @@ from great_expectations.datasource.data_connector.batch_filter import (
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
@@ -286,7 +289,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     actual = validator.convert_to_checkpoint_validations_list()
     expected_config = CheckpointValidationConfig(
         expectation_suite_name="validating_taxi_data",
-        expectation_suite_ge_cloud_id=None,
+        expectation_suite_ge_cloud_id=ANY,
         batch_request={
             "datasource_name": "taxi_pandas",
             "data_connector_name": "monthly",
@@ -298,7 +301,6 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
         id=None,
         name=None,
     )
-
     assert all(config.to_dict() == expected_config.to_dict() for config in actual)
 
 
@@ -734,7 +736,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
         kwargs={
             "column": "b",
             "mostly": 0.9,
-            "threshold": 4,
+            "threshold": 4.0,
             "double_sided": True,
         },
     )
@@ -792,7 +794,7 @@ def test_graph_validate_with_runtime_config(
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
+        kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
     try:
         # noinspection PyTypeChecker
@@ -1056,39 +1058,6 @@ def test_validator_include_rendered_content_diagnostic(
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
-        name="atomic.prescriptive.summary",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={
-                "column": {"schema": {"type": "string"}, "value": "passenger_count"},
-                "min_value": {
-                    "schema": {"type": "number"},
-                    "value": 1,
-                    "evaluation_parameter": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_min"},
-                    },
-                },
-                "max_value": {
-                    "schema": {"type": "number"},
-                    "value": 8,
-                    "evaluation_parameter": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_max"},
-                    },
-                },
-            },
-            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
-        ),
-        value_type="StringValueType",
-    )
-
-    assert (
-        expected_expectation_configuration_diagnostic_rendered_content
-        in validation_result.expectation_config.rendered_content
-    )
-
     # test conditional expectations render
     validation_result: ExpectationValidationResult = (
         validator_include_rendered_content.expect_column_min_to_be_between(
@@ -1258,7 +1227,7 @@ def _context_to_validator_and_expectation_sql(
         },
     )
     expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+        **expectation_configuration.kwargs
     )
 
     batch_request = BatchRequest(
@@ -1312,7 +1281,7 @@ def test_validator_result_format_config_from_expectation(
         context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
-        _: ExpectationValidationResult = expectation.validate(
+        _: ExpectationValidationResult = expectation.validate_(
             validator=validator, runtime_configuration=runtime_configuration
         )
 

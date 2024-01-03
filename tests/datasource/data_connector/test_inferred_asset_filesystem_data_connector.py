@@ -4,7 +4,6 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -299,7 +298,7 @@ def test_self_check(tmp_path_factory):
 def test_test_yaml_config(
     mock_emit, empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
@@ -982,7 +981,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
 
 
 def test_one_year_as_12_data_assets_1_batch_each(empty_data_context, tmp_path_factory):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     base_directory: str = str(tmp_path_factory.mktemp("log_data"))
     create_files_in_directory(
         directory=base_directory,
@@ -1045,7 +1044,7 @@ def test_one_year_as_12_data_assets_1_batch_each(empty_data_context, tmp_path_fa
 
 
 def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factory):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     base_directory: str = str(tmp_path_factory.mktemp("log_data"))
     create_files_in_directory(
         directory=base_directory,

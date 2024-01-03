@@ -1,9 +1,6 @@
-from typing import Optional, cast
-
 import pandas as pd
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.compatibility import aws
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -126,9 +123,8 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
 
     df = pd.DataFrame({"col": pd.Series([1, 2, None], dtype=pd.Int32Dtype())})
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_spark=False)
-    )
+    context = build_in_memory_runtime_context(include_spark=False)
+
     validator = get_test_validator_with_data(
         execution_engine="pandas",
         data=df,

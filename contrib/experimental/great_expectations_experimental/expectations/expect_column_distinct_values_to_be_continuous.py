@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
@@ -115,16 +117,9 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
         "row_condition": None,
         "condition_parser": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = ("column", "datetime_format")
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
-        super().validate_configuration(configuration)
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -265,11 +260,12 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        configuration = self.configuration
+
         observed_value_counts = metrics.get("column.value_counts", [])
         observed_max = metrics.get("column.max")
         observed_min = metrics.get("column.min")

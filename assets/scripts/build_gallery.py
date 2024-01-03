@@ -19,7 +19,9 @@ import pkg_resources
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
-from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 from great_expectations.expectations.expectation import Expectation
 
@@ -451,7 +453,7 @@ def build_gallery(  # noqa: C901 - 17
     outfile_name: str = "",
     only_these_expectations: List[str] | None = None,
     only_consider_these_backends: List[str] | None = None,
-    context: Optional[DataContext] = None,
+    context: Optional[FileDataContext] = None,
 ) -> None:
     """
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
@@ -669,13 +671,13 @@ def format_docstring_to_markdown(docstr: str) -> str:
     return clean_docstr
 
 
-def _disable_progress_bars() -> Tuple[str, DataContext]:
+def _disable_progress_bars() -> Tuple[str, FileDataContext]:
     """Return context_dir and context that was created"""
     context_dir = os.path.join(  # noqa: PTH118
         os.path.sep, "tmp", f"gx-context-{os.getpid()}"
     )
     os.makedirs(context_dir)  # noqa: PTH103
-    context = DataContext.create(context_dir, usage_statistics_enabled=False)
+    context = FileDataContext.create(context_dir, usage_statistics_enabled=False)
     context.variables.progress_bars = {
         "globally": False,
         "metric_calculations": False,

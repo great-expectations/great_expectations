@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Provide GX package dependencies.
 
 This module contains static lists of GX dependencies, along with a utility for
@@ -31,22 +33,18 @@ class GXDependencies:
     GX_REQUIRED_DEPENDENCIES: List[str] = sorted(
         [
             "altair",
-            "Click",
-            "colorama",
             "cryptography",
             "Ipython",
             "ipywidgets",
             "jinja2",
-            "jsonpatch",
             "jsonschema",
             "makefun",
             "marshmallow",
             "mistune",
-            "nbformat",
-            "notebook",
             "numpy",
             "packaging",
             "pandas",
+            "posthog",
             "pydantic",
             "pyparsing",
             "python-dateutil",
@@ -143,6 +141,7 @@ class GXDependencies:
         "mistune",
         "moto",
         "ipykernel",
+        "nbformat",
         "nbconvert",
         "py",
         "pact-python",

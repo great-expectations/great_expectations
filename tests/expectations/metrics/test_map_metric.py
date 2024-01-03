@@ -2,11 +2,11 @@ import pandas as pd
 import pytest
 
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
     IDDict,
 )
@@ -28,6 +28,9 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMax,
     ColumnValuesNonNull,
@@ -140,7 +143,7 @@ def _expecation_configuration_to_validation_result_pandas(
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
@@ -160,7 +163,7 @@ def _expecation_configuration_to_validation_result_pandas(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     return result
 
 
@@ -176,7 +179,7 @@ def _expecation_configuration_to_validation_result_sql(
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
     engine = SqlAlchemyExecutionEngine(
@@ -236,7 +239,7 @@ def _expecation_configuration_to_validation_result_sql(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     return result
 
 
@@ -759,10 +762,7 @@ def test_pandas_specify_not_include_unexpected_rows(
 
 
 @pytest.mark.unit
-def test_include_unexpected_rows_without_explicit_result_format_raises_error(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-):
+def test_include_unexpected_rows_without_explicit_result_format_raises_error():
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -774,28 +774,8 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
-    )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    with pytest.raises(ValueError):
-        expectation.validate(validator)
+    with pytest.raises(ValidationError):
+        ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
 
 
 # Spark
@@ -814,7 +794,7 @@ def test_spark_single_column_complete_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -834,7 +814,7 @@ def test_spark_single_column_complete_result_format(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -871,7 +851,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -894,7 +874,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
 
     # result_format configuration at ExpectationConfiguration-level will emit warning
     with pytest.warns(UserWarning):
-        result = expectation.validate(validator)
+        result = expectation.validate_(validator)
 
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -942,7 +922,7 @@ def test_spark_single_column_summary_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -962,7 +942,7 @@ def test_spark_single_column_summary_result_format(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -995,7 +975,7 @@ def test_spark_single_column_basic_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -1015,7 +995,7 @@ def test_spark_single_column_basic_result_format(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,

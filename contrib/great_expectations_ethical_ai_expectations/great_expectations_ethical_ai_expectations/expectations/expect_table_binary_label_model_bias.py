@@ -5,11 +5,13 @@ from aequitas.fairness import Fairness
 from aequitas.group import Group
 from aequitas.preprocessing import preprocess_input_df
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -196,7 +198,6 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
         "y_pred": None,
         "y_true": None,  # When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
         "result_format": "BASIC",
-        "include_config": True,
         "reference_group": None,
         "alpha": 0.05,
         "catch_exceptions": False,

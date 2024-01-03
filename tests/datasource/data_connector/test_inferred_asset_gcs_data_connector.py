@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.compatibility import google
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -468,7 +467,7 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
 def test_test_yaml_config(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
         """
@@ -540,7 +539,7 @@ default_regex:
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     context.test_yaml_config(
         """
@@ -606,7 +605,7 @@ default_regex:
 def test_yaml_config_excluding_non_regex_matching_files(
     mock_gcs_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
         """

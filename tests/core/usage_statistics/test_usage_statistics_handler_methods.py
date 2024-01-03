@@ -99,7 +99,7 @@ def test_usage_statistics_handler_validate_message_success(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
     mock_data_context: mock.MagicMock,
 ):
@@ -207,7 +207,7 @@ def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 def test_get_profiler_run_usage_statistics_with_handler_invalid_payload(
     mock_data_context: mock.MagicMock,
 ):

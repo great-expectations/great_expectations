@@ -18,7 +18,6 @@ from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import build_evaluation_parameters
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -35,6 +34,9 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.validator.validation_statistics import (
     calc_validation_statistics,
 )
@@ -131,9 +133,6 @@ class DataAsset:
             signature from the implementing method.
 
             @expectation intercepts and takes action based on the following parameters:
-                * include_config (boolean or None) : \
-                    If True, then include the generated expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
                 * catch_exceptions (boolean or None) : \
                     If True, then catch exceptions and include them as part of the result object. \
                     For more detail, see :ref:`catch_exceptions`.
@@ -217,14 +216,13 @@ class DataAsset:
                     )
 
                 # update evaluation_args with defaults from expectation signature
-                if method_name not in ExpectationConfiguration.kwarg_lookup_dict:
-                    default_kwarg_values = {
-                        k: v.default
-                        for k, v in inspect.signature(func).parameters.items()
-                        if v.default is not inspect.Parameter.empty
-                    }
-                    default_kwarg_values.update(evaluation_args)
-                    evaluation_args = default_kwarg_values
+                default_kwarg_values = {
+                    k: v.default
+                    for k, v in inspect.signature(func).parameters.items()
+                    if v.default is not inspect.Parameter.empty
+                }
+                default_kwarg_values.update(evaluation_args)
+                evaluation_args = default_kwarg_values
 
                 # Construct the expectation_config object
                 expectation_config = ExpectationConfiguration(
@@ -473,7 +471,7 @@ class DataAsset:
         """
 
         expectation_suite = copy.deepcopy(self._expectation_suite)
-        expectations = expectation_suite.expectations
+        expectations = expectation_suite.expectation_configurations
 
         discards = defaultdict(int)
 
@@ -536,7 +534,7 @@ class DataAsset:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.expectations = expectations
+        expectation_suite.expectation_configurations = expectations
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -781,7 +779,7 @@ class DataAsset:
             # Group expectations by column
             columns = {}
 
-            for expectation in expectation_suite.expectations:
+            for expectation in expectation_suite.expectation_configurations:
                 if "column" in expectation.kwargs and isinstance(
                     expectation.kwargs["column"], Hashable
                 ):

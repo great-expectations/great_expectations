@@ -7,7 +7,6 @@ import pytest
 
 import great_expectations
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -35,7 +34,7 @@ def test_df_spark(spark_session):
 def data_context_with_datasource_spark_engine_batch_spec_passthrough(
     empty_data_context, spark_session
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     config = yaml.load(
         """
     class_name: Datasource
@@ -68,7 +67,7 @@ def data_context_with_datasource_spark_engine_batch_spec_passthrough(
 def test_batch_data_get_batch_successful_specification_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
 
     batch_list: List[Batch] = context.get_batch_list(
@@ -87,7 +86,7 @@ def test_batch_data_get_batch_successful_specification_sparkdf_engine(
 def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, test_df_spark
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     batch_list: List[Batch] = context.get_batch_list(
@@ -109,7 +108,7 @@ def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asse
 def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asset_two_batch_requests(
     data_context_with_datasource_spark_engine, test_df_spark
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
 
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
@@ -146,7 +145,7 @@ def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asse
 def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
@@ -167,7 +166,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
 def test_batch_data_get_validator_successful_specification_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
 
     context.add_expectation_suite("my_expectations")
@@ -188,7 +187,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine(
 def test_batch_data_get_validator_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     context.add_expectation_suite("my_expectations")
@@ -223,7 +222,7 @@ def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_req
     taxi_test_file,
     spark_session,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -253,7 +252,7 @@ def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_req
 def test_file_path_get_batch_spark_directory_fail_no_reader_method(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         context.get_batch_list(
             batch_request=RuntimeBatchRequest(
@@ -271,7 +270,7 @@ def test_file_path_get_batch_spark_directory_fail_no_reader_method(
 def test_file_path_get_batch_spark_directory_fail_wrong_reader_method(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         context.get_batch_list(
             batch_request=RuntimeBatchRequest(
@@ -295,7 +294,7 @@ def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_req
     taxi_test_file,
     spark_session,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -324,7 +323,7 @@ def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_req
 def test_file_path_get_batch_successful_specification_spark_directory(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -365,9 +364,7 @@ def test_file_path_get_batch_successful_specification_spark_directory_batch_spec
     as a single SparkDF with 30,000 lines.
 
     """
-    context: DataContext = (
-        data_context_with_datasource_spark_engine_batch_spec_passthrough
-    )
+    context = data_context_with_datasource_spark_engine_batch_spec_passthrough
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -397,7 +394,7 @@ def test_file_path_get_batch_successful_specification_spark_directory_batch_spec
 def test_file_path_get_batch_successful_specification_spark_directory_no_header(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -426,7 +423,7 @@ def test_file_path_get_batch_successful_specification_spark_directory_no_header(
 def test_file_path_get_batch_spark_fail_wrong_file_path(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
 
     # raised by get_batch_data_and_markers() in SparkDFExecutionEngine.
     with pytest.raises(gx_exceptions.ExecutionEngineError):
@@ -449,7 +446,7 @@ def test_file_path_get_batch_spark_fail_wrong_file_path(
 def test_file_path_get_batch_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, taxi_test_file
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
@@ -470,7 +467,7 @@ def test_file_path_get_batch_successful_specification_sparkdf_engine_named_asset
 def test_file_path_get_batch_successful_specification_sparkdf_engine_named_asset_two_batch_requests(
     data_context_with_datasource_spark_engine, taxi_test_file
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
@@ -506,7 +503,7 @@ def test_file_path_get_batch_successful_specification_sparkdf_engine_named_asset
 def test_file_path_get_validator_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, taxi_test_file
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context = data_context_with_datasource_spark_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest

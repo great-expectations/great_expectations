@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -36,7 +35,7 @@ def test_table_domain_builder(
     alice_columnar_table_single_batch_context,
     table_Users_domain,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     domain_builder: DomainBuilder = TableDomainBuilder(data_context=data_context)
     domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule")
@@ -62,7 +61,7 @@ def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
     data_context_with_datasource_pandas_engine,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = data_context_with_datasource_pandas_engine
+    data_context = data_context_with_datasource_pandas_engine
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -133,7 +132,7 @@ def test_column_domain_builder(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -252,7 +251,7 @@ def test_column_domain_builder_with_simple_semantic_type_included(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -317,7 +316,7 @@ def test_column_pair_domain_builder_wrong_column_names(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -363,7 +362,7 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -426,7 +425,7 @@ def test_multi_column_domain_builder_wrong_column_list(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -477,7 +476,7 @@ def test_multi_column_domain_builder_correct_column_list(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 

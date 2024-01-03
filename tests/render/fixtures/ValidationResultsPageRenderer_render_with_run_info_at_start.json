@@ -798,7 +798,6 @@
                       "value_set": [],
                       "result_format": "SUMMARY",
                       "mostly": null,
-                      "parse_strings_as_datetimes": null,
                       "row_condition": null,
                       "condition_parser": null
                     },
@@ -1304,7 +1303,6 @@
                       "value_set": [],
                       "result_format": "SUMMARY",
                       "mostly": null,
-                      "parse_strings_as_datetimes": null,
                       "row_condition": null,
                       "condition_parser": null
                     },
@@ -1893,7 +1891,6 @@
                       "value_set": [],
                       "result_format": "SUMMARY",
                       "mostly": null,
-                      "parse_strings_as_datetimes": null,
                       "row_condition": null,
                       "condition_parser": null
                     },
@@ -2460,7 +2457,6 @@
                       "value_set": [],
                       "result_format": "SUMMARY",
                       "mostly": null,
-                      "parse_strings_as_datetimes": null,
                       "row_condition": null,
                       "condition_parser": null
                     },
@@ -2578,7 +2574,6 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "parse_strings_as_datetimes": null,
                     "row_condition": null,
                     "condition_parser": null,
                     "strict_min": null,
@@ -2643,7 +2638,6 @@
                     "min_value": null,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "parse_strings_as_datetimes": null,
                     "row_condition": null,
                     "condition_parser": null,
                     "strict_min": null,
@@ -3546,7 +3540,6 @@
                       "value_set": [],
                       "result_format": "SUMMARY",
                       "mostly": null,
-                      "parse_strings_as_datetimes": null,
                       "row_condition": null,
                       "condition_parser": null
                     },
@@ -4107,7 +4100,6 @@
                       "value_set": [],
                       "result_format": "SUMMARY",
                       "mostly": null,
-                      "parse_strings_as_datetimes": null,
                       "row_condition": null,
                       "condition_parser": null
                     },
@@ -4606,7 +4598,6 @@
                       "value_set": [],
                       "result_format": "SUMMARY",
                       "mostly": null,
-                      "parse_strings_as_datetimes": null,
                       "row_condition": null,
                       "condition_parser": null
                     },

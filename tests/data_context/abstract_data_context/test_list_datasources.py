@@ -2,7 +2,6 @@ from typing import List
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.data_context.types.base import DatasourceConfig
 
 # module level markers
@@ -10,14 +9,14 @@ pytestmark = pytest.mark.filesystem
 
 
 def test_list_datasources_base_data_context_no_datasources(
-    empty_data_context: DataContext, datasource_config_with_names: DatasourceConfig
+    empty_data_context, datasource_config_with_names: DatasourceConfig
 ) -> None:
     """What does this test and why?
 
     When listing datasources, we want to omit the name and id fields. This test uses DataContext.
     """
 
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     # no datasources
 
@@ -29,14 +28,14 @@ def test_list_datasources_base_data_context_no_datasources(
 
 
 def test_list_datasources_base_data_context_one_datasource(
-    empty_data_context: DataContext, datasource_config_with_names: DatasourceConfig
+    empty_data_context, datasource_config_with_names: DatasourceConfig
 ) -> None:
     """What does this test and why?
 
     When listing datasources, we want to omit the name and id fields. This test uses DataContext.
     """
 
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     # one datasource
 
@@ -76,14 +75,14 @@ def test_list_datasources_base_data_context_one_datasource(
 
 
 def test_list_datasources_base_data_context_two_datasources(
-    empty_data_context: DataContext, datasource_config_with_names: DatasourceConfig
+    empty_data_context, datasource_config_with_names: DatasourceConfig
 ) -> None:
     """What does this test and why?
 
     When listing datasources, we want to omit the name and id fields. This test uses DataContext.
     """
 
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     # two datasources
 

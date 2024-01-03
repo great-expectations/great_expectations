@@ -149,7 +149,6 @@ def _cloud_config(data_dir):
             "expectation_validation_result": True,
             "globally": True,
         },
-        "notebooks": None,
         "plugins_directory": "plugins/",
         "profiler_store_name": "default_profiler_store",
         "progress_bars": {

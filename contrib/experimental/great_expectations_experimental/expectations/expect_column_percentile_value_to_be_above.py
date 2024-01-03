@@ -1,8 +1,5 @@
-from typing import Dict, Optional
+from typing import Dict
 
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -89,38 +86,9 @@ class ExpectColumnPercentileToBeAbove(ColumnAggregateExpectation):
     # This dictionary contains default values for any parameters that should have default values.
     default_kwarg_values = {}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -128,7 +96,7 @@ class ExpectColumnPercentileToBeAbove(ColumnAggregateExpectation):
         """Validates the given data above the set value for the column given percentile"""
 
         column_percentile = metrics["column.percentile"]
-        given_value = self.get_success_kwargs(configuration).get("value")
+        given_value = self._get_success_kwargs().get("value")
 
         # Checking if the given percentile lies above the threshold
 

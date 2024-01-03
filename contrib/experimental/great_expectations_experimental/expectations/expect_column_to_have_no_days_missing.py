@@ -1,7 +1,6 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -113,15 +112,8 @@ class ExpectColumnToHaveNoDaysMissing(ColumnAggregateExpectation):
         "tags": ["date-column"],
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -138,7 +130,7 @@ class ExpectColumnToHaveNoDaysMissing(ColumnAggregateExpectation):
         date_set = {distinct_dates_sorted[0] + timedelta(x) for x in range(days_diff)}
         missing_days = sorted(date_set - set(distinct_dates_sorted))
 
-        threshold = self.get_success_kwargs(configuration).get("threshold")
+        threshold = self._get_success_kwargs().get("threshold")
         success: bool = len(missing_days) <= threshold
         return {
             "success": success,

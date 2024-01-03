@@ -7,10 +7,9 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, cast
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
@@ -21,6 +20,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 from great_expectations.profile.base import (
@@ -738,7 +740,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
         Returns:
             The ExpectationSuite
         """
-        expectations = suite.expectations
+        expectations = suite.expectation_configurations
         expectations_by_column = {}
         for expectation in expectations:
             domain = expectation["kwargs"].get("column") or "table_level_expectations"

@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -218,24 +217,17 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
         "threshold",
     )
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        run_date_str = self.get_success_kwargs(configuration).get("run_date")
+        run_date_str = self._get_success_kwargs().get("run_date")
 
         run_date = datetime.strptime(run_date_str, date_format)
 
-        threshold = float(self.get_success_kwargs(configuration).get("threshold"))
+        threshold = float(self._get_success_kwargs().get("threshold"))
 
         days_ago_dict = get_days_ago_dict(run_date)
 

@@ -112,7 +112,6 @@ fluent_datasources:
         table_name: event_names
         schema_name:
     connection_string: sqlite:///../../../data/visits.db
-notebooks:
 include_rendered_content:
   expectation_validation_result: false
   globally: false

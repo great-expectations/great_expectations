@@ -1,14 +1,18 @@
+from __future__ import annotations
+
+from datetime import datetime
 from functools import reduce
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import sqlalchemy as sa
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core.expectation_configuration import parse_result_format
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -23,6 +27,10 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+    parse_result_format,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
@@ -113,8 +121,6 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): If True, then catch exceptions and \
             include them as part of the result object. \
         For more detail, see [catch_exceptions]\
@@ -127,12 +133,14 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format \
-            , include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
     """
+
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     map_metric = "multicolumn_values_to_be_equal"
 
@@ -210,7 +218,6 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                 not contain the values required by the Expectation."
         """
         super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
         try:
             assert "column_list" in configuration.kwargs, "column_list is required"
@@ -390,16 +397,15 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+        result_format = self._get_result_format(
+            runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
+        mostly = self._get_success_kwargs().get(
+            "mostly", self._get_default_value("mostly")
         )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(

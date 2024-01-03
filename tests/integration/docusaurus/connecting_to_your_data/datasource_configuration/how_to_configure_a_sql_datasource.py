@@ -36,7 +36,7 @@ from tests.integration.docusaurus.connecting_to_your_data.datasource_configurati
 
 yaml = YAMLHandler()
 CONNECTION_STRING = "sqlite:///data/yellow_tripdata_sample_2020_all_months_combined.db"
-data_context: gx.DataContext = gx.get_context()
+data_context = gx.get_context()
 
 
 def validate_universal_config_elements():

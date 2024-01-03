@@ -392,7 +392,7 @@ def test_process_batch_parameters():
 def test_pandas_datasource_processes_dataset_options(
     test_folder_connection_path_csv, empty_data_context
 ):
-    context: DataContext = empty_data_context  # noqa: F821
+    context = empty_data_context
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={

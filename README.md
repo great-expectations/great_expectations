@@ -1,4 +1,3 @@
-
 [![Python Versions](https://img.shields.io/pypi/pyversions/great_expectations.svg)](https://pypi.python.org/pypi/great_expectations)
 [![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/great-expectations)](https://pypistats.org/packages/great-expectations)
@@ -21,14 +20,47 @@ Great Expectations
 
 *Always know what to expect from your data.*
 
+Important announcements regarding our upcoming 1.0 release
+================================================================================
+We’re planning a ton of work to take GX OSS to the next level as we officially graduate it to 1.0!
+
+Our biggest goal is to improve the user and contributor experiences by **streamlining the API**, based on the feedback
+we’ve
+gotten from the community (thank you!) over the years.
+
+Learn more about our plans for 1.0 and how we’ll be making this transition in
+our [blog post](https://greatexpectations.io/blog/the-next-step-for-gx-oss-1-0).
+
+As we gear up for the launch of our 1.0 release early next year, we want to share an important update regarding our
+current development process.
+
+Temporary hold on PRs
+--------------------------------------------------------------------------------
+
+We’re temporarily pausing the acceptance of new pull requests (PRs). We’re going to be updating the API and codebase
+frequently and significantly over the next few months—we don’t want contributors to spend time and effort only to find
+that we’ve just implemented a breaking change for their work.
+
+Looking forward
+--------------------------------------------------------------------------------
+We deeply value the contributions and engagement of our community. Please hold onto your fantastic ideas and PRs until
+after the 1.0 release, when we will be excited to resume accepting them. We appreciate your understanding and support
+as we make this final push toward this exciting milestone. Please watch for updates in our
+[slack](https://greatexpectations.io/slack) community, and thank you for being a crucial part of our journey!
+
+
 What is GX?
 --------------------------------------------------------------------------------
 
-Great Expectations (GX) helps data teams build a shared understanding of their data through quality testing, documentation, and profiling.
+Great Expectations (GX) helps data teams build a shared understanding of their data through quality testing,
+documentation, and profiling.
 
-Data practitioners know that testing and documentation are essential for managing complex data pipelines. GX makes it possible for data science and engineering teams to quickly deploy extensible, flexible data quality testing into their data stacks. Its human-readable documentation makes the results accessible to technical and nontechnical users.
+Data practitioners know that testing and documentation are essential for managing complex data pipelines. GX makes it
+possible for data science and engineering teams to quickly deploy extensible, flexible data quality testing into their
+data stacks. Its human-readable documentation makes the results accessible to technical and nontechnical users.
 
-[See Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to our philosophy of pipeline data quality testing.
+[See Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/)
+for an introduction to our philosophy of pipeline data quality testing.
 
 
 
@@ -44,19 +76,24 @@ Key features
 
 ### Seamless operation
 
-GX fits into your existing tech stack, and can integrate with your CI/CD pipelines to add data quality exactly where you need it. Connect to and validate your data wherever it already is, so you can focus on honing your Expectation Suites to perfectly meet your data quality needs.
+GX fits into your existing tech stack, and can integrate with your CI/CD pipelines to add data quality exactly where you
+need it. Connect to and validate your data wherever it already is, so you can focus on honing your Expectation Suites to
+perfectly meet your data quality needs.
 
 ### Start fast
 
-Get useful results quickly even for large data volumes. GX’s Data Assistants provide curated Expectations for different domains, so you can accelerate your data discovery to rapidly deploy data quality throughout your pipelines. Auto-generated Data Docs ensure your DQ documentation will always be up-to-date.
-
-
+Get useful results quickly even for large data volumes. GX’s Data Assistants provide curated Expectations for different
+domains, so you can accelerate your data discovery to rapidly deploy data quality throughout your pipelines.
+Auto-generated Data Docs ensure your DQ documentation will always be up-to-date.
 
 ![data_assistant_plot_expectations_and_metrics](./docs/readme_assets/data_assistant_plot_expectations_and_metrics.png)
 
 ### Unified understanding
 
-Expectations are GX’s workhorse abstraction: each Expectation declares an expected state of the data. The Expectation library provides a flexible, extensible vocabulary for data quality—one that’s human-readable, meaningful for technical and nontechnical users alike. Bundled into Expectation Suites, Expectations are the ideal tool for characterizing exactly what you expect from your data.
+Expectations are GX’s workhorse abstraction: each Expectation declares an expected state of the data. The Expectation
+library provides a flexible, extensible vocabulary for data quality—one that’s human-readable, meaningful for technical
+and nontechnical users alike. Bundled into Expectation Suites, Expectations are the ideal tool for characterizing
+exactly what you expect from your data.
 
 - `expect_column_values_to_not_be_null`
 - `expect_column_values_to_match_regex`
@@ -68,17 +105,24 @@ Expectations are GX’s workhorse abstraction: each Expectation declares an expe
 
 ### Secure and transparent
 
-GX doesn’t ask you to exchange security for your insight. It processes your data in place, on your systems, so your security and governance procedures can maintain control at all times. And because GX’s core is and always will be open source, its complete transparency is the opposite of a black box.
+GX doesn’t ask you to exchange security for your insight. It processes your data in place, on your systems, so your
+security and governance procedures can maintain control at all times. And because GX’s core is and always will be open
+source, its complete transparency is the opposite of a black box.
 
 ### Data contracts support
 
-Checkpoints are a transparent, central, and automatable mechanism for testing Expectations and evaluating your data quality. Every Checkpoint run produces human-readable Data Docs reporting the results. You can also configure Checkpoints to take Actions based on the results of the evaluation, like sending alerts and preventing low-quality data from moving further in your pipelines.
+Checkpoints are a transparent, central, and automatable mechanism for testing Expectations and evaluating your data
+quality. Every Checkpoint run produces human-readable Data Docs reporting the results. You can also configure
+Checkpoints to take Actions based on the results of the evaluation, like sending alerts and preventing low-quality data
+from moving further in your pipelines.
 
 ![Image of data contact support](./docs/readme_assets/data-contract-support.png)
 
 ### Readable for collaboration
 
-Everyone stays on the same page about your data quality with GX’s inspectable, shareable, and human-readable Data Docs. You can publish Data Docs to the locations where you need them in a variety of formats, making it easy to integrate Data Docs into your existing data catalogs, dashboards, and other reporting and data governance tools.
+Everyone stays on the same page about your data quality with GX’s inspectable, shareable, and human-readable Data Docs.
+You can publish Data Docs to the locations where you need them in a variety of formats, making it easy to integrate Data
+Docs into your existing data catalogs, dashboards, and other reporting and data governance tools.
 
 ![Image of data docs](./docs/readme_assets/datadocs-update.jpg)
 
@@ -88,9 +132,11 @@ Quick start
 To see Great Expectations in action on your own data:
 
 You can install it using pip
+
 ```
 pip install great_expectations
 ```
+
 and then run
 
 ```python
@@ -99,11 +145,15 @@ import great_expectations as gx
 context = gx.get_context()
 ```
 
-(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/terms/supporting_resource/), which will teach you how to get up and running in minutes.)
+(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks,
+or git, you may want to check out
+the [Supporting Resources](https://docs.greatexpectations.io/docs/terms/supporting_resource/), which will teach you how
+to get up and running in minutes.)
 
 For full documentation, visit [https://docs.greatexpectations.io/](https://docs.greatexpectations.io/).
 
-If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors
+and other users there.
 
 
 Integrations
@@ -450,15 +500,27 @@ Great Expectations works with the tools and systems that you're already using wi
 What is GX _not_?
 -------------------------------------------------------------
 
-Great Expectations is _not_ a pipeline execution framework. Instead, it integrates seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. GX carries out your data quality pipeline testing while these tools execute the pipelines.
+Great Expectations is _not_ a pipeline execution framework. Instead, it integrates seamlessly with DAG execution tools
+like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/)
+, [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster)
+, [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. GX carries out your data quality
+pipeline testing while these tools execute the pipelines.
 
-Great Expectations is _not_ a database or storage software. It processes your data in place, on your existing systems. Expectations and Validation Results that GX produces are metadata about your data.
+Great Expectations is _not_ a database or storage software. It processes your data in place, on your existing systems.
+Expectations and Validation Results that GX produces are metadata about your data.
 
-Great Expectations is _not_ a data versioning tool. If you want to bring your data itself under version control, check out tools like [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
+Great Expectations is _not_ a data versioning tool. If you want to bring your data itself under version control, check
+out tools like [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt),
+and [lakeFS](https://github.com/treeverse/lakeFS/).
 
-Great Expectations is _not_ a language-agnostic platform. Instead, it follows the philosophy of “take the compute to the data” by using the popular Python language to support native execution of Expectations in pandas, SQL (via SQLAlchemy), and Spark environments.
+Great Expectations is _not_ a language-agnostic platform. Instead, it follows the philosophy of “take the compute to the
+data” by using the popular Python language to support native execution of Expectations in pandas, SQL (via SQLAlchemy),
+and Spark environments.
 
-Great Expectations is _not_ exclusive to Python programming environments. It can be invoked from the command line without a Python environment. However, if you’re working into another ecosystem, you may want to explore ecosystem-specific alternatives such as [assertR](https://github.com/ropensci/assertr) (for R environments) or [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) (for Tensorflow environments).
+Great Expectations is _not_ exclusive to Python programming environments. It can be invoked from the command line
+without a Python environment. However, if you’re working into another ecosystem, you may want to explore
+ecosystem-specific alternatives such as [assertR](https://github.com/ropensci/assertr) (for R environments)
+or [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) (for Tensorflow environments).
 
 
 Who maintains Great Expectations?
@@ -469,15 +531,24 @@ Great Expectations OSS is under active development by GX Labs and the Great Expe
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) or post in our [Discourse](https://discourse.greatexpectations.io/).
+If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our
+public [Slack channel](https://greatexpectations.io/slack) or post in
+our [Discourse](https://discourse.greatexpectations.io/).
 
 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. See [Contributing code](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), [Contributing Expectations](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md), [Contributing packages](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md), or [Contribute to Great Expectations documentation](https://github.com/great-expectations/great_expectations/tree/develop/docs), and please don't be shy with questions.
+Absolutely. Yes, please.
+See [Contributing code](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md)
+, [Contributing Expectations](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md)
+, [Contributing packages](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md)
+,
+or [Contribute to Great Expectations documentation](https://github.com/great-expectations/great_expectations/tree/develop/docs)
+, and please don't be shy with questions.
 
 How do I stay up to date with Great Expectations?
 --------------------------------------------------------------------------------
 
-You can get updates on everything GX with our email newsletter. [Subscribe here!](https://greatexpectations.io/newsletter?utm_source=github&utm_medium=social&utm_campaign=newsletter&utm_content=form)
+You can get updates on everything GX with our email
+newsletter. [Subscribe here!](https://greatexpectations.io/newsletter?utm_source=github&utm_medium=social&utm_campaign=newsletter&utm_content=form)

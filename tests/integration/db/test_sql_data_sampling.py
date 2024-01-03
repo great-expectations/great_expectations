@@ -4,7 +4,6 @@ import pandas as pd
 import sqlalchemy as sa
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource import BaseDatasource
@@ -46,7 +45,7 @@ if __name__ == "test_script_module":
 
             # 1. Setup
 
-            context: DataContext = gx.get_context()
+            context = gx.get_context()
 
             datasource_name: str = "test_datasource"
             data_connector_name: str = "test_data_connector"

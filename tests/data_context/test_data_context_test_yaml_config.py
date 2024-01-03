@@ -9,7 +9,6 @@ import pytest
 from ruamel.yaml.error import MarkedYAMLError
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -172,7 +171,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
     )
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     yaml_config: str = f"""
     store_name: my_checkpoint_store
@@ -581,7 +580,7 @@ data_connectors:
 def test_config_variables_in_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled, sa
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     db_file = file_relative_path(
         __file__,
@@ -695,7 +694,7 @@ def test_golden_path_sql_datasource_configuration(
     test_connectable_postgresql_db,
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
@@ -840,7 +839,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx
@@ -1030,7 +1029,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx
@@ -1234,7 +1233,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx
@@ -1336,7 +1335,7 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
         import great_expectations as gx

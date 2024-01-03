@@ -6,7 +6,7 @@ description: Create and manage Checkpoints in GX Cloud.
 
 A Checkpoint validates Expectation Suite data. After you create a Checkpoint to validate data, you can save and reuse the Checkpoint. 
 
-To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
+To learn more about Checkpoints, see [Checkpoint](/docs/reference/learn/terms/checkpoint).
 
 ## Prerequisites
 
@@ -43,8 +43,8 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
         "name": checkpoint_name,
         "validations": [{
             "expectation_suite_name": expectation_suite.expectation_suite_name,
-             "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
-             "batch_request": {
+            "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
+            "batch_request": {
                 "datasource_name": "<data_source_name>",
                 "data_asset_name": "<data_asset_name>",
              },
@@ -81,6 +81,15 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 
 4. Click **Run Checkpoint** for the Checkpoint you want to run.
 
+## Edit a Checkpoint name
+
+1. In GX Cloud, click **Checkpoints**.
+
+2. Click **Edit Checkpoint** in the **Checkpoints** list for the Checkpoint you want to edit.
+
+3. Enter a new name for the Checkpoint and then click **Save**.
+
+4. Update the Checkpoint name in all code that included the previous Checkpoint name.
 
 ## Edit a Checkpoint configuration
 

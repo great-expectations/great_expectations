@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_asset import DataAsset
@@ -56,7 +55,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
 
 @pytest.mark.filesystem
 def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     asset = DataAsset()
     default_suite = ExpectationSuite(
         expectation_suite_name="default",

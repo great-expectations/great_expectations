@@ -3,7 +3,6 @@ from typing import Dict, List
 import pytest
 
 import great_expectations
-from great_expectations import DataContext
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
@@ -22,7 +21,7 @@ pytestmark = pytest.mark.filesystem
 def test_get_batch_successful_specification_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context = data_context_with_datasource_sqlalchemy_engine
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -41,7 +40,7 @@ def test_get_batch_successful_specification_sqlalchemy_engine(
 def test_get_batch_successful_specification_sqlalchemy_engine_named_asset(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context = data_context_with_datasource_sqlalchemy_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
@@ -64,7 +63,7 @@ def test_get_batch_successful_specification_sqlalchemy_engine_named_asset(
 def test_get_batch_successful_specification_pandas_engine_named_asset_two_batch_requests(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context = data_context_with_datasource_sqlalchemy_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
@@ -144,7 +143,7 @@ def test_get_validator_successful_specification_sqlalchemy_engine(
 def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context = data_context_with_datasource_sqlalchemy_engine
     context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
@@ -166,7 +165,7 @@ def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
 def test_get_validator_successful_specification_sqlalchemy_engine_named_asset(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context = data_context_with_datasource_sqlalchemy_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest

@@ -30,9 +30,9 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 
 def test_print_diagnostic_checklist__second_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__SecondIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__SecondIteration(
+        column="values"
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (
@@ -57,9 +57,9 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Mat
 
 
 def test_print_diagnostic_checklist__third_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__ThirdIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__ThirdIteration(
+        column="values"
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (

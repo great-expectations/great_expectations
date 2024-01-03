@@ -6,7 +6,6 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -97,7 +96,7 @@ def test_basic_instantiation(tmp_path_factory):
 def test_instantiation_from_a_config(
     mock_emit, empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     base_directory = str(tmp_path_factory.mktemp("test_instantiation_from_a_config"))
     create_files_in_directory(
@@ -180,7 +179,7 @@ assets:
 def test_instantiation_from_a_config_regex_does_not_match_paths(
     mock_emit, empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1453,7 +1452,7 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
 def test_one_half_year_as_6_data_assets_1_batch_each(
     empty_data_context, tmp_path_factory
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     base_directory: str = str(tmp_path_factory.mktemp("log_data"))
     create_files_in_directory(
         directory=base_directory,
@@ -1520,7 +1519,7 @@ def test_one_half_year_as_6_data_assets_1_batch_each(
 
 
 def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factory):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     base_directory: str = str(tmp_path_factory.mktemp("log_data"))
     create_files_in_directory(
         directory=base_directory,

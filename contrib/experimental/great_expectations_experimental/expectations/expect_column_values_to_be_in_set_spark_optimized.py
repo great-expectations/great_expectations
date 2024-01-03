@@ -1,11 +1,13 @@
 from typing import Dict, Optional
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
@@ -98,9 +100,9 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
 
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        value_set = configuration.kwargs.get(
+        value_set = configuration.kwargs.get("value_set") or self._get_default_value(
             "value_set"
-        ) or self.default_kwarg_values.get("value_set")
+        )
         column = configuration.kwargs.get("column")
 
         try:
@@ -121,11 +123,11 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        configuration = self.configuration
         mostly = configuration["kwargs"].get("mostly")
         strict = configuration["kwargs"].get("strict")
         result = metrics.get("column_values.in_set.spark_optimized")

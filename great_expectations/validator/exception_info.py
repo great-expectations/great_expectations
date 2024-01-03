@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 from great_expectations.compatibility.typing_extensions import override

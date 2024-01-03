@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
+import uuid
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
 
@@ -16,15 +18,16 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
-    import py
-
-    from great_expectations.compatibility import pyspark
-    from great_expectations.compatibility.sqlalchemy import engine
+    from great_expectations.checkpoint import Checkpoint
+    from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.core import ExpectationSuite
+    from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.validator.validator import Validator
 
 LOGGER: Final = logging.getLogger("tests")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 def context() -> CloudDataContext:
     context = gx.get_context(
         mode="cloud",
@@ -37,31 +40,116 @@ def context() -> CloudDataContext:
 
 
 @pytest.fixture(scope="module")
-def tmp_dir(tmpdir_factory) -> py.path:
-    return tmpdir_factory.mktemp("project")
+def datasource_name(
+    context: CloudDataContext,
+) -> Iterator[str]:
+    datasource_name = f"ds_{uuid.uuid4().hex}"
+    yield datasource_name
+    # if the test was skipped, we may not have a datasource to clean up
+    # in that case, we create one simply to test get and delete
+    try:
+        _ = context.get_datasource(datasource_name=datasource_name)
+    except ValueError:
+        _ = context.sources.add_pandas(name=datasource_name)
+        context.get_datasource(datasource_name=datasource_name)
+    context.delete_datasource(datasource_name=datasource_name)
+    with pytest.raises(ValueError):
+        _ = context.get_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture(scope="module")
-def get_missing_datasource_error_type() -> type[Exception]:
-    return ValueError
+def expectation_suite(
+    context: CloudDataContext,
+) -> Iterator[ExpectationSuite]:
+    expectation_suite_name = f"es_{uuid.uuid4().hex}"
+    expectation_suite = context.add_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+    assert len(expectation_suite.expectations) == 0
+    yield expectation_suite
+    expectation_suite = context.add_or_update_expectation_suite(
+        expectation_suite=expectation_suite
+    )
+    assert len(expectation_suite.expectations) > 0
+    _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
+    with pytest.raises(gx_exceptions.DataContextError):
+        _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
 @pytest.fixture(scope="module")
+def validator(
+    context: CloudDataContext,
+    batch_request: BatchRequest,
+    expectation_suite: ExpectationSuite,
+) -> Iterator[Validator]:
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite.expectation_suite_name,
+    )
+    validator.head()
+    yield validator
+    validator.save_expectation_suite()
+    expectation_suite = validator.get_expectation_suite()
+    _ = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite.expectation_suite_name,
+    )
+
+
+@pytest.fixture(scope="module")
+def checkpoint(
+    context: CloudDataContext,
+    batch_request: BatchRequest,
+    expectation_suite: ExpectationSuite,
+) -> Iterator[Checkpoint]:
+    checkpoint_name = (
+        f"{batch_request.data_asset_name} | {expectation_suite.expectation_suite_name}"
+    )
+    _ = context.add_checkpoint(
+        name=checkpoint_name,
+        validations=[
+            {
+                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "batch_request": batch_request,
+            },
+            {
+                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "batch_request": batch_request,
+            },
+        ],
+    )
+    _ = context.add_or_update_checkpoint(
+        name=checkpoint_name,
+        validations=[
+            {
+                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "batch_request": batch_request,
+            }
+        ],
+    )
+    checkpoint = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        len(checkpoint.validations) == 1
+    ), "Checkpoint was not updated in the previous method call."
+    yield checkpoint
+    context.delete_checkpoint(
+        name=checkpoint_name,
+    )
+    with pytest.raises(gx_exceptions.DataContextError):
+        context.get_checkpoint(name=checkpoint_name)
+
+
+@pytest.fixture(scope="module")
+def tmp_path(tmp_path_factory) -> pathlib.Path:
+    return tmp_path_factory.mktemp("project")
+
+
+@pytest.fixture(scope="package")
 def get_missing_data_asset_error_type() -> type[Exception]:
     return LookupError
 
 
-@pytest.fixture(scope="module")
-def get_missing_expectation_suite_error_type() -> type[Exception]:
-    return gx_exceptions.DataContextError
-
-
-@pytest.fixture(scope="module")
-def get_missing_checkpoint_error_type() -> type[Exception]:
-    return gx_exceptions.DataContextError
-
-
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
     return ValueError
 
@@ -85,7 +173,7 @@ def table_factory() -> Iterator[TableFactory]:
     all_created_tables: dict[
         str, list[dict[Literal["table_name", "schema_name"], str | None]]
     ] = {}
-    engines: dict[str, engine.Engine] = {}
+    engines: dict[str, sqlalchemy.engine.Engine] = {}
 
     def _table_factory(
         gx_engine: SqlAlchemyExecutionEngine,

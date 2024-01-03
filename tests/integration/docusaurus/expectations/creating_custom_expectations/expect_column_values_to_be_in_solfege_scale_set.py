@@ -123,12 +123,16 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
 
 if __name__ == "__main__":
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py diagnostics">
-    ExpectColumnValuesToBeInSolfegeScaleSet().print_diagnostic_checklist()
+    ExpectColumnValuesToBeInSolfegeScaleSet(
+        column="lowercase_solfege_scale"
+    ).print_diagnostic_checklist()
 #     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-diagnostics = ExpectColumnValuesToBeInSolfegeScaleSet().run_diagnostics()
+diagnostics = ExpectColumnValuesToBeInSolfegeScaleSet(
+    column="lowercase_solfege_scale"
+).run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True

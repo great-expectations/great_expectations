@@ -1,9 +1,8 @@
-from typing import Dict, Optional
+from typing import Dict
 
 import pandas as pd
 import pygeos as geos
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
@@ -204,48 +203,21 @@ class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
         "column_shape_format": "wkt",
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         radius = metrics.get("column.geometry.minimum_bounding_radius")
-        diameter_flag = self.get_success_kwargs(configuration).get("diameter_flag")
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
+
+        success_kwargs = self._get_success_kwargs()
+        diameter_flag = success_kwargs.get("diameter_flag")
+        min_value = success_kwargs.get("min_value")
+        max_value = success_kwargs.get("max_value")
+        strict_min = success_kwargs.get("strict_min")
+        strict_max = success_kwargs.get("strict_max")
 
         if diameter_flag:
             distance = radius * 2

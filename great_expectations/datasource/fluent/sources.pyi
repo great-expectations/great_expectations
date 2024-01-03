@@ -47,7 +47,12 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
+from great_expectations.datasource.fluent.snowflake_datasource import (
+    ConnectionDetails as SnowflakeConnectionDetails,
+)
+from great_expectations.datasource.fluent.snowflake_datasource import (
+    SnowflakeDsn,
+)
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
@@ -581,7 +586,9 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -617,7 +624,9 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -653,7 +662,9 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,

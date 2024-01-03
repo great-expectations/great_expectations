@@ -6,7 +6,7 @@ description: Create and manage Expectation Suites in GX Cloud.
 
 Expectation Suites contain multiple Expectations for a single Data Asset. Like Expectations, they can help you better understand your data and help you improve data quality. A default Expectation Suite is created when you create a Data Asset. 
 
-To learn more about Expectation Suites, see [Expectation Suites](../../terms/expectation_suite.md).
+To learn more about Expectation Suites, see [Expectation Suites](/docs/reference/learn/terms/expectation_suite).
 
 ## Prerequisites
 
@@ -53,6 +53,16 @@ If you have specific business requirements, or you want to examine specific data
 7. Add Expectations to the Expectation Suite. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
 
 8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+
+## Edit an Expectation Suite name
+
+1. In GX Cloud, click **Expectation Suites**.
+
+2. Click **Edit** for the Expectation Suite you want to edit.
+
+3. Edit the Expectation Suite name and then click **Save**.
+
+4. Update the Expectation Suite name in all code that included the previous Expectation Suite name.
 
 ## Delete an Expectation Suite
 

@@ -1,6 +1,8 @@
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -42,7 +44,7 @@ def test_expectation_decorator_build_config():
     config = eds.get_expectation_suite()
     assert (
         ExpectationConfiguration(expectation_type="no_op_expectation", kwargs={})
-        == config.expectations[0]
+        == config.expectation_configurations[0]
     )
 
     assert (
@@ -50,7 +52,7 @@ def test_expectation_decorator_build_config():
             expectation_type="no_op_value_expectation",
             kwargs={"value": "a"},
         )
-        == config.expectations[1]
+        == config.expectation_configurations[1]
     )
 
 
@@ -77,7 +79,9 @@ def test_expectation_decorator_meta():
 
     assert (
         ExpectationValidationResult(
-            success=True, meta=metadata, expectation_config=config.expectations[0]
+            success=True,
+            meta=metadata,
+            expectation_config=config.expectation_configurations[0],
         )
         == out
     )
@@ -88,7 +92,7 @@ def test_expectation_decorator_meta():
             kwargs={"value": "a"},
             meta=metadata,
         )
-        == config.expectations[0]
+        == config.expectation_configurations[0]
     )
 
 

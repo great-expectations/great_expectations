@@ -9,7 +9,6 @@ from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -28,6 +27,9 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.render import RenderedStringTemplateContent

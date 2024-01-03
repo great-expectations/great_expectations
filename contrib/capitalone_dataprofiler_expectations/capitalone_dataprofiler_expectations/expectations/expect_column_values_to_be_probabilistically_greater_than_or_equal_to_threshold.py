@@ -151,7 +151,6 @@ class ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold(
     default_kwarg_values = {
         "threshold": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
 

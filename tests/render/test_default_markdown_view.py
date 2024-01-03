@@ -5,10 +5,14 @@ from collections import OrderedDict
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import (
+    ExpectationSuite,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.render import (
     RenderedDocumentContent,
@@ -50,7 +54,7 @@ def validation_operator_result():
 
 @pytest.fixture()
 def expectation_suite_to_render_with_notes(empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={"great_expectations_version": "0.13.0-test"},

@@ -1,16 +1,15 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -26,6 +25,12 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -70,8 +75,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -82,11 +85,13 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set)
     """
+
+    value_set: Union[list, set, EvaluationParameterDict, None]
 
     library_metadata = {
         "maturity": "production",
@@ -103,52 +108,11 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     success_keys = (
         "value_set",
         "mostly",
-        "parse_strings_as_datetimes",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "parse_strings_as_datetimes": False,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-            Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
-            assert isinstance(
-                configuration.kwargs["value_set"], (list, set, dict)
-            ), "value_set must be a list or a set"
-            if isinstance(configuration.kwargs["value_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
-                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -159,7 +123,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -190,9 +153,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             else:
                 template_str += "."
 
-            if params.parse_strings_as_datetimes:
-                template_str += " Values should be parsed as datetimes."
-
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
@@ -220,7 +180,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 "column",
                 "value_set",
                 "mostly",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -246,9 +205,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -287,6 +243,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
+        from great_expectations.execution_engine import PandasExecutionEngine
+
         value_set = metric_value_kwargs["value_set"]
 
         if value_set is None:

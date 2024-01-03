@@ -9,7 +9,6 @@ import pytest
 from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -323,7 +322,7 @@ def test_self_check():
 )
 @mock_s3
 def test_test_yaml_config(mock_emit, empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -421,7 +420,7 @@ default_regex:
 def test_yaml_config_excluding_non_regex_matching_files(
     mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"

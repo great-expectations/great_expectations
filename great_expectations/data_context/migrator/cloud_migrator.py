@@ -235,7 +235,6 @@ class CloudMigrator:
             ("Datasource", configuration_bundle.datasources),
             ("Checkpoint", configuration_bundle.checkpoints),
             ("Expectation Suite", configuration_bundle.expectation_suites),
-            ("Profiler", configuration_bundle.profilers),
         )
 
         print("[Step 1/4]: Bundling context configuration")

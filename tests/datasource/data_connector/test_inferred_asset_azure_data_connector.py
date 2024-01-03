@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.compatibility import azure
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
@@ -438,7 +437,7 @@ def test_instantiation_with_test_yaml_config(
     empty_data_context_stats_enabled,
     expected_config_dict,
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
         """
@@ -480,7 +479,7 @@ def test_instantiation_with_test_yaml_config(
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(  # noqa: F841
         """
@@ -538,7 +537,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
 def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
         """

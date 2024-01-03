@@ -28,8 +28,12 @@ connection_string = f"sqlite:///{sqlite_database_path}"
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=GxDatasourceWarning)
+    # TODO: Remove create_temp_table=True once the bug fix goes in to develop that's equivalent of this PR for 0.18.6:
+    #       https://github.com/great-expectations/great_expectations/pull/9148
     datasource = context.sources.add_sql(
-        name="my_datasource", connection_string=connection_string
+        name="my_datasource",
+        connection_string=connection_string,
+        create_temp_table=True,
     )
 
 # Python
@@ -39,7 +43,7 @@ datasource = context.get_datasource("my_datasource")
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py add_query_asset">
-table_asset = datasource.add_query_asset(
+query_asset = datasource.add_query_asset(
     name="my_asset",
     query="SELECT passenger_count, total_amount FROM yellow_tripdata_sample_2019_01",
 )

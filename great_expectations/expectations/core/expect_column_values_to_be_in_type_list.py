@@ -1,23 +1,17 @@
+from __future__ import annotations
+
 import inspect
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from packaging import version
 
 from great_expectations.compatibility import pyspark
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
+    EvaluationParameterDict,
 )
 from great_expectations.expectations.core.expect_column_values_to_be_of_type import (
     _get_dialect_type_module,
@@ -45,12 +39,19 @@ from great_expectations.util import (
     get_trino_potential_type,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        type_list (str): \
+        type_list (list[str] or None): \
             A list of strings representing the data type that each column should have as entries. Valid types are \
             defined by the current backend implementation and are dynamically loaded. For example, valid types for \
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
@@ -86,8 +87,6 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -98,11 +97,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See also:
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
     """
+
+    condition_parser: Union[str, None] = "pandas"
+    type_list: Union[List[str], EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -115,65 +117,23 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     }
 
     map_metric = "column_values.in_type_list"
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
 
     success_keys = (
         "type_list",
         "mostly",
     )
-    default_kwarg_values = {
-        "type_list": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "type_list",
     )
 
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_in_type_list` it is required that:
-
-        - `type_list` has been provided.
-
-        - `type_list` is one of the following types: `list`, `dict`, or `None`
-
-        - If `type_list` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "type_list" in configuration.kwargs, "type_list is required"
-            assert (
-                isinstance(configuration.kwargs["type_list"], (list, dict))
-                or configuration.kwargs["type_list"] is None
-            ), "type_list must be a list or None"
-            if isinstance(configuration.kwargs["type_list"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["type_list"]
-                ), 'Evaluation Parameter dict for type_list kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -226,6 +186,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -241,7 +202,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "type_list", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -296,14 +257,12 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -452,20 +411,23 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in expected_types_list")
-            types = tuple(types)
-            success = isinstance(actual_column_type, types)
+            success = isinstance(actual_column_type, tuple(types))
         return {
             "success": success,
             "result": {"observed_value": type(actual_column_type).__name__},
         }
 
+    @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
+        from great_expectations.execution_engine import (
+            PandasExecutionEngine,
+        )
+
         # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
@@ -474,21 +436,23 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
             ColumnMapExpectation, self
-        ).get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )
+        ).get_validation_dependencies(execution_engine, runtime_configuration)
+
+        configuration = self.configuration
 
         # Only PandasExecutionEngine supports the column map version of the expectation.
         if isinstance(execution_engine, PandasExecutionEngine):
-            column_name = configuration.kwargs.get("column")
-            expected_types_list = configuration.kwargs.get("type_list")
+            column_name = configuration.kwargs.get("column") if configuration else None
+            expected_types_list = (
+                configuration.kwargs.get("type_list") if configuration else None
+            )
             metric_kwargs = get_metric_kwargs(
                 metric_name="table.column_types",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
-            metric_value_kwargs = metric_kwargs.get("metric_value_kwargs")
+            metric_domain_kwargs: dict = metric_kwargs.get("metric_domain_kwargs") or {}
+            metric_value_kwargs = metric_kwargs.get("metric_value_kwargs") or {}
             table_column_types_configuration = MetricConfiguration(
                 "table.column_types",
                 metric_domain_kwargs=metric_domain_kwargs,
@@ -514,7 +478,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             ):
                 # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
                 validation_dependencies = super().get_validation_dependencies(
-                    configuration, execution_engine, runtime_configuration
+                    execution_engine, runtime_configuration
                 )
 
         # this adds table.column_types dependency for both aggregate and map versions of expectation
@@ -534,21 +498,32 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        from great_expectations.execution_engine import (
+            PandasExecutionEngine,
+            SparkDFExecutionEngine,
+            SqlAlchemyExecutionEngine,
+        )
+
+        configuration = self.configuration
         column_name = configuration.kwargs.get("column")
         expected_types_list = configuration.kwargs.get("type_list")
         actual_column_types_list = metrics.get("table.column_types")
-        actual_column_type = [
-            type_dict["type"]
-            for type_dict in actual_column_types_list
-            if type_dict["name"] == column_name
-        ][0]
+        actual_column_type = (
+            [
+                type_dict["type"]
+                for type_dict in actual_column_types_list
+                if type_dict["name"] == column_name
+            ][0]
+            if actual_column_types_list
+            else []
+        )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             # only PandasExecutionEngine supports map version of expectation and
@@ -559,7 +534,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             ):
                 # this calls ColumnMapMetric._validate
                 return super()._validate(
-                    configuration, metrics, runtime_configuration, execution_engine
+                    metrics, runtime_configuration, execution_engine
                 )
             return self._validate_pandas(
                 actual_column_type=actual_column_type,

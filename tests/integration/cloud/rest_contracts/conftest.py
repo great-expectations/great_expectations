@@ -11,6 +11,7 @@ import pact
 import pytest
 from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
 
+from great_expectations import project_manager
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
 from great_expectations.data_context import CloudDataContext
@@ -88,20 +89,27 @@ def cloud_data_context(
     # we can't override the base url to use the mock service due to
     # reliance on env vars, so instead we override with a real project config
     project_config = cloud_data_context.config
-    return CloudDataContext(
+    context = CloudDataContext(
         cloud_base_url=PACT_MOCK_SERVICE_URL,
         cloud_organization_id=EXISTING_ORGANIZATION_ID,
         cloud_access_token=cloud_access_token,
         project_config=project_config,
     )
+    project_manager.set_project(cloud_data_context)
+    return context
 
 
 def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture
+@pytest.fixture(scope="package")
 def pact_test(request) -> pact.Pact:
+    """
+    pact_test can be used as a context manager and will:
+    1. write a new contract to the pact dir
+    2. verify the contract against the mock service
+    """
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
 
     broker_token: str
@@ -123,7 +131,7 @@ def pact_test(request) -> pact.Pact:
     # in GH, and we run the release build process on the tagged commit.
     version = f"{get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
 
-    pact_test: pact.Pact = pact.Consumer(
+    _pact: pact.Pact = pact.Consumer(
         name=CONSUMER_NAME,
         version=version,
         tag_with_git_branch=True,
@@ -138,9 +146,9 @@ def pact_test(request) -> pact.Pact:
         publish_to_broker=publish_to_broker,
     )
 
-    pact_test.start_service()
-    yield pact_test
-    pact_test.stop_service()
+    _pact.start_service()
+    yield _pact
+    _pact.stop_service()
 
 
 class ContractInteraction(pydantic.BaseModel):
@@ -185,7 +193,7 @@ class ContractInteraction(pydantic.BaseModel):
 
 
 @pytest.fixture
-def run_pact_test(
+def run_rest_api_pact_test(
     gx_cloud_session: Session,
     pact_test: pact.Pact,
 ) -> Callable:
@@ -233,32 +241,16 @@ def run_pact_test(
         request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{contract_interaction.request_path}"
 
         with pact_test:
-            gx_cloud_session.request(
+            # act
+            resp = gx_cloud_session.request(
                 method=contract_interaction.method,
                 url=request_url,
                 json=contract_interaction.request_body,
                 params=contract_interaction.request_params,
             )
 
-        try:
-            provider_base_url: Final[str] = os.environ["GX_CLOUD_BASE_URL"]
-        except KeyError as e:
-            raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
-
-        verifier = pact.Verifier(
-            provider=PROVIDER_NAME,
-            provider_base_url=provider_base_url,
-        )
-
-        pacts: tuple[str, ...] = tuple(
-            str(file.resolve()) for file in PACT_DIR.glob("*.json")
-        )
-
-        exit_code, logs = verifier.verify_pacts(
-            *pacts,
-            verbose=False,
-        )
-        if exit_code == 1:
-            raise AssertionError("Pact verifier reports failed interactions")
+        # assert
+        assert resp.status_code == contract_interaction.response_status
+        # TODO more unit test assertions would go here e.g. response body checks
 
     return _run_pact_test

@@ -22,12 +22,12 @@ from typing import (
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws, azure, google
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -195,7 +195,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
     @override
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]
+        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]  # type: ignore[override]
     ) -> None:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
@@ -365,7 +365,7 @@ Bucket: {error}"""
 not {batch_spec.__class__.__name__}"""
             )
 
-        df = self._apply_splitting_and_sampling_methods(batch_spec, df)
+        df = self._apply_splitting_and_sampling_methods(batch_spec, df)  # type: ignore[arg-type]
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 

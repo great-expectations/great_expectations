@@ -2,7 +2,6 @@ from typing import Union
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.compatibility import pyarrow, pyspark
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -152,7 +151,7 @@ def test_instantiation_from_datasource(
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     context.add_datasource(
         name="my_datasource",

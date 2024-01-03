@@ -416,7 +416,7 @@ def rule_without_variables(
         domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
         expectation_configuration_builders=[
             DefaultExpectationConfigurationBuilder(
-                expectation_type="expect_my_validation",
+                expectation_type="expect_column_to_exist",
                 column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             ),
         ],

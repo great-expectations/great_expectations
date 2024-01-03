@@ -9,11 +9,13 @@ from statistics import mean
 from typing import Any, Dict, List, Union
 
 from great_expectations.core import ExpectationValidationResult
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
@@ -125,13 +127,12 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnAggregateExpectation)
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         distance = metrics.get("column.coordinates.distance")
-        range = self.get_success_kwargs(configuration).get("range")
+        range = self._get_success_kwargs().get("range")
 
         success = distance <= range
 

@@ -24,14 +24,10 @@ from full_datasource_configurations import (
     get_partial_config_universal_datasource_config_elements,
 )
 
-import great_expectations as gx
-
 # The following methods correspond to the section headings in the how-to guide linked in the module docstring.
 
 
-def section_1_import_necessary_modules_and_initialize_your_data_context() -> (
-    gx.DataContext
-):
+def section_1_import_necessary_modules_and_initialize_your_data_context():
     """Provides and tests the snippets for section 1 of the Spark, Pandas, and SQL Datasource configuration guides.
 
     Returns:
@@ -42,10 +38,9 @@ def section_1_import_necessary_modules_and_initialize_your_data_context() -> (
     from great_expectations.core.yaml_handler import YAMLHandler
 
     yaml = YAMLHandler()
-    data_context: gx.DataContext = gx.get_context()
+    data_context = gx.get_context()
     # </snippet>
 
-    assert isinstance(data_context, gx.DataContext)
     return data_context
 
 

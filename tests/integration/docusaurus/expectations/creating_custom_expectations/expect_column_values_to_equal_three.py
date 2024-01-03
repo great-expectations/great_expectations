@@ -1,7 +1,6 @@
 from typing import Dict, Optional
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
@@ -14,6 +13,9 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationValidationResult,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -127,6 +129,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py docstring">
     """Expect values in this column to equal 3."""
+
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -171,9 +174,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
     # for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("mostly",)
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
 
     @renderer(renderer_type="renderer.diagnostic.observed_value")
     @render_evaluation_parameter_string

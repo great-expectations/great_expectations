@@ -25,7 +25,7 @@ import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
-data_context: gx.DataContext = gx.get_context()
+data_context = gx.get_context()
 
 # The following methods are used to verify that the example configuration snippets are consistent with each other.
 # Users can disregard them.

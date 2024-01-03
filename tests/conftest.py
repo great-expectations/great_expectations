@@ -20,10 +20,15 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations import project_manager, set_context
+from great_expectations.checkpoint.configurator import (
+    ActionDetails,
+    ActionDict,
+    ActionDicts,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -42,7 +47,6 @@ from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
-    BaseDataContext,
     CloudDataContext,
     get_context,
 )
@@ -84,6 +88,9 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -967,6 +974,7 @@ def empty_data_context(
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
+    project_manager.set_project(context)
     return context
 
 
@@ -1028,6 +1036,7 @@ def data_context_with_connection_to_metrics_db(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1179,7 +1188,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1213,7 +1222,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1282,6 +1291,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    project_manager.set_project(context)
     return context
 
 
@@ -1500,11 +1510,15 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
+    # add minimal Checkpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -1514,12 +1528,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -1531,13 +1552,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -1547,12 +1574,20 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -1566,7 +1601,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1649,6 +1684,7 @@ def deterministic_asset_data_connector_context(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1779,7 +1815,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1834,7 +1870,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1865,7 +1901,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2084,11 +2120,14 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -2098,12 +2137,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2115,13 +2161,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -2131,12 +2183,20 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2150,7 +2210,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2205,7 +2265,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2236,7 +2296,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2253,6 +2313,7 @@ def empty_context_with_checkpoint(empty_data_context):
     )
     shutil.copy(fixture_path, checkpoints_file)
     assert os.path.isfile(checkpoints_file)  # noqa: PTH113
+    project_manager.set_project(context)
     return context
 
 
@@ -2265,6 +2326,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
+    project_manager.set_project(context)
     return context
 
 
@@ -2292,7 +2354,9 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2319,7 +2383,9 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2346,7 +2412,9 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2375,7 +2443,9 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2404,7 +2474,9 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2433,7 +2505,9 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture(scope="module")
@@ -2548,170 +2622,6 @@ def empty_sqlite_db(sa):
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
-
-
-@pytest.fixture
-@freeze_time("09/26/2019 13:42:41")
-def site_builder_data_context_with_html_store_titanic_random(
-    tmp_path_factory, filesystem_csv_3
-):
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
-    project_dir = os.path.join(base_dir, "project_path")  # noqa: PTH118
-    os.mkdir(project_dir)  # noqa: PTH102
-
-    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH118, PTH103
-    os.makedirs(os.path.join(project_dir, "data/titanic"))  # noqa: PTH118, PTH103
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(project_dir, "data", "titanic", "Titanic.csv")  # noqa: PTH118
-        ),
-    )
-
-    os.makedirs(os.path.join(project_dir, "data", "random"))  # noqa: PTH118, PTH103
-    shutil.copy(
-        os.path.join(filesystem_csv_3, "f1.csv"),  # noqa: PTH118
-        str(os.path.join(project_dir, "data", "random", "f1.csv")),  # noqa: PTH118
-    )
-    shutil.copy(
-        os.path.join(filesystem_csv_3, "f2.csv"),  # noqa: PTH118
-        str(os.path.join(project_dir, "data", "random", "f2.csv")),  # noqa: PTH118
-    )
-    gx.data_context.FileDataContext.create(project_dir)
-    shutil.copy(
-        file_relative_path(
-            __file__, "./test_fixtures/great_expectations_site_builder.yml"
-        ),
-        str(
-            os.path.join(  # noqa: PTH118
-                project_dir, FileDataContext.GX_DIR, FileDataContext.GX_YML
-            )
-        ),
-    )
-    context = get_context(
-        context_root_dir=os.path.join(  # noqa: PTH118
-            project_dir, FileDataContext.GX_DIR
-        )
-    )
-
-    context.add_datasource(
-        "titanic",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(  # noqa: PTH118
-                    project_dir, "data", "titanic"
-                ),
-            }
-        },
-    )
-    context.add_datasource(
-        "random",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(  # noqa: PTH118
-                    project_dir, "data", "random"
-                ),
-            }
-        },
-    )
-
-    context.profile_datasource("titanic")
-    context.profile_datasource("random")
-    context.profile_datasource(context.list_datasources()[0]["name"])
-
-    context.variables.anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-        enabled=True,
-        data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
-    )
-
-    return context
-
-
-@pytest.fixture(scope="function")
-@freeze_time("09/26/2019 13:42:41")
-def site_builder_data_context_v013_with_html_store_titanic_random(
-    tmp_path, filesystem_csv_3
-):
-    base_dir = tmp_path / "project_dir"
-    base_dir.mkdir()
-    base_dir = str(base_dir)
-    project_dir = os.path.join(base_dir, "project_path")  # noqa: PTH118
-    os.mkdir(project_dir)  # noqa: PTH102
-
-    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH118, PTH103
-    os.makedirs(os.path.join(project_dir, "data", "titanic"))  # noqa: PTH118, PTH103
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(project_dir, "data", "titanic", "Titanic.csv")  # noqa: PTH118
-        ),
-    )
-
-    os.makedirs(os.path.join(project_dir, "data", "random"))  # noqa: PTH118, PTH103
-    shutil.copy(
-        os.path.join(filesystem_csv_3, "f1.csv"),  # noqa: PTH118
-        str(os.path.join(project_dir, "data", "random", "f1.csv")),  # noqa: PTH118
-    )
-    shutil.copy(
-        os.path.join(filesystem_csv_3, "f2.csv"),  # noqa: PTH118
-        str(os.path.join(project_dir, "data", "random", "f2.csv")),  # noqa: PTH118
-    )
-    gx.data_context.FileDataContext.create(project_dir)
-    shutil.copy(
-        file_relative_path(
-            __file__, "./test_fixtures/great_expectations_v013_site_builder.yml"
-        ),
-        str(
-            os.path.join(  # noqa: PTH118
-                project_dir, FileDataContext.GX_DIR, FileDataContext.GX_YML
-            )
-        ),
-    )
-    context = get_context(
-        context_root_dir=os.path.join(  # noqa: PTH118
-            project_dir, FileDataContext.GX_DIR
-        )
-    )
-
-    context.add_datasource(
-        "titanic",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(  # noqa: PTH118
-                    project_dir, "data", "titanic"
-                ),
-            }
-        },
-    )
-    context.add_datasource(
-        "random",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(  # noqa: PTH118
-                    project_dir, "data", "random"
-                ),
-            }
-        },
-    )
-
-    context.profile_datasource("titanic")
-    context.profile_datasource("random")
-    context.profile_datasource(context.list_datasources()[0]["name"])
-
-    context.variables.anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-        enabled=True,
-        data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
-    )
-
-    return context
 
 
 @pytest.fixture
@@ -3236,21 +3146,56 @@ def test_df(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_with_simple_sql_datasource_for_testing_get_batch(
-    sa, empty_data_context
-):
-    context = empty_data_context
-
+def sqlite_connection_string() -> str:
     db_file_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
             "test_sets", "test_cases_for_sql_data_connector.db"
         ),
     )
+    return f"sqlite:///{db_file_path}"
+
+
+@pytest.fixture
+def fds_data_context_datasource_name() -> str:
+    return "sqlite_datasource"
+
+
+@pytest.fixture
+def fds_data_context(
+    sa,
+    fds_data_context_datasource_name: str,
+    empty_data_context: AbstractDataContext,
+    sqlite_connection_string: str,
+) -> AbstractDataContext:
+    context = empty_data_context
+    datasource = context.sources.add_sqlite(
+        name=fds_data_context_datasource_name,
+        connection_string=sqlite_connection_string,
+        create_temp_table=True,
+    )
+
+    datasource.add_query_asset(
+        name="trip_asset",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    )
+    datasource.add_query_asset(
+        name="trip_asset_split_by_event_type",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    ).add_splitter_column_value("event_type")
+
+    return context
+
+
+@pytest.fixture
+def data_context_with_simple_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context, sqlite_connection_string
+) -> AbstractDataContext:
+    context = empty_data_context
 
     datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
-connection_string: sqlite:///{db_file_path}
+connection_string: {sqlite_connection_string}
 introspection:
     whole_table: {{}}
 
@@ -3602,19 +3547,19 @@ def empty_base_data_context_in_cloud_mode(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    with pytest.deprecated_call():
-        context = gx.data_context.BaseDataContext(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path,
-            cloud_mode=True,
-            cloud_config=ge_cloud_config,
-        )
-
+    context = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+    )
+    set_context(context)
     return context
 
 
@@ -3674,7 +3619,7 @@ def empty_cloud_data_context(
         cloud_access_token=ge_cloud_config.access_token,
         cloud_organization_id=ge_cloud_config.organization_id,
     )
-
+    set_context(context)
     return context
 
 
@@ -3705,7 +3650,7 @@ def empty_cloud_context_fluent(
         cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
-
+    set_context(context)
     return context
 
 
@@ -3719,7 +3664,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -3728,13 +3673,13 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    with pytest.deprecated_call():
-        context = gx.data_context.BaseDataContext(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path,
-            cloud_mode=True,
-            cloud_config=custom_ge_cloud_config,
-        )
+    context = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        cloud_base_url=custom_ge_cloud_config.base_url,
+        cloud_access_token=custom_ge_cloud_config.access_token,
+        cloud_organization_id=custom_ge_cloud_config.organization_id,
+    )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url
@@ -3909,8 +3854,8 @@ def alice_columnar_table_single_batch(empty_data_context):
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_between",
             kwargs={
-                "min_value": 1000,
-                "max_value": 999999999999,
+                "min_value": 1000.0,
+                "max_value": 999999999999.0,
                 "column": "user_id",
             },
             meta={},
@@ -3926,7 +3871,7 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     event_ts_column_data: Dict[str, str] = {
         "column_name": "event_ts",
-        "observed_max_time_str": "2004-10-19 11:05:20",
+        "observed_max_time_str": "2004-10-19T11:05:20",
         "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
     }
 
@@ -3934,7 +3879,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         event_ts_column_data,
         {
             "column_name": "server_ts",
-            "observed_max_time_str": "2004-10-19 11:05:20",
+            "observed_max_time_str": "2004-10-19T11:05:20",
         },
         {
             "column_name": "device_ts",
@@ -4609,7 +4554,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 7500, "max_value": 9000},
+                "kwargs": {"min_value": 7500.0, "max_value": 9000.0},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -4631,9 +4576,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "VendorID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4652,9 +4596,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 4,
-                    "min_value": 4,
+                    "max_value": 4.0,
+                    "min_value": 4.0,
                     "column": "VendorID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4673,9 +4616,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 0,
+                    "max_value": 1.0,
+                    "min_value": 0.0,
                     "column": "passenger_count",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4694,9 +4636,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 6,
-                    "min_value": 6,
+                    "max_value": 6.0,
+                    "min_value": 6.0,
                     "column": "passenger_count",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4715,7 +4656,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.0,
                     "min_value": 0.0,
                     "column": "trip_distance",
@@ -4736,7 +4676,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 57.8,
                     "min_value": 37.57,
                     "column": "trip_distance",
@@ -4757,9 +4696,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "RatecodeID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4778,9 +4716,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 6,
-                    "min_value": 5,
+                    "max_value": 6.0,
+                    "min_value": 5.0,
                     "column": "RatecodeID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4799,9 +4736,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "PULocationID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4820,9 +4756,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 265,
-                    "min_value": 265,
+                    "max_value": 265.0,
+                    "min_value": 265.0,
                     "column": "PULocationID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4841,9 +4776,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "DOLocationID",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4862,9 +4796,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 265,
-                    "min_value": 265,
+                    "max_value": 265.0,
+                    "min_value": 265.0,
                     "column": "DOLocationID",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4883,9 +4816,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 1,
-                    "min_value": 1,
+                    "max_value": 1.0,
+                    "min_value": 1.0,
                     "column": "payment_type",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4904,9 +4836,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
-                    "max_value": 4,
-                    "min_value": 4,
+                    "max_value": 4.0,
+                    "min_value": 4.0,
                     "column": "payment_type",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4925,7 +4856,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -21.02,
                     "min_value": -51.7,
                     "column": "fare_amount",
@@ -4946,7 +4876,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 2976.46,
                     "min_value": 215.35,
                     "column": "fare_amount",
@@ -4967,7 +4896,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -1.0,
                     "min_value": -36.35,
                     "column": "extra",
@@ -4988,7 +4916,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 7.0,
                     "min_value": 4.53,
                     "column": "extra",
@@ -5009,7 +4936,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -0.5,
                     "min_value": -0.5,
                     "column": "mta_tax",
@@ -5030,7 +4956,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 37.14,
                     "min_value": 0.5,
                     "column": "mta_tax",
@@ -5051,7 +4976,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.0,
                     "min_value": 0.0,
                     "column": "tip_amount",
@@ -5072,7 +4996,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 74.72,
                     "min_value": 38.93,
                     "column": "tip_amount",
@@ -5093,7 +5016,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.0,
                     "min_value": 0.0,
                     "column": "tolls_amount",
@@ -5114,7 +5036,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 495.58,
                     "min_value": 24.31,
                     "column": "tolls_amount",
@@ -5135,7 +5056,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -0.3,
                     "min_value": -0.3,
                     "column": "improvement_surcharge",
@@ -5156,7 +5076,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 0.3,
                     "min_value": 0.3,
                     "column": "improvement_surcharge",
@@ -5177,7 +5096,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -24.32,
                     "min_value": -52.54,
                     "column": "total_amount",
@@ -5198,7 +5116,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 2980.13,
                     "min_value": 253.18,
                     "column": "total_amount",
@@ -5219,7 +5136,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": -0.03,
                     "min_value": -2.5,
                     "column": "congestion_surcharge",
@@ -5240,7 +5156,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "mostly": 1.0,
                     "max_value": 2.5,
                     "min_value": 0.02,
                     "column": "congestion_surcharge",
@@ -5458,7 +5373,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_be_in_set",
                 "kwargs": {
                     "column": "VendorID",
-                    "value_set": [1, 2, 4],
+                    "value_set": [1.0, 2.0, 4.0],
                 },
                 "meta": {},
             }
@@ -5468,7 +5383,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_be_in_set",
                 "kwargs": {
                     "column": "passenger_count",
-                    "value_set": [0, 1, 2, 3, 4, 5, 6],
+                    "value_set": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
                 },
                 "meta": {},
             }
@@ -8394,7 +8309,7 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
     project_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
-    return EphemeralDataContext(project_config=project_config)
+    return get_context(project_config=project_config, mode="ephemeral")
 
 
 @pytest.fixture

@@ -9,7 +9,7 @@ from typing import Any, Sequence
 
 import pandas as pd
 
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -336,7 +336,7 @@ def build_count_and_index_table(
         total_count += count
 
         if unexpected_value is not None and unexpected_value != "":
-            row_list.append(unexpected_value)
+            row_list.append(unexpected_value)  # type: ignore[arg-type]
             row_list.append(count)
         elif unexpected_value == "":
             row_list.append("EMPTY")

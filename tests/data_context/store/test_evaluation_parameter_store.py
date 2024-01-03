@@ -5,13 +5,11 @@ from unittest import mock
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store import (
     EvaluationParameterStore,
     TupleAzureBlobStoreBackend,
@@ -22,6 +20,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationMetricIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
@@ -93,7 +94,7 @@ def in_memory_param_store(request, test_backends):
 
 @pytest.mark.filesystem
 def test_evaluation_parameter_store_methods(
-    data_context_parameterized_expectation_suite: DataContext,
+    data_context_parameterized_expectation_suite,
 ):
     run_id = RunIdentifier(run_name="20191125T000000.000000Z")
     source_patient_data_results = ExpectationSuiteValidationResult(

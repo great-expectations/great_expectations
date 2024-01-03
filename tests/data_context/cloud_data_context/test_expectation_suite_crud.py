@@ -4,7 +4,6 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.expectation_suite import (
-    ExpectationConfiguration,
     ExpectationSuite,
 )
 from great_expectations.data_context import get_context
@@ -12,12 +11,12 @@ from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.store.gx_cloud_store_backend import (
-    GXCloudStoreBackend,
-)
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from tests.data_context.conftest import MockResponse
 
@@ -576,32 +575,6 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
 
 
 @pytest.mark.cloud
-def test_add_or_update_expectation_suite_adds_new_obj(
-    empty_base_data_context_in_cloud_mode: CloudDataContext,
-):
-    context = empty_base_data_context_in_cloud_mode
-    mock_expectations_store_has_key.return_value = True
-
-    name = "my_suite"
-    suite = ExpectationSuite(expectation_suite_name=name)
-
-    with mock.patch(
-        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
-        return_value=False,
-    ), mock.patch(
-        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.get_expectation_suite",
-        side_effect=DataContextError("not found"),
-    ) as mock_get, mock.patch(
-        "requests.Session.post",
-        autospec=True,
-    ) as mock_post:
-        context.add_or_update_expectation_suite(expectation_suite=suite)
-
-    mock_get.assert_called_once()  # check if resource exists
-    mock_post.assert_called_once()  # persist resource
-
-
-@pytest.mark.cloud
 def test_add_expectation_suite_without_name_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
 ):
@@ -621,31 +594,6 @@ def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
 
     with pytest.raises(ValueError):
         context.expectations_store._validate_key(key=key)
-
-
-@pytest.mark.cloud
-def test_add_or_update_expectation_suite_updates_existing_obj(
-    empty_base_data_context_in_cloud_mode: CloudDataContext, mocked_get_by_name_response
-):
-    context = empty_base_data_context_in_cloud_mode
-    mock_expectations_store_has_key.return_value = True
-
-    name = "my_suite"
-    id = "861955f0-121e-40ea-9f4f-7b4fc78d9225"
-    suite = ExpectationSuite(expectation_suite_name=name, ge_cloud_id=id)
-
-    with mock.patch(
-        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
-        return_value=True,
-    ), mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
-    ) as mock_get, mock.patch(
-        "requests.Session.put", autospec=True
-    ) as mock_put:
-        context.add_or_update_expectation_suite(expectation_suite=suite)
-
-    assert mock_get.call_count == 2  # check if resource exists, get updated resource
-    mock_put.assert_called_once()  # persist resource
 
 
 @pytest.mark.big
@@ -676,7 +624,9 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     )
     assert (
-        expectation_suite_exclude_rendered_content.expectations[0].rendered_content
+        expectation_suite_exclude_rendered_content.expectation_configurations[
+            0
+        ].rendered_content
         is None
     )
 
@@ -712,6 +662,8 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     )
     assert (
-        expectation_suite_include_rendered_content.expectations[0].rendered_content
+        expectation_suite_include_rendered_content.expectation_configurations[
+            0
+        ].rendered_content
         == expected_expectation_configuration_prescriptive_rendered_content
     )

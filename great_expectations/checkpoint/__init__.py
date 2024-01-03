@@ -13,8 +13,7 @@ from .actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from .checkpoint import Checkpoint, SimpleCheckpoint
-from .configurator import SimpleCheckpointConfigurator
+from .checkpoint import Checkpoint
 
 for module_name, package_name in [
     (".actions", "great_expectations.checkpoint"),

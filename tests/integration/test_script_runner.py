@@ -10,7 +10,6 @@ import logging
 import os
 import pathlib
 import shutil
-import sys
 from typing import List
 
 import pkg_resources
@@ -91,6 +90,12 @@ def delay_rerun(*args):
 docs_test_matrix: List[IntegrationTestFixture] = []
 
 local_tests = [
+    IntegrationTestFixture(
+        name="how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[],
+    ),
     IntegrationTestFixture(
         name="how_to_validate_multiple_batches_within_single_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py",
@@ -180,19 +185,6 @@ local_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="auto_initializing_expect_column_mean_to_be_between",
-        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="is_expectation_auto_initializing",
-        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py",
         backend_dependencies=[],
@@ -223,13 +215,6 @@ local_tests = [
         name="how_to_create_and_edit_expectations_with_instant_feedback_fluent",
         user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_create_an_expectation_suite_with_the_onboarding_data_assistant",
-        user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -273,13 +258,6 @@ fluent_datasources = [
         data_context_dir=None,
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_create_and_edit_expectations_with_a_profiler",
-        data_context_dir=None,
-        data_dir=None,
-        user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -539,14 +517,12 @@ def pytest_parsed_arguments(request):
 
 @flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
     _execute_integration_test(integration_test_fixture, tmp_path)
 
 
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.mark.slow  # 79.77s
 def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)

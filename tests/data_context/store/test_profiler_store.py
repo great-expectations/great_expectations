@@ -4,7 +4,6 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -39,7 +38,7 @@ def test_profiler_store_set_adds_valid_key(
 
 @pytest.mark.filesystem
 def test_profiler_store_integration(
-    empty_data_context: DataContext,
+    empty_data_context,
     profiler_store_name: str,
     profiler_name: str,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,

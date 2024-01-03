@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from json import loads
 from typing import Dict
 

@@ -26,7 +26,9 @@ suite = context.add_expectation_suite(expectation_suite_name="my_suite")
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 # Create an Expectation
 expectation_configuration_1 = ExpectationConfiguration(
@@ -107,10 +109,10 @@ suite.add_expectation(expectation_configuration=expectation_configuration_4)
 
 # Does the ExpectationSuite contain what we expect
 assert len(suite.expectations) == 4
-assert suite.expectations[0] == expectation_configuration_1
-assert suite.expectations[1] == expectation_configuration_2
-assert suite.expectations[2] == expectation_configuration_3
-assert suite.expectations[3] == expectation_configuration_4
+assert suite.expectation_configurations[0] == expectation_configuration_1
+assert suite.expectation_configurations[1] == expectation_configuration_2
+assert suite.expectation_configurations[2] == expectation_configuration_3
+assert suite.expectation_configurations[3] == expectation_configuration_4
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)

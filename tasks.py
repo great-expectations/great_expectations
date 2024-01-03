@@ -748,12 +748,16 @@ def link_checker(ctx: Context, skip_external: bool = True):
 
     path: str = "docs/docusaurus/docs"
     docs_root: str = "docs/docusaurus/docs"
+    static_root: str = "docs/docusaurus/static"
     site_prefix: str = "docs"
+    static_prefix: str = "static"
 
     code, message = checker.scan_docs(
         path=path,
         docs_root=docs_root,
+        static_root=static_root,
         site_prefix=site_prefix,
+        static_prefix=static_prefix,
         skip_external=skip_external,
     )
     raise invoke.Exit(message, code)

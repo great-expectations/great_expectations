@@ -4,9 +4,11 @@ from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_pro
     DataProfilerProfileMetricProvider,
 )
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,

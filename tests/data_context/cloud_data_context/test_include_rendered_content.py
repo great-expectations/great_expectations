@@ -7,17 +7,22 @@ import pytest
 import responses
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationSuite,
     ExpectationValidationResult,
 )
 from great_expectations.data_context import CloudDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 
+@pytest.mark.xfail(
+    reason="add_or_update not responsible for rendered content - rewrite test for new suites factory"
+)
 @pytest.mark.cloud
 @responses.activate
 def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rendered_content(
@@ -50,12 +55,12 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
         expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
             "test_suite"
         )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    assert expectation_suite.expectations[0].rendered_content is None
+    assert expectation_suite.expectation_configurations[0].rendered_content is None
 
     with mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"

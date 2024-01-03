@@ -5,7 +5,9 @@ from typing import Callable, Dict, Union
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import RenderedAtomicContent
 
@@ -389,6 +391,10 @@ def test_atomic_prescriptive_summary_expect_column_most_common_value_to_be_in_se
 
 
 @pytest.mark.unit
+@pytest.mark.xfail(
+    strict=False,
+    reason="ExpectColumnPairCramersPhiValueToBeLessThan is not fully implemented",
+)
 def test_atomic_prescriptive_summary_expect_column_pair_cramers_phi_value_to_be_less_than(
     snapshot,
     get_prescriptive_rendered_content,

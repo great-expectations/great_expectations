@@ -16,7 +16,6 @@ from great_expectations.util import (
     convert_ndarray_to_datetime_dtype_best_effort,
     deep_filter_properties_iterable,
     filter_properties_dict,
-    get_currently_executing_function_call_arguments,
     hyphen,
     is_ndarray_datetime_dtype,
     lint_code,
@@ -24,16 +23,6 @@ from great_expectations.util import (
 
 if TYPE_CHECKING:
     import numpy as np
-
-
-@pytest.fixture
-def empty_expectation_suite():
-    expectation_suite = {
-        "expectation_suite_name": "default",
-        "meta": {},
-        "expectations": [],
-    }
-    return expectation_suite
 
 
 @pytest.fixture
@@ -71,22 +60,6 @@ def datetime_string_array():
 def numeric_array():
     idx: int
     return [idx for idx in range(4)]
-
-
-@pytest.mark.unit
-def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
-    with pytest.raises(
-        ValueError, match=r"The validate util method only supports dataset validations"
-    ):
-        with pytest.warns(
-            Warning,
-            match="No great_expectations version found in configuration object.",
-        ):
-            gx.validate(
-                file_data_asset,
-                empty_expectation_suite,
-                data_asset_class=gx.data_asset.FileDataAsset,
-            )
 
 
 @pytest.mark.unit
@@ -249,29 +222,6 @@ def test_convert_json_string_to_be_python_compliant_no_replacement():
     """
     res = convert_json_string_to_be_python_compliant(text)
     assert res == text
-
-
-@pytest.mark.unit
-def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs):
-    if a is None:
-        test_get_currently_executing_function_call_arguments(0, 1, 2, 3, b=5)
-    else:
-        assert a == 0
-        assert args == (1, 2, 3)
-        assert kwargs == {"b": 5}
-        params = get_currently_executing_function_call_arguments(
-            **{
-                "additional_param_0": "xyz_0",
-                "additional_param_1": "xyz_1",
-                "additional_param_2": "xyz_2",
-            }
-        )
-        assert params["a"] == 0
-        assert params["args"] == (1, 2, 3)
-        assert params["b"] == 5
-        assert params["additional_param_0"] == "xyz_0"
-        assert params["additional_param_1"] == "xyz_1"
-        assert params["additional_param_2"] == "xyz_2"
 
 
 @pytest.mark.unit

@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -10,6 +9,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -51,7 +53,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "threshold": 0,
@@ -62,14 +63,14 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:
-            threshold = self.default_kwarg_values["threshold"]
+            threshold = self._get_default_value("threshold")
 
         metrics = convert_to_json_serializable(data=metrics)
         holes_count: int
@@ -221,7 +222,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         super().validate_configuration(configuration)
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:
-            threshold = self.default_kwarg_values["threshold"]
+            threshold = self._get_default_value("threshold")
 
         try:
             assert isinstance(threshold, int) or isinstance(threshold, float)
