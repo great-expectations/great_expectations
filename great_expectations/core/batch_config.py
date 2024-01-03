@@ -28,6 +28,10 @@ class BatchConfig(pydantic.BaseModel):
     def data_asset(self) -> DataAsset:
         return self._data_asset
 
+    def set_data_asset(self, data_asset: DataAsset) -> None:
+        # pydantic prevents us from using @data_asset.setter
+        self._data_asset = data_asset
+
     def build_batch_request(
         self, batch_request_options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:

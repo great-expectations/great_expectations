@@ -137,12 +137,6 @@ A session is the period of time that you’re signed in to your GX Cloud account
 
 ## Get support
 
-:::note Support during the holiday season
-
-Customer support is not available from December 25 to December 29, 2023. If you request support after December 25, we will respond the first week of January 2024.
-
-:::
-
 If you can't find what you need in the documentation, we're here to help! You can 
 email us at [support@greatexpectations.io](mailto:support@greatexpectations.io) or create a ticket on our [support portal](https://support.greatexpectations.io).
 
