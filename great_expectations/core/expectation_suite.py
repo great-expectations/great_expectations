@@ -147,23 +147,33 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def add(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
-        if not any(
-            expectation.configuration == existing_expectation.configuration
+        if expectation.id:
+            raise RuntimeError(
+                "Cannot add Expectation because it already belongs to an ExpectationSuite. "
+                "If you want to update an existing Expectation, please call Expectation.save(). "
+                "If you are copying this Expectation to a new ExpectationSuite, please copy "
+                "it first (the core expectations and some others support copy(expectation)) "
+                "and set `Expectation.id = None`."
+            )
+        should_save_expectation = self._has_been_saved()
+        expectation_is_unique = all(
+            expectation.configuration != existing_expectation.configuration
             for existing_expectation in self.expectations
-        ):
+        )
+        if expectation_is_unique:
+            # suite is a set-like collection, so don't add if it not unique
             self.expectations.append(expectation)
-        else:
-            pass  # suite is a set-like collection
+            if should_save_expectation:
+                try:
+                    expectation = self._store.add_expectation(
+                        suite=self, expectation=expectation
+                    )
+                    self.expectations[-1].id = expectation.id
+                except Exception as exc:
+                    self.expectations.pop()
+                    raise exc
 
-        if self._has_been_saved():
-            # only persist on add if the suite has already been saved
-            try:
-                self.save()
-            except Exception as exc:
-                # rollback this change
-                self.expectations.pop()
-                raise exc
-
+        expectation.register_save_callback(save_callback=self._save_expectation)
         return expectation
 
     @public_api
@@ -185,7 +195,7 @@ class ExpectationSuite(SerializableDictDot):
         if self._has_been_saved():
             # only persist on delete if the suite has already been saved
             try:
-                self.save()
+                self._store.delete_expectation(suite=self, expectation=expectation)
             except Exception as exc:
                 # rollback this change
                 # expectation suite is set-like so order of expectations doesn't matter
@@ -197,14 +207,17 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
-        key = self._store.get_key(suite=self)
+        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a DataContext?"""
         # todo: this should only check local keys instead of potentially querying the remote backend
-        key = self._store.get_key(suite=self)
+        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         return self._store.has_key(key=key)
+
+    def _save_expectation(self, expectation) -> Expectation:
+        return self._store.update_expectation(suite=self, expectation=expectation)
 
     @property
     def expectation_configurations(self) -> list[ExpectationConfiguration]:
