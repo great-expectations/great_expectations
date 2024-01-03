@@ -385,7 +385,7 @@ def get_context(  # type: ignore[overload-overlap]
 
 
 @overload
-def get_context(
+def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: None = ...,
@@ -408,14 +408,29 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_base_url: str | None = ...,
     cloud_access_token: str | None = ...,
     cloud_organization_id: str | None = ...,
-    cloud_mode: bool | None = ...,
+    cloud_mode: Literal[False] | None = ...,
     mode: Literal["ephemeral"] = ...,
 ) -> EphemeralDataContext:
     ...
 
 
+@overload
+def get_context(  # type: ignore[overload-overlap]
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: PathStr | None = ...,
+    project_root_dir: PathStr | None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
+    cloud_mode: bool | None = ...,
+    mode: None = ...,
+) -> EphemeralDataContext | FileDataContext | CloudDataContext:
+    ...
+
+
 @public_api
-def get_context(
+def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = None,
     context_root_dir: PathStr | None = None,
     project_root_dir: PathStr | None = None,
