@@ -493,8 +493,13 @@ class TestCRUDMethods:
         assert suite.expectations[0].column == "a"
         assert suite.expectations[1].column == "b"
 
+        # Change the column names of both expectations
         expectation = suite.expectations[0]
+        other_expectation = suite.expectations[1]
         expectation.column = "c"
+        other_expectation.column = "d"
+
+        # Only persist change made to first expectation
         expectation.save()
 
         assert suite.expectations[0].column == "c"
