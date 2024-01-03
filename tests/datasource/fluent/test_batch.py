@@ -102,6 +102,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
     expectation = suite.expectations[0]
     assert isinstance(expectation, ExpectColumnValuesToNotBeNull)
     expectation.mostly = 0.95
+    expectation.save()
     assert suite.expectations[0].mostly == 0.95
     result = batch.validate(suite)
     assert result.success is True
