@@ -194,7 +194,7 @@ class ExpectationsStore(Store):
         self, suite
     ) -> tuple[Union[GXCloudIdentifier, ExpectationSuiteIdentifier], ExpectationSuite]:
         """Get the latest state of an ExpectationSuite from the backend."""
-        suite_identifier = self.get_key(suite=suite)
+        suite_identifier = self.get_key(name=suite.name, id=suite.ge_cloud_id)
         suite_dict = self.get(key=suite_identifier)
         suite = ExpectationSuite(**suite_dict)
         return suite_identifier, suite
