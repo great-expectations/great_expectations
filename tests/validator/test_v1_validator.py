@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from pprint import pformat as pf
+
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
@@ -68,7 +72,7 @@ def batch_config(
     fds_data_asset: DataAsset,
 ) -> BatchConfig:
     batch_config = BatchConfig(name="test_batch_config")
-    batch_config._data_asset = fds_data_asset
+    batch_config.set_data_asset(fds_data_asset)
     return batch_config
 
 
@@ -77,7 +81,7 @@ def batch_config_with_event_type_splitter(
     fds_data_asset_with_event_type_splitter: DataAsset,
 ) -> BatchConfig:
     batch_config = BatchConfig(name="test_batch_config")
-    batch_config._data_asset = fds_data_asset_with_event_type_splitter
+    batch_config.set_data_asset(fds_data_asset_with_event_type_splitter)
     return batch_config
 
 
@@ -176,7 +180,7 @@ def test_validate_expectation_with_batch_asset_options(
             value_set=[desired_event_type],
         )
     )
-
+    print(f"Result dict ->\n{pf(result)}")
     assert result.success
 
 

@@ -250,7 +250,7 @@ def test_datasource_store__add_batch_config__success(
 
     # Act
     batch_config = BatchConfig(name="my cool batch config")
-    batch_config._data_asset = asset
+    batch_config.set_data_asset(asset)
     updated_batch_config = store.add_batch_config(batch_config)
 
     # Assert
@@ -276,7 +276,7 @@ def test_datasource_store__add_batch_config__duplicate_name(
 
     # Act + Assert
     new_batch_config = BatchConfig(name=batch_config_name)
-    new_batch_config._data_asset = asset
+    new_batch_config.set_data_asset(asset)
 
     with pytest.raises(ValueError, match="already exists"):
         store.add_batch_config(new_batch_config)
@@ -320,7 +320,7 @@ def test_datasource_store__delete_batch_config__does_not_exist(
 
     # Act + Assert
     new_batch_config = BatchConfig(name=batch_config_name)
-    new_batch_config._data_asset = asset
+    new_batch_config.set_data_asset(asset)
 
     with pytest.raises(ValueError, match="does not exist"):
         store.delete_batch_config(new_batch_config)
