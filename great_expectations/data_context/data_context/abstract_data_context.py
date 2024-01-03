@@ -335,6 +335,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         submit_event(event=DataContextInitializedEvent())
 
+        # demonstrate which tests use a context without ExpectationsStore
+        if not self.stores.get(self.expectations_store_name):
+            raise RuntimeError("ExpectationsStore is required.")
+
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
         self._register_providers(config_provider)
