@@ -41,7 +41,9 @@ batch.validate(expectation)
 suite = context.add_expectation_suite("quickstart")
 suite.add(expectation)
 suite.add(
-    gxe.ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6)
+    gxe.ExpectColumnValuesToBeBetween(
+        column="passenger_count", min_value=1, max_value=6
+    )
 )
 # </snippet>
 
