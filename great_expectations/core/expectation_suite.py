@@ -212,7 +212,7 @@ class ExpectationSuite(SerializableDictDot):
 
     @expectation_configurations.setter
     def expectation_configurations(self, value):
-        raise RuntimeError(
+        raise AttributeError(
             "Cannot set ExpectationSuite.expectation_configurations. "
             "Please use ExpectationSuite.expectations instead."
         )
@@ -334,9 +334,6 @@ class ExpectationSuite(SerializableDictDot):
         memo[id(self)] = result
 
         attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
-        # map expectations to expectation_configurations
-        # attributes_to_copy.remove("expectations")
-        # attributes_to_copy.add("expectation_configurations")
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
@@ -355,9 +352,9 @@ class ExpectationSuite(SerializableDictDot):
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
-        _expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations = [exp.configuration for exp in self.expectations]
         myself["expectations"] = convert_to_json_serializable(
-            _expectation_configurations
+            expectation_configurations
         )
         try:
             myself["evaluation_parameters"] = convert_to_json_serializable(
@@ -447,7 +444,7 @@ class ExpectationSuite(SerializableDictDot):
             TypeError: Must provide either expectation_configuration or ge_cloud_id.
             ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
-        _expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations = [exp.configuration for exp in self.expectations]
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
@@ -465,10 +462,10 @@ class ExpectationSuite(SerializableDictDot):
             if remove_multiple_matches:
                 removed_expectations = []
                 for index in sorted(found_expectation_indexes, reverse=True):
-                    removed_expectations.append(_expectation_configurations.pop(index))
+                    removed_expectations.append(expectation_configurations.pop(index))
                 self.expectations = [
                     self._build_expectation(config)
-                    for config in _expectation_configurations
+                    for config in expectation_configurations
                 ]
                 return removed_expectations
             else:
@@ -478,10 +475,9 @@ class ExpectationSuite(SerializableDictDot):
                 )
 
         else:
-            result = [_expectation_configurations.pop(found_expectation_indexes[0])]
+            result = [expectation_configurations.pop(found_expectation_indexes[0])]
             self.expectations = [
-                self._build_expectation(config)
-                for config in _expectation_configurations
+                self._build_expectation(config) for config in expectation_configurations
             ]
             return result
 
@@ -897,11 +893,11 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_table_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of table expectations."""
-        _expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations = [exp.configuration for exp in self.expectations]
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.TABLE,
-                _expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -915,11 +911,11 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_column_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column map expectations."""
-        _expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations = [exp.configuration for exp in self.expectations]
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN,
-                _expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -938,13 +934,13 @@ class ExpectationSuite(SerializableDictDot):
     # noinspection PyPep8Naming
     def get_column_pair_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column_pair map expectations."""
-        _expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations = [exp.configuration for exp in self.expectations]
 
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.COLUMN_PAIR,
-                _expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -968,13 +964,13 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_multicolumn_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of multicolumn map expectations."""
-        _expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations = [exp.configuration for exp in self.expectations]
 
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.MULTICOLUMN,
-                _expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -998,8 +994,8 @@ class ExpectationSuite(SerializableDictDot):
 
         column: str
         expectation: ExpectationConfiguration
-        _expectation_configurations = [exp.configuration for exp in self.expectations]
-        for expectation in _expectation_configurations:
+        expectation_configurations = [exp.configuration for exp in self.expectations]
+        for expectation in expectation_configurations:
             if "column" in expectation.kwargs:
                 column = expectation.kwargs["column"]
             else:
