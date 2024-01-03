@@ -1,11 +1,9 @@
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
-from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.store.datasource_store import DatasourceStore
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
@@ -35,15 +33,14 @@ def context(empty_data_context: AbstractDataContext) -> AbstractDataContext:
 
 
 @pytest.fixture
-def store(
+def context_with_asset(
     context: AbstractDataContext,
     datasource_name: str,
     empty_data_asset_name: str,
     data_asset_with_batch_config_name: str,
     batch_config_name: str,
-) -> DatasourceStore:
-    """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
-    store = context._datasource_store
+) -> AbstractDataContext:
+    """Context with a datasource that has 2 assets. one of the assets has a batch config."""
     datasource = context.sources.add_pandas(datasource_name)
     datasource.add_csv_asset(empty_data_asset_name, "taxi.csv")  # type: ignore [arg-type]
     datasource.add_csv_asset(
@@ -51,19 +48,16 @@ def store(
         "taxi.csv",  # type: ignore [arg-type]
     ).add_batch_config(batch_config_name)
 
-    key = DataContextVariableKey(resource_name=datasource_name)
-    store.set(key=key, value=datasource)
-    return store
+    return context
 
 
 @pytest.fixture
 def empty_data_asset(
-    store: DatasourceStore,
+    context_with_asset: AbstractDataContext,
     datasource_name: str,
     empty_data_asset_name: str,
 ) -> DataAsset:
-    key = DataContextVariableKey(resource_name=datasource_name)
-    datasource = store.get(key)
+    datasource = context_with_asset.get_datasource(datasource_name)
 
     assert isinstance(datasource, Datasource)
     return datasource.get_asset(empty_data_asset_name)
@@ -71,12 +65,11 @@ def empty_data_asset(
 
 @pytest.fixture
 def data_asset_with_batch_config(
-    store: DatasourceStore,
+    context_with_asset: AbstractDataContext,
     datasource_name: str,
     data_asset_with_batch_config_name: str,
 ) -> DataAsset:
-    key = DataContextVariableKey(resource_name=datasource_name)
-    datasource = store.get(key)
+    datasource = context_with_asset.get_datasource(datasource_name)
 
     assert isinstance(datasource, Datasource)
     return datasource.get_asset(data_asset_with_batch_config_name)
@@ -100,22 +93,16 @@ def test_add_batch_config__success(empty_data_asset: DataAsset):
 
 
 @pytest.mark.unit
-def test_add_batch_config__persists_when_context_present(
+def test_add_batch_config__persists(
     context: AbstractDataContext,
-    store: DatasourceStore,
     empty_data_asset: DataAsset,
     datasource_name: str,
     empty_data_asset_name: str,
 ):
-    key = DataContextVariableKey(resource_name=datasource_name)
     name = "my batch config"
-
-    # depending on how a datasource is created, it may or may not have a context
-    empty_data_asset._datasource._data_context = context
-
     batch_config = empty_data_asset.add_batch_config(name)
 
-    loaded_datasource = store.get(key)
+    loaded_datasource = context.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(empty_data_asset_name)
 
@@ -153,20 +140,15 @@ def test_delete_batch_config__success(
 
 @pytest.mark.unit
 def test_delete_batch_config__persists(
-    store: DatasourceStore,
-    context: AbstractDataContext,
+    context_with_asset: AbstractDataContext,
     datasource_name: str,
     empty_data_asset_name: str,
     data_asset_with_batch_config: DataAsset,
     persisted_batch_config: BatchConfig,
 ):
-    key = DataContextVariableKey(resource_name=datasource_name)
-
-    # depending on how a datasource is created, it may or may not have a context
-    data_asset_with_batch_config._datasource._data_context = context
     data_asset_with_batch_config.delete_batch_config(persisted_batch_config)
 
-    loaded_datasource = store.get(key)
+    loaded_datasource = context_with_asset.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(empty_data_asset_name)
 
