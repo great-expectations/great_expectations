@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import TYPE_CHECKING, Dict, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -194,7 +194,7 @@ class ExpectationsStore(Store):
         self, suite
     ) -> tuple[Union[GXCloudIdentifier, ExpectationSuiteIdentifier], ExpectationSuite]:
         """Get the latest state of an ExpectationSuite from the backend."""
-        suite_identifier = self.get_key(suite=suite)
+        suite_identifier = self.get_key(name=suite.name, id=suite.ge_cloud_id)
         suite_dict = self.get(key=suite_identifier)
         suite = ExpectationSuite(**suite_dict)
         return suite_identifier, suite
@@ -324,20 +324,18 @@ class ExpectationsStore(Store):
             return self._expectationSuiteSchema.loads(value)
 
     def get_key(
-        self, suite: ExpectationSuite
+        self, name: str, id: Optional[str] = None
     ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
-        """Given an ExpectationSuite, build the correct key for use in the ExpectationsStore."""
+        """Given a name and optional ID, build the correct key for use in the ExpectationsStore."""
         key: GXCloudIdentifier | ExpectationSuiteIdentifier
         if self.cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                id=suite.ge_cloud_id,
-                resource_name=suite.expectation_suite_name,
+                id=id,
+                resource_name=name,
             )
         else:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=suite.expectation_suite_name
-            )
+            key = ExpectationSuiteIdentifier(expectation_suite_name=name)
         return key
 
     def self_check(self, pretty_print):  # noqa: PLR0912

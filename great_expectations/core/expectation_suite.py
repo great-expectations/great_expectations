@@ -219,13 +219,13 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
-        key = self._store.get_key(suite=self)
+        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a DataContext?"""
         # todo: this should only check local keys instead of potentially querying the remote backend
-        key = self._store.get_key(suite=self)
+        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         return self._store.has_key(key=key)
 
     def _save_expectation(self, expectation) -> Expectation:
