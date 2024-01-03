@@ -906,8 +906,10 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_table_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of table expectations."""
-        expectation_configurations = [exp.configuration for exp in self.expectations]
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.TABLE,
                 expectation_configurations,
@@ -924,8 +926,10 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_column_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column map expectations."""
-        expectation_configurations = [exp.configuration for exp in self.expectations]
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN,
                 expectation_configurations,
@@ -947,9 +951,11 @@ class ExpectationSuite(SerializableDictDot):
     # noinspection PyPep8Naming
     def get_column_pair_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column_pair map expectations."""
-        expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
 
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.COLUMN_PAIR,
@@ -977,9 +983,11 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_multicolumn_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of multicolumn map expectations."""
-        expectation_configurations = [exp.configuration for exp in self.expectations]
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
 
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.MULTICOLUMN,
