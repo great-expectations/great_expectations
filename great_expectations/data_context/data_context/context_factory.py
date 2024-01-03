@@ -400,7 +400,7 @@ def get_context(  # type: ignore[overload-overlap]
 
 
 @overload
-def get_context(  # type: ignore[overload-overlap]
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: None = ...,
@@ -415,7 +415,7 @@ def get_context(  # type: ignore[overload-overlap]
 
 
 @overload
-def get_context(  # type: ignore[overload-overlap]
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr | None = ...,
     project_root_dir: PathStr | None = ...,
