@@ -258,7 +258,7 @@ quickstart = [
     IntegrationTestFixture(
         name="v1_sql_quickstart",
         user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
+        backend_dependencies=[BackendDependencies.SQLALCHEMY],
     ),
 ]
 

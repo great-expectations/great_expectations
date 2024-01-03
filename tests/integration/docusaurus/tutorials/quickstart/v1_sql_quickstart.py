@@ -10,6 +10,8 @@ ephemeral assets.
 iterative process for trying and refining expectations.
 """
 
+import pathlib
+
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
@@ -22,7 +24,18 @@ import great_expectations.expectations as gxe
 context = gx.get_context()
 # </snippet>
 
-connection_string = "postgresql://postgres:postgres@localhost:5432/postgres"
+sqlite_database_path = pathlib.Path(
+    gx.__file__,
+    "..",
+    "..",
+    "tests",
+    "test_sets",
+    "taxi_yellow_tripdata_samples",
+    "sqlite",
+    "yellow_tripdata.db",
+).resolve(strict=True)
+connection_string = f"sqlite:///{sqlite_database_path}"
+
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">
 batch = context.sources.pandas_default.read_sql(
     "SELECT * FROM yellow_tripdata_sample_2019_01", connection_string
