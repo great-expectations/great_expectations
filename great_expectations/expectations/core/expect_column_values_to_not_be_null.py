@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -42,6 +43,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     """Expect the column values to not be null.
 

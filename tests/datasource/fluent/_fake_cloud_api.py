@@ -601,6 +601,30 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     return result
 
 
+def delete_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
+    parsed_url = urllib.parse.urlparse(request.url)
+    suite_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
+    old_suite = exp_suites.pop(suite_id, None)
+    if not old_suite:
+        result = CallbackResult(
+            404,
+            headers=DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "404",
+                        "detail": "Suite not found",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    else:
+        result = CallbackResult(204, headers={}, body="")
+    return result
+
+
 def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
     url = requests.url
     LOGGER.debug(f"{requests.method} {url}")
@@ -797,6 +821,11 @@ def gx_cloud_api_fake_ctx(
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
             put_expectation_suites_cb,
         ),
+        resp_mocker.add_callback(
+            responses.DELETE,
+            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            delete_expectation_suites_cb,
+        )
         resp_mocker.add_callback(
             responses.GET,
             f"{org_url_base}/checkpoints",
