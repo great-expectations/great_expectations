@@ -540,7 +540,7 @@ class Datasource(
     def save(self: Self) -> Self:
         if not self._data_context:
             raise DataContextError("Cannot save datasource without a data context.")
-        return self._data_context.update_datasource(datasource=self)
+        return self._data_context.update_datasource(datasource=self)  # type: ignore [return-value]
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
