@@ -82,6 +82,7 @@ module.exports = {
           items: [
             'cloud/quickstarts/snowflake_quickstart',
             'cloud/quickstarts/airflow_quickstart',
+            'cloud/quickstarts/python_quickstart',
           ]
         },
         {
