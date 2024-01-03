@@ -3,7 +3,6 @@ from typing import Dict
 
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
 )
@@ -40,11 +39,11 @@ class ColumnAggregateTimeSeriesExpectation(ColumnAggregateExpectation, ABC):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        configuration = self.configuration
         metric_value = metrics[self.metric_dependency]
         model_json = configuration.kwargs["model"]
         date = configuration.kwargs["date"]

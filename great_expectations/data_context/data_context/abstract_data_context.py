@@ -35,17 +35,17 @@ from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.analytics.events import DataContextInitializedEvent
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
     new_argument,
     new_method_or_class,
     public_api,
 )
+from great_expectations.analytics.events import DataContextInitializedEvent
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -59,14 +59,13 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.datasource_dict import CacheableDatasourceDict
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
+from great_expectations.core.suite_factory import SuiteFactory
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -91,9 +90,6 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import (
-    GXCloudIDAwareRef,
-)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -105,7 +101,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     parse_substitution_variable,
 )
-from great_expectations.dataset.dataset import Dataset
+from great_expectations.datasource.datasource_dict import CacheableDatasourceDict
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
@@ -116,7 +112,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
@@ -148,10 +143,7 @@ if TYPE_CHECKING:
 
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.datasource_dict import DatasourceDict
-    from great_expectations.core.expectation_configuration import (
-        ExpectationConfiguration,
-    )
+    from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -172,6 +164,7 @@ if TYPE_CHECKING:
         GXCloudIdentifier,
     )
     from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
@@ -179,6 +172,9 @@ if TYPE_CHECKING:
         BatchRequestOptions,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
@@ -201,7 +197,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     One of the primary responsibilities of the DataContext is managing CRUD operations for core GX objects:
 
     .. list-table:: Supported CRUD Methods
-       :widths: 10 18 18 18 18 18
+       :widths: 10 18 18 18 18
        :header-rows: 1
 
        * -
@@ -214,9 +210,7 @@ class AbstractDataContext(ConfigPeer, ABC):
          - ✅
          - ✅
          - ✅
-         - ✅
        * - `add`
-         - ✅
          - ✅
          - ✅
          - ✅
@@ -226,15 +220,12 @@ class AbstractDataContext(ConfigPeer, ABC):
          - ✅
          - ✅
          - ✅
-         - ✅
        * - `add_or_update`
          - ❌
          - ✅
          - ✅
          - ✅
-         - ✅
        * - `delete`
-         - ✅
          - ✅
          - ✅
          - ✅
@@ -318,6 +309,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._sources: _SourceFactories = _SourceFactories(self)
+
+        self._suites: Union[SuiteFactory, None]
+        if self.stores.get(self.expectations_store_name):
+            self._suites = SuiteFactory(
+                store=self.expectations_store,
+                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
+            )
+        else:
+            self._suites = None
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
@@ -495,7 +495,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id  # type: ignore[assignment]
+            self._in_memory_instance_id = instance_id
         return instance_id
 
     @property
@@ -548,6 +548,18 @@ class AbstractDataContext(ConfigPeer, ABC):
     def stores(self) -> dict:
         """A single holder for all Stores in this context"""
         return self._stores
+
+    @property
+    def datasource_store(self) -> DatasourceStore:
+        return self._datasource_store
+
+    @property
+    def suites(self) -> SuiteFactory:
+        if not self._suites:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured ExpectationsStore to persist ExpectationSuites."
+            )
+        return self._suites
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -1362,7 +1374,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
+        for datasource_name, datasource_config in self.config.datasources.items():
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(  # noqa: PLW2901
                     **datasource_config
@@ -1407,7 +1419,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             self.datasources.pop(datasource_name, None)
 
-        self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+        self.config.datasources.pop(datasource_name, None)
 
         self._save_project_config()
 
@@ -1428,11 +1440,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: str | list[str] | None = ...,
-        slack_webhook: str | None = ...,
-        notify_on: str | None = ...,
-        notify_with: str | list[str] | None = ...,
         ge_cloud_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1464,10 +1471,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        site_names: None = ...,
-        slack_webhook: None = ...,
-        notify_on: None = ...,
-        notify_with: None = ...,
         ge_cloud_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1518,11 +1521,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: str | list[str] | None = None,
-        slack_webhook: str | None = None,
-        notify_on: str | None = None,
-        notify_with: str | list[str] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1550,10 +1548,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1588,10 +1582,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            site_names=site_names,
-            slack_webhook=slack_webhook,
-            notify_on=notify_on,
-            notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1650,11 +1640,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        site_names: str | list[str] | None = ...,
-        slack_webhook: str | None = ...,
-        notify_on: str | None = ...,
-        notify_with: str | list[str] | None = ...,
         expectation_suite_id: str | None = ...,
+        expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
         validator: Validator | None = ...,
         checkpoint: None = ...,
@@ -1682,11 +1669,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        site_names: None = ...,
-        slack_webhook: None = ...,
-        notify_on: None = ...,
-        notify_with: None = ...,
         expectation_suite_id: None = ...,
+        expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
         validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
@@ -1720,12 +1704,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: str | list[str] | None = None,
-        slack_webhook: str | None = None,
-        notify_on: str | None = None,
-        notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
@@ -1747,11 +1727,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             default_validation_id: The default validation ID to use in generating this checkpoint.
             validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
@@ -1759,6 +1736,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
@@ -1774,10 +1755,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            site_names=site_names,
-            slack_webhook=slack_webhook,
-            notify_on=notify_on,
-            notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1811,10 +1788,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        site_names: str | list[str] | None = None,
-        slack_webhook: str | None = None,
-        notify_on: str | None = None,
-        notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
@@ -1850,10 +1823,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 profilers=profilers,
-                site_names=site_names,
-                slack_webhook=slack_webhook,
-                notify_on=notify_on,
-                notify_with=notify_with,
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
@@ -1995,7 +1964,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_time: The date/time of the run
             result_format: One of several supported formatting directives for expectation validation results
             ge_cloud_id: Great Expectations Cloud id for the checkpoint
-            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             id: Great Expectations Cloud id for the checkpoint (preferred over `ge_cloud_id`)
             expectation_suite_id: Great Expectations Cloud id for the expectation suite (preferred over `expectation_suite_ge_cloud_id`)
             **kwargs: Additional kwargs to pass to the validation operator
@@ -2805,7 +2774,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted `ExpectationSuite`.
         """
-
         self._validate_expectation_suite_xor_expectation_suite_name(
             expectation_suite, expectation_suite_name
         )
@@ -3080,183 +3048,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             return []
 
         return list(self.validation_operators.keys())
-
-    def profile_data_asset(  # noqa: PLR0912, PLR0913, PLR0915
-        self,
-        datasource_name,
-        batch_kwargs_generator_name=None,
-        data_asset_name=None,
-        batch_kwargs=None,
-        expectation_suite_name=None,
-        profiler=BasicDatasetProfiler,
-        profiler_configuration=None,
-        run_id=None,
-        additional_batch_kwargs=None,
-        run_name=None,
-        run_time=None,
-    ):
-        """
-        Profile a data asset
-
-        :param datasource_name: the name of the datasource to which the profiled data asset belongs
-        :param batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches (only if batch_kwargs are not provided)
-        :param data_asset_name: the name of the profiled data asset
-        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the batch kwargs generator (generator_name arg) will choose a batch
-        :param profiler: the profiler class to use
-        :param profiler_configuration: Optional profiler configuration dict
-        :param run_name: optional - if set, the validation result created by the profiler will be under the provided run_name
-        :param additional_batch_kwargs:
-        :returns
-            A dictionary::
-
-                {
-                    "success": True/False,
-                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
-                }
-
-            When success = False, the error details are under "error" key
-        """
-
-        assert not (run_id and run_name) and not (
-            run_id and run_time
-        ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, dict):
-            run_id = RunIdentifier(**run_id)
-        elif not isinstance(run_id, RunIdentifier):
-            run_name = run_name or "profiling"
-            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
-
-        logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
-
-        if not additional_batch_kwargs:
-            additional_batch_kwargs = {}
-
-        if batch_kwargs is None:
-            try:
-                generator = self.get_datasource(
-                    datasource_name=datasource_name
-                ).get_batch_kwargs_generator(name=batch_kwargs_generator_name)
-                batch_kwargs = generator.build_batch_kwargs(
-                    data_asset_name, **additional_batch_kwargs
-                )
-            except gx_exceptions.BatchKwargsError:
-                raise gx_exceptions.ProfilerError(
-                    "Unable to build batch_kwargs for datasource {}, using batch kwargs generator {} for name {}".format(
-                        datasource_name, batch_kwargs_generator_name, data_asset_name
-                    )
-                )
-            except ValueError:
-                raise gx_exceptions.ProfilerError(
-                    "Unable to find datasource {} or batch kwargs generator {}.".format(
-                        datasource_name, batch_kwargs_generator_name
-                    )
-                )
-        else:
-            batch_kwargs.update(additional_batch_kwargs)
-
-        profiling_results = {"success": False, "results": []}
-
-        total_columns, total_expectations, total_rows = 0, 0, 0
-        total_start_time = datetime.datetime.now()  # noqa: DTZ005
-
-        name = data_asset_name
-        # logger.info("\tProfiling '%s'..." % name)
-
-        start_time = datetime.datetime.now()  # noqa: DTZ005
-
-        if expectation_suite_name is None:
-            if batch_kwargs_generator_name is None and data_asset_name is None:
-                expectation_suite_name = (
-                    datasource_name
-                    + "."
-                    + profiler.__name__
-                    + "."
-                    + BatchKwargs(batch_kwargs).to_id()
-                )
-            else:
-                expectation_suite_name = (
-                    datasource_name
-                    + "."
-                    + batch_kwargs_generator_name
-                    + "."
-                    + data_asset_name
-                    + "."
-                    + profiler.__name__
-                )
-
-        self.add_or_update_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-
-        # TODO: Add batch_parameters
-        batch = self._get_batch_v2(
-            expectation_suite_name=expectation_suite_name,
-            batch_kwargs=batch_kwargs,
-        )
-
-        if not profiler.validate(batch):
-            raise gx_exceptions.ProfilerError(
-                f"batch '{name}' is not a valid batch for the '{profiler.__name__}' profiler"
-            )
-
-        # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
-        # will have more to unpack.
-        expectation_suite, validation_results = profiler.profile(
-            batch, run_id=run_id, profiler_configuration=profiler_configuration
-        )
-        profiling_results["results"].append((expectation_suite, validation_results))
-
-        validation_ref = self.validations_store.set(
-            key=ValidationResultIdentifier(
-                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                ),
-                run_id=run_id,
-                batch_identifier=batch.batch_id,
-            ),
-            value=validation_results,
-        )
-
-        if isinstance(validation_ref, GXCloudIDAwareRef):
-            ge_cloud_id = validation_ref.ge_cloud_id
-            validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
-
-        if isinstance(batch, Dataset):
-            # For datasets, we can produce some more detailed statistics
-            row_count = batch.get_row_count()
-            total_rows += row_count
-            new_column_count = len(
-                {
-                    exp.kwargs["column"]
-                    for exp in expectation_suite.expectation_configurations
-                    if "column" in exp.kwargs
-                }
-            )
-            total_columns += new_column_count
-
-        new_expectation_count = len(expectation_suite.expectations)
-        total_expectations += new_expectation_count
-
-        self.save_expectation_suite(expectation_suite)
-        duration = (
-            datetime.datetime.now() - start_time  # noqa: DTZ005
-        ).total_seconds()
-        # noinspection PyUnboundLocalVariable
-        logger.info(
-            f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
-        )
-
-        total_duration = (
-            datetime.datetime.now() - total_start_time  # noqa: DTZ005
-        ).total_seconds()
-        logger.info(
-            f"""
-Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
-Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
-        )
-
-        profiling_results["success"] = True
-        return profiling_results
 
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
@@ -4281,7 +4072,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update
         # caches or config, but keeping existing behavior for now
         self.datasources[name] = datasource
-        self.config.datasources[name] = config  # type: ignore[index,assignment]
+        self.config.datasources[name] = config  # type: ignore[assignment]
 
         return datasource
 
@@ -4575,228 +4366,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return_mode=return_mode,
             shorten_tracebacks=shorten_tracebacks,
         )
-
-    def profile_datasource(  # noqa: C901, PLR0912, PLR0913, PLR0915
-        self,
-        datasource_name,
-        batch_kwargs_generator_name=None,
-        data_assets=None,
-        max_data_assets=20,
-        profile_all_data_assets=True,
-        profiler=BasicDatasetProfiler,
-        profiler_configuration=None,
-        dry_run=False,
-        run_id=None,
-        additional_batch_kwargs=None,
-        run_name=None,
-        run_time=None,
-    ):
-        """Profile the named datasource using the named profiler.
-
-        Args:
-            datasource_name: the name of the datasource for which to profile data_assets
-            batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches
-            data_assets: list of data asset names to profile
-            max_data_assets: if the number of data assets the batch kwargs generator yields is greater than this max_data_assets,
-                profile_all_data_assets=True is required to profile all
-            profile_all_data_assets: when True, all data assets are profiled, regardless of their number
-            profiler: the profiler class to use
-            profiler_configuration: Optional profiler configuration dict
-            dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
-            additional_batch_kwargs: Additional keyword arguments to be provided to get_batch when loading the data asset.
-        Returns:
-            A dictionary::
-
-                {
-                    "success": True/False,
-                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
-                }
-
-            When success = False, the error details are under "error" key
-        """
-
-        # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
-        # an arg exists and raise an error if it does not.
-        datasource = self.get_datasource(datasource_name)
-        assert datasource
-
-        if not dry_run:
-            logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
-
-        profiling_results = {}
-
-        # Build the list of available data asset names (each item a tuple of name and type)
-
-        data_asset_names_dict = self.get_available_data_asset_names(datasource_name)
-
-        available_data_asset_name_list = []
-        try:
-            datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
-        except KeyError:
-            # KeyError will happen if there is not datasource
-            raise gx_exceptions.ProfilerError(f"No datasource {datasource_name} found.")
-
-        if batch_kwargs_generator_name is None:
-            # if no generator name is passed as an arg and the datasource has only
-            # one generator with data asset names, use it.
-            # if ambiguous, raise an exception
-            for name in datasource_data_asset_names_dict.keys():
-                if batch_kwargs_generator_name is not None:
-                    profiling_results = {
-                        "success": False,
-                        "error": {
-                            "code": self.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
-                        },
-                    }
-                    return profiling_results
-
-                if len(datasource_data_asset_names_dict[name]["names"]) > 0:
-                    available_data_asset_name_list = datasource_data_asset_names_dict[
-                        name
-                    ]["names"]
-                    batch_kwargs_generator_name = name
-
-            if batch_kwargs_generator_name is None:
-                profiling_results = {
-                    "success": False,
-                    "error": {
-                        "code": self.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
-                    },
-                }
-                return profiling_results
-        else:
-            # if the generator name is passed as an arg, get this generator's available data asset names
-            try:
-                available_data_asset_name_list = datasource_data_asset_names_dict[
-                    batch_kwargs_generator_name
-                ]["names"]
-            except KeyError:
-                raise gx_exceptions.ProfilerError(
-                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(
-                        batch_kwargs_generator_name
-                    )
-                )
-
-        available_data_asset_name_list = sorted(
-            available_data_asset_name_list, key=lambda x: x[0]
-        )
-
-        if len(available_data_asset_name_list) == 0:
-            raise gx_exceptions.ProfilerError(
-                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
-                    datasource_name, batch_kwargs_generator_name
-                )
-            )
-        total_data_assets = len(available_data_asset_name_list)
-
-        if isinstance(data_assets, list) and len(data_assets) > 0:
-            not_found_data_assets = [
-                name
-                for name in data_assets
-                if name not in [da[0] for da in available_data_asset_name_list]
-            ]
-            if len(not_found_data_assets) > 0:
-                profiling_results = {
-                    "success": False,
-                    "error": {
-                        "code": self.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
-                        "not_found_data_assets": not_found_data_assets,
-                        "data_assets": available_data_asset_name_list,
-                    },
-                }
-                return profiling_results
-
-            data_assets.sort()
-            data_asset_names_to_profiled = data_assets
-            total_data_assets = len(available_data_asset_name_list)
-            if not dry_run:
-                logger.info(
-                    f"Profiling the white-listed data assets: {','.join(data_assets)}, alphabetically."
-                )
-        else:
-            if not profile_all_data_assets:
-                if total_data_assets > max_data_assets:
-                    profiling_results = {
-                        "success": False,
-                        "error": {
-                            "code": self.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
-                            "num_data_assets": total_data_assets,
-                            "data_assets": available_data_asset_name_list,
-                        },
-                    }
-                    return profiling_results
-
-            data_asset_names_to_profiled = [
-                name[0] for name in available_data_asset_name_list
-            ]
-        if not dry_run:
-            logger.info(
-                f"Profiling all {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
-            )
-        else:
-            logger.info(
-                f"Found {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
-            )
-
-        profiling_results["success"] = True
-
-        if not dry_run:
-            profiling_results["results"] = []
-            total_columns, total_expectations, total_rows, skipped_data_assets = (
-                0,
-                0,
-                0,
-                0,
-            )
-            total_start_time = datetime.datetime.now()  # noqa: DTZ005
-
-            for name in data_asset_names_to_profiled:
-                logger.info(f"\tProfiling '{name}'...")
-                try:
-                    profiling_results["results"].append(
-                        self.profile_data_asset(
-                            datasource_name=datasource_name,
-                            batch_kwargs_generator_name=batch_kwargs_generator_name,
-                            data_asset_name=name,
-                            profiler=profiler,
-                            profiler_configuration=profiler_configuration,
-                            run_id=run_id,
-                            additional_batch_kwargs=additional_batch_kwargs,
-                            run_name=run_name,
-                            run_time=run_time,
-                        )["results"][0]
-                    )
-
-                except gx_exceptions.ProfilerError as err:
-                    logger.warning(err.message)
-                except OSError as err:
-                    logger.warning(
-                        f"IOError while profiling {name[1]}. (Perhaps a loading error?) Skipping."
-                    )
-                    logger.debug(str(err))
-                    skipped_data_assets += 1
-                except SQLAlchemyError as e:
-                    logger.warning(
-                        f"SqlAlchemyError while profiling {name[1]}. Skipping."
-                    )
-                    logger.debug(str(e))
-                    skipped_data_assets += 1
-
-            total_duration = (
-                datetime.datetime.now() - total_start_time  # noqa: DTZ005
-            ).total_seconds()
-            logger.info(
-                f"""
-    Profiled {len(data_asset_names_to_profiled)} of {total_data_assets} named data assets, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
-    Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
-            )
-            if skipped_data_assets > 0:
-                logger.warning(
-                    f"Skipped {skipped_data_assets} data assets due to errors."
-                )
-
-        profiling_results["success"] = True
-        return profiling_results
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,

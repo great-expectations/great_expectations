@@ -2,8 +2,10 @@ from typing import Dict, List
 
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.domain import Domain
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.rule_based_profiler.rule import RuleOutput
 
@@ -15,7 +17,7 @@ def test_rule_output_get_get_expectation_configurations(
     expected_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_my_validation",
+                "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "Age",
                 },
@@ -24,7 +26,7 @@ def test_rule_output_get_get_expectation_configurations(
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_my_validation",
+                "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": "Date",
                 },

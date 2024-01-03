@@ -10,13 +10,15 @@ from edtf_validate.valid_edtf import (
 )
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
@@ -111,7 +113,6 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).

@@ -1,14 +1,11 @@
-from itertools import zip_longest
-from typing import Dict, Optional, Union
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from itertools import zip_longest
+from typing import TYPE_CHECKING, Dict, Optional, Union
+
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -20,6 +17,15 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
@@ -36,8 +42,6 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -48,7 +52,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
     column_list: Union[list, set, EvaluationParameterDict, None]
@@ -72,17 +76,6 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         "row_condition",
         "condition_parser",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "column_list": None,
-        "result_format": "BASIC",
-        "column": None,
-        "column_index": None,
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = ("column_list",)
 
     @classmethod
@@ -159,13 +152,12 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
-        expected_column_list = self.get_success_kwargs(configuration).get("column_list")
+        expected_column_list = self._get_success_kwargs().get("column_list")
         actual_column_list = metrics.get("table.columns")
 
         if expected_column_list is None or list(actual_column_list) == list(

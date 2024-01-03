@@ -7,10 +7,12 @@ from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
@@ -226,7 +228,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     config_builder: DefaultExpectationConfigurationBuilder = (
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
-            value="$parameter.my_column_min.value[-1]",
+            min_value="$parameter.my_column_min.value[-1]",
             column="$domain.domain_kwargs.column",
         )
     )

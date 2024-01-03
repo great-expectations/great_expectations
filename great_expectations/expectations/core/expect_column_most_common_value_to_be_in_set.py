@@ -1,13 +1,10 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -24,6 +21,13 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -48,8 +52,6 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -60,7 +62,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * observed_value field in the result object is customized for this expectation to be a list \
@@ -88,15 +90,6 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "value_set",
         "ties_okay",
     )
-
-    # Default values
-    default_kwarg_values = {
-        "value_set": None,
-        "ties_okay": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",
@@ -206,11 +199,11 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         most_common_value = metrics.get("column.most_common_value")
         value_set = configuration.kwargs.get("value_set") or []
         expected_value_set = set(value_set)

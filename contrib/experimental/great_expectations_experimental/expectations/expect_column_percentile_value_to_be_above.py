@@ -1,8 +1,5 @@
 from typing import Dict
 
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -92,7 +89,6 @@ class ExpectColumnPercentileToBeAbove(ColumnAggregateExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -100,7 +96,7 @@ class ExpectColumnPercentileToBeAbove(ColumnAggregateExpectation):
         """Validates the given data above the set value for the column given percentile"""
 
         column_percentile = metrics["column.percentile"]
-        given_value = self.get_success_kwargs(configuration).get("value")
+        given_value = self._get_success_kwargs().get("value")
 
         # Checking if the given percentile lies above the threshold
 

@@ -3,11 +3,13 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -436,63 +438,6 @@ def test_remove_expectation_without_necessary_args(single_expectation_suite):
         )
     assert (
         str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
-    )
-
-
-@pytest.mark.filesystem
-def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
-
-    assert not domain_success_runtime_suite.expectation_configurations[
-        4
-    ].isEquivalentTo(exp6, match_type="success")
-    domain_success_runtime_suite.patch_expectation(
-        exp5,
-        op="replace",
-        path="/value_set",
-        value=[1, 2],
-        match_type="runtime",
-    )
-    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
-        exp6, match_type="success"
-    )
-
-
-@pytest.mark.filesystem
-def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
-
-    assert not domain_success_runtime_suite.expectation_configurations[
-        4
-    ].isEquivalentTo(exp7, match_type="success")
-    domain_success_runtime_suite.patch_expectation(
-        exp5,
-        op="add",
-        path="/value_set/-",
-        value=4,
-        match_type="runtime",
-    )
-    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
-        exp7, match_type="success"
-    )
-
-
-@pytest.mark.filesystem
-def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
-
-    assert not domain_success_runtime_suite.expectation_configurations[
-        4
-    ].isEquivalentTo(exp8, match_type="runtime")
-    domain_success_runtime_suite.patch_expectation(
-        exp5,
-        op="remove",
-        path="/result_format",
-        value=None,
-        match_type="runtime",
-    )
-    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
-        exp8, match_type="runtime"
     )
 
 

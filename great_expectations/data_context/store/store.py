@@ -251,13 +251,17 @@ class Store:
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
 
-    def add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def add_or_update(
+        self, key: DataContextKey, value: Any, **kwargs
+    ) -> None | GXCloudIdentifier:
         """
         Conditionally calls `add` or `update` based on the presence of the given key.
         """
         return self._add_or_update(key=key, value=value, **kwargs)
 
-    def _add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def _add_or_update(
+        self, key: DataContextKey, value: Any, **kwargs
+    ) -> None | GXCloudIdentifier:
         self._validate_key(key)
         return self._store_backend.add_or_update(
             self.key_to_tuple(key), self.serialize(value), **kwargs

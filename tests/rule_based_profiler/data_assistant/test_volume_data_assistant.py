@@ -10,7 +10,9 @@ import nbformat
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import (
+    ExpectationSuite,
+)
 from great_expectations.core.batch import Batch
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -19,6 +21,9 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import VolumeDataAssistant
@@ -1183,9 +1188,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 8,
-                        "strict_min": False,
                         "column": "passenger_count",
                         "min_value": 7,
                     },
@@ -1205,9 +1208,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 2,
-                        "strict_min": False,
                         "column": "store_and_fwd_flag",
                         "min_value": 2,
                     },
@@ -1227,9 +1228,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 4,
-                        "strict_min": False,
                         "column": "payment_type",
                         "min_value": 4,
                     },
@@ -1249,9 +1248,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 15,
-                        "strict_min": False,
                         "column": "extra",
                         "min_value": 5,
                     },
@@ -1271,9 +1268,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 4,
-                        "strict_min": False,
                         "column": "mta_tax",
                         "min_value": 3,
                     },
@@ -1293,9 +1288,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 31,
-                        "strict_min": False,
                         "column": "tolls_amount",
                         "min_value": 18,
                     },
@@ -1315,9 +1308,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 3,
-                        "strict_min": False,
                         "column": "improvement_surcharge",
                         "min_value": 3,
                     },
@@ -1337,9 +1328,7 @@ def quentin_expected_expectation_suite(
                     },
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
-                        "strict_max": False,
                         "max_value": 4,
-                        "strict_min": False,
                         "column": "congestion_surcharge",
                         "min_value": 0,
                     },
@@ -2456,22 +2445,6 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "format": "",
                 "title": "Max Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
-            }
-        ),
-        alt.Tooltip(
-            **{
-                "field": "strict_min",
-                "format": "",
-                "title": "Strict Min",
-                "type": AltairDataTypes.NOMINAL.value,
-            }
-        ),
-        alt.Tooltip(
-            **{
-                "field": "strict_max",
-                "format": "",
-                "title": "Strict Max",
-                "type": AltairDataTypes.NOMINAL.value,
             }
         ),
     ]

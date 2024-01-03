@@ -7,11 +7,13 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
@@ -93,6 +95,8 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     """Expect batch to contain columns with unique contents."""
     # </snippet>
 
+    strict: bool = True
+
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py examples">
@@ -148,9 +152,6 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ("strict",)
 
-    # This dictionary contains default values for any parameters that should have default values.
-    default_kwarg_values = {"strict": True}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -182,14 +183,13 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
     ):
         unique_columns = metrics.get("table.columns.unique")
         batch_columns = metrics.get("table.columns")
-        strict = configuration.kwargs.get("strict")
+        strict = self.configuration.kwargs.get("strict")
 
         duplicate_columns = unique_columns.symmetric_difference(batch_columns)
 

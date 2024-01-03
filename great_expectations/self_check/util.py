@@ -47,7 +47,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core import (
-    ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
@@ -75,6 +74,9 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfigurationSchema,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
@@ -881,7 +883,7 @@ def build_pandas_validator_with_data(
     batch_definition: Optional[BatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
-    batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type]
 
     if context is None:
         context = build_in_memory_runtime_context(include_spark=False)
@@ -910,7 +912,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(build_sa_validator_with_data) {x}"
+        )
 
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
@@ -1216,7 +1220,7 @@ def build_spark_validator_with_data(
 def build_pandas_engine(
     df: pd.DataFrame,
 ) -> PandasExecutionEngine:
-    batch = Batch(data=df)
+    batch = Batch(data=df)  # type: ignore[arg-type]
     execution_engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     return execution_engine
 
@@ -1295,11 +1299,11 @@ def build_spark_engine(
                 )
                 for record in df.to_records(index=False)
             ]
-            schema = df.columns.tolist()
+            schema = df.columns.tolist()  # type: ignore[assignment]
         else:
             data = df
 
-        df = spark.createDataFrame(data=data, schema=schema)
+        df = spark.createDataFrame(data=data, schema=schema)  # type: ignore[type-var,arg-type]
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, Any] = dict(conf)
@@ -1840,8 +1844,12 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     _debug = lambda x: x  # noqa: E731
     _error = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
-        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(generate_expectation_tests) {x}"
+        )
+        _error = lambda x: debug_logger.error(  # noqa: E731
+            f"(generate_expectation_tests) {x}"
+        )
 
     dialects_to_include = {}
     engines_to_include = {}
@@ -2103,17 +2111,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 ):
                     continue
 
-                # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                if (
-                    "allow_cross_type_comparisons" in test["input"]
-                    and validator_with_data
-                    and isinstance(
-                        validator_with_data.execution_engine.batch_manager.active_batch_data,
-                        SqlAlchemyBatchData,
-                    )
-                ):
-                    continue
-
                 parametrized_tests.append(
                     {
                         "expectation_type": expectation_type,
@@ -2136,7 +2133,9 @@ def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(should_we_generate_this_test) {x}"
+        )
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
@@ -2487,7 +2486,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     elif try_allclose:
                         assert np.allclose(
                             result["result"]["observed_value"],
-                            value,  # type: ignore[arg-type]
+                            value,
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"

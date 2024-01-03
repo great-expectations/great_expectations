@@ -16,6 +16,7 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.datasource.fluent.pandas_datasource import (
     _DYNAMIC_ASSET_TYPES,
     CSVAsset,
@@ -30,7 +31,6 @@ from great_expectations.datasource.fluent.sources import (
     _get_field_details,
 )
 from great_expectations.util import camel_to_snake
-from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -357,16 +357,24 @@ class TestDynamicPandasAssets:
         read_method: Callable = getattr(
             empty_data_context.sources.pandas_default, read_method_name
         )
+        # This is not a an ideal mock.
+        # In this test we are validating that the read_method for a particular pandas datasource
+        # has the correct positional arguments.
+        # We don't care about the actual data being read in and the batch that will be produced from that data.
+        # In fact, we call all our read methods on a path which might not be readable by the reader (eg calling
+        # read_json on a csv file). We patch the internal call that actually tries to read and create the batch.
+        # Ideally, we would rewrite this test so we wouldn't need to mock like this.
         mocker.patch(
-            "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext.get_validator"
+            "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
         )
+        # read_* normally returns batch but, since we've added a mock in the line above, we get a mock object returned.
+        # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.
         _ = read_method(*positional_args.values())
-        # read_* returns a validator, but we just want to inspect the asset
-        asset = empty_data_context.sources.pandas_default.get_asset(
+        default_asset = empty_data_context.sources.pandas_default.get_asset(
             asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
         )
         for positional_arg_name, positional_arg in positional_args.items():
-            assert getattr(asset, positional_arg_name) == positional_arg
+            assert getattr(default_asset, positional_arg_name) == positional_arg
 
 
 @pytest.mark.filesystem
@@ -378,10 +386,10 @@ def test_default_pandas_datasource_get_and_set(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
     assert len(pandas_datasource.assets) == 0
 
-    validator = pandas_datasource.read_csv(
+    batch = pandas_datasource.read_csv(
         filepath_or_buffer=valid_file_path,
     )
-    assert isinstance(validator, Validator)
+    assert isinstance(batch, Batch)
     csv_data_asset_1 = pandas_datasource.get_asset(
         asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
     )
@@ -444,7 +452,7 @@ def test_read_dataframe(
 ):
     # validates that a dataframe object is passed
     with pytest.raises(ValueError) as exc_info:
-        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
+        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})  # type: ignore[arg-type]
 
     assert (
         'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
@@ -453,8 +461,8 @@ def test_read_dataframe(
 
     # correct working behavior with read method
     datasource = empty_data_context.sources.pandas_default
-    validator = datasource.read_dataframe(dataframe=test_df_pandas)
-    assert isinstance(validator, Validator)
+    batch = datasource.read_dataframe(dataframe=test_df_pandas)
+    assert isinstance(batch, Batch)
     assert isinstance(
         empty_data_context.sources.pandas_default.get_asset(
             asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME

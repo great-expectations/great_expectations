@@ -3,7 +3,6 @@ from typing import Optional
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -14,6 +13,9 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
@@ -60,6 +62,7 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_docstring">
     """Expect two columns to have a row-wise difference of three."""
+
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py complete_map_metric">
     map_metric = "column_pair_values.diff_three"
@@ -102,14 +105,6 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
         "column_B",
         "mostly",
     )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1.0,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column_A",
         "column_B",

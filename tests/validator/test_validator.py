@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
+from unittest.mock import ANY
 
 import pandas as pd
 import pytest
@@ -16,7 +17,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -32,6 +32,9 @@ from great_expectations.datasource.data_connector.batch_filter import (
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
@@ -286,7 +289,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     actual = validator.convert_to_checkpoint_validations_list()
     expected_config = CheckpointValidationConfig(
         expectation_suite_name="validating_taxi_data",
-        expectation_suite_ge_cloud_id=None,
+        expectation_suite_ge_cloud_id=ANY,
         batch_request={
             "datasource_name": "taxi_pandas",
             "data_connector_name": "monthly",
@@ -298,7 +301,6 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
         id=None,
         name=None,
     )
-
     assert all(config.to_dict() == expected_config.to_dict() for config in actual)
 
 
@@ -734,7 +736,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
         kwargs={
             "column": "b",
             "mostly": 0.9,
-            "threshold": 4,
+            "threshold": 4.0,
             "double_sided": True,
         },
     )
@@ -792,7 +794,7 @@ def test_graph_validate_with_runtime_config(
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
+        kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
     try:
         # noinspection PyTypeChecker
@@ -950,7 +952,6 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "min_value": 0,
         "max_value": 5,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-        "result_format": "BASIC",
     }
 
     expect_column_values_to_be_of_type_config = validator.validate_expectation(
@@ -961,7 +962,6 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "column": "passenger_count",
         "type_": "int",
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-        "result_format": "BASIC",
     }
 
 

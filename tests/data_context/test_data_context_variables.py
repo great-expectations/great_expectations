@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import get_context
+from great_expectations import get_context, project_manager
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -142,6 +142,7 @@ def file_data_context(
     context = FileDataContext(
         project_config=data_context_config, context_root_dir=context_root_dir
     )
+    project_manager.set_project(context)
     return context
 
 
@@ -162,6 +163,7 @@ def cloud_data_context(
         cloud_organization_id=ge_cloud_config_e2e.organization_id,
         context_root_dir=context_root_dir,
     )
+    project_manager.set_project(cloud_data_context)
     return cloud_data_context
 
 

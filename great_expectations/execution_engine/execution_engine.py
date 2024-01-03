@@ -18,8 +18,8 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
@@ -225,7 +225,7 @@ class ExecutionEngine(ABC):
         batch_id: str
         batch_data: BatchDataType
         for batch_id, batch_data in batch_data_dict.items():
-            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
+            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)  # type: ignore[arg-type]
 
     def load_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:
         self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)

@@ -5,7 +5,6 @@ import numpy as np
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -21,6 +20,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,
@@ -161,7 +163,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -223,18 +224,16 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         dependencies: ValidationDependencies = super().get_validation_dependencies(
-            configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         metric_kwargs = get_metric_kwargs(
             metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
 
@@ -251,7 +250,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

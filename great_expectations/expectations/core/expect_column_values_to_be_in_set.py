@@ -1,11 +1,10 @@
-from typing import TYPE_CHECKING, List, Optional, Union
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
+
+from great_expectations.compatibility import pydantic
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -27,18 +26,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 
 try:
     import sqlalchemy as sa  # noqa: F401, TID251
@@ -49,6 +36,12 @@ from great_expectations.expectations.expectation import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -93,8 +86,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -105,13 +96,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict]
+    value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field([])
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -130,62 +121,15 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "value_set",
     )
 
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
     success_keys = (
         "value_set",
         "mostly",
-        "auto",
-        "profiler_config",
     )
-
-    value_set_estimator_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="ValueSetMultiBatchParameterBuilder",
-            name="value_set_estimator",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
-        )
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        value_set_estimator_parameter_builder_config,
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_values_to_be_in_set_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_in_set",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "value_set": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        "mostly": f"{VARIABLES_KEY}mostly",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-    default_kwarg_values = {
-        "value_set": [],
-        "auto": False,
-        "profiler_config": default_profiler_config,
-    }
 
     @classmethod
     def _prescriptive_template(

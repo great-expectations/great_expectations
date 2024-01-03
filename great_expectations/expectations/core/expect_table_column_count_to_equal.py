@@ -1,13 +1,10 @@
-from typing import Dict, Optional, Union
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Dict, Optional, Union
+
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -19,6 +16,15 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ExpectTableColumnCountToEqual(BatchExpectation):
@@ -35,8 +41,6 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -47,7 +51,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
@@ -68,13 +72,6 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
 
     metric_dependencies = ("table.column_count",)
     success_keys = ("value",)
-    default_kwarg_values = {
-        "value": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = ("value",)
 
     @classmethod
@@ -118,12 +115,11 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        expected_column_count = configuration.kwargs.get("value")
+        expected_column_count = self.configuration.kwargs.get("value")
         actual_column_count = metrics.get("table.column_count")
 
         return {

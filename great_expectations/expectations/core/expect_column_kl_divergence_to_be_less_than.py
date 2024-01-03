@@ -53,10 +53,12 @@ from great_expectations.validator.metrics_calculator import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
     from great_expectations.validator.validator import (
         ValidationDependencies,
@@ -112,8 +114,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -124,7 +124,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * observed_value field in the result object is customized for this expectation to be a float \
@@ -163,9 +163,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     partition_object: Union[dict, None]
     threshold: Union[float, None]
-    internal_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
-    tail_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
-    bucketize_data: bool = False
+    internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
+    tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
+    bucketize_data: bool = True
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
@@ -190,16 +190,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         "internal_weight_holdout",
         "bucketize_data",
     )
-    default_kwarg_values = {
-        "partition_object": None,
-        "threshold": None,
-        "tail_weight_holdout": 0,
-        "internal_weight_holdout": 0,
-        "bucketize_data": True,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "partition_object",
@@ -208,22 +198,20 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
-        partition_object = configuration.kwargs["partition_object"]
+        configuration = self.configuration
+        partition_object = configuration.kwargs.get("partition_object")
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
         bins = None
         if partition_object is None:
             if configuration.kwargs.get(
-                "bucketize_data", self.default_kwarg_values["bucketize_data"]
+                "bucketize_data", self._get_default_value("bucketize_data")
             ):
                 is_categorical = False
                 partition_metric_configuration = MetricConfiguration(
@@ -370,26 +358,26 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def _validate(  # noqa: C901, PLR0912, PLR0915
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         bucketize_data = configuration.kwargs.get(
-            "bucketize_data", self.default_kwarg_values["bucketize_data"]
+            "bucketize_data", self._get_default_value("bucketize_data")
         )
         partition_object = configuration.kwargs.get(
-            "partition_object", self.default_kwarg_values["partition_object"]
+            "partition_object", self._get_default_value("partition_object")
         )
         threshold = configuration.kwargs.get(
-            "threshold", self.default_kwarg_values["threshold"]
+            "threshold", self._get_default_value("threshold")
         )
         tail_weight_holdout = configuration.kwargs.get(
-            "tail_weight_holdout", self.default_kwarg_values["tail_weight_holdout"]
+            "tail_weight_holdout", self._get_default_value("tail_weight_holdout")
         )
         internal_weight_holdout = configuration.kwargs.get(
             "internal_weight_holdout",
-            self.default_kwarg_values["internal_weight_holdout"],
+            self._get_default_value("internal_weight_holdout"),
         )
         if partition_object is None:
             if bucketize_data:

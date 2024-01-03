@@ -6,11 +6,13 @@ For detailed instructions on how to use it, please see:
 
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -69,9 +71,6 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None

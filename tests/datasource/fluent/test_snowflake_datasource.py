@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 import sqlalchemy as sa
+from pytest import param
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
@@ -11,6 +12,7 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
     SnowflakeDsn,
 )
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 @pytest.fixture
@@ -23,23 +25,37 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.parametrize(
     "config_kwargs",
     [
-        {"connection_string": "snowflake://my_user:password@my_account"},
-        {"connection_string": "${MY_CONN_STR}"},
-        {
-            "connection_string": {
-                "user": "my_user",
-                "password": "password",
-                "account": "my_account",
-            }
-        },
-        {
-            "connection_string": {
-                "user": "my_user",
-                "password": "${MY_PASSWORD}",
-                "account": "my_account",
-            }
-        },
-        {"user": "my_user", "password": "password", "account": "my_account"},
+        param(
+            {"connection_string": "snowflake://my_user:password@my_account"},
+            id="connection_string str",
+        ),
+        param(
+            {"connection_string": "${MY_CONN_STR}"}, id="connection_string ConfigStr"
+        ),
+        param(
+            {
+                "connection_string": {
+                    "user": "my_user",
+                    "password": "password",
+                    "account": "my_account",
+                }
+            },
+            id="connection_string dict",
+        ),
+        param(
+            {
+                "connection_string": {
+                    "user": "my_user",
+                    "password": "${MY_PASSWORD}",
+                    "account": "my_account",
+                }
+            },
+            id="connection_string dict with password ConfigStr",
+        ),
+        param(
+            {"user": "my_user", "password": "password", "account": "my_account"},
+            id="old config format - top level keys",
+        ),
     ],
 )
 def test_valid_config(
@@ -53,6 +69,9 @@ def test_valid_config(
     )
     sql_engine = my_sf_ds_1.get_engine()
     assert isinstance(sql_engine, sa.engine.Engine)
+
+    exec_engine = my_sf_ds_1.get_execution_engine()
+    assert isinstance(exec_engine, SqlAlchemyExecutionEngine)
 
 
 @pytest.mark.unit

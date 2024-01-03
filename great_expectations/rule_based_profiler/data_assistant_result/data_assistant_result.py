@@ -29,8 +29,8 @@ from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -78,8 +78,10 @@ from great_expectations.types import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationSuite,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.rule_based_profiler.config import (
         RuleBasedProfilerConfig,
@@ -98,7 +100,7 @@ PANDAS_210_OR_GREATER = packaging.version.parse(
 
 
 def pandas_map(df: pd.DataFrame) -> Callable:
-    return df.map if PANDAS_210_OR_GREATER else df.applymap
+    return df.map if PANDAS_210_OR_GREATER else df.applymap  # type: ignore[return-value]
 
 
 class ColumnDataFrame(NamedTuple):
@@ -960,7 +962,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ]
             df_new_shape = df.iloc[ilocations, columns].reset_index(drop=True)
             cols_flat_df: pd.DataFrame = pd.DataFrame(cols_flat).T
-            cols_flat_df.columns = list_column_names
+            cols_flat_df.columns = list_column_names  # type: ignore[assignment]
             df_transformed = pd.concat([df_new_shape, cols_flat_df], axis=1)
 
             if "table_columns" in list_column_names:

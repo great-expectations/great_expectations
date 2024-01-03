@@ -432,53 +432,6 @@ assert second_batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint">
-using_simple_checkpoint = """
-
-name: my_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-site_names: all
-slack_webhook: <YOUR SLACK WEBHOOK URL>
-notify_on: failure
-notify_with: all
-
-"""
-# </snippet>
-using_simple_checkpoint = using_simple_checkpoint.replace(
-    "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
-)
-context.add_or_update_checkpoint(**yaml.load(using_simple_checkpoint))
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_5">
-results = context.run_checkpoint(checkpoint_name="my_checkpoint")
-# </snippet>
-assert results.success is True
-validation_result = list(results.run_results.items())[0][1]["validation_result"]
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite">
-expectation_suite = validation_result["meta"]["expectation_suite_name"]
-data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
-batch_identifiers = validation_result["meta"]["active_batch_definition"][
-    "batch_identifiers"
-]
-
-assert expectation_suite == "my_expectation_suite"
-assert data_asset == "taxi_asset"
-assert batch_identifiers == {
-    "path": "yellow_tripdata_sample_2019-01.csv",
-    "year": "2019",
-    "month": "01",
-}
-# </snippet>
-
 equivalent_using_checkpoint = """
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py checkpoint_example">
 name: my_checkpoint

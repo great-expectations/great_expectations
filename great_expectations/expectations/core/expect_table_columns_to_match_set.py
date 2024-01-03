@@ -1,13 +1,10 @@
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Dict, Optional, Union
+
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -19,20 +16,15 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -53,8 +45,6 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -65,7 +55,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
     column_set: Union[list, set, EvaluationParameterDict, None]
@@ -86,64 +76,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     success_keys = (
         "column_set",
         "exact_match",
-        "auto",
-        "profiler_config",
     )
-
-    mean_table_columns_set_match_multi_batch_parameter_builder_config = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
-            name="column_names_set_estimator",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
-        )
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        mean_table_columns_set_match_multi_batch_parameter_builder_config,
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_table_columns_to_match_set",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "expect_table_columns_to_match_set": {
-                "variables": {
-                    "exact_match": None,
-                    "success_ratio": 1.0,
-                },
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_table_columns_to_match_set",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "condition": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
-                        "column_set": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        "exact_match": f"{VARIABLES_KEY}exact_match",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-    default_kwarg_values = {
-        "column_set": None,
-        "exact_match": True,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "auto": False,
-        "profiler_config": default_profiler_config,
-    }
     args_keys = (
         "column_set",
         "exact_match",
@@ -241,19 +174,18 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
-        expected_column_set = self.get_success_kwargs(configuration).get("column_set")
+        expected_column_set = self._get_success_kwargs().get("column_set")
         expected_column_set = (
             set(expected_column_set) if expected_column_set is not None else set()
         )
         actual_column_list = metrics.get("table.columns")
         actual_column_set = set(actual_column_list)
-        exact_match = self.get_success_kwargs(configuration).get("exact_match")
+        exact_match = self._get_success_kwargs().get("exact_match")
 
         if (
             (expected_column_set is None) and (exact_match is not True)

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import root_validator
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
+    EvaluationParameterDict,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -23,27 +25,18 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     """Expect the column entries to be between a minimum value and a maximum value (inclusive).
 
@@ -69,8 +62,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -81,7 +72,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
@@ -124,126 +115,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "max_value",
         "strict_min",
         "strict_max",
-        "allow_cross_type_comparisons",
         "mostly",
-        "auto",
-        "profiler_config",
     )
 
-    column_min_range_estimator_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="column_min_range_estimator",
-        metric_name="column.min",
-        metric_multi_batch_parameter_builder_name=None,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        estimator=f"{VARIABLES_KEY}estimator",
-        n_resamples=f"{VARIABLES_KEY}n_resamples",
-        random_seed=f"{VARIABLES_KEY}random_seed",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
-        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
-        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-        truncate_values=f"{VARIABLES_KEY}truncate_values",
-        round_decimals=f"{VARIABLES_KEY}round_decimals",
-        evaluation_parameter_builder_configs=None,
-    )
-    column_max_range_estimator_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="column_max_range_estimator",
-        metric_name="column.max",
-        metric_multi_batch_parameter_builder_name=None,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        estimator=f"{VARIABLES_KEY}estimator",
-        n_resamples=f"{VARIABLES_KEY}n_resamples",
-        random_seed=f"{VARIABLES_KEY}random_seed",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
-        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
-        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-        truncate_values=f"{VARIABLES_KEY}truncate_values",
-        round_decimals=f"{VARIABLES_KEY}round_decimals",
-        evaluation_parameter_builder_configs=None,
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        column_min_range_estimator_parameter_builder_config,
-        column_max_range_estimator_parameter_builder_config,
-    ]
-    default_profiler_config: ClassVar[
-        RuleBasedProfilerConfig
-    ] = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_values_to_be_between_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                    "strict_min": False,
-                    "strict_max": False,
-                    "estimator": "exact",
-                    "include_estimator_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": None,
-                        "upper_bound": None,
-                    },
-                    "round_decimals": None,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{column_min_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{column_max_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
-                        "mostly": f"{VARIABLES_KEY}mostly",
-                        "strict_min": f"{VARIABLES_KEY}strict_min",
-                        "strict_max": f"{VARIABLES_KEY}strict_max",
-                        "meta": {
-                            "profiler_details": {
-                                "column_min_range_estimator": f"{PARAMETER_KEY}{column_min_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                                "column_max_range_estimator": f"{PARAMETER_KEY}{column_max_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                            },
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "min_value": None,
-        "max_value": None,
-        "strict_min": False,
-        "strict_max": False,  # tolerance=1e-9,
-        "allow_cross_type_comparisons": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-        "auto": False,
-        "profiler_config": default_profiler_config,
-    }
     args_keys = (
         "column",
         "min_value",
@@ -253,6 +127,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -271,17 +146,19 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         params = renderer_configuration.params
 
         template_str = ""
+        at_least_str = ""
+        at_most_str = ""
         if not params.min_value and not params.max_value:
             template_str += "may have any numerical value."
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str: str = cls._get_strict_min_string(
+                at_least_str = cls._get_strict_min_string(
                     renderer_configuration=renderer_configuration
                 )
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str: str = cls._get_strict_max_string(
+                at_most_str = cls._get_strict_max_string(
                     renderer_configuration=renderer_configuration
                 )
 
@@ -309,6 +186,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -324,7 +202,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column",
                 "min_value",
@@ -373,13 +251,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]

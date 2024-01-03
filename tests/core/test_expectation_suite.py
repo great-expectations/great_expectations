@@ -2,21 +2,29 @@ import datetime
 import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
+from uuid import UUID
 
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations import set_context
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.core import (
+    ExpectColumnValuesToBeInSet,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.util import filter_properties_dict
 
 
@@ -183,6 +191,282 @@ class TestInit:
         assert "is of type NotSerializable which cannot be serialized to json" in str(
             e.value
         )
+
+
+class TestCRUDMethods:
+    """Tests related to the 1.0 CRUD API."""
+
+    expectation_suite_name = "test-suite"
+
+    @pytest.fixture
+    def expectation(self) -> ExpectColumnValuesToBeInSet:
+        return ExpectColumnValuesToBeInSet(
+            column="a",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
+
+    @pytest.mark.unit
+    def test_add_success_with_saved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+
+        created_expectation = suite.add(expectation=expectation)
+
+        assert (
+            created_expectation
+            == context.expectations_store.add_expectation.return_value
+        )
+        context.expectations_store.add_expectation.assert_called_once_with(
+            suite=suite, expectation=expectation
+        )
+
+    @pytest.mark.unit
+    def test_add_success_with_unsaved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = False
+        set_context(project=context)
+        suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+
+        created_expectation = suite.add(expectation=expectation)
+
+        assert created_expectation == expectation
+        assert len(suite.expectations) == 1
+
+        # expect that adding an expectation to this suite doesnt have the side effect of
+        # persisting the suite to the data context
+        context.expectations_store.set.assert_not_called()
+
+    @pytest.mark.unit
+    def test_add_doesnt_duplicate_when_expectation_already_exists(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
+        set_context(project=context)
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[expectation.configuration],
+        )
+
+        suite.add(expectation=expectation)
+
+        assert len(suite.expectations) == 1
+        context.expectations_store.update.assert_not_called()
+
+    @pytest.mark.unit
+    def test_add_doesnt_mutate_suite_when_save_fails(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.add_expectation.side_effect = (
+            ConnectionError()
+        )  # arbitrary exception
+        context.expectations_store.has_key.return_value = True
+        set_context(project=context)
+        suite = ExpectationSuite(
+            expectation_suite_name="test-suite",
+        )
+
+        with pytest.raises(ConnectionError):  # exception type isn't important
+            suite.add(expectation=expectation)
+
+        assert len(suite.expectations) == 0, "Expectation must not be added to Suite."
+
+    @pytest.mark.unit
+    def test_delete_success_with_saved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = True
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[expectation.configuration],
+        )
+
+        deleted_expectation = suite.delete(expectation=expectation)
+
+        assert deleted_expectation == expectation
+        assert suite.expectations == []
+
+        # expect that the data context is kept in sync with the mutation
+        context.expectations_store.delete_expectation.assert_called_once_with(
+            suite=suite, expectation=expectation
+        )
+
+    @pytest.mark.unit
+    def test_delete_success_with_unsaved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = False
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[expectation.configuration],
+        )
+
+        deleted_expectation = suite.delete(expectation=expectation)
+
+        assert deleted_expectation == expectation
+        assert suite.expectations == []
+        # expect that deleting an expectation from this suite doesnt have the side effect of
+        # persisting the suite to the data context
+        context.expectations_store.delete_expectation.assert_not_called()
+
+    @pytest.mark.unit
+    def test_delete_fails_when_expectation_is_not_found(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        suite = ExpectationSuite(
+            expectation_suite_name="test-suite",
+        )
+
+        with pytest.raises(KeyError, match="No matching expectation was found."):
+            suite.delete(expectation=expectation)
+
+        context.expectations_store.delete_expectation.assert_not_called()
+
+    @pytest.mark.unit
+    def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
+        context.expectations_store.delete_expectation.side_effect = (
+            ConnectionError()
+        )  # arbitrary exception
+        set_context(project=context)
+        suite = ExpectationSuite(
+            expectation_suite_name="test-suite",
+            expectations=[
+                expectation.configuration,
+            ],
+        )
+
+        with pytest.raises(ConnectionError):  # exception type isn't important
+            suite.delete(expectation=expectation)
+
+        assert len(suite.expectations) == 1, "Expectation must still be in Suite."
+
+    @pytest.mark.unit
+    def test_save_success(self):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
+        set_context(project=context)
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+        )
+        store_key = context.expectations_store.get_key.return_value
+
+        suite.save()
+
+        # expect that the data context is kept in sync
+        context.expectations_store.update.assert_called_once_with(
+            key=store_key, value=suite
+        )
+
+    @pytest.mark.filesystem
+    def test_filesystem_context_update_suite_adds_ids(
+        self, empty_data_context, expectation
+    ):
+        context = empty_data_context
+        self._test_update_suite_adds_ids(context, expectation)
+
+    @pytest.mark.cloud
+    def test_cloud_context_update_suite_adds_ids(
+        self, empty_cloud_context_fluent, expectation
+    ):
+        context = empty_cloud_context_fluent
+        self._test_update_suite_adds_ids(context, expectation)
+
+    def _test_update_suite_adds_ids(self, context, expectation):
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+        uuid_to_test = suite.ge_cloud_id
+        try:
+            UUID(uuid_to_test)
+        except TypeError:
+            pytest.fail(
+                f"Expected UUID in ExpectationSuite.ge_cloud_id, found {uuid_to_test}"
+            )
+        expectation.id = None
+        suite.add(expectation)
+        expectation.column = "foo"
+        expectation.id = None
+        suite.add(expectation)
+        assert len(suite.expectations) == 2
+        # todo: update when expectations are source of truth
+        for expectation_configuration in suite.expectation_configurations:
+            uuid_to_test = expectation_configuration.ge_cloud_id
+            try:
+                UUID(uuid_to_test)
+            except TypeError:
+                pytest.fail(
+                    f"Expected UUID in ExpectationConfiguration.ge_cloud_id, found {uuid_to_test}"
+                )
+
+    @pytest.mark.unit
+    def test_suite_add_expectation_doesnt_allow_adding_an_expectation_with_id(
+        self, expectation
+    ):
+        suite = ExpectationSuite("test-suite")
+        provided_id = "6b3f003d-d97b-4649-ba23-3f4e30986297"
+        expectation.id = provided_id
+
+        with pytest.raises(
+            RuntimeError,
+            match="Cannot add Expectation because it already belongs to an ExpectationSuite.",
+        ):
+            suite.add(expectation)
+
+    @pytest.mark.cloud
+    def test_cloud_expectation_can_be_saved_after_added(
+        self, empty_cloud_context_fluent, expectation
+    ):
+        context = empty_cloud_context_fluent
+        self._test_expectation_can_be_saved_after_added(context, expectation)
+
+    @pytest.mark.filesystem
+    def test_filesystem_expectation_can_be_saved_after_added(
+        self, empty_data_context, expectation
+    ):
+        context = empty_data_context
+        self._test_expectation_can_be_saved_after_added(context, expectation)
+
+    def _test_expectation_can_be_saved_after_added(self, context, expectation):
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(suite_name)
+        suite.add(expectation)
+        updated_column_name = "foo"
+        assert expectation.column != updated_column_name
+        expectation.column = updated_column_name
+        expectation.save()
+        suite = context.get_expectation_suite(suite_name)
+        assert len(suite.expectations) == 1
+        assert suite.expectations[0].column == updated_column_name
+
+    @pytest.mark.cloud
+    def test_cloud_expectation_can_be_saved_after_update(
+        self, empty_cloud_context_fluent, expectation
+    ):
+        context = empty_cloud_context_fluent
+        self._test_expectation_can_be_saved_after_update(context, expectation)
+
+    @pytest.mark.filesystem
+    def test_filesystem_expectation_can_be_saved_after_update(
+        self, empty_data_context, expectation
+    ):
+        context = empty_data_context
+        self._test_expectation_can_be_saved_after_update(context, expectation)
+
+    def _test_expectation_can_be_saved_after_update(self, context, expectation):
+        suite_name = "test-suite"
+        # todo: update to new api
+        suite = context.add_expectation_suite(
+            suite_name, expectations=[expectation.configuration]
+        )
+        expectation = suite.expectations[0]
+        updated_column_name = "foo"
+        expectation.column = updated_column_name
+        expectation.save()
+        suite = context.get_expectation_suite(suite_name)
+        assert len(suite.expectations) == 1
+        assert suite.expectations[0].column == updated_column_name
 
 
 class TestAddCitation:

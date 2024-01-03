@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
@@ -6,7 +8,7 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 class ExpectationSuiteAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,  # noqa: F821
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
@@ -14,7 +16,7 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
         self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(
-        self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
+        self, obj: Optional[ExpectationSuite] = None, **kwargs  # noqa: F821
     ) -> dict:
         # Exit early if null
         expectation_suite = obj

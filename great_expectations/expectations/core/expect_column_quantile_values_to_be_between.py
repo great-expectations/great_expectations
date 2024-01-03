@@ -1,16 +1,13 @@
+from __future__ import annotations
+
 from numbers import Number
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 from typing_extensions import TypedDict
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -37,25 +34,20 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 from great_expectations.util import isclose
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 
 class QuantileRange(TypedDict):
@@ -115,7 +107,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -157,98 +148,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
-        "auto",
-        "profiler_config",
     )
 
-    quantile_value_ranges_estimator_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="quantile_value_ranges_estimator",
-        metric_name="column.quantile_values",
-        metric_multi_batch_parameter_builder_name=None,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs={
-            "quantiles": f"{VARIABLES_KEY}quantiles",
-            "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
-        },
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        estimator=f"{VARIABLES_KEY}estimator",
-        n_resamples=f"{VARIABLES_KEY}n_resamples",
-        random_seed=f"{VARIABLES_KEY}random_seed",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
-        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
-        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-        truncate_values=f"{VARIABLES_KEY}truncate_values",
-        round_decimals=f"{VARIABLES_KEY}round_decimals",
-        evaluation_parameter_builder_configs=None,
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        quantile_value_ranges_estimator_parameter_builder_config,
-    ]
-    default_profiler_config: ClassVar[
-        RuleBasedProfilerConfig
-    ] = RuleBasedProfilerConfig(
-        name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_quantile_values_to_be_between_rule": {
-                "variables": {
-                    "quantiles": [
-                        0.25,
-                        0.5,
-                        0.75,
-                    ],
-                    "allow_relative_error": "linear",
-                    "estimator": "exact",
-                    "include_estimator_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": None,
-                        "upper_bound": None,
-                    },
-                    "round_decimals": None,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_quantile_values_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "quantile_ranges": {
-                            "quantiles": f"{VARIABLES_KEY}quantiles",
-                            "value_ranges": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        },
-                        "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    }
-                ],
-            },
-        },
-    )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "quantile_ranges": None,
-        "result_format": "BASIC",
-        "allow_relative_error": False,
-        "catch_exceptions": False,
-        "meta": None,
-        "auto": False,
-        "profiler_config": default_profiler_config,
-    }
     args_keys = (
         "column",
         "quantile_ranges",
@@ -674,15 +575,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
+        configuration = self.configuration
         # column.quantile_values expects a "quantiles" key
         validation_dependencies.get_metric_configuration(
             metric_name="column.quantile_values"
@@ -693,13 +592,12 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         quantile_vals = metrics.get("column.quantile_values")
-        quantile_ranges = configuration.kwargs.get("quantile_ranges")
+        quantile_ranges = self.configuration.kwargs.get("quantile_ranges")
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
 

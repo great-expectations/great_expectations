@@ -18,7 +18,6 @@ from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import build_evaluation_parameters
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -35,6 +34,9 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.validator.validation_statistics import (
     calc_validation_statistics,
 )
@@ -214,14 +216,13 @@ class DataAsset:
                     )
 
                 # update evaluation_args with defaults from expectation signature
-                if method_name not in ExpectationConfiguration.kwarg_lookup_dict:
-                    default_kwarg_values = {
-                        k: v.default
-                        for k, v in inspect.signature(func).parameters.items()
-                        if v.default is not inspect.Parameter.empty
-                    }
-                    default_kwarg_values.update(evaluation_args)
-                    evaluation_args = default_kwarg_values
+                default_kwarg_values = {
+                    k: v.default
+                    for k, v in inspect.signature(func).parameters.items()
+                    if v.default is not inspect.Parameter.empty
+                }
+                default_kwarg_values.update(evaluation_args)
+                evaluation_args = default_kwarg_values
 
                 # Construct the expectation_config object
                 expectation_config = ExpectationConfiguration(

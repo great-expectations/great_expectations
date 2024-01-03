@@ -1,9 +1,7 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Literal, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     render_evaluation_parameter_string,
@@ -21,6 +19,12 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -41,8 +45,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -53,7 +55,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
     ignore_row_if: Literal[
@@ -72,7 +74,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     map_metric = "column_pair_values.equal"
     success_keys = (
         "column_A",
@@ -80,15 +81,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "ignore_row_if",
         "mostly",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "ignore_row_if": "both_values_are_missing",
-        "mostly": 1.0,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column_A",
         "column_B",

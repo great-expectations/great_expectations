@@ -98,12 +98,6 @@ data_context_init_with_dependencies: dict = {
             },
             {
                 "install_environment": "required",
-                "package_name": "colorama",
-                "installed": True,
-                "version": "0.4.4",
-            },
-            {
-                "install_environment": "required",
                 "package_name": "cryptography",
                 "installed": True,
                 "version": "3.4.8",
@@ -125,12 +119,6 @@ data_context_init_with_dependencies: dict = {
                 "package_name": "jinja2",
                 "installed": False,
                 "version": None,
-            },
-            {
-                "install_environment": "required",
-                "package_name": "jsonpatch",
-                "installed": True,
-                "version": "1.32",
             },
             {
                 "install_environment": "required",

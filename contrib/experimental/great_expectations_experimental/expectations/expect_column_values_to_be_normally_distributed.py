@@ -5,7 +5,6 @@ from typing import Dict, Union
 
 from scipy import stats
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
@@ -269,14 +268,12 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.custom.normally_distributed",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

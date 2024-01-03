@@ -1,5 +1,8 @@
 import pytest
 
+from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+    ExpectationDoctor,
+)
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,
 )
@@ -21,9 +24,9 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 
 @pytest.mark.unit
 def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_object():
-    augmented_library_metadata = ExpectColumnValuesToEqualThree(
-        column="values"
-    )._get_augmented_library_metadata()
+    expectation = ExpectColumnValuesToEqualThree(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    augmented_library_metadata = doctor._get_augmented_library_metadata()
     assert augmented_library_metadata == AugmentedLibraryMetadata(
         maturity="CONCEPT_ONLY",
         tags=[],
@@ -38,9 +41,9 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
 
 @pytest.mark.unit
 def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadata_object():
-    augmented_library_metadata = ExpectColumnValuesToEqualThree__SecondIteration(
-        column="values"
-    )._get_augmented_library_metadata()
+    expectation = ExpectColumnValuesToEqualThree__SecondIteration(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    augmented_library_metadata = doctor._get_augmented_library_metadata()
     assert augmented_library_metadata == AugmentedLibraryMetadata(
         maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
@@ -57,14 +60,17 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
 
 @pytest.mark.unit
 def test__get_examples_from_a_class_with_no_examples():
-    assert ExpectColumnValuesToEqualThree(column="values")._get_examples() == []
+    expectation = ExpectColumnValuesToEqualThree(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    examples = doctor._get_examples()
+    assert examples == []
 
 
 @pytest.mark.unit
 def test__get_examples_from_a_class_with_some_examples():
-    examples = ExpectColumnValuesToEqualThree__SecondIteration(
-        column="values"
-    )._get_examples()
+    expectation = ExpectColumnValuesToEqualThree__SecondIteration(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    examples = doctor._get_examples()
     assert len(examples) == 1
 
     first_example = examples[0]
@@ -77,9 +83,9 @@ def test__get_examples_from_a_class_with_some_examples():
 
 @pytest.mark.unit
 def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_false():
-    examples = ExpectColumnValuesToEqualThree__SecondIteration(
-        column="values"
-    )._get_examples(return_only_gallery_examples=False)
+    expectation = ExpectColumnValuesToEqualThree__SecondIteration(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    examples = doctor._get_examples(return_only_gallery_examples=False)
     assert len(examples) == 1
 
     first_example = examples[0]
@@ -101,9 +107,9 @@ def test__get_description_diagnostics():
         It has more to it.
         """
 
-    description_diagnostics = ExpectColumnValuesToBeAwesome(
-        column="values"
-    )._get_description_diagnostics()
+    expectation = ExpectColumnValuesToBeAwesome(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    description_diagnostics = doctor._get_description_diagnostics()
     assert description_diagnostics == ExpectationDescriptionDiagnostics(
         camel_name="ExpectColumnValuesToBeAwesome",
         snake_name="expect_column_values_to_be_awesome",
@@ -119,9 +125,11 @@ def test__get_description_diagnostics():
 @pytest.mark.unit
 def test__get_metric_diagnostics_list_on_a_class_without_metrics():
     _config = None
-    metric_diagnostics_list = ExpectColumnValuesToEqualThree(
-        column="values"
-    )._get_metric_diagnostics_list(expectation_config=_config)
+    expectation = ExpectColumnValuesToEqualThree(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    metric_diagnostics_list = doctor._get_metric_diagnostics_list(
+        expectation_config=_config
+    )
     assert len(metric_diagnostics_list) == 0
     ExpectationMetricDiagnostics(
         name="column_values.something",
@@ -132,9 +140,11 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
 @pytest.mark.unit
 def test__get_metric_diagnostics_list_on_a_class_with_metrics():
     _config = None
-    metric_diagnostics_list = ExpectColumnValuesToEqualThree__ThirdIteration(
-        column="values"
-    )._get_metric_diagnostics_list(expectation_config=_config)
+    expectation = ExpectColumnValuesToEqualThree__ThirdIteration(column="values")
+    doctor = ExpectationDoctor(expectation=expectation)
+    metric_diagnostics_list = doctor._get_metric_diagnostics_list(
+        expectation_config=_config
+    )
     assert len(metric_diagnostics_list) == 0
     ExpectationMetricDiagnostics(
         name="column_values.something",

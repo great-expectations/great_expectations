@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from pprint import pformat as pf
+
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
@@ -5,6 +9,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.expectations.core.expect_column_values_to_be_between import (
     ExpectColumnValuesToBeBetween,
 )
@@ -43,29 +48,41 @@ def expectation_suite(
 
 
 @pytest.fixture
-def batch_config(
+def fds_data_asset(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
+) -> DataAsset:
+    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    assert isinstance(datasource, Datasource)
+    return datasource.get_asset("trip_asset")
+
+
+@pytest.fixture
+def fds_data_asset_with_event_type_splitter(
+    fds_data_context: AbstractDataContext,
+    fds_data_context_datasource_name: str,
+) -> DataAsset:
+    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    assert isinstance(datasource, Datasource)
+    return datasource.get_asset("trip_asset_split_by_event_type")
+
+
+@pytest.fixture
+def batch_config(
+    fds_data_asset: DataAsset,
 ) -> BatchConfig:
-    return BatchConfig(
-        context=fds_data_context,
-        name="test_batch_config",
-        datasource_name=fds_data_context_datasource_name,
-        data_asset_name="trip_asset",
-    )
+    batch_config = BatchConfig(name="test_batch_config")
+    batch_config.set_data_asset(fds_data_asset)
+    return batch_config
 
 
 @pytest.fixture
 def batch_config_with_event_type_splitter(
-    fds_data_context: AbstractDataContext,
-    fds_data_context_datasource_name: str,
+    fds_data_asset_with_event_type_splitter: DataAsset,
 ) -> BatchConfig:
-    return BatchConfig(
-        context=fds_data_context,
-        name="test_batch_config",
-        datasource_name=fds_data_context_datasource_name,
-        data_asset_name="trip_asset_split_by_event_type",
-    )
+    batch_config = BatchConfig(name="test_batch_config")
+    batch_config.set_data_asset(fds_data_asset_with_event_type_splitter)
+    return batch_config
 
 
 @pytest.fixture
@@ -163,7 +180,7 @@ def test_validate_expectation_with_batch_asset_options(
             value_set=[desired_event_type],
         )
     )
-
+    print(f"Result dict ->\n{pf(result)}")
     assert result.success
 
 

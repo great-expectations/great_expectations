@@ -3,10 +3,10 @@ This is an example of a Custom QueryExpectation.
 For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
+from __future__ import annotations
 
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -16,6 +16,9 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def">
@@ -23,12 +26,13 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring">
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
+
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies">
     metric_dependencies = ("query.column",)
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query">
-    query = """
+    query: str = """
             SELECT {col},
             CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
             FROM {active_batch}
@@ -45,16 +49,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
-
-    default_kwarg_values = {
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-        "meta": None,
-        "column": None,
-        "value": None,
-        "threshold": 1,
-        "query": query,
-    }
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -82,7 +76,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
@@ -92,6 +85,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         query_result = metrics.get("query.column")
         query_result = dict([element.values() for element in query_result])
 
+        configuration = self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
 
