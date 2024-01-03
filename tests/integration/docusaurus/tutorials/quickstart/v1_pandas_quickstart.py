@@ -37,11 +37,11 @@ batches.append(batch)
 df = pd.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
-# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py connect_to_data pandas_dataframe">
-batch = context.sources.pandas_default.from_dataframe(df)
-# </snippet>
+# # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py connect_to_data pandas_dataframe">
+# batch = context.sources.pandas_default.from_dataframe(df)
+# # </snippet>
 
-batches.append(batch)
+# batches.append(batch)
 
 for batch in batches:
     # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py create_expectation">
