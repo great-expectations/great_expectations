@@ -358,6 +358,21 @@ project_manager = ProjectManager()
 @overload
 def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: None = ...,
+    project_root_dir: None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Literal[False] | None = ...,
+    mode: Literal["ephemeral"] = ...,
+) -> EphemeralDataContext:
+    ...
+
+
+@overload
+def get_context(  # type: ignore[overload-overlap]
+    project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be
     project_root_dir: None = ...,
     runtime_environment: dict | None = ...,
@@ -396,21 +411,6 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_mode: Literal[True] = ...,
     mode: Literal["cloud"] | None = ...,
 ) -> CloudDataContext:
-    ...
-
-
-@overload
-def get_context(  # type: ignore[overload-overlap]
-    project_config: DataContextConfig | Mapping | None = ...,
-    context_root_dir: PathStr | None = ...,
-    project_root_dir: PathStr | None = ...,
-    runtime_environment: dict | None = ...,
-    cloud_base_url: str | None = ...,
-    cloud_access_token: str | None = ...,
-    cloud_organization_id: str | None = ...,
-    cloud_mode: Literal[False] | None = ...,
-    mode: Literal["ephemeral"] = ...,
-) -> EphemeralDataContext:
     ...
 
 
