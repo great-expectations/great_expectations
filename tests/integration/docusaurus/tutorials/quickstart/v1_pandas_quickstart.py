@@ -10,7 +10,6 @@ ephemeral assets.
 iterative process for trying and refining expectations.
 """
 
-import pandas as pd
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py import_gx">
 import great_expectations as gx
@@ -24,42 +23,28 @@ import great_expectations.expectations as gxe
 context = gx.get_context()
 # </snippet>
 
-batches = []
-
-# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py connect_to_data pandas_csv">
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py connect_to_data">
 batch = context.sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
 
-batches.append(batch)
-
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py create_expectation">
+expectation = gxe.ExpectColumnValuesToNotBeNull(
+    column="pu_datetime",
+    notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
 )
-# # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py connect_to_data pandas_dataframe">
-# batch = context.sources.pandas_default.from_dataframe(df)
-# # </snippet>
+batch.validate(expectation)
+# Review the results of the expectation! Change parameters as needed.
+expectation.mostly = 0.8
+batch.validate(expectation)
+suite = context.add_expectation_suite("quickstart")
+suite.add(expectation)
+suite.add(
+    gxe.ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6)
+)
+# </snippet>
 
-# batches.append(batch)
+validation_result = batch.validate(suite)
 
-for batch in batches:
-    # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py create_expectation">
-    expectation = gxe.ExpectColumnValuesToNotBeNull(
-        column="pu_datetime",
-        notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
-    )
-    batch.validate(expectation)
-    # Review the results of the expectation! Change parameters as needed.
-    expectation.mostly = 0.8
-    batch.validate(expectation)
-    suite = context.add_expectation_suite("quickstart")
-    suite.add(expectation)
-    suite.add(
-        gxe.ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6)
-    )
-    # </snippet>
-
-    validation_result = batch.validate(suite)
-
-    validation_result.open_docs()
+validation_result.open_docs()

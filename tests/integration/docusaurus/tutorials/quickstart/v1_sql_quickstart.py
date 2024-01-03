@@ -23,7 +23,7 @@ context = gx.get_context()
 # </snippet>
 
 connection_string = "postgresql://postgres:postgres@localhost:5432/postgres"
-# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data sql_query">
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">
 batch = context.sources.pandas_default.read_sql(
     "SELECT * FROM yellow_tripdata_sample_2019_01", connection_string
 )
