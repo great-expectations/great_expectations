@@ -171,6 +171,9 @@ class ExpectationsStore(Store):
                 break
 
         self.update(key=suite_identifier, value=fetched_suite)
+
+        # Ensure that state of local suite is in sync with cloud backend
+        suite.expectation_configurations = fetched_suite.expectation_configurations
         return expectation
 
     def delete_expectation(
