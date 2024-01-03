@@ -30,14 +30,17 @@ batch = context.sources.pandas_default.read_csv(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py create_expectation">
+
 expectation = gxe.ExpectColumnValuesToNotBeNull(
     column="pu_datetime",
     notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
 )
-batch.validate(expectation)
+result = batch.validate(expectation)
+
 # Review the results of the expectation! Change parameters as needed.
 expectation.mostly = 0.8
-batch.validate(expectation)
+result = batch.validate(expectation)
+
 suite = context.add_expectation_suite("quickstart")
 suite.add(expectation)
 suite.add(
@@ -47,6 +50,8 @@ suite.add(
 )
 # </snippet>
 
-validation_result = batch.validate(suite)
+suite_result = batch.validate(suite)
+assert suite_result.success
 
-validation_result.open_docs()
+# TODO: Need to implement this
+# validation_result.open_docs()
