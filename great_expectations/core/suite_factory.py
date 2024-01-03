@@ -25,7 +25,7 @@ class SuiteFactory:
         Raises:
             DataContextError if ExpectationSuite already exists
         """
-        key = self._store.get_key(suite=suite)
+        key = self._store.get_key(name=suite.name, id=None)
         if self._store.has_key(key=key):
             raise DataContextError(
                 f"Cannot add ExpectationSuite with name {suite.name} because it already exists."
@@ -43,7 +43,7 @@ class SuiteFactory:
         Raises:
             DataContextError if ExpectationSuite doesn't exist
         """
-        key = self._store.get_key(suite=suite)
+        key = self._store.get_key(name=suite.name, id=suite.ge_cloud_id)
         if not self._store.has_key(key=key):
             raise DataContextError(
                 f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
@@ -62,7 +62,7 @@ class SuiteFactory:
             DataContextError when ExpectationSuite is not found.
         """
 
-        key = self._store.get_key_by_name(name=name)
+        key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
             raise DataContextError(f"ExpectationSuite with name {name} was not found.")
         suite_dict = self._store.get(key=key)

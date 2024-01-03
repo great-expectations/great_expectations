@@ -241,22 +241,9 @@ class ExpectationsStore(Store):
             return self._expectationSuiteSchema.loads(value)
 
     def get_key(
-        self, suite: ExpectationSuite
-    ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
-        """Given an ExpectationSuite, build the correct key for use in the ExpectationsStore."""
-        return self._get_key(name=suite.name, id=suite.ge_cloud_id)
-
-    def get_key_by_name(
-        self, name: str
-    ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
-        """Given a name, obtain the correct key."""
-        # Workaround to allow callers to obtain a key from name without needing to be
-        #    aware of the StoreBackend implementation.
-        return self._get_key(name=name)
-
-    def _get_key(
         self, name: str, id: Optional[str] = None
     ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
+        """Given a name and optional ID, build the correct key for use in the ExpectationsStore."""
         key: GXCloudIdentifier | ExpectationSuiteIdentifier
         if self.cloud_mode:
             key = GXCloudIdentifier(
