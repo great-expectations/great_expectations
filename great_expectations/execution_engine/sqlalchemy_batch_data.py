@@ -21,7 +21,7 @@ class SqlAlchemyBatchData(BatchData):
 
     # Instantiating SqlAlchemyBatchData with table_name and schema_name
     @overload
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         execution_engine,
         # Option 1
@@ -40,7 +40,7 @@ class SqlAlchemyBatchData(BatchData):
         ...
 
     @overload
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         execution_engine,
         # Option 1
@@ -59,7 +59,7 @@ class SqlAlchemyBatchData(BatchData):
         ...
 
     @overload
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         execution_engine,
         # Option 1
