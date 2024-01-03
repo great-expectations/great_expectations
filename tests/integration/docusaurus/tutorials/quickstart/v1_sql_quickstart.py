@@ -31,8 +31,8 @@ batch = context.sources.pandas_default.read_sql(
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py create_expectation">
 expectation = gxe.ExpectColumnValuesToNotBeNull(
-    column="pu_datetime",
-    notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
+    column="pickup_datetime",
+    notes="These are filtered out upstream, because the entire record is garbage if there is no pickup_datetime",
 )
 result = batch.validate(expectation)
 
