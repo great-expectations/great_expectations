@@ -53,7 +53,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     Args:
         foreign_key_column: foreign key column of current table that we want to validate.
         foreign_table: foreign table name.
-        foreign_table_key_column: key column for in foreign table.
+        foreign_table_key_column: key column in foreign table.
     """
 
     library_metadata = {
