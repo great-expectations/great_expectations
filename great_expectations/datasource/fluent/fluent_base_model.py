@@ -77,7 +77,7 @@ class FluentBaseModel(pydantic.BaseModel):
         return config
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -94,7 +94,7 @@ class FluentBaseModel(pydantic.BaseModel):
         ...
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: pathlib.Path,
         *,
