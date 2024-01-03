@@ -53,7 +53,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     Args:
         foreign_key_column: foreign key column of current table that we want to validate.
         foreign_table: foreign table name.
-        primary_key_column_in_foreign_table: key column for primary key in foreign table.
+        foreign_table_key_column: key column in foreign table.
     """
 
     library_metadata = {
@@ -75,7 +75,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
     foreign_key_column: str
     foreign_table: str
-    primary_key_column_in_foreign_table: str
+    foreign_table_key_column: str
 
     template_dict: dict = {}
 
@@ -83,8 +83,8 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         SELECT a.{foreign_key_column}
         FROM {active_batch} a
         LEFT JOIN {foreign_table} b
-            ON a.{foreign_key_column} = b.{primary_key_column_in_foreign_table}
-        WHERE b.{primary_key_column_in_foreign_table} IS NULL
+            ON a.{foreign_key_column} = b.{foreign_table_key_column}
+        WHERE b.{foreign_table_key_column} IS NULL
         """
     success_keys = (
         "template_dict",
@@ -109,8 +109,8 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         template_dict: dict = {
             "foreign_key_column": configuration["kwargs"]["foreign_key_column"],
             "foreign_table": configuration["kwargs"]["foreign_table"],
-            "primary_key_column_in_foreign_table": configuration["kwargs"][
-                "primary_key_column_in_foreign_table"
+            "foreign_table_key_column": configuration["kwargs"][
+                "foreign_table_key_column"
             ],
         }
         self._configuration["kwargs"]["template_dict"] = template_dict
@@ -131,14 +131,14 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
             [
                 "foreign_key_column" in configuration.kwargs,
                 "foreign_table" in configuration.kwargs,
-                "primary_key_column_in_foreign_table" in configuration.kwargs,
+                "foreign_table_key_column" in configuration.kwargs,
             ]
         ):
             raise InvalidExpectationConfigurationError(
                 f"The following are missing from the ExpectationConfiguration: "
                 f"{'foreign_key_column ' if 'foreign_key_column' not in configuration.kwargs else ''} "
                 f"{'foreign_table ' if 'foreign_table' not in configuration.kwargs else ''} "
-                f"{'primary_key_column_in_foreign_table ' if 'primary_key_column_in_foreign_table' not in configuration.kwargs else ''}"
+                f"{'foreign_table_key_column ' if 'foreign_table_key_column' not in configuration.kwargs else ''}"
             )
 
     @classmethod
@@ -155,16 +155,16 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
         foreign_key_column: str = configuration.kwargs.get("foreign_key_column")
         foreign_table: str = configuration.kwargs.get("foreign_table")
-        primary_key_column_in_foreign_table: str = configuration.kwargs.get(
-            "primary_key_column_in_foreign_table"
+        foreign_table_key_column: str = configuration.kwargs.get(
+            "foreign_table_key_column"
         )
 
-        template_str = "All values in column $foreign_key_column are present in column $primary_key_column_in_foreign_table of table $foreign_table."
+        template_str = "All values in column $foreign_key_column are present in column $foreign_table_key_column of table $foreign_table."
 
         params = {
             "foreign_key_column": foreign_key_column,
             "foreign_table": foreign_table,
-            "primary_key_column_in_foreign_table": primary_key_column_in_foreign_table,
+            "foreign_table_key_column": foreign_table_key_column,
         }
 
         return [
@@ -272,7 +272,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                     "in": {
                         "foreign_key_column": "CUSTOMER_ID",
                         "foreign_table": "customer_table",
-                        "primary_key_column_in_foreign_table": "CUSTOMER_ID",
+                        "foreign_table_key_column": "CUSTOMER_ID",
                     },
                     "out": {
                         "success": True,
@@ -309,7 +309,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                     "in": {
                         "foreign_key_column": "CUSTOMER_ID",
                         "foreign_table": "customer_table",
-                        "primary_key_column_in_foreign_table": "CUSTOMER_ID",
+                        "foreign_table_key_column": "CUSTOMER_ID",
                     },
                     "out": {
                         "success": False,
