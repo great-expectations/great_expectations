@@ -324,6 +324,7 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config",
     "tests/integration/docusaurus/tutorials/getting-started/getting_started.py datasource_yaml",
     "tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py connect_to_data",
+    "tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py create_expectation",
     "tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py get_context",
     "tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py import_gx",
     "tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data",
