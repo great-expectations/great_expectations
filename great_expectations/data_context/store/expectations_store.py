@@ -126,7 +126,7 @@ class ExpectationsStore(Store):
             expectation.id = None  # flag this expectation as new for the backend
         else:
             expectation.id = str(uuid.uuid4())
-        fetched_suite.expectation_configurations.append(expectation.configuration)
+        fetched_suite.expectations.append(expectation)
 
         self.update(key=suite_identifier, value=fetched_suite)
         if self.cloud_mode:
