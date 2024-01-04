@@ -229,7 +229,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     @classmethod
     @override
     @renderer(renderer_type="renderer.diagnostic.unexpected_table")
-    def _diagnostic_unexpected_table_renderer(  # too complex
+    def _diagnostic_unexpected_table_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
