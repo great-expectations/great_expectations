@@ -503,8 +503,10 @@ class TestCRUDMethods:
         # Only persist change made to first expectation
         expectation.save()
 
-        assert suite.expectations[0].column == "c"
-        assert suite.expectations[1].column == "b"
+        updated_suite = context.suites.get(name=suite_name)
+
+        assert updated_suite.expectations[0].column == "c"
+        assert updated_suite.expectations[1].column == "b"
 
 
 class TestAddCitation:
