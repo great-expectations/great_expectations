@@ -3559,7 +3559,7 @@ def empty_base_data_context_in_cloud_mode(
         cloud_access_token=ge_cloud_config.access_token,
         cloud_organization_id=ge_cloud_config.organization_id,
     )
-
+    set_context(context)
     return context
 
 

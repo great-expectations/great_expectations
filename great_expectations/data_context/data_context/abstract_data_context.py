@@ -65,6 +65,7 @@ from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
+from great_expectations.core.suite_factory import SuiteFactory
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -309,6 +310,15 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._sources: _SourceFactories = _SourceFactories(self)
 
+        self._suites: Union[SuiteFactory, None]
+        if self.stores.get(self.expectations_store_name):
+            self._suites = SuiteFactory(
+                store=self.expectations_store,
+                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
+            )
+        else:
+            self._suites = None
+
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
         if (
@@ -485,7 +495,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id  # type: ignore[assignment]
+            self._in_memory_instance_id = instance_id
         return instance_id
 
     @property
@@ -542,6 +552,14 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def datasource_store(self) -> DatasourceStore:
         return self._datasource_store
+
+    @property
+    def suites(self) -> SuiteFactory:
+        if not self._suites:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured ExpectationsStore to persist ExpectationSuites."
+            )
+        return self._suites
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -1407,7 +1425,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: str = ...,
         config_version: float = ...,
@@ -1438,7 +1456,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: None = ...,
         config_version: float = ...,
@@ -1606,7 +1624,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return result
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: str = ...,
         id: str | None = ...,
@@ -1635,7 +1653,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: None = ...,
         id: None = ...,
@@ -2482,7 +2500,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource.get_batch_list_from_batch_request(batch_request=result)
 
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2500,7 +2518,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -2685,7 +2703,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return ExpectationSuiteIdentifier(name)
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2704,7 +2722,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,

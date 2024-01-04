@@ -1,5 +1,6 @@
 module.exports = {
   gx_cloud: [
+    {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
           type: 'category',
           label: 'About GX Cloud',
@@ -81,6 +82,7 @@ module.exports = {
           items: [
             'cloud/quickstarts/snowflake_quickstart',
             'cloud/quickstarts/airflow_quickstart',
+            'cloud/quickstarts/python_quickstart',
           ]
         },
         {
