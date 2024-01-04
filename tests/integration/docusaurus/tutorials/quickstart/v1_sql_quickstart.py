@@ -48,7 +48,10 @@ expectation = gxe.ExpectColumnValuesToNotBeNull(
     notes="These are filtered out upstream, because the entire record is garbage if there is no pickup_datetime",
 )
 result = batch.validate(expectation)
+# </snippet>
+assert result.success
 
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py update_expectation">
 # Review the results of the expectation! Change parameters as needed.
 expectation.mostly = 0.8
 result = batch.validate(expectation)
@@ -61,6 +64,8 @@ suite.add(
     )
 )
 # </snippet>
+assert result.success
+assert result.expectation_config.kwargs["mostly"] == 0.8
 
 suite_result = batch.validate(suite)
 assert suite_result.success
