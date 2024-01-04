@@ -436,6 +436,7 @@ class TestCRUDMethods:
         assert expectation.column != updated_column_name
         expectation.column = updated_column_name
         expectation.save()
+        assert suite.expectations[0].column == updated_column_name
         suite = context.get_expectation_suite(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
@@ -464,9 +465,45 @@ class TestCRUDMethods:
         updated_column_name = "foo"
         expectation.column = updated_column_name
         expectation.save()
+        assert suite.expectations[0].column == updated_column_name
         suite = context.get_expectation_suite(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
+
+    @pytest.mark.filesystem
+    def test_expectation_save_only_persists_single_change(self, empty_data_context):
+        context = empty_data_context
+        suite_name = "test-suite"
+        expectations = [
+            ExpectColumnValuesToBeInSet(
+                column="a",
+                value_set=[1, 2, 3],
+            ),
+            ExpectColumnValuesToBeInSet(
+                column="b",
+                value_set=[4, 5, 6],
+            ),
+        ]
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=suite_name,
+            expectations=[e.configuration for e in expectations],
+        )
+
+        assert suite.expectations[0].column == "a"
+        assert suite.expectations[1].column == "b"
+
+        # Change the column names of both expectations
+        expectation = suite.expectations[0]
+        other_expectation = suite.expectations[1]
+        expectation.column = "c"
+        other_expectation.column = "d"
+
+        # Only persist change made to first expectation
+        expectation.save()
+
+        assert suite.expectations[0].column == "c"
+        assert suite.expectations[1].column == "b"
 
 
 class TestAddCitation:
