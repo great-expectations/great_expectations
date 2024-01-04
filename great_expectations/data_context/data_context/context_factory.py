@@ -42,7 +42,7 @@ ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
 
 @overload
-def get_context(  # type: ignore[misc] # noqa: PLR0913
+def get_context(  # type: ignore[misc]
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: None = ...,
@@ -71,7 +71,7 @@ def get_context(  # type: ignore[overload-overlap]
 
 
 @overload
-def get_context(  # type: ignore[misc] # noqa: PLR0913
+def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be
@@ -86,7 +86,7 @@ def get_context(  # type: ignore[misc] # noqa: PLR0913
 
 
 @overload
-def get_context(  # noqa: PLR0913
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: None = ...,
@@ -101,7 +101,7 @@ def get_context(  # noqa: PLR0913
 
 
 @overload
-def get_context(  # noqa: PLR0913
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr | None = ...,
     project_root_dir: PathStr | None = ...,
