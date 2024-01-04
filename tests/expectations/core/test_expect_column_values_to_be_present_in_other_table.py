@@ -1,5 +1,8 @@
 import pandas as pd
 import pytest
+from contrib.experimental.great_expectations_experimental.expectations.expect_column_values_to_be_present_in_other_table import (
+    ExpectColumnValuesToBePresentInAnotherTable,  # noqa: F401 # needed for expectation registration
+)
 
 import great_expectations as gx
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
