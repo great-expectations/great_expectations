@@ -108,4 +108,4 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 The Missingness Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary.  You might have some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
 
-For guidance on editing your new Expectation Suite, see our documentation on how to [Edit an existing Expectation Suite](/docs/oss/guides/expectations/how_to_edit_an_existing_expectationsuite).
+To edit your new Expectation Suite, see [Edit an existing Expectation Suite](/docs/oss/guides/expectations/how_to_edit_an_existing_expectationsuite).
