@@ -184,6 +184,17 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
     @pydantic.root_validator
     def _validate_template_dict(cls, values):
+        if not all(
+            [
+                "foreign_key_column" in values,
+                "foreign_table" in values,
+                "foreign_table_key_column" in values,
+            ]
+        ):
+            raise KeyError(
+                "The following keys have to be in the template dict: foreign_key_column, foreign_table, foreign_table_key_column"
+            )
+
         template_dict: dict = {
             "foreign_key_column": values["foreign_key_column"],
             "foreign_table": values["foreign_table"],
@@ -281,7 +292,6 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
