@@ -351,7 +351,7 @@ class ExpectationSuite(SerializableDictDot):
             if key == "expectations":
                 # expectations can't be reliably deepcopied without causing RecursionError
                 setattr(
-                    result, key, [exp.copy(deep=False) for exp in self.expectations]
+                    result, key, [exp.copy(deep=True) for exp in self.expectations]
                 )
             else:
                 setattr(result, key, deepcopy(getattr(self, key)))
