@@ -348,7 +348,13 @@ class ExpectationSuite(SerializableDictDot):
 
         attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
         for key in attributes_to_copy:
-            setattr(result, key, deepcopy(getattr(self, key)))
+            if key == "expectations":
+                # expectations can't be reliably deepcopied without causing RecursionError
+                setattr(
+                    result, key, [exp.copy(deep=False) for exp in self.expectations]
+                )
+            else:
+                setattr(result, key, deepcopy(getattr(self, key)))
 
         result._data_context = self._data_context
 
@@ -779,7 +785,9 @@ class ExpectationSuite(SerializableDictDot):
         self, expectation_configuration: ExpectationConfiguration
     ) -> Expectation:
         try:
-            return expectation_configuration.to_domain_obj()
+            expectation = expectation_configuration.to_domain_obj()
+            expectation.register_save_callback(save_callback=self._save_expectation)
+            return expectation
         except (
             gx_exceptions.ExpectationNotFoundError,
             gx_exceptions.InvalidExpectationConfigurationError,

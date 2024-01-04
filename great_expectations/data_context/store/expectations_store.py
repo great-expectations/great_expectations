@@ -166,8 +166,7 @@ class ExpectationsStore(Store):
 
         for i, old_expectation in enumerate(fetched_suite.expectations):
             if old_expectation.id == expectation.id:
-                # todo: update when expectations are source of truth
-                fetched_suite.expectation_configurations[i] = expectation.configuration
+                fetched_suite.expectations[i] = expectation
                 break
 
         self.update(key=suite_identifier, value=fetched_suite)
@@ -183,8 +182,7 @@ class ExpectationsStore(Store):
 
         for i, old_expectation in enumerate(suite.expectations):
             if old_expectation.id == expectation.id:
-                # todo: update when expectations are source of truth
-                del suite.expectation_configurations[i]
+                del suite.expectations[i]
                 break
 
         self.update(key=suite_identifier, value=suite)

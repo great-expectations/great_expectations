@@ -433,7 +433,6 @@ class TestCRUDMethods:
         # todo: update to new api
         suite = context.add_expectation_suite(suite_name)
         suite.add(expectation)
-        expectation = copy(expectation)
         updated_column_name = "foo"
         assert expectation.column != updated_column_name
         expectation.column = updated_column_name
