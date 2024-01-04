@@ -58,6 +58,22 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         foreign_table_key_column: key column in foreign table.
     """
 
+    metric_dependencies = ("query.template_values",)
+
+    foreign_key_column: str
+    foreign_table: str
+    foreign_table_key_column: str
+
+    template_dict: dict = {}
+
+    query = """
+            SELECT a.{foreign_key_column}
+            FROM {active_batch} a
+            LEFT JOIN {foreign_table} b
+                ON a.{foreign_key_column} = b.{foreign_table_key_column}
+            WHERE b.{foreign_table_key_column} IS NULL
+            """
+
     library_metadata = {
         "maturity": "experimental",
         "tags": ["table expectation", "multi-table expectation", "query-based"],
@@ -73,21 +89,6 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         "manually_reviewed_code": True,
     }
 
-    metric_dependencies = ("query.template_values",)
-
-    foreign_key_column: str
-    foreign_table: str
-    foreign_table_key_column: str
-
-    template_dict: dict = {}
-
-    query = """
-        SELECT a.{foreign_key_column}
-        FROM {active_batch} a
-        LEFT JOIN {foreign_table} b
-            ON a.{foreign_key_column} = b.{foreign_table_key_column}
-        WHERE b.{foreign_table_key_column} IS NULL
-        """
     success_keys = (
         "template_dict",
         "query",
@@ -295,7 +296,3 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                 "unexpected_index_list": unexpected_values,
             },
         )
-
-
-if __name__ == "__main__":
-    ExpectColumnValuesToBePresentInAnotherTable().print_diagnostic_checklist()
