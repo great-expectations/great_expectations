@@ -1,13 +1,11 @@
-from typing import List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import pandas as pd
 import pydantic
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
-    ExpectationConfiguration,
-)
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
@@ -17,6 +15,10 @@ from great_expectations.render import (
     RenderedTableContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
