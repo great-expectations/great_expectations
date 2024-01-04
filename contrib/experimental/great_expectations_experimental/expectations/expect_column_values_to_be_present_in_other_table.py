@@ -120,7 +120,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """Validates the configuration for the Expectation.
-        This override method validates that all necessary keys are present in ExpectationConfiguration
+        This override method validates that all necessary keys are present in ExpectationConfiguration.
 
         Raises:
             InvalidExpectationConfigurationError: The configuration does not contain the values required
