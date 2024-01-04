@@ -11,11 +11,11 @@ displayed_sidebar: gx_cloud
 import LinkCardGrid from '/docs/components/LinkCardGrid';
 import LinkCard from '/docs/components/LinkCard';
 
-<p class="DocItem__header-description">GX Cloud is the answer when you need proactive data quality.
+<p class="DocItem__header-description">GX Cloud is the fastest and most reliable way to validate your data. Connect, test, and validate Data Assets in a web-based UI.
+<br /> 
+To learn how its fast setup, collaboration-forward approach, and accessibility to technical and nontechnical stakeholders could be the perfect solution for your organization, see <a href='/docs/cloud/why_gx_cloud'>Why GX Cloud</a>.
 <br />
-<a href='/docs/cloud/why_gx_cloud'>Learn how its fast setup, collaboration-forward approach, and accessibility to technical and nontechnical stakeholders alike helps you build data quality that lasts</a>, or <a href='https://greatexpectations.io/cloud'>request a GX Cloud Beta account</a> to try it out yourself.
-< br/>
-If you're ready to get started and are connecting a Snowflake table, try the <a href='/docs/cloud/quickstarts/snowflake_quickstart'>Quickstart for GX Cloud and Snowflake</a>.
+If you're ready to get started and using Snowflake to store your data, try the <a href='/docs/cloud/quickstarts/snowflake_quickstart'>Quickstart for GX Cloud and Snowflake</a>.
 </p>
 
 ### Get started
