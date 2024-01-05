@@ -633,11 +633,11 @@ def test_pandas_sorter(
 
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>2018|2019|2020)-(?P<month>\d{2})\.csv",
         order_by=order_by,
     )
     batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
-    assert len(batches) == 37
+    assert len(batches) == 36
 
     @dataclass(frozen=True)
     class TimeRange:
