@@ -289,15 +289,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         batch_config = BatchConfig(name=name)
         batch_config.set_data_asset(self)
-        self.__fields_set__.add("batch_configs")
         self.batch_configs.append(batch_config)
+        self.__fields_set__.add("batch_configs")
         if self.datasource.data_context:
-            updated_datasource = self.datasource.save()
-            updated_asset = updated_datasource.get_asset(asset_name=self.name)
-            updated_batch_configs = [
-                bc for bc in updated_asset.batch_configs if bc.name == batch_config.name
-            ]
-            batch_config = updated_batch_configs[0]
+            batch_config = self.datasource.add_batch_config(batch_config)
+        else:
+            self.batch_configs.append(batch_config)
 
         return batch_config
 
@@ -329,6 +326,18 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         # per our serialization conventions.
         if not self.batch_configs and "batch_configs" in self.__fields_set__:
             self.__fields_set__.remove("batch_configs")
+
+    def get_batch_config(self, batch_config_name: str) -> BatchConfig:
+        batch_configs = [
+            batch_config
+            for batch_config in self.batch_configs
+            if batch_config.name == batch_config_name
+        ]
+        if len(batch_configs) == 0:
+            raise KeyError(f"BatchConfig {batch_config_name} not found")
+        elif len(batch_configs) > 1:
+            raise KeyError(f"Multiple keys for {batch_config_name} found")
+        return batch_configs[0]
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
         return set(options.keys()).issubset(set(self.batch_request_options))
@@ -541,10 +550,26 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def save(self: Self) -> Self:
-        if not self._data_context:
+    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        asset_name = batch_config.data_asset.name
+        if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")
-        return self._data_context.update_datasource(datasource=self)  # type: ignore [return-value]
+
+        loaded_datasource = self.data_context.get_datasource(self.name)
+        if loaded_datasource is not self:
+            # CachedDatasourceDict will return self; only add batch config if this is a remote copy
+            assert isinstance(loaded_datasource, Datasource)
+            loaded_asset = loaded_datasource.get_asset(asset_name)
+            loaded_asset.batch_configs.append(batch_config)
+            loaded_asset.__fields_set__.add("batch_configs")
+        updated_datasource = self.data_context.update_datasource(loaded_datasource)
+        assert isinstance(updated_datasource, Datasource)
+
+        output = updated_datasource.get_asset(asset_name).get_batch_config(
+            batch_config.name
+        )
+        output.set_data_asset(batch_config.data_asset)
+        return output
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(

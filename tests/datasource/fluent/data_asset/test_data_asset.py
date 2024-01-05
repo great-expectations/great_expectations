@@ -165,13 +165,17 @@ def _test_add_batch_config__does_not_clobber_other_assets(
     datasource_name: str,
 ):
     ds1 = context.get_datasource(datasource_name)
-    ds2 = context.get_datasource(datasource_name)
     assert isinstance(ds1, PandasDatasource)
-    assert isinstance(ds2, PandasDatasource)
-
     my_asset = ds1.add_csv_asset("my asset", "taxi.csv")  # type: ignore [arg-type]
+
+    # adding an asset currently clobbers the datasource, so for now we
+    # need to reload the datasource AFTER adding the asset
+    # TODO: Move fetching ds2 up with ds1 after V1-124
+    ds2 = context.get_datasource(datasource_name)
+    assert isinstance(ds2, PandasDatasource)
     your_asset = ds2.add_csv_asset("your asset", "taxi.csv")  # type: ignore [arg-type]
 
+    loaded_datasource = context.get_datasource(datasource_name)
     my_batch_config = my_asset.add_batch_config("my batch config")
     your_batch_config = your_asset.add_batch_config("your batch config")
 
