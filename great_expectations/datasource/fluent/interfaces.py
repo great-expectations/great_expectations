@@ -319,7 +319,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         self.batch_configs.remove(batch_config)
         if self.datasource.data_context:
-            self.datasource.save()
+            try:
+                self.datasource.save()
+            except DataContextError:
+                self.batch_configs.append(batch_config)
+                raise
 
         # If we removed the last of our batch configs, ensure we don't serialize an empty collection
         # per our serialization conventions.
