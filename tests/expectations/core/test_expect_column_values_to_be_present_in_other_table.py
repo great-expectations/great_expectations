@@ -9,14 +9,17 @@ from contrib.experimental.great_expectations_experimental.expectations.expect_co
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import SqliteDatasource
 
-DB_PATH: Final[str] = "sqlite:///../../test_sets/referential_integrity_dataset.db"
+DB_PATH: Final[str] = file_relative_path(
+    __file__, "../../test_sets/referential_integrity_dataset.db"
+)
 
 
 @pytest.fixture
 def referential_integrity_db(sa):
-    sqlite_engine = sa.create_engine(DB_PATH)
+    sqlite_engine = sa.create_engine(f"sqlite:///{DB_PATH}")
     order_table_1 = pd.DataFrame(
         {
             "ORDER_ID": ["aaa", "bbb", "ccc"],
@@ -65,7 +68,9 @@ def sqlite_datasource(
 ) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
-    return context.sources.add_sqlite(datasource_name, connection_string=DB_PATH)
+    return context.sources.add_sqlite(
+        datasource_name, connection_string=f"sqlite:///{DB_PATH}"
+    )
 
 
 @pytest.mark.sqlite
@@ -107,8 +112,11 @@ def test_failed_expectation_run(sqlite_datasource):
 
 @pytest.mark.sqlite
 def test_configuration_invalid_column_name(sqlite_datasource):
-    # this is testing default behavior of `batch.validate()` which catches Exception information
-    # and places it in `exception_info`. Here we check that the exception message contains the text we expect
+    """What does this test do, and why?
+
+    This is testing default behavior of `batch.validate()` which catches Exception information
+    and places it in `exception_info`. Here we check that the exception message contains the text we expect
+    """
     datasource = sqlite_datasource
     asset_name = "order_table_2"
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")

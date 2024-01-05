@@ -187,9 +187,9 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     @root_validator
     def _validate_template_dict(cls, values):
         template_dict: dict = {
-            "foreign_key_column": values["foreign_key_column"],
-            "foreign_table": values["foreign_table"],
-            "foreign_table_key_column": values["foreign_table_key_column"],
+            "foreign_key_column": values.get("foreign_key_column"),
+            "foreign_table": values.get("foreign_table"),
+            "foreign_table_key_column": values.get("foreign_table_key_column"),
         }
         values["template_dict"] = template_dict
         return values
@@ -270,14 +270,10 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
             row_list.append(unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
-            **{  # type: ignore[arg-type]
-                "content_block_type": "table",
-                "table": row_list,
-                "header_row": header_row,
-                "styling": {
-                    "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
-                },
-            }
+            content_block_type="table",
+            table=row_list,  # type: ignore[arg-type]
+            header_row=header_row,  # type: ignore[arg-type]
+            styling={"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
         )
         return [unexpected_table_content_block]
 
