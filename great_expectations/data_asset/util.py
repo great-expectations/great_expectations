@@ -101,7 +101,7 @@ def recursively_convert_to_json_serializable(
 
 
 def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
-    test_obj,
+    test_obj: Any,
 ) -> Any:
     # If it's one of our types, we pass
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
@@ -143,7 +143,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         # test_obj[key] = test_obj[key].tolist()
         # If we have an array or index, convert it first to a list--causing coercion to float--and then round
         # to the number of digits for which the string representation will equal the float representation
-        return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
+        return [_recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
 
     # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
@@ -175,14 +175,14 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         value_name = test_obj.name or "value"
         return [
             {
-                index_name: recursively_convert_to_json_serializable(idx),
-                value_name: recursively_convert_to_json_serializable(val),
+                index_name: _recursively_convert_to_json_serializable(idx),
+                value_name: _recursively_convert_to_json_serializable(val),
             }
             for idx, val in test_obj.items()
         ]
 
     elif isinstance(test_obj, pd.DataFrame):
-        return recursively_convert_to_json_serializable(
+        return _recursively_convert_to_json_serializable(
             test_obj.to_dict(orient="records")
         )
 

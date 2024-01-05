@@ -42,7 +42,7 @@ ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
 
 @overload
-def get_context(  # type: ignore[misc]
+def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: None = ...,
