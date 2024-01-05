@@ -4,6 +4,9 @@ from great_expectations.core.batch_config import BatchConfig
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
@@ -50,6 +53,17 @@ def context_with_asset(
     ).add_batch_config(batch_config_name)
 
     return context
+
+
+@pytest.fixture
+def cloud_context(
+    empty_cloud_context_fluent: CloudDataContext,
+    datasource_name: str,
+    empty_data_asset_name: str,
+) -> AbstractDataContext:
+    datasource = empty_cloud_context_fluent.sources.add_pandas(datasource_name)
+    datasource.add_csv_asset(empty_data_asset_name, "taxi.csv")  # type: ignore [arg-type]
+    return empty_cloud_context_fluent
 
 
 @pytest.fixture
@@ -129,8 +143,29 @@ def test_add_batch_config__file_data__does_not_clobber_other_assets(
     context_with_asset: AbstractDataContext,
     datasource_name: str,
 ):
-    ds1 = context_with_asset.get_datasource(datasource_name)
-    ds2 = context_with_asset.get_datasource(datasource_name)
+    _test_add_batch_config__does_not_clobber_other_assets(
+        context=context_with_asset,
+        datasource_name=datasource_name,
+    )
+
+
+@pytest.mark.unit
+def test_add_batch_config__cloud_data__does_not_clobber_other_assets(
+    cloud_context: AbstractDataContext,
+    datasource_name: str,
+):
+    _test_add_batch_config__does_not_clobber_other_assets(
+        context=cloud_context,
+        datasource_name=datasource_name,
+    )
+
+
+def _test_add_batch_config__does_not_clobber_other_assets(
+    context: AbstractDataContext,
+    datasource_name: str,
+):
+    ds1 = context.get_datasource(datasource_name)
+    ds2 = context.get_datasource(datasource_name)
     assert isinstance(ds1, PandasDatasource)
     assert isinstance(ds2, PandasDatasource)
 
@@ -140,7 +175,7 @@ def test_add_batch_config__file_data__does_not_clobber_other_assets(
     my_batch_config = my_asset.add_batch_config("my batch config")
     your_batch_config = your_asset.add_batch_config("your batch config")
 
-    loaded_datasource = context_with_asset.get_datasource(datasource_name)
+    loaded_datasource = context.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
     assert loaded_datasource.get_asset(my_asset.name).batch_configs == [my_batch_config]
     assert loaded_datasource.get_asset(your_asset.name).batch_configs == [
@@ -154,20 +189,45 @@ def test_add_batch_config__file_data__does_not_clobber_other_batch_configs(
     datasource_name: str,
     empty_data_asset_name: str,
 ):
-    ds1 = context_with_asset.get_datasource(datasource_name)
-    ds2 = context_with_asset.get_datasource(datasource_name)
+    _test_add_batch_config__does_not_clobber_other_batch_configs(
+        context=context_with_asset,
+        datasource_name=datasource_name,
+        asset_name=empty_data_asset_name,
+    )
+
+
+@pytest.mark.unit
+def test_add_batch_config__cloud_data__does_not_clobber_other_batch_configs(
+    cloud_context: AbstractDataContext,
+    datasource_name: str,
+    empty_data_asset_name: str,
+):
+    _test_add_batch_config__does_not_clobber_other_batch_configs(
+        context=cloud_context,
+        datasource_name=datasource_name,
+        asset_name=empty_data_asset_name,
+    )
+
+
+def _test_add_batch_config__does_not_clobber_other_batch_configs(
+    context: AbstractDataContext,
+    datasource_name: str,
+    asset_name: str,
+):
+    ds1 = context.get_datasource(datasource_name)
+    ds2 = context.get_datasource(datasource_name)
     assert isinstance(ds1, PandasDatasource)
     assert isinstance(ds2, PandasDatasource)
 
-    asset_1 = ds1.get_asset(empty_data_asset_name)
-    asset_2 = ds2.get_asset(empty_data_asset_name)
+    asset_1 = ds1.get_asset(asset_name)
+    asset_2 = ds2.get_asset(asset_name)
 
     my_batch_config = asset_1.add_batch_config("my batch config")
     your_batch_config = asset_2.add_batch_config("your batch config")
 
-    loaded_datasource = context_with_asset.get_datasource(datasource_name)
+    loaded_datasource = context.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
-    assert loaded_datasource.get_asset(empty_data_asset_name).batch_configs == [
+    assert loaded_datasource.get_asset(asset_name).batch_configs == [
         my_batch_config,
         your_batch_config,
     ]
