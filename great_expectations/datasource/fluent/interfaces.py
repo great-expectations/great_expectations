@@ -290,12 +290,15 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_config = BatchConfig(name=name)
         batch_config.set_data_asset(self)
         self.batch_configs.append(batch_config)
-        self.__fields_set__.add("batch_configs")
         if self.datasource.data_context:
-            batch_config = self.datasource.add_batch_config(batch_config)
+            try:
+                batch_config = self.datasource.add_batch_config(batch_config)
+            except DataContextError:
+                self.batch_configs.remove(batch_config)
+                raise
         else:
             self.batch_configs.append(batch_config)
-
+        self.update_batch_config_field_set()
         return batch_config
 
     @public_api
@@ -317,15 +320,21 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self.batch_configs.remove(batch_config)
         if self.datasource.data_context:
             try:
-                self.datasource.save()
+                self.datasource.delete_batch_config(batch_config)
             except DataContextError:
                 self.batch_configs.append(batch_config)
                 raise
 
-        # If we removed the last of our batch configs, ensure we don't serialize an empty collection
-        # per our serialization conventions.
-        if not self.batch_configs and "batch_configs" in self.__fields_set__:
+        self.update_batch_config_field_set()
+
+    def update_batch_config_field_set(self) -> None:
+        """Ensure that we have __fields_set__ set correctly for batch_configs to ensure we serialize IFF needed."""
+
+        has_batch_configs = len(self.batch_configs) > 0
+        if "batch_configs" in self.__fields_set__ and not has_batch_configs:
             self.__fields_set__.remove("batch_configs")
+        elif "batch_configs" not in self.__fields_set__ and has_batch_configs:
+            self.__fields_set__.add("batch_configs")
 
     def get_batch_config(self, batch_config_name: str) -> BatchConfig:
         batch_configs = [
@@ -561,7 +570,7 @@ class Datasource(
             assert isinstance(loaded_datasource, Datasource)
             loaded_asset = loaded_datasource.get_asset(asset_name)
             loaded_asset.batch_configs.append(batch_config)
-            loaded_asset.__fields_set__.add("batch_configs")
+            loaded_asset.update_batch_config_field_set()
         updated_datasource = self.data_context.update_datasource(loaded_datasource)
         assert isinstance(updated_datasource, Datasource)
 
@@ -570,6 +579,21 @@ class Datasource(
         )
         output.set_data_asset(batch_config.data_asset)
         return output
+
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        asset_name = batch_config.data_asset.name
+        if not self.data_context:
+            raise DataContextError("Cannot save datasource without a data context.")
+
+        loaded_datasource = self.data_context.get_datasource(self.name)
+        if loaded_datasource is not self:
+            # CachedDatasourceDict will return self; only add batch config if this is a remote copy
+            assert isinstance(loaded_datasource, Datasource)
+            loaded_asset = loaded_datasource.get_asset(asset_name)
+            loaded_asset.batch_configs.remove(batch_config)
+            loaded_asset.update_batch_config_field_set()
+        updated_datasource = self.data_context.update_datasource(loaded_datasource)
+        assert isinstance(updated_datasource, Datasource)
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
