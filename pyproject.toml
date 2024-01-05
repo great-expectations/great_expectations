@@ -37,6 +37,7 @@ files = [
     "tests/integration/docusaurus",
     "tests/core/test_batch_config.py",
     "tests/validator/test_v1_validator.py",
+    'expectations/core/test_expect_column_values_to_be_present_in_other_table.py',
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
@@ -112,7 +113,6 @@ exclude = [
     'expectations/core/expect_column_values_to_be_in_set\.py',                                             # 2
     'expectations/core/expect_column_values_to_be_equal\.py',                                              # 3
     'expectations/core/expect_column_values_a_to_be_greater_than_b\.py',                                   # 3
-    'expectations/core/test_expect_column_values_to_be_present_in_other_table\.py',                        # 7
     'expectations/core/expect_column_pair_cramers_phi_value_to_be_less_than\.py',                          # 7
     'expectations/core/expect_column_most_common_value_to_be_in_set\.py',                                  # 3
     'expectations/core/expect_column_kl_divergence_to_be_less_than\.py',                                   # 22
