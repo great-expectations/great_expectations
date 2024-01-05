@@ -1447,7 +1447,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
+        for datasource_name, datasource_config in self.config.datasources.items():
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(  # noqa: PLW2901
                     **datasource_config
@@ -1492,13 +1492,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             self.datasources.pop(datasource_name, None)
 
-        self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+        self.config.datasources.pop(datasource_name, None)
 
         self._save_project_config()
 
     @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: str = ...,
         config_version: float = ...,
@@ -1534,7 +1534,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: None = ...,
         config_version: float = ...,
@@ -1719,7 +1719,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return result
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: str = ...,
         id: str | None = ...,
@@ -1752,7 +1752,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: None = ...,
         id: None = ...,
@@ -2624,7 +2624,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource.get_batch_list_from_batch_request(batch_request=result)
 
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2642,7 +2642,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -2827,7 +2827,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return ExpectationSuiteIdentifier(name)
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2846,7 +2846,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -3021,7 +3021,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
     @overload
-    def add_profiler(  # noqa: PLR0913
+    def add_profiler(
         self,
         name: str,
         config_version: float,
@@ -3036,7 +3036,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_profiler(  # noqa: PLR0913
+    def add_profiler(
         self,
         name: None = ...,
         config_version: None = ...,
@@ -3170,7 +3170,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @overload
-    def add_or_update_profiler(  # noqa: PLR0913
+    def add_or_update_profiler(
         self,
         name: str = ...,
         id: str | None = ...,
@@ -3186,7 +3186,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_profiler(  # noqa: PLR0913
+    def add_or_update_profiler(
         self,
         name: None = ...,
         id: None = ...,
@@ -4725,7 +4725,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update
         # caches or config, but keeping existing behavior for now
         self.datasources[name] = datasource
-        self.config.datasources[name] = config  # type: ignore[index,assignment]
+        self.config.datasources[name] = config  # type: ignore[assignment]
 
         return datasource
 
