@@ -4,7 +4,6 @@ from contrib.experimental.great_expectations_experimental.expectations.expect_co
     ExpectColumnValuesToBePresentInAnotherTable,  # needed for expectation registration
 )
 
-import great_expectations as gx
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -59,8 +58,10 @@ def referential_integrity_db(sa):
 
 
 @pytest.fixture()
-def context_with_sqlite_datasource(referential_integrity_db) -> EphemeralDataContext:
-    context = gx.get_context(cloud_mode=False)
+def context_with_sqlite_datasource(
+    in_memory_runtime_context, referential_integrity_db
+) -> EphemeralDataContext:
+    context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
     context.sources.add_sqlite(datasource_name, connection_string=DB_PATH)
     return context
