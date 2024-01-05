@@ -7,6 +7,7 @@ from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.exceptions.exceptions import DataContextError
 
 
+@pytest.mark.unit
 def test_save__success(empty_data_context: AbstractDataContext):
     datasource = empty_data_context.sources.add_pandas("my_datasource")
 
@@ -14,6 +15,7 @@ def test_save__success(empty_data_context: AbstractDataContext):
     assert empty_data_context.get_datasource("my_datasource") == datasource
 
 
+@pytest.mark.unit
 def test_save__missing_data_context():
     datasource = Datasource(name="my_datasource", type="pandas")
 
