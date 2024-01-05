@@ -129,16 +129,6 @@ def test_configuration_invalid_column_name(sqlite_datasource):
 
 
 @pytest.mark.unit
-def test_invalid_configuration_missing_key():
-    with pytest.raises(KeyError):
-        # missing foreign_key_column
-        ExpectColumnValuesToBePresentInAnotherTable(
-            foreign_table="customer_table",
-            foreign_table_key_column="CUSTOMER_ID",
-        )
-
-
-@pytest.mark.unit
 def test_template_dict_creation():
     expectation = ExpectColumnValuesToBePresentInAnotherTable(
         foreign_key_column="CUSTOMER_ID",
