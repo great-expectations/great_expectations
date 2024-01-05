@@ -38,18 +38,20 @@ connection_string = f"sqlite:///{sqlite_database_path}"
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">
 batch = context.sources.pandas_default.read_sql(
-    "SELECT * FROM yellow_tripdata_sample_2019_01", connection_string
+    "SELECT * FROM yellow_tripdata_sample_2022_01", connection_string
 )
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py create_expectation">
-expectation = gxe.ExpectColumnValuesToNotBeNull(
-    column="pickup_datetime",
-    notes="These are filtered out upstream, because the entire record is garbage if there is no pickup_datetime",
+expectation = gxe.ExpectColumnValuesToBeBetween(
+    column="passenger_count",
+    min_value=0,
+    max_value=6,
+    notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
 )
 result = batch.validate(expectation)
 # </snippet>
-assert result.success
+assert result.success is False
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py update_expectation">
 # Review the results of the expectation! Change parameters as needed.
@@ -58,13 +60,9 @@ result = batch.validate(expectation)
 
 suite = context.add_expectation_suite("quickstart")
 suite.add(expectation)
-suite.add(
-    gxe.ExpectColumnValuesToBeBetween(
-        column="passenger_count", min_value=1, max_value=6
-    )
-)
+suite.add(gxe.ExpectColumnValuesToNotBeNull(column="trip_distance"))
 # </snippet>
-assert result.success
+assert result.success is True
 assert result.expectation_config.kwargs["mostly"] == 0.8
 
 suite_result = batch.validate(suite)
