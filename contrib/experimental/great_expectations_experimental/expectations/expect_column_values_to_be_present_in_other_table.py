@@ -103,7 +103,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         "condition_parser",
     )
 
-    examples = [
+    examples: ClassVar[List[dict]] = [
         {
             "data": [
                 {
