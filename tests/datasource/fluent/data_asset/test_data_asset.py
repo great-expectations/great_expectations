@@ -5,6 +5,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 
 @pytest.fixture
@@ -52,26 +53,23 @@ def context_with_asset(
 
 
 @pytest.fixture
-def empty_data_asset(
-    context_with_asset: AbstractDataContext,
-    datasource_name: str,
-    empty_data_asset_name: str,
-) -> DataAsset:
-    datasource = context_with_asset.get_datasource(datasource_name)
+def datasource(
+    context_with_asset: AbstractDataContext, datasource_name: str
+) -> PandasDatasource:
+    output = context_with_asset.get_datasource(datasource_name)
+    assert isinstance(output, PandasDatasource)
+    return output
 
-    assert isinstance(datasource, Datasource)
+
+@pytest.fixture
+def empty_data_asset(empty_data_asset_name: str, datasource: Datasource) -> DataAsset:
     return datasource.get_asset(empty_data_asset_name)
 
 
 @pytest.fixture
 def data_asset_with_batch_config(
-    context_with_asset: AbstractDataContext,
-    datasource_name: str,
-    data_asset_with_batch_config_name: str,
+    data_asset_with_batch_config_name: str, datasource: Datasource
 ) -> DataAsset:
-    datasource = context_with_asset.get_datasource(datasource_name)
-
-    assert isinstance(datasource, Datasource)
     return datasource.get_asset(data_asset_with_batch_config_name)
 
 
@@ -124,6 +122,55 @@ def test_add_batch_config__duplicate_key(empty_data_asset: DataAsset):
 
     with pytest.raises(ValueError, match="already exists"):
         empty_data_asset.add_batch_config(name)
+
+
+@pytest.mark.unit
+def test_add_batch_config__file_data__does_not_clobber_other_assets(
+    context_with_asset: AbstractDataContext,
+    datasource_name: str,
+):
+    ds1 = context_with_asset.get_datasource(datasource_name)
+    ds2 = context_with_asset.get_datasource(datasource_name)
+    assert isinstance(ds1, PandasDatasource)
+    assert isinstance(ds2, PandasDatasource)
+
+    my_asset = ds1.add_csv_asset("my asset", "taxi.csv")  # type: ignore [arg-type]
+    your_asset = ds2.add_csv_asset("your asset", "taxi.csv")  # type: ignore [arg-type]
+
+    my_batch_config = my_asset.add_batch_config("my batch config")
+    your_batch_config = your_asset.add_batch_config("your batch config")
+
+    loaded_datasource = context_with_asset.get_datasource(datasource_name)
+    assert isinstance(loaded_datasource, Datasource)
+    assert loaded_datasource.get_asset(my_asset.name).batch_configs == [my_batch_config]
+    assert loaded_datasource.get_asset(your_asset.name).batch_configs == [
+        your_batch_config
+    ]
+
+
+@pytest.mark.unit
+def test_add_batch_config__file_data__does_not_clobber_other_batch_configs(
+    context_with_asset: AbstractDataContext,
+    datasource_name: str,
+    empty_data_asset_name: str,
+):
+    ds1 = context_with_asset.get_datasource(datasource_name)
+    ds2 = context_with_asset.get_datasource(datasource_name)
+    assert isinstance(ds1, PandasDatasource)
+    assert isinstance(ds2, PandasDatasource)
+
+    asset_1 = ds1.get_asset(empty_data_asset_name)
+    asset_2 = ds2.get_asset(empty_data_asset_name)
+
+    my_batch_config = asset_1.add_batch_config("my batch config")
+    your_batch_config = asset_2.add_batch_config("your batch config")
+
+    loaded_datasource = context_with_asset.get_datasource(datasource_name)
+    assert isinstance(loaded_datasource, Datasource)
+    assert loaded_datasource.get_asset(empty_data_asset_name).batch_configs == [
+        my_batch_config,
+        your_batch_config,
+    ]
 
 
 @pytest.mark.unit
