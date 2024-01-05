@@ -913,6 +913,7 @@ class TableAsset(_SQLAsset):
         """
         datasource: SQLDatasource = self.datasource
         engine: sqlalchemy.Engine = datasource.get_engine()
+        # TODO: replace this with a select query
         inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
