@@ -637,7 +637,7 @@ def test_pandas_sorter(
         order_by=order_by,
     )
     batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
-    assert (len(batches)) == 36
+    assert len(batches) == 37
 
     @dataclass(frozen=True)
     class TimeRange:
