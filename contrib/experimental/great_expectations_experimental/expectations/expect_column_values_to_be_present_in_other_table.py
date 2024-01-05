@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -69,7 +69,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
     template_dict: dict = {}
 
-    query = """
+    query: str = """
             SELECT a.{foreign_key_column}
             FROM {active_batch} a
             LEFT JOIN {foreign_table} b
@@ -77,7 +77,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
             WHERE b.{foreign_table_key_column} IS NULL
             """
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "experimental",
         "tags": ["table expectation", "multi-table expectation", "query-based"],
         "contributors": [
@@ -92,17 +92,16 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         "manually_reviewed_code": True,
     }
 
-    success_keys = (
+    success_keys: ClassVar[Tuple[str, ...]] = (
         "template_dict",
         "query",
     )
-    domain_keys = ("query", "batch_id", "row_condition", "condition_parser")
-
-    default_kwarg_values = {
-        "catch_exceptions": False,
-        "meta": None,
-        "query": query,
-    }
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "query",
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
     examples = [
         {
@@ -187,17 +186,6 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
     @root_validator
     def _validate_template_dict(cls, values):
-        if not all(
-            [
-                "foreign_key_column" in values,
-                "foreign_table" in values,
-                "foreign_table_key_column" in values,
-            ]
-        ):
-            raise KeyError(
-                "The following keys have to be in the template dict: foreign_key_column, foreign_table, foreign_table_key_column"
-            )
-
         template_dict: dict = {
             "foreign_key_column": values["foreign_key_column"],
             "foreign_table": values["foreign_table"],
