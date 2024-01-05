@@ -90,7 +90,7 @@ class TableHead(TableMetricProvider):
                 MetricConfiguration("table.columns", metric_domain_kwargs)
             )
             df = pd.DataFrame(columns=columns)
-        return df
+        return df  # type: ignore[return-value]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(  # noqa: PLR0913
@@ -119,6 +119,6 @@ class TableHead(TableMetricProvider):
                 rows = df.head(n=df.count() + n_rows)
 
         rows = [element.asDict() for element in rows]
-        df = pd.DataFrame(data=rows)
+        df = pd.DataFrame(data=rows)  # type: ignore[assignment]
 
-        return df
+        return df  # type: ignore[return-value]

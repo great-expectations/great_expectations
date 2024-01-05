@@ -392,7 +392,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         if dataframe is None:
             df = self.dataframe
         else:
-            df = dataframe
+            df = dataframe  # type: ignore[assignment]
 
         if df is None:
             raise ValueError(

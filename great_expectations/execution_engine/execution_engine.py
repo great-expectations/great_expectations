@@ -225,7 +225,7 @@ class ExecutionEngine(ABC):
         batch_id: str
         batch_data: BatchDataType
         for batch_id, batch_data in batch_data_dict.items():
-            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
+            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)  # type: ignore[arg-type]
 
     def load_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:
         self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
