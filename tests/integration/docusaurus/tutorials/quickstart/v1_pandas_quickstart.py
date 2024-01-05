@@ -25,7 +25,7 @@ context = gx.get_context()
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py connect_to_data">
 batch = context.sources.pandas_default.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2022-01.csv"
+    "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/quickstart/yellow_tripdata_sample_2022-01.csv"
 )
 # </snippet>
 
