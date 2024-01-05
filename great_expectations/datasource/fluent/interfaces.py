@@ -288,7 +288,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         assert isinstance(self.datasource, Datasource)
 
         batch_config = BatchConfig(name=name)
-        batch_config._data_asset = self
+        batch_config.set_data_asset(self)
         self.__fields_set__.add("batch_configs")
         self.batch_configs.append(batch_config)
         if self.datasource.data_context:
