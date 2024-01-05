@@ -580,7 +580,7 @@ class _SourceFactories:
         name: str,
     ) -> None: ...
     @overload
-    def add_snowflake(  # noqa: PLR0913
+    def add_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -600,7 +600,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def add_snowflake(  # noqa: PLR0913
+    def add_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -618,7 +618,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def update_snowflake(  # noqa: PLR0913
+    def update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -638,7 +638,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def update_snowflake(  # noqa: PLR0913
+    def update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -656,7 +656,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def add_or_update_snowflake(  # noqa: PLR0913
+    def add_or_update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -676,7 +676,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def add_or_update_snowflake(  # noqa: PLR0913
+    def add_or_update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,

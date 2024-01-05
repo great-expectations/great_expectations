@@ -254,7 +254,7 @@ class GxConfig(FluentBaseModel):
         return config
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -271,7 +271,7 @@ class GxConfig(FluentBaseModel):
         ...
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: pathlib.Path,
         *,
