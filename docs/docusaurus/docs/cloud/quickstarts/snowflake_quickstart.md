@@ -74,17 +74,17 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
 5. Complete the following fields:
 
-    - **Username**: Enter your Snowflake username.
+    - **Username**: Enter the username you use to access Snowflake.
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
     - **Password/environment variable**: Enter `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
 
-    - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
+    - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored. In Snowsight, click **Data** > **Databases**. In the Snowflake Classic Console, click **Databases**.
  
-    - **Schema**: Enter the name of the schema for the Snowflake database where the data you want to validate is stored.
+    - **Schema**: Enter the name of the Snowflake schema (table) where the data you want to validate is stored.
 
-    - **Warehouse**: Enter the name of the Snowflake database warehouse.
+    - **Warehouse**: Enter the name of your Snowflake database warehouse. In Snowsight, click **Admin** > **Warehouses**. In the Snowflake Classic Console, click **Warehouses**.
 
     - **Role**: Enter your Snowflake role.
 
