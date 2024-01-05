@@ -246,11 +246,6 @@ local_tests = [
 
 quickstart = [
     IntegrationTestFixture(
-        name="quickstart",
-        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
         name="v1_pandas_quickstart",
         user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py",
         backend_dependencies=[BackendDependencies.PANDAS],
