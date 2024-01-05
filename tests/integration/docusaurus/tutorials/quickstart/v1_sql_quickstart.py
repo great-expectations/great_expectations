@@ -11,6 +11,7 @@ iterative process for trying and refining expectations.
 """
 
 import pathlib
+import shutil
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py import_gx">
 import great_expectations as gx
@@ -34,9 +35,14 @@ sqlite_database_path = pathlib.Path(
     "sqlite",
     "yellow_tripdata.db",
 ).resolve(strict=True)
-connection_string = f"sqlite:///{sqlite_database_path}"
+
+# Copy the test database to the current directory for purposes of this test file (users will curl)
+shutil.move(sqlite_database_path, "yellow_tripdata.db")
+
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">
+# curl https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db > yellow_tripdata.db
+connection_string = "sqlite:///yellow_tripdata.db"
 batch = context.sources.pandas_default.read_sql(
     "SELECT * FROM yellow_tripdata_sample_2022_01", connection_string
 )
