@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import datetime
 import functools
 import logging
@@ -29,7 +30,7 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, Self
 
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
@@ -1237,6 +1238,19 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def __copy__(self):
         return self.copy(update={"id": None})
+
+    def copy(self, deep: bool = True) -> Self:
+        new_expectation = self.__class__(
+            id=None,
+            meta=self.meta,
+            notes=self.notes,
+            result_format=copy.deepcopy(self.result_format),
+            catch_exceptions=self.catch_exceptions,
+            rendered_content=copy.deepcopy(self.rendered_content),
+            **self.configuration.kwargs,
+        )
+        new_expectation._save_callback = self._save_callback
+        return new_expectation
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913
