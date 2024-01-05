@@ -1,3 +1,5 @@
+from typing import Final
+
 import pandas as pd
 import pytest
 from contrib.experimental.great_expectations_experimental.expectations.expect_column_values_to_be_present_in_other_table import (
@@ -7,9 +9,9 @@ from contrib.experimental.great_expectations_experimental.expectations.expect_co
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.data_context import EphemeralDataContext
+from great_expectations.datasource.fluent import SqliteDatasource
 
-DB_PATH: str = "sqlite:///../../test_sets/referential_integrity_dataset.db"
+DB_PATH: Final[str] = "sqlite:///../../test_sets/referential_integrity_dataset.db"
 
 
 @pytest.fixture
@@ -58,19 +60,17 @@ def referential_integrity_db(sa):
 
 
 @pytest.fixture()
-def context_with_sqlite_datasource(
+def sqlite_datasource(
     in_memory_runtime_context, referential_integrity_db
-) -> EphemeralDataContext:
+) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
-    context.sources.add_sqlite(datasource_name, connection_string=DB_PATH)
-    return context
+    return context.sources.add_sqlite(datasource_name, connection_string=DB_PATH)
 
 
 @pytest.mark.sqlite
-def test_successful_expectation_run(context_with_sqlite_datasource):
-    context = context_with_sqlite_datasource
-    datasource = context.get_datasource("my_snowflake_datasource")
+def test_successful_expectation_run(sqlite_datasource):
+    datasource = sqlite_datasource
     asset_name = "order_table_1"
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_1")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
@@ -85,9 +85,8 @@ def test_successful_expectation_run(context_with_sqlite_datasource):
 
 
 @pytest.mark.sqlite
-def test_failed_expectation_run(context_with_sqlite_datasource):
-    context = context_with_sqlite_datasource
-    datasource = context.get_datasource("my_snowflake_datasource")
+def test_failed_expectation_run(sqlite_datasource):
+    datasource = sqlite_datasource
     asset_name = "order_table_2"
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
@@ -107,11 +106,10 @@ def test_failed_expectation_run(context_with_sqlite_datasource):
 
 
 @pytest.mark.sqlite
-def test_configuration_invalid_column_name(context_with_sqlite_datasource):
+def test_configuration_invalid_column_name(sqlite_datasource):
     # this is testing default behavior of `batch.validate()` which catches Exception information
     # and places it in `exception_info`. Here we check that the exception message contains the text we expect
-    context = context_with_sqlite_datasource
-    datasource = context.get_datasource("my_snowflake_datasource")
+    datasource = sqlite_datasource
     asset_name = "order_table_2"
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
@@ -138,3 +136,17 @@ def test_invalid_configuration_missing_key():
             foreign_table="customer_table",
             foreign_table_key_column="CUSTOMER_ID",
         )
+
+
+@pytest.mark.unit
+def test_template_dict_creation():
+    expectation = ExpectColumnValuesToBePresentInAnotherTable(
+        foreign_key_column="CUSTOMER_ID",
+        foreign_table="customer_table",
+        foreign_table_key_column="CUSTOMER_ID",
+    )
+    assert expectation.template_dict == {
+        "foreign_key_column": "CUSTOMER_ID",
+        "foreign_table": "customer_table",
+        "foreign_table_key_column": "CUSTOMER_ID",
+    }
