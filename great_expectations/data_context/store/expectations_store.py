@@ -130,7 +130,7 @@ class ExpectationsStore(Store):
 
         self.update(key=suite_identifier, value=fetched_suite)
         if self.cloud_mode:
-            # since update doesn't return the object we need (here), refetch
+            # since update doesn't return the object we need (here), we refetch the suite
             suite_identifier, fetched_suite = self._refresh_suite(suite)
             new_ids = [
                 exp.id for exp in fetched_suite.expectations if exp.id not in old_ids
@@ -170,6 +170,9 @@ class ExpectationsStore(Store):
                 break
 
         self.update(key=suite_identifier, value=fetched_suite)
+        # we don't expect the backend to have made changes to the Expectation,
+        # so we don't update its in-memory reference.
+
         return expectation
 
     def delete_expectation(
@@ -278,7 +281,12 @@ class ExpectationsStore(Store):
     ) -> ExpectationSuite:
         if not local_suite.ge_cloud_id:
             local_suite.ge_cloud_id = cloud_suite.ge_cloud_id
-        # replace local expectations with those returned from the backend
+        # We replace local expectations with those returned from the backend
+        # so remote changes are reflected in the in-memory ExpectationSuite.
+        # Note that the parent Suite of these Expectations is actually `cloud_suite`,
+        # since we aren't using the public ExpectationSuite API to add the Expectations.
+        # This means that `Expectation._save_callback` is provided by a different copy of the
+        # same ExpectationSuite.
         local_suite.expectations = [
             expectation for expectation in cloud_suite.expectations
         ]

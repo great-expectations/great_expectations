@@ -508,6 +508,59 @@ class TestCRUDMethods:
         assert updated_suite.expectations[0].column == "c"
         assert updated_suite.expectations[1].column == "b"
 
+    @pytest.mark.cloud
+    def test_expectation_save_callback_can_come_from_any_copy_of_a_suite(
+        self, empty_cloud_context_fluent
+    ):
+        """Equivalent calls to ExpectationSuite._save_expectation from different copies of a
+        single ExpectationSuite must produce equivalent side effects.
+
+        In some cases, the ExpectationsStore replaces Expectations from a given suite with Expectations
+        from another copy of the same suite, in order to keep the ExpectationSuite in memory up to date
+        with the remote ExpectationSuite. ExpectationSuite._save_expectation (and the corresponding logic
+        the suite uses within the ExpectationsStore) must work equivalently regardless of which Suite instance
+        it belongs to.
+        """
+        # Arrange
+        context = empty_cloud_context_fluent
+        suite_name = "test-suite"
+        suite_a = ExpectationSuite(name=suite_name)
+        column_name = "a"
+        updated_column_name = "foo"
+        expectations = [
+            ExpectColumnValuesToBeInSet(
+                column=column_name,
+                value_set=[1, 2, 3],
+            ),
+            ExpectColumnValuesToBeInSet(
+                column="b",
+                value_set=[4, 5, 6],
+            ),
+        ]
+        for expectation in expectations:
+            suite_a.add(expectation)
+
+        context.suites.add(suite_a)
+
+        suite_b = context.suites.get(name=suite_name)
+
+        # Act
+        suite_a.expectations = suite_b.expectations
+        expectation = suite_a.expectations[0]
+        # the following assert is the method equivalent of `is`
+        assert expectation._save_callback == suite_b._save_expectation
+        assert expectation.column == column_name
+        expectation.column = updated_column_name
+        expectation.save()
+
+        # Assert
+        fetched_suite = context.suites.get(name=suite_name)
+        assert (
+            suite_a.expectations[0].column
+            == fetched_suite.expectations[0].column
+            == updated_column_name
+        )
+
 
 class TestAddCitation:
     @pytest.mark.unit
