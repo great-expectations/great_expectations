@@ -69,7 +69,7 @@ suite = context.add_expectation_suite("quickstart")
 suite.add(expectation)
 suite.add(gxe.ExpectColumnValuesToNotBeNull(column="trip_distance"))
 # </snippet>
-assert result.success is True
+assert result.success is True, result
 assert result.expectation_config.kwargs["mostly"] == 0.8
 
 suite_result = batch.validate(suite)
