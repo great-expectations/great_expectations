@@ -50,13 +50,9 @@ class TestSnowflake:
             "my_ds", connection_string=connection_string
         )
 
-        inspector_schemas = sa.inspection.inspect(
-            snowflake_ds.get_engine()
-        ).get_schema_names()
         inspector_tables = sa.inspection.inspect(
             snowflake_ds.get_engine()
         ).get_table_names()
-        print(f"schemas: {len(inspector_schemas)}")
         print(f"tables: {len(inspector_tables)}")
 
         table_name = random.choice(inspector_tables)
@@ -96,13 +92,9 @@ class TestSnowflake:
             "my_ds", connection_string=connection_string
         )
 
-        inspector_schemas = sa.inspection.inspect(
-            snowflake_ds.get_engine()
-        ).get_schema_names()
         inspector_tables = sa.inspection.inspect(
             snowflake_ds.get_engine()
         ).get_table_names()
-        print(f"schemas: {len(inspector_schemas)}")
         print(f"tables: {len(inspector_tables)}")
 
         table_name = random.choice(inspector_tables)
