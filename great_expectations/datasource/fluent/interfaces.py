@@ -293,11 +293,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         if self.datasource.data_context:
             try:
                 batch_config = self.datasource.add_batch_config(batch_config)
-            except DataContextError:
+            except Exception:
                 self.batch_configs.remove(batch_config)
                 raise
-        else:
-            self.batch_configs.append(batch_config)
         self.update_batch_config_field_set()
         return batch_config
 
@@ -321,7 +319,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         if self.datasource.data_context:
             try:
                 self.datasource.delete_batch_config(batch_config)
-            except DataContextError:
+            except Exception:
                 self.batch_configs.append(batch_config)
                 raise
 
