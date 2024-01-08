@@ -35,10 +35,7 @@ from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
-from great_expectations.compatibility.typing_extensions import (
-    dataclass_transform,
-    override,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -106,6 +103,17 @@ logger = logging.getLogger(__name__)
 
 P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
+
+try:
+    from typing_extensions import dataclass_transform
+except ImportError:
+    _T = TypeVar("_T")
+
+    # This is only for static type analysis, so it's okay for it to be a no-op
+    def dataclass_transform(  # type: ignore[misc]
+        **kwargs: Any,
+    ) -> Callable[[_T], _T]:
+        return lambda x: x
 
 
 @public_api
