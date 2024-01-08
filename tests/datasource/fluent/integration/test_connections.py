@@ -26,12 +26,10 @@ class TestSnowflake:
             param(
                 "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci",
                 id="missing role",
-                # marks=pytest.mark.skip,
             ),
             param(
                 "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}?warehouse=ci&role=ci",
                 id="missing database + schema",
-                # marks=pytest.mark.skip(reason="taking too long"),
             ),
             param(
                 "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci?warehouse=ci&role=ci",
