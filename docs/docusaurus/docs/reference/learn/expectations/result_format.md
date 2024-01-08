@@ -23,9 +23,9 @@ When using a dictionary, `result_format` can include the following keys:
 
 - `include_unexpected_rows`: When running validations, this returns the entire row for each unexpected value in dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` and `result_format` must be more verbose than `BOOLEAN_ONLY`.
 
-    :::note
-    `include_unexpected_rows` returns EVERY row for each unexpected value. In large tables, this could result in an unmanageable amount of data.
-    :::
+:::note
+`include_unexpected_rows` returns EVERY row for each unexpected value. In large tables, this could result in an unmanageable amount of data.
+:::
 
 ## Configure result format
 
