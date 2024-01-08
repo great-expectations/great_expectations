@@ -1235,7 +1235,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
 
     def __copy__(self):
-        return self.copy(update={"id": None})
+        return self.copy(update={"id": None}, deep=True)
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913
