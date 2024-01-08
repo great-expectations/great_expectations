@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -13,7 +12,7 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
@@ -27,9 +26,6 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.data_context import EphemeralDataContext
 
 logger = logging.getLogger(__name__)
 
