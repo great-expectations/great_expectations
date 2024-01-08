@@ -17,7 +17,7 @@ except ImportError:
     # borrowed from pydantic 1.9
     _T = TypeVar("_T")
 
-    def __dataclass_transform__(
+    def dataclass_transform(
         *,
         eq_default: bool = True,
         order_default: bool = False,
