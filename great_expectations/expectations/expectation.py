@@ -277,6 +277,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         arbitrary_types_allowed = True
         smart_union = True
         extra = pydantic.Extra.forbid
+        json_encoders = {RenderedAtomicContent: lambda data: data.to_json_dict()}
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
@@ -284,6 +285,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
 
     catch_exceptions: bool = False
+    rendered_content: Optional[List[RenderedAtomicContent]] = None
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
@@ -1229,7 +1231,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             ge_cloud_id=id,
+            rendered_content=self.rendered_content,
         )
+
+    def __copy__(self):
+        return self.copy(update={"id": None}, deep=True)
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913

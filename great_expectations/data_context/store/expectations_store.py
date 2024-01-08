@@ -126,11 +126,11 @@ class ExpectationsStore(Store):
             expectation.id = None  # flag this expectation as new for the backend
         else:
             expectation.id = str(uuid.uuid4())
-        fetched_suite.expectation_configurations.append(expectation.configuration)
+        fetched_suite.expectations.append(expectation)
 
         self.update(key=suite_identifier, value=fetched_suite)
         if self.cloud_mode:
-            # since update doesn't return the object we need (here), refetch
+            # since update doesn't return the object we need (here), we refetch the suite
             suite_identifier, fetched_suite = self._refresh_suite(suite)
             new_ids = [
                 exp.id for exp in fetched_suite.expectations if exp.id not in old_ids
@@ -166,13 +166,13 @@ class ExpectationsStore(Store):
 
         for i, old_expectation in enumerate(fetched_suite.expectations):
             if old_expectation.id == expectation.id:
-                # todo: update when expectations are source of truth
-                fetched_suite.expectation_configurations[i] = expectation.configuration
-                # Ensure that state of local suite is in sync with persisted suite
-                suite.expectation_configurations[i] = expectation.configuration
+                fetched_suite.expectations[i] = expectation
                 break
 
         self.update(key=suite_identifier, value=fetched_suite)
+        # we don't expect the backend to have made changes to the Expectation,
+        # so we don't update its in-memory reference.
+
         return expectation
 
     def delete_expectation(
@@ -185,8 +185,7 @@ class ExpectationsStore(Store):
 
         for i, old_expectation in enumerate(suite.expectations):
             if old_expectation.id == expectation.id:
-                # todo: update when expectations are source of truth
-                del suite.expectation_configurations[i]
+                del suite.expectations[i]
                 break
 
         self.update(key=suite_identifier, value=suite)
@@ -263,24 +262,18 @@ class ExpectationsStore(Store):
         """This method handles adding IDs to suites and expectations for non-cloud backends.
         In the future, this logic should be the responsibility of each non-cloud backend.
         """
-        if not suite["ge_cloud_id"]:
-            suite["ge_cloud_id"] = str(uuid.uuid4())
-        if isinstance(suite, ExpectationSuite):
-            key = "expectation_configurations"
-        else:
-            # this will be true if a serialized suite is provided
-            key = "expectations"
+
+        if not suite.ge_cloud_id:
+            suite.ge_cloud_id = str(uuid.uuid4())
 
         # enforce that every ID in this suite is unique
-        expectation_ids = [
-            exp["ge_cloud_id"] for exp in suite[key] if exp["ge_cloud_id"]
-        ]
+        expectation_ids = [exp.id for exp in suite.expectations if exp.id]
         if len(expectation_ids) != len(set(expectation_ids)):
             raise RuntimeError("Expectation IDs must be unique within a suite.")
 
-        for expectation_configuration in suite[key]:
-            if not expectation_configuration["ge_cloud_id"]:
-                expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
+        for expectation in suite.expectations:
+            if not expectation.id:
+                expectation.id = str(uuid.uuid4())
         return suite
 
     def _add_cloud_ids_to_local_suite_and_expectations(
@@ -288,10 +281,14 @@ class ExpectationsStore(Store):
     ) -> ExpectationSuite:
         if not local_suite.ge_cloud_id:
             local_suite.ge_cloud_id = cloud_suite.ge_cloud_id
-        # replace local expectations with those returned from the backend
-        # todo: update when configurations are no longer source of truth on suite
-        local_suite.expectation_configurations = [
-            expectation.configuration for expectation in cloud_suite.expectations
+        # We replace local expectations with those returned from the backend
+        # so remote changes are reflected in the in-memory ExpectationSuite.
+        # Note that the parent Suite of these Expectations is actually `cloud_suite`,
+        # since we aren't using the public ExpectationSuite API to add the Expectations.
+        # This means that `Expectation._save_callback` is provided by a different copy of the
+        # same ExpectationSuite.
+        local_suite.expectations = [
+            expectation for expectation in cloud_suite.expectations
         ]
         return local_suite
 
