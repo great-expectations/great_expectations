@@ -27,11 +27,6 @@ class TestSnowflake:
                 # marks=pytest.mark.skip,
             ),
             param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?role=ci",
-                id="missing warehouse",
-                # marks=pytest.mark.skip(reason="taking too long"),
-            ),
-            param(
                 "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}?warehouse=ci&role=ci",
                 id="missing database + schema",
                 # marks=pytest.mark.skip(reason="taking too long"),
@@ -69,10 +64,9 @@ class TestSnowflake:
         # query the asset, if it fails then we should expect a TestConnectionError
         # expect the sql ProgrammingError to be raised
         # we are only testing the failure case here
-        try:
+        with pytest.raises(sa.exc.ProgrammingError):
             snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
-        except sa.exc.ProgrammingError as sql_err:
-            print(f"\n  {table_name} is not queryable ->\n{sql_err!r}")
+            print(f"\n  {table_name} is queryable")
 
         with pytest.raises(TestConnectionError) as exc_info:
             # TODO: check specific error message
@@ -88,6 +82,10 @@ class TestSnowflake:
             param(
                 "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
                 id="full connection string",
+            ),
+            param(
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?role=ci",
+                id="missing warehouse",
             ),
         ],
     )
@@ -109,13 +107,10 @@ class TestSnowflake:
 
         table_name = random.choice(inspector_tables)
 
-        # query the asset, if it fails then we should expect a TestConnectionError
-        try:
-            snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
-        except sa.exc.ProgrammingError:
-            print(f"\n  {table_name} is not queryable")
-            raise
+        # query the table to make sure it is queryable
+        snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
 
+        # the table is queryable so the `add_table_asset()` should pass the test_connection step
         asset = snowflake_ds.add_table_asset(
             name="reachable asset", table_name=table_name
         )
