@@ -44,7 +44,6 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.result_format import ResultFormat
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -278,7 +277,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         arbitrary_types_allowed = True
         smart_union = True
         extra = pydantic.Extra.forbid
-        json_encoders = {RenderedAtomicContent: convert_to_json_serializable}
+        json_encoders = {RenderedAtomicContent: lambda data: data.to_json_dict()}
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
