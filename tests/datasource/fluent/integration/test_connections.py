@@ -13,6 +13,8 @@ from great_expectations.datasource.fluent import (
 )
 
 if TYPE_CHECKING:
+    from sqlalchemy.engine.reflection import Inspector
+
     from great_expectations.data_context import AbstractDataContext as DataContext
 
 
@@ -50,24 +52,31 @@ class TestSnowflake:
             "my_ds", connection_string=connection_string
         )
 
-        inspector_tables = sa.inspection.inspect(
-            snowflake_ds.get_engine()
-        ).get_table_names()
-        print(f"tables: {len(inspector_tables)}")
+        inspector: Inspector = sa.inspection.inspect(snowflake_ds.get_engine())
+        inspector_tables: list[str] = inspector.get_table_names()
+        print(f"tables: {len(inspector_tables)}\n{inspector_tables}")
+        random.shuffle(inspector_tables)
 
-        table_name = random.choice(inspector_tables)
-
-        # query the asset, if it fails then we should expect a TestConnectionError
-        # expect the sql ProgrammingError to be raised
-        # we are only testing the failure case here
-        with pytest.raises(sa.exc.ProgrammingError):
-            snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
-            print(f"\n  {table_name} is queryable")
+        unqueryable_table: str = ""
+        for table_name in inspector_tables:
+            try:
+                # query the asset, if it fails then we should expect a TestConnectionError
+                # expect the sql ProgrammingError to be raised
+                # we are only testing the failure case here
+                snowflake_ds.get_engine().execute(
+                    f"SELECT * FROM {table_name} LIMIT 1;"
+                )
+                print(f"{table_name} is queryable")
+            except sa.exc.ProgrammingError:
+                print(f"{table_name} is not queryable")
+                unqueryable_table = table_name
+                break
+        assert unqueryable_table, "no unqueryable tables found, cannot run test"
 
         with pytest.raises(TestConnectionError) as exc_info:
             # TODO: check specific error message
             asset = snowflake_ds.add_table_asset(
-                name="un-reachable asset", table_name=table_name
+                name="un-reachable asset", table_name=unqueryable_table
             )
             print(f"\n  Uh oh, asset should not have been created...\n{asset!r}")
         print(f"\n  TestConnectionError was raised as expected.\n{exc_info.exconly()}")
@@ -92,10 +101,9 @@ class TestSnowflake:
             "my_ds", connection_string=connection_string
         )
 
-        inspector_tables = sa.inspection.inspect(
-            snowflake_ds.get_engine()
-        ).get_table_names()
-        print(f"tables: {len(inspector_tables)}")
+        inspector: Inspector = sa.inspection.inspect(snowflake_ds.get_engine())
+        inspector_tables = inspector.get_table_names()
+        print(f"tables: {len(inspector_tables)}\n{inspector_tables}")
 
         table_name = random.choice(inspector_tables)
 
