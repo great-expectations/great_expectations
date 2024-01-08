@@ -35,8 +35,10 @@ sqlite_database_path = pathlib.Path(
     "yellow_tripdata.db",
 ).resolve(strict=True)
 
+assert sqlite_database_path.exists()
+
 # Copy the test database to the current directory for purposes of this test file (users will curl)
-shutil.move(sqlite_database_path, "yellow_tripdata.db")
+shutil.copy(sqlite_database_path, "yellow_tripdata.db")
 
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">
