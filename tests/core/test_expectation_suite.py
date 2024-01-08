@@ -37,7 +37,10 @@ def fake_expectation_suite_name() -> str:
 def expect_column_values_to_be_in_set_col_a_with_meta() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3],
+        },
         meta={"notes": "This is an expectation."},
     )
 
@@ -50,7 +53,6 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
         "kwargs": {
             "column": "a",
             "value_set": [1, 2, 3, 4, 5],
-            "result_format": "BASIC",
         },
         "meta": {"notes": "This is an expectation."},
     }
@@ -385,13 +387,12 @@ class TestCRUDMethods:
             )
         expectation.id = None
         suite.add(expectation)
+        expectation = copy(expectation)
         expectation.column = "foo"
-        expectation.id = None
         suite.add(expectation)
         assert len(suite.expectations) == 2
-        # todo: update when expectations are source of truth
-        for expectation_configuration in suite.expectation_configurations:
-            uuid_to_test = expectation_configuration.ge_cloud_id
+        for expectation in suite.expectations:
+            uuid_to_test = expectation.id
             try:
                 UUID(uuid_to_test)
             except TypeError:
@@ -502,8 +503,63 @@ class TestCRUDMethods:
         # Only persist change made to first expectation
         expectation.save()
 
-        assert suite.expectations[0].column == "c"
-        assert suite.expectations[1].column == "b"
+        updated_suite = context.suites.get(name=suite_name)
+
+        assert updated_suite.expectations[0].column == "c"
+        assert updated_suite.expectations[1].column == "b"
+
+    @pytest.mark.cloud
+    def test_expectation_save_callback_can_come_from_any_copy_of_a_suite(
+        self, empty_cloud_context_fluent
+    ):
+        """Equivalent calls to ExpectationSuite._save_expectation from different copies of a
+        single ExpectationSuite must produce equivalent side effects.
+
+        In some cases, the ExpectationsStore replaces Expectations from a given suite with Expectations
+        from another copy of the same suite, in order to keep the ExpectationSuite in memory up to date
+        with the remote ExpectationSuite. ExpectationSuite._save_expectation (and the corresponding logic
+        the suite uses within the ExpectationsStore) must work equivalently regardless of which Suite instance
+        it belongs to.
+        """
+        # Arrange
+        context = empty_cloud_context_fluent
+        suite_name = "test-suite"
+        suite_a = ExpectationSuite(name=suite_name)
+        column_name = "a"
+        updated_column_name = "foo"
+        expectations = [
+            ExpectColumnValuesToBeInSet(
+                column=column_name,
+                value_set=[1, 2, 3],
+            ),
+            ExpectColumnValuesToBeInSet(
+                column="b",
+                value_set=[4, 5, 6],
+            ),
+        ]
+        for expectation in expectations:
+            suite_a.add(expectation)
+
+        context.suites.add(suite_a)
+
+        suite_b = context.suites.get(name=suite_name)
+
+        # Act
+        suite_a.expectations = suite_b.expectations
+        expectation = suite_a.expectations[0]
+        # the following assert is the method equivalent of `is`
+        assert expectation._save_callback == suite_b._save_expectation
+        assert expectation.column == column_name
+        expectation.column = updated_column_name
+        expectation.save()
+
+        # Assert
+        fetched_suite = context.suites.get(name=suite_name)
+        assert (
+            suite_a.expectations[0].column
+            == fetched_suite.expectations[0].column
+            == updated_column_name
+        )
 
 
 class TestAddCitation:
@@ -649,41 +705,6 @@ class TestAddCitation:
 
 class TestIsEquivalentTo:
     @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_unit_test(self):
-        class StubExpectationConfiguration:
-            def isEquivalentTo(self, *args, **kwargs):
-                return True
-
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        assert suite1.isEquivalentTo(suite2)
-        assert suite2.isEquivalentTo(suite1)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes_unit_test(
-        self,
-    ):
-        class StubExpectationConfiguration:
-            def isEquivalentTo(self, *args, **kwargs):
-                return True
-
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()], data_asset_type="different", meta={"notes": "different"}, ge_cloud_id="different")  # type: ignore[arg-type]
-        assert suite1.isEquivalentTo(suite2)
-        assert suite2.isEquivalentTo(suite1)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_false_unit_test(self):
-        class StubExpectationConfiguration:
-            def isEquivalentTo(self, *args, **kwargs):
-                return False
-
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        assert not suite1.isEquivalentTo(suite2)
-        assert not suite2.isEquivalentTo(suite1)
-
-    @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_and_dict_true(
         self, suite_with_single_expectation: ExpectationSuite
     ):
@@ -701,7 +722,7 @@ class TestIsEquivalentTo:
         self, suite_with_single_expectation: ExpectationSuite
     ):
         modified_suite = deepcopy(suite_with_single_expectation)
-        modified_suite.expectation_configurations[0]["kwargs"]["value_set"][0] = -1
+        modified_suite.expectations[0].value_set[0] = -1
 
         modified_suite_dict: dict = expectationSuiteSchema.dump(modified_suite)
 
@@ -753,11 +774,9 @@ class TestIsEquivalentTo:
         """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
         # Set different column in expectation kwargs
-        different_and_not_equivalent_suite.expectation_configurations[0].kwargs = {
-            "column": "b",
-            "value_set": [1, 2, 3],
-            "result_format": "BASIC",
-        }
+        expectation = different_and_not_equivalent_suite.expectations[0]
+        expectation.column = "b"
+        expectation.value_set = [1, 2, 3]
 
         assert not suite_with_single_expectation.isEquivalentTo(
             different_and_not_equivalent_suite
@@ -773,8 +792,12 @@ class TestIsEquivalentTo:
         """Only expectation equivalence is considered for suite equivalence, and the same number of expectations in the suite is required for equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
         # Add a copy of the existing expectation, using list .append() to bypass add_expectation logic to handle overwrite
-        different_and_not_equivalent_suite.expectation_configurations.append(
-            different_and_not_equivalent_suite.expectation_configurations[0]
+        different_and_not_equivalent_suite.expectations.append(
+            different_and_not_equivalent_suite._build_expectation(
+                expectation_configuration=different_and_not_equivalent_suite.expectation_configurations[
+                    0
+                ]
+            )
         )
         assert len(suite_with_single_expectation.expectations) == 1
         assert len(different_and_not_equivalent_suite.expectations) == 2
@@ -824,7 +847,7 @@ class TestEqDunder:
                     reason="Currently data_context is not considered in ExpectationSuite equality",
                 ),
             ),
-            pytest.param("expectation_configurations", []),
+            pytest.param("expectations", []),
             pytest.param(
                 "evaluation_parameters", {"different": "evaluation_parameters"}
             ),
@@ -874,7 +897,7 @@ class TestEqDunder:
 def exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
+        kwargs={"column": "b", "value_set": [-1, -2, -3]},
         meta={"notes": "This is an expectation."},
     )
 
@@ -883,7 +906,10 @@ def exp2() -> ExpectationConfiguration:
 def exp3() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
+        kwargs={
+            "column": "b",
+            "value_set": [-1, -2, -3],
+        },
         meta={"notes": "This is an expectation."},
     )
 
@@ -892,7 +918,10 @@ def exp3() -> ExpectationConfiguration:
 def exp4() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "BASIC"},
+        kwargs={
+            "column": "b",
+            "value_set": [1, 2, 3],
+        },
         meta={"notes": "This is an expectation."},
     )
 
@@ -904,8 +933,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
         kwargs={
             "column_A": "1",
             "column_B": "b",
-            "value_set": [(1, 1), (2, 2)],
-            "result_format": "BASIC",
+            "value_pairs_set": [(1, 1), (2, 2)],
         },
     )
 
@@ -914,7 +942,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
 def table_exp1() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_columns_to_match_ordered_list",
-        kwargs={"value": ["a", "b", "c"]},
+        kwargs={"column_list": ["a", "b", "c"]},
     )
 
 
@@ -972,16 +1000,6 @@ def suite_with_table_and_column_expectations(
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
-    assert suite.expectation_configurations == [
-        expect_column_values_to_be_in_set_col_a_with_meta,
-        exp2,
-        exp3,
-        exp4,
-        column_pair_expectation,
-        table_exp1,
-        table_exp2,
-        table_exp3,
-    ]
     return suite
 
 
@@ -1050,10 +1068,6 @@ def test_expectation_suite_copy(baseline_suite):
     assert (
         baseline_suite.data_asset_type != "blarg"
     )  # copy on primitive properties shouldn't propagate
-    suite_copy.expectation_configurations[0].meta["notes"] = "a different note"
-    assert (
-        baseline_suite.expectation_configurations[0].meta["notes"] == "a different note"
-    )  # copy on deep attributes does propagate
 
 
 @pytest.mark.unit

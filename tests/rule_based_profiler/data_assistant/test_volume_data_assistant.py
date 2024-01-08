@@ -1951,8 +1951,11 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     expectation_configuration: ExpectationConfiguration
 
-    expected_expectation_suite.expectation_configurations = [
-        expectation_configuration
+    # todo: this test must be updated to use the ExpectationSuite public API
+    expected_expectation_suite.expectations = [
+        expected_expectation_suite._build_expectation(
+            expectation_configuration=expectation_configuration
+        )
         for expectation_configuration in expected_expectation_suite.expectation_configurations
         if not (
             expectation_configuration.kwargs

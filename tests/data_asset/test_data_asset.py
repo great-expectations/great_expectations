@@ -68,25 +68,3 @@ def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
     # We should have a default-initialized suite stored internally and available for getting
     assert asset._expectation_suite == default_suite
     assert asset.get_expectation_suite() == default_suite
-
-
-@pytest.mark.filesystem
-def test_custom_expectation_default_arg_values_set(
-    data_context_simple_expectation_suite_with_custom_pandas_dataset,
-):
-    # this test ensures that default arg values in custom expectations are being set properly
-    context = data_context_simple_expectation_suite_with_custom_pandas_dataset
-
-    df = pd.DataFrame({"a": [1, None, 1, 1], "b": [None, 1, 1, 1], "c": [1, 1, 1, 1]})
-
-    batch_kwargs = {
-        "data_asset_name": "multicolumn_ignore_row_if",
-        "datasource": "mycustomdatasource",
-        "dataset": df,
-    }
-    batch = context._get_batch_v2(batch_kwargs, expectation_suite_name="default")
-    # this expectation has a declared default arg value `ignore_row_if="any_value_is_missing"`
-    # which overrides an internal default of "all_values_are_missing"
-    # can only pass if the declared default is set properly
-    result = batch.expect_column_sum_equals_3(column_list=["a", "b", "c"])
-    assert result.success

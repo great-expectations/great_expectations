@@ -128,64 +128,6 @@ def test_create_pandas_datasource(
 
 
 @pytest.mark.filesystem
-def test_pandas_datasource_custom_data_asset(
-    data_context_parameterized_expectation_suite, test_folder_connection_path_csv
-):
-    name = "test_pandas_datasource"
-    class_name = "PandasDatasource"
-
-    data_asset_type_config = {
-        "module_name": "custom_pandas_dataset",
-        "class_name": "CustomPandasDataset",
-    }
-    data_context_parameterized_expectation_suite.add_datasource(
-        name,
-        class_name=class_name,
-        data_asset_type=data_asset_type_config,
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(test_folder_connection_path_csv),
-            }
-        },
-    )
-
-    # We should now see updated configs
-    with open(
-        os.path.join(  # noqa: PTH118
-            data_context_parameterized_expectation_suite.root_directory,
-            FileDataContext.GX_YML,
-        ),
-    ) as data_context_config_file:
-        data_context_file_config = yaml.load(data_context_config_file)
-
-    assert (
-        data_context_file_config["datasources"][name]["data_asset_type"]["module_name"]
-        == "custom_pandas_dataset"
-    )
-    assert (
-        data_context_file_config["datasources"][name]["data_asset_type"]["class_name"]
-        == "CustomPandasDataset"
-    )
-
-    # We should be able to get a dataset of the correct type from the datasource.
-    data_context_parameterized_expectation_suite.add_expectation_suite(
-        expectation_suite_name="test"
-    )
-    batch = data_context_parameterized_expectation_suite._get_batch_v2(
-        expectation_suite_name="test",
-        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-            datasource=name,
-            batch_kwargs_generator="subdir_reader",
-            data_asset_name="test",
-        ),
-    )
-    assert type(batch).__name__ == "CustomPandasDataset"
-    res = batch.expect_column_values_to_have_odd_lengths("col_2")
-    assert res.success is True
-
-
-@pytest.mark.filesystem
 def test_pandas_source_read_csv(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
