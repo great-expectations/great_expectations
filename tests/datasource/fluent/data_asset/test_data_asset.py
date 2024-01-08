@@ -20,15 +20,15 @@ BATCH_CONFIG_NAME = "my batch config"
 
 
 @pytest.fixture
-def context(empty_data_context: AbstractDataContext) -> AbstractDataContext:
+def file_context(empty_data_context: AbstractDataContext) -> AbstractDataContext:
     return empty_data_context
 
 
 @pytest.fixture
-def context_with_assets(context: AbstractDataContext) -> AbstractDataContext:
+def file_context_with_assets(file_context: AbstractDataContext) -> AbstractDataContext:
     """Context with a datasource that has 2 assets. one of the assets has a batch config."""
-    datasource = context.sources.add_pandas(DATASOURCE_NAME)
-    datasource.add_csv_asset(EMPTY_DATA_ASSET_NAME, "taxi.csv")
+    datasource = file_context.sources.add_pandas(DATASOURCE_NAME)
+    datasource.add_csv_asset(EMPTY_DATA_ASSET_NAME, "taxi.csv")  # type: ignore [arg-type]
     datasource.add_csv_asset(
         DATA_ASSET_WITH_BATCH_CONFIG_NAME,
         "taxi.csv",  # type: ignore [arg-type]
@@ -38,7 +38,7 @@ def context_with_assets(context: AbstractDataContext) -> AbstractDataContext:
         "taxi.csv",  # type: ignore [arg-type]
     ).add_batch_config(BATCH_CONFIG_NAME)
 
-    return context
+    return file_context
 
 
 @pytest.fixture
@@ -57,8 +57,8 @@ def cloud_context(empty_cloud_context_fluent: CloudDataContext) -> AbstractDataC
 
 
 @pytest.fixture
-def datasource(context_with_assets: AbstractDataContext) -> PandasDatasource:
-    output = context_with_assets.get_datasource(DATASOURCE_NAME)
+def datasource(file_context_with_assets: AbstractDataContext) -> PandasDatasource:
+    output = file_context_with_assets.get_datasource(DATASOURCE_NAME)
     assert isinstance(output, PandasDatasource)
     return output
 
@@ -90,12 +90,12 @@ def test_add_batch_config__success(empty_data_asset: DataAsset):
 
 @pytest.mark.unit
 def test_add_batch_config__persists(
-    context: AbstractDataContext, empty_data_asset: DataAsset
+    file_context: AbstractDataContext, empty_data_asset: DataAsset
 ):
     name = "my batch config"
     batch_config = empty_data_asset.add_batch_config(name)
 
-    loaded_datasource = context.get_datasource(DATASOURCE_NAME)
+    loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
@@ -121,10 +121,10 @@ def test_add_batch_config__duplicate_key(empty_data_asset: DataAsset):
 
 @pytest.mark.unit
 def test_add_batch_config__file_data__does_not_clobber_other_assets(
-    context_with_assets: AbstractDataContext,
+    file_context_with_assets: AbstractDataContext,
 ):
     _test_add_batch_config__does_not_clobber_other_assets(
-        context=context_with_assets,
+        context=file_context_with_assets,
         datasource_name=DATASOURCE_NAME,
     )
 
@@ -167,10 +167,10 @@ def _test_add_batch_config__does_not_clobber_other_assets(
 
 @pytest.mark.unit
 def test_add_batch_config__file_data__does_not_clobber_other_batch_configs(
-    context_with_assets: AbstractDataContext,
+    file_context_with_assets: AbstractDataContext,
 ):
     _test_add_batch_config__does_not_clobber_other_batch_configs(
-        context=context_with_assets,
+        context=file_context_with_assets,
         datasource_name=DATASOURCE_NAME,
         asset_name=EMPTY_DATA_ASSET_NAME,
     )
@@ -225,13 +225,13 @@ def test_delete_batch_config__success(
 
 @pytest.mark.unit
 def test_delete_batch_config__persists(
-    context_with_assets: AbstractDataContext,
+    file_context_with_assets: AbstractDataContext,
     data_asset_with_batch_config: DataAsset,
     persisted_batch_config: BatchConfig,
 ):
     data_asset_with_batch_config.delete_batch_config(persisted_batch_config)
 
-    loaded_datasource = context_with_assets.get_datasource(DATASOURCE_NAME)
+    loaded_datasource = file_context_with_assets.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
@@ -274,10 +274,10 @@ def test_fields_set(empty_data_asset: DataAsset):
 
 @pytest.mark.unit
 def test_delete_batch_config__file_data__does_not_clobber_other_assets(
-    context_with_assets: AbstractDataContext,
+    file_context_with_assets: AbstractDataContext,
 ):
     _test_delete_batch_config__does_not_clobber_other_assets(
-        context=context_with_assets,
+        context=file_context_with_assets,
         datasource_name=DATASOURCE_NAME,
         asset_names=[
             DATA_ASSET_WITH_BATCH_CONFIG_NAME,
