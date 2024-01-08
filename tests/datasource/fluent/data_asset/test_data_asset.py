@@ -1,91 +1,80 @@
+from typing import List
+
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
-from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.store.datasource_store import DatasourceStore
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
+
+DATASOURCE_NAME = "my datasource for batch configs"
+EMPTY_DATA_ASSET_NAME = "my data asset for batch configs"
+DATA_ASSET_WITH_BATCH_CONFIG_NAME = "I have batch configs"
+ANOTHER_DATA_ASSET_WITH_BATCH_CONFIG_NAME = "I have batch configs too"
+BATCH_CONFIG_NAME = "my batch config"
 
 
 @pytest.fixture
-def datasource_name() -> str:
-    return "my datasource for batch configs"
-
-
-@pytest.fixture
-def empty_data_asset_name() -> str:
-    return "my data asset for batch configs"
-
-
-@pytest.fixture
-def data_asset_with_batch_config_name() -> str:
-    return "I have batch configs"
-
-
-@pytest.fixture
-def batch_config_name() -> str:
-    return "my batch config"
-
-
-@pytest.fixture
-def context(empty_data_context: AbstractDataContext) -> AbstractDataContext:
+def file_context(empty_data_context: AbstractDataContext) -> AbstractDataContext:
     return empty_data_context
 
 
 @pytest.fixture
-def store(
-    context: AbstractDataContext,
-    datasource_name: str,
-    empty_data_asset_name: str,
-    data_asset_with_batch_config_name: str,
-    batch_config_name: str,
-) -> DatasourceStore:
-    """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
-    store = context._datasource_store
-    datasource = context.sources.add_pandas(datasource_name)
-    datasource.add_csv_asset(empty_data_asset_name, "taxi.csv")  # type: ignore [arg-type]
+def file_context_with_assets(file_context: AbstractDataContext) -> AbstractDataContext:
+    """Context with a datasource that has 2 assets. one of the assets has a batch config."""
+    datasource = file_context.sources.add_pandas(DATASOURCE_NAME)
+    datasource.add_csv_asset(EMPTY_DATA_ASSET_NAME, "taxi.csv")  # type: ignore [arg-type]
     datasource.add_csv_asset(
-        data_asset_with_batch_config_name,
+        DATA_ASSET_WITH_BATCH_CONFIG_NAME,
         "taxi.csv",  # type: ignore [arg-type]
-    ).add_batch_config(batch_config_name)
+    ).add_batch_config(BATCH_CONFIG_NAME)
+    datasource.add_csv_asset(
+        ANOTHER_DATA_ASSET_WITH_BATCH_CONFIG_NAME,
+        "taxi.csv",  # type: ignore [arg-type]
+    ).add_batch_config(BATCH_CONFIG_NAME)
 
-    key = DataContextVariableKey(resource_name=datasource_name)
-    store.set(key=key, value=datasource)
-    return store
-
-
-@pytest.fixture
-def empty_data_asset(
-    store: DatasourceStore,
-    datasource_name: str,
-    empty_data_asset_name: str,
-) -> DataAsset:
-    key = DataContextVariableKey(resource_name=datasource_name)
-    datasource = store.get(key)
-
-    assert isinstance(datasource, Datasource)
-    return datasource.get_asset(empty_data_asset_name)
+    return file_context
 
 
 @pytest.fixture
-def data_asset_with_batch_config(
-    store: DatasourceStore,
-    datasource_name: str,
-    data_asset_with_batch_config_name: str,
-) -> DataAsset:
-    key = DataContextVariableKey(resource_name=datasource_name)
-    datasource = store.get(key)
-
-    assert isinstance(datasource, Datasource)
-    return datasource.get_asset(data_asset_with_batch_config_name)
+def cloud_context(empty_cloud_context_fluent: CloudDataContext) -> AbstractDataContext:
+    datasource = empty_cloud_context_fluent.sources.add_pandas(DATASOURCE_NAME)
+    datasource.add_csv_asset(EMPTY_DATA_ASSET_NAME, "taxi.csv")  # type: ignore [arg-type]
+    datasource.add_csv_asset(
+        DATA_ASSET_WITH_BATCH_CONFIG_NAME,
+        "taxi.csv",  # type: ignore [arg-type]
+    ).add_batch_config(BATCH_CONFIG_NAME)
+    datasource.add_csv_asset(
+        ANOTHER_DATA_ASSET_WITH_BATCH_CONFIG_NAME,
+        "taxi.csv",  # type: ignore [arg-type]
+    ).add_batch_config(BATCH_CONFIG_NAME)
+    return empty_cloud_context_fluent
 
 
 @pytest.fixture
-def persisted_batch_config(
-    data_asset_with_batch_config: DataAsset,
-) -> BatchConfig:
+def datasource(file_context_with_assets: AbstractDataContext) -> PandasDatasource:
+    output = file_context_with_assets.get_datasource(DATASOURCE_NAME)
+    assert isinstance(output, PandasDatasource)
+    return output
+
+
+@pytest.fixture
+def empty_data_asset(datasource: Datasource) -> DataAsset:
+    return datasource.get_asset(EMPTY_DATA_ASSET_NAME)
+
+
+@pytest.fixture
+def data_asset_with_batch_config(datasource: Datasource) -> DataAsset:
+    return datasource.get_asset(DATA_ASSET_WITH_BATCH_CONFIG_NAME)
+
+
+@pytest.fixture
+def persisted_batch_config(data_asset_with_batch_config: DataAsset) -> BatchConfig:
     return data_asset_with_batch_config.batch_configs[0]
 
 
@@ -100,24 +89,15 @@ def test_add_batch_config__success(empty_data_asset: DataAsset):
 
 
 @pytest.mark.unit
-def test_add_batch_config__persists_when_context_present(
-    context: AbstractDataContext,
-    store: DatasourceStore,
-    empty_data_asset: DataAsset,
-    datasource_name: str,
-    empty_data_asset_name: str,
+def test_add_batch_config__persists(
+    file_context: AbstractDataContext, empty_data_asset: DataAsset
 ):
-    key = DataContextVariableKey(resource_name=datasource_name)
     name = "my batch config"
-
-    # depending on how a datasource is created, it may or may not have a context
-    empty_data_asset._datasource._data_context = context
-
     batch_config = empty_data_asset.add_batch_config(name)
 
-    loaded_datasource = store.get(key)
+    loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
-    loaded_asset = loaded_datasource.get_asset(empty_data_asset_name)
+    loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
     assert loaded_asset.batch_configs == [batch_config]
 
@@ -140,6 +120,98 @@ def test_add_batch_config__duplicate_key(empty_data_asset: DataAsset):
 
 
 @pytest.mark.unit
+def test_add_batch_config__file_data__does_not_clobber_other_assets(
+    file_context_with_assets: AbstractDataContext,
+):
+    _test_add_batch_config__does_not_clobber_other_assets(
+        context=file_context_with_assets,
+        datasource_name=DATASOURCE_NAME,
+    )
+
+
+@pytest.mark.unit
+def test_add_batch_config__cloud_data__does_not_clobber_other_assets(
+    cloud_context: AbstractDataContext,
+):
+    _test_add_batch_config__does_not_clobber_other_assets(
+        context=cloud_context,
+        datasource_name=DATASOURCE_NAME,
+    )
+
+
+def _test_add_batch_config__does_not_clobber_other_assets(
+    context: AbstractDataContext,
+    datasource_name: str,
+):
+    ds1 = context.get_datasource(datasource_name)
+    assert isinstance(ds1, PandasDatasource)
+    my_asset = ds1.add_csv_asset("my asset", "taxi.csv")  # type: ignore [arg-type]
+
+    # adding an asset currently clobbers the datasource, so for now we
+    # need to reload the datasource AFTER adding the asset
+    # TODO: Move fetching ds2 up with ds1 after V1-124
+    ds2 = context.get_datasource(datasource_name)
+    assert isinstance(ds2, PandasDatasource)
+    your_asset = ds2.add_csv_asset("your asset", "taxi.csv")  # type: ignore [arg-type]
+
+    my_batch_config = my_asset.add_batch_config("my batch config")
+    your_batch_config = your_asset.add_batch_config("your batch config")
+
+    loaded_datasource = context.get_datasource(datasource_name)
+    assert isinstance(loaded_datasource, Datasource)
+    assert loaded_datasource.get_asset(my_asset.name).batch_configs == [my_batch_config]
+    assert loaded_datasource.get_asset(your_asset.name).batch_configs == [
+        your_batch_config
+    ]
+
+
+@pytest.mark.unit
+def test_add_batch_config__file_data__does_not_clobber_other_batch_configs(
+    file_context_with_assets: AbstractDataContext,
+):
+    _test_add_batch_config__does_not_clobber_other_batch_configs(
+        context=file_context_with_assets,
+        datasource_name=DATASOURCE_NAME,
+        asset_name=EMPTY_DATA_ASSET_NAME,
+    )
+
+
+@pytest.mark.unit
+def test_add_batch_config__cloud_data__does_not_clobber_other_batch_configs(
+    cloud_context: AbstractDataContext,
+):
+    _test_add_batch_config__does_not_clobber_other_batch_configs(
+        context=cloud_context,
+        datasource_name=DATASOURCE_NAME,
+        asset_name=EMPTY_DATA_ASSET_NAME,
+    )
+
+
+def _test_add_batch_config__does_not_clobber_other_batch_configs(
+    context: AbstractDataContext,
+    datasource_name: str,
+    asset_name: str,
+):
+    ds1 = context.get_datasource(datasource_name)
+    ds2 = context.get_datasource(datasource_name)
+    assert isinstance(ds1, PandasDatasource)
+    assert isinstance(ds2, PandasDatasource)
+
+    asset_1 = ds1.get_asset(asset_name)
+    asset_2 = ds2.get_asset(asset_name)
+
+    my_batch_config = asset_1.add_batch_config("my batch config")
+    your_batch_config = asset_2.add_batch_config("your batch config")
+
+    loaded_datasource = context.get_datasource(datasource_name)
+    assert isinstance(loaded_datasource, Datasource)
+    assert loaded_datasource.get_asset(asset_name).batch_configs == [
+        my_batch_config,
+        your_batch_config,
+    ]
+
+
+@pytest.mark.unit
 def test_delete_batch_config__success(
     data_asset_with_batch_config: DataAsset,
     persisted_batch_config: BatchConfig,
@@ -153,22 +225,15 @@ def test_delete_batch_config__success(
 
 @pytest.mark.unit
 def test_delete_batch_config__persists(
-    store: DatasourceStore,
-    context: AbstractDataContext,
-    datasource_name: str,
-    empty_data_asset_name: str,
+    file_context_with_assets: AbstractDataContext,
     data_asset_with_batch_config: DataAsset,
     persisted_batch_config: BatchConfig,
 ):
-    key = DataContextVariableKey(resource_name=datasource_name)
-
-    # depending on how a datasource is created, it may or may not have a context
-    data_asset_with_batch_config._datasource._data_context = context
     data_asset_with_batch_config.delete_batch_config(persisted_batch_config)
 
-    loaded_datasource = store.get(key)
+    loaded_datasource = file_context_with_assets.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
-    loaded_asset = loaded_datasource.get_asset(empty_data_asset_name)
+    loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
     assert loaded_asset.batch_configs == []
 
@@ -205,3 +270,49 @@ def test_fields_set(empty_data_asset: DataAsset):
     # delete the remaining batch config and ensure we don't have it in the set
     asset.delete_batch_config(batch_config_b)
     assert "batch_configs" not in asset.__fields_set__
+
+
+@pytest.mark.unit
+def test_delete_batch_config__file_data__does_not_clobber_other_assets(
+    file_context_with_assets: AbstractDataContext,
+):
+    _test_delete_batch_config__does_not_clobber_other_assets(
+        context=file_context_with_assets,
+        datasource_name=DATASOURCE_NAME,
+        asset_names=[
+            DATA_ASSET_WITH_BATCH_CONFIG_NAME,
+            ANOTHER_DATA_ASSET_WITH_BATCH_CONFIG_NAME,
+        ],
+    )
+
+
+@pytest.mark.unit
+def test_delete_batch_config__cloud_data__does_not_clobber_other_assets(
+    cloud_context: AbstractDataContext,
+):
+    _test_delete_batch_config__does_not_clobber_other_assets(
+        context=cloud_context,
+        datasource_name=DATASOURCE_NAME,
+        asset_names=[
+            DATA_ASSET_WITH_BATCH_CONFIG_NAME,
+            ANOTHER_DATA_ASSET_WITH_BATCH_CONFIG_NAME,
+        ],
+    )
+
+
+def _test_delete_batch_config__does_not_clobber_other_assets(
+    context: AbstractDataContext, datasource_name: str, asset_names: List[str]
+):
+    # each asset has one batch config; delete it
+    for asset_name in asset_names:
+        datasource = context.get_datasource(datasource_name)
+        assert isinstance(datasource, Datasource)
+        asset = datasource.get_asset(asset_name)
+        asset.delete_batch_config(asset.batch_configs[0])
+
+    loaded_datasource = context.get_datasource(datasource_name)
+    assert isinstance(loaded_datasource, Datasource)
+
+    # ensure neither call to delete_batch_config() didn't clobber each other
+    for asset_name in asset_names:
+        assert loaded_datasource.get_asset(asset_name).batch_configs == []
