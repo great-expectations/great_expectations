@@ -28,6 +28,10 @@ class TestSnowflake:
                 id="missing role",
             ),
             param(
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=no_select",
+                id="role wo select",
+            ),
+            param(
                 "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}?warehouse=ci&role=ci",
                 id="missing database + schema",
             ),
