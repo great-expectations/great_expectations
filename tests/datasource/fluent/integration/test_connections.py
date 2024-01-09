@@ -28,7 +28,7 @@ class TestSnowflake:
                 id="missing role",
             ),
             param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=no_select",
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci_no_select",
                 id="role wo select",
             ),
             param(
