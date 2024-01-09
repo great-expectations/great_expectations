@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import Dict, List, cast
 
@@ -50,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 def get_table_columns_metric(
     execution_engine: ExecutionEngine,
-) -> [MetricConfiguration, dict]:
+) -> tuple[MetricConfiguration, dict]:
     resolved_metrics: dict = {}
 
     results: dict
@@ -72,7 +74,7 @@ def get_table_columns_metric(
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    table_columns_metric.metric_dependencies = {
+    table_columns_metric.metric_dependencies = {  # type: ignore[assignment]
         "table.column_types": table_column_types_metric,
     }
     results = execution_engine.resolve_metrics(
