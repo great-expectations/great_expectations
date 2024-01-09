@@ -923,7 +923,7 @@ class TableAsset(_SQLAsset):
 
         try:
             engine.execute(f"SELECT * FROM {self.qualified_name} LIMIT 1;")
-        except sa.exc.ProgrammingError as query_error:
+        except Exception as query_error:
             LOGGER.debug(
                 f"{self.name} `.test_connection()` query failed: {query_error!r}"
             )
@@ -931,15 +931,6 @@ class TableAsset(_SQLAsset):
                 f"Attempt to connect to table: {self.qualified_name} failed because the test query "
                 f"failed. Ensure the table exists and the user has access: {query_error}"
             ) from query_error
-        # TODO: remove this inspector check
-        if not inspector.has_table(
-            table_name=self.table_name,
-            schema=self.schema_name,
-        ):
-            raise TestConnectionError(
-                f"Attempt to connect to table: {self.qualified_name} failed because the table"
-                f" {self.table_name} does not exist or the user does not have access to it."
-            )
 
     @override
     def test_splitter_connection(self) -> None:
