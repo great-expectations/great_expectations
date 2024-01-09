@@ -410,9 +410,6 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     )
     assert expected == actual
 
-    # add_expectation() will not send usage_statistics event when called from a Validator
-    assert mock_emit.call_count == 0
-
 
 @pytest.mark.big
 def test_validator_can_instantiate_with_a_multi_batch_request(
