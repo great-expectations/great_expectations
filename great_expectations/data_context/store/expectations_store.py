@@ -212,6 +212,8 @@ class ExpectationsStore(Store):
                 cloud_suite = ExpectationSuite(
                     **result.response["data"]["attributes"]["suite"]
                 )
+                # todo: cloud backend must add this ID to serialized suite - remove when it does
+                cloud_suite.ge_cloud_id = result.id
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,
