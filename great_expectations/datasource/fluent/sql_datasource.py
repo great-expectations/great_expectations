@@ -923,11 +923,9 @@ class TableAsset(_SQLAsset):
 
         try:
             with engine.connect() as connection:
-                connection.execute(
-                    sa.select([sa.text("test_connection")])
-                    .select_from(self.as_selectable())
-                    .limit(1)
-                )
+                table = sa.table(self.qualified_name)
+                # don't need to fetch any data, just want to make sure the table is accessible
+                connection.execute(sa.select(1, table).limit(1))
         except Exception as query_error:
             LOGGER.info(
                 f"{self.name} `.test_connection()` query failed: {query_error!r}"
