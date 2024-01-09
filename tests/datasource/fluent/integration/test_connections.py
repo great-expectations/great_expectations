@@ -76,7 +76,6 @@ class TestSnowflake:
         assert unqueryable_table, "no unqueryable tables found, cannot run test"
 
         with pytest.raises(TestConnectionError) as exc_info:
-            # TODO: check specific error message
             asset = snowflake_ds.add_table_asset(
                 name="un-reachable asset", table_name=unqueryable_table
             )

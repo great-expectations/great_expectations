@@ -922,7 +922,8 @@ class TableAsset(_SQLAsset):
             )
 
         try:
-            engine.execute(f"SELECT * FROM {self.qualified_name} LIMIT 1;")
+            with engine.connect() as connection:
+                connection.execute(f"SELECT 1 FROM {self.qualified_name} LIMIT 1;")
         except Exception as query_error:
             LOGGER.debug(
                 f"{self.name} `.test_connection()` query failed: {query_error!r}"
