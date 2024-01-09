@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Final, List, Optional, Union
 
 import pandas as pd
 
@@ -63,6 +63,8 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         foreign_table: foreign table name.
         foreign_table_key_column: key column in foreign table.
     """
+
+    MAX_UNEXPECTED_VALUES_TO_RENDER: Final[int] = 10
 
     library_metadata = {
         "maturity": "experimental",
@@ -158,6 +160,8 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration = cls._prescriptive_template()
+
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
 
@@ -166,8 +170,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         foreign_table_key_column: str = configuration.kwargs.get(
             "foreign_table_key_column"
         )
-
-        template_str = "All values in column $foreign_key_column are present in column $foreign_table_key_column of table $foreign_table."
+        template_str = renderer_configuration.template_str
 
         params = {
             "foreign_key_column": foreign_key_column,
@@ -211,27 +214,42 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
+        """Override of base-class's _atomic_diagnostic_observed_value()
+
+        Until unexpected table can be properly rendered in Cloud, we will include the unexpected indices as part of the
+        OBSERVED_VALUE rendering so the output will look like:
+
+        OBSERVED VALUE: 2 missing values. [4, 5]
+        """
         observed_value: str = result.result.get("observed_value")
         unexpected_index_list = result.result.get("unexpected_index_list")
 
-        index_list = []
+        processed_unexpected_index_list: List[str] = []
+
         for unexpected_index in unexpected_index_list:
-            index_list.append(list(unexpected_index.values())[0])
+            processed_unexpected_index_list.append(list(unexpected_index.values())[0])
 
-        if len(index_list) > 1:
-            index_list = index_list[:1]
-            index_list.append("...")
+        if len(processed_unexpected_index_list) > cls.MAX_UNEXPECTED_VALUES_TO_RENDER:
+            processed_unexpected_index_list = processed_unexpected_index_list[
+                : cls.MAX_UNEXPECTED_VALUES_TO_RENDER
+            ]
+            processed_unexpected_index_list.append("...")
 
-        index_list_str: str = "[" + ", ".join(index_list) + "]"
+        processed_unexpected_index_list_to_str: str = (
+            "[" + ", ".join(processed_unexpected_index_list) + "]"
+        )
+        final_template_value: str = (
+            observed_value + "    " + processed_unexpected_index_list_to_str
+        )
 
-        final_value = observed_value + "    " + index_list_str
         value_obj = renderedAtomicValueSchema.load(
             {
-                "template": final_value,
+                "template": final_template_value,
                 "params": {},
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
+
         rendered = RenderedAtomicContent(
             name=AtomicDiagnosticRendererType.OBSERVED_VALUE,
             value=value_obj,
