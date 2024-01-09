@@ -107,13 +107,16 @@ T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 try:
     from typing_extensions import dataclass_transform
 except ImportError:
-    _T = TypeVar("_T")
+    if TYPE_CHECKING:
+        from typing_extensions import dataclass_transform
+    else:
+        _T = TypeVar("_T")
 
-    # This is only for static type analysis, so it's okay for it to be a no-op
-    def dataclass_transform(  # type: ignore[misc]
-        **kwargs: Any,
-    ) -> Callable[[_T], _T]:
-        return lambda x: x
+        # This is only for static type analysis, so it's okay for it to be a no-op
+        def dataclass_transform(  # type: ignore[misc]
+            **kwargs: Any,
+        ) -> Callable[[_T], _T]:
+            return lambda x: x
 
 
 @public_api
