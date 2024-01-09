@@ -14,7 +14,7 @@ If you're using Snowflake and are ready to create Expectations and run Validatio
 
 <Tabs
   groupId="set-up-gx-cloud"
-  defaultValue='admin'
+  defaultValue='Admin'
   values={[
   {label: 'Admin', value:'Admin'},
   {label: 'Viewer/Editor', value:'Viewer/Editor'},
