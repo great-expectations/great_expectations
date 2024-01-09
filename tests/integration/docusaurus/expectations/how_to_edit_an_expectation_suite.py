@@ -90,11 +90,9 @@ my_suite.add_expectation(updated_config)
 # </snippet>
 
 assert len(my_suite.expectations) == 2
-assert my_suite.expectation_configurations[0] == ExpectationConfiguration(
-    expectation_type="expect_column_values_to_not_be_null",
-    kwargs={"column": "pickup_datetime"},
-)
-assert my_suite.expectation_configurations[1] == updated_config
+assert isinstance(my_suite.expectations[0], ExpectColumnValuesToNotBeNull)
+assert isinstance(my_suite.expectations[1], ExpectColumnValuesToBeBetween)
+assert my_suite.expectations[1] == updated_config.to_domain_obj()
 
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration">
@@ -105,8 +103,9 @@ config_to_search = ExpectationConfiguration(
 found_expectation = my_suite.find_expectations(config_to_search, match_type="domain")
 
 # This assertion will succeed because the ExpectationConfiguration has been updated.
-assert found_expectation == [updated_config]
+assert len(found_expectation) == 1
 # </snippet>
+assert found_expectation[0].to_domain_obj() == updated_config.to_domain_obj()
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite remove_configuration">
 config_to_remove = ExpectationConfiguration(
