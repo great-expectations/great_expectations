@@ -161,6 +161,7 @@ exclude = [
 ]
 
 [[tool.mypy.overrides]]
+# TODO: remove these overrides once we have typed the modules
 module = [
     "great_expectations.expectations.core.*",
     "great_expectations.render.*",
