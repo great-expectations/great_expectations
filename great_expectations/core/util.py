@@ -41,6 +41,7 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.render import RenderedContent
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 
@@ -409,6 +410,9 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
+
+    if isinstance(data, RenderedContent):
+        return data.to_json_dict()
 
     # Unable to serialize (unrecognized data type).
     raise TypeError(
