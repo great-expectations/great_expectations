@@ -71,7 +71,7 @@ def suite_with_single_expectation(
     expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
     empty_suite_with_meta: ExpectationSuite,
 ) -> ExpectationSuite:
-    empty_suite_with_meta.add_expectation(
+    empty_suite_with_meta.add_expectation_configuration(
         expect_column_values_to_be_in_set_col_a_with_meta
     )
     return empty_suite_with_meta
@@ -1393,6 +1393,6 @@ def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuit
     )
 
     with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
-        suite.add_expectation(expectation_configuration)
+        suite.add_expectation_configuration(expectation_configuration)
 
     assert f"{expectation_type} not found" in str(e)
