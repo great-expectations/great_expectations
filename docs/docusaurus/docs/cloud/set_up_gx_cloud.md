@@ -132,7 +132,7 @@ To join a GX Cloud org, you must be invited by your org Admin. After you're invi
 
 2. Enter and then confirm your new password, and then click **Reset password**.
 
-3. Click **Back to <org name>**. 
+3. Click **Back to ORG_NAME**. 
 
 ## Get your user access token and organization ID (Optional)
 
