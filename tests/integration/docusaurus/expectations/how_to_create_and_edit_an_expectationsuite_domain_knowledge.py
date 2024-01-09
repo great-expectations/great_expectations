@@ -58,7 +58,9 @@ expectation_configuration_1 = ExpectationConfiguration(
     },
 )
 # Add the Expectation to the suite
-suite.add_expectation(expectation_configuration=expectation_configuration_1)
+suite.add_expectation_configuration(
+    expectation_configuration=expectation_configuration_1
+)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2">
@@ -70,7 +72,9 @@ expectation_configuration_2 = ExpectationConfiguration(
     },
     # Note optional comments omitted
 )
-suite.add_expectation(expectation_configuration=expectation_configuration_2)
+suite.add_expectation_configuration(
+    expectation_configuration=expectation_configuration_2
+)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3">
@@ -87,7 +91,9 @@ expectation_configuration_3 = ExpectationConfiguration(
         }
     },
 )
-suite.add_expectation(expectation_configuration=expectation_configuration_3)
+suite.add_expectation_configuration(
+    expectation_configuration=expectation_configuration_3
+)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4">
@@ -104,7 +110,9 @@ expectation_configuration_4 = ExpectationConfiguration(
         }
     },
 )
-suite.add_expectation(expectation_configuration=expectation_configuration_4)
+suite.add_expectation_configuration(
+    expectation_configuration=expectation_configuration_4
+)
 # </snippet>
 
 # Does the ExpectationSuite contain what we expect
