@@ -165,7 +165,7 @@ module = [
     "great_expectations.expectations.core.*",
     "great_expectations.render.*",
     "great_expectations.self_check.*",
-    "great_expectations.compatibility.*",
+    "great_expectations.compatibility.docstring_parser",
     "great_expectations.core.usage_statistics.*",
     "great_expectations.validation_operators.*",
     "great_expectations.rule_based_profiler.*",
