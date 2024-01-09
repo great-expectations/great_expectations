@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import Final, List, Optional, Union
 
 import pandas as pd
@@ -13,11 +14,8 @@ from great_expectations.expectations.expectation import (
     QueryExpectation,
 )
 from great_expectations.render import (
-    AtomicDiagnosticRendererType,
-    RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -125,6 +123,11 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         }
         self._configuration["kwargs"]["template_dict"] = template_dict
 
+        # `column` parameter needed when rendering unexpected_results
+        self._configuration["kwargs"]["column"] = configuration["kwargs"][
+            "foreign_key_column"
+        ]
+
     @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -207,60 +210,9 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
-    def _atomic_diagnostic_observed_value(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-    ) -> RenderedAtomicContent:
-        """Override of base-class's _atomic_diagnostic_observed_value()
-
-        Until unexpected table can be properly rendered in Cloud, we will include the unexpected indices as part of the
-        OBSERVED_VALUE rendering so the output will look like:
-
-        OBSERVED VALUE: 2 missing values. [4, 5]
-        """
-        observed_value: str = result.result.get("observed_value")
-        unexpected_index_list = result.result.get("unexpected_index_list")
-
-        processed_unexpected_index_list: List[str] = []
-
-        for unexpected_index in unexpected_index_list:
-            processed_unexpected_index_list.append(list(unexpected_index.values())[0])
-
-        if len(processed_unexpected_index_list) > cls.MAX_UNEXPECTED_VALUES_TO_RENDER:
-            processed_unexpected_index_list = processed_unexpected_index_list[
-                : cls.MAX_UNEXPECTED_VALUES_TO_RENDER
-            ]
-            processed_unexpected_index_list.append("...")
-
-        processed_unexpected_index_list_to_str: str = (
-            "[" + ", ".join(processed_unexpected_index_list) + "]"
-        )
-        final_template_value: str = (
-            observed_value + "    " + processed_unexpected_index_list_to_str
-        )
-
-        value_obj = renderedAtomicValueSchema.load(
-            {
-                "template": final_template_value,
-                "params": {},
-                "schema": {"type": "com.superconductive.rendered.string"},
-            }
-        )
-
-        rendered = RenderedAtomicContent(
-            name=AtomicDiagnosticRendererType.OBSERVED_VALUE,
-            value=value_obj,
-            value_type="StringValueType",
-        )
-        return rendered
-
-    @classmethod
     @override
     @renderer(renderer_type="renderer.diagnostic.unexpected_table")
-    def _diagnostic_unexpected_table_renderer(  # too complex
+    def _diagnostic_unexpected_table_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
@@ -316,12 +268,32 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         unexpected_values = metrics.get("query.template_values")
         final_value = len(unexpected_values)
+        unexpected_list = []
+
+        for values in unexpected_values:
+            value = list(values.values())[0]
+            unexpected_list.append(value)
+
+        partial_unexpected_counts = [
+            {"value": key, "count": value}
+            for key, value in sorted(
+                Counter(unexpected_list).most_common(
+                    self.MAX_UNEXPECTED_VALUES_TO_RENDER
+                ),
+                key=lambda x: (-x[1], x[0]),
+            )
+        ]
+
+        unexpected_index_column_names: List[str] = [configuration.kwargs["column"]]
 
         return ExpectationValidationResult(
             success=(final_value == 0),
             result={
                 "observed_value": f"{final_value} missing value{'s' if final_value != 1 else ''}.",
+                "unexpected_list": unexpected_list,
+                "unexpected_index_column_names": unexpected_index_column_names,  # Needed to utilize me
                 "unexpected_index_list": unexpected_values,
+                "partial_unexpected_counts": partial_unexpected_counts,
             },
         )
 
