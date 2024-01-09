@@ -218,7 +218,7 @@ class TestCRUDMethods:
 
         assert (
             created_expectation
-            == context.expectations_store.add_expectation_configuration.return_value
+            == context.expectations_store.add_expectation.return_value
         )
         context.expectations_store.add_expectation.assert_called_once_with(
             suite=suite, expectation=expectation
