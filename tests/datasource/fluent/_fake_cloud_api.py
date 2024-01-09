@@ -536,7 +536,8 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     else:
         suite_id = FAKE_EXPECTATION_SUITE_ID
         payload["data"]["id"] = suite_id
-        payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
+        # todo: cloud backend should add this ID, but currently does not
+        # payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
         for expectation_configuration in payload["data"]["attributes"]["suite"][
             "expectations"
         ]:

@@ -558,3 +558,22 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
     assert len(updated_suite.expectations) == 1
+
+
+@pytest.mark.cloud
+def test_add_suite_returns_id(empty_cloud_context_fluent):
+    # Arrange
+    context = empty_cloud_context_fluent
+    suite = ExpectationSuite(name="test-suite")
+    assert suite.ge_cloud_id is None
+
+    # Act
+    result = context.suites.add(suite)
+
+    # Assert
+    try:
+        UUID(result.ge_cloud_id)
+    except (ValueError, TypeError):
+        pytest.fail(
+            f"ExpectationSuite does not have valid ID: `{result.ge_cloud_id}` is not a valid UUID."
+        )
