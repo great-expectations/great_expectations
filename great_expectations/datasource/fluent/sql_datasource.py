@@ -924,7 +924,9 @@ class TableAsset(_SQLAsset):
         try:
             with engine.connect() as connection:
                 connection.execute(
-                    sa.text(f"SELECT * FROM {self.qualified_name} LIMIT 1;")
+                    sa.select([sa.text("test_connection")])
+                    .select_from(self.as_selectable())
+                    .limit(1)
                 )
         except Exception as query_error:
             LOGGER.info(
