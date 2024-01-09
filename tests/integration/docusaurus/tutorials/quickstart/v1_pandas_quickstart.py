@@ -18,7 +18,6 @@ import great_expectations.expectations as gxe
 # </snippet>
 
 # Set up
-# NOTE: Context is a singleton now. Once the context has been set instantiated in a session
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py get_context">
 context = gx.get_context()
 # </snippet>
@@ -42,7 +41,7 @@ assert result.success is False
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py update_expectation">
 # Review the results of the expectation! Change parameters as needed.
-expectation.mostly = 0.8
+expectation.mostly = 0.95
 result = batch.validate(expectation)
 
 suite = context.add_expectation_suite("quickstart")
@@ -50,7 +49,7 @@ suite.add(expectation)
 suite.add(gxe.ExpectColumnValuesToNotBeNull(column="trip_distance"))
 # </snippet>
 assert result.success is True
-assert result.expectation_config.kwargs["mostly"] == 0.8
+assert result.expectation_config.kwargs["mostly"] == 0.95
 
 suite_result = batch.validate(suite)
 assert suite_result.success
