@@ -42,8 +42,7 @@ files = [
 ]
 warn_unused_configs = true
 ignore_missing_imports = true
-# TODO: change this to 'normal' once we have 'full' type coverage
-follow_imports = 'silent'
+follow_imports = 'normal'
 warn_redundant_casts = true
 show_error_codes = true
 enable_error_code = [
@@ -160,6 +159,22 @@ exclude = [
     'tests/integration/docusaurus/setup',
     'tests/integration/docusaurus/validation',
 ]
+
+[[tool.mypy.overrides]]
+module = [
+    "great_expectations.expectations.core.*",
+    "great_expectations.render.*",
+    "great_expectations.self_check.*",
+    "great_expectations.compatibility.*",
+    "great_expectations.core.usage_statistics.*",
+    "great_expectations.validation_operators.*",
+    "great_expectations.rule_based_profiler.*",
+    "great_expectations.datasource.data_connector.*",
+    "great_expectations.dataset.*",
+    "contrib.experimental.great_expectations_experimental.*",
+    "tests.test_utils",
+]
+follow_imports = 'silent'
 
 [[tool.mypy.overrides]]
 # need to use override because a mypy bug prevents ignoring an assignment warning inline
