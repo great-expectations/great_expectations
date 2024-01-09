@@ -923,7 +923,7 @@ class TableAsset(_SQLAsset):
 
         try:
             with engine.connect() as connection:
-                table = sa.table(self.qualified_name)
+                table = sa.table(self.table_name, schema=self.schema_name)
                 # don't need to fetch any data, just want to make sure the table is accessible
                 connection.execute(sa.select(1, table).limit(1))
         except Exception as query_error:
