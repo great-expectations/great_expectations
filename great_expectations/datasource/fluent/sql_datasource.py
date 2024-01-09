@@ -932,7 +932,7 @@ class TableAsset(_SQLAsset):
             )
             raise TestConnectionError(
                 f"Attempt to connect to table: {self.qualified_name} failed because the test query "
-                f"failed. Ensure the table exists and the user has access: {query_error}"
+                f"failed. Ensure the table exists and the user has access to select data from the table: {query_error}"
             ) from query_error
 
     @override
