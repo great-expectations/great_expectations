@@ -913,7 +913,6 @@ class TableAsset(_SQLAsset):
         """
         datasource: SQLDatasource = self.datasource
         engine: sqlalchemy.Engine = datasource.get_engine()
-        # TODO: replace this with a select query
         inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
@@ -922,13 +921,24 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
+        try:
+            engine.execute(f"SELECT * FROM {self.qualified_name} LIMIT 1;")
+        except sa.exc.ProgrammingError as query_error:
+            LOGGER.debug(
+                f"{self.name} `.test_connection()` query failed: {query_error!r}"
+            )
+            raise TestConnectionError(
+                f"Attempt to connect to table: {self.qualified_name} failed because the test query "
+                f"failed. Ensure the table exists and the user has access: {query_error}"
+            ) from query_error
+        # TODO: remove this inspector check
         if not inspector.has_table(
             table_name=self.table_name,
             schema=self.schema_name,
         ):
             raise TestConnectionError(
                 f"Attempt to connect to table: {self.qualified_name} failed because the table"
-                f" {self.table_name} does not exist."
+                f" {self.table_name} does not exist or the user does not have access to it."
             )
 
     @override
