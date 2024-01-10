@@ -97,7 +97,7 @@ class DocsBuilder:
             "Building API docs for current version. Please ignore sphinx docstring errors in red/pink, for example: ERROR: Unexpected indentation."
         )
         # TODO: not this
-        self._run("invoke api-docs")
+        self._run("(cd ../../; invoke api-docs)")
 
         if self._is_local:
             self.logger.print_header(
