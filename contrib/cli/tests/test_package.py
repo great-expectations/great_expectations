@@ -10,17 +10,9 @@ from great_expectations_contrib.package import (
     Maturity,
 )
 
+import great_expectations.expectations as gxe
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
-)
-from great_expectations.expectations.core.expect_column_min_to_be_between import (
-    ExpectColumnMinToBeBetween,
-)
-from great_expectations.expectations.core.expect_column_most_common_value_to_be_in_set import (
-    ExpectColumnMostCommonValueToBeInSet,
-)
-from great_expectations.expectations.core.expect_column_stdev_to_be_between import (
-    ExpectColumnStdevToBeBetween,
 )
 
 
@@ -33,9 +25,9 @@ def package() -> GreatExpectationsContribPackageManifest:
 @pytest.fixture
 def diagnostics() -> List[ExpectationDiagnostics]:
     expectations = [
-        ExpectColumnMinToBeBetween,
-        ExpectColumnMostCommonValueToBeInSet,
-        ExpectColumnStdevToBeBetween,
+        gxe.ExpectColumnMinToBeBetween,
+        gxe.ExpectColumnMostCommonValueToBeInSet,
+        gxe.ExpectColumnStdevToBeBetween,
     ]
     diagnostics = list(
         map(

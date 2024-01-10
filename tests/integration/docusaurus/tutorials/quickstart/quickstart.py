@@ -1,9 +1,6 @@
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
-from great_expectations.expectations.core import (
-    ExpectColumnValuesToBeBetween,
-    ExpectColumnValuesToNotBeNull,
-)
+import great_expectations.expectations as gxe
 
 # </snippet>
 
@@ -24,9 +21,11 @@ batch = context.sources.pandas_default.read_csv(
 suite = context.add_expectation_suite("my_suite")
 
 # TODO: update where these expectations are imported
-suite.add(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
-suite.add(
-    ExpectColumnValuesToBeBetween(column="passenger_count", min_value=1, max_value=6)
+suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+suite.add_expectation(
+    gxe.ExpectColumnValuesToBeBetween(
+        column="passenger_count", min_value=1, max_value=6
+    )
 )
 # </snippet>
 

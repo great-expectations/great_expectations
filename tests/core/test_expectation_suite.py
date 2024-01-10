@@ -8,6 +8,7 @@ from uuid import UUID
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import set_context
 from great_expectations.core.expectation_suite import (
@@ -19,9 +20,6 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.core import (
-    ExpectColumnValuesToBeInSet,
-)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -71,7 +69,7 @@ def suite_with_single_expectation(
     expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
     empty_suite_with_meta: ExpectationSuite,
 ) -> ExpectationSuite:
-    empty_suite_with_meta.add_expectation(
+    empty_suite_with_meta.add_expectation_configuration(
         expect_column_values_to_be_in_set_col_a_with_meta
     )
     return empty_suite_with_meta
@@ -201,8 +199,8 @@ class TestCRUDMethods:
     expectation_suite_name = "test-suite"
 
     @pytest.fixture
-    def expectation(self) -> ExpectColumnValuesToBeInSet:
-        return ExpectColumnValuesToBeInSet(
+    def expectation(self) -> gxe.ExpectColumnValuesToBeInSet:
+        return gxe.ExpectColumnValuesToBeInSet(
             column="a",
             value_set=[1, 2, 3],
             result_format="BASIC",
@@ -214,7 +212,7 @@ class TestCRUDMethods:
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
 
-        created_expectation = suite.add(expectation=expectation)
+        created_expectation = suite.add_expectation(expectation=expectation)
 
         assert (
             created_expectation
@@ -231,7 +229,7 @@ class TestCRUDMethods:
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
 
-        created_expectation = suite.add(expectation=expectation)
+        created_expectation = suite.add_expectation(expectation=expectation)
 
         assert created_expectation == expectation
         assert len(suite.expectations) == 1
@@ -250,7 +248,7 @@ class TestCRUDMethods:
             expectations=[expectation.configuration],
         )
 
-        suite.add(expectation=expectation)
+        suite.add_expectation(expectation=expectation)
 
         assert len(suite.expectations) == 1
         context.expectations_store.update.assert_not_called()
@@ -268,7 +266,7 @@ class TestCRUDMethods:
         )
 
         with pytest.raises(ConnectionError):  # exception type isn't important
-            suite.add(expectation=expectation)
+            suite.add_expectation(expectation=expectation)
 
         assert len(suite.expectations) == 0, "Expectation must not be added to Suite."
 
@@ -282,7 +280,7 @@ class TestCRUDMethods:
             expectations=[expectation.configuration],
         )
 
-        deleted_expectation = suite.delete(expectation=expectation)
+        deleted_expectation = suite.delete_expectation(expectation=expectation)
 
         assert deleted_expectation == expectation
         assert suite.expectations == []
@@ -302,7 +300,7 @@ class TestCRUDMethods:
             expectations=[expectation.configuration],
         )
 
-        deleted_expectation = suite.delete(expectation=expectation)
+        deleted_expectation = suite.delete_expectation(expectation=expectation)
 
         assert deleted_expectation == expectation
         assert suite.expectations == []
@@ -319,7 +317,7 @@ class TestCRUDMethods:
         )
 
         with pytest.raises(KeyError, match="No matching expectation was found."):
-            suite.delete(expectation=expectation)
+            suite.delete_expectation(expectation=expectation)
 
         context.expectations_store.delete_expectation.assert_not_called()
 
@@ -339,7 +337,7 @@ class TestCRUDMethods:
         )
 
         with pytest.raises(ConnectionError):  # exception type isn't important
-            suite.delete(expectation=expectation)
+            suite.delete_expectation(expectation=expectation)
 
         assert len(suite.expectations) == 1, "Expectation must still be in Suite."
 
@@ -386,10 +384,10 @@ class TestCRUDMethods:
                 f"Expected UUID in ExpectationSuite.ge_cloud_id, found {uuid_to_test}"
             )
         expectation.id = None
-        suite.add(expectation)
+        suite.add_expectation(expectation)
         expectation = copy(expectation)
         expectation.column = "foo"
-        suite.add(expectation)
+        suite.add_expectation(expectation)
         assert len(suite.expectations) == 2
         for expectation in suite.expectations:
             uuid_to_test = expectation.id
@@ -412,7 +410,7 @@ class TestCRUDMethods:
             RuntimeError,
             match="Cannot add Expectation because it already belongs to an ExpectationSuite.",
         ):
-            suite.add(expectation)
+            suite.add_expectation(expectation)
 
     @pytest.mark.cloud
     def test_cloud_expectation_can_be_saved_after_added(
@@ -432,7 +430,7 @@ class TestCRUDMethods:
         suite_name = "test-suite"
         # todo: update to new api
         suite = context.add_expectation_suite(suite_name)
-        suite.add(expectation)
+        suite.add_expectation(expectation)
         updated_column_name = "foo"
         assert expectation.column != updated_column_name
         expectation.column = updated_column_name
@@ -476,11 +474,11 @@ class TestCRUDMethods:
         context = empty_data_context
         suite_name = "test-suite"
         expectations = [
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column="a",
                 value_set=[1, 2, 3],
             ),
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column="b",
                 value_set=[4, 5, 6],
             ),
@@ -528,17 +526,17 @@ class TestCRUDMethods:
         column_name = "a"
         updated_column_name = "foo"
         expectations = [
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column=column_name,
                 value_set=[1, 2, 3],
             ),
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column="b",
                 value_set=[4, 5, 6],
             ),
         ]
         for expectation in expectations:
-            suite_a.add(expectation)
+            suite_a.add_expectation(expectation)
 
         context.suites.add(suite_a)
 
@@ -1393,6 +1391,6 @@ def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuit
     )
 
     with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
-        suite.add_expectation(expectation_configuration)
+        suite.add_expectation_configuration(expectation_configuration)
 
     assert f"{expectation_type} not found" in str(e)

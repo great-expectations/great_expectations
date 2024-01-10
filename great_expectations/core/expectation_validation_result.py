@@ -396,7 +396,7 @@ class ExpectationValidationResultSchema(Schema):
     exception_info = fields.Dict(required=False, allow_none=True)
     rendered_content = fields.List(
         fields.Nested(
-            lambda: RenderedAtomicContentSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
         )
     )
 

@@ -287,6 +287,8 @@ def type_check(  # noqa: PLR0913, PLR0912
     else:
         bin = "mypy"
 
+    cmds = [bin]
+
     ge_pkgs = [f"great_expectations.{p}" for p in packages]
 
     if check_stub_sources:
@@ -297,11 +299,11 @@ def type_check(  # noqa: PLR0913, PLR0912
             )
             relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
+        # following imports here can cause mutually exclusive import errors with normal type-checking
+        cmds.append("--follow-imports=silent")
 
-    cmds = [
-        bin,
-        *ge_pkgs,
-    ]
+    cmds.extend(ge_pkgs)
+
     if install_types:
         cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
