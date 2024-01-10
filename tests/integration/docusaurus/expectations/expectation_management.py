@@ -21,9 +21,9 @@ suite = context.suites.add(suite=suite)
 expectation_a = ExpectColumnValuesToBeInSet(
     column=column_a, value_set=["foo", "bar", "baz"]
 )
-suite.add(expectation=expectation_a)
+suite.add_expectation(expectation=expectation_a)
 expectation_b = ExpectColumnValuesToNotBeNull(column=column_a)
-suite.add(expectation=expectation_b)
+suite.add_expectation(expectation=expectation_b)
 
 # find and update a single expectation
 expectation_type = ExpectColumnValuesToNotBeNull
@@ -47,7 +47,7 @@ expectation = next(
     for expectation in suite.expectations
     if isinstance(expectation, expectation_type)
 )
-suite.delete(expectation=expectation)
+suite.delete_expectation(expectation=expectation)
 
 # get a suite
 suite = context.suites.get(name=suite_name)
