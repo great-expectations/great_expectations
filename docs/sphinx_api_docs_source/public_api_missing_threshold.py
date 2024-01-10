@@ -8,7 +8,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/actions.py Name: _run",
     "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
     "File: great_expectations/core/batch.py Name: head",
-    "File: great_expectations/core/batch_config.py Name: BatchConfig",
     "File: great_expectations/core/batch_spec.py Name: to_json_dict",
     "File: great_expectations/core/expectation_diagnostics/expectation_doctor.py Name: print_diagnostic_checklist",
     "File: great_expectations/core/expectation_diagnostics/expectation_doctor.py Name: run_diagnostics",
