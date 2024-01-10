@@ -3,10 +3,10 @@ from typing import Any, Dict, List
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
-from great_expectations.expectations.core import ExpectColumnMaxToBeBetween
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -209,7 +209,9 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
 
 @pytest.mark.unit
 def test_expectation_configuration_property():
-    expectation = ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo", min_value=0, max_value=10
+    )
 
     assert expectation.configuration == ExpectationConfiguration(
         expectation_type="expect_column_max_to_be_between",
@@ -223,7 +225,9 @@ def test_expectation_configuration_property():
 
 @pytest.mark.unit
 def test_expectation_configuration_property_recognizes_state_changes():
-    expectation = ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo", min_value=0, max_value=10
+    )
 
     expectation.column = "bar"
     expectation.min_value = 5
@@ -244,6 +248,6 @@ def test_expectation_configuration_property_recognizes_state_changes():
 @pytest.mark.unit
 def test_unrecognized_expectation_arg_raises_error():
     with pytest.raises(pydantic.ValidationError, match="extra fields not permitted"):
-        ExpectColumnMaxToBeBetween(
+        gxe.ExpectColumnMaxToBeBetween(
             column="foo", min_value=0, max_value=10, mostyl=0.95  # 'mostly' typo
         )
