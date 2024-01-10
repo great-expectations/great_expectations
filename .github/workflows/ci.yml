@@ -322,7 +322,7 @@ jobs:
           SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
           LOGGING_LEVEL: DEBUG
           ENVIRONMENT: local
-        run: invoke ci-tests 'cloud' --up-services --verbose
+        run: invoke ci-tests 'cloud' --verbose
 
       - name: Get mercury version
         run: |
