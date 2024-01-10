@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
+from docs.docs_build import DocsBuilder
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
@@ -689,13 +690,13 @@ def docs(
             print("Making sure docusaurus dependencies are installed.")
             ctx.run(" ".join(["yarn install"]), echo=True)
 
+            docs_builder = DocsBuilder(ctx)
             if build:
-                build_docs_cmd = "../build_docs"
+                print("Running build_docs from:", docusaurus_dir)
+                docs_builder.build_docs()
             else:
-                build_docs_cmd = "../build_docs_locally.sh"
-
-            print(f"Running {build_docs_cmd} from:", docusaurus_dir)
-            ctx.run(build_docs_cmd, echo=True)
+                print("Running build_docs_locally from:", docusaurus_dir)
+                docs_builder.build_docs_locally()
 
     os.chdir(old_pwd)
 
