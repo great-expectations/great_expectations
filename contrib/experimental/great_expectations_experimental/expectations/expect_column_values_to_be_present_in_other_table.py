@@ -166,6 +166,8 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
             unexpected_list = ["4", "5", "5"]
         and output
             [{"value": "5", "count": 2}, {"value": "4", "count": 1}]
+
+        the `partial_unexpected_count` parameter will determine how many values are returned.
         """
         return [
             {"value": key, "count": value}
