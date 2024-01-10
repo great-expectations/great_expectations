@@ -4,13 +4,13 @@ from unittest import mock
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.exceptions import DataContextError
-from great_expectations.expectations.core import ExpectColumnValuesToNotBeNull
 
 
 @pytest.mark.unit
@@ -436,7 +436,7 @@ def test_view_validation_result_uses_run_name_template_env_var(
 
     # Create Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add_expectation(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+    suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
 
     # Create and run Checkpoint
     checkpoint = context.add_or_update_checkpoint(

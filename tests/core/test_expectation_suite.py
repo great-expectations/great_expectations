@@ -8,6 +8,7 @@ from uuid import UUID
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import set_context
 from great_expectations.core.expectation_suite import (
@@ -19,9 +20,6 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.core import (
-    ExpectColumnValuesToBeInSet,
-)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -201,8 +199,8 @@ class TestCRUDMethods:
     expectation_suite_name = "test-suite"
 
     @pytest.fixture
-    def expectation(self) -> ExpectColumnValuesToBeInSet:
-        return ExpectColumnValuesToBeInSet(
+    def expectation(self) -> gxe.ExpectColumnValuesToBeInSet:
+        return gxe.ExpectColumnValuesToBeInSet(
             column="a",
             value_set=[1, 2, 3],
             result_format="BASIC",
@@ -476,11 +474,11 @@ class TestCRUDMethods:
         context = empty_data_context
         suite_name = "test-suite"
         expectations = [
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column="a",
                 value_set=[1, 2, 3],
             ),
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column="b",
                 value_set=[4, 5, 6],
             ),
@@ -528,11 +526,11 @@ class TestCRUDMethods:
         column_name = "a"
         updated_column_name = "foo"
         expectations = [
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column=column_name,
                 value_set=[1, 2, 3],
             ),
-            ExpectColumnValuesToBeInSet(
+            gxe.ExpectColumnValuesToBeInSet(
                 column="b",
                 value_set=[4, 5, 6],
             ),
