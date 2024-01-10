@@ -145,7 +145,7 @@ class ExpectationSuite(SerializableDictDot):
         return self.expectation_suite_name
 
     @public_api
-    def add(self, expectation: Expectation) -> Expectation:
+    def add_expectation(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
         if expectation.id:
             raise RuntimeError(
@@ -177,7 +177,7 @@ class ExpectationSuite(SerializableDictDot):
         return expectation
 
     @public_api
-    def delete(self, expectation: Expectation) -> Expectation:
+    def delete_expectation(self, expectation: Expectation) -> Expectation:
         """Delete an Expectation from the collection.
 
         Raises:
@@ -211,7 +211,7 @@ class ExpectationSuite(SerializableDictDot):
         self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
-        """Has this ExpectationSuite been persisted to a DataContext?"""
+        """Has this ExpectationSuite been persisted to a Store?"""
         # todo: this should only check local keys instead of potentially querying the remote backend
         key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         return self._store.has_key(key=key)

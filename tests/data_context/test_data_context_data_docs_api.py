@@ -436,7 +436,7 @@ def test_view_validation_result_uses_run_name_template_env_var(
 
     # Create Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+    suite.add_expectation(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
 
     # Create and run Checkpoint
     checkpoint = context.add_or_update_checkpoint(

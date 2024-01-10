@@ -52,7 +52,7 @@ def test_batch_validate_expectation_suite(
 
     # Make Expectation Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add(
+    suite.add_expectation(
         ExpectColumnValuesToNotBeNull(
             column="vendor_id",
             mostly=0.95,
@@ -92,7 +92,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
 
     # Make Expectation Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add(ExpectColumnValuesToNotBeNull(column="vendor_id"))
+    suite.add_expectation(ExpectColumnValuesToNotBeNull(column="vendor_id"))
     # Validate
     result = batch.validate(suite)
     # Asserts on result
@@ -142,7 +142,7 @@ def test_batch_validate_change_expectation_suite_result_format(
     assert batch.result_format == "SUMMARY"
     # Make Expectation Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add(
+    suite.add_expectation(
         ExpectColumnValuesToNotBeNull(
             column="vendor_id",
             mostly=0.95,

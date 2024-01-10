@@ -41,7 +41,7 @@ files = [
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
-ignore_missing_imports = true
+ignore_missing_imports = false
 follow_imports = 'normal'
 warn_redundant_casts = true
 show_error_codes = true
@@ -188,6 +188,37 @@ module = ["great_expectations.compatibility.azure"]
 disable_error_code = [
     'assignment', # cannot assign NotImported to a ModuleType
 ]
+
+[[tool.mypy.overrides]]
+module = [
+    "great_expectations.compatibility.pydantic.*",
+    "altair.*",
+    "boto3.*",
+    "botocore.*",
+    "clickhouse_sqlalchemy.*",
+    "google.*",
+    "ipywidgets.*",
+    "mistune.*",
+    "moto.*",
+    "pact.*",
+    "posthog.*",
+    "pyarrow.*",
+    "pyfakefs.*",
+    "pypd.*",
+    "ruamel.*",
+    "scipy.*",
+    "sempy.*",
+    "shapely.*",
+    "snowflake.*",
+    "sqlalchemy_bigquery.*",
+    "sqlalchemy_dremio.*",
+    "sqlalchemy_redshift.*",
+    "sqlalchemy.*",  # remove once we are using sqlalchemy 2 in type-checking step
+    "teradatasqlalchemy.*",
+    "trino.*",
+]
+ignore_missing_imports = true
+
 
 [tool.pydantic-mypy]
 # https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings
