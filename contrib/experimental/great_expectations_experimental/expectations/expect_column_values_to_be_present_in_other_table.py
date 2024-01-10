@@ -294,7 +294,8 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        # loading any overrides from user
+        foreign_key_column_name: str = configuration.kwargs["foreign_key_column"]
+
         result_format: dict = self.get_result_format(
             configuration, runtime_configuration
         )
@@ -303,18 +304,17 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         )
 
         unexpected_values = metrics.get("query.template_values")
-        final_value = len(unexpected_values)
-        unexpected_list = []
+        final_value: int = len(unexpected_values)
 
+        unexpected_list: List[Any] = []
         for values in unexpected_values:
-            value = list(values.values())[0]
-            unexpected_list.append(value)
+            unexpected_list.append(values[foreign_key_column_name])
 
         partial_unexpected_counts = self._generate_partial_unexpected_counts(
             unexpected_list=unexpected_list,
             partial_unexpected_count=partial_unexpected_count,
         )
-        unexpected_index_column_names = [configuration.kwargs["foreign_key_column"]]
+        unexpected_index_column_names: List[str] = [foreign_key_column_name]
 
         return ExpectationValidationResult(
             success=(final_value == 0),
