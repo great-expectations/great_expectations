@@ -291,6 +291,6 @@ def filesystem_datasource(test_backends, empty_data_context, request) -> Datasou
 @pytest.fixture
 def context() -> EphemeralDataContext:
     """Return an ephemeral data context for testing."""
-    ctx = get_context(cloud_mode=False)
+    ctx = get_context(mode="ephemeral")
     assert isinstance(ctx, EphemeralDataContext)
     return ctx
