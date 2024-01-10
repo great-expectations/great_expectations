@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Final, List, Optional, Union
+from typing import Any, Dict, Final, List, Optional, Union
 
 import pandas as pd
 
@@ -121,10 +121,10 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
                 "foreign_table_key_column"
             ],
         }
-        self._configuration["kwargs"]["template_dict"] = template_dict
+        self.configuration["kwargs"]["template_dict"] = template_dict
 
         # `column` parameter needed when rendering unexpected_results
-        self._configuration["kwargs"]["column"] = configuration["kwargs"][
+        self.configuration["kwargs"]["column"] = configuration["kwargs"][
             "foreign_key_column"
         ]
 
@@ -154,8 +154,16 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
                 f"{'foreign_table_key_column ' if 'foreign_table_key_column' not in configuration.kwargs else ''}"
             )
 
-    def _generate_partial_unexpected_counts(self, unexpected_list):
-        """Generate partial_unexpected counts using logic borrowed from _format_map_output() in expectations.py"""
+    def _generate_partial_unexpected_counts(
+        self, unexpected_list: List[Any]
+    ) -> List[Dict]:
+        """Generate partial_unexpected counts using logic borrowed from _format_map_output() in expectations.py
+
+        Will take in
+            unexpected_list = ["4", "5", "5"]
+        and output
+            [{"value": "5", "count": 2}, {"value": "4", "count": 1}]
+        """
         return [
             {"value": key, "count": value}
             for key, value in sorted(
