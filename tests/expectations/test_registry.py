@@ -1,9 +1,7 @@
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
-    ExpectColumnValuesToBeInSet,
-)
+import great_expectations.expectations as gxe
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -15,7 +13,7 @@ pytestmark = pytest.mark.unit
 
 def test_registry_basics():
     expectation = get_expectation_impl("expect_column_values_to_be_in_set")
-    assert expectation == ExpectColumnValuesToBeInSet
+    assert expectation == gxe.ExpectColumnValuesToBeInSet
 
 
 def test_registry_from_configuration():
@@ -23,7 +21,7 @@ def test_registry_from_configuration():
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "PClass", "value_set": [1, 2, 3]},
     )
-    assert configuration._get_expectation_impl() == ExpectColumnValuesToBeInSet
+    assert configuration._get_expectation_impl() == gxe.ExpectColumnValuesToBeInSet
 
 
 def test_registry_raises_error_when_invalid_expectation_requested():

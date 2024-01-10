@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
@@ -27,7 +28,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -143,7 +143,7 @@ def _expecation_configuration_to_validation_result_pandas(
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
-    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
+    expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
@@ -179,7 +179,7 @@ def _expecation_configuration_to_validation_result_sql(
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
-    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
+    expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
     engine = SqlAlchemyExecutionEngine(
@@ -775,7 +775,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error():
     )
 
     with pytest.raises(ValidationError):
-        ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
+        gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
 
 
 # Spark
@@ -794,7 +794,7 @@ def test_spark_single_column_complete_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
+    expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -851,7 +851,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
+    expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -922,7 +922,7 @@ def test_spark_single_column_summary_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
+    expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -975,7 +975,7 @@ def test_spark_single_column_basic_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
+    expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
