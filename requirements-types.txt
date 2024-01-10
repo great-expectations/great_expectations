@@ -6,11 +6,14 @@
 --requirement reqs/requirements-dev-sqlalchemy.txt
 # typing stubs
 pandas-stubs
+types-colorama
 types-decorator
 types-jsonschema
+types-openpyxl
 types-protobuf
 types-psycopg2
 types-pycurl
+types-Pygments
 types-python-dateutil
 types-pytz
 types-PyYAML
