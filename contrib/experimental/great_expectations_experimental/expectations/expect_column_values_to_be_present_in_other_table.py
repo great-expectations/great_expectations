@@ -308,6 +308,8 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
 
         unexpected_list: List[Any] = []
         for values in unexpected_values:
+            # we don't use `foreign_key_column_name` but do an explicit listing of values() here because
+            # the returned unexpected_values are not always case-sensitive.
             value = list(values.values())[0]
             unexpected_list.append(value)
 
