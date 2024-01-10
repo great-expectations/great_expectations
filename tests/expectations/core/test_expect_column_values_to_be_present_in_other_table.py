@@ -214,6 +214,7 @@ def test_generate_partial_unexpected_counts(
     )
     expectation = ExpectColumnValuesToBePresentInOtherTable(expectation_configuration)
     calculated_unexpected_counts = expectation._generate_partial_unexpected_counts(
-        unexpected_list, partial_unexpected_count=partial_unexpected_count
+        unexpected_list=unexpected_list,
+        partial_unexpected_count=partial_unexpected_count,
     )
     assert unexpected_counts == calculated_unexpected_counts
