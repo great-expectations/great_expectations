@@ -480,7 +480,7 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
-  airflow220-min-versions:
+  airflow-min-versions:
     needs: [unit-tests, static-analysis]
     runs-on: ubuntu-latest
     steps:
@@ -493,7 +493,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: requirements.txt
       - name: Install dependencies
-        run: pip install . -c ci/constraints-test/airflow220-min-install.txt
+        run: pip install . -c ci/constraints-test/airflow-min-install.txt
       - name: Run the test
         # ensure the great_expectations can be imported and a context created
         run: sh ci/checks/check_min_airflow_dependency_compatibility.sh
@@ -557,7 +557,7 @@ jobs:
       py310-min-versions,
       py311-min-versions,
       pydantic-v1,
-      airflow220-min-versions,
+      airflow-min-versions,
       import_gx,
       usage_stats_integration
     ]
@@ -605,7 +605,7 @@ jobs:
       py310-min-versions,
       py311-min-versions,
       pydantic-v1,
-      airflow220-min-versions,
+      airflow-min-versions,
       import_gx,
       usage_stats_integration,
       build-n-publish
