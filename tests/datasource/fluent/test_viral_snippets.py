@@ -308,8 +308,8 @@ def test_quickstart_workflow(
 
     # Create Expectations
     suite = context.add_expectation_suite("my_suite")
-    suite.add(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
-    suite.add(
+    suite.add_expectation(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+    suite.add_expectation(
         ExpectColumnValuesToBeBetween(
             column="passenger_count", min_value=1, max_value=6
         )
