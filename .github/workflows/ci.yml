@@ -334,6 +334,10 @@ jobs:
             --provider-version-branch=develop \
             --provider-app-version=${{ steps.get_mercury_version.outputs.api_version }}
 
+      - name: Show logs, if failure
+        if: failure()
+        run: docker compose logs
+
 
   marker-tests:
     needs: [unit-tests, static-analysis]
