@@ -63,7 +63,9 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
 
     """
 
-    _MAX_UNEXPECTED_VALUES_TO_RENDER: Final[int] = 20
+    # Default value for maximum values to return. Can be overriden using the `partial_unexpected_count` parameter
+    # of result_format.
+    _MAX_UNEXPECTED_VALUES_TO_RETURN: Final[int] = 20
 
     library_metadata = {
         "maturity": "experimental",
@@ -246,7 +248,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
 
         result_format = cls.get_result_format(configuration, runtime_configuration)
         partial_unexpected_count = result_format.get(
-            "partial_unexpected_count", cls._MAX_UNEXPECTED_VALUES_TO_RENDER
+            "partial_unexpected_count", cls._MAX_UNEXPECTED_VALUES_TO_RETURN
         )
 
         unexpected_index_list: Optional[List[dict]] = result_dict.get(
@@ -297,7 +299,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
             configuration, runtime_configuration
         )
         partial_unexpected_count: int = result_format.get(
-            "partial_unexpected_count", self._MAX_UNEXPECTED_VALUES_TO_RENDER
+            "partial_unexpected_count", self._MAX_UNEXPECTED_VALUES_TO_RETURN
         )
 
         unexpected_values = metrics.get("query.template_values")
