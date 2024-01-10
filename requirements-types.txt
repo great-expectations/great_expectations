@@ -11,6 +11,7 @@ types-decorator
 types-jsonschema
 types-openpyxl
 types-protobuf
+types-psutil
 types-psycopg2
 types-pycurl
 types-Pygments
