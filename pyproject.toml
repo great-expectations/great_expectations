@@ -191,6 +191,7 @@ disable_error_code = [
 
 [[tool.mypy.overrides]]
 module = [
+    "great_expectations.compatibility.pydantic.*",
     "altair.*",
     "boto3.*",
     "botocore.*",
