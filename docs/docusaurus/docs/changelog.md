@@ -10,6 +10,14 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.8
+* [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](https://github.com/great-expectations/great_expectations/pull/9207))
+* [DOCS] `0.18.x` Update `get_context()` overload to for `EphemeralDataContext` ([#9183](https://github.com/great-expectations/great_expectations/pull/9183)
+* [MAINTENANCE] `0.18.x` `mypy` & `ruff` updates ([#9191](https://github.com/great-expectations/great_expectations/pull/9191))
+* [MAINTENANCE] Update Contrib Pipeline to release from `0.18` branch ([#9182](https://github.com/great-expectations/great_expectations/pull/9182))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Parameter Rename ([#9180](https://github.com/great-expectations/great_expectations/pull/9180))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Interface Update ([#9165](https://github.com/great-expectations/great_expectations/pull/9165))
+
 ### 0.18.7
 * [BUGFIX] 0.18.x - Apply `QueryAsset` splitting fix ([#9160](https://github.com/great-expectations/great_expectations/pull/9160))
 * [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Referential Integrity (0.18 branch) ([#9145](https://github.com/great-expectations/great_expectations/pull/9145))
