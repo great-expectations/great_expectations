@@ -308,7 +308,8 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
 
         unexpected_list: List[Any] = []
         for values in unexpected_values:
-            unexpected_list.append(values[foreign_key_column_name])
+            value = list(values.values())[0]
+            unexpected_list.append(value)
 
         partial_unexpected_counts = self._generate_partial_unexpected_counts(
             unexpected_list=unexpected_list,
