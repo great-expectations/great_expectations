@@ -1,12 +1,7 @@
-#!/bin/bash
+print("Installing Great Expectations library dev dependencies.")
+(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
-# Build API docs then build docusaurus docs.
-# Currently used in our netlify pipeline.
+print("Installing api docs dependencies.")
+(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
-source ../logging.sh
-
-print_orange_header "Preparing to build docs..."
-../prepare_to_build_docs.sh
-
-print_orange_header "Building docusaurus docs..."
-yarn build
+invoke docs

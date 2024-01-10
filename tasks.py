@@ -670,6 +670,18 @@ def docs(
     old_pwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
+    pull_request = os.environ.get(  # noqa: TID251 # os.enrivon allowed in config files
+        "PULL_REQUEST"
+    )
+    is_pull_request = pull_request == "true"
+    is_local = not pull_request
+    docs_builder = DocsBuilder(
+        ctx,
+        docusaurus_dir,
+        is_pull_request=is_pull_request,
+        is_local=is_local,
+    )
+
     if clean:
         rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
         ctx.run(" ".join(rm_cmds), echo=True)
@@ -690,7 +702,6 @@ def docs(
             print("Making sure docusaurus dependencies are installed.")
             ctx.run(" ".join(["yarn install"]), echo=True)
 
-            docs_builder = DocsBuilder(ctx)
             if build:
                 print("Running build_docs from:", docusaurus_dir)
                 docs_builder.build_docs()
