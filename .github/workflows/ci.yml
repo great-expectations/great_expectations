@@ -343,7 +343,7 @@ jobs:
 
       - name: Show logs, if failure
         if: failure()
-        run: docker compose -f assets/docker/mercury/docker-compose.yml logs
+        run: docker compose -f assets/docker/mercury/docker-compose.yml logs mercury-service-api
 
 
   marker-tests:
