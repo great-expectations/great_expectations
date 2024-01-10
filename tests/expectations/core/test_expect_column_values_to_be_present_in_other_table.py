@@ -173,10 +173,30 @@ def test_template_dict_creation():
 @pytest.mark.parametrize(
     "unexpected_list,unexpected_counts,partial_unexpected_count",
     [
-        (["4", "5", "5"], [{"value": "5", "count": 2}, {"value": "4", "count": 1}], 20),
-        (["4", "5", "5"], [{"value": "5", "count": 2}], 1),
-        (["4", "5"], [{"value": "4", "count": 1}, {"value": "5", "count": 1}], 20),
-        (["1", "1"], [{"value": "1", "count": 2}], 20),
+        pytest.param(
+            ["4", "5"],
+            [{"value": "4", "count": 1}, {"value": "5", "count": 1}],
+            20,
+            id="basic test with values appearing once.",
+        ),
+        pytest.param(
+            ["1", "1"],
+            [{"value": "1", "count": 2}],
+            20,
+            id="basic test with single value appearing twice.",
+        ),
+        pytest.param(
+            ["4", "5", "5"],
+            [{"value": "5", "count": 2}, {"value": "4", "count": 1}],
+            20,
+            id="test with default partial_unexpected_count of 20",
+        ),
+        pytest.param(
+            ["4", "5", "5"],
+            [{"value": "5", "count": 2}],
+            1,
+            id="test with partial_unexpected_count set to 1 and output only showing 1 value with full count.",
+        ),
     ],
 )
 def test_generate_partial_unexpected_counts(
