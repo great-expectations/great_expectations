@@ -1635,7 +1635,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1712,7 +1712,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1790,7 +1790,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1885,7 +1885,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = checkpoint.run(
@@ -1963,7 +1963,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
@@ -2040,7 +2040,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
@@ -2133,7 +2133,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(
@@ -2228,7 +2228,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
+    suite.add_expectation(expectation)
     context.update_expectation_suite(expectation_suite=suite)
 
     result = context.run_checkpoint(

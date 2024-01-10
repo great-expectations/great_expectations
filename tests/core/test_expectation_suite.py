@@ -214,7 +214,7 @@ class TestCRUDMethods:
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
 
-        created_expectation = suite.add(expectation=expectation)
+        created_expectation = suite.add_expectation(expectation=expectation)
 
         assert (
             created_expectation
@@ -231,7 +231,7 @@ class TestCRUDMethods:
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
 
-        created_expectation = suite.add(expectation=expectation)
+        created_expectation = suite.add_expectation(expectation=expectation)
 
         assert created_expectation == expectation
         assert len(suite.expectations) == 1
@@ -250,7 +250,7 @@ class TestCRUDMethods:
             expectations=[expectation.configuration],
         )
 
-        suite.add(expectation=expectation)
+        suite.add_expectation(expectation=expectation)
 
         assert len(suite.expectations) == 1
         context.expectations_store.update.assert_not_called()
@@ -268,7 +268,7 @@ class TestCRUDMethods:
         )
 
         with pytest.raises(ConnectionError):  # exception type isn't important
-            suite.add(expectation=expectation)
+            suite.add_expectation(expectation=expectation)
 
         assert len(suite.expectations) == 0, "Expectation must not be added to Suite."
 
@@ -386,10 +386,10 @@ class TestCRUDMethods:
                 f"Expected UUID in ExpectationSuite.ge_cloud_id, found {uuid_to_test}"
             )
         expectation.id = None
-        suite.add(expectation)
+        suite.add_expectation(expectation)
         expectation = copy(expectation)
         expectation.column = "foo"
-        suite.add(expectation)
+        suite.add_expectation(expectation)
         assert len(suite.expectations) == 2
         for expectation in suite.expectations:
             uuid_to_test = expectation.id
@@ -412,7 +412,7 @@ class TestCRUDMethods:
             RuntimeError,
             match="Cannot add Expectation because it already belongs to an ExpectationSuite.",
         ):
-            suite.add(expectation)
+            suite.add_expectation(expectation)
 
     @pytest.mark.cloud
     def test_cloud_expectation_can_be_saved_after_added(
@@ -432,7 +432,7 @@ class TestCRUDMethods:
         suite_name = "test-suite"
         # todo: update to new api
         suite = context.add_expectation_suite(suite_name)
-        suite.add(expectation)
+        suite.add_expectation(expectation)
         updated_column_name = "foo"
         assert expectation.column != updated_column_name
         expectation.column = updated_column_name
@@ -538,7 +538,7 @@ class TestCRUDMethods:
             ),
         ]
         for expectation in expectations:
-            suite_a.add(expectation)
+            suite_a.add_expectation(expectation)
 
         context.suites.add(suite_a)
 
