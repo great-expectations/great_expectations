@@ -60,9 +60,10 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         foreign_key_column: foreign key column of current table that we want to validate.
         foreign_table: foreign table name.
         foreign_table_key_column: key column in foreign table.
+
     """
 
-    MAX_UNEXPECTED_VALUES_TO_RENDER: Final[int] = 20
+    _MAX_UNEXPECTED_VALUES_TO_RENDER: Final[int] = 20
 
     library_metadata = {
         "maturity": "experimental",
@@ -155,7 +156,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
             )
 
     def _generate_partial_unexpected_counts(
-        self, unexpected_list: List[Any]
+        self, unexpected_list: List[Any], partial_unexpected_count: int
     ) -> List[Dict]:
         """Generate partial_unexpected counts using logic borrowed from _format_map_output() in expectations.py
 
@@ -167,9 +168,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         return [
             {"value": key, "count": value}
             for key, value in sorted(
-                Counter(unexpected_list).most_common(
-                    self.MAX_UNEXPECTED_VALUES_TO_RENDER
-                ),
+                Counter(unexpected_list).most_common(partial_unexpected_count),
                 key=lambda x: (-x[1], x[0]),
             )
         ]
@@ -245,6 +244,11 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         if result_dict is None:
             return None
 
+        result_format = cls.get_result_format(configuration, runtime_configuration)
+        partial_unexpected_count = result_format.get(
+            "partial_unexpected_count", cls._MAX_UNEXPECTED_VALUES_TO_RENDER
+        )
+
         unexpected_index_list: Optional[List[dict]] = result_dict.get(
             "unexpected_index_list"
         )
@@ -264,7 +268,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         for index, row in unexpected_index_df.iterrows():
             unexpected_value = row
             row_list.append(unexpected_value)
-            if len(row_list) >= cls.MAX_UNEXPECTED_VALUES_TO_RENDER:
+            if len(row_list) >= partial_unexpected_count:
                 break
 
         unexpected_table_content_block = RenderedTableContent(
@@ -286,6 +290,16 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        super()._validate(
+            configuration, metrics, runtime_configuration, execution_engine
+        )
+        result_format: dict = self.get_result_format(
+            configuration, runtime_configuration
+        )
+        partial_unexpected_count: int = result_format.get(
+            "partial_unexpected_count", self._MAX_UNEXPECTED_VALUES_TO_RENDER
+        )
+
         unexpected_values = metrics.get("query.template_values")
         final_value = len(unexpected_values)
         unexpected_list = []
@@ -295,7 +309,8 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
             unexpected_list.append(value)
 
         partial_unexpected_counts = self._generate_partial_unexpected_counts(
-            unexpected_list=unexpected_list
+            unexpected_list=unexpected_list,
+            partial_unexpected_count=partial_unexpected_count,
         )
         unexpected_index_column_names = [configuration.kwargs["foreign_key_column"]]
 

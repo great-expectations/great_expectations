@@ -171,14 +171,17 @@ def test_template_dict_creation():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "unexpected_list,unexpected_counts",
+    "unexpected_list,unexpected_counts,partial_unexpected_count",
     [
-        (["4", "5", "5"], [{"value": "5", "count": 2}, {"value": "4", "count": 1}]),
-        (["4", "5"], [{"value": "4", "count": 1}, {"value": "5", "count": 1}]),
-        (["1", "1"], [{"value": "1", "count": 2}]),
+        (["4", "5", "5"], [{"value": "5", "count": 2}, {"value": "4", "count": 1}], 20),
+        (["4", "5", "5"], [{"value": "5", "count": 2}], 1),
+        (["4", "5"], [{"value": "4", "count": 1}, {"value": "5", "count": 1}], 20),
+        (["1", "1"], [{"value": "1", "count": 2}], 20),
     ],
 )
-def test_generate_partial_unexpected_counts(unexpected_list, unexpected_counts):
+def test_generate_partial_unexpected_counts(
+    unexpected_list, unexpected_counts, partial_unexpected_count
+):
     expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_present_in_other_table",
         kwargs={
@@ -189,6 +192,6 @@ def test_generate_partial_unexpected_counts(unexpected_list, unexpected_counts):
     )
     expectation = ExpectColumnValuesToBePresentInOtherTable(expectation_configuration)
     calculated_unexpected_counts = expectation._generate_partial_unexpected_counts(
-        unexpected_list
+        unexpected_list, partial_unexpected_count=partial_unexpected_count
     )
     assert unexpected_counts == calculated_unexpected_counts
