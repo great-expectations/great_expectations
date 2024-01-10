@@ -292,9 +292,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        super()._validate(
-            configuration, metrics, runtime_configuration, execution_engine
-        )
+        # loading any overrides from user
         result_format: dict = self.get_result_format(
             configuration, runtime_configuration
         )
