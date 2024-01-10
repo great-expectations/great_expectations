@@ -44,9 +44,6 @@ class DocsBuilder:
         self._context.run("yarn start")
 
     def _prepare(self) -> None:
-        CURRENT_BRANCH = self._current_branch
-        CURRENT_COMMIT = self._current_commit
-        LATEST_TAG = self._latest_tag
         S3_URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip"
 
         self._run("git pull")
@@ -93,7 +90,7 @@ class DocsBuilder:
             self._run(f"git checkout {self._latest_tag}")
             self._run("git pull")
             self.logger.print_header(
-                f"Not in a pull request. Using latest released version {LATEST_TAG} at {CURRENT_COMMIT} to build API docs."
+                f"Not in a pull request. Using latest released version {self._latest_tag} at {self._current_commit} to build API docs."
             )
 
         self.logger.print_header(
@@ -104,14 +101,14 @@ class DocsBuilder:
 
         if self._is_local:
             self.logger.print_header(
-                f"Building locally - Checking back out current branch ({CURRENT_BRANCH}) before building the rest of the docs."
+                f"Building locally - Checking back out current branch ({self._current_branch}) before building the rest of the docs."
             )
-            self._run(f"git checkout {CURRENT_BRANCH}")
+            self._run(f"git checkout {self._current_branch}")
         else:
             self.logger.print_header(
-                f"In a pull request or deploying in netlify (PULL_REQUEST = ${self._is_pull_request}) Checking out ${CURRENT_COMMIT}."
+                f"In a pull request or deploying in netlify (PULL_REQUEST = ${self._is_pull_request}) Checking out ${self._current_commit}."
             )
-            self._run(f"git checkout {CURRENT_BRANCH}")
+            self._run(f"git checkout {self._current_branch}")
 
         self._run("git pull")
 
