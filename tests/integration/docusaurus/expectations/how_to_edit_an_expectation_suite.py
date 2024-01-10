@@ -32,8 +32,8 @@ context.sources.pandas_default.read_csv(
 
 
 my_suite = context.add_expectation_suite("my_suite")
-my_suite.add(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
-my_suite.add(
+my_suite.add_expectation(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+my_suite.add_expectation(
     ExpectColumnValuesToBeBetween(column="passenger_count", min_value=1, max_value=6)
 )
 
