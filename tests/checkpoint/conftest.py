@@ -105,7 +105,7 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
         min_value=1,
         max_value=2,
     )
-    suite.add(expectation=expectation)
+    suite.add_expectation(expectation=expectation)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
