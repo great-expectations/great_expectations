@@ -755,10 +755,41 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         filepath=pathlib.Path("great_expectations/core/batch_config.py"),
     ),
     IncludeExcludeDefinition(
-        reason="Not part of the public API",
+        reason="This method shares a name with a public API method.",
         name="add_expectation",
         filepath=pathlib.Path(
             "great_expectations/data_context/store/expectations_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="delete_expectation",
+        filepath=pathlib.Path(
+            "great_expectations/data_context/store/expectations_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="build_batch_request",
+        filepath=pathlib.Path("great_expectations/core/batch_config.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="save",
+        filepath=pathlib.Path("great_expectations/core/batch_config.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="delete",
+        filepath=pathlib.Path(
+            "great_expectations/data_context/store/datasource_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="",
+        name="ExpectColumnValuesToBeInSet",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_be_in_set.py"
         ),
     ),
 ]
