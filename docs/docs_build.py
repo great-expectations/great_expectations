@@ -1,6 +1,7 @@
 from __future__ import annotations
 from functools import cached_property
 import json
+import os
 import shutil
 from pathlib import Path
 import re
@@ -79,7 +80,11 @@ class DocsBuilder:
         self.logger.print_header(
             "Updating versioned code and docs via prepare_prior_versions.py..."
         )
+
+        # TODO: not change directors!
+        os.chdir("..")
         prepare_prior_versions()
+        os.chdir("docusaurus")
         self.logger.print_header("Updated versioned code and docs")
 
         if self._is_pull_request:
