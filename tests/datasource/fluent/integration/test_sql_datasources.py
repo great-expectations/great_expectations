@@ -21,7 +21,6 @@ import pytest
 from packaging.version import Version
 from pytest import param
 
-from great_expectations import get_context
 from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
@@ -140,13 +139,6 @@ UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
 UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
 QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
 QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
-
-
-@pytest.fixture
-def context() -> EphemeralDataContext:
-    ctx = get_context(cloud_mode=False)
-    assert isinstance(ctx, EphemeralDataContext)
-    return ctx
 
 
 def get_random_identifier_name() -> str:

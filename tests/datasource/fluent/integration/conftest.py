@@ -7,11 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from great_expectations import get_context
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
@@ -285,3 +286,11 @@ def multibatch_datasource_test_data(
 @pytest.fixture(params=[pandas_filesystem_datasource, spark_filesystem_datasource])
 def filesystem_datasource(test_backends, empty_data_context, request) -> Datasource:
     return request.param(test_backends=test_backends, context=empty_data_context)
+
+
+@pytest.fixture
+def context() -> EphemeralDataContext:
+    """Return an ephemeral data context for testing."""
+    ctx = get_context(mode="ephemeral")
+    assert isinstance(ctx, EphemeralDataContext)
+    return ctx
