@@ -177,7 +177,7 @@ class ExpectationSuite(SerializableDictDot):
         return expectation
 
     @public_api
-    def delete(self, expectation: Expectation) -> Expectation:
+    def delete_expectation(self, expectation: Expectation) -> Expectation:
         """Delete an Expectation from the collection.
 
         Raises:

@@ -282,7 +282,7 @@ class TestCRUDMethods:
             expectations=[expectation.configuration],
         )
 
-        deleted_expectation = suite.delete(expectation=expectation)
+        deleted_expectation = suite.delete_expectation(expectation=expectation)
 
         assert deleted_expectation == expectation
         assert suite.expectations == []
@@ -302,7 +302,7 @@ class TestCRUDMethods:
             expectations=[expectation.configuration],
         )
 
-        deleted_expectation = suite.delete(expectation=expectation)
+        deleted_expectation = suite.delete_expectation(expectation=expectation)
 
         assert deleted_expectation == expectation
         assert suite.expectations == []
@@ -319,7 +319,7 @@ class TestCRUDMethods:
         )
 
         with pytest.raises(KeyError, match="No matching expectation was found."):
-            suite.delete(expectation=expectation)
+            suite.delete_expectation(expectation=expectation)
 
         context.expectations_store.delete_expectation.assert_not_called()
 
@@ -339,7 +339,7 @@ class TestCRUDMethods:
         )
 
         with pytest.raises(ConnectionError):  # exception type isn't important
-            suite.delete(expectation=expectation)
+            suite.delete_expectation(expectation=expectation)
 
         assert len(suite.expectations) == 1, "Expectation must still be in Suite."
 
