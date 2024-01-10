@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Any, Final, List
 
 import pandas as pd
 import pytest
@@ -200,7 +200,9 @@ def test_template_dict_creation():
     ],
 )
 def test_generate_partial_unexpected_counts(
-    unexpected_list, unexpected_counts, partial_unexpected_count
+    unexpected_list: List[Any],
+    unexpected_counts: List[dict],
+    partial_unexpected_count: int,
 ):
     expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_present_in_other_table",
