@@ -297,10 +297,15 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Start service: mercury
-        run: docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
+      - name: Start service for mercury
+        run: |
+          docker compose up db mq -d
+          docker compose run db-provisioner
+          docker compose run db-seeder
+          docker compose run mq-wait
+          docker compose up mercury-service-api -d
 
-      - name: Start service: spark
+      - name: Start service for spark
         run: docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 150
 
       - name: Run the tests
