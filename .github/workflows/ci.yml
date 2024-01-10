@@ -300,11 +300,11 @@ jobs:
       - name: Start service for mercury
         run: |
           cd assets/docker/mercury/
-          docker compose up db mq -d
-          docker compose run db-provisioner
-          docker compose run db-seeder
-          docker compose run mq-wait
-          docker compose up mercury-service-api -d
+          docker compose up --quiet-pull db mq -d
+          docker compose run --quiet-pull db-provisioner
+          docker compose run --quiet-pull db-seeder
+          docker compose run --quiet-pull mq-wait
+          docker compose up --quiet-pull mercury-service-api -d
 
       - name: Start service for spark
         run: docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 150
