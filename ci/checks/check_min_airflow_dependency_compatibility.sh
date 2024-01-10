@@ -5,7 +5,7 @@ set -e
 
 # Install great_expectations using the airflow constraints file for our minimum supported version
 
-AIRFLOW_VERSION=2.2.0  # TODO: this should be 2.0.2
+AIRFLOW_VERSION=2.6.0
 PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
 
 CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
