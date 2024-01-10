@@ -45,8 +45,8 @@ expectation.mostly = 0.95
 result = batch.validate(expectation)
 
 suite = context.add_expectation_suite("quickstart")
-suite.add(expectation)
-suite.add(gxe.ExpectColumnValuesToNotBeNull(column="trip_distance"))
+suite.add_expectation(expectation)
+suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="trip_distance"))
 # </snippet>
 assert result.success is True
 assert result.expectation_config.kwargs["mostly"] == 0.95
