@@ -9,15 +9,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
-from great_expectations.expectations.core import (
-    ExpectColumnValuesToBeBetween,
-    ExpectColumnValuesToNotBeNull,
-)
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -308,9 +305,9 @@ def test_quickstart_workflow(
 
     # Create Expectations
     suite = context.add_expectation_suite("my_suite")
-    suite.add_expectation(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+    suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
     suite.add_expectation(
-        ExpectColumnValuesToBeBetween(
+        gxe.ExpectColumnValuesToBeBetween(
             column="passenger_count", min_value=1, max_value=6
         )
     )

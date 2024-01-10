@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -31,7 +32,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -1208,7 +1208,7 @@ def test_list_available_expectation_types(
 
 def _context_to_validator_and_expectation_sql(
     context: FileDataContext,
-) -> Tuple[Validator, ExpectColumnValuesToBeInSet]:
+) -> Tuple[Validator, gxe.ExpectColumnValuesToBeInSet]:
     """
     Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuple of Validator and
     Expectation after building a BatchRequest and creating ExpectationSuite.
@@ -1223,7 +1223,7 @@ def _context_to_validator_and_expectation_sql(
             "value_set": ["cat", "fish", "dog"],
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
+    expectation: gxe.ExpectColumnValuesToBeInSet = gxe.ExpectColumnValuesToBeInSet(
         **expectation_configuration.kwargs
     )
 
