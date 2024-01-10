@@ -25,7 +25,7 @@ from great_expectations.render.renderer_configuration import (
 )
 
 
-class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
+class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
     """Expect the values in a column to be present in another table.
 
     This is an Expectation that allows for the validation of referential integrity, that a foreign key exists in
@@ -62,7 +62,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         foreign_table_key_column: key column in foreign table.
     """
 
-    MAX_UNEXPECTED_VALUES_TO_RENDER: Final[int] = 10
+    MAX_UNEXPECTED_VALUES_TO_RENDER: Final[int] = 20
 
     library_metadata = {
         "maturity": "experimental",
@@ -154,6 +154,18 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                 f"{'foreign_table_key_column ' if 'foreign_table_key_column' not in configuration.kwargs else ''}"
             )
 
+    def _generate_partial_unexpected_counts(self, unexpected_list):
+        """Generate partial_unexpected counts using logic borrowed from _format_map_output() in expectations.py"""
+        return [
+            {"value": key, "count": value}
+            for key, value in sorted(
+                Counter(unexpected_list).most_common(
+                    self.MAX_UNEXPECTED_VALUES_TO_RENDER
+                ),
+                key=lambda x: (-x[1], x[0]),
+            )
+        ]
+
     @classmethod
     @override
     @renderer(renderer_type="renderer.prescriptive")
@@ -163,8 +175,6 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[RenderedStringTemplateContent]:
-        renderer_configuration = cls._prescriptive_template()
-
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
 
@@ -173,7 +183,7 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         foreign_table_key_column: str = configuration.kwargs.get(
             "foreign_table_key_column"
         )
-        template_str = renderer_configuration.template_str
+        template_str = "All values in column $foreign_key_column are present in column $foreign_table_key_column of table $foreign_table."
 
         params = {
             "foreign_key_column": foreign_key_column,
@@ -246,6 +256,8 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
         for index, row in unexpected_index_df.iterrows():
             unexpected_value = row
             row_list.append(unexpected_value)
+            if len(row_list) >= cls.MAX_UNEXPECTED_VALUES_TO_RENDER:
+                break
 
         unexpected_table_content_block = RenderedTableContent(
             **{  # type: ignore[arg-type]
@@ -274,24 +286,17 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
             value = list(values.values())[0]
             unexpected_list.append(value)
 
-        partial_unexpected_counts = [
-            {"value": key, "count": value}
-            for key, value in sorted(
-                Counter(unexpected_list).most_common(
-                    self.MAX_UNEXPECTED_VALUES_TO_RENDER
-                ),
-                key=lambda x: (-x[1], x[0]),
-            )
-        ]
-
-        unexpected_index_column_names: List[str] = [configuration.kwargs["column"]]
+        partial_unexpected_counts = self._generate_partial_unexpected_counts(
+            unexpected_list=unexpected_list
+        )
+        unexpected_index_column_names = [configuration.kwargs["foreign_key_column"]]
 
         return ExpectationValidationResult(
             success=(final_value == 0),
             result={
                 "observed_value": f"{final_value} missing value{'s' if final_value != 1 else ''}.",
                 "unexpected_list": unexpected_list,
-                "unexpected_index_column_names": unexpected_index_column_names,  # Needed to utilize me
+                "unexpected_index_column_names": unexpected_index_column_names,
                 "unexpected_index_list": unexpected_values,
                 "partial_unexpected_counts": partial_unexpected_counts,
             },
@@ -330,6 +335,9 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                         "result": {
                             "observed_value": "0 missing values.",
                             "unexpected_index_list": [],
+                            "unexpected_list": [],
+                            "unexpected_index_column_names": ["CUSTOMER_ID"],
+                            "partial_unexpected_counts": [],
                         },
                     },
                 },
@@ -371,6 +379,12 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
                                 {"customer_id": "5"},
                                 {"customer_id": "6"},
                             ],
+                            "unexpected_list": ["5", "6"],
+                            "unexpected_index_column_names": ["CUSTOMER_ID"],
+                            "partial_unexpected_counts": [
+                                {"value": "4", "count": 1},
+                                {"value": "5", "count": 1},
+                            ],
                         },
                     },
                 },
@@ -380,4 +394,4 @@ class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBePresentInAnotherTable().print_diagnostic_checklist()
+    ExpectColumnValuesToBePresentInOtherTable().print_diagnostic_checklist()
