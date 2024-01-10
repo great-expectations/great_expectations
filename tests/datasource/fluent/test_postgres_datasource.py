@@ -1080,7 +1080,7 @@ def mock_connection_execute_failure(mocker: MockFixture) -> Mock:
     """
     Engine execute should raise an exception when called.
     """
-    execute = mocker.patch("tests.sqlalchemy_test_doubles._MockConnection")
+    execute = mocker.patch("tests.sqlalchemy_test_doubles._MockConnection.execute")
 
     def execute_side_effect(*args, **kwargs):
         LOGGER.info("MockSaEngine.execute() called")
