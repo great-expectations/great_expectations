@@ -58,6 +58,7 @@ class DocsBuilder:
             versions_json = zip_ref.read("versions.json")
             versions = json.loads(versions_json)
         assert versions
+        os.mkdir("versioned_code")
         for version in versions:
             self.logger.print(
                 f"Copying code referenced in docs from {version} and writing to versioned_code/version-{version}"
