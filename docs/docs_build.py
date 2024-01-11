@@ -77,6 +77,7 @@ class DocsBuilder:
 
     def _load_files(self) -> None:
         """Load oss_docs_versions zip and relevant versions from github.
+
         oss_docs_versions contains the versioned docs to be used later by prepare_prior_versions, as well
         as the versions.json file, which contains the list of versions that we then download from github.
         """
