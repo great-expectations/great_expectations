@@ -279,7 +279,7 @@ def type_check(  # noqa: PLR0913, PLR0912
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
-            print("✅"),
+            print("✅")
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
@@ -667,7 +667,7 @@ def docs(
     )
 
     print("Running invoke docs from:", repo_root)
-    old_pwd = pathlib.Path.cwd()
+    old_cwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
     pull_request = os.environ.get(  # noqa: TID251 # os.enrivon allowed in config files
@@ -709,7 +709,7 @@ def docs(
                 print("Running build_docs_locally from:", docusaurus_dir)
                 docs_builder.build_docs_locally()
 
-    os.chdir(old_pwd)
+    os.chdir(old_cwd)
 
 
 @invoke.task(
