@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Generator, List, Optional, cast
 from io import BytesIO
 import zipfile
 
-import requests
 
 from docs.prepare_prior_versions import prepare_prior_versions
 
@@ -70,6 +69,8 @@ class DocsBuilder:
 
     @contextmanager
     def _load_zip(self, url: str) -> Generator[zipfile.ZipFile, None, None]:
+        import requests  # imported here to avoid this getting imported before `invoke deps` finishes
+
         response = requests.get(url)
         zip_data = BytesIO(response.content)
         with zipfile.ZipFile(zip_data, "r") as zip_ref:
