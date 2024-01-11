@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
@@ -161,6 +162,10 @@ class ExpectColumnToExist(BatchExpectation):
                 },
             )
         ]
+
+    @public_api
+    def delete_me_plq(self) -> None:
+        pass
 
     @override
     def _validate(
