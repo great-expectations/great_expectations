@@ -29,7 +29,7 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, dataclass_transform
 
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
@@ -221,6 +221,7 @@ def param_method(param_name: str) -> Callable:
 
 
 # noinspection PyMethodParameters
+@dataclass_transform(kw_only_default=True, field_specifiers=(Field,))
 class MetaExpectation(ModelMetaclass):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
 
