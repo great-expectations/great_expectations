@@ -5,13 +5,13 @@ from uuid import UUID
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
 )
-from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
 from tests.core.usage_statistics.util import (
@@ -339,7 +339,7 @@ def _test_add_expectation_success(context):
     store = context.expectations_store
     suite_name = "test-suite"
     suite = context.add_expectation_suite(suite_name)
-    expectation = ExpectColumnValuesToBeInSet(
+    expectation = gxe.ExpectColumnValuesToBeInSet(
         column="a",
         value_set=[1, 2, 3],
         result_format="BASIC",
@@ -376,7 +376,7 @@ def _test_add_expectation_disregards_provided_id(context):
     suite_name = "test-suite"
     suite = context.add_expectation_suite(suite_name)
     provided_id = "e86bb8a8-b75f-4efb-a3bb-210b6440661e"
-    expectation = ExpectColumnValuesToBeInSet(
+    expectation = gxe.ExpectColumnValuesToBeInSet(
         id=provided_id,
         column="a",
         value_set=[1, 2, 3],
@@ -410,7 +410,7 @@ def _test_update_expectation_success(context):
     # Arrange
     store = context.expectations_store
     suite_name = "test-suite"
-    expectation = ExpectColumnValuesToBeInSet(
+    expectation = gxe.ExpectColumnValuesToBeInSet(
         column="a",
         value_set=[1, 2, 3],
         result_format="BASIC",
@@ -455,7 +455,7 @@ def test_update_expectation_raises_error_for_missing_expectation_cloud(
 def _test_update_expectation_raises_error_for_missing_expectation(context):
     store = context.expectations_store
     suite_name = "test-suite"
-    expectation = ExpectColumnValuesToBeInSet(
+    expectation = gxe.ExpectColumnValuesToBeInSet(
         id="2b284004-0e0e-455d-a7f4-11e162fd06c9",
         column="a",
         value_set=[1, 2, 3],
@@ -492,7 +492,7 @@ def test_delete_expectation_success_filesystem_backend(empty_data_context):
 def _test_delete_expectation_success(context):
     store = context.expectations_store
     suite_name = "test-suite"
-    expectation = ExpectColumnValuesToBeInSet(
+    expectation = gxe.ExpectColumnValuesToBeInSet(
         column="a",
         value_set=[1, 2, 3],
         result_format="BASIC",
@@ -531,7 +531,7 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     # Arrange
     store = context.expectations_store
     suite_name = "test-suite"
-    existing_expectation = ExpectColumnValuesToBeInSet(
+    existing_expectation = gxe.ExpectColumnValuesToBeInSet(
         column="a",
         value_set=[1, 2, 3],
         result_format="BASIC",
@@ -540,7 +540,7 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
         suite_name, expectations=[existing_expectation.configuration]
     )
     # Act
-    nonexistent_expectation = ExpectColumnValuesToBeInSet(
+    nonexistent_expectation = gxe.ExpectColumnValuesToBeInSet(
         # this ID will be different from the ID created by the Suite
         id="1296c5c8-6f7b-4cee-a09c-9037c7e40df7",
         column="a",

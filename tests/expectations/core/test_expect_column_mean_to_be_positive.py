@@ -4,17 +4,15 @@ from typing import Union
 import pandas as pd
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
-from great_expectations.expectations.core.expect_column_mean_to_be_between import (
-    ExpectColumnMeanToBeBetween,
-)
 
 
 # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def">
-class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
+class ExpectColumnMeanToBePositive(gxe.ExpectColumnMeanToBeBetween):
     """Expect the mean of values in this column to be positive."""
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = 0

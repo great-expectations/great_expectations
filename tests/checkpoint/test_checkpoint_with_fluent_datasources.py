@@ -10,6 +10,7 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
@@ -31,9 +32,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest as FluentBatchRequest,
-)
-from great_expectations.expectations.core.expect_column_values_to_be_between import (
-    ExpectColumnValuesToBeBetween,
 )
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
@@ -1630,7 +1628,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
@@ -1707,7 +1705,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
@@ -1785,7 +1783,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
@@ -1880,7 +1878,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
@@ -1958,7 +1956,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context.add_checkpoint(**checkpoint_config)
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
@@ -2035,7 +2033,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context.add_checkpoint(**checkpoint_config)
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
@@ -2128,7 +2126,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
@@ -2223,7 +2221,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
