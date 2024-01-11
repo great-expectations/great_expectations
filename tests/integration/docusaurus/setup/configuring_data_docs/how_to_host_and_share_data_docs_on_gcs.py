@@ -56,7 +56,8 @@ except Exception:
 
 create_data_docs_directory = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket command">
-gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
+"gsutil rm -r gs://superconductive-integration-tests-data-docs/".split(),
+# gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
 # </snippet>
 """
 
