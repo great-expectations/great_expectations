@@ -55,10 +55,12 @@ class DocsBuilder:
         zip_data = BytesIO(response.content)
         versions: list[str]
         with zipfile.ZipFile(zip_data, "r") as zip_ref:
+            zip_ref.extractall(self._current_directory)
             versions_json = zip_ref.read("versions.json")
             versions = json.loads(versions_json)
         assert versions
-        os.mkdir("versioned_code")
+        if not os.path.exists("versioned_code"):
+            os.mkdir("versioned_code")
         for version in versions:
             self.logger.print(
                 f"Copying code referenced in docs from {version} and writing to versioned_code/version-{version}"
