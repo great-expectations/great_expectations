@@ -14,11 +14,13 @@ from typing import (
     Dict,
     Generator,
     List,
+    Literal,
     Optional,
     Tuple,
 )
 
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility.pydantic import ValidationError
@@ -48,6 +50,9 @@ from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
+    from unittest.mock import Mock
+
+    from pytest_mock import MockFixture
     from typing_extensions import TypeAlias
 
     from great_expectations.data_context import AbstractDataContext
@@ -1026,26 +1031,74 @@ def bad_configuration_datasource(
     )
 
 
-@pytest.mark.postgresql
-def test_test_connection_failures(
-    mocker,
-    bad_configuration_datasource: PostgresDatasource,
-):
+@pytest.fixture
+def mock_create_engine(mocker: MockFixture) -> Mock:
     create_engine = mocker.patch("sqlalchemy.create_engine")
     create_engine.return_value = MockSaEngine(dialect=Dialect("postgresql"))
-    mocker.patch("tests.datasource.fluent.conftest.MockSaEngine.connect")
+    return create_engine
+
+
+@pytest.fixture
+def mock_inspector(
+    mocker: MockFixture,
+) -> Generator[dict[Literal["schema_names", "table_names"], list[str]], None, None]:
+    """
+    Mock the inspector to return the schema and table names we want.
+    Append the desired schema and table names (in tests) to the mock_inspector_returns dict.
+    """
+    mock_inspector_returns: dict[Literal["schema_names", "table_names"], list[str]] = {
+        "schema_names": [],
+        "table_names": [],
+    }
+    mock_inspector = MockSaInspector()
+
+    def get_table_names(schema: str | None = None) -> list[str]:
+        LOGGER.info("MockSaInspector.get_table_names() called")
+        return mock_inspector_returns["table_names"]
+
+    def get_schema_names() -> list[str]:
+        LOGGER.info("MockSaInspector.get_schema_names() called")
+        return mock_inspector_returns["schema_names"]
+
+    def has_table(table_name: str, schema: str | None = None) -> bool:
+        LOGGER.info("MockSaInspector.has_table() called")
+        return table_name in mock_inspector_returns["table_names"]
+
+    # directly patching the instance rather then using mocker.patch
+    mock_inspector.get_schema_names = get_schema_names  # type: ignore[method-assign]
+    mock_inspector.get_table_names = get_table_names  # type: ignore[method-assign]
+    mock_inspector.has_table = has_table  # type: ignore[method-assign]
+
     inspect = mocker.patch("sqlalchemy.inspect")
-    inspect.return_value = MockSaInspector()
-    get_schema_names = mocker.patch(
-        "tests.sqlalchemy_test_doubles.MockSaInspector.get_schema_names"
-    )
-    get_schema_names.return_value = ["good_schema"]
-    has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
-    has_table.return_value = False
-    get_table_names = mocker.patch(
-        "tests.sqlalchemy_test_doubles.MockSaInspector.get_table_names"
-    )
-    get_table_names.return_value = ["good_table", "bad_table"]
+    inspect.return_value = mock_inspector
+
+    yield mock_inspector_returns
+
+
+@pytest.fixture
+def mock_connection_execute_failure(mocker: MockFixture) -> Mock:
+    """
+    Engine execute should raise an exception when called.
+    """
+    execute = mocker.patch("tests.sqlalchemy_test_doubles._MockConnection.execute")
+
+    def execute_side_effect(*args, **kwargs):
+        LOGGER.info("MockSaEngine.execute() called")
+        raise SQLAlchemyError("Mocked exception")
+
+    execute.side_effect = execute_side_effect
+    return execute
+
+
+@pytest.mark.postgresql
+def test_test_connection_failures(
+    mock_create_engine: Mock,
+    mock_connection_execute_failure: Mock,
+    mock_inspector: dict[Literal["schema_names", "table_names"], list[str]],
+    bad_configuration_datasource: PostgresDatasource,
+):
+    mock_inspector["schema_names"].extend(["good_schema"])
+    mock_inspector["table_names"].extend(["good_table", "bad_table"])
 
     with pytest.raises(TestConnectionError):
         bad_configuration_datasource.test_connection()
