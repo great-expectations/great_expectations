@@ -55,6 +55,7 @@ IGNORED_VIOLATIONS = [
     "tests/expectations/core/test_expect_column_mean_to_be_positive.py",
     "tests/integration/docusaurus/expectations/examples/column_aggregate_expectation_template.py",
     "tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py",
+    "tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
 ]
 
 
