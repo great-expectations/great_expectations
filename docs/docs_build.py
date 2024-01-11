@@ -85,9 +85,9 @@ class DocsBuilder:
         os.chdir("..")
         prepare_prior_versions()
         os.chdir("docusaurus")
-        self.logger.print_header("Updated versioned code and docs")
+        self.logger.print("Updated versioned code and docs")
 
-        if self._is_pull_request:
+        if self._is_pull_request or self._is_local:
             self.logger.print_header(
                 "Building locally or from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview."
             )
@@ -118,7 +118,7 @@ class DocsBuilder:
         self._run("git pull")
 
     def _run(self, command: str) -> Optional[str]:
-        result = self._context.run(command, hide=True)
+        result = self._context.run(command)
         if not result:
             return None
         elif not result.ok:
