@@ -30,6 +30,11 @@ class DocsBuilder:
         self._is_pull_request = is_pull_request
         self._is_local = is_local
 
+        self._current_commit = self._run_and_get_output("git rev-parse HEAD")
+        self._current_branch = self._run_and_get_output(
+            "git rev-parse --abbrev-ref HEAD"
+        )
+
     def build_docs(self) -> None:
         """Build API docs + docusaurus docs.
         Currently used in our netlify pipeline.
@@ -90,35 +95,43 @@ class DocsBuilder:
         os.chdir("docusaurus")
         self.logger.print("Updated versioned code and docs")
 
+        self._invoke_api_docs()
+
+    def _invoke_api_docs(self) -> None:
+        """Invokes the invoke api-docs command.
+        If this is a non-PR running on netflify, we use the latest tag. Otherwise, we use the current branch.
+        """
         if self._is_pull_request or self._is_local:
             self.logger.print_header(
                 "Building locally or from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview."
             )
         else:
             self._run(f"git checkout {self._latest_tag}")
-            self._run("git pull")
             self.logger.print_header(
                 f"Not in a pull request. Using latest released version {self._latest_tag} at {self._current_commit} to build API docs."
             )
-
-        self.logger.print_header(
+        self.logger.print(
             "Building API docs for current version. Please ignore sphinx docstring errors in red/pink, for example: ERROR: Unexpected indentation."
         )
+        self._run("git pull")
+
         # TODO: not this
+        breakpoint()
         self._run("(cd ../../; invoke api-docs)")
 
+    def _checkout_correct_branch(self) -> None:
+        """Ensure we are on the right branch to run docusaurus."""
         if self._is_local:
             self.logger.print_header(
                 f"Building locally - Checking back out current branch ({self._current_branch}) before building the rest of the docs."
             )
             self._run(f"git checkout {self._current_branch}")
+            self._run("git pull")
         else:
             self.logger.print_header(
                 f"In a pull request or deploying in netlify (PULL_REQUEST = ${self._is_pull_request}) Checking out ${self._current_commit}."
             )
-            self._run(f"git checkout {self._current_branch}")
-
-        self._run("git pull")
+            self._run(f"git checkout {self._current_commit}")
 
     def _run(self, command: str) -> Optional[str]:
         result = self._context.run(command)
@@ -132,14 +145,6 @@ class DocsBuilder:
         output = self._run(command)
         assert output
         return output
-
-    @cached_property
-    def _current_commit(self) -> str:
-        return self._run_and_get_output("git rev-parse HEAD")
-
-    @cached_property
-    def _current_branch(self) -> str:
-        return self._run_and_get_output("git rev-parse --abbrev-ref HEAD")
 
     @cached_property
     def _latest_tag(self) -> str:
