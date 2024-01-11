@@ -117,13 +117,13 @@ class DocsBuilder:
             )
         else:
             self._run(f"git checkout {self._latest_tag}")
+            self._run("git pull")
             self.logger.print_header(
                 f"Not in a pull request. Using latest released version {self._latest_tag} at {self._current_commit} to build API docs."
             )
         self.logger.print(
             "Building API docs for current version. Please ignore sphinx docstring errors in red/pink, for example: ERROR: Unexpected indentation."
         )
-        self._run("git pull")
 
         # TODO: not this
         self._run("(cd ../../; invoke api-docs)")
