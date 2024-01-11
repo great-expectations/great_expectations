@@ -11,17 +11,17 @@ title: Changelog
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
 ### 0.18.8
-* [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](GxURL.PULL_REQUESTS/9207))
-* [FEATURE] `TableAsset.test_connection()` should fail if table is not queryable. ([#9198](GxURL.PULL_REQUESTS/9198))
-* [BUGFIX] Disable GCS Docs Integration Test to unblock Release ([#9226](GxURL.PULL_REQUESTS/9226))
-* [DOCS] `0.18.x` Update `get_context()` overload to for `EphemeralDataContext` ([#9183](GxURL.PULL_REQUESTS/9183))
-* [MAINTENANCE] Update Contrib Pipeline to release from `0.18` branch ([#9182](GxURL.PULL_REQUESTS/9182))
-* [MAINTENANCE] `0.18.x` `mypy` & `ruff` updates ([#9191](GxURL.PULL_REQUESTS/9191))
-* [MAINTENANCE] Apply the contract testing fixes to 0.18 ([#9225](GxURL.PULL_REQUESTS/9225))
-* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Interface Update ([#9165](GxURL.PULL_REQUESTS/9165))
-* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Parameter Rename ([#9180](GxURL.PULL_REQUESTS/9180))
-* [CONTRIB] Referential Integrity Expectation- Atomic Renderers ([#9202](GxURL.PULL_REQUESTS/9202))
-* [CONTRIB] Referential Integrity - Make building of `unexpected_value` table non-case sensitive ([#9224](GxURL.PULL_REQUESTS/9224))
+* [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](https://github.com/great-expectations/great_expectations/pull/9207))
+* [FEATURE] `TableAsset.test_connection()` should fail if table is not queryable. ([#9198](https://github.com/great-expectations/great_expectations/pull/9198))
+* [BUGFIX] Disable GCS Docs Integration Test to unblock Release ([#9226](https://github.com/great-expectations/great_expectations/pull/9226))
+* [DOCS] `0.18.x` Update `get_context()` overload to for `EphemeralDataContext` ([#9183](https://github.com/great-expectations/great_expectations/pull/9183))
+* [MAINTENANCE] Update Contrib Pipeline to release from `0.18` branch ([#9182](https://github.com/great-expectations/great_expectations/pull/9182))
+* [MAINTENANCE] `0.18.x` `mypy` & `ruff` updates ([#9191](https://github.com/great-expectations/great_expectations/pull/9191))
+* [MAINTENANCE] Apply the contract testing fixes to 0.18 ([#9225](https://github.com/great-expectations/great_expectations/pull/9225))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Interface Update ([#9165](https://github.com/great-expectations/great_expectations/pull/9165))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Parameter Rename ([#9180](https://github.com/great-expectations/great_expectations/pull/9180))
+* [CONTRIB] Referential Integrity Expectation- Atomic Renderers ([#9202](https://github.com/great-expectations/great_expectations/pull/9202))
+* [CONTRIB] Referential Integrity - Make building of `unexpected_value` table non-case sensitive ([#9224](https://github.com/great-expectations/great_expectations/pull/9224))
 
 ### 0.18.7
 * [BUGFIX] 0.18.x - Apply `QueryAsset` splitting fix ([#9160](https://github.com/great-expectations/great_expectations/pull/9160))
