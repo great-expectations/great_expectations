@@ -237,11 +237,11 @@ jobs:
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
   docs-build:
-    needs: [doc-checks, docs-changes]
-    # run on non-draft PRs with docs changes
-    if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+    # needs: [doc-checks, docs-changes]
+    # # run on non-draft PRs with docs changes
+    # if: |
+    #   (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+    #   (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
