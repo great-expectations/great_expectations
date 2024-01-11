@@ -1,7 +1,9 @@
-print("Installing Great Expectations library dev dependencies.")
+#!/bin/bash
+
+echo "Installing Great Expectations library dev dependencies."
 (cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
-print("Installing api docs dependencies.")
+echo "Installing api docs dependencies."
 (cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
 invoke docs
