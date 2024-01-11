@@ -109,7 +109,7 @@ class DocsBuilder:
 
     def _invoke_api_docs(self) -> None:
         """Invokes the invoke api-docs command.
-        If this is a non-PR running on netflify, we use the latest tag. Otherwise, we use the current branch.
+        If this is a non-PR running on netlify, we use the latest tag. Otherwise, we use the current branch.
         """
         if self._is_pull_request or self._is_local:
             self.logger.print_header(
