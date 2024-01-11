@@ -1,11 +1,13 @@
 from __future__ import annotations
+from contextlib import contextmanager
 from functools import cached_property
 import json
+from .logging import Logger
 import os
 import shutil
 from pathlib import Path
 import re
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Generator, List, Optional, cast
 from io import BytesIO
 import zipfile
 
@@ -50,31 +52,51 @@ class DocsBuilder:
         self._context.run("yarn start")
 
     def _prepare(self) -> None:
-        S3_URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip"
-
-        self._run("git pull")
-
+        """A whole bunch of common work we need"""
         self.logger.print_header("Preparing to build docs...")
-        self.logger.print(f"Copying previous versioned docs from {S3_URL}")
-        response = requests.get(S3_URL)
+        self._load_files()
+
+        self.logger.print_header(
+            "Updating versioned code and docs via prepare_prior_versions.py..."
+        )
+        # TODO: none of this messing with current directory stuff
+        os.chdir("..")
+        prepare_prior_versions()
+        os.chdir("docusaurus")
+        self.logger.print("Updated versioned code and docs")
+
+        self._invoke_api_docs()
+        self._checkout_correct_branch()
+
+    @contextmanager
+    def _load_zip(self, url: str) -> Generator[zipfile.ZipFile, None, None]:
+        response = requests.get(url)
         zip_data = BytesIO(response.content)
-        versions: list[str]
         with zipfile.ZipFile(zip_data, "r") as zip_ref:
+            yield zip_ref
+
+    def _load_files(self) -> None:
+        """Load oss_docs_versions zip and relevant versions from github.
+        oss_docs_versions contains the versioned docs to be used later by prepare_prior_versions, as well
+        as the versions.json file, which contains the list of versions that we then download from github.
+        """
+
+        S3_URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip"
+        if os.path.exists("versioned_code"):
+            shutil.rmtree("versioned_code")
+        os.mkdir("versioned_code")
+        self.logger.print(f"Copying previous versioned docs from {S3_URL}")
+        with self._load_zip(S3_URL) as zip_ref:
             zip_ref.extractall(self._current_directory)
             versions_json = zip_ref.read("versions.json")
-            versions = json.loads(versions_json)
-        assert versions
-        if not os.path.exists("versioned_code"):
-            os.mkdir("versioned_code")
+            versions = cast(List[str], json.loads(versions_json))
         for version in versions:
             self.logger.print(
                 f"Copying code referenced in docs from {version} and writing to versioned_code/version-{version}"
             )
-            response = requests.get(
-                f"https://github.com/great-expectations/great_expectations/archive/refs/tags/{version}.zip"
-            )
-            zip_data = BytesIO(response.content)
-            with zipfile.ZipFile(zip_data, "r") as zip_ref:
+            url = f"https://github.com/great-expectations/great_expectations/archive/refs/tags/{version}.zip"
+
+            with self._load_zip(url) as zip_ref:
                 zip_ref.extractall(self._current_directory / "versioned_code")
                 old_location = (
                     self._current_directory
@@ -84,18 +106,6 @@ class DocsBuilder:
                     self._current_directory / f"versioned_code/version-{version}"
                 )
                 shutil.move(str(old_location), str(new_location))
-
-        self.logger.print_header(
-            "Updating versioned code and docs via prepare_prior_versions.py..."
-        )
-
-        # TODO: not change directors!
-        os.chdir("..")
-        prepare_prior_versions()
-        os.chdir("docusaurus")
-        self.logger.print("Updated versioned code and docs")
-
-        self._invoke_api_docs()
 
     def _invoke_api_docs(self) -> None:
         """Invokes the invoke api-docs command.
@@ -116,7 +126,6 @@ class DocsBuilder:
         self._run("git pull")
 
         # TODO: not this
-        breakpoint()
         self._run("(cd ../../; invoke api-docs)")
 
     def _checkout_correct_branch(self) -> None:
@@ -160,18 +169,3 @@ class DocsBuilder:
     @cached_property
     def _tag_regex(self) -> re.Pattern:
         return re.compile(r"([0-9]+\.)+[0-9]+")
-
-
-class Logger:
-    @staticmethod
-    def print_header(string: str) -> None:
-        LINE = "================================================================================"
-        Logger.print(LINE)
-        Logger.print(string)
-        Logger.print(LINE)
-
-    @staticmethod
-    def print(string: str) -> None:
-        ORANGE = "\033[38;5;208m"
-        END = "\033[1;37;0m"
-        print(ORANGE + string + END)
