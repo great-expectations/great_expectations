@@ -11,7 +11,6 @@ from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 context = gx.get_context()
-print("reviewer: ask me to back this out!")
 
 # <snippet name="tests/integration/docusaurus/template/script_example.py assert">
 assert context
