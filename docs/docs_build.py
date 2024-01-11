@@ -137,7 +137,6 @@ class DocsBuilder:
                 f"Building locally - Checking back out current branch ({self._current_branch}) before building the rest of the docs."
             )
             self._run(f"git checkout {self._current_branch}")
-            self._run("git pull")
         else:
             self.logger.print_header(
                 f"In a pull request or deploying in netlify (PULL_REQUEST = ${self._is_pull_request}) Checking out ${self._current_commit}."
