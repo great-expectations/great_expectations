@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple, Type, TypeVar
 from typing_extensions import ParamSpec
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -23,7 +23,9 @@ from great_expectations.expectations.registry import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 

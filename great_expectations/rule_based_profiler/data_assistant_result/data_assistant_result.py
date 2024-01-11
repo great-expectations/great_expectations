@@ -29,8 +29,8 @@ from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -78,8 +78,10 @@ from great_expectations.types import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationSuite,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.rule_based_profiler.config import (
         RuleBasedProfilerConfig,

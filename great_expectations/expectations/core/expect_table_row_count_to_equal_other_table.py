@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import TYPE_CHECKING, Dict, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -18,19 +19,19 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (  # noqa: TCH001
+    MetricConfiguration,
 )
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.validator.validator import (
-        ValidationDependencies,
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
+    from great_expectations.validator.validator import ValidationDependencies
 
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
@@ -81,6 +82,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     success_keys = ("other_table_name",)
     args_keys = ("other_table_name",)
 
+    @override
     @classmethod
     def _prescriptive_template(
         cls,
@@ -94,6 +96,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         )
         return renderer_configuration
 
+    @override
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
@@ -106,22 +109,23 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
+        if not configuration:
+            raise ValueError("configuration is required for prescriptive renderer")
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
+    @override
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
@@ -131,53 +135,59 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        if not result.result.get("observed_value"):
+        if not result or result.result.get("observed_value"):
             return "--"
 
         self_table_row_count = num_to_str(result.result["observed_value"]["self"])
         other_table_row_count = num_to_str(result.result["observed_value"]["other"])
 
         return RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Row Count: $self_table_row_count<br>Other Table Row Count: $other_table_row_count",
-                    "params": {
-                        "self_table_row_count": self_table_row_count,
-                        "other_table_row_count": other_table_row_count,
-                    },
-                    "styling": {"classes": ["mb-2"]},
+            content_block_type="string_template",
+            string_template={
+                "template": "Row Count: $self_table_row_count<br>Other Table Row Count: $other_table_row_count",
+                "params": {
+                    "self_table_row_count": self_table_row_count,
+                    "other_table_row_count": other_table_row_count,
                 },
-            }
+                "styling": {"classes": ["mb-2"]},
+            },
         )
 
+    @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+            super().get_validation_dependencies(execution_engine, runtime_configuration)
         )
-        other_table_name = configuration.kwargs.get("other_table_name")
+
+        configuration = self.configuration
+        kwargs = configuration.kwargs if configuration else {}
+        other_table_name = kwargs.get("other_table_name")
+
         # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
-        table_row_count_metric_config_other: MetricConfiguration = deepcopy(
+        table_row_count_metric_config_other: Optional[MetricConfiguration] = deepcopy(
             validation_dependencies.get_metric_configuration(
                 metric_name="table.row_count"
             )
         )
+        assert (
+            table_row_count_metric_config_other
+        ), "table_row_count_metric_config_other should not be None"
+
         table_row_count_metric_config_other.metric_domain_kwargs[
             "table"
         ] = other_table_name
         # rename original "table.row_count" metric to "table.row_count.self"
+        table_row_count_metric = validation_dependencies.get_metric_configuration(
+            metric_name="table.row_count"
+        )
+        assert table_row_count_metric, "table_row_count_metric should not be None"
         validation_dependencies.set_metric_configuration(
             metric_name="table.row_count.self",
-            metric_configuration=validation_dependencies.get_metric_configuration(
-                metric_name="table.row_count"
-            ),
+            metric_configuration=table_row_count_metric,
         )
         validation_dependencies.remove_metric_configuration(
             metric_name="table.row_count"
@@ -188,9 +198,9 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         )
         return validation_dependencies
 
+    @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,

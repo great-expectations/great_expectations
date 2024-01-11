@@ -1,13 +1,16 @@
-import hashlib
-from typing import List, Union
+from __future__ import annotations
 
-import pandas as pd
+import hashlib
+from typing import TYPE_CHECKING, List, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class PandasDataSplitter(DataSplitter):

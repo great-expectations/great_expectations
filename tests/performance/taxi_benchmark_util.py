@@ -10,12 +10,14 @@ from typing import List, Optional
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import AbstractDataContext, get_context
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -375,7 +377,7 @@ def _add_checkpoint(
 
 def _add_expectation_configuration(context: AbstractDataContext, suite_name: str):
     suite = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_table_columns_to_match_set",
             kwargs={
@@ -402,25 +404,25 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
             },
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={"column": "vendor_id"},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={"column": "vendor_id", "type_": "INTEGER"},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={"column": "pickup_datetime", "type_": "STRING"},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
             # rate_code_id refers to the final rate code in effect at the end of the trip
@@ -435,7 +437,7 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
             kwargs={"column": "rate_code_id", "value_set": [1, 2, 3, 4, 5, 6, 99]},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_between",
             kwargs={

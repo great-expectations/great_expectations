@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 import logging
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
@@ -6,19 +8,8 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.compatibility import aws, pyspark, trino
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -41,22 +32,26 @@ from great_expectations.util import (
     get_pyathena_potential_type,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-from great_expectations.compatibility.bigquery import (
-    GEOGRAPHY,
-    bigquery_types_tuple,
-)
+from great_expectations.compatibility.bigquery import GEOGRAPHY, bigquery_types_tuple
 from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as BigQueryDialect,
 )
@@ -157,6 +152,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "type_",
     )
 
+    @override
     @classmethod
     def _prescriptive_template(
         cls,
@@ -189,6 +185,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
         return renderer_configuration
 
+    @override
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
@@ -205,8 +202,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         )
         styling = runtime_configuration.get("styling")
 
+        kwargs = configuration.kwargs if configuration is not None else {}
+
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             ["column", "type_", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -234,14 +233,12 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -370,13 +367,17 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             "result": {"observed_value": type(actual_column_type).__name__},
         }
 
+    @override
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
+        from great_expectations.execution_engine import (
+            PandasExecutionEngine,
+        )
+
         # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
@@ -385,20 +386,22 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
             ColumnMapExpectation, self
-        ).get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )
+        ).get_validation_dependencies(execution_engine, runtime_configuration)
+
+        configuration = self.configuration
 
         # Only PandasExecutionEngine supports the column map version of the expectation.
+        kwargs = configuration.kwargs if configuration else {}
+
         if isinstance(execution_engine, PandasExecutionEngine):
-            column_name = configuration.kwargs.get("column")
-            expected_type = configuration.kwargs.get("type_")
+            column_name = kwargs.get("column")
+            expected_type = kwargs.get("type_")
             metric_kwargs = get_metric_kwargs(
                 metric_name="table.column_types",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
+            metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs", {})
             metric_value_kwargs = metric_kwargs.get("metric_value_kwargs")
             table_column_types_configuration = MetricConfiguration(
                 "table.column_types",
@@ -431,7 +434,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ):
                 # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
                 validation_dependencies = super().get_validation_dependencies(
-                    configuration, execution_engine, runtime_configuration
+                    execution_engine, runtime_configuration
                 )
 
         # this adds table.column_types dependency for both aggregate and map versions of expectation
@@ -451,16 +454,23 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        from great_expectations.execution_engine import (
+            PandasExecutionEngine,
+            SparkDFExecutionEngine,
+            SqlAlchemyExecutionEngine,
+        )
+
+        configuration = self.configuration
         column_name = configuration.kwargs.get("column")
         expected_type = configuration.kwargs.get("type_")
-        actual_column_types_list = metrics.get("table.column_types")
+        actual_column_types_list = metrics.get("table.column_types", [])
         actual_column_type = [
             type_dict["type"]
             for type_dict in actual_column_types_list
@@ -478,7 +488,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ]:
                 # this calls ColumnMapMetric._validate
                 return super()._validate(
-                    configuration, metrics, runtime_configuration, execution_engine
+                    metrics, runtime_configuration, execution_engine
                 )
             return self._validate_pandas(
                 actual_column_type=actual_column_type, expected_type=expected_type

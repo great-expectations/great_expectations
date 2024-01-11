@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import ClassVar, List
 
 from great_expectations.analytics.actions import DATA_CONTEXT_INITIALIZED

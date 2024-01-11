@@ -26,26 +26,31 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import (
     Field,
     StrictBool,
     StrictInt,
-    root_validator,
     validate_arguments,
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.datasource.fluent.constants import (
+    _ASSETS_KEY,
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.metrics_calculator import MetricsCalculator
+from great_expectations.validator.v1_validator import ResultFormat
 
 logger = logging.getLogger(__name__)
 
@@ -55,14 +60,18 @@ if TYPE_CHECKING:
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
-    # TODO: We should try to import the annotations from core.batch so we no longer need to call
-    #  Batch.update_forward_refs() before instantiation.
+    from great_expectations.core import (
+        ExpectationSuite,
+        ExpectationSuiteValidationResult,
+        ExpectationValidationResult,
+    )
     from great_expectations.core.batch import (
         BatchData,
         BatchDefinition,
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
@@ -76,6 +85,10 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
+    )
+    from great_expectations.expectations.expectation import Expectation
+    from great_expectations.validator.v1_validator import (
+        Validator as V1Validator,
     )
 
 
@@ -171,8 +184,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
+    batch_configs: List[BatchConfig] = Field(default_factory=list)
 
     # non-field private attributes
+    _save_batch_config: Callable[[BatchConfig], None] = pydantic.PrivateAttr()
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
@@ -250,6 +265,87 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     # End Abstract Methods
 
+    @public_api
+    def add_batch_config(self, name: str) -> BatchConfig:
+        """Add a BatchConfig to this DataAsset.
+        BatchConfig names must be unique within a DataAsset.
+
+        If the DataAsset is tied to a DataContext, the BatchConfig will be persisted.
+
+        Args:
+            name (str): Name of the new batch config.
+
+        Returns:
+            BatchConfig: The new batch config.
+        """
+        batch_config_names = {bc.name for bc in self.batch_configs}
+        if name in batch_config_names:
+            raise ValueError(
+                f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
+            )
+
+        # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)
+        assert isinstance(self.datasource, Datasource)
+
+        batch_config = BatchConfig(name=name)
+        batch_config.set_data_asset(self)
+        self.batch_configs.append(batch_config)
+        if self.datasource.data_context:
+            try:
+                batch_config = self.datasource.add_batch_config(batch_config)
+            except Exception:
+                self.batch_configs.remove(batch_config)
+                raise
+        self.update_batch_config_field_set()
+        return batch_config
+
+    @public_api
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        """Delete a batch config.
+
+        Args:
+            batch_config (BatchConfig): BatchConfig to delete.
+        """
+        batch_config_names = {bc.name for bc in self.batch_configs}
+        if batch_config not in self.batch_configs:
+            raise ValueError(
+                f'"{batch_config.name}" does not exist (all existing batch_config names are {batch_config_names})'
+            )
+
+        # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)
+        assert isinstance(self.datasource, Datasource)
+
+        self.batch_configs.remove(batch_config)
+        if self.datasource.data_context:
+            try:
+                self.datasource.delete_batch_config(batch_config)
+            except Exception:
+                self.batch_configs.append(batch_config)
+                raise
+
+        self.update_batch_config_field_set()
+
+    def update_batch_config_field_set(self) -> None:
+        """Ensure that we have __fields_set__ set correctly for batch_configs to ensure we serialize IFF needed."""
+
+        has_batch_configs = len(self.batch_configs) > 0
+        if "batch_configs" in self.__fields_set__ and not has_batch_configs:
+            self.__fields_set__.remove("batch_configs")
+        elif "batch_configs" not in self.__fields_set__ and has_batch_configs:
+            self.__fields_set__.add("batch_configs")
+
+    def get_batch_config(self, batch_config_name: str) -> BatchConfig:
+        batch_configs = [
+            batch_config
+            for batch_config in self.batch_configs
+            if batch_config.name == batch_config_name
+        ]
+        if len(batch_configs) == 0:
+            raise KeyError(f"BatchConfig {batch_config_name} not found")
+        elif len(batch_configs) > 1:
+            raise KeyError(f"Multiple keys for {batch_config_name} found")
+        return batch_configs[0]
+
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
         return set(options.keys()).issubset(set(self.batch_request_options))
 
@@ -260,7 +356,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
-        config_variables = self._datasource._data_context.config_variables  # type: ignore[attr-defined]
+        config_variables = self._datasource.data_context.config_variables  # type: ignore[attr-defined]
         batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
             data=batch_metadata, replace_variables_dict=config_variables
         )
@@ -327,6 +423,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
+
+
+# Now that BatchAsset is defined, we need to update BatchConfig
+BatchConfig.update_forward_refs(DataAsset=DataAsset)
 
 
 def _sort_batches_with_none_metadata_values(
@@ -410,6 +510,14 @@ class Datasource(
     def _config_provider(self) -> Union[_ConfigurationProvider, None]:
         return getattr(self._data_context, "config_provider", None)
 
+    @property
+    def data_context(self) -> GXDataContext | None:
+        """The data context that this datasource belongs to.
+
+        This method should only be used by library implementers.
+        """
+        return self._data_context
+
     @pydantic.validator("assets", each_item=True)
     @classmethod
     def _load_asset_subtype(
@@ -439,9 +547,51 @@ class Datasource(
         logger.debug(f"{asset_type_name} - {asset_of_intended_type!r}")
         return asset_of_intended_type
 
+    @pydantic.validator(_ASSETS_KEY, each_item=True)
+    def _update_batch_configs(cls, data_asset: DataAsset) -> DataAsset:
+        for batch_config in data_asset.batch_configs:
+            batch_config.set_data_asset(data_asset)
+        return data_asset
+
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
+
+    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+        asset_name = batch_config.data_asset.name
+        if not self.data_context:
+            raise DataContextError("Cannot save datasource without a data context.")
+
+        loaded_datasource = self.data_context.get_datasource(self.name)
+        if loaded_datasource is not self:
+            # CachedDatasourceDict will return self; only add batch config if this is a remote copy
+            assert isinstance(loaded_datasource, Datasource)
+            loaded_asset = loaded_datasource.get_asset(asset_name)
+            loaded_asset.batch_configs.append(batch_config)
+            loaded_asset.update_batch_config_field_set()
+        updated_datasource = self.data_context.update_datasource(loaded_datasource)
+        assert isinstance(updated_datasource, Datasource)
+
+        output = updated_datasource.get_asset(asset_name).get_batch_config(
+            batch_config.name
+        )
+        output.set_data_asset(batch_config.data_asset)
+        return output
+
+    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+        asset_name = batch_config.data_asset.name
+        if not self.data_context:
+            raise DataContextError("Cannot save datasource without a data context.")
+
+        loaded_datasource = self.data_context.get_datasource(self.name)
+        if loaded_datasource is not self:
+            # CachedDatasourceDict will return self; only add batch config if this is a remote copy
+            assert isinstance(loaded_datasource, Datasource)
+            loaded_asset = loaded_datasource.get_asset(asset_name)
+            loaded_asset.batch_configs.remove(batch_config)
+            loaded_asset.update_batch_config_field_set()
+        updated_datasource = self.data_context.update_datasource(loaded_datasource)
+        assert isinstance(updated_datasource, Datasource)
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
@@ -728,61 +878,83 @@ class HeadData:
         return self.data.__repr__()
 
 
-class Batch(FluentBaseModel):
+@public_api
+class Batch:
     """This represents a batch of data.
 
     This is usually not the data itself but a hook to the data on an external datastore such as
     a spark or a sql database. An exception exists for pandas or any in-memory datastore.
     """
 
-    datasource: Datasource
-    data_asset: DataAsset
-    batch_request: BatchRequest
-    data: BatchData
-    id: str = ""
-    # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
-    # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any] = Field(default_factory=dict, allow_mutation=True)
+    def __init__(  # noqa: PLR0913
+        self,
+        datasource: Datasource,
+        data_asset: DataAsset,
+        batch_request: BatchRequest,
+        data: BatchData,
+        batch_markers: BatchMarkers,
+        batch_spec: BatchSpec,
+        batch_definition: BatchDefinition,
+        metadata: Dict[str, Any] | None = None,
+    ):
+        # Immutable attributes
+        self._datasource = datasource
+        self._data_asset = data_asset
+        self._batch_request = batch_request
+        self._data = data
 
-    # TODO: These legacy fields are currently required. They are only used in usage stats so we
-    #       should figure out a better way to anonymize and delete them.
-    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
-    batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
+        # Immutable legacy attributes
+        # TODO: These legacy fields are required but we should figure out how to delete them
+        self._batch_markers = batch_markers
+        self._batch_spec = batch_spec
+        self._batch_definition = batch_definition
 
-    class Config:
-        allow_mutation = False
-        arbitrary_types_allowed = True
+        # Mutable Attribute
+        # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
+        # to a batch so developers may want to namespace any custom metadata they add.
+        self.metadata = metadata or {}
 
-    @root_validator(pre=True)
-    def _set_id(cls, values: dict) -> dict:
-        # We need a unique identifier. This will likely change as we get more input.
+        # Immutable generated attribute
+        self._id = self._create_id()
+
+    def _create_id(self) -> str:
         options_list = []
-        for key, value in values["batch_request"].options.items():
+        for key, value in self.batch_request.options.items():
             if key != "path":
                 options_list.append(f"{key}_{value}")
+        return "-".join([self.datasource.name, self.data_asset.name, *options_list])
 
-        values["id"] = "-".join(
-            [values["datasource"].name, values["data_asset"].name, *options_list]
-        )
+    @property
+    def datasource(self) -> Datasource:
+        return self._datasource
 
-        return values
+    @property
+    def data_asset(self) -> DataAsset:
+        return self._data_asset
 
-    @classmethod
-    def update_forward_refs(cls):
-        from great_expectations.core.batch import (
-            BatchData,
-            BatchDefinition,
-            BatchMarkers,
-        )
-        from great_expectations.datasource.fluent import BatchRequest
+    @property
+    def batch_request(self) -> BatchRequest:
+        return self._batch_request
 
-        super().update_forward_refs(
-            BatchData=BatchData,
-            BatchDefinition=BatchDefinition,
-            BatchMarkers=BatchMarkers,
-            BatchRequest=BatchRequest,
-        )
+    @property
+    def data(self) -> BatchData:
+        return self._data
+
+    @property
+    def batch_markers(self) -> BatchMarkers:
+        return self._batch_markers
+
+    @property
+    def batch_spec(self) -> BatchSpec:
+        return self._batch_spec
+
+    @property
+    def batch_definition(self) -> BatchDefinition:
+        return self._batch_definition
+
+    @property
+    def id(self) -> str:
+        return self._id
 
     @public_api
     @validate_arguments
@@ -832,3 +1004,71 @@ class Batch(FluentBaseModel):
             fetch_all=fetch_all,
         )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
+
+    @property
+    def result_format(self) -> str | ResultFormat:
+        # We always `return a ResultFormat`. However to prevent having to do #ignore[assignment] we return
+        # `str | ResultFormat`. When the getter/setter have different types mypy gets confused on lines like:
+        # batch.result_format = "SUMMARY"
+        # See:
+        # https://github.com/python/mypy/issues/3004
+        return self._validator.result_format
+
+    @result_format.setter
+    def result_format(self, result_format: str | ResultFormat):
+        # We allow a str result_format because this is an interactive workflow
+        self._validator.result_format = ResultFormat(result_format)
+
+    @overload
+    def validate(self, expect: Expectation) -> ExpectationValidationResult:
+        ...
+
+    @overload
+    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult:
+        ...
+
+    @public_api
+    def validate(
+        self, expect: Expectation | ExpectationSuite
+    ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
+        from great_expectations.core import ExpectationSuite
+        from great_expectations.expectations.expectation import Expectation
+
+        if isinstance(expect, Expectation):
+            return self._validate_expectation(expect)
+        elif isinstance(expect, ExpectationSuite):
+            return self._validate_expectation_suite(expect)
+        else:
+            # If we are type checking, we should never fall through to this case. However, exploratory
+            # workflows are not being type checked.
+            raise ValueError(
+                f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"
+            )
+
+    def _validate_expectation(self, expect: Expectation) -> ExpectationValidationResult:
+        return self._validator.validate_expectation(expect)
+
+    def _validate_expectation_suite(
+        self, expect: ExpectationSuite
+    ) -> ExpectationSuiteValidationResult:
+        return self._validator.validate_expectation_suite(expect)
+
+    @functools.cached_property
+    def _validator(self) -> V1Validator:
+        from great_expectations.validator.v1_validator import Validator as V1Validator
+
+        context = self.datasource.data_context
+        if context is None:
+            raise ValueError(
+                "We can't validate batches that are attached to datasources without a data context"
+            )
+        batch_config = self.data_asset.add_batch_config(
+            name="-".join(
+                [self.datasource.name, self.data_asset.name, str(uuid.uuid4())]
+            )
+        )
+        return V1Validator(
+            context=context,
+            batch_config=batch_config,
+            batch_request_options=self.batch_request.options,
+        )

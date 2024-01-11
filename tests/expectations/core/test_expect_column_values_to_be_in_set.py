@@ -3,16 +3,14 @@ from typing import List
 import pandas as pd
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
-    ExpectColumnValuesToBeInSet,
-)
 
 
 # <snippet name="tests/expectations/core/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def">
-class ExpectColumnValuesToBeTwoLetterCountryCode(ExpectColumnValuesToBeInSet):
+class ExpectColumnValuesToBeTwoLetterCountryCode(gxe.ExpectColumnValuesToBeInSet):
     value_set: List[str] = ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"]
 
 

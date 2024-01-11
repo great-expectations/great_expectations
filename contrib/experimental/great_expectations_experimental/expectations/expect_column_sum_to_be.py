@@ -6,7 +6,6 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 
@@ -51,13 +50,12 @@ class ExpectColumnSumToBe(ColumnAggregateExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         actual_value = metrics["column.sum"]
-        predicted_value = self.get_success_kwargs().get("sum_total")
+        predicted_value = self._get_success_kwargs().get("sum_total")
         success = actual_value == predicted_value
         return {"success": success, "result": {"observed_value": actual_value}}
 

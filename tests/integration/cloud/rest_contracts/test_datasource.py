@@ -83,6 +83,6 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 )
 def test_datasource(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    run_rest_api_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
-    run_pact_test(contract_interaction)
+    run_rest_api_pact_test(contract_interaction)

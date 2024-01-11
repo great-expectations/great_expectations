@@ -4,11 +4,13 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
+from unittest.mock import ANY
 
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -16,7 +18,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -31,7 +32,9 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
@@ -286,7 +289,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     actual = validator.convert_to_checkpoint_validations_list()
     expected_config = CheckpointValidationConfig(
         expectation_suite_name="validating_taxi_data",
-        expectation_suite_ge_cloud_id=None,
+        expectation_suite_ge_cloud_id=ANY,
         batch_request={
             "datasource_name": "taxi_pandas",
             "data_connector_name": "monthly",
@@ -298,7 +301,6 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
         id=None,
         name=None,
     )
-
     assert all(config.to_dict() == expected_config.to_dict() for config in actual)
 
 
@@ -407,9 +409,6 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
         multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
     )
     assert expected == actual
-
-    # add_expectation() will not send usage_statistics event when called from a Validator
-    assert mock_emit.call_count == 0
 
 
 @pytest.mark.big
@@ -1209,7 +1208,7 @@ def test_list_available_expectation_types(
 
 def _context_to_validator_and_expectation_sql(
     context: FileDataContext,
-) -> Tuple[Validator, ExpectColumnValuesToBeInSet]:
+) -> Tuple[Validator, gxe.ExpectColumnValuesToBeInSet]:
     """
     Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuple of Validator and
     Expectation after building a BatchRequest and creating ExpectationSuite.
@@ -1224,7 +1223,7 @@ def _context_to_validator_and_expectation_sql(
             "value_set": ["cat", "fish", "dog"],
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
+    expectation: gxe.ExpectColumnValuesToBeInSet = gxe.ExpectColumnValuesToBeInSet(
         **expectation_configuration.kwargs
     )
 

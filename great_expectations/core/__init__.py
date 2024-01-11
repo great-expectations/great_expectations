@@ -2,8 +2,6 @@ import logging
 
 from .domain import Domain
 from .expectation_suite import (
-    ExpectationConfiguration,
-    ExpectationConfigurationSchema,
     ExpectationSuite,
     ExpectationSuiteSchema,
     expectationSuiteSchema,
@@ -22,8 +20,7 @@ from .run_identifier import RunIdentifier, RunIdentifierSchema
 from .urn import ge_urn
 
 __all__ = [
-    "ExpectationConfiguration",
-    "ExpectationConfigurationSchema",
+    "Domain",
     "ExpectationSuite",
     "ExpectationSuiteSchema",
     "expectationSuiteSchema",

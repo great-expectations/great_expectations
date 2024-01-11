@@ -7,11 +7,13 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
@@ -181,14 +183,13 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
     ):
         unique_columns = metrics.get("table.columns.unique")
         batch_columns = metrics.get("table.columns")
-        strict = configuration.kwargs.get("strict")
+        strict = self.configuration.kwargs.get("strict")
 
         duplicate_columns = unique_columns.symmetric_difference(batch_columns)
 

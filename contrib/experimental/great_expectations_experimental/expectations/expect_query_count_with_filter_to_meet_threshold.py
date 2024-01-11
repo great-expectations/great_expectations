@@ -6,7 +6,6 @@ For detailed instructions on how to use it, please see:
 
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -15,6 +14,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -58,11 +60,11 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         metrics = convert_to_json_serializable(data=metrics)
         count: int = list(metrics.get("query.template_values")[0].values())[0]
         threshold: Union[float, int] = configuration["kwargs"].get("threshold")

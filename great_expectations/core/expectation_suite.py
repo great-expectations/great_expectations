@@ -24,19 +24,14 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load, p
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
     public_api,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
-)
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-    ExpectationConfigurationSchema,
-    expectationConfigurationSchema,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -46,9 +41,6 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
-from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -61,7 +53,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
-    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +96,10 @@ class ExpectationSuite(SerializableDictDot):
             str
         ] = None,  # for backwards compatibility - remove
     ) -> None:
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
         if name:
             assert isinstance(name, str), "Name is a required field."
             self.expectation_suite_name = name
@@ -113,11 +111,14 @@ class ExpectationSuite(SerializableDictDot):
 
         if expectations is None:
             expectations = []
-        self.expectation_configurations = [
+        expectation_configurations = [
             ExpectationConfiguration(**expectation)
             if isinstance(expectation, dict)
             else expectation
             for expectation in expectations
+        ]
+        self.expectations: list[Expectation] = [
+            self._build_expectation(config) for config in expectation_configurations
         ]
         if evaluation_parameters is None:
             evaluation_parameters = {}
@@ -143,62 +144,62 @@ class ExpectationSuite(SerializableDictDot):
     def name(self) -> str:
         return self.expectation_suite_name
 
-    @property
-    def expectations(self) -> list[Expectation]:
-        return [
-            self._build_expectation(expectation_configuration=expectation_configuration)
-            for expectation_configuration in self.expectation_configurations
-        ]
-
     @public_api
-    def add(self, expectation: Expectation) -> Expectation:
+    def add_expectation(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
-        if not any(
-            expectation.configuration == existing_config
-            for existing_config in self.expectation_configurations
-        ):
-            self.expectation_configurations.append(expectation.configuration)
-        else:
-            pass  # suite is a set-like collection
+        if expectation.id:
+            raise RuntimeError(
+                "Cannot add Expectation because it already belongs to an ExpectationSuite. "
+                "If you want to update an existing Expectation, please call Expectation.save(). "
+                "If you are copying this Expectation to a new ExpectationSuite, please copy "
+                "it first (the core expectations and some others support copy(expectation)) "
+                "and set `Expectation.id = None`."
+            )
+        should_save_expectation = self._has_been_saved()
+        expectation_is_unique = all(
+            expectation.configuration != existing_expectation.configuration
+            for existing_expectation in self.expectations
+        )
+        if expectation_is_unique:
+            # suite is a set-like collection, so don't add if it not unique
+            self.expectations.append(expectation)
+            if should_save_expectation:
+                try:
+                    expectation = self._store.add_expectation(
+                        suite=self, expectation=expectation
+                    )
+                    self.expectations[-1].id = expectation.id
+                except Exception as exc:
+                    self.expectations.pop()
+                    raise exc
 
-        if self._has_been_saved():
-            # only persist on add if the suite has already been saved
-            try:
-                self.save()
-            except Exception as exc:
-                # rollback this change
-                self.expectation_configurations.pop()
-                raise exc
-
+        expectation.register_save_callback(save_callback=self._save_expectation)
         return expectation
 
     @public_api
-    def delete(self, expectation: Expectation) -> Expectation:
+    def delete_expectation(self, expectation: Expectation) -> Expectation:
         """Delete an Expectation from the collection.
 
         Raises:
             KeyError: Expectation not found in suite.
         """
-        remaining_expectation_configs = [
-            exp_config
-            for exp_config in self.expectation_configurations
-            if exp_config != expectation.configuration
+        remaining_expectations = [
+            exp
+            for exp in self.expectations
+            if exp.configuration != expectation.configuration
         ]
-        if (
-            len(remaining_expectation_configs)
-            != len(self.expectation_configurations) - 1
-        ):
+        if len(remaining_expectations) != len(self.expectations) - 1:
             raise KeyError("No matching expectation was found.")
-        self.expectation_configurations = remaining_expectation_configs
+        self.expectations = remaining_expectations
 
         if self._has_been_saved():
             # only persist on delete if the suite has already been saved
             try:
-                self.save()
+                self._store.delete_expectation(suite=self, expectation=expectation)
             except Exception as exc:
                 # rollback this change
                 # expectation suite is set-like so order of expectations doesn't matter
-                self.expectation_configurations.append(expectation.configuration)
+                self.expectations.append(expectation)
                 raise exc
 
         return expectation
@@ -206,15 +207,28 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
-        key = self._store.get_key(suite=self)
-        res = self._store.add_or_update(key=key, value=self)
-        if self.ge_cloud_id is None and isinstance(res, GXCloudResourceRef):
-            self.ge_cloud_id = res.response["data"]["id"]
+        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
+        self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
-        """Has this ExpectationSuite been persisted to a DataContext?"""
-        key = self._store.get_key(suite=self)
+        """Has this ExpectationSuite been persisted to a Store?"""
+        # todo: this should only check local keys instead of potentially querying the remote backend
+        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         return self._store.has_key(key=key)
+
+    def _save_expectation(self, expectation) -> Expectation:
+        return self._store.update_expectation(suite=self, expectation=expectation)
+
+    @property
+    def expectation_configurations(self) -> list[ExpectationConfiguration]:
+        return [exp.configuration for exp in self.expectations]
+
+    @expectation_configurations.setter
+    def expectation_configurations(self, value):
+        raise AttributeError(
+            "Cannot set ExpectationSuite.expectation_configurations. "
+            "Please use ExpectationSuite.expectations instead."
+        )
 
     def add_citation(  # noqa: PLR0913
         self,
@@ -290,9 +304,7 @@ class ExpectationSuite(SerializableDictDot):
                 # Delegate comparison to the other instance
                 return NotImplemented
 
-        exp_count_is_equal = len(self.expectation_configurations) == len(
-            other.expectation_configurations
-        )
+        exp_count_is_equal = len(self.expectations) == len(other.expectations)
 
         exp_configs_are_equal = all(
             mine.isEquivalentTo(theirs)
@@ -311,7 +323,7 @@ class ExpectationSuite(SerializableDictDot):
         return all(
             (
                 self.expectation_suite_name == other.expectation_suite_name,
-                self.expectation_configurations == other.expectation_configurations,
+                self.expectations == other.expectations,
                 self.evaluation_parameters == other.evaluation_parameters,
                 self.data_asset_type == other.data_asset_type,
                 self.meta == other.meta,
@@ -335,11 +347,8 @@ class ExpectationSuite(SerializableDictDot):
         memo[id(self)] = result
 
         attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
-        # map expectations to expectation_configurations
-        attributes_to_copy.remove("expectations")
-        attributes_to_copy.add("expectation_configurations")
         for key in attributes_to_copy:
-            setattr(result, key, deepcopy(getattr(self, key)))
+            setattr(result, key, deepcopy(getattr(self, key), memo))
 
         result._data_context = self._data_context
 
@@ -356,8 +365,9 @@ class ExpectationSuite(SerializableDictDot):
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
+        expectation_configurations = [exp.configuration for exp in self.expectations]
         myself["expectations"] = convert_to_json_serializable(
-            self.expectation_configurations
+            expectation_configurations
         )
         try:
             myself["evaluation_parameters"] = convert_to_json_serializable(
@@ -370,8 +380,8 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_evaluation_parameter_dependencies(self) -> dict:
         dependencies: dict = {}
-        for expectation in self.expectation_configurations:
-            t = expectation.get_evaluation_parameter_dependencies()
+        for expectation in self.expectations:
+            t = expectation.configuration.get_evaluation_parameter_dependencies()
             nested_update(dependencies, t)
 
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
@@ -416,20 +426,6 @@ class ExpectationSuite(SerializableDictDot):
     def _sort_citations(citations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         return sorted(citations, key=lambda x: x["citation_date"])
 
-    # CRUD methods #
-
-    def append_expectation(self, expectation_config) -> None:
-        """Appends an expectation.
-
-           Args:
-               expectation_config (ExpectationConfiguration): \
-                   The expectation to be added to the list.
-
-           Notes:
-               May want to add type-checking in the future.
-        """
-        self.expectation_configurations.append(expectation_config)
-
     @public_api
     @new_argument(
         argument_name="ge_cloud_id",
@@ -461,6 +457,7 @@ class ExpectationSuite(SerializableDictDot):
             TypeError: Must provide either expectation_configuration or ge_cloud_id.
             ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
+        expectation_configurations = [exp.configuration for exp in self.expectations]
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
@@ -478,9 +475,11 @@ class ExpectationSuite(SerializableDictDot):
             if remove_multiple_matches:
                 removed_expectations = []
                 for index in sorted(found_expectation_indexes, reverse=True):
-                    removed_expectations.append(
-                        self.expectation_configurations.pop(index)
-                    )
+                    removed_expectations.append(expectation_configurations.pop(index))
+                self.expectations = [
+                    self._build_expectation(config)
+                    for config in expectation_configurations
+                ]
                 return removed_expectations
             else:
                 raise ValueError(
@@ -489,7 +488,11 @@ class ExpectationSuite(SerializableDictDot):
                 )
 
         else:
-            return [self.expectation_configurations.pop(found_expectation_indexes[0])]
+            result = [expectation_configurations.pop(found_expectation_indexes[0])]
+            self.expectations = [
+                self._build_expectation(config) for config in expectation_configurations
+            ]
+            return result
 
     def remove_all_expectations_of_type(
         self, expectation_types: Union[List[str], str]
@@ -498,13 +501,13 @@ class ExpectationSuite(SerializableDictDot):
             expectation_types = [expectation_types]
 
         removed_expectations = [
-            expectation
-            for expectation in self.expectation_configurations
+            expectation.configuration
+            for expectation in self.expectations
             if expectation.expectation_type in expectation_types
         ]
-        self.expectation_configurations = [
+        self.expectations = [
             expectation
-            for expectation in self.expectation_configurations
+            for expectation in self.expectations
             if expectation.expectation_type not in expectation_types
         ]
 
@@ -536,6 +539,10 @@ class ExpectationSuite(SerializableDictDot):
             InvalidExpectationConfigurationError
 
         """
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
@@ -549,12 +556,12 @@ class ExpectationSuite(SerializableDictDot):
             )
 
         match_indexes = []
-        for idx, expectation in enumerate(self.expectation_configurations):
+        for idx, expectation in enumerate(self.expectations):
             if ge_cloud_id is not None:
-                if expectation.ge_cloud_id == ge_cloud_id:
+                if expectation.id == ge_cloud_id:
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
-                if expectation.isEquivalentTo(
+                if expectation.configuration.isEquivalentTo(
                     other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)
@@ -596,99 +603,11 @@ class ExpectationSuite(SerializableDictDot):
 
         if len(found_expectation_indexes) > 0:
             return [
-                self.expectation_configurations[idx]
+                self.expectations[idx].configuration
                 for idx in found_expectation_indexes
             ]
 
         return []
-
-    def replace_expectation(
-        self,
-        new_expectation_configuration: Union[ExpectationConfiguration, dict],
-        existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
-        match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
-        """
-        Find Expectations matching the given ExpectationConfiguration on the given match_type.
-        If a ge_cloud_id is provided, match_type is ignored and only Expectations with matching
-        ge_cloud_id are returned.
-
-        Args:
-            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
-                find the index of any matching Expectation Configurations on the suite.
-            match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
-                on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                 based on all configuration parameters
-            ge_cloud_id: Great Expectations Cloud id
-
-        Returns: A list of matching ExpectationConfigurations
-        """
-        if existing_expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError(
-                "Must provide either existing_expectation_configuration or ge_cloud_id"
-            )
-
-        if isinstance(new_expectation_configuration, dict):
-            new_expectation_configuration = expectationConfigurationSchema.load(
-                new_expectation_configuration
-            )
-
-        found_expectation_indexes = self.find_expectation_indexes(
-            existing_expectation_configuration, match_type, ge_cloud_id
-        )
-        if len(found_expectation_indexes) > 1:
-            raise ValueError(
-                "More than one matching expectation was found. Please be more specific with your search "
-                "criteria"
-            )
-        elif len(found_expectation_indexes) == 0:
-            raise ValueError("No matching Expectation was found.")
-
-        self.expectation_configurations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
-
-    def patch_expectation(  # noqa: PLR0913
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        op: str,
-        path: str,
-        value: Any,
-        match_type: str,
-    ) -> ExpectationConfiguration:
-        """
-
-        Args:
-             expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
-                 find the expectation to patch.
-             op: A jsonpatch operation (one of 'add','update', or 'remove') (see http://jsonpatch.com/)
-             path: A jsonpatch path for the patch operation (see http://jsonpatch.com/)
-             value: The value to patch (see http://jsonpatch.com/)
-             match_type: The match type to use for find_expectation_index()
-
-        Returns: The patched ExpectationConfiguration
-
-        Raises:
-            No match
-            More than 1 match
-
-        """
-        found_expectation_indexes = self.find_expectation_indexes(
-            expectation_configuration, match_type
-        )
-
-        if len(found_expectation_indexes) < 1:
-            raise ValueError("No matching expectation was found.")
-        elif len(found_expectation_indexes) > 1:
-            raise ValueError(
-                "More than one matching expectation was found. Please be more specific with your search "
-                "criteria"
-            )
-
-        self.expectation_configurations[found_expectation_indexes[0]].patch(
-            op, path, value
-        )
-        return self.expectation_configurations[found_expectation_indexes[0]]
 
     def _add_expectation(
         self,
@@ -738,17 +657,19 @@ class ExpectationSuite(SerializableDictDot):
             # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
             if overwrite_existing:
                 # if existing Expectation has a ge_cloud_id, add it back to the new Expectation Configuration
-                existing_expectation_ge_cloud_id = self.expectation_configurations[
+                existing_expectation_ge_cloud_id = self.expectations[
                     found_expectation_indexes[0]
-                ].ge_cloud_id
+                ].id
                 if existing_expectation_ge_cloud_id is not None:
                     expectation_configuration.ge_cloud_id = (
                         existing_expectation_ge_cloud_id
                     )
 
-                self.expectation_configurations[
+                self.expectations[
                     found_expectation_indexes[0]
-                ] = expectation_configuration
+                ] = self._build_expectation(
+                    expectation_configuration=expectation_configuration
+                )
             else:
                 if send_usage_event:
                     self.send_usage_event(success=False)
@@ -758,7 +679,11 @@ class ExpectationSuite(SerializableDictDot):
                     "ExpectationConfiguration, set overwrite_existing=True"
                 )
         else:
-            self.append_expectation(expectation_configuration)
+            self.expectations.append(
+                self._build_expectation(
+                    expectation_configuration=expectation_configuration
+                )
+            )
 
         if send_usage_event:
             self.send_usage_event(success=True)
@@ -804,7 +729,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configurations_attempted_to_be_added: List[
             ExpectationConfiguration
         ] = [
-            self.add_expectation(
+            self.add_expectation_configuration(
                 expectation_configuration=expectation_configuration,
                 send_usage_event=send_usage_event,
                 match_type=match_type,
@@ -815,7 +740,7 @@ class ExpectationSuite(SerializableDictDot):
         return expectation_configurations_attempted_to_be_added
 
     @public_api
-    def add_expectation(
+    def add_expectation_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,
         send_usage_event: bool = True,
@@ -854,10 +779,8 @@ class ExpectationSuite(SerializableDictDot):
         self, expectation_configuration: ExpectationConfiguration
     ) -> Expectation:
         try:
-            class_ = get_expectation_impl(expectation_configuration.expectation_type)
-            expectation = class_(
-                meta=expectation_configuration.meta, **expectation_configuration.kwargs
-            )  # Implicitly validates in constructor
+            expectation = expectation_configuration.to_domain_obj()
+            expectation.register_save_callback(save_callback=self._save_expectation)
             return expectation
         except (
             gx_exceptions.ExpectationNotFoundError,
@@ -985,10 +908,13 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_table_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of table expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.TABLE,
-                self.expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -1002,10 +928,13 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_column_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column map expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN,
-                self.expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -1024,11 +953,15 @@ class ExpectationSuite(SerializableDictDot):
     # noinspection PyPep8Naming
     def get_column_pair_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column_pair map expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
+
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.COLUMN_PAIR,
-                self.expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -1052,11 +985,15 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_multicolumn_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of multicolumn map expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = list(
+        expectation_configurations: List[ExpectationConfiguration] = [
+            exp.configuration for exp in self.expectations
+        ]
+
+        expectation_configurations = list(
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.MULTICOLUMN,
-                self.expectation_configurations,
+                expectation_configurations,
             )
         )
 
@@ -1080,7 +1017,8 @@ class ExpectationSuite(SerializableDictDot):
 
         column: str
         expectation: ExpectationConfiguration
-        for expectation in self.expectation_configurations:
+        expectation_configurations = [exp.configuration for exp in self.expectations]
+        for expectation in expectation_configurations:
             if "column" in expectation.kwargs:
                 column = expectation.kwargs["column"]
             else:
@@ -1099,6 +1037,7 @@ class ExpectationSuite(SerializableDictDot):
             if (
                 expectation.expectation_type
                 == "expect_table_columns_to_match_ordered_list"
+                and expectation.kwargs.get("column_list")
             ):
                 exp_column_list: List[str] = expectation.kwargs["column_list"]
                 if exp_column_list and len(exp_column_list) > 0:
@@ -1143,39 +1082,28 @@ class ExpectationSuite(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for each expectation configuration associated with
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
-        for expectation_configuration in self.expectation_configurations:
-            inline_renderer_config: InlineRendererConfig = {
-                "class_name": "InlineRenderer",
-                "render_object": expectation_configuration,
-            }
-            module_name = "great_expectations.render.renderer.inline_renderer"
-            inline_renderer = instantiate_class_from_config(
-                config=inline_renderer_config,
-                runtime_environment={},
-                config_defaults={"module_name": module_name},
-            )
-            if not inline_renderer:
-                raise gx_exceptions.ClassInstantiationError(
-                    module_name=module_name,
-                    package_name=None,
-                    class_name=inline_renderer_config["class_name"],
-                )
+        from great_expectations.render.renderer.inline_renderer import InlineRenderer
+
+        for expectation in self.expectations:
+            inline_renderer = InlineRenderer(render_object=expectation.configuration)
 
             rendered_content: List[
                 RenderedAtomicContent
             ] = inline_renderer.get_rendered_content()
 
-            expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
-                existing_rendered_content=expectation_configuration.rendered_content,
-                new_rendered_content=rendered_content,
-                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+            expectation.rendered_content = (
+                inline_renderer.replace_or_keep_existing_rendered_content(
+                    existing_rendered_content=expectation.rendered_content,
+                    new_rendered_content=rendered_content,
+                    failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+                )
             )
 
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
-    expectations = fields.List(fields.Nested(ExpectationConfigurationSchema))
+    expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()

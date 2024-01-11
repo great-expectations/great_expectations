@@ -8,7 +8,6 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationSuite,
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -16,6 +15,9 @@ from great_expectations.core import (
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.validator.validator import Validator
 
@@ -58,7 +60,7 @@ def test_catch_exceptions_no_exceptions(
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"Notes": "Some notes"}
+    expectation_meta: dict = {"notes": "Some notes"}
 
     expectation_arguments_without_meta: dict
 
@@ -73,7 +75,9 @@ def test_catch_exceptions_no_exceptions(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     expectation_arguments_table: dict = {
         "value": 4,
@@ -86,7 +90,9 @@ def test_catch_exceptions_no_exceptions(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -171,7 +177,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"Notes": "Some notes"}
+    expectation_meta: dict = {"notes": "Some notes"}
 
     expectation_arguments_without_meta: dict
 
@@ -186,7 +192,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     expectation_arguments_table: dict = {
         "value": 4,
@@ -199,7 +207,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -285,7 +295,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"Notes": "Some notes"}
+    expectation_meta: dict = {"notes": "Some notes"}
 
     expectation_arguments_without_meta: dict
 
@@ -300,7 +310,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     expectation_arguments_table: dict = {
         "value": 4,
@@ -313,7 +325,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -435,7 +449,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"Notes": "Some notes"}
+    expectation_meta: dict = {"notes": "Some notes"}
 
     expectation_arguments_without_meta: dict
 
@@ -450,7 +464,9 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -512,7 +528,9 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
@@ -553,7 +571,9 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         meta=expectation_meta,
     )
 
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
@@ -576,7 +596,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
             "expectation_type": "expect_column_values_to_not_be_null",
-            "meta": {"Notes": "Some notes"},
+            "meta": {"notes": "Some notes"},
         },
         "meta": {},
         "exception_info": {
@@ -613,7 +633,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
                     "partial_unexpected_count": 20,
                 },
                 "column": "Name",
-                "Notes": "Some notes",
+                "notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
         },
@@ -655,7 +675,7 @@ def test_result_format_configured_with_set_default_override(
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"Notes": "Some notes"}
+    expectation_meta: dict = {"notes": "Some notes"}
 
     expectation_arguments_without_meta: dict
 
@@ -670,7 +690,9 @@ def test_result_format_configured_with_set_default_override(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -716,7 +738,7 @@ def test_result_format_configured_with_set_default_override(
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
-            "meta": {"Notes": "Some notes"},
+            "meta": {"notes": "Some notes"},
             "expectation_type": "expect_column_values_to_not_be_null",
         },
         "success": True,
@@ -748,7 +770,9 @@ def test_result_format_configured_with_set_default_override(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
@@ -777,7 +801,7 @@ def test_result_format_configured_with_set_default_override(
         "expectation_config": {
             "kwargs": {
                 "column": "Name",
-                "Notes": "Some notes",
+                "notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
             "meta": {},
@@ -831,7 +855,7 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"Notes": "Some notes"}
+    expectation_meta: dict = {"notes": "Some notes"}
 
     expectation_arguments_without_meta: dict
 
@@ -846,7 +870,9 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation(expectation_configuration=expectation_configuration)
+    suite.add_expectation_configuration(
+        expectation_configuration=expectation_configuration
+    )
 
     # emit 1 from add_expectation
     assert mock_emit.call_count == 1

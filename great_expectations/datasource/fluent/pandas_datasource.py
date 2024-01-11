@@ -26,16 +26,16 @@ from typing import (
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import pydantic, sqlalchemy
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
     public_api,
 )
+from great_expectations.compatibility import pydantic, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
-from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -66,9 +66,10 @@ if TYPE_CHECKING:
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
-    from great_expectations.validator.validator import Validator
+
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,7 @@ class PandasDatasourceError(Exception):
 
 class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_configs",
         "batch_metadata",
         "name",
         "order_by",
@@ -155,10 +157,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
         batch_list.append(
             Batch(
                 datasource=self.datasource,
@@ -166,22 +164,40 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         )
         return batch_list
 
     @public_api
     @override
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options:
+            raise ValueError(
+                "options is not currently supported for this DataAssets and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise ValueError(
+                "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -378,17 +394,32 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     )
     @override
     def build_batch_request(  # type: ignore[override]
-        self, dataframe: Optional[pd.DataFrame] = None
+        self,
+        dataframe: Optional[pd.DataFrame] = None,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options:
+            raise ValueError(
+                "options is not currently supported for this DataAssets and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise ValueError(
+                "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
         if dataframe is None:
             df = self.dataframe
         else:
@@ -434,11 +465,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_request=batch_request
         )
 
-        # Some pydantic annotations are postponed due to circular imports.
-        # Batch.update_forward_refs() will set the annotations before we
-        # instantiate the Batch class since we can import them in this scope.
-        Batch.update_forward_refs()
-
         return [
             Batch(
                 datasource=self.datasource,
@@ -446,9 +472,9 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 batch_request=batch_request,
                 data=data,
                 metadata=batch_metadata,
-                legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
-                legacy_batch_definition=batch_definition,
+                batch_markers=markers,
+                batch_spec=batch_spec,
+                batch_definition=batch_definition,
             )
         ]
 
@@ -631,9 +657,9 @@ class PandasDatasource(_PandasDatasource):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
-    def _get_validator(
+    def _get_batch(
         self, asset: _PandasDataAsset, dataframe: pd.DataFrame | None = None
-    ) -> Validator:
+    ) -> Batch:
         batch_request: BatchRequest
         if isinstance(asset, DataFrameAsset):
             if not isinstance(dataframe, pd.DataFrame):
@@ -645,8 +671,7 @@ class PandasDatasource(_PandasDatasource):
         else:
             batch_request = asset.build_batch_request()
 
-        # TODO: raise error if `_data_context` not set
-        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
+        return asset.get_batch_list_from_batch_request(batch_request)[-1]
 
     @public_api
     @deprecated_argument(
@@ -684,8 +709,8 @@ class PandasDatasource(_PandasDatasource):
         dataframe: pd.DataFrame,
         asset_name: Optional[str] = None,
         batch_metadata: Optional[BatchMetadata] = None,
-    ) -> Validator:
-        """Reads a Dataframe and returns a Validator associated with it.
+    ) -> Batch:
+        """Reads a Dataframe and returns a Batch containing the data.
 
         Args:
             dataframe: The Dataframe containing the data for this data asset.
@@ -694,14 +719,14 @@ class PandasDatasource(_PandasDatasource):
                             batches created from the asset.
 
         Returns:
-            A Validator using an ephemeral DataFrameAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral DataFrameAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
             batch_metadata=batch_metadata or {},
         )
-        return self._get_validator(asset=asset, dataframe=dataframe)
+        return self._get_batch(asset=asset, dataframe=dataframe)
 
     @public_api
     def add_clipboard_asset(
@@ -730,23 +755,23 @@ class PandasDatasource(_PandasDatasource):
         self,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a clipboard and return a Validator associated with it.
+        Read a clipboard and return a Batch containing the data.
 
         Args:
             asset_name: The name of the clipboard asset, should you wish to use it again.
             **kwargs: Additional keyword arguments to pass to pandas.read_clipboard().
 
         Returns:
-            A Validator using an ephemeral ClipboardAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral ClipboardAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ClipboardAsset = self.add_clipboard_asset(  # type: ignore[valid-type]
             name=name,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_csv_asset(
@@ -779,9 +804,9 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a CSV file and return a Validator associated with it.
+        Read a CSV file and return a Batch containing the data.
 
         Args:
             filepath_or_buffer: The path to the CSV file or a URL pointing to the CSV file.
@@ -789,7 +814,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_csv().
 
         Returns:
-            A Validator using an ephemeral CSVAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral CSVAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
@@ -797,7 +822,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_excel_asset(
@@ -830,9 +855,9 @@ class PandasDatasource(_PandasDatasource):
         io: os.PathLike | str | bytes,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read an Excel file and return a Validator associated with it.
+        Read an Excel file and return a Batch containing the data.
 
         Args:
             io: The path to the Excel file or a URL pointing to the Excel file.
@@ -840,7 +865,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_excel().
 
         Returns:
-            A Validator using an ephemeral ExcelAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral ExcelAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ExcelAsset = self.add_excel_asset(  # type: ignore[valid-type]
@@ -848,7 +873,7 @@ class PandasDatasource(_PandasDatasource):
             io=io,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_feather_asset(
@@ -881,9 +906,9 @@ class PandasDatasource(_PandasDatasource):
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a Feather file and return a Validator associated with it.
+        Read a Feather file and return a Batch containing the data.
 
         Args:
             path: The path to the Feather file or a URL pointing to the Feather file.
@@ -891,7 +916,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_feather().
 
         Returns:
-            A Validator using an ephemeral FeatherAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral FeatherAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: FeatherAsset = self.add_feather_asset(  # type: ignore[valid-type]
@@ -899,7 +924,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_fwf_asset(
@@ -909,7 +934,7 @@ class PandasDatasource(_PandasDatasource):
         **kwargs,
     ) -> FeatherAsset:  # type: ignore[valid-type]
         """
-        Read a Fixed Width File and return a Validator associated with it.
+        Adds a Fixed Width File DataAsset to the datasource.
 
         Args:
             filepath_or_buffer: The path to the file or a URL pointing to the Feather file.
@@ -932,9 +957,9 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a Fixed Width File and return a Validator associated with it.
+        Read a Fixed Width File and return a Batch containing the data.
 
         Args:
             filepath_or_buffer: The path to the file or a URL pointing to the Feather file.
@@ -942,7 +967,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
 
         Returns:
-            A Validator using an ephemeral FWFAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral FWFAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: FWFAsset = self.add_fwf_asset(  # type: ignore[valid-type]
@@ -950,7 +975,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_gbq_asset(
@@ -983,9 +1008,9 @@ class PandasDatasource(_PandasDatasource):
         query: str,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a Google BigQuery query and return a Validator associated with it.
+        Read a Google BigQuery query and return a Batch containing the data.
 
         Args:
             query: The SQL query to send to Google BigQuery.
@@ -993,7 +1018,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_gbq().
 
         Returns:
-            A Validator using an ephemeral GBQAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral GBQAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: GBQAsset = self.add_gbq_asset(  # type: ignore[valid-type]
@@ -1001,7 +1026,7 @@ class PandasDatasource(_PandasDatasource):
             query=query,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_hdf_asset(
@@ -1034,9 +1059,9 @@ class PandasDatasource(_PandasDatasource):
         path_or_buf: pd.HDFStore | os.PathLike | str,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read an HDF file and return a Validator associated with it.
+        Read an HDF file and return a Batch containing the data.
 
         Args:
             path_or_buf: The path to the HDF file or a URL pointing to the HDF file.
@@ -1044,7 +1069,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_hdf().
 
         Returns:
-            A Validator using an ephemeral HDFAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral HDFAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HDFAsset = self.add_hdf_asset(  # type: ignore[valid-type]
@@ -1052,7 +1077,7 @@ class PandasDatasource(_PandasDatasource):
             path_or_buf=path_or_buf,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_html_asset(
@@ -1085,9 +1110,9 @@ class PandasDatasource(_PandasDatasource):
         io: os.PathLike | str,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read an HTML file and return a Validator associated with it.
+        Read an HTML file and return a Batch containing the data.
 
         Args:
             io: The path to the HTML file or a URL pointing to the HTML file.
@@ -1095,7 +1120,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_html().
 
         Returns:
-            A Validator using an ephemeral HTMLAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral HTMLAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HTMLAsset = self.add_html_asset(  # type: ignore[valid-type]
@@ -1103,7 +1128,7 @@ class PandasDatasource(_PandasDatasource):
             io=io,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_json_asset(
@@ -1136,9 +1161,9 @@ class PandasDatasource(_PandasDatasource):
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a JSON file and return a Validator associated with it.
+        Read a JSON file and return a Batch containing the data.
 
         Args:
             path_or_buf: The path to the JSON file or a URL pointing to the JSON file.
@@ -1146,7 +1171,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_json().
 
         Returns:
-            A Validator using an ephemeral JSONAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral JSONAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: JSONAsset = self.add_json_asset(  # type: ignore[valid-type]
@@ -1154,7 +1179,7 @@ class PandasDatasource(_PandasDatasource):
             path_or_buf=path_or_buf,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_orc_asset(
@@ -1187,9 +1212,9 @@ class PandasDatasource(_PandasDatasource):
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read an ORC file and return a Validator associated with it.
+        Read an ORC file and return a Batch containing the data.
 
         Args:
             path: The path to the ORC file.
@@ -1197,7 +1222,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional kwargs to pass to the ORC reader.
 
         Returns:
-            A Validator using an ephemeral ORCAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral ORCAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ORCAsset = self.add_orc_asset(  # type: ignore[valid-type]
@@ -1205,7 +1230,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_parquet_asset(
@@ -1238,9 +1263,9 @@ class PandasDatasource(_PandasDatasource):
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a parquet file and return a Validator associated with it.
+        Read a parquet file and return a Batch containing the data.
 
         Args:
             path: The path to the parquet file.
@@ -1248,7 +1273,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional kwargs to pass to the parquet reader.
 
         Returns:
-            A Validator using an ephemeral ParquetAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral ParquetAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ParquetAsset = self.add_parquet_asset(  # type: ignore[valid-type]
@@ -1256,7 +1281,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_pickle_asset(
@@ -1289,9 +1314,9 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a pickle file and return a Validator associated with it.
+        Read a pickle file and return a Batch containing the data.
 
         Args:
             filepath_or_buffer: The path to the pickle file.
@@ -1299,7 +1324,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional kwargs to pass to the pickle reader.
 
         Returns:
-            A Validator using the pickle file as a DataAsset
+            A Batch using an ephemeral PickleAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: PickleAsset = self.add_pickle_asset(  # type: ignore[valid-type]
@@ -1307,7 +1332,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_sas_asset(
@@ -1340,9 +1365,9 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a SAS file and return a Validator associated with it.
+        Read a SAS file and return a Batch containing the data.
 
         Args:
             filepath_or_buffer: The path to the SAS file or a URL pointing to the SAS file.
@@ -1350,7 +1375,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_sas().
 
         Returns:
-            A Validator using an ephemeral SASAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral SASAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SASAsset = self.add_sas_asset(  # type: ignore[valid-type]
@@ -1358,7 +1383,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_spss_asset(
@@ -1391,9 +1416,9 @@ class PandasDatasource(_PandasDatasource):
         path: pydantic.FilePath,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read an SPSS file and return a Validator associated with it.
+        Read an SPSS file and return a Batch containing the data.
 
         Args:
             path: The path to the SPSS file.
@@ -1401,7 +1426,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_spss().
 
         Returns:
-            A Validator using an ephemeral SPSSAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral SPSSAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SPSSAsset = self.add_parquet_asset(  # type: ignore[valid-type]
@@ -1409,7 +1434,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_sql_asset(
@@ -1446,9 +1471,9 @@ class PandasDatasource(_PandasDatasource):
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a SQL query and return a Validator associated with it.
+        Read a SQL query and return a Batch containing the data.
 
         Args:
             sql: The SQL query to send to the database.
@@ -1457,7 +1482,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_sql().
 
         Returns:
-            A Validator using an ephemeral SQLAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral SQLAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLAsset = self.add_sql_asset(  # type: ignore[valid-type]
@@ -1466,7 +1491,7 @@ class PandasDatasource(_PandasDatasource):
             con=con,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_sql_query_asset(
@@ -1503,9 +1528,9 @@ class PandasDatasource(_PandasDatasource):
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a SQL query and return a Validator associated with it.
+        Read a SQL query and return a Batch containing the data.
 
         Args:
             sql: The SQL query to send to the database.
@@ -1514,7 +1539,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_sql_query().
 
         Returns:
-            A Validator using an ephemeral SQLQueryAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral SQLQueryAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLQueryAsset = self.add_sql_query_asset(  # type: ignore[valid-type]
@@ -1523,7 +1548,7 @@ class PandasDatasource(_PandasDatasource):
             con=con,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_sql_table_asset(
@@ -1560,9 +1585,9 @@ class PandasDatasource(_PandasDatasource):
         con: sqlalchemy.Engine | str,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a SQL table and return a Validator associated with it.
+        Read a SQL table and return a Batch containing the data.
 
         Args:
             table_name: The name of the SQL table to read.
@@ -1571,7 +1596,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_sql_table().
 
         Returns:
-            A Validator using an ephemeral SQLTableAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral SQLTableAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLTableAsset = self.add_sql_table_asset(  # type: ignore[valid-type]
@@ -1580,7 +1605,7 @@ class PandasDatasource(_PandasDatasource):
             con=con,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_stata_asset(
@@ -1613,9 +1638,9 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a Stata file and return a Validator associated with it.
+        Read a Stata file and return a Batch containing the data.
 
         Args:
             filepath_or_buffer: The path to the Stata file or a URL pointing to the Stata file.
@@ -1623,7 +1648,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_stata().
 
         Returns:
-            A Validator using an ephemeral StataAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral StataAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: StataAsset = self.add_stata_asset(  # type: ignore[valid-type]
@@ -1631,7 +1656,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_table_asset(
@@ -1664,9 +1689,9 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read a Table file and return a Validator associated with it.
+        Read a Table file and return a Batch containing the data.
 
         Args:
             filepath_or_buffer: The path to the Table file or a URL pointing to the Table file.
@@ -1674,7 +1699,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_table().
 
         Returns:
-            A Validator using an ephemeral TableAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral TableAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: TableAsset = self.add_table_asset(  # type: ignore[valid-type]
@@ -1682,7 +1707,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     @public_api
     def add_xml_asset(
@@ -1715,9 +1740,9 @@ class PandasDatasource(_PandasDatasource):
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
-    ) -> Validator:
+    ) -> Batch:
         """
-        Read an XML file and return a Validator associated with it.
+        Read an XML file and return a Batch containing the data.
 
         Args:
             path_or_buffer: The path to the XML file or a URL pointing to the XML file.
@@ -1725,7 +1750,7 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_xml().
 
         Returns:
-            A Validator using an ephemeral XMLAsset and the "default" Expectation Suite.
+            A Batch using an ephemeral XMLAsset.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: XMLAsset = self.add_xml_asset(  # type: ignore[valid-type]
@@ -1733,7 +1758,7 @@ class PandasDatasource(_PandasDatasource):
             path_or_buffer=path_or_buffer,
             **kwargs,
         )
-        return self._get_validator(asset=asset)
+        return self._get_batch(asset=asset)
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472

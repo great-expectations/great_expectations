@@ -6,12 +6,14 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
 )
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -139,7 +141,6 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py validate">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,

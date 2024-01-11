@@ -3,10 +3,10 @@ This is an example of a Custom QueryExpectation.
 For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
+from __future__ import annotations
 
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -15,6 +15,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -73,7 +76,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
@@ -83,6 +85,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         query_result = metrics.get("query.column")
         query_result = dict([element.values() for element in query_result])
 
+        configuration = self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
 

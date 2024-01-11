@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import logging
 from typing import Any, Dict, List, Optional, Set, Union
@@ -22,7 +24,7 @@ logger = logging.getLogger(__name__)
 class BatchRequestAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,  # noqa: F821
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)

@@ -4,6 +4,7 @@ from unittest import mock
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
@@ -427,18 +428,25 @@ def test_view_validation_result_uses_run_name_template_env_var(
 ):
     monkeypatch.setenv("MY_ENV_VAR", "PLEASE_RENDER_ME")
 
+    # Read in data
     context = empty_data_context
-
-    validator = context.sources.pandas_default.read_csv(
+    batch = context.sources.pandas_default.read_csv(
         "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
     )
 
-    validator.expect_column_values_to_not_be_null("pickup_datetime")
-    validator.save_expectation_suite()
+    # Create Suite
+    suite = context.add_expectation_suite("my_suite")
+    suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
 
+    # Create and run Checkpoint
     checkpoint = context.add_or_update_checkpoint(
         name="my_checkpoint",
-        validator=validator,
+        validations=[
+            {
+                "expectation_suite_name": suite.name,
+                "batch_request": batch.data_asset.build_batch_request(),
+            }
+        ],
         run_name_template="staging-$MY_ENV_VAR",
     )
 

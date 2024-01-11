@@ -1,6 +1,5 @@
 import random
 import string
-from typing import List
 from unittest import mock
 
 import pandas as pd
@@ -467,37 +466,6 @@ def test_build_suite_with_semantic_types_dict(
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
 
-    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
-    # send a usage_stats event when called from a Profiler.
-    assert mock_emit.call_count == 1
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[mock._Call]
-    # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call]
-
-    expected_events = [
-        mock.call(
-            {
-                "event": "legacy_profiler.build_suite",
-                "event_payload": {
-                    "profile_dataset_type": "Validator",
-                    "excluded_expectations_specified": True,
-                    "ignored_columns_specified": True,
-                    "not_null_only": False,
-                    "primary_or_compound_key_specified": True,
-                    "semantic_types_dict_specified": True,
-                    "table_expectations_only": False,
-                    "value_set_threshold_specified": True,
-                    "api_version": "v2",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    actual_events = mock_emit.call_args_list
-    assert actual_events == expected_events
-
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -527,52 +495,6 @@ def test_build_suite_when_suite_already_exists(
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
     assert len(suite.expectations) == 1
     assert "expect_table_row_count_to_be_between" in expectations
-
-    assert mock_emit.call_count == 2
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[mock._Call]
-    # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call]
-
-    expected_events = [
-        mock.call(
-            {
-                "event": "legacy_profiler.build_suite",
-                "event_payload": {
-                    "profile_dataset_type": "Validator",
-                    "excluded_expectations_specified": True,
-                    "ignored_columns_specified": True,
-                    "not_null_only": False,
-                    "primary_or_compound_key_specified": False,
-                    "semantic_types_dict_specified": False,
-                    "table_expectations_only": True,
-                    "value_set_threshold_specified": True,
-                    "api_version": "v2",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "legacy_profiler.build_suite",
-                "event_payload": {
-                    "profile_dataset_type": "Validator",
-                    "excluded_expectations_specified": True,
-                    "ignored_columns_specified": True,
-                    "not_null_only": False,
-                    "primary_or_compound_key_specified": False,
-                    "semantic_types_dict_specified": False,
-                    "table_expectations_only": True,
-                    "value_set_threshold_specified": True,
-                    "api_version": "v2",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    actual_events = mock_emit.call_args_list
-    assert actual_events == expected_events
 
 
 @pytest.mark.slow  # 1.01s

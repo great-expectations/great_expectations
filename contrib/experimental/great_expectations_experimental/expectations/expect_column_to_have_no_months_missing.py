@@ -3,7 +3,6 @@ from typing import Dict
 from dateutil.relativedelta import relativedelta
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -146,7 +145,6 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -167,7 +165,7 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
         }
         n_missing_months = len(month_set - set(distinct_months_sorted))
 
-        threshold = self.get_success_kwargs().get("threshold")
+        threshold = self._get_success_kwargs().get("threshold")
         success: bool = n_missing_months <= threshold
         return {
             "success": success,

@@ -21,6 +21,7 @@ from pyparsing import (
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
@@ -100,6 +101,7 @@ class RowCondition(SerializableDictDot):
     condition: str
     condition_type: RowConditionParserType
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
@@ -109,6 +111,7 @@ class RowCondition(SerializableDictDot):
             "condition_type": self.condition_type.value,
         }
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.
@@ -124,7 +127,7 @@ def _parse_great_expectations_condition(row_condition: str):
 
 
 # noinspection PyUnresolvedReferences
-def parse_condition_to_spark(  # noqa: PLR0911, PLR0912
+def parse_condition_to_spark(  # type: ignore[return] # return or raise exists for all branches  # noqa: PLR0911, PLR0912
     row_condition: str,
 ) -> pyspark.Column:
     parsed = _parse_great_expectations_condition(row_condition)
@@ -138,7 +141,7 @@ def parse_condition_to_spark(  # noqa: PLR0911, PLR0912
             )
     elif "fnumber" in parsed:
         try:
-            num = int(parsed["fnumber"])
+            num: int | float = int(parsed["fnumber"])
         except ValueError:
             num = float(parsed["fnumber"])
         op = parsed["op"]

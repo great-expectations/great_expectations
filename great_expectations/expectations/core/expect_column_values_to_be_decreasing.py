@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Optional, Union
+
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -21,6 +19,12 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -65,6 +69,8 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     See Also:
         [expect_column_values_to_be_increasing](https://greatexpectations.io/expectations/expect_column_values_to_be_increasing)
     """
+
+    strictly: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

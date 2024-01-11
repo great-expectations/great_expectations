@@ -6,8 +6,10 @@ import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationSuiteValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 # Snippet: example data frame for result_format
@@ -206,7 +208,7 @@ expectation_config = ExpectationConfiguration(
         "value_set": ["A", "B"],
     },
 )
-test_suite.add_expectation(expectation_configuration=expectation_config)
+test_suite.add_expectation_configuration(expectation_configuration=expectation_config)
 
 test_suite.expectation_suite_name = "test_suite"
 context.add_or_update_expectation_suite(

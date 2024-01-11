@@ -4,8 +4,8 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,

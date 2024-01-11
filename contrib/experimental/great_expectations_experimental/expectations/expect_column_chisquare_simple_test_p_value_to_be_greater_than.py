@@ -2,10 +2,12 @@ from typing import Dict, Optional
 
 import scipy.stats as stats
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -113,12 +115,11 @@ class ExpectColumnChisquareSimpleTestPValueToBeGreaterThan(BatchExpectation):
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        threshold = configuration["kwargs"].get("p_value_threshold")
+        threshold = self.configuration["kwargs"].get("p_value_threshold")
         chi2, p_value = metrics.get("column.p_value_greater_than_threshold")
 
         success = p_value >= threshold
