@@ -670,7 +670,8 @@ def docs(
     old_cwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
-    pull_request = os.environ.get(  # noqa: TID251 # os.enrivon allowed in config files
+    # set by netlify: https://docs.netlify.com/configure-builds/environment-variables/#git-metadata
+    pull_request = os.environ.get(  # noqa: TID251 # os.environ allowed in config files
         "PULL_REQUEST"
     )
     is_pull_request = pull_request == "true"
