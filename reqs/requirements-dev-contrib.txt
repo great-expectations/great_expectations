@@ -3,5 +3,6 @@ black[jupyter]==23.10.1
 invoke>=2.0.0
 mypy==1.7.1
 pre-commit>=2.21.0
+requests>=2.20
 ruff==0.1.11
 tomli>=2.0.1
