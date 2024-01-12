@@ -68,6 +68,10 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
 
