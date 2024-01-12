@@ -15,6 +15,7 @@ from typing import Dict, List, Optional, Tuple
 
 import click
 import pkg_resources
+from hypothesis.strategies import builds
 
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
@@ -295,7 +296,7 @@ def get_expectation_instances(expectations_info):
         import_module_args = expectations_info[expectation_name]["import_module_args"]
         if import_module_args:
             try:
-                importlib.import_module(*import_module_args)
+                model = importlib.import_module(*import_module_args)
             except (ModuleNotFoundError, ImportError, Exception):
                 logger.error(f"Failed to load expectation_name: {expectation_name}")
                 print(traceback.format_exc())
@@ -306,11 +307,10 @@ def get_expectation_instances(expectations_info):
                 continue
 
         try:
+            exp = builds(model).example()
             expectation_instances[
                 expectation_name
-            ] = great_expectations.expectations.registry.get_expectation_impl(
-                expectation_name
-            )()
+            ] = exp
         except ExpectationNotFoundError:
             logger.error(
                 f"Failed to get Expectation implementation from registry: {expectation_name}"
