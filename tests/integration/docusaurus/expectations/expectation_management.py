@@ -18,14 +18,20 @@ suite.add_expectation(
 )
 suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
 
-# find a single expectation
+# find a single expectation by type and/or domain
+expectation = next(
+    expectation
+    for expectation in suite.expectations
+    if isinstance(expectation, gxe.ExpectColumnValuesToNotBeNull)
+    and expectation.column == "pickup_datetime"
+)
+
+# update a single expectation
 expectation = next(
     expectation
     for expectation in suite.expectations
     if isinstance(expectation, gxe.ExpectColumnValuesToNotBeNull)
 )
-
-# update a single expectation
 expectation.column = "pickup_location_id"
 expectation.save()
 
@@ -35,6 +41,11 @@ for expectation in suite.expectations:
 suite.save()
 
 # delete an expectation
+expectation = next(
+    expectation
+    for expectation in suite.expectations
+    if isinstance(expectation, gxe.ExpectColumnValuesToNotBeNull)
+)
 suite.delete_expectation(expectation=expectation)
 
 # delete a suite
