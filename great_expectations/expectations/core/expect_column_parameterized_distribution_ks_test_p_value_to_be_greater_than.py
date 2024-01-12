@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-# NOTE: This Expectation is incomplete and not ready for use.
-#       It should remain unexported until it meets the requirements set by our V1 API.
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     BatchExpectation,
 )
 
 
-@public_api
+# NOTE: This Expectation is incomplete and not ready for use.
+#       It should remain unexported until it meets the requirements set by our V1 API.
 class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     BatchExpectation
 ):
