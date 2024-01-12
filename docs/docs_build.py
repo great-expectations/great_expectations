@@ -1,17 +1,18 @@
 from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import zipfile
 from contextlib import contextmanager
 from functools import cached_property
-import json
-from .logging import Logger
-import os
-import shutil
-from pathlib import Path
-import re
-from typing import TYPE_CHECKING, Generator, List, Optional, cast
 from io import BytesIO
-import zipfile
+from pathlib import Path
+from typing import TYPE_CHECKING, Generator, List, Optional, cast
 
-
+from docs.docs_version_bucket_info import S3_URL
+from docs.logging import Logger
 from docs.prepare_prior_versions import prepare_prior_versions
 
 if TYPE_CHECKING:
@@ -83,7 +84,6 @@ class DocsBuilder:
         as the versions.json file, which contains the list of versions that we then download from github.
         """
 
-        S3_URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip"
         if os.path.exists("versioned_code"):
             shutil.rmtree("versioned_code")
         os.mkdir("versioned_code")
