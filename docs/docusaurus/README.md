@@ -77,19 +77,19 @@ To add a new version, follow these steps:
 (Note: yarn commands should be run from docs/docusaurus/)
 
 1. It may help to start with a fresh virtualenv and clone of gx.
-2. Check out the version from the tag, e.g. `git checkout 0.15.50`
-3. Modify `docs/docusaurus/docusaurus.config.js` and `docs/docusaurus/docs/components/_data.jsx` to the new version (the patch version may be off by 1 e.g. 0.17.22 instead of 0.17.23 since we update this in the release PR which comes after the release tag).
-4. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"` and `pip install pyspark`
-5. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
-6. Build API docs `invoke api-docs` from the repo root.
-7. Run `yarn install` from `docs/docusaurus/`.
-8. Temporarily change onBrokenLinks: 'throw' to onBrokenLinks: 'warn' in `docusaurus.config.js` to allow the build to complete even if there are broken links.
-9. Run `yarn build` from `docs/docusaurus/`.
-10. Create the version e.g. `yarn docusaurus docs:version 0.15.50` from `docs/docusaurus/`.
-11. Pull down the version file (see `docs/build_docs` for the file path, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
-12. Unzip and add your newly created versioned docs via the following:
-13. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
-14. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
-15. Add your version number to `versions.json` in the unzipped version file.
-16. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` as `oss_docs_versions.zip` and upload to the s3 bucket (see `docs/build_docs` for the bucket name). Make sure `versioned_docs`, `versioned_sidebars` and `versions.json` are at the top level of the zip file (not nested in a folder).
-17. Once the docs are built again, this zip file will be used for the prior versions.
+1. Check out the version from the tag, e.g. `git checkout 0.15.50`
+1. Modify `docs/docusaurus/docusaurus.config.js` and `docs/docusaurus/docs/components/_data.jsx` to the new version (the patch version may be off by 1 e.g. 0.17.22 instead of 0.17.23 since we update this in the release PR which comes after the release tag).
+1. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"` and `pip install pyspark`
+1. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
+1. Build API docs `invoke api-docs` from the repo root.
+1. Run `yarn install` from `docs/docusaurus/`.
+1. Temporarily change onBrokenLinks: 'throw' to onBrokenLinks: 'warn' in `docusaurus.config.js` to allow the build to complete even if there are broken links.
+1. Run `yarn build` from `docs/docusaurus/`.
+1. Create the version e.g. `yarn docusaurus docs:version 0.15.50` from `docs/docusaurus/`.
+1. Pull down the version file (see `docs/build_docs` for the file path, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
+1. Unzip and add your newly created versioned docs via the following:
+1. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
+1. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
+1. Add your version number to `versions.json` in the unzipped version file.
+1. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` as `oss_docs_versions.zip` and upload to the s3 bucket (see `docs/build_docs` for the bucket name). Make sure `versioned_docs`, `versioned_sidebars` and `versions.json` are at the top level of the zip file (not nested in a folder).
+1. Once the docs are built again, this zip file will be used for the prior versions.
