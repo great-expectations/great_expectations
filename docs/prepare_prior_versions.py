@@ -55,7 +55,22 @@ def _paths_to_versioned_docs_after_v0_15_50() -> list[pathlib.Path]:
     paths = [
         f
         for f in data_path.iterdir()
-        if f.is_dir() and ("0.14.13" not in str(f) or "0.15.50" not in str(f))
+        if f.is_dir() and ("0.14.13" not in str(f) and "0.15.50" not in str(f))
+    ]
+    return paths
+
+
+def _paths_to_versioned_docs_after_v0_16_16() -> list[pathlib.Path]:
+    data_path = _docs_dir() / "docusaurus/versioned_docs"
+    paths = [
+        f
+        for f in data_path.iterdir()
+        if f.is_dir()
+        and (
+            "0.14.13" not in str(f)
+            and "0.15.50" not in str(f)
+            and "0.16.16" not in str(f)
+        )
     ]
     return paths
 
@@ -394,7 +409,7 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
     version_from_path_name_pattern = re.compile(
         r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
     )
-    paths = _paths_to_versioned_docs_after_v0_15_50()
+    paths = _paths_to_versioned_docs_after_v0_16_16()
 
     method_name_for_logging = "prepend_version_info_to_name_for_md_relative_links"
     print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
