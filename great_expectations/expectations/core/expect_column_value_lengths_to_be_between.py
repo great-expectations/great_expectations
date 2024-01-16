@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     """Expect the column entries to be strings with length between a minimum value and a maximum value (inclusive).
 

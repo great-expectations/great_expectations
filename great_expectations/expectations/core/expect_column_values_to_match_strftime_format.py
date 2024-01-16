@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     """Expect the column entries to be strings representing a date or time with a given format.
 
@@ -86,7 +88,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
         return strftime_format
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
