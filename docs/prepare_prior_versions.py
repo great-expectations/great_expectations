@@ -437,6 +437,68 @@ def _prepend_version_info_to_name_for_md_relative_links(
     return contents
 
 
+def prepend_version_info_to_name_for_md_relative_links_2(verbose: bool = False) -> None:
+    """Prepend version info to md relative links.
+
+    Links to ../../../../docs/guides/validation/index.md#checkpoints
+    Should link to: ../../../../docs/0.16.16/guides/validation/#checkpoints
+
+    Args:
+        verbose: Whether to print verbose output.
+    """
+
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+    paths = _paths_to_versioned_docs_after_v0_15_50()
+
+    method_name_for_logging = "prepend_version_info_to_name_for_md_relative_links_2"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        version = path.name
+        version_only = version_from_path_name_pattern.search(version).group("version")
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = _prepend_version_info_to_name_for_md_relative_links_2(
+                    contents=contents, version=version_only
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _prepend_version_info_to_name_for_md_relative_links_2(
+    contents: str, version: str
+) -> str:
+    """
+    Fixes issues like this:
+    Location of link: docs/docusaurus/versioned_docs/version-0.17.23/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_and_run.md
+    Link structure: ../../../../docs/guides/validation/checkpoints/checkpoint_lp.md
+    Output link structure: ../../../../version-0.17.23/guides/validation/checkpoints/checkpoint_lp.md
+
+    """
+    pattern = re.compile(r"(?P<up_dir>(.*\.\.))/docs/(?P<path>(.*\.mdx?))")
+    contents = re.sub(pattern, rf"\g<up_dir>/version-{version}/\g<path>", contents)
+
+    return contents
+
+
 def _prepend_version_info_to_name_for_md_image(contents: str, version: str) -> str:
     pattern = re.compile(r"\.\./(?P<path>(static/img/.*\.(gif|png)))")
     contents = re.sub(
