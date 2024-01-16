@@ -179,7 +179,7 @@ def in_memory_asset_checkpoint(
     in_memory_asset: DataFrameAsset,
     pandas_test_df: pd.DataFrame,
     expectation_suite: ExpectationSuite,
-) -> Checkpoint:
+) -> Iterator[Checkpoint]:
     """This Checkpoint only has one in-memory validation configured.
     This means with a deserialized Checkpoint, if we don't update with the latest DataFrame,
     we should get an error because nothing is there to be validated.
@@ -283,7 +283,7 @@ def test_in_memory_checkpoint_run_build_batch_request(
     )
     # building a new Batch Request also associates the DataFrame with the DataFrameAsset again
     # users might choose to pass this Batch Request as a runtime validation
-    datasource = context.get_datasource(datasource_name=datasource.name)
+    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
     # remove the dataframe instead of getting a new Data Context
     in_memory_asset.dataframe = None
