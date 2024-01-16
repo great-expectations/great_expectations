@@ -590,6 +590,7 @@ def prepare_prior_versions() -> None:
     update_tag_references_for_correct_version()
     use_relative_path_for_imports()
     prepend_version_info_to_name_for_md_relative_links_to_index_files()
+    prepend_version_info_to_name_for_md_relative_links()
     prepend_version_info_for_md_absolute_links()
     prepend_version_info_to_name_for_md_images()
     print("Finished processing files in prepare_prior_versions.py")
