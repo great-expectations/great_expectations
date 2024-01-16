@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -32,14 +31,11 @@ if TYPE_CHECKING:
 
 # NOTE: This Expectation is incomplete and not ready for use.
 #       It should remain unexported until it meets the requirements set by our V1 API.
-
-
-@public_api
 class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError
 
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": [
             "core expectation",
