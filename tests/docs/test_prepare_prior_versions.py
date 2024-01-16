@@ -154,7 +154,7 @@ def test__prepend_version_info_to_name_for_md_relative_links():
     updated_contents = _prepend_version_info_to_name_for_md_relative_links(
         contents, version
     )
-    expected_contents = """here's something: ../../../../versioned_docs/version-0.17.23/guides/validation/checkpoints/checkpoint_lp.md what"""
+    expected_contents = """here's something: ../../../../version-0.17.23/guides/validation/checkpoints/checkpoint_lp.md what"""
     assert updated_contents == expected_contents
 
 

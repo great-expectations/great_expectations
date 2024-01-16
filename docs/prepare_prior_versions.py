@@ -438,9 +438,7 @@ def _prepend_version_info_to_name_for_md_relative_links(
 
     """
     pattern = re.compile(r"(?P<up_dir>(.*\.\.))/docs/(?P<path>(.*\.mdx?))")
-    contents = re.sub(
-        pattern, rf"\g<up_dir>/versioned_docs/version-{version}/\g<path>", contents
-    )
+    contents = re.sub(pattern, rf"\g<up_dir>/version-{version}/\g<path>", contents)
 
     return contents
 
