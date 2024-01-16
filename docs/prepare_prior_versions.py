@@ -379,8 +379,7 @@ def prepend_version_info_to_name_for_md_images(verbose: bool = False) -> None:
     """Prepend version info to md relative image links.
 
     Links to ../../../static/img/<FILENAME>
-    Should link to: ../../../../docs/0.16.16/guides/validation/#checkpoints
-
+    Should link to: ../../../../versioned_code/version-<VERSION>/docs/docusaurus/static/img/<FILENAME>
     Args:
         verbose: Whether to print verbose output.
     """
@@ -390,7 +389,7 @@ def prepend_version_info_to_name_for_md_images(verbose: bool = False) -> None:
     )
     paths = _paths_to_versioned_docs_after_v0_15_50()
 
-    method_name_for_logging = "prepend_version_info_to_name_for_md_relative_links"
+    method_name_for_logging = "prepend_version_info_to_name_for_md_images"
     print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
     for path in paths:
         version = path.name
