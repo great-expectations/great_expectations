@@ -5,18 +5,19 @@ import importlib
 import json
 import logging
 import os
+import pathlib
 import re
 import sys
 import traceback
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Final, List, Optional, Tuple
 
 import click
 import pkg_resources
-from hypothesis.strategies import builds
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
@@ -296,7 +297,7 @@ def get_expectation_instances(expectations_info):
         import_module_args = expectations_info[expectation_name]["import_module_args"]
         if import_module_args:
             try:
-                model = importlib.import_module(*import_module_args)
+                importlib.import_module(*import_module_args)
             except (ModuleNotFoundError, ImportError, Exception):
                 logger.error(f"Failed to load expectation_name: {expectation_name}")
                 print(traceback.format_exc())
@@ -307,10 +308,14 @@ def get_expectation_instances(expectations_info):
                 continue
 
         try:
-            exp = builds(model).example()
-            expectation_instances[
-                expectation_name
-            ] = exp
+            expectation_class = (
+                great_expectations.expectations.registry.get_expectation_impl(
+                    expectation_name
+                )
+            )
+            # instantiate expectation
+            exp = create_expectation_instance(expectation_class)
+            expectation_instances[expectation_name] = exp
         except ExpectationNotFoundError:
             logger.error(
                 f"Failed to get Expectation implementation from registry: {expectation_name}"
@@ -321,7 +326,36 @@ def get_expectation_instances(expectations_info):
             )
             expectation_tracebacks.write(traceback.format_exc())
             continue
+        except pydantic.ValidationError as exc:
+            logger.error(exc)
+            continue
+        except IndexError:
+            logger.error(f"Expectation {expectation_name} has invalid test case.")
+        except Exception as exc:
+            logger.error(f"Unexpected error occurred: {exc}")
     return expectation_instances
+
+
+def create_expectation_instance(expectation_class: type[Expectation]) -> Expectation:
+    expectation_params: dict
+    if expectation_class.examples:
+        expectation_params = expectation_class.examples[0]["tests"][0]["in"]
+
+    else:
+        _TEST_DEFS_DIR: Final = pathlib.Path(
+            __file__, "..", "..", "..", "tests", "test_definitions"
+        ).resolve()
+        found = next(
+            _TEST_DEFS_DIR.rglob(f"**/{expectation_class.expectation_type}.json"), None
+        )
+        if not found:
+            raise Exception(
+                f"No JSON test case found for Expectation {expectation_class.expectation_type}, cannot build gallery example."
+            )
+        with open(found) as fp:
+            test_cases = json.load(fp)
+            expectation_params = test_cases["datasets"][0]["tests"][0]["in"]
+    return expectation_class(**expectation_params)
 
 
 def combine_backend_results(
