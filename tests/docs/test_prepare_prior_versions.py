@@ -4,7 +4,7 @@ import pytest
 
 from docs.prepare_prior_versions import (
     _prepend_version_info_for_md_absolute_links,
-    _prepend_version_info_to_name_for_md_relative_links,
+    _prepend_version_info_to_name_for_md_relative_links_to_index_files,
     _update_tag_references_for_correct_version_substitution,
     _use_relative_path_for_imports_substitution,
     _use_relative_path_for_imports_substitution_path_starting_with_forwardslash,
@@ -136,8 +136,10 @@ def test__prepend_version_info_to_name_for_md_relative_links():
     contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](../../../../docs/guides/validation/checkpoints/checkpoint_lp.md)."""
 
     version = "0.16.16"
-    updated_contents = _prepend_version_info_to_name_for_md_relative_links(
-        contents, version
+    updated_contents = (
+        _prepend_version_info_to_name_for_md_relative_links_to_index_files(
+            contents, version
+        )
     )
     expected_contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](../../../../docs/guides/validation/checkpoints/checkpoint_lp.md)."""
     assert updated_contents == expected_contents
