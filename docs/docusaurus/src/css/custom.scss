@@ -36,6 +36,8 @@
     --ifm-heading-margin-bottom: 0;
     --ifm-heading-vertical-rhythm-bottom: 0;
 
+    --p-sm-font-size: 0.875rem;
+
     /* make pagination look like the nice buttons */
     --ifm-pagination-nav-border-radius: 35px;
     --ifm-pagination-nav-padding: 16px;
@@ -353,6 +355,17 @@ div[role="tabpanel"]{
     .main-wrapper {
         overflow: hidden;
     }
+}
+
+/* left navbar overrides */
+.theme-doc-sidebar-item-link-level-2 {
+  font-size: var(--p-sm-font-size);
+}
+
+.menu__link--active,
+.menu__link--active:hover {
+  color: var(--ifm-menu-color);
+  font-weight: bold;
 }
 
 @import "api_docs/api_docs.scss";
