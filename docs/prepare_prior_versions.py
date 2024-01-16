@@ -452,7 +452,7 @@ def _prepend_version_info_for_md_absolute_links(contents: str, version: str) -> 
     return contents
 
 
-if __name__ == "__main__":
+def prepare_prior_versions() -> None:
     print("Starting to process files in prepare_prior_versions.py...")
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
@@ -462,3 +462,7 @@ if __name__ == "__main__":
     prepend_version_info_to_name_for_md_relative_links()
     prepend_version_info_for_md_absolute_links()
     print("Finished processing files in prepare_prior_versions.py")
+
+
+if __name__ == "__main__":
+    prepare_prior_versions()

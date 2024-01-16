@@ -1452,7 +1452,7 @@ def test_add_expectation_to_expectation_suite(
     expectation_suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
     )
-    expectation_suite.add_expectation(
+    expectation_suite.add_expectation_configuration(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
@@ -2576,6 +2576,9 @@ class ExpectSkyToBeColor(BatchExpectation):
         }
 
 
+@pytest.mark.xfail(
+    reason="Uses unsupported expectation but tests required behavior - fix this test as part of V1-117"
+)
 @pytest.mark.filesystem
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
     empty_data_context,

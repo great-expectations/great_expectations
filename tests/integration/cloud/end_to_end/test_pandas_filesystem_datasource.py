@@ -126,7 +126,7 @@ def expectation_suite(
     Note: There is no need to test Expectation Suite create, get, or delete in this module.
     Those assertions can be found in the expectation_suite fixture.
     """
-    expectation_suite.add_expectation(
+    expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={

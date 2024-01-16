@@ -228,8 +228,6 @@ class GxConfig(FluentBaseModel):
                 # attach the datasource to the nested assets, avoiding recursion errors
                 for asset in datasource.assets:
                     asset._datasource = datasource
-                    for batch_config in asset.batch_configs:
-                        batch_config._data_asset = asset
 
         logger.debug(f"Loaded 'datasources' ->\n{loaded_datasources!r}")
 
@@ -263,7 +261,7 @@ class GxConfig(FluentBaseModel):
         return config
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -280,7 +278,7 @@ class GxConfig(FluentBaseModel):
         ...
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: pathlib.Path,
         *,

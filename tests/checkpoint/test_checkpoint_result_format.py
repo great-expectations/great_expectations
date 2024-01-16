@@ -5,24 +5,13 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
-from great_expectations.expectations.core.expect_column_pair_values_to_be_equal import (
-    ExpectColumnPairValuesToBeEqual,
-)
-from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
-    ExpectColumnValuesToBeInSet,
-)
-from great_expectations.expectations.core.expect_column_values_to_not_be_in_set import (
-    ExpectColumnValuesToNotBeInSet,
-)
-from great_expectations.expectations.core.expect_multicolumn_sum_to_equal import (
-    ExpectMulticolumnSumToEqual,
-)
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -145,26 +134,26 @@ def reference_sql_checkpoint_config_for_multi_column_sum_table(
 
 @pytest.fixture()
 def expect_multicolumn_sum_to_equal() -> Expectation:
-    return ExpectMulticolumnSumToEqual(column_list=["a", "b", "c"], sum_total=30)
+    return gxe.ExpectMulticolumnSumToEqual(column_list=["a", "b", "c"], sum_total=30)
 
 
 @pytest.fixture()
 def expect_column_pair_values_to_be_equal() -> Expectation:
-    return ExpectColumnPairValuesToBeEqual(
+    return gxe.ExpectColumnPairValuesToBeEqual(
         column_A="ordered_item", column_B="received_item"
     )
 
 
 @pytest.fixture()
 def expect_column_values_to_be_in_set() -> Expectation:
-    return ExpectColumnValuesToBeInSet(
+    return gxe.ExpectColumnValuesToBeInSet(
         column="animals", value_set=["cat", "fish", "dog"]
     )
 
 
 @pytest.fixture()
 def expect_column_values_to_not_be_in_set() -> Expectation:
-    return ExpectColumnValuesToNotBeInSet(
+    return gxe.ExpectColumnValuesToNotBeInSet(
         column="animals", value_set=["giraffe", "lion", "zebra"]
     )
 
@@ -332,7 +321,7 @@ def _add_expectations_and_checkpoint(
     context.add_expectation_suite(expectation_suite_name="metrics_exp")
     animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
     for expectation in expectations_list:
-        animals_suite.add(expectation=expectation)
+        animals_suite.add_expectation(expectation=expectation)
     animals_suite.expectation_suite_name = "metrics_exp"
     context.add_or_update_expectation_suite(
         expectation_suite=animals_suite,

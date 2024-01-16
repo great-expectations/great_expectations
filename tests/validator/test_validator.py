@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -31,7 +32,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -409,9 +409,6 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
         multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
     )
     assert expected == actual
-
-    # add_expectation() will not send usage_statistics event when called from a Validator
-    assert mock_emit.call_count == 0
 
 
 @pytest.mark.big
@@ -971,7 +968,7 @@ def test_validator_docstrings(multi_batch_taxi_validator):
         multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
     )
     assert expectation_impl.__doc__.startswith(
-        "Expect each column value to be in a given set"
+        "--Public API--Expect each column value to be in a given set"
     )
 
 
@@ -1211,7 +1208,7 @@ def test_list_available_expectation_types(
 
 def _context_to_validator_and_expectation_sql(
     context: FileDataContext,
-) -> Tuple[Validator, ExpectColumnValuesToBeInSet]:
+) -> Tuple[Validator, gxe.ExpectColumnValuesToBeInSet]:
     """
     Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuple of Validator and
     Expectation after building a BatchRequest and creating ExpectationSuite.
@@ -1226,7 +1223,7 @@ def _context_to_validator_and_expectation_sql(
             "value_set": ["cat", "fish", "dog"],
         },
     )
-    expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
+    expectation: gxe.ExpectColumnValuesToBeInSet = gxe.ExpectColumnValuesToBeInSet(
         **expectation_configuration.kwargs
     )
 

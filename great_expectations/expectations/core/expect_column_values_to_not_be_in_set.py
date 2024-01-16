@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import numpy as np
 import pandas as pd
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     """Expect column entries to not be in the set.
 
@@ -244,6 +245,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
+        from great_expectations.execution_engine import PandasExecutionEngine
+
         value_set = metric_value_kwargs["value_set"]
 
         if value_set is None:

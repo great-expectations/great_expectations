@@ -35,6 +35,7 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
     YAMLReadyDictDatasourceConfigSerializer,
 )
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from tests.data_context.conftest import MockResponse
 
 yaml = YAMLHandler()
@@ -43,6 +44,42 @@ yaml = YAMLHandler()
 @pytest.fixture
 def fake_datasource_name() -> str:
     return "my_first_datasource"
+
+
+@pytest.fixture
+def empty_asset_name() -> str:
+    return "empty asset"
+
+
+@pytest.fixture
+def asset_with_batch_config_name() -> str:
+    return "i have a batch config"
+
+
+@pytest.fixture
+def batch_config_name() -> str:
+    return "my cool batch config"
+
+
+@pytest.fixture
+def datasource_store_with_fds_datasource(
+    empty_datasource_store: DatasourceStore,
+    fake_datasource_name: str,
+    empty_asset_name: str,
+    asset_with_batch_config_name: str,
+    batch_config_name: str,
+) -> DatasourceStore:
+    """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
+    datasource = PandasDatasource(name=fake_datasource_name)
+    datasource.add_csv_asset(empty_asset_name, "taxi.csv")
+    asset = datasource.add_csv_asset(asset_with_batch_config_name, "taxi.csv")
+    asset.add_batch_config(batch_config_name)
+
+    key = DataContextVariableKey(
+        resource_name=fake_datasource_name,
+    )
+    empty_datasource_store.set(key=key, value=datasource)
+    return empty_datasource_store
 
 
 @pytest.fixture
@@ -75,13 +112,12 @@ def test_datasource_store_with_bad_key_raises_error(
 
     error_msg: str = "key must be an instance of DataContextVariableKey"
 
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError, match=error_msg) as e:
         store.set(key="my_bad_key", value=block_config_datasource_config)  # type: ignore[arg-type]
     assert error_msg in str(e.value)
 
     with pytest.raises(TypeError) as e:
         store.get(key="my_bad_key")  # type: ignore[arg-type]
-    assert error_msg in str(e.value)
 
 
 def _assert_serialized_datasource_configs_are_equal(
@@ -419,16 +455,14 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     empty_datasource_store: DatasourceStore,
 ) -> None:
     updated_datasource_config = DatasourceConfig()
-    with pytest.raises(gx_exceptions.DatasourceNotFoundError) as e:
+    with pytest.raises(
+        gx_exceptions.DatasourceNotFoundError,
+        match=f"Could not find an existing Datasource named {fake_datasource_name}.",
+    ):
         empty_datasource_store.update_by_name(
             datasource_name=fake_datasource_name,
             datasource_config=updated_datasource_config,
         )
-
-    assert (
-        f"Could not find an existing Datasource named {fake_datasource_name}."
-        in str(e.value)
-    )
 
 
 @pytest.mark.unit

@@ -35,17 +35,17 @@ from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.analytics.events import DataContextInitializedEvent
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
     new_argument,
     new_method_or_class,
     public_api,
 )
+from great_expectations.analytics.events import DataContextInitializedEvent
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -59,13 +59,13 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.datasource_dict import CacheableDatasourceDict
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
+from great_expectations.core.suite_factory import SuiteFactory
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -101,6 +101,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     parse_substitution_variable,
 )
+from great_expectations.datasource.datasource_dict import CacheableDatasourceDict
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
@@ -142,7 +143,6 @@ if TYPE_CHECKING:
 
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.datasource_dict import DatasourceDict
     from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -164,6 +164,7 @@ if TYPE_CHECKING:
         GXCloudIdentifier,
     )
     from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
@@ -308,6 +309,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._sources: _SourceFactories = _SourceFactories(self)
+
+        self._suites: Union[SuiteFactory, None]
+        if self.stores.get(self.expectations_store_name):
+            self._suites = SuiteFactory(
+                store=self.expectations_store,
+                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
+            )
+        else:
+            self._suites = None
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
@@ -485,7 +495,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id  # type: ignore[assignment]
+            self._in_memory_instance_id = instance_id
         return instance_id
 
     @property
@@ -538,6 +548,18 @@ class AbstractDataContext(ConfigPeer, ABC):
     def stores(self) -> dict:
         """A single holder for all Stores in this context"""
         return self._stores
+
+    @property
+    def datasource_store(self) -> DatasourceStore:
+        return self._datasource_store
+
+    @property
+    def suites(self) -> SuiteFactory:
+        if not self._suites:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured ExpectationsStore to persist ExpectationSuites."
+            )
+        return self._suites
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -1403,7 +1425,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: str = ...,
         config_version: float = ...,
@@ -1434,7 +1456,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: None = ...,
         config_version: float = ...,
@@ -1602,7 +1624,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return result
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: str = ...,
         id: str | None = ...,
@@ -1631,7 +1653,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: None = ...,
         id: None = ...,
@@ -2478,7 +2500,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource.get_batch_list_from_batch_request(batch_request=result)
 
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2496,7 +2518,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -2681,7 +2703,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return ExpectationSuiteIdentifier(name)
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2700,7 +2722,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -2752,7 +2774,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted `ExpectationSuite`.
         """
-
         self._validate_expectation_suite_xor_expectation_suite_name(
             expectation_suite, expectation_suite_name
         )

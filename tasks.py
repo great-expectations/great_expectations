@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
+from docs.docs_build import DocsBuilder
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
@@ -278,7 +279,7 @@ def type_check(  # noqa: PLR0913, PLR0912
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
-            print("✅"),
+            print("✅")
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
@@ -286,6 +287,8 @@ def type_check(  # noqa: PLR0913, PLR0912
         bin = "dmypy run --"
     else:
         bin = "mypy"
+
+    cmds = [bin]
 
     ge_pkgs = [f"great_expectations.{p}" for p in packages]
 
@@ -297,11 +300,11 @@ def type_check(  # noqa: PLR0913, PLR0912
             )
             relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
+        # following imports here can cause mutually exclusive import errors with normal type-checking
+        cmds.append("--follow-imports=silent")
 
-    cmds = [
-        bin,
-        *ge_pkgs,
-    ]
+    cmds.extend(ge_pkgs)
+
     if install_types:
         cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
@@ -664,9 +667,22 @@ def docs(
     )
 
     print("Running invoke docs from:", repo_root)
-    old_pwd = pathlib.Path.cwd()
+    old_cwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
+    # set by netlify: https://docs.netlify.com/configure-builds/environment-variables/#git-metadata
+    pull_request = os.environ.get(  # noqa: TID251 # os.environ allowed in config files
+        "PULL_REQUEST"
+    )
+    is_pull_request = pull_request == "true"
+    is_local = not pull_request
+    docs_builder = DocsBuilder(
+        ctx,
+        docusaurus_dir,
+        is_pull_request=is_pull_request,
+        is_local=is_local,
+    )
+
     if clean:
         rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
         ctx.run(" ".join(rm_cmds), echo=True)
@@ -688,14 +704,13 @@ def docs(
             ctx.run(" ".join(["yarn install"]), echo=True)
 
             if build:
-                build_docs_cmd = "../build_docs"
+                print("Running build_docs from:", docusaurus_dir)
+                docs_builder.build_docs()
             else:
-                build_docs_cmd = "../build_docs_locally.sh"
+                print("Running build_docs_locally from:", docusaurus_dir)
+                docs_builder.build_docs_locally()
 
-            print(f"Running {build_docs_cmd} from:", docusaurus_dir)
-            ctx.run(build_docs_cmd, echo=True)
-
-    os.chdir(old_pwd)
+    os.chdir(old_cwd)
 
 
 @invoke.task(
@@ -748,12 +763,16 @@ def link_checker(ctx: Context, skip_external: bool = True):
 
     path: str = "docs/docusaurus/docs"
     docs_root: str = "docs/docusaurus/docs"
+    static_root: str = "docs/docusaurus/static"
     site_prefix: str = "docs"
+    static_prefix: str = "static"
 
     code, message = checker.scan_docs(
         path=path,
         docs_root=docs_root,
+        static_root=static_root,
         site_prefix=site_prefix,
+        static_prefix=static_prefix,
         skip_external=skip_external,
     )
     raise invoke.Exit(message, code)

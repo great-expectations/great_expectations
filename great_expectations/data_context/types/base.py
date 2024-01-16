@@ -42,9 +42,9 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -1400,19 +1400,21 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
-        globally: bool = True,
-        profilers: bool = True,
-        metric_calculations: bool = True,
+        globally: Optional[bool] = None,
+        profilers: Optional[bool] = None,
+        metric_calculations: Optional[bool] = None,
     ) -> None:
-        self.globally = globally
-        self.profilers = profilers
-        self.metric_calculations = metric_calculations
+        self.globally: bool = True if globally is None else globally
+        self.profilers: bool = profilers if profilers is not None else self.globally
+        self.metric_calculations: bool = (
+            metric_calculations if metric_calculations is not None else self.globally
+        )
 
 
 class ProgressBarsConfigSchema(Schema):
-    globally = fields.Boolean(default=True)
-    profilers = fields.Boolean(default=True)
-    metric_calculations = fields.Boolean(default=True)
+    globally = fields.Boolean()
+    profilers = fields.Boolean()
+    metric_calculations = fields.Boolean()
 
 
 class IncludeRenderedContentConfig(DictDot):

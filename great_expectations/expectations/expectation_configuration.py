@@ -19,8 +19,8 @@ from typing import (
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
+from great_expectations._docs_decorators import new_argument, public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     build_evaluation_parameters,
@@ -588,13 +588,13 @@ class ExpectationConfigurationSchema(Schema):
     )
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
-        lambda: ExpectationContextSchema,  # type: ignore[arg-type,return-value]
+        lambda: ExpectationContextSchema,
         required=False,
         allow_none=True,
     )
     rendered_content = fields.List(
         fields.Nested(
-            lambda: RenderedAtomicContentSchema,  # type: ignore[arg-type,return-value]
+            lambda: RenderedAtomicContentSchema,
             required=False,
             allow_none=True,
         )

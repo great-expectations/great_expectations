@@ -3172,6 +3172,7 @@ def fds_data_context(
     datasource = context.sources.add_sqlite(
         name=fds_data_context_datasource_name,
         connection_string=sqlite_connection_string,
+        create_temp_table=True,
     )
 
     datasource.add_query_asset(
@@ -3558,7 +3559,7 @@ def empty_base_data_context_in_cloud_mode(
         cloud_access_token=ge_cloud_config.access_token,
         cloud_organization_id=ge_cloud_config.organization_id,
     )
-
+    set_context(context)
     return context
 
 

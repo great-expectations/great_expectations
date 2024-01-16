@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
@@ -300,27 +301,32 @@ def test_quickstart_workflow(
     filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
     assert filepath.exists()
 
-    validator = context.sources.pandas_default.read_csv(filepath)
+    batch = context.sources.pandas_default.read_csv(filepath)
 
     # Create Expectations
-    validator.expect_column_values_to_not_be_null("pickup_datetime")
-    validator.expect_column_values_to_be_between(
-        "passenger_count", min_value=1, max_value=6
+    suite = context.add_expectation_suite("my_suite")
+    suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+    suite.add_expectation(
+        gxe.ExpectColumnValuesToBeBetween(
+            column="passenger_count", min_value=1, max_value=6
+        )
     )
-    validator.save_expectation_suite()
 
     # Validate data
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_quickstart_checkpoint",
-        validator=validator,
-    )
-    checkpoint_result = checkpoint.run()
+    result = batch.validate(suite)
 
-    # View results
-    mock_open = mocker.patch("webbrowser.open")
-    context.view_validation_result(checkpoint_result)
+    assert result.success
 
-    mock_open.assert_called_once()
+    # TODO: Add mechanism to view results.
+    #       See: https://greatexpectations.atlassian.net/browse/V1-119
+    # Previously we did:
+    #     mock_open = mocker.patch("webbrowser.open")
+    #     context.view_validation_result(result)
+    #     mock_open.assert_called_once()
+    # Our goal is to have:
+    #     1. Setup mocks if necessary
+    #     2. result.open_docs()
+    #     3. assert docs opened.
 
 
 if __name__ == "__main__":

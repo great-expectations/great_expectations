@@ -25,16 +25,16 @@ from typing import (
 import pandas as pd
 from typing_extensions import TypeAlias
 
-from great_expectations.compatibility import pydantic, sqlalchemy
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
 )
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     public_api as public_api,
 )
+from great_expectations.compatibility import pydantic, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
@@ -52,7 +52,6 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.validator.validator import Validator
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type]
 
@@ -189,7 +188,7 @@ class PandasDatasource(_PandasDatasource):
         *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def add_clipboard_asset(
         self,
         name: str,
@@ -579,7 +578,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         sep: str = r"\s+",
         kwargs: typing.Union[dict, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_csv(  # noqa: PLR0913
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -636,7 +635,7 @@ class PandasDatasource(_PandasDatasource):
         low_memory: typing.Any = ...,
         memory_map: bool = ...,
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_excel(  # noqa: PLR0913
         self,
         io: os.PathLike | str | bytes,
@@ -666,7 +665,7 @@ class PandasDatasource(_PandasDatasource):
         convert_float: typing.Union[bool, None] = ...,
         mangle_dupe_cols: bool = ...,
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_feather(  # noqa: PLR0913
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
@@ -676,7 +675,7 @@ class PandasDatasource(_PandasDatasource):
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_fwf(  # noqa: PLR0913
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -686,7 +685,7 @@ class PandasDatasource(_PandasDatasource):
         widths: Union[Sequence[int], None] = ...,
         infer_nrows: int = ...,
         kwargs: Optional[dict] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_gbq(  # noqa: PLR0913
         self,
         query: str,
@@ -705,7 +704,7 @@ class PandasDatasource(_PandasDatasource):
         use_bqstorage_api: typing.Union[bool, None] = ...,
         max_results: typing.Union[int, None] = ...,
         progress_bar_type: typing.Union[str, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_hdf(  # noqa: PLR0913
         self,
         path_or_buf: pd.HDFStore | os.PathLike | str,
@@ -722,7 +721,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         chunksize: typing.Union[int, None] = ...,
         kwargs: typing.Union[dict, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_html(  # noqa: PLR0913
         self,
         io: os.PathLike | str,
@@ -743,7 +742,7 @@ class PandasDatasource(_PandasDatasource):
         na_values: Union[Iterable[object], None] = ...,
         keep_default_na: bool = ...,
         displayed_only: bool = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_json(  # noqa: PLR0913
         self,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
@@ -765,7 +764,7 @@ class PandasDatasource(_PandasDatasource):
         compression: CompressionOptions = "infer",
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_orc(  # noqa: PLR0913
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
@@ -774,7 +773,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_parquet(  # noqa: PLR0913
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
@@ -786,7 +785,7 @@ class PandasDatasource(_PandasDatasource):
         storage_options: StorageOptions = ...,
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_pickle(  # noqa: PLR0913
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -795,7 +794,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_sas(  # noqa: PLR0913
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -808,7 +807,7 @@ class PandasDatasource(_PandasDatasource):
         chunksize: typing.Union[int, None] = ...,
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_spss(  # noqa: PLR0913
         self,
         path: pydantic.FilePath,
@@ -817,7 +816,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_sql(  # noqa: PLR0913
         self,
         sql: sa.select | sa.text | str,
@@ -831,7 +830,7 @@ class PandasDatasource(_PandasDatasource):
         parse_dates: typing.Any = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         chunksize: typing.Union[int, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_sql_query(  # noqa: PLR0913
         self,
         sql: sa.select | sa.text | str,
@@ -845,7 +844,7 @@ class PandasDatasource(_PandasDatasource):
         parse_dates: typing.Union[typing.List[str], typing.Dict[str, str], None] = ...,
         chunksize: typing.Union[int, None] = ...,
         dtype: typing.Union[dict, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_sql_table(  # noqa: PLR0913
         self,
         table_name: str,
@@ -859,7 +858,7 @@ class PandasDatasource(_PandasDatasource):
         parse_dates: typing.Union[typing.List[str], typing.Dict[str, str], None] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         chunksize: typing.Union[int, None] = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_stata(  # noqa: PLR0913
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -877,7 +876,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_table(  # noqa: PLR0913
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -935,7 +934,7 @@ class PandasDatasource(_PandasDatasource):
         memory_map: bool = ...,
         float_precision: typing.Union[str, None] = ...,
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...
     def read_xml(  # noqa: PLR0913
         self,
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -953,4 +952,4 @@ class PandasDatasource(_PandasDatasource):
         iterparse: typing.Union[typing.Dict[str, typing.List[str]], None] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> Validator: ...
+    ) -> Batch: ...

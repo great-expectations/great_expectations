@@ -29,16 +29,13 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, dataclass_transform
 
 from great_expectations import __version__ as ge_version
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_diagnostics.expectation_doctor import (
-    ExpectationDoctor,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -51,10 +48,6 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
-)
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -93,14 +86,17 @@ from great_expectations.render.util import (
 from great_expectations.util import camel_to_snake
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies, Validator
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
         ExpectationDiagnostics,
     )
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+    )
     from great_expectations.render.renderer_configuration import MetaNotes
+    from great_expectations.validator.validator import ValidationDependencies, Validator
 
 logger = logging.getLogger(__name__)
 
@@ -225,6 +221,7 @@ def param_method(param_name: str) -> Callable:
 
 
 # noinspection PyMethodParameters
+@dataclass_transform(kw_only_default=True, field_specifiers=(Field,))
 class MetaExpectation(ModelMetaclass):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
 
@@ -281,6 +278,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         arbitrary_types_allowed = True
         smart_union = True
         extra = pydantic.Extra.forbid
+        json_encoders = {RenderedAtomicContent: lambda data: data.to_json_dict()}
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
@@ -288,6 +286,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
 
     catch_exceptions: bool = False
+    rendered_content: Optional[List[RenderedAtomicContent]] = None
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
@@ -300,6 +299,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
+
+    _save_callback: Union[
+        Callable[[Expectation], Expectation], None
+    ] = pydantic.PrivateAttr(default=None)
 
     @pydantic.validator("result_format")
     def _validate_result_format(
@@ -314,6 +317,21 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @classmethod
     def is_abstract(cls) -> bool:
         return isabstract(cls)
+
+    def register_save_callback(
+        self, save_callback: Callable[[Expectation], Expectation]
+    ) -> None:
+        self._save_callback = save_callback
+
+    @public_api
+    def save(self):
+        """Save the current state of this Expectation."""
+        if not self._save_callback:
+            raise RuntimeError(
+                "Expectation must be added to ExpectationSuite before it can be saved."
+            )
+        updated_self = self._save_callback(self)
+        self.id = updated_self.id
 
     @classmethod
     def _register_renderer_functions(cls) -> None:
@@ -1068,6 +1086,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
+        from great_expectations.validator.validator import ValidationDependencies
+
         runtime_configuration = self._get_runtime_kwargs(
             runtime_configuration=runtime_configuration,
         )
@@ -1083,8 +1103,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if field is not None:
             return field.default if not field.required else None
         else:
-            logger.warning(
-                f"_get_default_value called with key {key}, but it is not a known field"
+            logger.info(
+                f'_get_default_value called with key "{key}", but it is not a known field'
             )
             return None
 
@@ -1212,7 +1232,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             ge_cloud_id=id,
+            rendered_content=self.rendered_content,
         )
+
+    def __copy__(self):
+        return self.copy(update={"id": None}, deep=True)
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913
@@ -1257,6 +1281,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Returns:
             An Expectation Diagnostics report object
         """
+        from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+            ExpectationDoctor,
+        )
+
         return ExpectationDoctor(self).run_diagnostics(
             raise_exceptions_for_backends=raise_exceptions_for_backends,
             ignore_suppress=ignore_suppress,
@@ -1286,6 +1314,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             backends: list of backends to pass to run_diagnostics
             show_debug_messages (bool): If true, create a logger and pass to run_diagnostics
         """
+        from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+            ExpectationDoctor,
+        )
+
         return ExpectationDoctor(self).print_diagnostic_checklist(
             diagnostics=diagnostics,
             show_failed_tests=show_failed_tests,
@@ -2336,6 +2368,10 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+
+        from great_expectations.execution_engine import (
+            SqlAlchemyExecutionEngine,
+        )
 
         # ID/PK currently doesn't work for ExpectCompoundColumnsToBeUnique in SQL
         if self.map_metric == "compound_columns.unique" and isinstance(

@@ -6,7 +6,7 @@ description: Create and manage Expectations in GX Cloud.
 
 An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. An Expectation Suite contains multiple Expectations.
 
-To learn more about Expectations, see [Expectation](../../terms/expectation.md).
+To learn more about Expectations, see [Expectation](/docs/reference/learn/terms/expectation).
 
 ## Prerequisites
 
@@ -71,6 +71,20 @@ The following table lists the available GX Cloud Expectations.
     If you prefer to work in a code editor, or you configured an Expectation from the [Expectations Gallery](https://greatexpectations.io/expectations/), click the **JSON Editor** tab and edit the Expectation parameters in the code pane.
 
 6. Click **Save**.
+
+## View Expectation history
+
+View the Expectation history to determine when an Expectation was changed and who made the change. 
+
+1. In GX Cloud, click **Expectation Suites**.
+
+2. In the **Expectation Suites** list, click the Expectation Suite name.
+
+3. Click the **Change Log** tab.
+
+4. Optional. Select an Expectation in the **Table of contents** pane to view the change history for a specific Expectation.
+
+    The date, time, and email address of the users who changed the Expectation appear below the Expectation name. Strikethrough text indicates an Expectation was deleted.
 
 ## Delete an Expectation
 
