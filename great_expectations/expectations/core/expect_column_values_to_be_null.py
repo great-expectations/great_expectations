@@ -43,10 +43,6 @@ if TYPE_CHECKING:
     )
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     """Expect the column values to be null.
 

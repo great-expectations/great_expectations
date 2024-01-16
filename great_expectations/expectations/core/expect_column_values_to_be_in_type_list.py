@@ -56,10 +56,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """Expect a column to contain values from a specified type list.
 

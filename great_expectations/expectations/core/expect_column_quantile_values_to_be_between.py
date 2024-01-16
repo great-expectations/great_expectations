@@ -55,10 +55,6 @@ class QuantileRange(TypedDict):
     value_ranges: List[List[Union[None, int, float]]]
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     # noinspection PyUnresolvedReferences
     """Expect the specific provided column quantiles to be between a minimum value and a maximum value.

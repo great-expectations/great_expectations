@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, List, Literal, Tuple
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
 )
 
 
-@public_api
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """Expect the paired values from columns A and B to belong to a set of valid pairs.
 

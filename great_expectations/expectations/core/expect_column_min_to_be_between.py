@@ -38,10 +38,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
     """Expect the column minimum to be between a minimum value and a maximum value.
 

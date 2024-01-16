@@ -28,10 +28,6 @@ if TYPE_CHECKING:
     )
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     """Expect the columns to exactly match a specified list.
 

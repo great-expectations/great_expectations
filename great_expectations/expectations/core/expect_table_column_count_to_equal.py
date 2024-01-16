@@ -27,10 +27,6 @@ if TYPE_CHECKING:
     )
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectTableColumnCountToEqual(BatchExpectation):
     """Expect the number of columns to equal a value.
 

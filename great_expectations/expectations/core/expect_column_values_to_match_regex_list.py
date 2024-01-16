@@ -31,10 +31,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
 

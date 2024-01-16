@@ -34,10 +34,6 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import ValidationDependencies
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """Expect the number of rows to equal the number in another table.
 

@@ -42,10 +42,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     """Expect the column values to not be null.
 

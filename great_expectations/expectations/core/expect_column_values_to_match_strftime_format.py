@@ -33,10 +33,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     """Expect the column entries to be strings representing a date or time with a given format.
 

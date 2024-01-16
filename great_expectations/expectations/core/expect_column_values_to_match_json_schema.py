@@ -34,10 +34,6 @@ except ImportError:
     pass
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     """Expect the column entries to be JSON objects matching a given JSON schema.
 

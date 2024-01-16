@@ -75,10 +75,6 @@ except (ImportError, KeyError):
     ch_types = None
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     """Expect a column to contain values of a specified data type.
 
