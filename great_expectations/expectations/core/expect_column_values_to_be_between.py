@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import root_validator
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     """Expect the column entries to be between a minimum value and a maximum value (inclusive).
 

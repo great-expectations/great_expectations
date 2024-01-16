@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import numpy as np
 import pandas as pd
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
@@ -34,6 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     """Expect column entries to not be in the set.
 
