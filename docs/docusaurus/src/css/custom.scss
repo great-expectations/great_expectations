@@ -290,6 +290,17 @@ div[role="tabpanel"]{
     }
 }
 
+/* left navbar overrides */
+.theme-doc-sidebar-item-link-level-2 {
+  font-size: var(--p-sm-font-size);
+}
+
+.menu__link--active,
+.menu__link--active:hover {
+  color: var(--ifm-menu-color);
+  font-weight: bold;
+}
+
 .table-of-contents {
   font-size: var(--p-sm-font-size);
   line-height: var(--p-line-height)
