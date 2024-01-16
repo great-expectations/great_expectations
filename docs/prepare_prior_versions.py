@@ -329,7 +329,7 @@ def _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
     return contents
 
 
-def prepend_version_info_to_name_for_md_relative_links_to_index_files(
+def prepend_version_info_to_name_for_md_relative_links(
     verbose: bool = False,
 ) -> None:
     """Prepend version info to md relative links.
@@ -385,49 +385,6 @@ def prepend_version_info_to_name_for_md_relative_links_to_index_files(
                         contents=contents, version=version_only
                     )
                 )
-                f.seek(0)
-                f.truncate()
-                f.write(contents)
-            if verbose:
-                print(f"processed {file_path}")
-        print(
-            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
-        )
-    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
-
-
-def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) -> None:
-    """Prepend version info to md relative links.
-
-    Links to ../../../../docs/guides/validation/index.md#checkpoints
-    Should link to: ../../../../docs/0.16.16/guides/validation/#checkpoints
-
-    Args:
-        verbose: Whether to print verbose output.
-    """
-
-    version_from_path_name_pattern = re.compile(
-        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
-    )
-    paths = _paths_to_versioned_docs_after_v0_16_16()
-
-    method_name_for_logging = "prepend_version_info_to_name_for_md_relative_links"
-    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
-    for path in paths:
-        version = path.name
-        version_only = version_from_path_name_pattern.search(version).group("version")
-        if not version_only:
-            raise ValueError("Path does not contain a version number")
-
-        files = []
-        for extension in (".md", ".mdx"):
-            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
-        print(
-            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
-        )
-        for file_path in files:
-            with open(file_path, "r+") as f:
-                contents = f.read()
                 contents = _prepend_version_info_to_name_for_md_relative_links(
                     contents=contents, version=version_only
                 )
@@ -604,7 +561,6 @@ def prepare_prior_versions() -> None:
     prepend_version_info_to_name_for_href_absolute_links()
     update_tag_references_for_correct_version()
     use_relative_path_for_imports()
-    prepend_version_info_to_name_for_md_relative_links_to_index_files()
     prepend_version_info_to_name_for_md_relative_links()
     prepend_version_info_for_md_absolute_links()
     prepend_version_info_to_name_for_md_images()
