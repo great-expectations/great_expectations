@@ -118,6 +118,7 @@ class BatchRequest(pydantic.BaseModel):
         validate_assignment = True
 
     def __setattr__(self, key, val):
+        """Required so users can set batch_slice property."""
         method = self.__config__.property_set_methods.get(key)
         if method is None:
             super().__setattr__(key, val)

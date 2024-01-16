@@ -183,17 +183,13 @@ def in_memory_asset(
     )
 
 
-@pytest.mark.cloud
-def test_checkpoint_run_in_memory(
-    cloud_base_url: str,
-    cloud_organization_id: str,
-    cloud_access_token: str,
+@pytest.fixture(scope="module")
+def in_memory_asset_checkpoint(
     context: CloudDataContext,
     in_memory_asset: DataFrameAsset,
     spark_test_df: pyspark.DataFrame,
-    datasource: SparkDatasource,
     expectation_suite: ExpectationSuite,
-):
+) -> Checkpoint:
     """This Checkpoint only has one in-memory validation configured.
     This means with a deserialized Checkpoint, if we don't update with the latest DataFrame,
     we should get an error because nothing is there to be validated.
@@ -208,56 +204,111 @@ def test_checkpoint_run_in_memory(
             "batch_request": batch_request,
         },
     ]
-    checkpoint: Checkpoint = context.add_checkpoint(
+    checkpoint = context.add_checkpoint(
         name=checkpoint_name,
         validations=validations,
     )
+    yield checkpoint
+    # clean up Checkpoint, so associated entities can also be deleted in fixtures
+    context.delete_checkpoint(name=checkpoint_name)
 
-    # the Checkpoint from the fixture hasn't been round-tripped,
+
+@pytest.mark.cloud
+def test_in_memory_checkpoint_run(
+    in_memory_asset: DataFrameAsset,
+    in_memory_asset_checkpoint: Checkpoint,
+):
+    # the Data Context hasn't been reloaded,
     # so it will work as long as everything stays in memory
-    checkpoint_result: CheckpointResult = checkpoint.run()
+    checkpoint_result: CheckpointResult = in_memory_asset_checkpoint.run()
     assert checkpoint_result.success
 
-    # re-retrieve the Data Context, losing the in-memory DataFrame
+
+@pytest.mark.cloud
+def test_in_memory_checkpoint_run_missing_dataframe_error(
+    cloud_base_url: str,
+    cloud_organization_id: str,
+    cloud_access_token: str,
+    in_memory_asset_checkpoint: Checkpoint,
+):
+    # context reload results in loss of DataFrame since it isn't serializable
     context = gx.get_context(
         mode="cloud",
         cloud_base_url=cloud_base_url,
         cloud_organization_id=cloud_organization_id,
         cloud_access_token=cloud_access_token,
     )
-    checkpoint = context.get_checkpoint(name=checkpoint.name)
+    # the checkpoint fixture came from the old Data Context, so we get it again
+    checkpoint = context.get_checkpoint(name=in_memory_asset_checkpoint.name)
     # failure to pass runtime validations results in error
     with pytest.raises(RuntimeError):
         _ = checkpoint.run()
 
-    # now that the Data Context is unaware of the Dataframe,
+
+@pytest.mark.cloud
+def test_in_memory_checkpoint_run_set_dataframe_attribute(
+    cloud_base_url: str,
+    cloud_organization_id: str,
+    cloud_access_token: str,
+    datasource: SparkDatasource,
+    in_memory_asset: DataFrameAsset,
+    spark_test_df: pyspark.DataFrame,
+    in_memory_asset_checkpoint: Checkpoint,
+):
+    # context reload results in loss of DataFrame since it isn't serializable
+    context = gx.get_context(
+        mode="cloud",
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=cloud_organization_id,
+        cloud_access_token=cloud_access_token,
+    )
     # we need to re-associate the DataFrame with the DataFrameAsset
     # one way to do this is to assign to the attribute directly
-    # and update the datasource
-    # the fixtures came from the old Data Context
-    # we have to get them again, because they exist in a new place in memory
+    # the fixtures came from the old Data Context, so we get them again
     datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
     in_memory_asset.dataframe = spark_test_df
-    context.update_datasource(datasource=datasource)
+    checkpoint = context.get_checkpoint(name=in_memory_asset_checkpoint.name)
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.success
 
+
+@pytest.mark.cloud
+def test_in_memory_checkpoint_run_build_batch_request(
+    cloud_base_url: str,
+    cloud_organization_id: str,
+    cloud_access_token: str,
+    datasource: SparkDatasource,
+    in_memory_asset: DataFrameAsset,
+    spark_test_df: pyspark.DataFrame,
+    expectation_suite: ExpectationSuite,
+    in_memory_asset_checkpoint: Checkpoint,
+):
+    # context reload results in loss of DataFrame since it isn't serializable
+    context = gx.get_context(
+        mode="cloud",
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=cloud_organization_id,
+        cloud_access_token=cloud_access_token,
+    )
     # building a new Batch Request also associates the DataFrame with the DataFrameAsset again
     # users might choose to pass this Batch Request as a runtime validation
-    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
+    datasource = context.get_datasource(datasource_name=datasource.name)
     in_memory_asset = datasource.get_asset(asset_name=in_memory_asset.name)
     # remove the dataframe instead of getting a new Data Context
     in_memory_asset.dataframe = None
     batch_request = in_memory_asset.build_batch_request(dataframe=spark_test_df)
-    validations[0]["batch_request"] = batch_request
+    validations = [
+        {
+            "expectation_suite_name": expectation_suite.expectation_suite_name,
+            "batch_request": batch_request,
+        },
+    ]
     # runtime validations actually don't need to be passed,
-    # but it's confusing for users if they built a batch request and never used it
+    # but it could be confusing for users if they built a batch request and never used it, so it should work
+    checkpoint = context.get_checkpoint(name=in_memory_asset_checkpoint.name)
     checkpoint_result = checkpoint.run(validations=validations)
     assert checkpoint_result.success
     # ensure the runtime validation wasn't additive since it
     # is identical to the configured Batch Request
     assert len(validations) == len(checkpoint_result.run_results)
-
-    # clean up Checkpoint used only in this test, so associated entities can also be deleted in fixtures
-    context.delete_checkpoint(name=checkpoint_name)
