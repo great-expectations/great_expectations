@@ -10,7 +10,6 @@ import logging
 import os
 import pathlib
 import shutil
-import sys
 from typing import List
 
 import pkg_resources
@@ -243,13 +242,29 @@ local_tests = [
         data_context_dir=None,
         backend_dependencies=[],
     ),
+    IntegrationTestFixture(
+        name="expectation_management",
+        user_flow_script="tests/integration/docusaurus/expectations/expectation_management.py",
+        data_context_dir=None,
+        backend_dependencies=[],
+    ),
 ]
 
 quickstart = [
     IntegrationTestFixture(
         name="quickstart",
         user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
-        backend_dependencies=[],
+        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="v1_pandas_quickstart",
+        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py",
+        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="v1_sql_quickstart",
+        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py",
+        backend_dependencies=[BackendDependencies.SQLALCHEMY],
     ),
 ]
 
@@ -518,14 +533,12 @@ def pytest_parsed_arguments(request):
 
 @flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
     _execute_integration_test(integration_test_fixture, tmp_path)
 
 
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.mark.slow  # 79.77s
 def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import Dict, List, cast
 
@@ -9,7 +11,6 @@ from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -28,6 +29,9 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.render import RenderedStringTemplateContent
@@ -48,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 def get_table_columns_metric(
     execution_engine: ExecutionEngine,
-) -> [MetricConfiguration, dict]:
+) -> tuple[MetricConfiguration, dict]:
     resolved_metrics: dict = {}
 
     results: dict
@@ -70,7 +74,7 @@ def get_table_columns_metric(
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    table_columns_metric.metric_dependencies = {
+    table_columns_metric.metric_dependencies = {  # type: ignore[assignment]
         "table.column_types": table_column_types_metric,
     }
     results = execution_engine.resolve_metrics(

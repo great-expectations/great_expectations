@@ -214,6 +214,16 @@ class DatasourceStore(Store):
         )
         return self.store_backend.build_key(name=datasource_config.name, id=id_)
 
+    def get_fluent_datasource_by_name(self, name: str) -> FluentDatasource:
+        # TODO: Delete this when we remove block style datasource configs
+        key = DataContextVariableKey(
+            resource_name=name,
+        )
+        datasource = self.get(key)
+        if not isinstance(datasource, FluentDatasource):
+            raise ValueError("Datasource is not a FluentDatasource")
+        return datasource
+
     @overload  # type: ignore[override]
     def set(
         self,

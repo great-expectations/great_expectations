@@ -12,7 +12,7 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
@@ -356,7 +356,22 @@ project_manager = ProjectManager()
 
 
 @overload
-def get_context(  # type: ignore[overload-overlap] # noqa: PLR0913
+def get_context(  # type: ignore[overload-overlap]
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: None = ...,
+    project_root_dir: None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Literal[False] | None = ...,
+    mode: Literal["ephemeral"] = ...,
+) -> EphemeralDataContext:
+    ...
+
+
+@overload
+def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be
     project_root_dir: None = ...,
@@ -370,7 +385,7 @@ def get_context(  # type: ignore[overload-overlap] # noqa: PLR0913
 
 
 @overload
-def get_context(  # type: ignore[overload-overlap] # noqa: PLR0913
+def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be
@@ -385,7 +400,7 @@ def get_context(  # type: ignore[overload-overlap] # noqa: PLR0913
 
 
 @overload
-def get_context(  # noqa: PLR0913
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: None = ...,
@@ -400,7 +415,7 @@ def get_context(  # noqa: PLR0913
 
 
 @overload
-def get_context(  # noqa: PLR0913
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr | None = ...,
     project_root_dir: PathStr | None = ...,
@@ -410,7 +425,7 @@ def get_context(  # noqa: PLR0913
     cloud_organization_id: str | None = ...,
     cloud_mode: bool | None = ...,
     mode: None = ...,
-) -> AbstractDataContext:
+) -> EphemeralDataContext | FileDataContext | CloudDataContext:
     ...
 
 

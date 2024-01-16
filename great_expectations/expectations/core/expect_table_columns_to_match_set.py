@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
@@ -19,13 +20,16 @@ from great_expectations.render.util import substitute_none_for_missing
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectTableColumnsToMatchSet(BatchExpectation):
     """Expect the columns to match an unordered set.
 
@@ -59,7 +63,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     column_set: Union[list, set, EvaluationParameterDict, None]
     exact_match: Union[bool, None]
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
         "contributors": [

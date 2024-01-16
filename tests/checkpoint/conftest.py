@@ -5,7 +5,7 @@ from typing import Dict, List
 import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
+import great_expectations.expectations as gxe
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
@@ -13,7 +13,9 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
-from great_expectations.expectations.core import ExpectColumnValuesToBeBetween
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 @pytest.fixture
@@ -98,12 +100,12 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # create expectation suite
     suite = context.add_expectation_suite("my_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="col1",
         min_value=1,
         max_value=2,
     )
-    suite.add(expectation=expectation)
+    suite.add_expectation(expectation=expectation)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -140,7 +142,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.add_expectation_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -171,7 +173,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.add_expectation_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -403,7 +405,7 @@ def context_with_single_csv_spark_and_suite(
         expectation_type="expect_column_to_exist",
         kwargs={"column": "pickup_datetime"},
     )
-    suite.add_expectation(expectation, send_usage_event=False)
+    suite.add_expectation_configuration(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
     # noinspection PyProtectedMember
     context._save_project_config()

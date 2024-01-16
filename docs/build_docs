@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# Build API docs then build docusaurus docs.
-# Currently used in our netlify pipeline.
+echo "Installing Great Expectations library dev dependencies."
+(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
-source ../logging.sh
+echo "Installing api docs dependencies."
+(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
-print_orange_header "Preparing to build docs..."
-../prepare_to_build_docs.sh
-
-print_orange_header "Building docusaurus docs..."
-yarn build
+# TODO: change netlify settings so we don't need to do this
+cd ../..
+invoke docs --build

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     render_evaluation_parameter_string,
@@ -20,12 +21,15 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     """Expect the values in column A to be the same as column B.
 
@@ -61,7 +65,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     ] = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": [
             "core expectation",

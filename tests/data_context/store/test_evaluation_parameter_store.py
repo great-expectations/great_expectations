@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -21,6 +20,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationMetricIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,

@@ -7,15 +7,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -41,8 +36,13 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
     from great_expectations.validator.validator import ValidationDependencies
@@ -76,6 +76,7 @@ except (ImportError, KeyError):
     ch_types = None
 
 
+@public_api
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     """Expect a column to contain values of a specified data type.
 
@@ -129,7 +130,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     type_: str
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -375,6 +376,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
+        from great_expectations.execution_engine import (
+            PandasExecutionEngine,
+        )
+
         # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
@@ -458,6 +463,12 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        from great_expectations.execution_engine import (
+            PandasExecutionEngine,
+            SparkDFExecutionEngine,
+            SqlAlchemyExecutionEngine,
+        )
+
         configuration = self.configuration
         column_name = configuration.kwargs.get("column")
         expected_type = configuration.kwargs.get("type_")

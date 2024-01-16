@@ -62,14 +62,10 @@
                 "name": {
                     "title": "Name",
                     "type": "string"
-                },
-                "data_asset": {
-                    "$ref": "#/definitions/DataAsset"
                 }
             },
             "required": [
-                "name",
-                "data_asset"
+                "name"
             ]
         },
         "DataAsset": {

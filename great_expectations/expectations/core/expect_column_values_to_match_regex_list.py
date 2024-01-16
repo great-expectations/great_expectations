@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Literal, Optional, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
@@ -23,12 +24,15 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+@public_api
 class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
 
@@ -82,7 +86,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     regex_list: Union[List[str], EvaluationParameterDict]
     match_on: Literal["any", "all"] = "any"
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [

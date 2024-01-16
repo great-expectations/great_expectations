@@ -23,12 +23,16 @@ from typing import (
 from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.batch_spec import (
+    BatchSpec,
+    RuntimeQueryBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -686,7 +690,7 @@ class _SQLAsset(DataAsset):
                     )
                 )
             # Creating the batch_spec is our hook into the execution engine.
-            batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+            batch_spec = self._create_batch_spec(batch_spec_kwargs)
             execution_engine: SqlAlchemyExecutionEngine = (
                 self.datasource.get_execution_engine()
             )
@@ -709,10 +713,6 @@ class _SQLAsset(DataAsset):
                 batch_spec_passthrough=None,
             )
 
-            # Some pydantic annotations are postponed due to circular imports.
-            # Batch.update_forward_refs() will set the annotations before we
-            # instantiate the Batch class since we can import them in this scope.
-            Batch.update_forward_refs()
             batch_list.append(
                 Batch(
                     datasource=self.datasource,
@@ -720,9 +720,9 @@ class _SQLAsset(DataAsset):
                     batch_request=request,
                     data=data,
                     metadata=batch_metadata,
-                    legacy_batch_markers=markers,
-                    legacy_batch_spec=batch_spec,
-                    legacy_batch_definition=batch_definition,
+                    batch_markers=markers,
+                    batch_spec=batch_spec,
+                    batch_definition=batch_definition,
                 )
             )
         self.sort_batches(batch_list)
@@ -790,12 +790,18 @@ class _SQLAsset(DataAsset):
             )
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
-        """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec
+        """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec
 
         This is called by get_batch_list_from_batch_request to generate the batches.
 
         Returns:
-            A dictionary that will be passed to SqlAlchemyDatasourceBatchSpec(**returned_dict)
+            A dictionary that will be passed to self._create_batch_spec(**returned_dict)
+        """
+        raise NotImplementedError
+
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> BatchSpec:
+        """
+        Instantiates a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec.
         """
         raise NotImplementedError
 
@@ -837,6 +843,10 @@ class QueryAsset(_SQLAsset):
             "temp_table_schema_name": None,
             "batch_identifiers": {},
         }
+
+    @override
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> RuntimeQueryBatchSpec:
+        return RuntimeQueryBatchSpec(**batch_spec_kwargs)
 
 
 @public_api
@@ -951,6 +961,12 @@ class TableAsset(_SQLAsset):
             "batch_identifiers": {},
         }
 
+    @override
+    def _create_batch_spec(
+        self, batch_spec_kwargs: dict
+    ) -> SqlAlchemyDatasourceBatchSpec:
+        return SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+
     @staticmethod
     def _is_bracketed_by_quotes(target: str) -> bool:
         """Returns True if the target string is bracketed by quotes.
@@ -1025,7 +1041,7 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
-    create_temp_table: bool = True
+    create_temp_table: bool = False
     kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
         default={},
         description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
@@ -1087,6 +1103,9 @@ class SQLDatasource(Datasource):
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+            # by default we exclude unset values to prevent lots of extra values in the yaml files
+            # but we want to include them here
+            exclude_unset=False,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs

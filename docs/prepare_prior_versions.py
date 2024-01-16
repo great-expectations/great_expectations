@@ -314,7 +314,9 @@ def _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
     return contents
 
 
-def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) -> None:
+def prepend_version_info_to_name_for_md_relative_links_to_index_files(
+    verbose: bool = False,
+) -> None:
     """Prepend version info to md relative links.
 
     Links to ../../../../docs/guides/validation/index.md#checkpoints
@@ -337,7 +339,9 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
     )
     paths = _paths_to_versioned_docs_after_v0_15_50()
 
-    method_name_for_logging = "prepend_version_info_to_name_for_md_relative_links"
+    method_name_for_logging = (
+        "prepend_version_info_to_name_for_md_relative_links_to_index_files"
+    )
     print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
     for path in paths:
         version = path.name
@@ -361,6 +365,54 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
         for file_path in files:
             with open(file_path, "r+") as f:
                 contents = f.read()
+                contents = (
+                    _prepend_version_info_to_name_for_md_relative_links_to_index_files(
+                        contents=contents, version=version_only
+                    )
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) -> None:
+    """Prepend version info to md relative links.
+
+    Links to ../../../../docs/guides/validation/index.md#checkpoints
+    Should link to: ../../../../docs/0.16.16/guides/validation/#checkpoints
+
+    Args:
+        verbose: Whether to print verbose output.
+    """
+
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+    paths = _paths_to_versioned_docs_after_v0_15_50()
+
+    method_name_for_logging = "prepend_version_info_to_name_for_md_relative_links"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        version = path.name
+        version_only = version_from_path_name_pattern.search(version).group("version")
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
                 contents = _prepend_version_info_to_name_for_md_relative_links(
                     contents=contents, version=version_only
                 )
@@ -378,10 +430,88 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
 def _prepend_version_info_to_name_for_md_relative_links(
     contents: str, version: str
 ) -> str:
+    """
+    Fixes issues like this:
+    Location of link: docs/docusaurus/versioned_docs/version-0.17.23/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_and_run.md
+    Link structure: ../../../../docs/guides/validation/checkpoints/checkpoint_lp.md
+    Output link structure: ../../../../version-0.17.23/guides/validation/checkpoints/checkpoint_lp.md
+
+    """
+    pattern = re.compile(r"(?P<up_dir>(.*\.\.))/docs/(?P<path>(.*\.mdx?))")
+    contents = re.sub(pattern, rf"\g<up_dir>/version-{version}/\g<path>", contents)
+
+    return contents
+
+
+def prepend_version_info_to_name_for_md_images(verbose: bool = False) -> None:
+    """Prepend version info to md relative image links.
+
+    Links to ../../../static/img/<FILENAME>
+    Should link to: ../../../../versioned_code/version-<VERSION>/docs/docusaurus/static/img/<FILENAME>
+    Args:
+        verbose: Whether to print verbose output.
+    """
+
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+    paths = _paths_to_versioned_docs_after_v0_15_50()
+
+    method_name_for_logging = "prepend_version_info_to_name_for_md_images"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        version = path.name
+        version_only = version_from_path_name_pattern.search(version).group("version")
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        # NOTE: update files_to_process if there are more files that use relative markdown links.
+        # Alternatively, remove this list if all files should be processed.
+        files_to_process = {
+            "manage_validations.md",
+        }
+        files = [file for file in files if file.split("/")[-1] in files_to_process]
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = _prepend_version_info_to_name_for_md_image(
+                    contents=contents, version=version_only
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _prepend_version_info_to_name_for_md_relative_links_to_index_files(
+    contents: str, version: str
+) -> str:
     pattern = re.compile(
         r"(?P<docs>(.*\.\./docs/))(?P<middle>(.*))(?P<index>(index\.md))(?P<rest>(.*))"
     )
     contents = re.sub(pattern, rf"\g<docs>{version}/\g<middle>\g<rest>", contents)
+
+    return contents
+
+
+def _prepend_version_info_to_name_for_md_image(contents: str, version: str) -> str:
+    pattern = re.compile(r"\.\./(?P<path>(static/img/.*\.(gif|png)))")
+    contents = re.sub(
+        pattern,
+        rf"../../versioned_code/version-{version}/docs/docusaurus/\g<path>",
+        contents,
+    )
 
     return contents
 
@@ -452,13 +582,18 @@ def _prepend_version_info_for_md_absolute_links(contents: str, version: str) -> 
     return contents
 
 
-if __name__ == "__main__":
+def prepare_prior_versions() -> None:
     print("Starting to process files in prepare_prior_versions.py...")
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
     update_tag_references_for_correct_version()
     use_relative_path_for_imports()
-    prepend_version_info_to_name_for_md_relative_links()
+    prepend_version_info_to_name_for_md_relative_links_to_index_files()
     prepend_version_info_for_md_absolute_links()
+    prepend_version_info_to_name_for_md_images()
     print("Finished processing files in prepare_prior_versions.py")
+
+
+if __name__ == "__main__":
+    prepare_prior_versions()

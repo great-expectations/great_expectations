@@ -10,7 +10,9 @@ import nbformat
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import (
+    ExpectationSuite,
+)
 from great_expectations.core.batch import Batch
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -19,6 +21,9 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import VolumeDataAssistant
@@ -1946,8 +1951,11 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     expectation_configuration: ExpectationConfiguration
 
-    expected_expectation_suite.expectation_configurations = [
-        expectation_configuration
+    # todo: this test must be updated to use the ExpectationSuite public API
+    expected_expectation_suite.expectations = [
+        expected_expectation_suite._build_expectation(
+            expectation_configuration=expectation_configuration
+        )
         for expectation_configuration in expected_expectation_suite.expectation_configurations
         if not (
             expectation_configuration.kwargs

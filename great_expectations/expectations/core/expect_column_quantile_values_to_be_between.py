@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from numbers import Number
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
 
 import numpy as np
 from typing_extensions import TypedDict
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
@@ -38,10 +39,12 @@ from great_expectations.util import isclose
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
     from great_expectations.validator.validator import (
         ValidationDependencies,
@@ -53,6 +56,7 @@ class QuantileRange(TypedDict):
     value_ranges: List[List[Union[None, int, float]]]
 
 
+@public_api
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     # noinspection PyUnresolvedReferences
     """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
@@ -133,7 +137,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     allow_relative_error: Union[bool, str] = False
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],

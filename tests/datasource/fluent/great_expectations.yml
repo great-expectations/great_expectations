@@ -45,6 +45,8 @@ fluent_datasources:
         order_by:
             - key: year
             - key: month
+        batch_configs:
+          my_batch_config: {}
   sqlite_taxi:
     type: sqlite
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"

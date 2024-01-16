@@ -5,9 +5,11 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+import great_expectations.expectations as gxe
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.core import ExpectColumnValueZScoresToBeLessThan
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -105,7 +107,7 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
 
     graph = ValidationGraph(execution_engine=execution_engine)
     validation_dependencies: ValidationDependencies = (
-        ExpectColumnValueZScoresToBeLessThan(
+        gxe.ExpectColumnValueZScoresToBeLessThan(
             **expectation_configuration.kwargs
         ).get_validation_dependencies(execution_engine)
     )
