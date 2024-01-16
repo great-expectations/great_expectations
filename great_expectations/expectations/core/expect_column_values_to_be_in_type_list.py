@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 from packaging import version
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
@@ -57,7 +56,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """Expect a column to contain values from a specified type list.
 
@@ -109,7 +107,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     type_list: Union[List[str], EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

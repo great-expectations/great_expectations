@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -29,7 +28,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-@public_api
 class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     """Expect the column values to be decreasing.
 
@@ -75,7 +73,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     strictly: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

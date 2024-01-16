@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
@@ -69,7 +68,6 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-@public_api
 class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
 
@@ -172,7 +170,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": [
             "core expectation",
