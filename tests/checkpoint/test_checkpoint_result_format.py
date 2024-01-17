@@ -9,6 +9,7 @@ import great_expectations.expectations as gxe
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
@@ -23,7 +24,6 @@ if TYPE_CHECKING:
 
     from great_expectations.compatibility import pyspark
     from great_expectations.core import (
-        ExpectationSuite,
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context.data_context.abstract_data_context import (
