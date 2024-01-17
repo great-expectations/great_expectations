@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
@@ -32,7 +31,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-@public_api
 class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
     """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can be anywhere in the string.
 
@@ -78,7 +76,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
 
     regex_list: Union[List[str], EvaluationParameterDict]
 
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [

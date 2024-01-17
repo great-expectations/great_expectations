@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -29,7 +28,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-@public_api
 class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
     """Expect that the columns are unique together (e.g. a multi-column primary key)
 

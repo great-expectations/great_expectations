@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -35,7 +34,6 @@ except ImportError:
     pass
 
 
-@public_api
 class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     """Expect the column entries to be JSON objects matching a given JSON schema.
 
@@ -77,7 +75,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     json_schema: dict
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
