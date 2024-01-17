@@ -1,48 +1,30 @@
 ---
-title: Create a Custom Query Expectation
+title: Create a SQL Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 
-**`QueryExpectations`** are a type of <TechnicalTag tag="expectation" text="Expectation"/>, enabled for SQL and Spark, that enable a higher-complexity type of workflow
-when compared with core Expectation classes such as **`ColumnAggregate`**, **`ColumnMap`**, and **`Table`**.
-
-`QueryExpectations` allow you to set Expectations against the results of your own custom queries, and make intermediate queries to your database.
-While this approach can result in extra roundtrips to your database, it can also unlock advanced functionality for your <TechnicalTag tag="custom_expectation" text="Custom Expectations"/>.
-
-They are evaluated for the results of a query, and answer a semantic question about your data returned by that query. For example, `expect_queried_table_row_count_to_equal` answers how many rows are returned from your table by your query.
-
-This guide will walk you through the process of creating your own custom `QueryExpectation`.
+A `SQLExpectation` allows you to define an Expectation based on the results of a query against your data. This guide will walk you through the process of creating your own 
+custom `SQLExpectation`.
 
 ## Prerequisites
 
 <Prerequisites>
-
 </Prerequisites>
 
-##  Choose a name for your Expectation
+##  Write the Query
 
-First, decide on a name for your own Expectation. By convention, `QueryExpectations` always start with `expect_queried_`.
+## Build the Expectation
 
-All `QueryExpectations` support the parameterization of your <TechnicalTag tag="batch" text="Active Batch"/>;
-some `QueryExpectations` also support the parameterization of a `Column`. This tutorial will detail both approaches.
+## Test the Expectation
 
-<Tabs
-  groupId="expectation_type"
-  defaultValue='query.table'
-  values={[
-  {label: 'Batch Parameterization', value:'query.table'},
-  {label: 'Batch & Column Parameterization', value:'query.column'},
-  ]}>
+## Appendix
 
-<TabItem value="query.table">
+### 
 
-Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
-
-- `ExpectQueriedTableRowCountToBe`
-- `expect_queried_table_row_count_to_be`
+Choose a descriptive name that clarifies what your expectation will test.
 
 :::info
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
@@ -58,6 +40,24 @@ Download the file, place it in the appropriate directory, and rename it to the a
 ```bash
 cp query_expectation_template.py /SOME_DIRECTORY/expect_queried_table_row_count_to_equal.py
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Storing Expectation files
 
