@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -43,6 +44,7 @@ if TYPE_CHECKING:
     )
 
 
+@public_api
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     """Expect the column values to be null.
 
@@ -85,7 +87,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
