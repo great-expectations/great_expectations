@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -35,7 +34,6 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import ValidationDependencies
 
 
-@public_api
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """Expect the number of rows to equal the number in another table.
 
@@ -69,7 +67,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
     other_table_name: str
 
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation", "multi-table expectation"],
         "contributors": [

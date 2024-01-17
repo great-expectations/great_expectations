@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import ClassVar, Tuple, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
@@ -11,7 +10,6 @@ from great_expectations.expectations.expectation import (
 )
 
 
-@public_api
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """Expect the Z-scores of a column's values to be less than a given threshold.
 
@@ -64,7 +62,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

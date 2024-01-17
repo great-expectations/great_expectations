@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     render_evaluation_parameter_string,
@@ -29,7 +28,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-@public_api
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     """Expect the values in column A to be greater than column B.
 
@@ -67,7 +65,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     ] = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": [
             "core expectation",

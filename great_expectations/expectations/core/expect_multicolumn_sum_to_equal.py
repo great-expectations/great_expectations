@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, List, Literal, Optional
+from typing import TYPE_CHECKING, List, Literal, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
 )
@@ -26,7 +25,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     """Expect that the sum of row values in a specified column list is the same for each row, and equal to a specified sum total.
 
@@ -63,7 +61,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     ] = "all_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": [
             "core expectation",

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
@@ -45,7 +44,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-@public_api
 class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     """Expect the column maximum to be between a minimum value and a maximum value.
 
@@ -97,7 +95,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     strict_max: bool = False
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
