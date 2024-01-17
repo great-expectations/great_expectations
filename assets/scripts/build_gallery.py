@@ -316,9 +316,8 @@ def get_expectation_instances(expectations_info):
                     expectation_name
                 )
             )
-            # instantiate expectation
-            exp = create_expectation_instance(expectation_class)
-            expectation_instances[expectation_name] = exp
+            expectation = create_expectation_instance(expectation_class)
+            expectation_instances[expectation_name] = expectation
         except ExpectationNotFoundError:
             logger.error(
                 f"Failed to get Expectation implementation from registry: {expectation_name}"
@@ -328,14 +327,16 @@ def get_expectation_instances(expectations_info):
                 f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
             )
             expectation_tracebacks.write(traceback.format_exc())
-            continue
-        except pydantic.ValidationError as exc:
-            logger.error(exc)
-            continue
+        except pydantic.ValidationError:
+            expectation_tracebacks.write(traceback.format_exc())
         except IndexError:
-            logger.error(f"Expectation {expectation_name} has invalid test case.")
+            expectation_tracebacks.write(
+                f"Expectation {expectation_name} has invalid test case."
+            )
+            expectation_tracebacks.write(traceback.format_exc())
         except Exception as exc:
-            logger.error(f"Unexpected error occurred: {exc}")
+            expectation_tracebacks.write(f"Unexpected error occurred: {exc}")
+            expectation_tracebacks.write(traceback.format_exc())
     return expectation_instances
 
 
