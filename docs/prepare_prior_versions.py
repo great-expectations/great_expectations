@@ -483,14 +483,22 @@ def prepare_prior_versions(versions: list[Version]) -> None:
 
 def prepare_prior_version(version: Version) -> None:
     print(f"Starting to process files for version {version}")
-    change_paths_for_docs_file_references(version)
-    prepend_version_info_to_name_for_snippet_by_name_references(version)
+    if version < Version(0, 15):
+        change_paths_for_docs_file_references(version)
+    if version >= Version(0, 15):
+        prepend_version_info_to_name_for_snippet_by_name_references(version)
+
     prepend_version_info_to_name_for_href_absolute_links(version)
     update_tag_references_for_correct_version(version)
     use_relative_path_for_imports(version)
-    prepend_version_info_to_name_for_md_relative_links(version)
+
+    if version >= Version(0, 16):
+        prepend_version_info_to_name_for_md_relative_links(version)
+
     prepend_version_info_for_md_absolute_links(version)
-    prepend_version_info_to_name_for_md_images(version)
+
+    if version >= Version(0, 16):
+        prepend_version_info_to_name_for_md_images(version)
 
 
 @total_ordering
