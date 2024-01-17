@@ -341,8 +341,12 @@ def get_expectation_instances(expectations_info):
 
 
 def create_expectation_instance(expectation_class: type[Expectation]) -> Expectation:
+    """Accepts an Expectation class and attempts to instantiate it with valid parameters
+    obtained from the Expectation's test cases.
+    """
     expectation_params: dict
     if expectation_class.examples:
+        # take the first test case available:
         expectation_params = expectation_class.examples[0]["tests"][0]["in"]
 
     else:
@@ -358,6 +362,7 @@ def create_expectation_instance(expectation_class: type[Expectation]) -> Expecta
             )
         with open(found) as fp:
             test_cases = json.load(fp)
+            # take the first test case available:
             expectation_params = test_cases["datasets"][0]["tests"][0]["in"]
     return expectation_class(**expectation_params)
 
