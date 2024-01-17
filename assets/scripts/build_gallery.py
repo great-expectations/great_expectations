@@ -18,6 +18,9 @@ import click
 import pkg_resources
 
 from great_expectations.compatibility import pydantic
+from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+    ExpectationDoctor,
+)
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
@@ -549,7 +552,8 @@ def build_gallery(  # noqa: C901 - 17
     for expectation_name, expectation_instance in sorted(expectation_instances.items()):
         logger.debug(f"Running diagnostics for expectation_name: {expectation_name}")
         try:
-            diagnostics = expectation_instance.run_diagnostics(
+            expectation_doctor = ExpectationDoctor(expectation_instance)
+            diagnostics = expectation_doctor.run_diagnostics(
                 ignore_suppress=ignore_suppress,
                 ignore_only_for=ignore_only_for,
                 for_gallery=True,
