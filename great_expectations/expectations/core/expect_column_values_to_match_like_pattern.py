@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
@@ -27,7 +26,6 @@ except ImportError:
     pass
 
 
-@public_api
 class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
     """Expect the column entries to be strings that match a given like pattern expression.
 

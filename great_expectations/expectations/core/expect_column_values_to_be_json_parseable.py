@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -34,7 +33,6 @@ except ImportError:
     pass
 
 
-@public_api
 class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
     """Expect the column entries to be data written in JavaScript Object Notation.
 
