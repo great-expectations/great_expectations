@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
-from docs.docs_build import DocsBuilder
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
@@ -651,14 +650,16 @@ def api_docs(ctx: Context):
         "lint": "Run the linter",
     },
 )
-def docs(
+def docs(  # noqa: PLR0913
     ctx: Context,
     build: bool = False,
     clean: bool = False,
     start: bool = False,
     lint: bool = False,
+    version: str | None = None,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    from docs.docs_build import DocsBuilder, Version
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -696,6 +697,8 @@ def docs(
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
+    elif version:
+        docs_builder.create_version(version=Version.from_string(version))
     else:  # noqa: PLR5501
         if start:
             ctx.run(" ".join(["yarn start"]), echo=True)

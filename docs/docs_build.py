@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Generator, List, Optional, cast
 
 from docs.docs_version_bucket_info import S3_URL
+from docs.prepare_prior_versions import prepare_prior_versions, Version
 from docs.logging import Logger
 
 if TYPE_CHECKING:
@@ -50,9 +51,10 @@ class DocsBuilder:
         self.logger.print_header("Running yarn start to serve docs locally...")
         self._context.run("yarn start")
 
-    def _prepare(self) -> None:
-        from docs.prepare_prior_versions import prepare_prior_versions, Version
+    def create_version(self, version: Version) -> None:
+        self.logger.print("Creating version...")
 
+    def _prepare(self) -> None:
         """A whole bunch of common work we need"""
         self.logger.print_header("Preparing to build docs...")
         versions_loaded = self._load_files()
