@@ -57,14 +57,16 @@ class DocsBuilder:
 
     def create_version(self, version: Version) -> None:
         self.logger.print_header(f"Creating version {version}")
-        # load existing versions
         versions = self._load_all_versioned_docs()
-        if version in versions:
-            raise Exception(f"Version {version} already exists")
 
         # load state of code for given version and process it
         # we'll end up checking this branch out as well, but need the data in versioned_code for prepare_prior_version
-        self._load_versioned_code(version)
+        versions = self._load_all_versioned_docs()
+        if version in versions:
+            raise Exception(f"Version {version} already exists")
+        for v in versions:
+            self._load_versioned_code(v)
+
         os.chdir("..")  # TODO: none of this messing with current directory stuff
         prepare_prior_version(version)
         os.chdir("docusaurus")
