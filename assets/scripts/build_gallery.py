@@ -5,17 +5,22 @@ import importlib
 import json
 import logging
 import os
+import pathlib
 import re
 import sys
 import traceback
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Final, List, Optional, Tuple
 
 import click
 import pkg_resources
 
+from great_expectations.compatibility import pydantic
+from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+    ExpectationDoctor,
+)
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
@@ -306,11 +311,13 @@ def get_expectation_instances(expectations_info):
                 continue
 
         try:
-            expectation_instances[
-                expectation_name
-            ] = great_expectations.expectations.registry.get_expectation_impl(
-                expectation_name
-            )()
+            expectation_class = (
+                great_expectations.expectations.registry.get_expectation_impl(
+                    expectation_name
+                )
+            )
+            expectation = create_expectation_instance(expectation_class)
+            expectation_instances[expectation_name] = expectation
         except ExpectationNotFoundError:
             logger.error(
                 f"Failed to get Expectation implementation from registry: {expectation_name}"
@@ -320,8 +327,44 @@ def get_expectation_instances(expectations_info):
                 f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
             )
             expectation_tracebacks.write(traceback.format_exc())
-            continue
+        except pydantic.ValidationError:
+            expectation_tracebacks.write(traceback.format_exc())
+        except IndexError:
+            expectation_tracebacks.write(
+                f"Expectation {expectation_name} has invalid test case."
+            )
+            expectation_tracebacks.write(traceback.format_exc())
+        except Exception as exc:
+            expectation_tracebacks.write(f"Unexpected error occurred: {exc}")
+            expectation_tracebacks.write(traceback.format_exc())
     return expectation_instances
+
+
+def create_expectation_instance(expectation_class: type[Expectation]) -> Expectation:
+    """Accepts an Expectation class and attempts to instantiate it with valid parameters
+    obtained from the Expectation's test cases.
+    """
+    expectation_params: dict
+    if expectation_class.examples:
+        # take the first test case available:
+        expectation_params = expectation_class.examples[0]["tests"][0]["in"]
+
+    else:
+        _TEST_DEFS_DIR: Final = pathlib.Path(
+            __file__, "..", "..", "..", "tests", "test_definitions"
+        ).resolve()
+        found = next(
+            _TEST_DEFS_DIR.rglob(f"**/{expectation_class.expectation_type}.json"), None
+        )
+        if not found:
+            raise Exception(
+                f"No JSON test case found for Expectation {expectation_class.expectation_type}, cannot build gallery example."
+            )
+        with open(found) as fp:
+            test_cases = json.load(fp)
+            # take the first test case available:
+            expectation_params = test_cases["datasets"][0]["tests"][0]["in"]
+    return expectation_class(**expectation_params)
 
 
 def combine_backend_results(
@@ -515,7 +558,8 @@ def build_gallery(  # noqa: C901 - 17
     for expectation_name, expectation_instance in sorted(expectation_instances.items()):
         logger.debug(f"Running diagnostics for expectation_name: {expectation_name}")
         try:
-            diagnostics = expectation_instance.run_diagnostics(
+            expectation_doctor = ExpectationDoctor(expectation_instance)
+            diagnostics = expectation_doctor.run_diagnostics(
                 ignore_suppress=ignore_suppress,
                 ignore_only_for=ignore_only_for,
                 for_gallery=True,
