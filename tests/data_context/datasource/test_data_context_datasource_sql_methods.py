@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, List, Union
 
 import pytest
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -129,7 +130,7 @@ def test_get_validator_bad_batch_request(
     context: AbstractDataContext = (
         data_context_with_simple_sql_datasource_for_testing_get_batch
     )
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite("my_expectations"))
     batch_request: BatchRequest = BatchRequest(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
@@ -146,7 +147,7 @@ def test_get_validator_bad_batch_request(
 
 def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite("my_expectations"))
 
     # Successful specification using a typed BatchRequest
     context.get_validator(
@@ -278,7 +279,7 @@ def test_get_validator_expectation_suite_options(
     data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
-    context.add_expectation_suite("some_expectations")
+    context.suites.add(ExpectationSuite("some_expectations"))
 
     # Successful specification with an existing expectation_suite_name
     context.get_validator(
@@ -290,7 +291,7 @@ def test_get_validator_expectation_suite_options(
     )
 
     # Successful specification with a fetched ExpectationSuite object
-    some_expectations = context.get_expectation_suite("some_expectations")
+    some_expectations = context.suites.get("some_expectations")
     context.get_validator(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
@@ -300,8 +301,8 @@ def test_get_validator_expectation_suite_options(
     )
 
     # Successful specification with a fresh ExpectationSuite object
-    some_more_expectations = context.add_expectation_suite(
-        expectation_suite_name="some_more_expectations"
+    some_more_expectations = context.suites.add(
+        ExpectationSuite(name="some_more_expectations")
     )
     context.get_validator(
         datasource_name="my_sqlite_db",
