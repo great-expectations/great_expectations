@@ -31,18 +31,6 @@
     --color-primary-10: rgba(255, 99, 16, .1);
     --ifm-code-font-size: 95%;
 
-    /* sync up some of the typography */
-    --ifm-heading-line-height: 1;
-    --ifm-h1-font-size: 48px;
-    --ifm-h2-font-size: 20px;
-    --ifm-font-family-base: Montserrat, 'Open Sans', Verdana, sans‑serif;
-    --ifm-dropdown-font-weight: bold;
-    --ifm-heading-margin-bottom: 0;
-    --ifm-heading-vertical-rhythm-bottom: 0;
-
-    --p-sm-font-size: 0.875rem;
-    --p-sm-line-height: 1.5;
-
     /* make pagination look like the nice buttons */
     --ifm-pagination-nav-border-radius: 35px;
     --ifm-pagination-nav-padding: 16px;
@@ -143,6 +131,51 @@ a.pagination-nav__link:hover {
     display: block;
     margin: 0 calc(-1 * var(--ifm-pre-padding));
     padding: 0 var(--ifm-pre-padding);
+}
+
+/* navbar tweaks */
+.navbar--fixed-top {
+    opacity: .95;
+}
+
+.navbar__link {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.navbar__brand {
+    width: 190px;
+    height: auto;
+}
+
+.navbar__logo{
+    height: 44px;
+}
+
+.navbar__item {
+    margin-left: 4px;
+}
+
+.navbar__items--right > :last-child {
+    padding-right: 16px;
+}
+
+.header-cloud-link {
+    border: none;
+    border-radius: 35px;
+    color: #fff;
+    font-size: var(--p-font-size);
+    font-weight: var(--ifm-font-weight-semibold);
+    padding: 8px 16px;
+    background: var(--ifm-link-color);
+    text-align: center;
+    text-transform: none;
+}
+
+.header-cloud-link:hover {
+    color: #FFF;
+    background-color: #DE550A;
 }
 
 /*footer*/
@@ -302,24 +335,9 @@ div[role="tabpanel"]{
     }
 }
 
-/* left navbar overrides */
-.theme-doc-sidebar-item-link-level-2 {
-  font-size: var(--p-sm-font-size);
-
-  .menu__link {
-    line-height: var(--p-sm-line-height)
-  }
-}
-
-.menu__link--active,
-.menu__link--active:hover {
-  color: var(--ifm-menu-color);
-  font-weight: bold;
-}
-
 .table-of-contents {
   font-size: var(--p-sm-font-size);
-  line-height: var(--p-sm-line-height)
+  line-height: var(--p-line-height)
 }
 
 /* overrides to keep margin consistent in edge cases when there are lists inside list subitems */
