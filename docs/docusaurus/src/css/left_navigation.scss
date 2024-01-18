@@ -1,0 +1,20 @@
+.theme-doc-sidebar-item-link,
+.theme-doc-sidebar-item-category {
+  font-size: var(--p-sm-font-size);
+  font-weight: var(--ifm-font-weight-normal);
+}
+
+.theme-doc-sidebar-item-link-level-1,
+.theme-doc-sidebar-item-category-level-1 {
+  font-size: var(--p-md-font-size);
+}
+
+.menu__link {
+  line-height: var(--p-line-height);
+}
+
+.menu__link--active,
+.menu__link--active:hover {
+  color: var(--ifm-menu-color);
+  font-weight: bold;
+}
