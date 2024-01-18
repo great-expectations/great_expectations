@@ -347,7 +347,9 @@ def create_expectation_instance(expectation_class: type[Expectation]) -> Expecta
     expectation_params: dict
     if expectation_class.examples:
         # take the first test case available:
-        expectation_params = expectation_class.examples[0]["tests"][0]["in"]
+        expectation_params = get_success_test_case(
+            expectation_class.examples[0]["tests"]
+        )
 
     else:
         _TEST_DEFS_DIR: Final = pathlib.Path(
@@ -362,9 +364,20 @@ def create_expectation_instance(expectation_class: type[Expectation]) -> Expecta
             )
         with open(found) as fp:
             test_cases = json.load(fp)
-            # take the first test case available:
-            expectation_params = test_cases["datasets"][0]["tests"][0]["in"]
+            expectation_params = get_success_test_case(
+                test_cases["datasets"][0]["tests"]
+            )
     return expectation_class(**expectation_params)
+
+
+def get_success_test_case(tests: list[dict]) -> dict:
+    """Given a list of Expectation test cases, return the input to first successful case."""
+    try:
+        return next(test["in"] for test in tests if test["out"]["success"] is True)
+    except StopIteration:
+        raise ValueError("Error: Expectation test case has no valid success case.")
+    except IndexError:
+        raise ValueError("Error: Expectation test case is malformed.")
 
 
 def combine_backend_results(
