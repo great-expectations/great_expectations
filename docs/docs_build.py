@@ -64,7 +64,7 @@ class DocsBuilder:
         )
         # TODO: none of this messing with current directory stuff
         os.chdir("..")
-        prepare_prior_versions([Version.from_string(v) for v in versions_loaded])
+        prepare_prior_versions(versions_loaded)
         os.chdir("docusaurus")
         self.logger.print("Updated versioned code and docs")
 
@@ -80,7 +80,7 @@ class DocsBuilder:
         with zipfile.ZipFile(zip_data, "r") as zip_ref:
             yield zip_ref
 
-    def _load_files(self) -> List[str]:
+    def _load_files(self) -> List[Version]:
         """Load oss_docs_versions zip and relevant versions from github.
 
         oss_docs_versions contains the versioned docs to be used later by prepare_prior_versions, as well
@@ -96,24 +96,24 @@ class DocsBuilder:
         with self._load_zip(S3_URL) as zip_ref:
             zip_ref.extractall(self._current_directory)
             versions_json = zip_ref.read("versions.json")
-            versions = cast(List[str], json.loads(versions_json))
+            versions = [Version.from_string(x) for x in json.loads(versions_json)]
         for version in versions:
-            self.logger.print(
-                f"Copying code referenced in docs from {version} and writing to versioned_code/version-{version}"
-            )
-            url = f"https://github.com/great-expectations/great_expectations/archive/refs/tags/{version}.zip"
-
-            with self._load_zip(url) as zip_ref:
-                zip_ref.extractall(self._current_directory / "versioned_code")
-                old_location = (
-                    self._current_directory
-                    / f"versioned_code/great_expectations-{version}"
-                )
-                new_location = (
-                    self._current_directory / f"versioned_code/version-{version}"
-                )
-                shutil.move(str(old_location), str(new_location))
+            self._load_versioned_code(version)
         return versions
+
+    def _load_versioned_code(self, version: Version) -> None:
+        self.logger.print(
+            f"Copying code referenced in docs from {version} and writing to versioned_code/version-{version}"
+        )
+        url = f"https://github.com/great-expectations/great_expectations/archive/refs/tags/{version}.zip"
+
+        with self._load_zip(url) as zip_ref:
+            zip_ref.extractall(self._current_directory / "versioned_code")
+            old_location = (
+                self._current_directory / f"versioned_code/great_expectations-{version}"
+            )
+            new_location = self._current_directory / f"versioned_code/version-{version}"
+            shutil.move(str(old_location), str(new_location))
 
     def _invoke_api_docs(self) -> None:
         """Invokes the invoke api-docs command.
