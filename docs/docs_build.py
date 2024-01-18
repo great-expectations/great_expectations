@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Generator, List, Optional, cast
 
 from docs.docs_version_bucket_info import S3_URL
 from docs.logging import Logger
-from docs.prepare_prior_versions import prepare_prior_versions, Version
 
 if TYPE_CHECKING:
     from invoke.context import Context
@@ -52,6 +51,8 @@ class DocsBuilder:
         self._context.run("yarn start")
 
     def _prepare(self) -> None:
+        from docs.prepare_prior_versions import prepare_prior_versions, Version
+
         """A whole bunch of common work we need"""
         self.logger.print_header("Preparing to build docs...")
         versions_loaded = self._load_files()
