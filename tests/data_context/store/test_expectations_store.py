@@ -338,7 +338,8 @@ def _test_add_expectation_success(context):
     # Arrange
     store = context.expectations_store
     suite_name = "test-suite"
-    suite = context.add_expectation_suite(suite_name)
+    suite = ExpectationSuite(suite_name)
+    context.suites.add(suite)
     expectation = gxe.ExpectColumnValuesToBeInSet(
         column="a",
         value_set=[1, 2, 3],
@@ -374,7 +375,8 @@ def _test_add_expectation_disregards_provided_id(context):
     # Arrange
     store = context.expectations_store
     suite_name = "test-suite"
-    suite = context.add_expectation_suite(suite_name)
+    suite = ExpectationSuite(suite_name)
+    context.suites.add(suite)
     provided_id = "e86bb8a8-b75f-4efb-a3bb-210b6440661e"
     expectation = gxe.ExpectColumnValuesToBeInSet(
         id=provided_id,
@@ -415,9 +417,8 @@ def _test_update_expectation_success(context):
         value_set=[1, 2, 3],
         result_format="BASIC",
     )
-    suite = context.add_expectation_suite(
-        suite_name, expectations=[expectation.configuration]
-    )
+    suite = ExpectationSuite(suite_name, expectations=[expectation.configuration])
+    context.suites.add(suite)
     # Act
     expectation = suite.expectations[0]
     assert expectation.column == "a"
@@ -461,7 +462,9 @@ def _test_update_expectation_raises_error_for_missing_expectation(context):
         value_set=[1, 2, 3],
         result_format="BASIC",
     )
-    suite = context.add_expectation_suite(suite_name, expectations=[])
+
+    suite = ExpectationSuite(suite_name, expectations=[])
+    context.suites.add(suite)
     # Act
     with pytest.raises(
         KeyError, match="Cannot update Expectation because it was not found."
@@ -497,9 +500,8 @@ def _test_delete_expectation_success(context):
         value_set=[1, 2, 3],
         result_format="BASIC",
     )
-    suite = context.add_expectation_suite(
-        suite_name, expectations=[expectation.configuration]
-    )
+    suite = ExpectationSuite(suite_name, expectations=[expectation.configuration])
+    context.suites.add(suite)
     # Act
     expectation = suite.expectations[0]
     store.delete_expectation(suite=suite, expectation=expectation)
@@ -536,9 +538,10 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
         value_set=[1, 2, 3],
         result_format="BASIC",
     )
-    suite = context.add_expectation_suite(
+    suite = ExpectationSuite(
         suite_name, expectations=[existing_expectation.configuration]
     )
+    context.suites.add(suite)
     # Act
     nonexistent_expectation = gxe.ExpectColumnValuesToBeInSet(
         # this ID will be different from the ID created by the Suite

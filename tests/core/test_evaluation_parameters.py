@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.core import (
+    ExpectationSuite,
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -412,7 +413,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     expectation_suite_name = "test_suite"
-    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.suites.add(ExpectationSuite(name=expectation_suite_name))
 
     batch_request = RuntimeBatchRequest(
         datasource_name="my_datasource",
