@@ -91,5 +91,56 @@ To add a new version, follow these steps:
 1. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
 1. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
 1. Add your version number to `versions.json` in the unzipped version file (at the top if it is the most recent).
-1. Run `zip oss_docs_versions.zip versioned_docs versioned_sidebars versions.json` to zip up `versioned_docs`, `versioned_sidebars` and `versions.json` as `oss_docs_versions.zip` and upload the zip file to the s3 bucket (see `docs/docs_version_bucket_info.py` for the bucket name). Make sure `versioned_docs`, `versioned_sidebars` and `versions.json` are at the top level of the zip file (not nested in a folder).
+1. Run `zip oss_docs_versions.zip versioned_docs versioned_sidebars versions.json` to zip up `versioned_docs`, `versioned_sidebars` and `versions.json` as `oss_docs_versions.zip` and upload the zip file to the s3 bucket (see `docs/docs_version_bucket_info.py` for the bucket name:vsp. Make sure `versioned_docs`, `versioned_sidebars` and `versions.json` are at the top level of the zip file (not nested in a folder).
 1. Once the docs are built again, this zip file will be used to build the earlier versions.
+
+
+## Versioning and docs build flow (pre v1.0)
+### Versioning
+```mermaid
+sequenceDiagram
+    Participant Code
+    Participant SphinxBuild as temp_sphinx_api_docs_build_dir/
+    Participant Docusaurus as docs/docusaurus
+    Participant DocsBuild as docs/docusaurus/build
+    Participant Github
+    Participant S3
+    Participant Netlify
+
+    loop versioning
+        % invoke api-docs
+        Code ->> SphinxBuild: sphinx generated html
+        activate SphinxBuild
+        SphinxBuild ->> Docusaurus: html converted to .md and store in docs/docusaurus/docs/reference/api
+        deactivate SphinxBuild
+
+        % invoke docs --build
+        activate Docusaurus
+        % yarn docusaurus build
+        Code ->> DocsBuild: generate docs
+        DocsBuild ->> Docusaurus: yarn docusaurus docs:version
+        DocsBuild ->> S3: Update S3 with the new version
+    end
+
+    loop invoke docs --build
+        % invoke docs --build
+        activate Docusaurus
+        S3 ->> Docusaurus: Load versions.json, versioned_docs/ and versioned_sidebars/
+        Github ->> Docusaurus: Load versioned_code/
+
+        % prepare prior versions
+        Docusaurus ->> Docusaurus: Process each prior version
+
+        % invoke api-docs
+        Code ->> SphinxBuild: sphinx generated html
+        activate SphinxBuild
+        SphinxBuild ->> Docusaurus: html converted to .md and store in docs/docusaurus/docs/reference/api
+        deactivate SphinxBuild
+
+        % yarn docusaurus build
+        activate DocsBuild
+        Docusaurus ->> DocsBuild: build docs and versioned_*
+        deactivate Docusaurus
+        DocsBuild ->> Netlify: Deploy
+        deactivate DocsBuild
+    end
