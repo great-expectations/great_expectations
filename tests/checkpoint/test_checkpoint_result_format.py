@@ -3608,7 +3608,7 @@ def test_rendered_content_bool_only_respected(
     expectation_suite_name = "test_result_format_suite"
     context.suites.add(
         ExpectationSuite(
-            suite=expectation_suite_name,
+            name=expectation_suite_name,
         )
     )
     validator = context.get_validator(
