@@ -328,14 +328,17 @@ def get_expectation_instances(expectations_info):
             )
             expectation_tracebacks.write(traceback.format_exc())
         except pydantic.ValidationError:
+            expectation_tracebacks.write(
+                f"Test case for {expectation_name} has invalid input type."
+            )
             expectation_tracebacks.write(traceback.format_exc())
-        except IndexError:
+        except (IndexError, ValueError):
             expectation_tracebacks.write(
                 f"Expectation {expectation_name} has invalid test case."
             )
             expectation_tracebacks.write(traceback.format_exc())
-        except Exception as exc:
-            expectation_tracebacks.write(f"Unexpected error occurred: {exc}")
+        except Exception:  # continue even if this expectation fails catastrophically
+            expectation_tracebacks.write("Unexpected error occurred.")
             expectation_tracebacks.write(traceback.format_exc())
     return expectation_instances
 
