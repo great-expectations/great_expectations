@@ -9,10 +9,14 @@ from contextlib import contextmanager
 from functools import cached_property
 from io import BytesIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, List, Optional, cast
+from typing import TYPE_CHECKING, Generator, List, Optional
 
 from docs.docs_version_bucket_info import S3_URL
-from docs.prepare_prior_versions import prepare_prior_versions, Version
+from docs.prepare_prior_versions import (
+    prepare_prior_version,
+    prepare_prior_versions,
+    Version,
+)
 from docs.logging import Logger
 
 if TYPE_CHECKING:
@@ -52,7 +56,31 @@ class DocsBuilder:
         self._context.run("yarn start")
 
     def create_version(self, version: Version) -> None:
-        self.logger.print("Creating version...")
+        self.logger.print_header(f"Creating version {version}")
+        # load existing versions
+        versions = self._load_all_versioned_docs()
+        if version in versions:
+            raise Exception(f"Version {version} already exists")
+
+        # load state of code for given version and process it
+        # we'll end up checking this branch out as well, but need the data in versioned_code for prepare_prior_version
+        self._load_versioned_code(version)
+        os.chdir("..")  # TODO: none of this messing with current directory stuff
+        prepare_prior_version(version)
+        os.chdir("docusaurus")
+
+        # switch to the version branch for its docs and create versioned docs
+        self._context.run(f"git checkout {version}")
+        self._context.run(f"yarn docusaurus docs:version {version}")
+
+        output_file = "oss_docs_versions.zip"
+        self._context.run(
+            f"zip -r {output_file} versioned_docs versioned_sidebars versions.json"
+        )
+        self.logger.print(f"Created {output_file}")
+
+        # got back to intended branch
+        self._context.run("git checkout -")
 
     def _prepare(self) -> None:
         """A whole bunch of common work we need"""
@@ -88,18 +116,20 @@ class DocsBuilder:
 
         Returns a list of verions loaded.
         """
-
-        if os.path.exists("versioned_code"):
-            shutil.rmtree("versioned_code")
-        os.mkdir("versioned_code")
-        self.logger.print(f"Copying previous versioned docs from {S3_URL}")
-        with self._load_zip(S3_URL) as zip_ref:
-            zip_ref.extractall(self._current_directory)
-            versions_json = zip_ref.read("versions.json")
-            versions = [Version.from_string(x) for x in json.loads(versions_json)]
+        versions = self._load_all_versioned_docs()
         for version in versions:
             self._load_versioned_code(version)
         return versions
+
+    def _load_all_versioned_docs(self) -> List[Version]:
+        self.logger.print(f"Copying previous versioned docs from {S3_URL}")
+        if os.path.exists("versioned_code"):
+            shutil.rmtree("versioned_code")
+        os.mkdir("versioned_code")
+        with self._load_zip(S3_URL) as zip_ref:
+            zip_ref.extractall(self._current_directory)
+            versions_json = zip_ref.read("versions.json")
+            return [Version.from_string(x) for x in json.loads(versions_json)]
 
     def _load_versioned_code(self, version: Version) -> None:
         self.logger.print(
