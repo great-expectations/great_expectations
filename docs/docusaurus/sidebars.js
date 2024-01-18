@@ -1,4 +1,81 @@
 module.exports = {
+  gx_core:
+      [
+        {
+          type: 'category',
+          label: 'Manage Expectations',
+          link: { type: 'doc', id: 'core/expectations/manage_expectations' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create an Expectation',
+              href: '/docs/core/expectations/manage_expectations#create-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Test an Expectation',
+              href: '/docs/core/expectations/manage_expectations#test-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Modify an Expectation',
+              href: '/docs/core/expectations/manage_expectations#modify-an-expectation',
+            },
+          ]
+        },
+      {
+          type: 'category',
+          label: 'Manage Expectation Suites',
+          link: { type: 'doc', id: 'core/expectations/manage_expectation_suites' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create an Expectation Suite',
+              href: '/docs/core/expectations/manage_expectation_suites#create-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Get an existing Expectation Suite',
+              href: '/docs/core/expectations/manage_expectation_suites#get-an-existing-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Modify an Expectation Suite',
+              href: '/docs/core/expectations/manage_expectation_suites#modify-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation Suite',
+              href: '/docs/core/expectations/manage_expectation_suites#delete-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Add Expectations',
+              href: '/docs/core/expectations/manage_expectation_suites#add-expectations',
+            },
+            {
+              type: 'link',
+              label: 'Get an Expectation',
+              href: '/docs/core/expectations/manage_expectation_suites#get-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Edit a single Expectation',
+              href: '/docs/core/expectations/manage_expectation_suites#edit-a-single-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Edit multiple Expectations',
+              href: '/docs/core/expectations/manage_expectation_suites#edit-multiple-expectations',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation',
+              href: '/docs/core/expectations/manage_expectation_suites#delete-an-expectation',
+            },
+          ]
+        },
+  ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
