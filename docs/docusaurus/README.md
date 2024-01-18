@@ -91,7 +91,7 @@ To add a new version, follow these steps:
 1. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
 1. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
 1. Add your version number to `versions.json` in the unzipped version file (at the top if it is the most recent).
-1. Run `zip oss_docs_versions.zip versioned_docs versioned_sidebars versions.json` to zip up `versioned_docs`, `versioned_sidebars` and `versions.json` as `oss_docs_versions.zip` and upload the zip file to the s3 bucket (see `docs/docs_version_bucket_info.py` for the bucket name). Make sure `versioned_docs`, `versioned_sidebars` and `versions.json` are at the top level of the zip file (not nested in a folder).
+1. Run `zip -r oss_docs_versions.zip versioned_docs versioned_sidebars versions.json` to zip up `versioned_docs`, `versioned_sidebars` and `versions.json` as `oss_docs_versions.zip` and upload the zip file to the s3 bucket (see `docs/docs_version_bucket_info.py` for the bucket name). Make sure `versioned_docs`, `versioned_sidebars` and `versions.json` are at the top level of the zip file (not nested in a folder).
 1. Once the docs are built again, this zip file will be used to build the earlier versions.
 
 
