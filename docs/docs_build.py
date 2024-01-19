@@ -30,11 +30,13 @@ class DocsBuilder:
         current_directory: Path,
         is_pull_request: bool,
         is_local: bool,
+        s3_url: str = S3_URL,
     ) -> None:
         self._context = context
         self._current_directory = current_directory
         self._is_pull_request = is_pull_request
         self._is_local = is_local
+        self._s3_url = s3_url
 
         self._current_commit = self._run_and_get_output("git rev-parse HEAD")
         self._current_branch = self._run_and_get_output(
@@ -151,11 +153,11 @@ class DocsBuilder:
         return versions
 
     def _load_all_versioned_docs(self) -> List[Version]:
-        self.logger.print(f"Copying previous versioned docs from {S3_URL}")
+        self.logger.print(f"Copying previous versioned docs from {self._s3_url}")
         if os.path.exists("versioned_code"):
             shutil.rmtree("versioned_code")
         os.mkdir("versioned_code")
-        with self._load_zip(S3_URL) as zip_ref:
+        with self._load_zip(self._s3_url) as zip_ref:
             zip_ref.extractall(self._current_directory)
             versions_json = zip_ref.read("versions.json")
             return [Version.from_string(x) for x in json.loads(versions_json)]
