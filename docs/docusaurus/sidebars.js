@@ -65,7 +65,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Set the environment variables and start the GX Cloud agent',
+              label: 'Set the environment variables and start the GX Agent',
               href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
           ]
