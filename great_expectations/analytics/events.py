@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import ClassVar, List
 
 from great_expectations.analytics.actions import (
@@ -31,16 +32,13 @@ class ExpectationSuiteExpectationCreatedEvent(Event):
         EXPECTATION_SUITE_EXPECTATION_CREATED,
     ]
 
-    def __init__(self):
-        super().__init__(action=EXPECTATION_SUITE_EXPECTATION_CREATED)
-
     @override
     def _properties(self) -> dict:
         return {
             "expectation_id": self.expectation_id,
             "expectation_suite_id": self.expectation_suite_id,
             "expectation_type": self.expectation_type,
-            "custom_epx_type": self.custom_exp_type,
+            "custom_exp_type": self.custom_exp_type,
         }
 
 
@@ -51,9 +49,6 @@ class ExpectationSuiteExpectationUpdatedEvent(Event):
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_UPDATED,
     ]
-
-    def __init__(self):
-        super().__init__(action=EXPECTATION_SUITE_EXPECTATION_UPDATED)
 
     @override
     def _properties(self) -> dict:
@@ -71,9 +66,6 @@ class ExpectationSuiteExpectationDeletedEvent(Event):
         EXPECTATION_SUITE_EXPECTATION_DELETED,
     ]
 
-    def __init__(self):
-        super().__init__(action=EXPECTATION_SUITE_EXPECTATION_DELETED)
-
     @override
     def _properties(self) -> dict:
         return {
@@ -82,13 +74,11 @@ class ExpectationSuiteExpectationDeletedEvent(Event):
         }
 
 
+@dataclass
 class ExpectationSuiteCreatedEvent(Event):
     expectation_suite_id: str | None = None
 
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_CREATED]
-
-    def __init__(self):
-        super().__init__(action=EXPECTATION_SUITE_CREATED)
 
     @override
     def _properties(self) -> dict:
@@ -97,13 +87,11 @@ class ExpectationSuiteCreatedEvent(Event):
         }
 
 
+@dataclass
 class ExpectationSuiteDeletedEvent(Event):
     expectation_suite_id: str | None = None
 
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_DELETED]
-
-    def __init__(self):
-        super().__init__(action=EXPECTATION_SUITE_DELETED)
 
     @override
     def _properties(self) -> dict:

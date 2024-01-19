@@ -1,8 +1,17 @@
+from unittest import mock
 from unittest.mock import Mock
 
 import pytest
 
 from great_expectations import set_context
+from great_expectations.analytics.actions import (
+    EXPECTATION_SUITE_CREATED,
+    EXPECTATION_SUITE_DELETED,
+)
+from great_expectations.analytics.events import (
+    ExpectationSuiteCreatedEvent,
+    ExpectationSuiteDeletedEvent,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.suite_factory import SuiteFactory
 from great_expectations.data_context import AbstractDataContext
@@ -194,3 +203,58 @@ def _test_suite_factory_delete_success(context):
         match=f"ExpectationSuite with name {name} was not found.",
     ):
         context.suites.get(name)
+
+
+class TestSuiteFactoryAnalytics:
+    @pytest.mark.filesystem
+    def test_suite_factory_add_emits_event_filesystem(self, empty_data_context):
+        self._test_suite_factory_add_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_suite_factory_add_emits_event_cloud(self, empty_cloud_context_fluent):
+        self._test_suite_factory_add_emits_event(empty_cloud_context_fluent)
+
+    def _test_suite_factory_add_emits_event(self, context):
+        # Arrange
+        name = "test-suite"
+        suite = ExpectationSuite(name=name)
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.suite_factory.submit_event", autospec=True
+        ) as mock_submit:
+            _ = context.suites.add(suite=suite)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ExpectationSuiteCreatedEvent(
+                action=EXPECTATION_SUITE_CREATED, expectation_suite_id=suite.ge_cloud_id
+            )
+        )
+
+    @pytest.mark.filesystem
+    def test_suite_factory_delete_emits_event_filesystem(self, empty_data_context):
+        self._test_suite_factory_delete_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_suite_factory_delete_emits_event_cloud(self, empty_cloud_context_fluent):
+        self._test_suite_factory_delete_emits_event(empty_cloud_context_fluent)
+
+    def _test_suite_factory_delete_emits_event(self, context):
+        # Arrange
+        name = "test-suite"
+        suite = ExpectationSuite(name=name)
+        suite = context.suites.add(suite=suite)
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.suite_factory.submit_event", autospec=True
+        ) as mock_submit:
+            context.suites.delete(suite=suite)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ExpectationSuiteDeletedEvent(
+                action=EXPECTATION_SUITE_DELETED, expectation_suite_id=suite.ge_cloud_id
+            )
+        )

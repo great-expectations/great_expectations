@@ -3,6 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.actions import (
+    EXPECTATION_SUITE_CREATED,
+    EXPECTATION_SUITE_DELETED,
+)
 from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import (
     ExpectationSuiteCreatedEvent,
@@ -39,6 +43,7 @@ class SuiteFactory:
 
         submit_event(
             event=ExpectationSuiteCreatedEvent(
+                action=EXPECTATION_SUITE_CREATED,
                 expectation_suite_id=suite.ge_cloud_id,
             )
         )
@@ -64,6 +69,7 @@ class SuiteFactory:
 
         submit_event(
             event=ExpectationSuiteDeletedEvent(
+                action=EXPECTATION_SUITE_DELETED,
                 expectation_suite_id=suite.ge_cloud_id,
             )
         )
