@@ -68,11 +68,6 @@ module.exports = {
               label: 'Set the environment variables and start the GX Cloud agent',
               href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
-            {
-              type: 'link',
-              label: 'Secure your GX API Data Source connection strings',
-              href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
-            },
           ]
         },
         {
@@ -119,6 +114,11 @@ module.exports = {
               type: 'link',
               label: 'Edit a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Secure your GX API Data Source connection strings',
+              href: '/docs/cloud/data_assets/manage_data_assets#secure-your-gx-api-data-source-connection-strings',
             },
             {
               type: 'link',
