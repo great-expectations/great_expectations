@@ -2,6 +2,7 @@ import datetime
 import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
+from unittest import mock
 from unittest.mock import MagicMock, Mock
 from uuid import UUID
 
@@ -11,6 +12,8 @@ import great_expectations.exceptions.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import set_context
+from great_expectations.analytics.actions import EXPECTATION_SUITE_EXPECTATION_CREATED
+from great_expectations.analytics.events import ExpectationSuiteExpectationCreatedEvent
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -1393,3 +1396,60 @@ def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuit
         suite.add_expectation_configuration(expectation_configuration)
 
     assert f"{expectation_type} not found" in str(e)
+
+
+class TestExpectationSuiteAnalytics:
+    @pytest.mark.unit
+    def test_add_expectation_emits_event(self, empty_suite):
+        suite = empty_suite
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="passenger_count", min_value=1, max_value=6
+        )
+
+        with mock.patch(
+            "great_expectations.core.expectation_suite.submit_event"
+        ) as mock_submit:
+            _ = suite.add_expectation(expectation)
+
+        mock_submit.assert_called_once_with(
+            event=ExpectationSuiteExpectationCreatedEvent(
+                action=EXPECTATION_SUITE_EXPECTATION_CREATED,
+                expectation_id=None,
+                expectation_suite_id=None,
+                expectation_type="expect_column_values_to_be_between",
+                custom_exp_type=False,
+            )
+        )
+
+    @pytest.mark.unit
+    def test_add_custom_expectation_emits_event(self, empty_suite):
+        suite = empty_suite
+
+        class ExpectColumnValuesToBeBetweenOneAndTen(gxe.ExpectColumnValuesToBeBetween):
+            min_value: int = 1
+            max_value: int = 10
+
+        expectation = ExpectColumnValuesToBeBetweenOneAndTen(column="passenger_count")
+
+        with mock.patch(
+            "great_expectations.core.expectation_suite.submit_event"
+        ) as mock_submit:
+            _ = suite.add_expectation(expectation)
+
+        mock_submit.assert_called_once_with(
+            event=ExpectationSuiteExpectationCreatedEvent(
+                action=EXPECTATION_SUITE_EXPECTATION_CREATED,
+                expectation_id=None,
+                expectation_suite_id=None,
+                expectation_type=mock.ANY,
+                custom_exp_type=True,
+            )
+        )
+
+        # Due to anonymizer randomization, we can't assert the exact expectation type
+        # We can however assert that it has been hashed
+        expectation_type = mock_submit.call_args.kwargs["event"].expectation_type
+        assert not expectation_type.startswith("expect_")
+
+    def test_delete_expectation_emits_event(self):
+        pass

@@ -190,19 +190,13 @@ class ExpectationSuite(SerializableDictDot):
         return expectation
 
     def _submit_expectation_created_event(self, expectation: Expectation) -> None:
-        from great_expectations.expectations.registry import get_expectation_impl
-
-        expectation_type = expectation.expectation_type
-
-        try:
-            get_expectation_impl(expectation_type)
+        if expectation.__module__.startswith("great_expectations."):
             custom_exp_type = False
-        except gx_exceptions.ExpectationNotFoundError:
+            expectation_type = expectation.expectation_type
+        else:
             custom_exp_type = True
-
-        if custom_exp_type:
             anonymizer = Anonymizer()
-            expectation_type = anonymizer.anonymize(expectation_type)
+            expectation_type = anonymizer.anonymize(expectation.expectation_type)
 
         submit_event(
             event=ExpectationSuiteExpectationCreatedEvent(
