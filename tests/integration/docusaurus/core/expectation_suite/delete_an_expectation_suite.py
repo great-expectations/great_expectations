@@ -6,9 +6,9 @@ The <snippet> tags are used to insert the corresponding code into the
  Great Expectations documentation.  They can be disregarded by anyone
  reviewing this script.
 """
-# <snippet name="tests/integration/docusaurus/core/expectations/delete_an_expectation_suite.py full example code">
+# <snippet name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py full example code">
 # 1. Import the Great Expectations library
-# <snippet name="tests/integration/docusaurus/core/expectations/delete_an_expectation_suite.py imports">
+# <snippet name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py imports">
 import great_expectations as gx
 
 # </snippet>
@@ -21,7 +21,7 @@ new_suite_name = "my_deletable_expectation_suite"
 new_suite = ExpectationSuite(name=new_suite_name)
 
 # 2. Get a Data Context
-# <snippet name="tests/integration/docusaurus/core/expectations/delete_an_expectation_suite.py get_context">
+# <snippet name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py get_context">
 context = gx.get_context()
 # </snippet>
 
@@ -31,7 +31,7 @@ context = gx.get_context()
 suite = context.suites.add(new_suite)
 
 # 3. Use the Data Context to delete the existing Expectation Suite.
-# <snippet name="tests/integration/docusaurus/core/expectations/delete_an_expectation_suite.py delete Expectation Suite">
+# <snippet name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py delete Expectation Suite">
 name_of_suite_to_delete = "my_deletable_expectation_suite"  # replace this with the name of your Expectation Suite
 context.suites.delete(suite=name_of_suite_to_delete)
 # </snippet>
