@@ -134,7 +134,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 3. [Create a new](#create-a-new-expectation-suite) or [get an existing](#get-an-existing-expectation-suite) Expectation Suite.  This example retrieves an existing Expectation Suite.
 
-  ```python "tests/integration/docusaurus/core/expectation_suite/add_expectations_to_an_expectation_suite.py get_suite"
+  ```python name="tests/integration/docusaurus/core/expectation_suite/add_expectations_to_an_expectation_suite.py get_suite"
   ```
 
 4. Create an Expectation.

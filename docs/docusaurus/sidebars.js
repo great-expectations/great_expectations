@@ -26,52 +26,52 @@ module.exports = {
       {
           type: 'category',
           label: 'Manage Expectation Suites',
-          link: { type: 'doc', id: 'core/expectations/manage_expectation_suites' },
+          link: { type: 'doc', id: 'core/expectation_suites/manage_expectation_suites' },
           items: [
             {
               type: 'link',
               label: 'Create an Expectation Suite',
-              href: '/docs/core/expectations/manage_expectation_suites#create-an-expectation-suite',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
             },
             {
               type: 'link',
               label: 'Get an existing Expectation Suite',
-              href: '/docs/core/expectations/manage_expectation_suites#get-an-existing-expectation-suite',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
             },
             {
               type: 'link',
               label: 'Modify an Expectation Suite',
-              href: '/docs/core/expectations/manage_expectation_suites#modify-an-expectation-suite',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#modify-an-expectation-suite',
             },
             {
               type: 'link',
               label: 'Delete an Expectation Suite',
-              href: '/docs/core/expectations/manage_expectation_suites#delete-an-expectation-suite',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
             },
             {
               type: 'link',
               label: 'Add Expectations',
-              href: '/docs/core/expectations/manage_expectation_suites#add-expectations',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#add-expectations',
             },
             {
               type: 'link',
               label: 'Get an Expectation',
-              href: '/docs/core/expectations/manage_expectation_suites#get-an-expectation',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#get-an-expectation',
             },
             {
               type: 'link',
               label: 'Edit a single Expectation',
-              href: '/docs/core/expectations/manage_expectation_suites#edit-a-single-expectation',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#edit-a-single-expectation',
             },
             {
               type: 'link',
               label: 'Edit multiple Expectations',
-              href: '/docs/core/expectations/manage_expectation_suites#edit-multiple-expectations',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#edit-multiple-expectations',
             },
             {
               type: 'link',
               label: 'Delete an Expectation',
-              href: '/docs/core/expectations/manage_expectation_suites#delete-an-expectation',
+              href: '/docs/core/expectation_suites/manage_expectation_suites#delete-an-expectation',
             },
           ]
         },

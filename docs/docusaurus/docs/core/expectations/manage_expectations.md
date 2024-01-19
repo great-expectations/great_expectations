@@ -67,26 +67,26 @@ validation_result = batch.validate(expectation)
 
 ## Modify an Expectation
 
-1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/expectations/manage_expectation_suites#get-a-specific-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.
-  
-  :::note
-  In the full example code at the end of this section, we retrieve the Expectation to edit from an Expectation Suite.
-
-  The rest of this section assumes the variable `expectation` is the Expectation you wish to modify.
-  :::
+1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/expectations/manage_expectation_suites#get-a-specific-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.  This example uses an Expectation that was newly created in an Expectation Suite.
+  ```python name="tests/integration/docusaurus/core/expectation/edit_an_expectation.py get expectation"
+  ```
 
 2. Modify the Expectation's attributes.
-  ```python name="tests/integration/docusaurus/core/expectations/edit_a_single_expectation.py edit attribute"
+  ```python name="tests/integration/docusaurus/core/expectation/edit_an_expectation.py modify attributes"
   ```
+  The specific attributes that can be modified correspond to the parameters used to initialize the Expectation.  You can view available Expectations and the parameters they take in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
 3. (Optional) If the Expectation belongs to an Expectation Suite, save the changes to the Expectation Suite.
-  ```python name="tests/integration/docusaurus/core/expectations/edit_a_single_expectation.py save the Expectation"
+  ```python name="tests/integration/docusaurus/core/expectation/edit_an_expectation.py save the Expectation"
   ```
+  :::info
+  `expectation.save()` is explicitly used to update the configuration of an Expectation in an Expectation Suite.  If the Expectation is not part of an Expectation Suite, `expectation.save()` will fail.
+  :::
 
 <details><summary>Full example code</summary>
 <p>
 
-```python name="tests/integration/docusaurus/core/expectations/edit_a_single_expectation.py full example code"
+```python name="tests/integration/docusaurus/core/expectation/edit_an_expectation.py full example code
 ```
 
 </p>
