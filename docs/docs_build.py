@@ -1,18 +1,18 @@
 from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import zipfile
 from contextlib import contextmanager
 from functools import cached_property
-import json
-from .logging import Logger
-import os
-import shutil
-from pathlib import Path
-import re
-from typing import TYPE_CHECKING, Generator, List, Optional, cast
 from io import BytesIO
-import zipfile
+from pathlib import Path
+from typing import TYPE_CHECKING, Generator, List, Optional, cast
 
-
-from docs.prepare_prior_versions import prepare_prior_versions
+from docs.docs_version_bucket_info import S3_URL
+from docs.logging import Logger
 
 if TYPE_CHECKING:
     from invoke.context import Context
@@ -51,16 +51,18 @@ class DocsBuilder:
         self._context.run("yarn start")
 
     def _prepare(self) -> None:
+        from docs.prepare_prior_versions import prepare_prior_versions, Version
+
         """A whole bunch of common work we need"""
         self.logger.print_header("Preparing to build docs...")
-        self._load_files()
+        versions_loaded = self._load_files()
 
         self.logger.print_header(
             "Updating versioned code and docs via prepare_prior_versions.py..."
         )
         # TODO: none of this messing with current directory stuff
         os.chdir("..")
-        prepare_prior_versions()
+        prepare_prior_versions([Version.from_string(v) for v in versions_loaded])
         os.chdir("docusaurus")
         self.logger.print("Updated versioned code and docs")
 
@@ -76,14 +78,15 @@ class DocsBuilder:
         with zipfile.ZipFile(zip_data, "r") as zip_ref:
             yield zip_ref
 
-    def _load_files(self) -> None:
+    def _load_files(self) -> List[str]:
         """Load oss_docs_versions zip and relevant versions from github.
 
         oss_docs_versions contains the versioned docs to be used later by prepare_prior_versions, as well
         as the versions.json file, which contains the list of versions that we then download from github.
+
+        Returns a list of verions loaded.
         """
 
-        S3_URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip"
         if os.path.exists("versioned_code"):
             shutil.rmtree("versioned_code")
         os.mkdir("versioned_code")
@@ -108,6 +111,7 @@ class DocsBuilder:
                     self._current_directory / f"versioned_code/version-{version}"
                 )
                 shutil.move(str(old_location), str(new_location))
+        return versions
 
     def _invoke_api_docs(self) -> None:
         """Invokes the invoke api-docs command.
