@@ -12,3 +12,4 @@ UPDATED_S3_URL = f"https://{S3_BUCKET}.s3.{REGION}.amazonaws.com/{UPDATED_FILENA
 # Run this file to print the S3_URL
 if __name__ == "__main__":
     print(S3_URL)
+    print(UPDATED_S3_URL)

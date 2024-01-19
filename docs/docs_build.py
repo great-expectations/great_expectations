@@ -72,7 +72,6 @@ class DocsBuilder:
 
     def create_version(self, version: Version) -> None:
         self.logger.print_header(f"Creating version {version}")
-        versions = self._load_all_versioned_docs()
 
         # load state of code for given version and process it
         # we'll end up checking this branch out as well, but need the data in versioned_code for prepare_prior_version
