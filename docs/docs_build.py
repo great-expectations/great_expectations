@@ -112,7 +112,9 @@ class DocsBuilder:
 
         # finally, check that we can actually build the docs
         self.logger.print_header("Testing that we can build the docs...")
-        self.build_docs_2()
+        # this is the steps from build_docs minus loading data from s3
+        self._invoke_api_docs()
+        self._context.run("yarn build")
         self.logger.print_header(
             f"Successfully created version {version}. Upload {output_file} to S3."
         )
