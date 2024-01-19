@@ -3,12 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
-from great_expectations.analytics.actions import (
-    EXPECTATION_SUITE_CREATED,
-    EXPECTATION_SUITE_DELETED,
-)
 from great_expectations.analytics.client import submit as submit_event
-from great_expectations.analytics.events import ExpectationSuiteEvent
+from great_expectations.analytics.events import (
+    ExpectationSuiteCreatedEvent,
+    ExpectationSuiteDeletedEvent,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.exceptions import DataContextError
 
@@ -39,11 +38,8 @@ class SuiteFactory:
         self._store.add(key=key, value=suite)
 
         submit_event(
-            event=ExpectationSuiteEvent(
-                action=EXPECTATION_SUITE_CREATED,
+            event=ExpectationSuiteCreatedEvent(
                 expectation_suite_id=suite.ge_cloud_id,
-                expectation_suite_name=suite.name,
-                expectation_ids=[exp.id for exp in suite.expectations],
             )
         )
 
@@ -67,11 +63,8 @@ class SuiteFactory:
         self._store.remove_key(key=key)
 
         submit_event(
-            event=ExpectationSuiteEvent(
-                action=EXPECTATION_SUITE_DELETED,
+            event=ExpectationSuiteDeletedEvent(
                 expectation_suite_id=suite.ge_cloud_id,
-                expectation_suite_name=suite.name,
-                expectation_ids=[exp.id for exp in suite.expectations],
             )
         )
 
