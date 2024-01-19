@@ -1,11 +1,11 @@
 ---
-sidebar_label: 'Quickstart for GX Cloud and Snowflake'
-title: 'Quickstart for GX Cloud and Snowflake'
+sidebar_label: 'Try GX Cloud'
+title: 'Try GX Cloud'
 id: snowflake_quickstart
-description: Connect GX Cloud to Snowflake Data Assets.
+description: Try GX Cloud features and functionality.
 ---
 
-In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Assets.
+In you're new to GX Cloud, start here to learn how you can quickly connect to your Data Assets and validate data.
 
 ## Prerequisites
 

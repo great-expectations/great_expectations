@@ -45,37 +45,36 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Set up GX Cloud',
-          link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
+          label: 'Try GX Cloud',
+          link: { type: 'doc', id: 'cloud/quickstarts/snowflake_quickstart' },
           items: [
             {
               type: 'link',
-              label: 'Request a GX Cloud Beta account',
-              href: '/docs/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account',
+              label: 'Generate your user access token and copy your organization ID',
+              href: '/docs/cloud/quickstarts/snowflake_quickstart#generate-your-user-access-token-and-copy-your-organization-id',
             },
             {
               type: 'link',
-              label: 'Prepare your environment',
-              href: '/docs/cloud/set_up_gx_cloud#prepare-your-environment',
+              label: 'Set the environment variables and start the GX Agent',
+              href: '/docs/cloud/quickstarts/snowflake_quickstart#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
             {
               type: 'link',
-              label: 'Get your user access token and organization ID',
-              href: '/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id',
+              label: 'Add an Expectation',
+              href: '/docs/cloud/quickstarts/snowflake_quickstart#add-an-expectation',
             },
             {
               type: 'link',
-              label: 'Set the environment variables and start the GX Cloud agent',
-              href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
+              label: 'Validate Expectations',
+              href: '/docs/cloud/quickstarts/snowflake_quickstart#validate-expectations',
             },
           ]
         },
         {
           type: 'category',
-          label: 'Quickstarts',
+          label: 'Deploy GX Cloud',
           link: { type: 'doc', id: 'cloud/quickstarts/quickstart_lp' },
           items: [
-            'cloud/quickstarts/snowflake_quickstart',
             'cloud/quickstarts/airflow_quickstart',
             'cloud/quickstarts/python_quickstart',
           ]
