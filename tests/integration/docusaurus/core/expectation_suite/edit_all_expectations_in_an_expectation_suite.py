@@ -11,10 +11,11 @@ The <snippet> tags are used to insert the corresponding code into the
 # <snippet name="tests/integration/docusaurus/core/expectation_suite/edit_all_expectations_in_an_expectation_suite.py create and populate Expectation Suite">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 context = gx.get_context()
 
-suite = context.suites.add(name="my_expectation_suite")
+suite = context.suites.add(suite=ExpectationSuite(name="my_expectation_suite"))
 
 suite.add_expectation(
     gxe.ExpectColumnValuesToBeInSet(column="passenger_count", value_set=[1, 2, 3, 4, 5])
