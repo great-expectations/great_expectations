@@ -75,7 +75,7 @@ class DocsBuilder:
 
         # load state of code for given version and process it
         # we'll end up checking this branch out as well, but need the data in versioned_code for prepare_prior_version
-        versions = self._load_files()
+        versions = self._load_all_versioned_docs()
         if version in versions:
             raise Exception(f"Version {version} already exists")
 
