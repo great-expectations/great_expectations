@@ -12,8 +12,14 @@ import great_expectations.exceptions.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import set_context
-from great_expectations.analytics.actions import EXPECTATION_SUITE_EXPECTATION_CREATED
-from great_expectations.analytics.events import ExpectationSuiteExpectationCreatedEvent
+from great_expectations.analytics.actions import (
+    EXPECTATION_SUITE_EXPECTATION_CREATED,
+    EXPECTATION_SUITE_EXPECTATION_DELETED,
+)
+from great_expectations.analytics.events import (
+    ExpectationSuiteExpectationCreatedEvent,
+    ExpectationSuiteExpectationDeletedEvent,
+)
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -1451,5 +1457,24 @@ class TestExpectationSuiteAnalytics:
         expectation_type = mock_submit.call_args.kwargs["event"].expectation_type
         assert not expectation_type.startswith("expect_")
 
-    def test_delete_expectation_emits_event(self):
-        pass
+    @pytest.mark.unit
+    def test_delete_expectation_emits_event(self, empty_suite):
+        suite = empty_suite
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="passenger_count", min_value=1, max_value=6
+        )
+
+        suite.add_expectation(expectation)
+
+        with mock.patch(
+            "great_expectations.core.expectation_suite.submit_event"
+        ) as mock_submit:
+            suite.delete_expectation(expectation)
+
+        mock_submit.assert_called_once_with(
+            event=ExpectationSuiteExpectationDeletedEvent(
+                action=EXPECTATION_SUITE_EXPECTATION_DELETED,
+                expectation_id=None,
+                expectation_suite_id=None,
+            )
+        )
