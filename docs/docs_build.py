@@ -41,6 +41,19 @@ class DocsBuilder:
             "git rev-parse --abbrev-ref HEAD"
         )
 
+    def build_docs_2(self) -> None:
+        """Build API docs + docusaurus docs.
+
+        NOTE: This will replace `build_docs` very shortly!
+        """
+        self.logger.print_header("Preparing to build docs...")
+        self._load_files()
+
+        self._invoke_api_docs()
+
+        self.logger.print_header("Building docusaurus docs...")
+        self._context.run("yarn build")
+
     def build_docs(self) -> None:
         """Build API docs + docusaurus docs.
         Currently used in our netlify pipeline.
@@ -93,7 +106,7 @@ class DocsBuilder:
         self._context.run("git checkout -")
 
         # finally, check that we can actually build the docs
-        self.build_docs()
+        self.build_docs_2()
         self.logger.print_header(
             f"Successfully created version {version}. Upload {output_file} to S3."
         )
