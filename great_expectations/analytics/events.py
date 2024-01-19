@@ -22,9 +22,21 @@ class DataContextInitializedEvent(Event):
         super().__init__(action=DATA_CONTEXT_INITIALIZED)
 
 
-class ExpectationSuiteExpectationCreatedEvent(Event):
+@dataclass
+class _ExpectationSuiteExpectationEvent(Event):
     expectation_id: str | None = None
     expectation_suite_id: str | None = None
+
+    @override
+    def _properties(self) -> dict:
+        return {
+            "expectation_id": self.expectation_id,
+            "expectation_suite_id": self.expectation_suite_id,
+        }
+
+
+@dataclass
+class ExpectationSuiteExpectationCreatedEvent(_ExpectationSuiteExpectationEvent):
     expectation_type: str = "UNKNOWN"
     custom_exp_type: bool = False
 
@@ -35,66 +47,42 @@ class ExpectationSuiteExpectationCreatedEvent(Event):
     @override
     def _properties(self) -> dict:
         return {
-            "expectation_id": self.expectation_id,
-            "expectation_suite_id": self.expectation_suite_id,
+            **super()._properties(),
             "expectation_type": self.expectation_type,
             "custom_exp_type": self.custom_exp_type,
         }
 
 
-class ExpectationSuiteExpectationUpdatedEvent(Event):
-    expectation_id: str | None = None
-    expectation_suite_id: str | None = None
-
+@dataclass
+class ExpectationSuiteExpectationUpdatedEvent(_ExpectationSuiteExpectationEvent):
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_UPDATED,
     ]
 
-    @override
-    def _properties(self) -> dict:
-        return {
-            "expectation_id": self.expectation_id,
-            "expectation_suite_id": self.expectation_suite_id,
-        }
 
-
-class ExpectationSuiteExpectationDeletedEvent(Event):
-    expectation_id: str | None = None
-    expectation_suite_id: str | None = None
-
+@dataclass
+class ExpectationSuiteExpectationDeletedEvent(_ExpectationSuiteExpectationEvent):
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_DELETED,
     ]
 
+
+@dataclass
+class _ExpectationSuiteEvent(Event):
+    expectation_suite_id: str | None = None
+
     @override
     def _properties(self) -> dict:
         return {
-            "expectation_id": self.expectation_id,
             "expectation_suite_id": self.expectation_suite_id,
         }
 
 
 @dataclass
-class ExpectationSuiteCreatedEvent(Event):
-    expectation_suite_id: str | None = None
-
+class ExpectationSuiteCreatedEvent(_ExpectationSuiteEvent):
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_CREATED]
 
-    @override
-    def _properties(self) -> dict:
-        return {
-            "expectation_suite_id": self.expectation_suite_id,
-        }
-
 
 @dataclass
-class ExpectationSuiteDeletedEvent(Event):
-    expectation_suite_id: str | None = None
-
+class ExpectationSuiteDeletedEvent(_ExpectationSuiteEvent):
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_DELETED]
-
-    @override
-    def _properties(self) -> dict:
-        return {
-            "expectation_suite_id": self.expectation_suite_id,
-        }
