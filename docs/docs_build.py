@@ -90,8 +90,12 @@ class DocsBuilder:
                 ]
             )
         )
-        self._context.run(f"yarn docusaurus docs:version {version}")
 
+        # create versioned_docs and load versioned_code
+        self._context.run(f"yarn docusaurus docs:version {version}")
+        self._load_versioned_code(version)
+
+        # process the above
         os.chdir("..")  # TODO: none of this messing with current directory stuff
         prepare_prior_version(version)
         os.chdir("docusaurus")
