@@ -67,6 +67,15 @@ class DocsBuilder:
 
         # switch to the version branch for its docs and create versioned docs
         self._context.run(f"git checkout {version}")
+        old_version_file = self._read_prior_release_version_file()
+        self._write_release_version(
+            "\n".join(
+                [
+                    "// This file was automatically generated.",
+                    f'export const release_version = "great_expectations, version {version}"',
+                ]
+            )
+        )
         self._context.run(f"yarn docusaurus docs:version {version}")
 
         os.chdir("..")  # TODO: none of this messing with current directory stuff
@@ -79,7 +88,8 @@ class DocsBuilder:
         )
         self.logger.print(f"Created {output_file}")
 
-        # got back to intended branch
+        # restore version file and go back to intended branch
+        self._write_release_version(old_version_file)
         self._context.run("git checkout -")
 
     def _prepare(self) -> None:
@@ -179,6 +189,14 @@ class DocsBuilder:
             )
             self._run(f"git checkout {self._current_commit}")
 
+    def _read_prior_release_version_file(self) -> str:
+        with open(self._release_version_file, "r") as file:
+            return file.read()
+
+    def _write_release_version(self, content: str) -> None:
+        with open(self._release_version_file, "w") as file:
+            file.write(content)
+
     def _run(self, command: str) -> Optional[str]:
         result = self._context.run(command)
         if not result:
@@ -191,6 +209,10 @@ class DocsBuilder:
         output = self._run(command)
         assert output
         return output
+
+    @property
+    def _release_version_file(self) -> str:
+        return "./docs/components/_data.jsx"
 
     @cached_property
     def _latest_tag(self) -> str:
