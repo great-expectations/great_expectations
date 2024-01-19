@@ -29,9 +29,6 @@ from great_expectations._docs_decorators import (
     new_argument,
     public_api,
 )
-from great_expectations.analytics.actions import EXPECTATION_SUITE_UPDATED
-from great_expectations.analytics.client import submit as submit_event
-from great_expectations.analytics.events import ExpectationSuiteEvent
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -177,16 +174,6 @@ class ExpectationSuite(SerializableDictDot):
                     raise exc
 
         expectation.register_save_callback(save_callback=self._save_expectation)
-
-        submit_event(
-            event=ExpectationSuiteEvent(
-                action=EXPECTATION_SUITE_UPDATED,
-                expectation_suite_id=self.ge_cloud_id,
-                expectation_suite_name=self.name,
-                expectation_ids=[exp.id for exp in self.expectations],
-            )
-        )
-
         return expectation
 
     @public_api
@@ -214,15 +201,6 @@ class ExpectationSuite(SerializableDictDot):
                 # expectation suite is set-like so order of expectations doesn't matter
                 self.expectations.append(expectation)
                 raise exc
-
-        submit_event(
-            event=ExpectationSuiteEvent(
-                action=EXPECTATION_SUITE_UPDATED,
-                expectation_suite_id=self.ge_cloud_id,
-                expectation_suite_name=self.name,
-                expectation_ids=[exp.id for exp in self.expectations],
-            )
-        )
 
         return expectation
 
