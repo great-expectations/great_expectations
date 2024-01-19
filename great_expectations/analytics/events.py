@@ -16,6 +16,11 @@ from great_expectations.compatibility.typing_extensions import override
 
 
 class DataContextInitializedEvent(Event):
+    """
+    Emitted when a DataContext is initialized.
+      - AbstractDataContext.__init__
+    """
+
     _allowed_actions: ClassVar[List[Action]] = [DATA_CONTEXT_INITIALIZED]
 
     def __init__(self):
@@ -37,6 +42,10 @@ class _ExpectationSuiteExpectationEvent(Event):
 
 @dataclass
 class ExpectationSuiteExpectationCreatedEvent(_ExpectationSuiteExpectationEvent):
+    """
+    TBD
+    """
+
     expectation_type: str = "UNKNOWN"
     custom_exp_type: bool = False
 
@@ -55,6 +64,10 @@ class ExpectationSuiteExpectationCreatedEvent(_ExpectationSuiteExpectationEvent)
 
 @dataclass
 class ExpectationSuiteExpectationUpdatedEvent(_ExpectationSuiteExpectationEvent):
+    """
+    TBD
+    """
+
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_UPDATED,
     ]
@@ -62,6 +75,10 @@ class ExpectationSuiteExpectationUpdatedEvent(_ExpectationSuiteExpectationEvent)
 
 @dataclass
 class ExpectationSuiteExpectationDeletedEvent(_ExpectationSuiteExpectationEvent):
+    """
+    TBD
+    """
+
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_DELETED,
     ]
@@ -80,9 +97,19 @@ class _ExpectationSuiteEvent(Event):
 
 @dataclass
 class ExpectationSuiteCreatedEvent(_ExpectationSuiteEvent):
+    """
+    Emitted when an ExpectationSuite is created.
+      - SuiteFactory.add
+    """
+
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_CREATED]
 
 
 @dataclass
 class ExpectationSuiteDeletedEvent(_ExpectationSuiteEvent):
+    """
+    Emitted when an ExpectationSuite is deleted.
+      - SuiteFactory.delete
+    """
+
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_DELETED]
