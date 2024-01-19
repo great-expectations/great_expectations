@@ -92,6 +92,12 @@ class DocsBuilder:
         self._write_release_version(old_version_file)
         self._context.run("git checkout -")
 
+        # finally, check that we can actually build the docs
+        self.build_docs()
+        self.logger.print_header(
+            f"Successfully created version {version}. Upload {output_file} to S3."
+        )
+
     def _prepare(self) -> None:
         """A whole bunch of common work we need"""
         self.logger.print_header("Preparing to build docs...")
