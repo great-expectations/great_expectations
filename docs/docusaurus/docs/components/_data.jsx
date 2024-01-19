@@ -1,4 +1,4 @@
-import { release_version } from './_version'
+import { release_version } from './_release_version'
 
 export default {
   release_version,

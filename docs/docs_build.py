@@ -239,7 +239,7 @@ class DocsBuilder:
 
     @property
     def _release_version_file(self) -> str:
-        return "./docs/components/_version.js"
+        return "./docs/components/_release_version.js"
 
     @cached_property
     def _latest_tag(self) -> str:
