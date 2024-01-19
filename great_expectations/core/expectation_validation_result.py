@@ -3,7 +3,10 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import webbrowser
 from copy import deepcopy
+from tempfile import NamedTemporaryFile
+from time import sleep
 from typing import TYPE_CHECKING, List, Optional
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
@@ -638,6 +641,27 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             statistics=statistics,
             meta=self.meta,
         )
+
+    def open_docs(self) -> None:
+        """View DataDocs for this result in a web browser."""
+        from great_expectations.render.renderer import ValidationResultsPageRenderer
+
+        renderer = ValidationResultsPageRenderer()
+        if not self.meta.get("run_id"):
+            self.meta["run_id"] = "temporary_result"
+        if not self.meta.get("expectation_suite_name"):
+            self.meta["expectation_suite_name"] = "temporary_suite"
+        rendered_content = renderer.render(self)
+        from great_expectations.render import DefaultJinjaPageView
+
+        view_class = DefaultJinjaPageView()
+        viewable_content = view_class.render(rendered_content)
+        with NamedTemporaryFile(mode="w") as file:
+            file.write(viewable_content)
+            webbrowser.open(
+                "file:///" + file.name
+            )  # prefix probably doesnt work across platforms, update me
+            sleep(1)  # ensure file is still there when the browser tries to access it
 
 
 class ExpectationSuiteValidationResultSchema(Schema):
