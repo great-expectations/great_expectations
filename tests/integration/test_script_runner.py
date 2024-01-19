@@ -242,6 +242,12 @@ local_tests = [
         data_context_dir=None,
         backend_dependencies=[],
     ),
+    IntegrationTestFixture(
+        name="expectation_management",
+        user_flow_script="tests/integration/docusaurus/expectations/expectation_management.py",
+        data_context_dir=None,
+        backend_dependencies=[],
+    ),
 ]
 
 quickstart = [
