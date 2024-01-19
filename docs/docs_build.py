@@ -98,7 +98,7 @@ class DocsBuilder:
 
         output_file = "oss_docs_versions.zip"
         self._context.run(
-            f"zip -r {output_file} versioned_docs versioned_sidebars versions.json"
+            f"zip -r {output_file} versioned_code versioned_docs versioned_sidebars versions.json"
         )
         self.logger.print(f"Created {output_file}")
 
