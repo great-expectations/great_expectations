@@ -29,6 +29,16 @@ from great_expectations._docs_decorators import (
     new_argument,
     public_api,
 )
+from great_expectations.analytics.actions import (
+    EXPECTATION_SUITE_EXPECTATION_CREATED,
+    EXPECTATION_SUITE_EXPECTATION_DELETED,
+)
+from great_expectations.analytics.anonymizer import Anonymizer
+from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.events import (
+    ExpectationSuiteExpectationCreatedEvent,
+    ExpectationSuiteExpectationDeletedEvent,
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -174,7 +184,35 @@ class ExpectationSuite(SerializableDictDot):
                     raise exc
 
         expectation.register_save_callback(save_callback=self._save_expectation)
+
+        self._submit_expectation_created_event(expectation=expectation)
+
         return expectation
+
+    def _submit_expectation_created_event(self, expectation: Expectation) -> None:
+        from great_expectations.expectations.registry import get_expectation_impl
+
+        expectation_type = expectation.expectation_type
+
+        try:
+            get_expectation_impl(expectation_type)
+            custom_exp_type = False
+        except gx_exceptions.ExpectationNotFoundError:
+            custom_exp_type = True
+
+        if custom_exp_type:
+            anonymizer = Anonymizer()
+            expectation_type = anonymizer.anonymize(expectation_type)
+
+        submit_event(
+            event=ExpectationSuiteExpectationCreatedEvent(
+                action=EXPECTATION_SUITE_EXPECTATION_CREATED,
+                expectation_id=expectation.id,
+                expectation_suite_id=self.ge_cloud_id,
+                expectation_type=expectation_type,
+                custom_exp_type=custom_exp_type,
+            )
+        )
 
     @public_api
     def delete_expectation(self, expectation: Expectation) -> Expectation:
@@ -201,6 +239,14 @@ class ExpectationSuite(SerializableDictDot):
                 # expectation suite is set-like so order of expectations doesn't matter
                 self.expectations.append(expectation)
                 raise exc
+
+        submit_event(
+            event=ExpectationSuiteExpectationDeletedEvent(
+                action=EXPECTATION_SUITE_EXPECTATION_DELETED,
+                expectation_id=expectation.id,
+                expectation_suite_id=self.ge_cloud_id,
+            )
+        )
 
         return expectation
 
