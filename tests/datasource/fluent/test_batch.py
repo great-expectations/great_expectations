@@ -6,13 +6,9 @@ from typing import Tuple
 import pytest
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.interfaces import Batch
-
-# TODO: We should namespace the expectations better
-from great_expectations.expectations.core.expect_column_values_to_not_be_null import (
-    ExpectColumnValuesToNotBeNull,
-)
 
 
 @pytest.fixture
@@ -34,7 +30,7 @@ def test_batch_validate_expectation(pandas_setup: Tuple[AbstractDataContext, Bat
     _, batch = pandas_setup
 
     # Make Expectation
-    expectation = ExpectColumnValuesToNotBeNull(
+    expectation = gxe.ExpectColumnValuesToNotBeNull(
         column="vendor_id",
         mostly=0.95,
     )
@@ -52,8 +48,8 @@ def test_batch_validate_expectation_suite(
 
     # Make Expectation Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add(
-        ExpectColumnValuesToNotBeNull(
+    suite.add_expectation(
+        gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
             mostly=0.95,
         )
@@ -71,7 +67,7 @@ def test_batch_validate_with_updated_expectation(
     _, batch = pandas_setup
 
     # Make Expectation
-    expectation = ExpectColumnValuesToNotBeNull(
+    expectation = gxe.ExpectColumnValuesToNotBeNull(
         column="vendor_id",
     )
     # Validate
@@ -92,7 +88,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
 
     # Make Expectation Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add(ExpectColumnValuesToNotBeNull(column="vendor_id"))
+    suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="vendor_id"))
     # Validate
     result = batch.validate(suite)
     # Asserts on result
@@ -101,11 +97,11 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
     assert len(suite.expectations) == 1
 
     expectation = suite.expectations[0]
-    assert isinstance(expectation, ExpectColumnValuesToNotBeNull)
+    assert isinstance(expectation, gxe.ExpectColumnValuesToNotBeNull)
     expectation.mostly = 0.95
 
     expectation.save()
-    assert isinstance(suite.expectations[0], ExpectColumnValuesToNotBeNull)
+    assert isinstance(suite.expectations[0], gxe.ExpectColumnValuesToNotBeNull)
     assert suite.expectations[0].mostly == 0.95
 
     result = batch.validate(suite)
@@ -120,7 +116,7 @@ def test_batch_validate_change_expectation_result_format(
 
     # "SUMMARY"" is the default result format
     assert batch.result_format == "SUMMARY"
-    expectation = ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)
+    expectation = gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)
     summary_result = batch.validate(expectation)
     # Summary result succeeds and .result has non-empty summary
     assert summary_result.success is True
@@ -142,8 +138,8 @@ def test_batch_validate_change_expectation_suite_result_format(
     assert batch.result_format == "SUMMARY"
     # Make Expectation Suite
     suite = context.add_expectation_suite("my_suite")
-    suite.add(
-        ExpectColumnValuesToNotBeNull(
+    suite.add_expectation(
+        gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
             mostly=0.95,
         )
