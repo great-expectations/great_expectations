@@ -377,12 +377,6 @@ def prepend_version_info_to_name_for_md_images(
     print(
         f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
     )
-    # NOTE: update files_to_process if there are more files that use relative markdown links.
-    # Alternatively, remove this list if all files should be processed.
-    files_to_process = {
-        "manage_validations.md",
-    }
-    files = [file for file in files if file.split("/")[-1] in files_to_process]
     for file_path in files:
         with open(file_path, "r+") as f:
             contents = f.read()
