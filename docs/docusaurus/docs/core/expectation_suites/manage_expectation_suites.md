@@ -107,7 +107,11 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py get_context"
   ```
 
-3. Use the Data Context to delete an existing Expectation Suite.
+3. Get the Expectation Suite to delete from the Data Context.
+  ```python name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py get Expectation Suite"
+  ```
+
+4. Use the Data Context to delete an existing Expectation Suite.
   ```python name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py delete Expectation Suite"
   ```
 

@@ -30,9 +30,14 @@ context = gx.get_context()
 #  been added to your Data Context.
 suite = context.suites.add(new_suite)
 
-# 3. Use the Data Context to delete the existing Expectation Suite.
+# 3. Get the Expectation Suite that will be deleted.
+# <snippet name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py get Expectation Suite">
+suite_name = "my_deletable_expectation_suite"
+suite = context.suites.get(suite_name)
+# </snippet>
+
+# 4. Use the Data Context to delete the existing Expectation Suite.
 # <snippet name="tests/integration/docusaurus/core/expectation_suite/delete_an_expectation_suite.py delete Expectation Suite">
-name_of_suite_to_delete = "my_deletable_expectation_suite"  # replace this with the name of your Expectation Suite
-context.suites.delete(suite=name_of_suite_to_delete)
+context.suites.delete(suite=suite)
 # </snippet>
 # </snippet>
