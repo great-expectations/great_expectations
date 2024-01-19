@@ -54,5 +54,4 @@ assert result.expectation_config.kwargs["mostly"] == 0.95
 suite_result = batch.validate(suite)
 assert suite_result.success
 
-# TODO: Need to implement this
-# validation_result.open_docs()
+suite_result.open_docs()
