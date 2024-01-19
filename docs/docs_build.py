@@ -49,7 +49,7 @@ class DocsBuilder:
         NOTE: This will replace `build_docs` very shortly!
         """
         self.logger.print_header("Preparing to build docs...")
-        self._load_files()
+        self._load_all_versioned_docs()
 
         self._invoke_api_docs()
 
@@ -107,6 +107,7 @@ class DocsBuilder:
         self._context.run("git checkout -")
 
         # finally, check that we can actually build the docs
+        self.logger.print_header("Testing that we can build the docs...")
         self.build_docs_2()
         self.logger.print_header(
             f"Successfully created version {version}. Upload {output_file} to S3."
