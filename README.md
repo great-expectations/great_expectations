@@ -173,7 +173,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/datahub_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/oss/integrations/integration_datahub/">
+.				<a href="https://docs.greatexpectations.io/docs/oss/integrations/integration_datahub/">
 					DataHub
 				</a>
 			</td>
@@ -478,19 +478,6 @@ Great Expectations works with the tools and systems that you're already using wi
 			</td>
 			<td>
 				Plugin
-			</td>
-		</tr>
-		<tr>
-			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./docs/readme_assets/jupyter.jpg" />
-			</td>
-			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/oss/tutorials/getting_started/tutorial_create_expectations/#creating-expectations-in-jupyter-notebooks">
-					Jupyter Notebooks
-				</a>
-			</td>
-			<td>
-				Utility
 			</td>
 		</tr>
 	</tbody>
