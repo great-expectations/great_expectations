@@ -10,16 +10,13 @@ from great_expectations.expectations.expectation_configuration import (
 # NOTE: The following code is only for testing and can be ignored by users.
 import sys, io
 
-from great_expectations.expectations.core import (
-    ExpectColumnValuesToNotBeNull,
-    ExpectColumnValuesToBeBetween,
-)
 
 stdout = sys.stdout
 sys.stdout = io.StringIO()
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_context">
 import great_expectations as gx
+import great_expectations.expectations as gxe
 
 context = gx.get_context()
 # </snippet>
@@ -32,9 +29,11 @@ context.sources.pandas_default.read_csv(
 
 
 my_suite = context.add_expectation_suite("my_suite")
-my_suite.add(ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
-my_suite.add(
-    ExpectColumnValuesToBeBetween(column="passenger_count", min_value=1, max_value=6)
+my_suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+my_suite.add_expectation(
+    gxe.ExpectColumnValuesToBeBetween(
+        column="passenger_count", min_value=1, max_value=6
+    )
 )
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite show_suite">
@@ -86,15 +85,13 @@ updated_config = ExpectationConfiguration(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_configuration">
-my_suite.add_expectation(updated_config)
+my_suite.add_expectation_configuration(updated_config)
 # </snippet>
 
 assert len(my_suite.expectations) == 2
-assert my_suite.expectation_configurations[0] == ExpectationConfiguration(
-    expectation_type="expect_column_values_to_not_be_null",
-    kwargs={"column": "pickup_datetime"},
-)
-assert my_suite.expectation_configurations[1] == updated_config
+assert isinstance(my_suite.expectations[0], gxe.ExpectColumnValuesToNotBeNull)
+assert isinstance(my_suite.expectations[1], gxe.ExpectColumnValuesToBeBetween)
+assert my_suite.expectations[1] == updated_config.to_domain_obj()
 
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration">
@@ -105,8 +102,9 @@ config_to_search = ExpectationConfiguration(
 found_expectation = my_suite.find_expectations(config_to_search, match_type="domain")
 
 # This assertion will succeed because the ExpectationConfiguration has been updated.
-assert found_expectation == [updated_config]
+assert len(found_expectation) == 1
 # </snippet>
+assert found_expectation[0].to_domain_obj() == updated_config.to_domain_obj()
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite remove_configuration">
 config_to_remove = ExpectationConfiguration(

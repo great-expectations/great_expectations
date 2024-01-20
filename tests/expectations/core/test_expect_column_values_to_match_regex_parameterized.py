@@ -1,11 +1,11 @@
 import pandas as pd
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.expectations.core import ExpectColumnValuesToMatchRegex
 
 
-class ExpectColumnValuesAsStringToBePositiveInteger(ExpectColumnValuesToMatchRegex):
+class ExpectColumnValuesAsStringToBePositiveInteger(gxe.ExpectColumnValuesToMatchRegex):
     regex: str = "^\\d+$"
 
 

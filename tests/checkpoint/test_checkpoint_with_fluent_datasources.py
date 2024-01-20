@@ -10,9 +10,11 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
+    ExpectationSuite,
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.config_peer import ConfigOutputModes
@@ -31,9 +33,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest as FluentBatchRequest,
-)
-from great_expectations.expectations.core.expect_column_values_to_be_between import (
-    ExpectColumnValuesToBeBetween,
 )
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
@@ -168,7 +167,8 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.add_expectation_suite(expectation_suite_name="users.delivery")
+    suite = ExpectationSuite(expectation_suite_name="users.delivery")
+    data_context.suites.add(suite)
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.name,
     )
@@ -274,7 +274,9 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.add_expectation_suite(expectation_suite_name="users.delivery")
+    suite = ExpectationSuite(expectation_suite_name="users.delivery")
+    data_context.suites.add(suite)
+
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.name,
     )
@@ -400,8 +402,8 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.add_expectation_suite(expectation_suite_name="users.warning")
-    data_context.add_expectation_suite(expectation_suite_name="users.error")
+    data_context.suites.add(ExpectationSuite(expectation_suite_name="users.warning"))
+    data_context.suites.add(ExpectationSuite(expectation_suite_name="users.error"))
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.name,
     )
@@ -489,7 +491,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.add_expectation_suite(expectation_suite_name="users.delivery")
+    data_context.suites.add(ExpectationSuite(expectation_suite_name="users.delivery"))
 
     result = data_context.run_checkpoint(
         checkpoint_name="my_base_checkpoint",
@@ -617,7 +619,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
     checkpoint: Checkpoint = data_context.get_checkpoint(checkpoint_config.name)
 
-    data_context.add_expectation_suite("my_expectation_suite")
+    data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run()
 
     assert len(data_context.validations_store.list_keys()) == 1
@@ -659,7 +661,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 
     assert len(data_context.validations_store.list_keys()) == 0
 
-    data_context.add_expectation_suite("my_expectation_suite")
+    data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     result: CheckpointResult = checkpoint.run()
 
     assert len(data_context.validations_store.list_keys()) == 1
@@ -685,7 +687,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
     batch_request: FluentBatchRequest = fluent_batch_request
-    data_context.add_expectation_suite("my_expectation_suite")
+    data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
         expectation_suite_name="my_expectation_suite",
@@ -714,7 +716,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
     batch_request: FluentBatchRequest = fluent_batch_request
-    data_context.add_expectation_suite("my_expectation_suite")
+    data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
         expectation_suite_name="my_expectation_suite",
@@ -1011,7 +1013,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         action_list=common_action_list,
     )
 
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1038,7 +1040,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         action_list=common_action_list,
     )
 
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1054,7 +1056,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request = {
         "datasource_name": "my_sqlite_datasource",
@@ -1115,7 +1117,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         action_list=common_action_list,
     )
 
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
     # noinspection PyUnusedLocal
     result = checkpoint.run(
         validations=[
@@ -1151,7 +1153,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request_0 = {
         "datasource_name": "my_sqlite_datasource",
@@ -1190,7 +1192,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_pandas_dataframes_datasource",
@@ -1220,7 +1222,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_spark_dataframes_datasource",
@@ -1251,7 +1253,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: FluentBatchRequest = FluentBatchRequest(
         datasource_name="my_sqlite_datasource",
@@ -1283,7 +1285,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: FluentBatchRequest = FluentBatchRequest(
         datasource_name="my_sqlite_datasource",
@@ -1313,7 +1315,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_pandas_dataframes_datasource",
@@ -1348,7 +1350,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_spark_dataframes_datasource",
@@ -1384,7 +1386,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: FluentBatchRequest = FluentBatchRequest(
         datasource_name="my_sqlite_datasource",
@@ -1419,7 +1421,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_pandas_dataframes_datasource",
@@ -1455,7 +1457,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_spark_dataframes_datasource",
@@ -1492,7 +1494,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request = {
         "datasource_name": "my_sqlite_datasource",
@@ -1528,7 +1530,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_pandas_dataframes_datasource",
@@ -1558,7 +1560,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request: dict = {
         "datasource_name": "my_spark_dataframes_datasource",
@@ -1628,15 +1630,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         ]
         == 0
     )
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = checkpoint.run(
         expectation_suite_name="my_new_expectation_suite",
@@ -1706,14 +1707,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = checkpoint.run(
         expectation_suite_name="my_new_expectation_suite",
@@ -1784,14 +1784,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = checkpoint.run(
         validations=[
@@ -1879,14 +1878,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
+
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0,
         max_value=71,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = checkpoint.run(
         validations=[
@@ -1957,14 +1956,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     context.add_checkpoint(**checkpoint_config)
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
+
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
     assert result["success"] is False
@@ -2034,14 +2033,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     context.add_checkpoint(**checkpoint_config)
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
+
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
     assert result["success"] is False
@@ -2127,14 +2126,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
+
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
@@ -2222,14 +2221,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    suite = context.add_expectation_suite("my_new_expectation_suite")
-    expectation = ExpectColumnValuesToBeBetween(
+    suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
+
+    expectation = gxe.ExpectColumnValuesToBeBetween(
         column="Age",
         min_value=0.0,
         max_value=71.0,
     )
-    suite.add(expectation)
-    context.update_expectation_suite(expectation_suite=suite)
+    suite.add_expectation(expectation)
 
     result = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
@@ -2277,7 +2276,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
+    context.suites.add(ExpectationSuite("my_expectation_suite"))
 
     batch_request = {
         "datasource_name": "my_sqlite_datasource",

@@ -242,13 +242,29 @@ local_tests = [
         data_context_dir=None,
         backend_dependencies=[],
     ),
+    IntegrationTestFixture(
+        name="expectation_management",
+        user_flow_script="tests/integration/docusaurus/expectations/expectation_management.py",
+        data_context_dir=None,
+        backend_dependencies=[],
+    ),
 ]
 
 quickstart = [
     IntegrationTestFixture(
         name="quickstart",
         user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
-        backend_dependencies=[],
+        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="v1_pandas_quickstart",
+        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py",
+        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="v1_sql_quickstart",
+        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py",
+        backend_dependencies=[BackendDependencies.SQLALCHEMY],
     ),
 ]
 
