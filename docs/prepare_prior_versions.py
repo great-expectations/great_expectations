@@ -468,6 +468,46 @@ def _prepend_version_info_for_md_absolute_links(contents: str, version: Version)
     return contents
 
 
+def remove_extension_from_absolute_md_links(
+    version: Version,
+    verbose: bool = False,
+) -> None:
+    """Needed for a bad link in 0.18 docs"""
+
+    path = _path_to_versioned_docs() / version_dir_name(version)
+
+    method_name_for_logging = "remove_extension_from_absolute_md_links"
+    print(f"Processing {method_name_for_logging}...")
+
+    files: list[pathlib.Path] = []
+    for extension in (".md", ".mdx"):
+        files.extend(path.glob(f"**/*{extension}"))
+
+    files_to_process = [
+        "airflow_quickstart.md",
+    ]
+    files = [file for file in files if file.name in files_to_process]
+
+    print(
+        f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+    )
+    for file_path in files:
+        with open(file_path, "r+") as f:
+            contents = f.read()
+            contents = contents.replace(
+                "/cloud/expectation_suites/manage_expectation_suites.md",
+                "/cloud/expectation_suites/manage_expectation_suites",
+            )
+            f.seek(0)
+            f.truncate()
+            f.write(contents)
+        if verbose:
+            print(f"processed {file_path}")
+    print(
+        f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+    )
+
+
 def prepare_prior_versions(versions: list[Version]) -> None:
     print("Starting to process files in prepare_prior_versions.py...")
     for version in versions:
@@ -493,6 +533,10 @@ def prepare_prior_version(version: Version) -> None:
 
     if version >= Version(0, 16):
         prepend_version_info_to_name_for_md_images(version)
+
+    # TODO: delete this after we cut 0.18.9
+    if version >= Version(0, 18) and version < Version(0, 18, 9):
+        remove_extension_from_absolute_md_links(version)
 
 
 @total_ordering
