@@ -670,14 +670,13 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
+
         try:
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
-        except StoreBackendError:
-            raise DataContextError(
-                f"Unable to load Expectation Suite {key.resource_name or key.id}"
-            )
+        except:
+            return None
 
         if include_rendered_content is None:
             include_rendered_content = (

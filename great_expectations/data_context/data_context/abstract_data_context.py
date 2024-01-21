@@ -2794,16 +2794,34 @@ class AbstractDataContext(ConfigPeer, ABC):
                 execution_engine_type=execution_engine_type,
                 meta=meta,
             )
+        existing = None
+        if id is not None:
+            try:
+                existing = self.get_expectation_suite(
+                    ge_cloud_id=id
+                )
+            except gx_exceptions.DataContextError:
+                raise gx_exceptions.ExpectationSuiteError(
+                    f"An Expectation Suite with id {id} not found."
+                )
 
-        try:
-            existing = self.get_expectation_suite(
-                expectation_suite_name=expectation_suite.name
+        if existing is not None and existing.name != expectation_suite_name:
+            # check to see if existing suites have the same name
+            existing_suite_same_name = self.get_expectation_suite(
+               expectation_suite_name=expectation_suite_name
             )
-        except gx_exceptions.DataContextError:
-            # not found
+            if existing_suite_same_name is not None:
+                raise gx_exceptions.ExpectationSuiteError(
+                    f"An ExpectationSuite named {expectation_suite_name} already exists."
+                )
+        elif existing is None and expectation_suite_name is not None:
+            existing = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+
+        if existing is None:
             return self._add_expectation_suite(expectation_suite=expectation_suite)
 
-        # The suite object must have an ID in order to request a PUT to GX Cloud.
         expectation_suite.ge_cloud_id = existing.ge_cloud_id
         return self._update_expectation_suite(expectation_suite=expectation_suite)
 
