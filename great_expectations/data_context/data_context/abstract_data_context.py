@@ -337,13 +337,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._attach_fluent_config_datasources_and_build_data_connectors(
             self.fluent_config
         )
+        self._init_analytics()
+        submit_event(event=DataContextInitializedEvent())
+
+    def _init_analytics(self) -> None:
         oss_id = self._get_oss_id()
         init_analytics(
             user_id=oss_id,
             data_context_id=uuid.UUID(self._data_context_id),
             oss_id=oss_id,
         )
-        submit_event(event=DataContextInitializedEvent())
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()

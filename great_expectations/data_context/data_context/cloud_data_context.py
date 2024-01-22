@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import uuid
 import warnings
 from typing import (
     TYPE_CHECKING,
@@ -19,6 +20,7 @@ from typing import (
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.client import init as init_analytics
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
@@ -141,6 +143,16 @@ class CloudDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
         )
 
+    @override
+    def _init_analytics(self) -> None:
+        oss_id = self._get_oss_id()
+        init_analytics(
+            user_id=self._user_id,
+            data_context_id=uuid.UUID(self._data_context_id),
+            oss_id=oss_id,
+            cloud_mode=True,
+        )
+
     def _check_if_latest_version(self) -> None:
         checker = _VersionChecker(__version__)
         checker.check_if_using_latest_gx()
@@ -150,9 +162,10 @@ class CloudDataContext(SerializableDataContext):
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
         if project_config is None:
-            project_config = self.retrieve_data_context_config_from_cloud(
+            project_config, user_id = self.retrieve_data_context_config_from_cloud(
                 cloud_config=self._cloud_config,
             )
+            self._user_id = user_id
 
         project_data_context_config = (
             CloudDataContext.get_or_create_data_context_config(project_config)
@@ -236,7 +249,7 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def retrieve_data_context_config_from_cloud(
         cls, cloud_config: GXCloudConfig
-    ) -> DataContextConfig:
+    ) -> tuple[DataContextConfig, uuid.UUID | None]:
         """
         Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
         Given proper authorization, the request retrieves a data context config that is pre-populated with
@@ -245,7 +258,7 @@ class CloudDataContext(SerializableDataContext):
         Please note that substitution for ${VAR} variables is performed in GX Cloud before being sent
         over the wire.
 
-        :return: the configuration object retrieved from the Cloud API
+        :return: the configuration object retrieved from the Cloud API and the user's client ID
         """
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
@@ -262,7 +275,14 @@ class CloudDataContext(SerializableDataContext):
             )
         config = response.json()
         config["fluent_datasources"] = _extract_fluent_datasources(config)
-        return DataContextConfig(**config)
+
+        user_id = config.pop("user_id")
+        if not isinstance(user_id, str):
+            raise gx_exceptions.GXCloudError(
+                f"Invalid user ID retrieved from GX Cloud; {user_id}", response=response
+            )
+
+        return DataContextConfig(**config), uuid.UUID(user_id)
 
     @classmethod
     def get_cloud_config(
@@ -883,7 +903,9 @@ class CloudDataContext(SerializableDataContext):
         cloud_config: Optional[GXCloudConfig],
     ):
         assert cloud_config is not None
-        config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)
+        config, _ = cls.retrieve_data_context_config_from_cloud(
+            cloud_config=cloud_config
+        )
         return config
 
     @override
