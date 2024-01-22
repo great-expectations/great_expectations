@@ -660,7 +660,6 @@ def docs(  # noqa: PLR0913
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
     from docs.docs_build import DocsBuilder, Version
-    from docs.docs_version_bucket_info import UPDATED_S3_URL
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -698,7 +697,6 @@ def docs(  # noqa: PLR0913
             docusaurus_dir,
             is_pull_request=is_pull_request,
             is_local=is_local,
-            s3_url=UPDATED_S3_URL,
         )
         docs_builder.create_version(version=Version.from_string(version))
     else:  # noqa: PLR5501
