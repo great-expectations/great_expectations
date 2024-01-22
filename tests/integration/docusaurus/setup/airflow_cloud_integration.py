@@ -40,6 +40,6 @@ run_gx_task = PythonOperator(
     task_id="gx_airflow",
     python_callable=run_gx_airflow,
     dag=gx_dag,
-)
+) # pylint: disable=expression-not-assigned
 # </snippet>
 run_gx_task
