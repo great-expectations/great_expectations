@@ -3,13 +3,10 @@
 
 S3_BUCKET = "superconductive-public"
 REGION = "us-east-2"
-FILENAME = "oss_docs_versions_20230615.zip"
-UPDATED_FILENAME = "oss_docs_versions_20240118.zip"
+FILENAME = "oss_docs_versions_20240118.zip"
 
 S3_URL = f"https://{S3_BUCKET}.s3.{REGION}.amazonaws.com/{FILENAME}"
-UPDATED_S3_URL = f"https://{S3_BUCKET}.s3.{REGION}.amazonaws.com/{UPDATED_FILENAME}"
 
 # Run this file to print the S3_URL
 if __name__ == "__main__":
     print(S3_URL)
-    print(UPDATED_S3_URL)
