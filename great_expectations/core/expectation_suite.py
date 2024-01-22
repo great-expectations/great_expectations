@@ -16,6 +16,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
@@ -56,6 +57,8 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
+
+    _TExpectation = TypeVar("_TExpectation", bound=Expectation)
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +148,7 @@ class ExpectationSuite(SerializableDictDot):
         return self.expectation_suite_name
 
     @public_api
-    def add_expectation(self, expectation: Expectation) -> Expectation:
+    def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
         """Add an Expectation to the collection."""
         if expectation.id:
             raise RuntimeError(
@@ -562,7 +565,8 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
                 if expectation.configuration.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
+                    other=expectation_configuration,  # type: ignore[arg-type]
+                    match_type=match_type,
                 ):
                     match_indexes.append(idx)
 
