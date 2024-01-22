@@ -43,8 +43,8 @@ module.exports = {
           href: "https://greatexpectations.io/cloud"
         },
         secondary: {
-          label: "Learn about Great Expectations",
-          href: "https://greatexpectations.io/company"
+          label: "Learn why GX Cloud is the leading data quality solution",
+          href: "https://docs.greatexpectations.io/docs/cloud/why_gx_cloud"
         }
       }
     },
