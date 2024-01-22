@@ -2797,9 +2797,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             if id is not None:
                 try:
-                    self.get_expectation_suite(
-                        ge_cloud_id=id
-                    )
+                    self.get_expectation_suite(ge_cloud_id=id)
                 except gx_exceptions.DataContextError:
                     raise gx_exceptions.ExpectationSuiteError(
                         f"An Expectation Suite with id: {id} not found."
@@ -2810,7 +2808,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                         expectation_suite_name=expectation_suite_name
                     )
                 except gx_exceptions.DataContextError:
-                    return self._add_expectation_suite(expectation_suite=expectation_suite)
+                    return self._add_expectation_suite(
+                        expectation_suite=expectation_suite
+                    )
                 expectation_suite.ge_cloud_id = existing.ge_cloud_id
 
         return self._update_expectation_suite(expectation_suite=expectation_suite)

@@ -670,7 +670,6 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
-
         try:
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
