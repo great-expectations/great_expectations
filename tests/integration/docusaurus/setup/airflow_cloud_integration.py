@@ -43,4 +43,3 @@ run_gx_task = PythonOperator(
 )
 # </snippet>
 run_gx_task
-
