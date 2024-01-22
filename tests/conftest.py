@@ -8,6 +8,7 @@ import os
 import pathlib
 import random
 import shutil
+import uuid
 import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
@@ -3589,7 +3590,10 @@ def empty_data_context_in_cloud_mode(
     ), mock.patch(
         "great_expectations.data_context.data_context.CloudDataContext.get_cloud_config",
         autospec=True,
-        side_effect=mocked_get_cloud_config,
+        side_effect=(
+            mocked_get_cloud_config,
+            uuid.UUID("00000000-0000-0000-0000-000000000000"),
+        ),
     ):
         context = CloudDataContext(
             context_root_dir=project_path_name,
