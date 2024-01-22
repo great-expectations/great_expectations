@@ -2795,23 +2795,23 @@ class AbstractDataContext(ConfigPeer, ABC):
                 meta=meta,
             )
 
-            if id is not None:
-                try:
-                    self.get_expectation_suite(ge_cloud_id=id)
-                except gx_exceptions.DataContextError:
-                    raise gx_exceptions.ExpectationSuiteError(
-                        f"An Expectation Suite with id: {id} not found."
-                    )
-            elif expectation_suite_name is not None:
-                try:
-                    existing = self.get_expectation_suite(
-                        expectation_suite_name=expectation_suite_name
-                    )
-                except gx_exceptions.DataContextError:
-                    return self._add_expectation_suite(
-                        expectation_suite=expectation_suite
-                    )
-                expectation_suite.ge_cloud_id = existing.ge_cloud_id
+        if id is not None or (expectation_suite is not None and expectation_suite.ge_cloud_id is not None):
+            try:
+                self.get_expectation_suite(ge_cloud_id=id or expectation_suite.ge_cloud_id)
+            except gx_exceptions.DataContextError:
+                raise gx_exceptions.ExpectationSuiteError(
+                    f"An Expectation Suite with id: {id or expectation_suite.ge_cloud_id} not found."
+                )
+        elif expectation_suite_name is not None or (expectation_suite is not None and expectation_suite.expectation_suite_name is not None):
+            try:
+                existing = self.get_expectation_suite(
+                    expectation_suite_name=expectation_suite_name or expectation_suite.expectation_suite_name
+                )
+            except gx_exceptions.DataContextError:
+                return self._add_expectation_suite(
+                    expectation_suite=expectation_suite
+                )
+            expectation_suite.ge_cloud_id = existing.ge_cloud_id
 
         return self._update_expectation_suite(expectation_suite=expectation_suite)
 
