@@ -249,7 +249,7 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def retrieve_data_context_config_from_cloud(
         cls, cloud_config: GXCloudConfig
-    ) -> tuple[DataContextConfig, uuid.UUID | None]:
+    ) -> tuple[DataContextConfig, uuid.UUID]:
         """
         Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
         Given proper authorization, the request retrieves a data context config that is pre-populated with
