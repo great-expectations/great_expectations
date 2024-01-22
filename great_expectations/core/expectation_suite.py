@@ -565,8 +565,8 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
                 if expectation.configuration.isEquivalentTo(
-                    other=expectation_configuration,
-                    match_type=match_type,  # type: ignore[arg-type]
+                    other=expectation_configuration,  # type: ignore[arg-type]
+                    match_type=match_type,
                 ):
                     match_indexes.append(idx)
 
