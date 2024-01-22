@@ -32,7 +32,13 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
         "query",
     )
 
-    domain_keys = ("user_query", "batch_id", "row_condition", "condition_parser")
+    domain_keys = (
+        "template_dict",
+        "user_query",
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
     default_kwarg_values = {
         "result_format": "BASIC",

@@ -14,9 +14,9 @@ To learn more about Data Assets, see [Data Asset](/docs/reference/learn/terms/da
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have [set up GX Cloud](../set_up_gx_cloud.md) including setting the `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variable, and the GX Agent is running. 
+- You have [set up GX Cloud](../set_up_gx_cloud.md) and the GX Agent is running. 
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
 
 ## Create a Data Asset
@@ -37,7 +37,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password/environment variable**: Enter `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+    - **Password**: Enter your Snowflake password.
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored. In Snowsight, click **Data** > **Databases**. In the Snowflake Classic Console, click **Databases**.
  
@@ -195,6 +195,30 @@ Currently, you can only edit Snowflake Data Assets.
     - **Data Asset name**: Enter a new name for the Data Asset. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
 3. Click **Save**.
+
+## Secure your GX API Data Source connection strings
+
+When you use the GX API and not GX Cloud to connect to Data Sources, you must obfuscate your sensitive Data Source credentials in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
+
+1. Store your credential value as an environment variable by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
+
+    ```bash title="Terminal input"
+    export GX_CLOUD_SNOWFLAKE_PASSWORD=<password-string>
+    ```
+    Prefix environment variable names with `GX_CLOUD_`.
+
+2. Create a Data Source connection string using the environment variable name instead of the credential value. For example:
+
+    ```python title="Example Data Source connection string"
+    snowflake://<user-name>:${GX_CLOUD_SNOWFLAKE_PASSWORD}@<account-name>/<database-name>/<schema-name>?warehouse=<warehouse-name>&role=<role-name>
+    ```
+    Environment variable names must be enclosed by curly braces and be preceded by a dollar sign. For example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. Do not use interpolation to add credential values to connection strings.
+
+3. Use the environment variable to supply the credential value when you run the GX Agent. For example:
+
+    ```bash title="Terminal input"
+    docker run --rm -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
+    ```
 
 ## Delete a Data Asset
 

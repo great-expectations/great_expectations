@@ -901,6 +901,33 @@ Run the following Python code to create a SQL Data Source:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"
 ```
 
+### Connect to the data in a table (Optional)
+
+1. Run the following Python code to set the `asset_name` and `asset_table_name` variables:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
+    ```
+
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py table_asset"
+    ```
+
+### Connect to the data in a query (Optional)
+
+1. Run the following Python code to define a Query Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_query"
+    ```
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py query_table_asset"
+    ```
+
+### Add additional tables or queries (Optional)
+
+Repeat the previous steps to add additional Data Assets.
+
 </TabItem>
 </Tabs>
 

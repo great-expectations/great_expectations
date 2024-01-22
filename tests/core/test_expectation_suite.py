@@ -374,8 +374,8 @@ class TestCRUDMethods:
 
     def _test_update_suite_adds_ids(self, context, expectation):
         suite_name = "test-suite"
-        # todo: update to new api
-        suite = context.add_expectation_suite(suite_name)
+        suite = ExpectationSuite(suite_name)
+        suite = context.suites.add(suite)
         uuid_to_test = suite.ge_cloud_id
         try:
             UUID(uuid_to_test)
@@ -428,8 +428,8 @@ class TestCRUDMethods:
 
     def _test_expectation_can_be_saved_after_added(self, context, expectation):
         suite_name = "test-suite"
-        # todo: update to new api
-        suite = context.add_expectation_suite(suite_name)
+        suite = ExpectationSuite(suite_name)
+        suite = context.suites.add(suite)
         suite.add_expectation(expectation)
         updated_column_name = "foo"
         assert expectation.column != updated_column_name
@@ -456,10 +456,8 @@ class TestCRUDMethods:
 
     def _test_expectation_can_be_saved_after_update(self, context, expectation):
         suite_name = "test-suite"
-        # todo: update to new api
-        suite = context.add_expectation_suite(
-            suite_name, expectations=[expectation.configuration]
-        )
+        suite = ExpectationSuite(suite_name, expectations=[expectation.configuration])
+        suite = context.suites.add(suite)
         expectation = suite.expectations[0]
         updated_column_name = "foo"
         expectation.column = updated_column_name
@@ -484,10 +482,11 @@ class TestCRUDMethods:
             ),
         ]
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=suite_name,
+        suite = ExpectationSuite(
+            name=suite_name,
             expectations=[e.configuration for e in expectations],
         )
+        context.suites.add(suite)
 
         assert suite.expectations[0].column == "a"
         assert suite.expectations[1].column == "b"
