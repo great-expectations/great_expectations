@@ -70,33 +70,9 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"
 
     CHECKPOINT_NAME = "<YOUR_CHECKPOINT>"
+    ```
 
-    def run_gx_airflow():
-
-        context = gx.get_context()
-        checkpoint = context.get_checkpoint(name = CHECKPOINT_NAME)
-        checkpoint.run()
-
-    default_args = {
-        'owner': 'airflow',
-        'depends_on_past': False,
-        'start_date': datetime(2023, 8, 9),
-    }
-
-    gx_dag = DAG(
-        'gx_dag',
-        default_args=default_args,
-        schedule_interval= '0 0 * * *', # This is set to run daily at midnight. Adjust as needed.
-        catchup=False
-    )
-
-    run_gx_task = PythonOperator(
-        task_id='gx_airflow',
-        python_callable=run_gx_airflow,
-        dag=gx_dag,
-    )
-
-    run_gx_task
+    ```python name="tests/integration/docusaurus/setup/airflow_cloud_integration.py run_gx_airflow"
     ```
 
 3. Save your changes and close the `gx_dag.py` DAG file.
