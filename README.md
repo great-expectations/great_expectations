@@ -173,7 +173,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/datahub_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/integrations/integration_datahub/">
+.				<a href="https://docs.greatexpectations.io/docs/oss/integrations/integration_datahub/">
 					DataHub
 				</a>
 			</td>
@@ -186,7 +186,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/aws-glue-logo__1_.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_aws_glue/">
+				<a href="https://docs.greatexpectations.io/docs/oss/deployment_patterns/how_to_use_great_expectations_in_aws_glue/">
 					AWS Glue
 				</a>
 			</td>
@@ -225,7 +225,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/awss3.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/host_and_share_data_docs">
+				<a href="https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs">
 					AWS S3
 				</a>
 			</td>
@@ -238,7 +238,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/bigquery.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data">
+				<a href="https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data">
 					BigQuery
 				</a>
 			</td>
@@ -251,7 +251,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/og-databricks.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks/">
+				<a href="https://docs.greatexpectations.io/docs/oss/tutorials/getting_started/how_to_use_great_expectations_in_databricks/">
 					Databricks
 				</a>
 			</td>
@@ -264,7 +264,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/deepnote_logo_400x.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_deepnote/">
+				<a href="https://docs.greatexpectations.io/docs/oss/deployment_patterns/how_to_use_great_expectations_in_deepnote/">
 					Deepnote
 				</a>
 			</td>
@@ -368,7 +368,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/spark.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster/">
+				<a href="https://docs.greatexpectations.io/docs/oss/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster/">
 					Spark
 				</a>
 			</td>
@@ -407,7 +407,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/Apache_Airflow.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow/">
+				<a href="https://docs.greatexpectations.io/docs/oss/deployment_patterns/how_to_use_great_expectations_with_airflow/">
 					Apache Airflow
 				</a>
 			</td>
@@ -420,7 +420,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/flyte_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte/">
+				<a href="https://docs.greatexpectations.io/docs/oss/deployment_patterns/how_to_use_great_expectations_in_flyte/">
 					Flyte
 				</a>
 			</td>
@@ -433,7 +433,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/meltano-logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_meltano/">
+				<a href="https://docs.greatexpectations.io/docs/oss/deployment_patterns/how_to_use_great_expectations_with_meltano/">
 					Meltano
 				</a>
 			</td>
@@ -446,7 +446,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/prefect-logo-gradient-navy.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_prefect/">
+				<a href="https://docs.greatexpectations.io/docs/oss/deployment_patterns/how_to_use_great_expectations_with_prefect/">
 					Prefect
 				</a>
 			</td>
@@ -459,7 +459,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/zenml.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/integrations/integration_zenml/">
+				<a href="https://docs.greatexpectations.io/docs/oss/integrations/integration_zenml/">
 					ZenML
 				</a>
 			</td>
@@ -472,25 +472,12 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/slack.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/">
+				<a href="https://docs.greatexpectations.io/docs/oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/">
 					Slack
 				</a>
 			</td>
 			<td>
 				Plugin
-			</td>
-		</tr>
-		<tr>
-			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./docs/readme_assets/jupyter.jpg" />
-			</td>
-			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations/#creating-expectations-in-jupyter-notebooks">
-					Jupyter Notebooks
-				</a>
-			</td>
-			<td>
-				Utility
 			</td>
 		</tr>
 	</tbody>
