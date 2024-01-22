@@ -74,6 +74,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
     ```python name="tests/integration/docusaurus/setup/airflow_cloud_integration.py run_gx_airflow"
     ```
+    run_gx_task
 
 3. Save your changes and close the `gx_dag.py` DAG file.
 

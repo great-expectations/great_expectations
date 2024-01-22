@@ -41,6 +41,6 @@ run_gx_task = PythonOperator(
     python_callable=run_gx_airflow,
     dag=gx_dag,
 )
-
-run_gx_task
 # </snippet>
+run_gx_task
+
