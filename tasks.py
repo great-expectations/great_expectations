@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
-from docs.docs_build import DocsBuilder
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
@@ -651,14 +650,17 @@ def api_docs(ctx: Context):
         "lint": "Run the linter",
     },
 )
-def docs(
+def docs(  # noqa: PLR0913
     ctx: Context,
     build: bool = False,
     clean: bool = False,
     start: bool = False,
     lint: bool = False,
+    version: str | None = None,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    from docs.docs_build import DocsBuilder, Version
+    from docs.docs_version_bucket_info import UPDATED_S3_URL
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -676,12 +678,6 @@ def docs(
     )
     is_pull_request = pull_request == "true"
     is_local = not pull_request
-    docs_builder = DocsBuilder(
-        ctx,
-        docusaurus_dir,
-        is_pull_request=is_pull_request,
-        is_local=is_local,
-    )
 
     if clean:
         rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
@@ -696,10 +692,25 @@ def docs(
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
+    elif version:
+        docs_builder = DocsBuilder(
+            ctx,
+            docusaurus_dir,
+            is_pull_request=is_pull_request,
+            is_local=is_local,
+            s3_url=UPDATED_S3_URL,
+        )
+        docs_builder.create_version(version=Version.from_string(version))
     else:  # noqa: PLR5501
         if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
+            docs_builder = DocsBuilder(
+                ctx,
+                docusaurus_dir,
+                is_pull_request=is_pull_request,
+                is_local=is_local,
+            )
             print("Making sure docusaurus dependencies are installed.")
             ctx.run(" ".join(["yarn install"]), echo=True)
 
