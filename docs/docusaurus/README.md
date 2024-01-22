@@ -74,25 +74,11 @@ sitemap.xml is not in the repo since it is built and uploaded by a netlify plugi
 
 To add a new version, follow these steps:
 
-(Note: yarn commands should be run from docs/docusaurus/)
-
 1. It may help to start with a fresh virtualenv and clone of gx.
-1. Check out the version from the tag, e.g. `git checkout 0.15.50`
-1. Modify `docs/docusaurus/docusaurus.config.js` and `docs/docusaurus/docs/components/_data.jsx` to the new version (the patch version may be off by 1 e.g. 0.17.22 instead of 0.17.23 since we update this in the release PR which comes after the release tag).
 1. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"` and `pip install pyspark`
 1. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
-1. Build API docs `invoke api-docs` from the repo root.
-1. Run `yarn install` from `docs/docusaurus/`.
-1. Temporarily change `onBrokenLinks: 'throw'` to `onBrokenLinks: 'warn'` in `docusaurus.config.js` to allow the build to complete even if there are broken links.
-1. Run `yarn build` from `docs/docusaurus/`.
-1. Create the version e.g. `yarn docusaurus docs:version 0.15.50` from `docs/docusaurus/`.
-1. Pull down the version file (run `docs/docs_version_bucket_info.py` to generate the url).
-1. Unzip and add your newly created versioned docs via the following:
-1. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
-1. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
-1. Add your version number to `versions.json` in the unzipped version file (at the top if it is the most recent).
-1. Run `zip -r oss_docs_versions.zip versioned_docs versioned_sidebars versions.json` to zip up `versioned_docs`, `versioned_sidebars` and `versions.json` as `oss_docs_versions.zip` and upload the zip file to the s3 bucket (see `docs/docs_version_bucket_info.py` for the bucket name). Make sure `versioned_docs`, `versioned_sidebars` and `versions.json` are at the top level of the zip file (not nested in a folder).
-1. Once the docs are built again, this zip file will be used to build the earlier versions.
+1. Run `invoke docs version=<MAJOR.MINOR.PATCH>` (substituting your new version numbers)
+1. This will create a new zip file (`oss_docs_versions.zip`). Upload to S3 (run `docs/docs_version_bucket_info.py` to generate the url). This will be used later by `invoke docs --build`
 
 
 ## Versioning and docs build flow (pre v1.0)
@@ -114,22 +100,17 @@ sequenceDiagram
         SphinxBuild ->> Docusaurus: html converted to .md and store in docs/docusaurus/docs/reference/api
         deactivate SphinxBuild
 
-        % invoke docs --build
         activate Docusaurus
-        % yarn docusaurus build
-        Code ->> DocsBuild: generate docs
-        DocsBuild ->> Docusaurus: yarn docusaurus docs:version
-        DocsBuild ->> S3: Update S3 with the new version
+        Code ->> Docusaurus: yarn docusaurus docs:version
+        Docusaurus ->> Docusaurus: process new version with prepare_prior_versions.py
+        DocsBuild ->> S3: Manually update S3 with the new version
+        deactivate Docusaurus
     end
 
     loop invoke docs --build
         % invoke docs --build
         activate Docusaurus
-        S3 ->> Docusaurus: Load versions.json, versioned_docs/ and versioned_sidebars/
-        Github ->> Docusaurus: Load versioned_code/
-
-        % prepare prior versions
-        Docusaurus ->> Docusaurus: Process each prior version
+        S3 ->> Docusaurus: Load versions.json, versoned_code/, versioned_docs/ and versioned_sidebars/
 
         % invoke api-docs
         Code ->> SphinxBuild: sphinx generated html
