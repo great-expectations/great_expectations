@@ -145,11 +145,10 @@ class CloudDataContext(SerializableDataContext):
 
     @override
     def _init_analytics(self) -> None:
-        oss_id = self._get_oss_id()
         init_analytics(
             user_id=self._user_id,
             data_context_id=uuid.UUID(self._data_context_id),
-            oss_id=oss_id,
+            oss_id=self._get_oss_id(),
             cloud_mode=True,
         )
 
