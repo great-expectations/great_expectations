@@ -35,11 +35,11 @@ gx_dag = DAG(
     schedule_interval="0 0 * * *",  # This is set to run daily at midnight. Adjust as needed.
     catchup=False,
 )
-
+# ruff: ignore B018
 run_gx_task = PythonOperator(
     task_id="gx_airflow",
     python_callable=run_gx_airflow,
     dag=gx_dag,
-) # pylint: disable=expression-not-assigned
+)
 # </snippet>
 run_gx_task
