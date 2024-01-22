@@ -297,7 +297,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation):  # noqa: PLR0912
+    def _render_expectation_meta_notes(cls, expectation):
         if not expectation.meta.get("notes"):
             return None
         else:
@@ -318,59 +318,16 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     },
                 }
             )
-            notes = expectation.meta["notes"]
-            note_content = None
-
-            if isinstance(notes, str):
-                note_content = [notes]
-
-            elif isinstance(notes, list):
-                note_content = notes
-
-            elif isinstance(notes, dict):
-                if "format" in notes:
-                    if notes["format"] == "string":
-                        if isinstance(notes["content"], str):
-                            note_content = [notes["content"]]
-                        elif isinstance(notes["content"], list):
-                            note_content = notes["content"]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-
-                    elif notes["format"] == "markdown":
-                        if isinstance(notes["content"], str):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": notes["content"],
-                                        "styling": {
-                                            "parent": {"styles": {"color": "red"}}
-                                        },
-                                    }
-                                )
-                            ]
-                        elif isinstance(notes["content"], list):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": note,
-                                        "styling": {"parent": {}},
-                                    }
-                                )
-                                for note in notes["content"]
-                            ]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-                else:
-                    logger.warning(
-                        "Unrecognized Expectation suite notes format. Skipping rendering."
-                    )
+            notes = expectation.notes
+            note_content = [
+                RenderedMarkdownContent(
+                    **{
+                        "content_block_type": "markdown",
+                        "markdown": notes,
+                        "styling": {"parent": {"styles": {"color": "red"}}},
+                    }
+                )
+            ]
 
             notes_block = TextContent(
                 **{

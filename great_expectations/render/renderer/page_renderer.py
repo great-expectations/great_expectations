@@ -802,7 +802,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     # TODO: Update tests
     @classmethod
-    def _render_expectation_suite_notes(cls, expectations):  # noqa: PLR0912
+    def _render_expectation_suite_notes(cls, expectations):
         content = []
 
         total_expectations = len(expectations.expectations)
@@ -819,61 +819,17 @@ class ExpectationSuitePageRenderer(Renderer):
             f"This Expectation suite currently contains {total_expectations} total Expectations across {total_columns} columns.",
         ]
 
-        if "notes" in expectations.meta:
-            notes = expectations.meta["notes"]
-            note_content = None
-
-            if isinstance(notes, str):
-                note_content = [notes]
-
-            elif isinstance(notes, list):
-                note_content = notes
-
-            elif isinstance(notes, dict):
-                if "format" in notes:
-                    if notes["format"] == "string":
-                        if isinstance(notes["content"], str):
-                            note_content = [notes["content"]]
-                        elif isinstance(notes["content"], list):
-                            note_content = notes["content"]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-
-                    elif notes["format"] == "markdown":
-                        if isinstance(notes["content"], str):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": notes["content"],
-                                        "styling": {"parent": {}},
-                                    }
-                                )
-                            ]
-                        elif isinstance(notes["content"], list):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": note,
-                                        "styling": {"parent": {}},
-                                    }
-                                )
-                                for note in notes["content"]
-                            ]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-                else:
-                    logger.warning(
-                        "Unrecognized Expectation suite notes format. Skipping rendering."
-                    )
-
-            if note_content is not None:
-                content += note_content
+        notes = expectations.notes
+        note_content = [
+            RenderedMarkdownContent(
+                **{
+                    "content_block_type": "markdown",
+                    "markdown": notes,
+                    "styling": {"parent": {}},
+                }
+            )
+        ]
+        content += note_content
 
         return TextContent(
             **{
