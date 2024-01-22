@@ -67,6 +67,8 @@ from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 
 if TYPE_CHECKING:
+    from requests import Response
+
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -146,11 +148,26 @@ class CloudDataContext(SerializableDataContext):
     @override
     def _init_analytics(self) -> None:
         init_analytics(
-            user_id=self._user_id,
+            user_id=self._get_cloud_user_id(),
             data_context_id=uuid.UUID(self._data_context_id),
             oss_id=self._get_oss_id(),
             cloud_mode=True,
         )
+
+    def _get_cloud_user_id(self) -> uuid.UUID | None:
+        try:
+            response = self._request_cloud_backend(
+                cloud_config=self.ge_cloud_config, uri="user"
+            )
+        except gx_exceptions.GXCloudError:
+            return None
+
+        data = response.json()
+        user_id = data.get("user_id")
+        if not user_id:
+            return None
+
+        return uuid.UUID(user_id)
 
     def _check_if_latest_version(self) -> None:
         checker = _VersionChecker(__version__)
@@ -248,7 +265,7 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def retrieve_data_context_config_from_cloud(
         cls, cloud_config: GXCloudConfig
-    ) -> tuple[DataContextConfig, uuid.UUID]:
+    ) -> DataContextConfig:
         """
         Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
         Given proper authorization, the request retrieves a data context config that is pre-populated with
@@ -259,11 +276,18 @@ class CloudDataContext(SerializableDataContext):
 
         :return: the configuration object retrieved from the Cloud API and the user's client ID
         """
+        response = cls._request_cloud_backend(
+            cloud_config=cloud_config, uri="data-context-configuration"
+        )
+        config = response.json()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
+        return DataContextConfig(**config)
+
+    @classmethod
+    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
-        cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
+        cloud_url = f"{base_url}/organizations/{organization_id}/{uri}"
 
         session = create_session(access_token=cloud_config.access_token)
 
@@ -272,16 +296,8 @@ class CloudDataContext(SerializableDataContext):
             raise gx_exceptions.GXCloudError(
                 f"Bad request made to GX Cloud; {response.text}", response=response
             )
-        config = response.json()
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
 
-        user_id = config.pop("user_id")
-        if not isinstance(user_id, str):
-            raise gx_exceptions.GXCloudError(
-                f"Invalid user ID retrieved from GX Cloud; {user_id}", response=response
-            )
-
-        return DataContextConfig(**config), uuid.UUID(user_id)
+        return response
 
     @classmethod
     def get_cloud_config(
