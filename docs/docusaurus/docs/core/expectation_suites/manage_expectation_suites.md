@@ -180,7 +180,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python name="tests/integration/docusaurus/core/expectation_suite/get_a_specific_expectation_from_an_expectation_suite.py get_context"
   ```
 
-3. [Get an existing Expectation Suite](get-an-existing-expectation-suite) that contains Expectations, or [create a new Expectation Suite](#create-a-new-expectation-suite) and [add some Expectations to it](#add-expectations-to-an-expectation-suite).  This example retrieves an existing Expectation Suite.
+3. [Get an existing Expectation Suite](#get-an-existing-expectation-suite) that contains Expectations, or [create a new Expectation Suite](#create-a-new-expectation-suite) and [add some Expectations to it](#add-expectations-to-an-expectation-suite).  This example retrieves an existing Expectation Suite.
   ```python name="tests/integration/docusaurus/core/expectation_suite/get_a_specific_expectation_from_an_expectation_suite.py retrieve Expectation Suite"
   ```
 
@@ -211,7 +211,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python name="tests/integration/docusaurus/core/expectation_suite/edit_a_single_expectation.py get expectation to edit"
   ```
 
-5. [Modify the Expectation](/core/expectations/manage_expectations#modify-an-expectation).
+5. [Modify the Expectation](/docs/core/expectations/manage_expectations#modify-an-expectation).
   ```python name="tests/integration/docusaurus/core/expectation_suite/edit_a_single_expectation.py edit attribute"
   ```
 
@@ -221,7 +221,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   :::info
   `expectation.save()` is explicitly used to update the configuration of an Expectation in an Expectation Suite.  If the Expectation is not part of an Expectation Suite, `expectation.save()` will fail.
   
-  You can [test changes to an Expectation](/core/expectations/manage_expectations#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
+  You can [test changes to an Expectation](/docs/core/expectations/manage_expectations#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
   :::
 
 <details><summary>Full example code</summary>
