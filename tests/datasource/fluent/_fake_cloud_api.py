@@ -49,6 +49,7 @@ DUMMY_JWT_TOKEN: Final[
 ] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 # Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
 # https://github.com/getsentry/responses/tree/master#dynamic-responses
+FAKE_USER_ID: Final[str] = "00000000-0000-0000-0000-000000000000"
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
 FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
@@ -219,6 +220,13 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
 
 # WARNING: this dict should always be cleared during test teardown
 _CLOUD_API_FAKE_DB: FakeDBTypedDict = {}  # type: ignore[typeddict-item] # will be assigned in `create_fake_db_seed_data`
+
+
+def get_user_id(request: PreparedRequest) -> CallbackResult:
+    if not request.url:
+        raise NotImplementedError("request.url should not be empty")
+    LOGGER.debug(f"{request.method} {request.url}")
+    return CallbackResult(200, headers=DEFAULT_HEADERS, body={"user_id": FAKE_USER_ID})
 
 
 def get_dc_configuration_cb(
@@ -770,6 +778,9 @@ def gx_cloud_api_fake_ctx(
     with responses.RequestsMock(
         assert_all_requests_are_fired=assert_all_requests_are_fired
     ) as resp_mocker:
+        resp_mocker.add_callback(
+            responses.GET, f"{org_url_base}/accounts/me", get_user_id
+        )
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
