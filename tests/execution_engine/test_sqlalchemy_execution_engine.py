@@ -1018,7 +1018,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
 
     # Expect GreatExpectationsError because parser doesn't exist
     with pytest.raises(gx_exceptions.GreatExpectationsError):
-        data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
+        _data, _compute_kwargs, _accessor_kwargs = execution_engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "nonexistent",
@@ -1153,7 +1153,7 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     batch_spec = RuntimeQueryBatchSpec(
         query=query,
     )
-    batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
+    _batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
 
