@@ -75,7 +75,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```
 
 2. Modify the Expectation Suite's attributes.
-  ```python name="tests/integration/docusaurus/core/expectation_suite/edit_a_single_expectation.py edit attribute"
+  ```python name="tests/integration/docusaurus/core/expectation_suite/edit_an_expectation_suite.py edit attribute"
   ```
 
 3. Save the Expectation Suite.
