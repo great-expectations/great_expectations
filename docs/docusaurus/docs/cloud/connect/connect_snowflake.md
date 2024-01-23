@@ -117,12 +117,12 @@ To learn how to deploy a Docker container image in a specific environment, see t
 
    ```bash title="Terminal input"
    docker run -it \
-   -e GX_CLOUD_ACCESS_TOKEN= <your_access_token> \ 
-   -e GX_CLOUD_ORGANIZATION_ID= <your_organization_id> \ 
-   -e GX_CLOUD_SNOWFLAKE_PW= <your_snowflake_password> \ 
+   -e GX_CLOUD_ACCESS_TOKEN= YOUR_ACCESS_TOKEN \ 
+   -e GX_CLOUD_ORGANIZATION_ID= YOUR_ORGANIZATION_ID \ 
+   -e GX_CLOUD_SNOWFLAKE_PW= YOUR_SNOWFLAKE_PASSWORD \ 
    greatexpectations/agent:latest
     ```
-    Replace `your_organization_id` and `your_access_token` with the values you copied previously and `your_snowflake_password` with your Snowflake password. The `your_snowflake_password` variable is optional, and you can remove it if you prefer to provide the password in GX Cloud.
+    Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously and `YOUR_SNOWFLAKE_PASSWORD` with your Snowflake password. The `YOUR_SNOWFLAKE_PASSWORD` variable is optional, and you can remove it if you prefer to provide the password in GX Cloud.
 
 3. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
 
@@ -156,11 +156,11 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
     
    ```sh
    kubectl create secret generic gx-agent-secret \
-   --from-literal=GX_CLOUD_ORGANIZATION_ID=<your_organization_id> \
-   --from-literal=GX_CLOUD_ACCESS_TOKEN=<your_acces_token> \
-   --from-literal=GX_CLOUD_SNOWFLAKE_PW=<your_snowflake_password>
+   --from-literal=GX_CLOUD_ORGANIZATION_ID=YOUR_ORGANIZATION_ID \
+   --from-literal=GX_CLOUD_ACCESS_TOKEN=YOUR_ACCESS_TOKEN \
+   --from-literal=GX_CLOUD_SNOWFLAKE_PW=YOUR_SNOWFLAKE_PASSWORD
    ```
-    Replace `your_organization_id` and `your_access_token` with the values you copied previously and `your_snowflake_password` with your Snowflake password. The `your_snowflake_password` variable is optional, and you can remove it if you provide the password in GX Cloud.
+    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously and `YOUR_SNOWFLAKE_PASSWORD` with your Snowflake password. The `YOUR_SNOWFLAKE_PASSWORD` variable is optional, and you can remove it if you provide the password in GX Cloud.
 
 3. Create and save a file named `deployment.yaml`, with the following configuration:
 
