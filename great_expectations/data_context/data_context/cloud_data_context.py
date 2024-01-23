@@ -429,9 +429,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.cloud_config.to_dict(),
             "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
-            "ge_cloud_base_url": self.cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.cloud_config.base_url,
         }
 
         datasource_store = DatasourceStore(
@@ -449,9 +449,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.cloud_config.to_dict(),
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_ASSET,
-            "ge_cloud_base_url": self.cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.cloud_config.base_url,
         }
 
         data_asset_store = DataAssetStore(
@@ -506,7 +506,7 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             UUID to use as the data_context_id
         """
-        return self.cloud_config.organization_id  # type: ignore[return-value,union-attr]
+        return self.cloud_config.organization_id  # type: ignore[return-value]
 
     @override
     def get_config_with_variables_substituted(

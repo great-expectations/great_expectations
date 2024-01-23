@@ -109,6 +109,7 @@ FakeDBTypedDict = TypedDict(
     # using alternative syntax for creating type dict because of key names with hyphens
     # https://peps.python.org/pep-0589/#alternative-syntax
     {
+        "me": Dict[str, str],
         "data-context-configuration": Dict[str, Union[str, dict]],
         "DATASOURCE_NAMES": Set[str],
         "datasources": Dict[str, dict],
