@@ -608,7 +608,12 @@ class ExpectationConfigurationSchema(Schema):
         )
     )
 
-    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
+    REMOVE_KEYS_IF_NONE = [
+        "ge_cloud_id",
+        "expectation_context",
+        "rendered_content",
+        "notes",
+    ]
 
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
