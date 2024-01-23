@@ -59,7 +59,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             except TypeError:
                 # Having values of multiple types in a object dtype column (e.g., strings and floats)
                 # raises a TypeError when the sorting method performs comparisons.
-                if df[column].dtype == object:
+                if isinstance(df[column].dtype, object):
                     counts.index = counts.index.astype(str)
                     counts.sort_index(inplace=True)
         elif sort == "counts":
