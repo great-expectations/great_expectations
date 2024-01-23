@@ -297,7 +297,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation):
+    def _render_expectation_meta_notes(cls, expectation_config):
+        expectation = expectation_config.to_domain_obj()
         notes = expectation.notes
         if not notes:
             return None
