@@ -159,9 +159,7 @@ class CloudDataContext(SerializableDataContext):
         )
 
     def _get_cloud_user_id(self) -> uuid.UUID:
-        response = self._request_cloud_backend(
-            cloud_config=self.ge_cloud_config, uri="me"
-        )
+        response = self._request_cloud_backend(cloud_config=self.cloud_config, uri="me")
         data = response.json()
         user_id = data["user_id"]
         return uuid.UUID(user_id)
@@ -172,7 +170,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> DataContextConfig:
         if project_config is None:
             project_config = self.retrieve_data_context_config_from_cloud(
-                cloud_config=self._cloud_config,
+                cloud_config=self.cloud_config,
             )
 
         project_data_context_config = (
@@ -198,7 +196,7 @@ class CloudDataContext(SerializableDataContext):
         """
         super()._register_providers(config_provider)
         config_provider.register_provider(
-            _CloudConfigurationProvider(self._cloud_config)
+            _CloudConfigurationProvider(self.cloud_config)
         )
 
     @classmethod
@@ -431,9 +429,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.cloud_config.to_dict(),  # type: ignore[union-attr]
             "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.cloud_config.base_url,  # type: ignore[union-attr]
         }
 
         datasource_store = DatasourceStore(
@@ -451,9 +449,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.cloud_config.to_dict(),  # type: ignore[union-attr]
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_ASSET,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.cloud_config.base_url,  # type: ignore[union-attr]
         }
 
         data_asset_store = DataAssetStore(
@@ -482,14 +480,14 @@ class CloudDataContext(SerializableDataContext):
         return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
 
     @property
-    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
+    def cloud_config(self) -> GXCloudConfig:
         return self._cloud_config
 
     @override
     def _init_variables(self) -> CloudDataContextVariables:
-        ge_cloud_base_url: str = self._cloud_config.base_url
-        ge_cloud_organization_id: str = self._cloud_config.organization_id  # type: ignore[assignment]
-        ge_cloud_access_token: str = self._cloud_config.access_token
+        ge_cloud_base_url: str = self.cloud_config.base_url
+        ge_cloud_organization_id: str = self.cloud_config.organization_id  # type: ignore[assignment]
+        ge_cloud_access_token: str = self.cloud_config.access_token
 
         variables = CloudDataContextVariables(
             config=self._project_config,
@@ -508,7 +506,7 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             UUID to use as the data_context_id
         """
-        return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
+        return self.cloud_config.organization_id  # type: ignore[return-value,union-attr]
 
     @override
     def get_config_with_variables_substituted(
@@ -516,7 +514,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
+        in order of precedence: cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
         be optional in GX Cloud mode).
         """
