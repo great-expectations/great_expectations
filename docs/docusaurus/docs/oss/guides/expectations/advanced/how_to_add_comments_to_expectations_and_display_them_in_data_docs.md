@@ -39,62 +39,32 @@ Leads to the following representation in the <TechnicalTag tag="data_docs" text=
 
 ## Add styling to your comments (Optional)
 
-To add styling to your comments, you can add a format tag. Here are a few examples.
+To add styling to your comments, you can add formatted notes. Here are a few examples.
 
 A single line of markdown is rendered in red, with any Markdown formatting applied.
 
 ```python
 validator.expect_column_values_to_not_be_null(
   column="column_name",
-  meta={
-      "notes": {
-          "format": "markdown",
-          "content": "Example notes about this expectation. **Markdown** `Supported`."
-      }
-  }
+  notes="Example notes about this expectation. **Markdown** `Supported`.",
 )
 ```
 
 ![Expectation with a single line of markdown comment is rendered in red with markdown formatting](/docs/oss/images/single_line_markdown_red.png)
 
-Multiple lines can be rendered by using a list for ``content``; these lines are rendered in black text with any Markdown formatting applied.
+Multiple lines can be rendered by using a list of notes; these lines are rendered in black text with any Markdown formatting applied.
 
 ```python
 validator.expect_column_values_to_not_be_null(
   column="column_name",
-  meta={
-      "notes": {
-          "format": "markdown",
-          "content": [
-              "Example notes about this expectation. **Markdown** `Supported`.",
-              "Second example note **with** *Markdown*",
-          ]
-      }
-  }
+  notes=[
+    "Example notes about this expectation. **Markdown** `Supported`.",
+    "Second example note **with** *Markdown*",
+  ],
 )
 ```
 
 ![Multiple lines of markdown rendered with formatting](/docs/oss/images/multiple_line_markdown.png)
-
-You can also change the ``format`` to ``string`` and single or multiple lines will be formatted similar to the above, but the Markdown formatting will not be applied.
-
-```python
-validator.expect_column_values_to_not_be_null(
-  column="column_name",
-  meta={
-      "notes": {
-          "format": "string",
-          "content": [
-              "Example notes about this expectation. **Markdown** `Not Supported`.",
-              "Second example note **without** *Markdown*",
-          ]
-      }
-  }
-)
-```
-
-![Multiple lines of string rendered without formatting](/docs/oss/images/multiple_line_string.png)
-
 
 
 ## Review your comments in the Expectation Suite overview of your Data Docs
