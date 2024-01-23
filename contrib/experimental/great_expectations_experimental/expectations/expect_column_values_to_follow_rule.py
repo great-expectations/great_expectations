@@ -33,7 +33,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, rule, **kwargs):
-        if rule["ranges"] is {}:
+        if rule["ranges"] == {}:
             raise ValueError("Ranges must contain at least 1 variable!")
 
         return column.apply(lambda x: ColumnRuleFollowers._helper(x, rule))
