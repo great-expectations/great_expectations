@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Quickstart for GX Cloud and Airflow'
-title: 'Quickstart for GX Cloud and Airflow'
+sidebar_label: 'Connect GX Cloud to Airflow'
+title: 'Connect GX Cloud to Airflow'
 id: airflow_quickstart
 description: Connect GX Cloud to an Airflow Orchestrator.
 ---

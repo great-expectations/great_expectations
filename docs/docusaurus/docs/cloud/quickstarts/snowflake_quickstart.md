@@ -5,7 +5,9 @@ id: snowflake_quickstart
 description: Try GX Cloud features and functionality.
 ---
 
-In you're new to GX Cloud, start here to learn how you can quickly connect to your Data Assets and validate data.
+If you're new to GX Cloud, start here to learn how you can quickly connect to your Data Assets and validate data.
+
+If you've tested GX Cloud features and functionality and discovered it's a great solution for your organization, see [Connect GX Cloud](../connect/connect_snowflake.md).
 
 ## Prerequisites
 

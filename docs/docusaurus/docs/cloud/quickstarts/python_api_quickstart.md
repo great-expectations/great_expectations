@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Quickstart for GX Cloud and Python'
-title: 'Quickstart for GX Cloud and Python'
+sidebar_label: 'Connect to GX Cloud with Python'
+title: 'Connect to GX Cloud with Python'
 id: python_quickstart
 description: Connect to a GX Cloud account and validate data from a Python script.
 ---
