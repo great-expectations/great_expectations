@@ -298,8 +298,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _render_expectation_notes(
         cls, expectation_config: ExpectationConfiguration
     ) -> CollapseContent:
-        expectation = expectation_config.to_domain_obj()
-        notes = expectation.notes
+        notes = expectation_config.notes
         if not notes:
             return None
         else:
