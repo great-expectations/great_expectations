@@ -1,9 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.expectations.expectation import Expectation
 
 
 @pytest.mark.parametrize(
@@ -51,7 +58,9 @@ from great_expectations.render.renderer.content_block.content_block import (
     ],
 )
 @pytest.mark.unit
-def test__render_expectation_notes_with_notes(expectation, expected):
+def test__render_expectation_notes_with_notes(
+    expectation: Expectation, expected: list[dict]
+):
     config = expectation.configuration
     content = ContentBlockRenderer._render_expectation_notes(config)
     notes_block = content.collapse[0]

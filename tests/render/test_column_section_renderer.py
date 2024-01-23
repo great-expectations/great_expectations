@@ -561,7 +561,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
         notes=[
             "This is a",
             "string list,",
-            "assigned to the 'content' key of a notes dict.",
             "Cool",
             "huh?",
         ],
@@ -679,11 +678,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
                                         },
                                         {
                                             "content_block_type": "markdown",
-                                            "markdown": "assigned to the 'content' key of a notes dict.",
-                                            "styling": {"parent": {}},
-                                        },
-                                        {
-                                            "content_block_type": "markdown",
                                             "markdown": "Cool",
                                             "styling": {"parent": {}},
                                         },
@@ -741,7 +735,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
         },
-        notes="This is just a single string, assigned to the 'content' key of a notes dict.",
+        notes="This is just a single string",
     )
     expectations = [expectation_with_single_string_note_in_dict]
     expected_result_json = {
@@ -846,7 +840,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
                                     "text": [
                                         {
                                             "content_block_type": "markdown",
-                                            "markdown": "This is just a single string, assigned to the 'content' key of a notes dict.",
+                                            "markdown": "This is just a single string",
                                             "styling": {
                                                 "parent": {"styles": {"color": "red"}},
                                             },
@@ -900,7 +894,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
         },
-        notes=["This is a list", "of strings", "assigned to the notes", "key."],
+        notes=["This is a list", "of strings"],
     )
     expectations = [expectation_with_string_list_note]
     expected_result_json = {
@@ -1013,16 +1007,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
                                             "markdown": "of strings",
                                             "styling": {"parent": {}},
                                         },
-                                        {
-                                            "content_block_type": "markdown",
-                                            "markdown": "assigned to the notes",
-                                            "styling": {"parent": {}},
-                                        },
-                                        {
-                                            "content_block_type": "markdown",
-                                            "markdown": "key.",
-                                            "styling": {"parent": {}},
-                                        },
                                     ],
                                 }
                             ],
@@ -1072,7 +1056,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
         },
-        notes="This is a single string assigned to the 'notes' key.",
+        notes="This is a string",
     )
     expectations = [expectation_with_single_string_note]
     expected_result_json = {
@@ -1177,7 +1161,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
                                     "text": [
                                         {
                                             "content_block_type": "markdown",
-                                            "markdown": "This is a single string assigned to the 'notes' key.",
+                                            "markdown": "This is a string",
                                             "styling": {
                                                 "parent": {"styles": {"color": "red"}},
                                             },

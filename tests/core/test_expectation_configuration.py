@@ -174,12 +174,19 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies_with_qu
     assert dependencies == {}
 
 
+@pytest.mark.parametrize(
+    "notes",
+    [
+        pytest.param("my notes", id="string notes"),
+        pytest.param(["my", "list", "of", "notes"], id="string notes"),
+        pytest.param(None, id="no notes"),
+    ],
+)
 @pytest.mark.unit
-def test_expectation_configuration_to_domain_obj():
+def test_expectation_configuration_to_domain_obj(notes):
     expectation_type = "expect_column_values_to_be_in_set"
     column = "genre_id"
     value_set = {1, 2, 3}
-    notes = "my notes"
     meta = {"foo": "bar"}
 
     config = ExpectationConfiguration(
