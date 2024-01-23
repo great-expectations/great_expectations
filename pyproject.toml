@@ -262,8 +262,6 @@ select = [
     # "NPY", # numpy 2.0 compatibility (see https://numpy.org/devdocs/numpy_2_0_migration_guide.html#ruff-plugin)
     "NPY201", # numpy 2.0 compatibility (see https://numpy.org/devdocs/numpy_2_0_migration_guide.html#ruff-plugin) -- Explicitly listed to view preview rule errors
 ]
-preview = true
-explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-single-preview-rules
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
     "F842", # variable annotated but unused # TODO enable
