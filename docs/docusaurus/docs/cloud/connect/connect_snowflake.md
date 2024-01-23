@@ -124,7 +124,6 @@ To learn how to deploy a Docker container image in a specific environment, see t
     ```
     Replace `your_organization_id` and `your_access_token` with the values you copied previously and `your_snowflake_password` with your Snowflake password. The `your_snowflake_password` variable is optional, and you can remove it if you prefer to provide the password in GX Cloud.
 
-
 3. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
 
     ```bash title="Terminal input"
@@ -136,6 +135,7 @@ To learn how to deploy a Docker container image in a specific environment, see t
     ```bash title="Terminal input"
     docker build -t myorg/agent
     ```
+
 </TabItem>
 <TabItem value="kubernetes">
 
@@ -199,7 +199,6 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
     kubectl delete -f deployment.yaml
     kubectl delete secret gx-agent-secret
     ```
-
 </TabItem>
 </Tabs>
 
