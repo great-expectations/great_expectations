@@ -1139,10 +1139,12 @@ class ExpectationSuiteSchema(Schema):
 
             if not data.get("meta"):
                 pass
-            elif data.get("meta") is None or data.get("meta") == []:
-                pass
             elif len(data.get("meta")) == 0:
                 data.pop("meta")
+
+            if "notes" in data and not data.get("notes"):
+                data.pop("notes")
+
         return data
 
     # noinspection PyUnusedLocal
