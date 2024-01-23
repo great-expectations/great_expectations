@@ -67,7 +67,7 @@ validation_result = batch.validate(expectation)
 
 ## Modify an Expectation
 
-1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/docs/core/expectations/manage_expectation_suites#get-a-specific-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.  This example uses an Expectation that was newly created in an Expectation Suite.
+1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/docs/core/expectations/manage_expectation_suites#get-an-expectation), or a pre-existing Expectation from your code.  This example uses an Expectation that was newly created in an Expectation Suite.
   ```python name="tests/integration/docusaurus/core/expectation/edit_an_expectation.py get expectation"
   ```
 
