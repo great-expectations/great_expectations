@@ -786,6 +786,7 @@ def test_result_format_configured_with_set_default_override(
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
             "expectation_type": "expect_column_values_to_not_be_null",
+            "meta": {},
         },
         "success": True,
         "meta": {},
