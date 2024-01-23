@@ -26,7 +26,7 @@ def test_DataSetProfiler_methods():
 def test_ColumnsExistProfiler():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
 
-    expectations_config, evr_config = ColumnsExistProfiler.profile(toy_dataset)
+    expectations_config, _evr_config = ColumnsExistProfiler.profile(toy_dataset)
 
     assert len(expectations_config.expectations) == 1
     assert (

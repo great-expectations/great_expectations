@@ -689,7 +689,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."
             )
 
-        resource_type, id, resource_name = key
+        resource_type, _id, _resource_name = key
         try:
             GXCloudRESTResource(resource_type)
         except ValueError:

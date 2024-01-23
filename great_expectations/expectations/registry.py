@@ -287,7 +287,9 @@ def register_metric(  # noqa: PLR0913
 
         providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
-            current_provider_cls, current_provider_fn = providers[execution_engine_name]
+            _current_provider_cls, current_provider_fn = providers[
+                execution_engine_name
+            ]
             if current_provider_fn != metric_provider:
                 logger.warning(
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
@@ -340,7 +342,7 @@ def get_metric_function_type(
 ) -> Optional[Union[MetricPartialFunctionTypes, MetricFunctionTypes]]:
     try:
         metric_definition = _registered_metrics[metric_name]
-        provider_fn, provider_class = metric_definition["providers"][
+        provider_fn, _provider_class = metric_definition["providers"][
             type(execution_engine).__name__
         ]
         return getattr(provider_fn, "metric_fn_type", None)

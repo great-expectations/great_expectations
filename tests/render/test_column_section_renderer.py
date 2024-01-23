@@ -59,7 +59,7 @@ def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
 
     (
         columns,
-        ordered_columns,
+        _ordered_columns,
     ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
     name_column_expectations = columns["Name"]
 
@@ -308,7 +308,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
     titanic_profiled_name_column_expectations,
 ):
     (
-        remaining_expectations,
+        _remaining_expectations,
         content_blocks,
     ) = ExpectationSuiteColumnSectionRenderer._render_header(
         titanic_profiled_name_column_expectations,
@@ -351,7 +351,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
         meta={"BasicDatasetProfiler": {"confidence": "very low"}},
     )
     (
-        remaining_expectations,
+        _remaining_expectations,
         content_blocks,
     ) = ExpectationSuiteColumnSectionRenderer._render_header(
         [expectation_with_unescaped_dollar_sign],
@@ -1199,7 +1199,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header(
     titanic_profiled_name_column_evrs,
 ):
     (
-        remaining_evrs,
+        _remaining_evrs,
         content_block,
     ) = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=titanic_profiled_name_column_evrs,
@@ -1255,7 +1255,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
     )
 
     (
-        remaining_evrs,
+        _remaining_evrs,
         content_block,
     ) = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=[evr_with_unescaped_dollar_sign],
@@ -1285,7 +1285,7 @@ def test_ValidationResultsColumnSectionRenderer_render_table(
     titanic_profiled_name_column_evrs,
 ):
     (
-        remaining_evrs,
+        _remaining_evrs,
         content_block,
     ) = ValidationResultsColumnSectionRenderer()._render_table(
         validation_results=titanic_profiled_name_column_evrs,
