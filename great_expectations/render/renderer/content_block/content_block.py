@@ -166,10 +166,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
             if result is not None:
                 if isinstance(obj_, ExpectationConfiguration):
-                    expectation_meta_notes = cls._render_expectation_meta_notes(obj_)
-                    if expectation_meta_notes:
+                    expectation_notes = cls._render_expectation_notes(obj_)
+                    if expectation_notes:
                         # this adds collapse content block to expectation string
-                        result[0] = [result[0], expectation_meta_notes]
+                        result[0] = [result[0], expectation_notes]
 
                     horizontal_rule = RenderedStringTemplateContent(
                         **{
@@ -289,15 +289,15 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 )
         if result is not None:
             if isinstance(render_object, ExpectationConfiguration):
-                expectation_meta_notes = cls._render_expectation_meta_notes(
-                    render_object
-                )
-                if expectation_meta_notes:
-                    result.append(expectation_meta_notes)
+                expectation_notes = cls._render_expectation_notes(render_object)
+                if expectation_notes:
+                    result.append(expectation_notes)
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation_config):
+    def _render_expectation_notes(
+        cls, expectation_config: ExpectationConfiguration
+    ) -> CollapseContent:
         expectation = expectation_config.to_domain_obj()
         notes = expectation.notes
         if not notes:
