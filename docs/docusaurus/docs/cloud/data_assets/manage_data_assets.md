@@ -14,7 +14,7 @@ To learn more about Data Assets, see [Data Asset](/docs/reference/learn/terms/da
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have [set up GX Cloud](../set_up_gx_cloud.md) and the GX Agent is running. 
+- The GX Agent is running. See [Try GX Cloud](../set_up_gx_cloud.md) or [Connect GX cloud](/docs/cloud/quickstarts/quickstart_lp)
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
@@ -170,7 +170,7 @@ Currently, you can only edit Snowflake Data Source settings.
 
     - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password/environment variable**: Enter a Snowflake password or `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+    - **Password**: Enter your Snowflake password.
 
     - **Database**: Enter a new Snowflake database name.
  

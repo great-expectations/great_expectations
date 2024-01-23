@@ -38,7 +38,7 @@ With Admin permissions, you can add users, edit organization roles, and delete u
 
 ## Create a user access token
 
-You'll need your user access token and organization ID when you set your environment variables. See [Set up GX Cloud](../set_up_gx_cloud.md).
+You'll need your user access token and organization ID when you set your environment variables.
 
 Access tokens shouldn't be committed to version control software.
 

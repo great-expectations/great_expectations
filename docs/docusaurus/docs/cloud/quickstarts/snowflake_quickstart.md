@@ -9,9 +9,11 @@ In you're new to GX Cloud, start here to learn how you can quickly connect to yo
 
 ## Prerequisites
 
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+- You have a Snowflake database, schema, and table.
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you have SELECT privileges on the table you are validating. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
+
+- You know your Snowflake password.
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
