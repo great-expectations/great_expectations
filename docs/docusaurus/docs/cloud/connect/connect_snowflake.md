@@ -203,7 +203,7 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
     ```
 ## Next steps
 
-- [Create a Data Asset](docs/cloud/data_assets/manage_data_assets#create-a-data-asset)
+- [Create a Data Asset](docs/cloud/data_assets/manage_data_assets#create_a_data_asset)
 
-- [Invite users](docs/cloud/users/manage_users#invite-a-user)
+- [Invite users](docs/cloud/users/manage_users#invite_a_user)
 
