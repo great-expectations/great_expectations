@@ -928,7 +928,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         col_has_list: pd.DataFrame = pd.DataFrame(
             {
                 "column_name": df.columns,
-                "has_list": (pandas_map(df)(type) is list).any(),
+                # Related to the noqa E721 below: numpy / pandas implements equality, see https://github.com/astral-sh/ruff/issues/9570
+                "has_list": (pandas_map(df)(type) == list).any(),  # noqa: E721
             }
         )
         list_column_names: List[str] = list(
@@ -3881,7 +3882,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 return pd.DataFrame()
 
         # if there are any lists in the dataframe
-        if (pandas_map(df)(type) is list).any().any():
+        # Related to the noqa E721 below: numpy / pandas implements equality, see https://github.com/astral-sh/ruff/issues/9570
+        if (pandas_map(df)(type) == list).any().any():  # noqa: E721
             df = DataAssistantResult._transform_column_lists_to_rows(
                 df=df,
             )

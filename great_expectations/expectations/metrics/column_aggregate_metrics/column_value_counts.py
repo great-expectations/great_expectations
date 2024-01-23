@@ -59,7 +59,8 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             except TypeError:
                 # Having values of multiple types in a object dtype column (e.g., strings and floats)
                 # raises a TypeError when the sorting method performs comparisons.
-                if isinstance(df[column].dtype, object):
+                # Related to the noqa E721 below: numpy / pandas implements equality, see https://github.com/astral-sh/ruff/issues/9570
+                if df[column].dtype == object:  # noqa: E721
                     counts.index = counts.index.astype(str)
                     counts.sort_index(inplace=True)
         elif sort == "counts":
