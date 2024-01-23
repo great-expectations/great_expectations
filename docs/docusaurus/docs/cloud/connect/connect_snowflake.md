@@ -27,12 +27,12 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 2. Copy and paste the following code into the SQL worksheet:
 
-    ```sh
-    use role accountadmin;
-    create user gx_user password="secure_password";
-    create role gx_role;
-    grant role gx_role to user gx_user;
-    ```
+   ```sh
+   use role accountadmin;
+   create user gx_user password="secure_password";
+   create role gx_role;
+   grant role gx_role to user gx_user;
+   ```
 3. Replace `secure_password` with your value.
 
 4. Select **Run All** to define your user password, create a new GX role (`gx_role`), and assign the password and role to a new user (`gx_user`).
@@ -41,26 +41,26 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
  5. Copy the following code and paste it into the SQL worksheet:
 
-    ```sh
-    create warehouse gx_wh
-    warehouse_size=xsmall 
-    auto_suspend=10  
-    auto_resume=true
-    initially_suspended=true;
-    ```
+   ```sh
+   create warehouse gx_wh
+   warehouse_size=xsmall 
+   auto_suspend=10  
+   auto_resume=true
+   initially_suspended=true;
+   ```
     The settings in the code example optimize cost and performance. Adjust them to suit your business requirements.
 
 6. Select **Run All** to create a new warehouse (`gx_wh`) for the GX Agent.
 
 7. Copy the following code and paste it into the SQL worksheet:
 
-    ```sh
-    grant usage, operate on warehouse gx_wh to role gx_role;
-    grant usage on database "database_name" to role gx_role;
-    grant usage on schema "database_name.schema_name" to role gx_role;
-    grant select on all tables in schema "database_name.schema_name" to role gx_role;
-    grant select on future tables in schema "database_name.schema_name" to role gx_role; 
-    ```
+   ```sh
+   grant usage, operate on warehouse gx_wh to role gx_role;
+   grant usage on database "database_name" to role gx_role;
+   grant usage on schema "database_name.schema_name" to role gx_role;
+   grant select on all tables in schema "database_name.schema_name" to role gx_role;
+   grant select on future tables in schema "database_name.schema_name" to role gx_role; 
+   ```
 8. Replace `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
 
 9. Select **Run All** to allow the user with the `gx_role` role to access data on the Snowflake database and schema.
@@ -115,26 +115,26 @@ To learn how to deploy a Docker container image in a specific environment, see t
 
 2. After configuring your cloud service to run Docker containers, run the following Docker command to start the GX Agent: 
 
-    ```bash title="Terminal input"
-    docker run -it \
-    -e GX_CLOUD_ACCESS_TOKEN= <your_access_token> \ 
-    -e GX_CLOUD_ORGANIZATION_ID= <your_organization_id> \ 
-    -e GX_CLOUD_SNOWFLAKE_PW= <your_snowflake_password> \ 
-    greatexpectations/agent:latest
+   ```bash title="Terminal input"
+   docker run -it \
+   -e GX_CLOUD_ACCESS_TOKEN= <your_access_token> \ 
+   -e GX_CLOUD_ORGANIZATION_ID= <your_organization_id> \ 
+   -e GX_CLOUD_SNOWFLAKE_PW= <your_snowflake_password> \ 
+   greatexpectations/agent:latest
     ```
     Replace `your_organization_id` and `your_access_token` with the values you copied previously and `your_snowflake_password` with your Snowflake password. The `your_snowflake_password` variable is optional, and you can remove it if you prefer to provide the password in GX Cloud.
 
 3. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
 
-    ```bash title="Terminal input"
-    FROM greatexpectations/agent
-    RUN echo "custom_commands"
-    ```
+   ```bash title="Terminal input"
+   FROM greatexpectations/agent
+   RUN echo "custom_commands"
+   ```
 4. Run the following command to rebuild the Docker image:
 
-    ```bash title="Terminal input"
-    docker build -t myorg/agent
-    ```
+   ```bash title="Terminal input"
+   docker build -t myorg/agent
+   ```
 
 </TabItem>
 <TabItem value="kubernetes">
@@ -154,51 +154,51 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
 
 2. Run the following command to provide the access credentials to the Kubernetes container:
     
-    ```sh
-    kubectl create secret generic gx-agent-secret \
-    --from-literal=GX_CLOUD_ORGANIZATION_ID=<your_organization_id> \
-    --from-literal=GX_CLOUD_ACCESS_TOKEN=<your_acces_token> \
-    --from-literal=GX_CLOUD_SNOWFLAKE_PW=<your_snowflake_password>
-    ```
+   ```sh
+   kubectl create secret generic gx-agent-secret \
+   --from-literal=GX_CLOUD_ORGANIZATION_ID=<your_organization_id> \
+   --from-literal=GX_CLOUD_ACCESS_TOKEN=<your_acces_token> \
+   --from-literal=GX_CLOUD_SNOWFLAKE_PW=<your_snowflake_password>
+   ```
     Replace `your_organization_id` and `your_access_token` with the values you copied previously and `your_snowflake_password` with your Snowflake password. The `your_snowflake_password` variable is optional, and you can remove it if you provide the password in GX Cloud.
 
 3. Create and save a file named `deployment.yaml`, with the following configuration:
 
-    ```yaml
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-        name: gx-agent
-        labels:
-         app: gx-agent
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+    name: gx-agent
+    labels:
+    app: gx-agent
     spec:
     replicas: 1
     selector:
     matchLabels:
-      app: gx-agent
+    app: gx-agent
     template:
     metadata:
       labels:
         app: gx-agent
     spec:
       containers:
-      - name: gx-agent
+       name: gx-agent
         image: greatexpectations/agent:latest
         envFrom:
-        - secretRef:
-            name: gx-agent-secret
-    ```
+        secretRef:
+         name: gx-agent-secret
+   ```
 4. Run the following command to use the `deployment.yaml`configuration file to deploy the GX Agent:
 
-    ```sh
-    kubectl apply -f deployment.yaml
-    ```
+   ```sh
+   kubectl apply -f deployment.yaml
+   ```
 5. Run the following command to terminate running resources gracefully:
 
-    ```sh
-    kubectl delete -f deployment.yaml
-    kubectl delete secret gx-agent-secret
-    ```
+   ```sh
+   kubectl delete -f deployment.yaml
+   kubectl delete secret gx-agent-secret
+   ```
 </TabItem>
 </Tabs>
 
