@@ -183,7 +183,7 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies_with_qu
     ],
 )
 @pytest.mark.unit
-def test_expectation_configuration_to_domain_obj(notes):
+def test_expectation_configuration_to_domain_obj(notes: str | list[str] | None):
     expectation_type = "expect_column_values_to_be_in_set"
     column = "genre_id"
     value_set = {1, 2, 3}
