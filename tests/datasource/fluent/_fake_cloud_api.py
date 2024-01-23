@@ -150,6 +150,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         datasources_by_id[id] = ds_response_json
 
     return {
+        "me": {"user_id": FAKE_USER_ID},
         "DATASOURCE_NAMES": datasource_names,
         "datasources": datasources_by_id,
         "EXPECTATION_SUITE_NAMES": set(),
@@ -226,7 +227,9 @@ def get_user_id(request: PreparedRequest) -> CallbackResult:
     if not request.url:
         raise NotImplementedError("request.url should not be empty")
     LOGGER.debug(f"{request.method} {request.url}")
-    return CallbackResult(200, headers=DEFAULT_HEADERS, body={"user_id": FAKE_USER_ID})
+    resource_path: str = request.url.split("/")[-1]
+    user_dict = _CLOUD_API_FAKE_DB.get(resource_path)
+    return CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(user_dict))
 
 
 def get_dc_configuration_cb(
