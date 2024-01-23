@@ -24,7 +24,6 @@ from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ValidationResultsPageRenderer,
 )
-from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.render.view import DefaultMarkdownPageView
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -76,15 +75,10 @@ def expectation_suite_to_render_with_notes(empty_data_context):
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_unique",
                 kwargs={"column": "testings"},
-                meta={
-                    "notes": {
-                        "content": [
-                            "Example notes about this expectation. **Markdown** `Supported`.",
-                            "Second example note **with** *Markdown*",
-                        ],
-                        "format": MetaNotesFormat.MARKDOWN,
-                    }
-                },
+                notes=[
+                    "Example notes about this expectation. **Markdown** `Supported`.",
+                    "Second example note **with** *Markdown*",
+                ],
             ),
         ],
         data_context=context,
