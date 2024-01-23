@@ -75,9 +75,9 @@ You'll need your access token and organization ID to set your access credentials
 
 3. Complete the following fields:
 
-    - **Token name** - Enter a name for the token that will help you quickly identify it.
+   - **Token name** - Enter a name for the token that will help you quickly identify it.
 
-    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?).
+   - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?).
 
 4. Click **Create**.
 
@@ -87,7 +87,7 @@ You'll need your access token and organization ID to set your access credentials
 
 7. Copy the value in the **Organization ID** field into the temporary file with your access token and then save the file. 
 
-    GX recommends deleting the temporary file after you set the environment variables.
+   GX recommends deleting the temporary file after you set the environment variables.
 
 ## Deploy the GX Agent
 
