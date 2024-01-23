@@ -159,7 +159,9 @@ class CloudDataContext(SerializableDataContext):
         )
 
     def _get_cloud_user_id(self) -> uuid.UUID:
-        response = self._request_cloud_backend(cloud_config=self.cloud_config, uri="me")
+        response = self._request_cloud_backend(
+            cloud_config=self.cloud_config, uri="accounts/me"
+        )
         data = response.json()
         user_id = data["user_id"]
         return uuid.UUID(user_id)
