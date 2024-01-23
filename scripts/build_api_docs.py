@@ -364,7 +364,7 @@ def get_whitelisted_methods(
     """
     methods = dict(inspect.getmembers(imported_class, inspect.isroutine))
     for method_name, class_method in methods.items():
-        synopsis, desc = pydoc.splitdoc(pydoc.getdoc(class_method))
+        _synopsis, desc = pydoc.splitdoc(pydoc.getdoc(class_method))
         if is_included_in_public_api(desc):
             yield method_name, class_method
 
@@ -419,8 +419,8 @@ def get_title(file_path: Path) -> str:
     with open(file_path) as f:
         data = f.read()
     if "---" in data:
-        prefix, title_block = data.split("---", 1)
-        title_block, suffix = title_block.split("---", 1)
+        _prefix, title_block = data.split("---", 1)
+        title_block, _suffix = title_block.split("---", 1)
         for line in title_block.split("\n"):
             if line.strip().startswith("title:"):
                 title = line.split(":", 1)[1]
@@ -794,7 +794,7 @@ def gather_classes_to_document(
     module = importlib.import_module(import_path)
     imported_classes = dict(inspect.getmembers(module, inspect.isclass))
     for class_name, imported_class in imported_classes.items():
-        synopsis, desc = pydoc.splitdoc(pydoc.getdoc(imported_class))
+        _synopsis, desc = pydoc.splitdoc(pydoc.getdoc(imported_class))
         if is_included_in_public_api(desc):
             yield class_name, imported_class
 

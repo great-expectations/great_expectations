@@ -39,7 +39,7 @@ def run_checkpoint_and_data_doc(
     include_rendered_content: bool,
 ):
     # context, datasource, asset, batch_request
-    context, datasource, asset, batch_request = datasource_test_data
+    context, datasource, _asset, batch_request = datasource_test_data
     if include_rendered_content:
         context.variables.include_rendered_content.globally = True
 
