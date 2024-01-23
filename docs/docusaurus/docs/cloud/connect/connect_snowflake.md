@@ -199,8 +199,11 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
    kubectl delete -f deployment.yaml
    kubectl delete secret gx-agent-secret
    ```
+
+
 </TabItem>
 </Tabs>
+
 
 ## Next steps
 
