@@ -742,7 +742,7 @@ def test_result_format_configured_with_set_default_override(
             "expectation_type": "expect_column_values_to_not_be_null",
         },
         "success": True,
-        "meta": {},
+        "notes": "Some notes",
         "exception_info": {
             "raised_exception": False,
             "exception_traceback": None,
@@ -804,7 +804,6 @@ def test_result_format_configured_with_set_default_override(
                 "notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
-            "meta": {},
             "expectation_type": "expect_column_values_to_not_be_null",
             "notes": "Some notes",
         },
