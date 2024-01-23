@@ -335,6 +335,9 @@ explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-
 "great_expectations/compatibility/*.py" = [
     "TID251", # flake8-banned-api
 ]
+"tests/integration/docusaurus/*.py" = [
+    "F841", # local variable is assigned to but never used - ignored for code used in snippets
+]
 
 [tool.ruff.flake8-type-checking]
 # pydantic models use annotations at runtime
