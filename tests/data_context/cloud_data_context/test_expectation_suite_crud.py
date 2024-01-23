@@ -511,7 +511,8 @@ def test_save_expectation_suite_overwrites_existing_suite(
     }
 
     actual_put_suite_json = mock_put.call_args[1]["json"]["data"]["attributes"]["suite"]
-    actual_put_suite_json.pop("meta")
+    for attr in ("meta", "notes"):
+        actual_put_suite_json.pop(attr)
     assert actual_put_suite_json == expected_suite_json
 
     actual_patch_suite_json = mock_patch.call_args[1]["json"]["data"]["attributes"][
