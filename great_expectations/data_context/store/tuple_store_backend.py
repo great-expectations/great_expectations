@@ -336,7 +336,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         filepath = os.path.join(  # noqa: PTH118
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
-        path, filename = os.path.split(filepath)
+        path, _filename = os.path.split(filepath)
 
         os.makedirs(str(path), exist_ok=True)  # noqa: PTH103
         with open(filepath, "wb") as outfile:
@@ -354,7 +354,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         dest_path = os.path.join(  # noqa: PTH118
             self.full_base_directory, self._convert_key_to_filepath(dest_key)
         )
-        dest_dir, dest_filename = os.path.split(dest_path)
+        dest_dir, _dest_filename = os.path.split(dest_path)
 
         if os.path.exists(source_path):  # noqa: PTH110
             os.makedirs(dest_dir, exist_ok=True)  # noqa: PTH103

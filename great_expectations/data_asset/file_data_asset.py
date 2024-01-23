@@ -119,7 +119,7 @@ class MetaFileDataAsset(DataAsset):
                             nonnull_lines_index, np.invert(boolean_mapped_success_lines)
                         )
                     )
-                    success, percent_success = self._calc_map_expectation_success(
+                    success, _percent_success = self._calc_map_expectation_success(
                         success_count, nonnull_count, mostly
                     )
                     return_obj = self._format_map_output(
