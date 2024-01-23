@@ -17,6 +17,8 @@ from typing import (
     overload,
 )
 
+from requests import HTTPError, Response
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations._docs_decorators import public_api
@@ -67,8 +69,6 @@ from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 
 if TYPE_CHECKING:
-    from requests import Response
-
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -145,6 +145,10 @@ class CloudDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
         )
 
+    def _check_if_latest_version(self) -> None:
+        checker = _VersionChecker(__version__)
+        checker.check_if_using_latest_gx()
+
     @override
     def _init_analytics(self) -> None:
         init_analytics(
@@ -154,34 +158,22 @@ class CloudDataContext(SerializableDataContext):
             cloud_mode=True,
         )
 
-    def _get_cloud_user_id(self) -> uuid.UUID | None:
-        try:
-            response = self._request_cloud_backend(
-                cloud_config=self.ge_cloud_config, uri="user"
-            )
-        except gx_exceptions.GXCloudError:
-            return None
-
+    def _get_cloud_user_id(self) -> uuid.UUID:
+        response = self._request_cloud_backend(
+            cloud_config=self.ge_cloud_config, endpoint="me"
+        )
         data = response.json()
-        user_id = data.get("user_id")
-        if not user_id:
-            return None
-
+        user_id = data["user_id"]
         return uuid.UUID(user_id)
-
-    def _check_if_latest_version(self) -> None:
-        checker = _VersionChecker(__version__)
-        checker.check_if_using_latest_gx()
 
     @override
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
         if project_config is None:
-            project_config, user_id = self.retrieve_data_context_config_from_cloud(
+            project_config = self.retrieve_data_context_config_from_cloud(
                 cloud_config=self._cloud_config,
             )
-            self._user_id = user_id
 
         project_data_context_config = (
             CloudDataContext.get_or_create_data_context_config(project_config)
@@ -274,25 +266,29 @@ class CloudDataContext(SerializableDataContext):
         Please note that substitution for ${VAR} variables is performed in GX Cloud before being sent
         over the wire.
 
-        :return: the configuration object retrieved from the Cloud API and the user's client ID
+        :return: the configuration object retrieved from the Cloud API
         """
         response = cls._request_cloud_backend(
-            cloud_config=cloud_config, uri="data-context-configuration"
+            cloud_config=cloud_config, endpoint="data-context-configuration"
         )
         config = response.json()
         config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod
-    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
+    def _request_cloud_backend(
+        cls, cloud_config: GXCloudConfig, endpoint: str
+    ) -> Response:
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
-        cloud_url = f"{base_url}/organizations/{organization_id}/{uri}"
+        cloud_url = f"{base_url}/organizations/{organization_id}/{endpoint}"
 
         session = create_session(access_token=cloud_config.access_token)
-
         response = session.get(cloud_url)
-        if response.status_code != 200:  # noqa: PLR2004
+
+        try:
+            response.raise_for_status()
+        except HTTPError:
             raise gx_exceptions.GXCloudError(
                 f"Bad request made to GX Cloud; {response.text}", response=response
             )
@@ -918,9 +914,7 @@ class CloudDataContext(SerializableDataContext):
         cloud_config: Optional[GXCloudConfig],
     ):
         assert cloud_config is not None
-        config, _ = cls.retrieve_data_context_config_from_cloud(
-            cloud_config=cloud_config
-        )
+        config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)
         return config
 
     @override

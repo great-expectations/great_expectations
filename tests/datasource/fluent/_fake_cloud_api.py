@@ -156,7 +156,6 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         "CHECKPOINT_NAMES": set(),
         "checkpoints": {},
         "data-context-configuration": {
-            "user_id": "00000000-0000-0000-0000-000000000000",
             "anonymous_usage_statistics": {
                 "data_context_id": FAKE_DATA_CONTEXT_ID,
                 "enabled": False,

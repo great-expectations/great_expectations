@@ -8,7 +8,6 @@ import os
 import pathlib
 import random
 import shutil
-import uuid
 import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
@@ -3575,10 +3574,8 @@ def empty_data_context_in_cloud_mode(
     project_path.mkdir(exist_ok=True)
     project_path_name: str = str(project_path)
 
-    def mocked_config(*args, **kwargs) -> tuple[DataContextConfig, uuid.UUID]:
-        return empty_ge_cloud_data_context_config, uuid.UUID(
-            "00000000-0000-0000-0000-000000000000"
-        )
+    def mocked_config(*args, **kwargs) -> DataContextConfig:
+        return empty_ge_cloud_data_context_config
 
     def mocked_get_cloud_config(*args, **kwargs) -> GXCloudConfig:
         return ge_cloud_config
