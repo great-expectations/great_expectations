@@ -94,6 +94,7 @@ class ExpectationSuite(SerializableDictDot):
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
+        notes: str | list[str] | None = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_name: Optional[
             str
@@ -138,6 +139,7 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self.notes = notes
 
         from great_expectations import project_manager
 
