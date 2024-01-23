@@ -341,11 +341,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         submit_event(event=DataContextInitializedEvent())
 
     def _init_analytics(self) -> None:
-        oss_id = self._get_oss_id()
         init_analytics(
-            user_id=oss_id,
+            user_id=None,
             data_context_id=uuid.UUID(self._data_context_id),
-            oss_id=oss_id,
+            oss_id=self._get_oss_id(),
         )
 
     def _init_config_provider(self) -> _ConfigurationProvider:
