@@ -46,7 +46,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Try GX Cloud',
-          link: { type: 'doc', id: 'cloud/quickstarts/snowflake_quickstart' },
+          link: { type: 'doc', id: '/docs/cloud/quickstarts/snowflake_quickstart' },
         },
         {
           type: 'category',
