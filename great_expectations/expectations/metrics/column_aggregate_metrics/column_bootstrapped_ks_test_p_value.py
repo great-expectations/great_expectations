@@ -76,7 +76,7 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
 
         test_result = (1 + sum(x >= p for x in results)) / (bootstrap_samples + 1)
 
-        hist, bin_edges = np.histogram(column, partition_object["bins"])
+        hist, _bin_edges = np.histogram(column, partition_object["bins"])
         below_partition = len(np.where(column < partition_object["bins"][0])[0])
         above_partition = len(np.where(column > partition_object["bins"][-1])[0])
 

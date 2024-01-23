@@ -307,6 +307,11 @@ extend-exclude = [
     "tests/dataset",                                            # 10 warnings
 ]
 
+[tool.ruff.lint]
+# This enables preview rules for specified rules e.g. NPY201
+preview = true
+explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-single-preview-rules
+
 [tool.ruff.per-file-ignores]
 "assets/benchmark/benchmark.py" = [
     "DTZ", # flake8-datetimez-dtz - doesn't matter for benchmark tests
@@ -329,6 +334,9 @@ extend-exclude = [
 ]
 "great_expectations/compatibility/*.py" = [
     "TID251", # flake8-banned-api
+]
+"tests/integration/docusaurus/*.py" = [
+    "F841", # local variable is assigned to but never used - ignored for code used in snippets
 ]
 
 [tool.ruff.flake8-type-checking]

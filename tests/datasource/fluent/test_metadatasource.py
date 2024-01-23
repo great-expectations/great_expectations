@@ -625,7 +625,7 @@ def test_add_or_update_datasource_using_update(
 )
 @pytest.mark.unit
 def test_delete_datasource(context_with_fluent_datasource):
-    context, config_file_path, data_dir = context_with_fluent_datasource
+    context, config_file_path, _data_dir = context_with_fluent_datasource
     context.sources.delete(name=DEFAULT_CRUD_DATASOURCE_NAME)
     assert_fluent_datasource_content(config_file_path, {})
 
