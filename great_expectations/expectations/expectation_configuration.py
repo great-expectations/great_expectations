@@ -590,6 +590,10 @@ class ExpectationConfigurationSchema(Schema):
         required=False,
         allow_none=True,
     )
+    notes = fields.Raw(
+        required=False,
+        allow_none=True,
+    )
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema,

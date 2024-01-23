@@ -1113,6 +1113,7 @@ class ExpectationSuiteSchema(Schema):
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
+    notes = fields.Raw(required=False, allow_none=True)
 
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
