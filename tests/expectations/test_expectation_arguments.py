@@ -675,7 +675,7 @@ def test_result_format_configured_with_set_default_override(
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"notes": "Some notes"}
+    notes = "Some notes"
 
     expectation_arguments_without_meta: dict
 
@@ -688,7 +688,7 @@ def test_result_format_configured_with_set_default_override(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
+        notes=notes,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -738,7 +738,7 @@ def test_result_format_configured_with_set_default_override(
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
-            "meta": {"notes": "Some notes"},
+            "notes": "Some notes",
             "expectation_type": "expect_column_values_to_not_be_null",
         },
         "success": True,
@@ -768,7 +768,7 @@ def test_result_format_configured_with_set_default_override(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
+        notes=notes,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -793,7 +793,7 @@ def test_result_format_configured_with_set_default_override(
 
     expectation_parameters: dict
 
-    expectation_parameters = dict(**expectation_arguments_column, **expectation_meta)
+    expectation_parameters = dict(**expectation_arguments_column, notes=notes)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert result.success
     assert result.to_json_dict() == {
@@ -806,6 +806,7 @@ def test_result_format_configured_with_set_default_override(
             },
             "meta": {},
             "expectation_type": "expect_column_values_to_not_be_null",
+            "notes": "Some notes",
         },
         "success": True,
         "meta": {},

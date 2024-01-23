@@ -97,7 +97,6 @@ def test_all_expectations_using_test_definitions():
                 render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
                     [fake_expectation]
                 )
-
                 assert render_result is not None
                 render_result = render_result.to_json_dict()
 

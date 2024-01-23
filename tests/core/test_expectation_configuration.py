@@ -172,3 +172,30 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies_with_qu
     # Should fully skip `nested_update` calls in method due to lacking an "expectation_suite_name" key
     dependencies = ec.get_evaluation_parameter_dependencies()
     assert dependencies == {}
+
+
+@pytest.mark.unit
+def test_expectation_configuration_to_domain_obj():
+    expectation_type = "expect_column_values_to_be_in_set"
+    column = "genre_id"
+    value_set = {1, 2, 3}
+    notes = "my notes"
+    meta = {"foo": "bar"}
+
+    config = ExpectationConfiguration(
+        expectation_type=expectation_type,
+        kwargs={"column": column, "value_set": value_set},
+        notes=notes,
+        meta=meta,
+    )
+    expectation = config.to_domain_obj()
+
+    # Check that the expectation object has the same properties as the config
+    assert expectation.expectation_type == expectation_type
+    assert expectation.column == column
+    assert expectation.value_set == value_set
+    assert expectation.notes == notes
+    assert expectation.meta == meta
+
+    # Ensure that translation to/from config is consistent
+    assert expectation.configuration == config

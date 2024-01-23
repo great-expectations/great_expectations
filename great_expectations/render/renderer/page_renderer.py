@@ -802,7 +802,9 @@ class ExpectationSuitePageRenderer(Renderer):
 
     # TODO: Update tests
     @classmethod
-    def _render_expectation_suite_notes(cls, expectations):
+    def _render_expectation_suite_notes(
+        cls, expectations: ExpectationSuite
+    ) -> TextContent:
         content = []
 
         total_expectations = len(expectations.expectations)
