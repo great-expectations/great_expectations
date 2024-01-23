@@ -2,8 +2,6 @@
 sidebar_label: 'Connect GX Cloud to Snowflake'
 title: 'Connect GX Cloud to Snowflake'
 description: Connect GX cloud to a Snowflake Data Source.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
 ---
 
 import TabItem from '@theme/TabItem';
@@ -201,9 +199,13 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
     kubectl delete -f deployment.yaml
     kubectl delete secret gx-agent-secret
     ```
+
+</TabItem>
+</Tabs>
+
 ## Next steps
 
-- [Create a Data Asset](docs/cloud/data_assets/manage_data_assets#create_a_data_asset)
+- [Create a Data Asset](../data_assets/manage_data_assets.md#create-a-data-asset)
 
-- [Invite users](docs/cloud/users/manage_users#invite_a_user)
+- [Invite users](../users/manage_users.md#invite-a-user)
 
