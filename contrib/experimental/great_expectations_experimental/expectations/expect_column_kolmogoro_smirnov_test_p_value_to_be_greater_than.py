@@ -120,7 +120,7 @@ class ExpectColumnKolmogorovSmirnovTestPValueToBeGreaterThan(BatchExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         threshold = self.configuration["kwargs"].get("p_value_threshold")
-        test_statistic, p_value = metrics.get("column.p_value_greater_than_threshold")
+        _test_statistic, p_value = metrics.get("column.p_value_greater_than_threshold")
 
         success = p_value >= threshold
 

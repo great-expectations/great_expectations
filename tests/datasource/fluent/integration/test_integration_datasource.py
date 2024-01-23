@@ -443,7 +443,7 @@ def test_simple_checkpoint_run(
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ]
 ):
-    context, datasource, data_asset, batch_request = datasource_test_data
+    context, _datasource, _data_asset, batch_request = datasource_test_data
     expectation_suite_name = "my_expectation_suite"
     context.add_expectation_suite(expectation_suite_name)
 

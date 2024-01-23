@@ -63,7 +63,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
     ):
         (
             selectable,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
