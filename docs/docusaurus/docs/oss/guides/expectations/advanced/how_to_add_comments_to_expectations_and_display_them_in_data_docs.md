@@ -66,18 +66,6 @@ validator.expect_column_values_to_not_be_null(
 
 ![Multiple lines of markdown rendered with formatting](/docs/oss/images/multiple_line_markdown.png)
 
-You can also avoid formatting by escaping any Markdown syntax. 
-
-```python
-validator.expect_column_values_to_not_be_null(
-  column="column_name",
-  notes="Example notes about this expectation. \*\*Not Markdown\*\*.",
-)
-```
-
-![Multiple lines of string rendered without formatting](/docs/oss/images/multiple_line_string.png)
-
-
 
 ## Review your comments in the Expectation Suite overview of your Data Docs
 
