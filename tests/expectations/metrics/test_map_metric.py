@@ -228,7 +228,7 @@ def _expecation_configuration_to_validation_result_sql(
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])

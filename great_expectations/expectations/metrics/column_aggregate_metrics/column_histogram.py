@@ -53,7 +53,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         column_series: pd.Series = df[column]
         column_null_elements_cond: pd.Series = column_series.isnull()
         column_nonnull_elements: pd.Series = column_series[~column_null_elements_cond]
-        hist, bin_edges = np.histogram(column_nonnull_elements, bins, density=False)
+        hist, _bin_edges = np.histogram(column_nonnull_elements, bins, density=False)
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -239,7 +239,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        df, _, _accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         bins = metric_value_kwargs["bins"]

@@ -601,7 +601,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
             condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
         )
     ]
-    df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
+    df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
 
@@ -616,7 +616,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
             condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
         ),
     ]
-    df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
+    df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
 
@@ -628,7 +628,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
             condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
         )
     ]
-    df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
+    df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (None,), (2,), (3,), (4,), (5,), (6,)]
 
@@ -646,7 +646,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
             condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
         )
     ]
-    df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
+    df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
 
@@ -658,7 +658,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
             condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
         ),
     ]
-    df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
+    df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     expected = [(1,), (2,), (3,), (3,), (np.nan,), (2,), (3,), (4,), (5,), (6,)]
     # since nan != nan by default
@@ -959,7 +959,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
     # Ensuring errors for column and column_ pair domains are caught
     with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        data, _compute_kwargs, _accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "spark",
@@ -968,7 +968,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
         )
     with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        data, _compute_kwargs, _accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "spark",
