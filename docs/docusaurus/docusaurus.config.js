@@ -34,6 +34,14 @@ module.exports = {
   ],
 
   themeConfig: {
+    announcementBar: {
+        id: 'cta_bar',
+        content:
+          '<b>GX Cloud public preview starts on February 21!</b>  Join us for a community kickoff event, workshop, or both.',
+        backgroundColor: '#20232a',
+        textColor: '#fff',
+        isCloseable: false,
+      },
     gxCard: {
       title: "What is GX Cloud?",
       description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
