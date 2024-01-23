@@ -449,7 +449,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"notes": "Some notes"}
+    notes = "Some notes"
 
     expectation_arguments_without_meta: dict
 
@@ -462,7 +462,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
+        notes=notes,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -526,7 +526,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
+        notes=notes,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -568,7 +568,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
+        notes=notes,
     )
 
     suite.add_expectation_configuration(
@@ -596,7 +596,8 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
             "expectation_type": "expect_column_values_to_not_be_null",
-            "meta": {"notes": "Some notes"},
+            "meta": {},
+            "notes": "Some notes",
         },
         "meta": {},
         "exception_info": {
@@ -615,7 +616,8 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_parameters: dict
 
     expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
+        **expectation_arguments_without_meta,
+        notes=notes,
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert result.success
@@ -636,6 +638,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
                 "notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
+            "notes": "Some notes",
         },
         "result": {},
         "exception_info": {
@@ -738,11 +741,12 @@ def test_result_format_configured_with_set_default_override(
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
+            "meta": {},
             "notes": "Some notes",
             "expectation_type": "expect_column_values_to_not_be_null",
         },
         "success": True,
-        "notes": "Some notes",
+        "meta": {},
         "exception_info": {
             "raised_exception": False,
             "exception_traceback": None,
