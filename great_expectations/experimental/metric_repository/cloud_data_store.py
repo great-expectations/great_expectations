@@ -63,9 +63,11 @@ class CloudDataStore(DataStore[StorableTypes]):
     @override
     def __init__(self, context: CloudDataContext):
         super().__init__(context=context)
-        assert context.cloud_config is not None
-        assert self._context.cloud_config is not None
-        self._session = create_session(access_token=context.cloud_config.access_token)
+        assert context.ge_cloud_config is not None
+        assert self._context.ge_cloud_config is not None
+        self._session = create_session(
+            access_token=context.ge_cloud_config.access_token
+        )
 
     def _map_to_url(self, value: StorableTypes) -> str:
         if isinstance(value, MetricRun):
@@ -87,8 +89,8 @@ class CloudDataStore(DataStore[StorableTypes]):
         return payload.json()
 
     def _build_url(self, value: StorableTypes) -> str:
-        assert self._context.cloud_config is not None
-        config = self._context.cloud_config
+        assert self._context.ge_cloud_config is not None
+        config = self._context.ge_cloud_config
         return f"{config.base_url}/organizations/{config.organization_id}{self._map_to_url(value)}"
 
     @override
