@@ -6,7 +6,6 @@ For detailed information on QueryExpectations, please see:
 
 from typing import ClassVar, List, Tuple, Union
 
-from great_expectations.compatibility.pydantic import conint
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -41,7 +40,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
             modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
     """
 
-    value: int = conint(ge=0)
+    value: int
     query: str = """
             SELECT COUNT(*)
             FROM {active_batch}
