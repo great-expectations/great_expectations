@@ -13,7 +13,7 @@ from great_expectations.expectations.expectation_configuration import (
 
 
 @pytest.mark.unit
-def test_expectation_validation_result_describe_returns_expected_shape():
+def test_expectation_validation_result_describe_returns_expected_description():
     # arrange
     evr = ExpectationValidationResult(
         success=False,
@@ -60,6 +60,92 @@ def test_expectation_validation_result_describe_returns_expected_shape():
                 "unexpected_percent_nonmissing": 0.001,
                 "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
                 "partial_unexpected_index_list": [48422],
+            },
+        },
+        indent=4,
+    )
+
+
+@pytest.mark.unit
+def test_expectation_validation_result_describe_returns_expected_description_with_null_values():
+    # It's unclear if an ExpectationValidationResult can ever be valid without an Expectation
+    # or a result, but since it's typed that way we test it
+    # arrange
+    evr = ExpectationValidationResult(
+        success=True,
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+    )
+    # act
+    description = evr.describe()
+    # assert
+    assert description == json.dumps(
+        {
+            "expectation_type": None,
+            "success": True,
+            "kwargs": None,
+            "result": {},
+        },
+        indent=4,
+    )
+
+
+@pytest.mark.unit
+def test_expectation_validation_result_describe_returns_expected_description_with_exception():
+    # arrange
+    evr = ExpectationValidationResult(
+        success=False,
+        expectation_config=gxe.ExpectColumnValuesToBeBetween(
+            column="passenger_count",
+            min_value=0,
+            max_value=6,
+            notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+        ).configuration,
+        result={
+            "element_count": 100000,
+            "unexpected_count": 1,
+            "unexpected_percent": 0.001,
+            "partial_unexpected_list": [7.0],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.001,
+            "unexpected_percent_nonmissing": 0.001,
+            "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+            "partial_unexpected_index_list": [48422],
+        },
+        exception_info={
+            "raised_exception": True,
+            "exception_traceback": "Traceback (most recent call last): something went wrong",
+            "exception_message": "Helpful message here",
+        },
+    )
+    # act
+    description = evr.describe()
+    # assert
+    assert description == json.dumps(
+        {
+            "expectation_type": "expect_column_values_to_be_between",
+            "success": False,
+            "kwargs": {"column": "passenger_count", "min_value": 0.0, "max_value": 6.0},
+            "result": {
+                "element_count": 100000,
+                "unexpected_count": 1,
+                "unexpected_percent": 0.001,
+                "partial_unexpected_list": [7.0],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 0.001,
+                "unexpected_percent_nonmissing": 0.001,
+                "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+                "partial_unexpected_index_list": [48422],
+            },
+            "exception_info": {
+                "raised_exception": True,
+                "exception_traceback": "Traceback (most recent call last): something went wrong",
+                "exception_message": "Helpful message here",
             },
         },
         indent=4,
