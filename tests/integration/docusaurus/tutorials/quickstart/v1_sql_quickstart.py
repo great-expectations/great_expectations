@@ -56,6 +56,7 @@ expectation = gxe.ExpectColumnValuesToBeBetween(
     notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
 )
 result = batch.validate(expectation)
+result.describe()
 # </snippet>
 assert result.success is False
 
@@ -74,5 +75,4 @@ assert result.expectation_config.kwargs["mostly"] == 0.95
 suite_result = batch.validate(suite)
 assert suite_result.success
 
-# TODO: Need to implement this
-# validation_result.open_docs()
+suite_result.describe()
