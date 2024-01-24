@@ -7,7 +7,7 @@ description: Try GX Cloud features and functionality.
 
 If you're new to GX Cloud, start here to learn how you can quickly connect to your Data Assets and validate data.
 
-If you've tested GX Cloud features and functionality and discovered it's a great solution for your organization, see [Connect GX Cloud](connect/connect_lp.md).
+If you've tested GX Cloud features and functionality and discovered it's a great solution for your organization, see [Connect GX Cloud](./connect/connect_lp.md).
 
 ## Prerequisites
 
