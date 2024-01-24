@@ -94,6 +94,7 @@ class ExpectationSuite(SerializableDictDot):
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
+        notes: str | list[str] | None = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_name: Optional[
             str
@@ -138,6 +139,7 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self.notes = notes
 
         from great_expectations import project_manager
 
@@ -1111,6 +1113,7 @@ class ExpectationSuiteSchema(Schema):
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
+    notes = fields.Raw(required=False, allow_none=True)
 
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
@@ -1136,10 +1139,12 @@ class ExpectationSuiteSchema(Schema):
 
             if not data.get("meta"):
                 pass
-            elif data.get("meta") is None or data.get("meta") == []:
-                pass
             elif len(data.get("meta")) == 0:
                 data.pop("meta")
+
+            if "notes" in data and not data.get("notes"):
+                data.pop("notes")
+
         return data
 
     # noinspection PyUnusedLocal
