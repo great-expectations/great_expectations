@@ -249,7 +249,7 @@ def _get_column_quantiles_mysql(
     selects: list[sqlalchemy.WithinGroup] = []
     for idx, quantile in enumerate(quantiles):
         # pymysql cannot handle conversion of numpy float64 to float; convert just in case
-        if np.issubdtype(type(quantile), np.float_):
+        if np.issubdtype(type(quantile), np.double):
             quantile = float(quantile)  # noqa: PLW2901
         quantile_column: sqlalchemy.Label = (
             sa.func.first_value(column)
