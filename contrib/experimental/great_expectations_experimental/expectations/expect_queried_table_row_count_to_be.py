@@ -4,19 +4,13 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Optional, Union
+from typing import Union
 
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 
 
@@ -24,13 +18,12 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
 
     value: int
-
-    metric_dependencies = ("query.table",)
-
-    query = """
+    query: str = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
+
+    metric_dependencies = ("query.table",)
 
     success_keys = (
         "value",
@@ -38,28 +31,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     )
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
-
-    default_kwarg_values = {
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-        "meta": None,
-        "value": None,
-        "query": query,
-    }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
-        value = configuration["kwargs"].get("value")
-
-        try:
-            assert value is not None, "'value' must be specified"
-            assert (
-                isinstance(value, int) and value >= 0
-            ), "`value` must be an integer greater than or equal to zero"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     def _validate(
         self,
