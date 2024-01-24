@@ -773,6 +773,7 @@ def gx_cloud_api_fake_ctx(
     """Mock the GX Cloud API for the lifetime of the context manager."""
     org_url_base = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
+    me_url = f"{cloud_details.base_url}/accounts/me"
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
     _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(fds_config))
@@ -782,7 +783,7 @@ def gx_cloud_api_fake_ctx(
     with responses.RequestsMock(
         assert_all_requests_are_fired=assert_all_requests_are_fired
     ) as resp_mocker:
-        resp_mocker.add_callback(responses.GET, "accounts/me", get_user_id)
+        resp_mocker.add_callback(responses.GET, me_url, get_user_id)
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
