@@ -14,7 +14,7 @@ export default function GithubNavbarItem({ owner, repository }) {
                 setStarsCount(formatCompactNumber(data.stargazers_count))
                 setForksCount(formatCompactNumber(data.forks_count))
                 setShowGithubBadgeInfo(true)
-            }).catch(error => {
+            }).catch( _ => {
                 setShowGithubBadgeInfo(false)
             })
     }, []);
@@ -27,24 +27,22 @@ export default function GithubNavbarItem({ owner, repository }) {
     let githubMarkImg = useBaseUrl(`img/github-mark.svg`);
     let githubLogoImg = useBaseUrl(`img/github.svg`);
     let starIcon = useBaseUrl(`img/star.svg`);
-    let forkIcon = useBaseUrl(`img/github-mark.svg`);
+    let forkIcon = useBaseUrl(`img/code-branch.svg`);
 
     return repository && (
-        <a href={`https://github.com/${owner}/${repository}`} target="_blank" className={styles.github_badge}>
-            <img src={githubMarkImg} className={styles.github_mark}
+        <a href={`https://github.com/${owner}/${repository}`} target="_blank" className={styles.githubBadge}>
+            <img src={githubMarkImg} className={styles.githubMark}
                  alt="Github Invertocat Logo"/>
-            { showGithubBadgeInfo && (<div className={styles.github_badge_info}>
-                <img src={githubLogoImg} className={styles.github_logo}
+            { showGithubBadgeInfo && (<div className={styles.githubBadgeInfo}>
+                <img src={githubLogoImg} className={styles.githubLogo}
                      alt="Github Logo"/>
-                <div className={styles.github_stats}>
+                <div className={styles.githubStats}>
                     <div>
-                        <img src={starIcon} className={styles.github_mark}
-                             alt="Github Stargazers Count"/>
+                        <img src={starIcon} alt="Github Stargazers Count"/>
                         {starsCount}
                     </div>
                     <div>
-                        <img src={forkIcon} className={styles.github_mark}
-                             alt="Github Forks Count"/>
+                        <img src={forkIcon} alt="Github Forks Count"/>
                         {forksCount}
                     </div>
                 </div>
