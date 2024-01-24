@@ -116,7 +116,7 @@ How you interact with GX Cloud is dependent on the role you're assigned by your 
 | Role          | Responsibilities                                  |
 |---------------|---------------------------------------------------|
 | Viewer        | View Checkpoints and Validation Results           | 
-| Editor        | Create and edit Expectations<br/>Create access tokens<br/>Create Data Assets |
+| Editor        | Create Data Assets<br/>Create and edit Expectations<br/>Create access tokens<br/>Create and edit Checkpoints |
 | Admin         | Full access<br/>Perform all GX Cloud administrative functions including user and role assignment |
 
 ## Supported browsers
