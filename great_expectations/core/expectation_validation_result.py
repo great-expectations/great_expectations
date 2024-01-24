@@ -386,10 +386,16 @@ class ExpectationValidationResult(SerializableDictDot):
         )
 
     def describe_dict(self) -> dict:
+        if self.expectation_config:
+            expectation_type = self.expectation_config.expectation_type
+            kwargs = self.expectation_config.kwargs
+        else:
+            expectation_type = None
+            kwargs = None
         describe_dict = {
-            "expectation_type": self.expectation_config.expectation_type,
+            "expectation_type": expectation_type,
             "success": self.success,
-            "kwargs": self.expectation_config.kwargs,
+            "kwargs": kwargs,
             "result": self.result,
         }
         if self.exception_info.get("raised_exception"):
