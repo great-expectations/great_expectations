@@ -4,8 +4,9 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Union
+from typing import ClassVar, List, Tuple, Union
 
+from great_expectations.compatibility.pydantic import conint
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -15,42 +16,51 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
-    """Expect the expect the number of rows returned from a queried table to equal a specified value."""
+    """Expect the expect the number of rows returned from a queried table to equal a specified value.
 
-    value: int
+    expect_queried_table_row_count_to_be is a \
+    [Query Expectation](https://docs.greatexpectations.io/docs/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations)
+
+    Args:
+        value (int): \
+            Expected number of returned rows
+        query (str): \
+            SQL query to be executed (default will perform a SELECT COUNT(*) on the table)
+
+    Keyword Args:
+        mostly (None or a float between 0 and 1): \
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
+    """
+
+    value: int = conint(ge=0)
     query: str = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
 
-    metric_dependencies = ("query.table",)
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
 
-    success_keys = (
+    success_keys: ClassVar[Tuple[str, ...]] = (
         "value",
         "query",
     )
 
-    domain_keys = ("batch_id", "row_condition", "condition_parser")
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
-    def _validate(
-        self,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ) -> Union[ExpectationValidationResult, dict]:
-        configuration = self.configuration
-        metrics = convert_to_json_serializable(data=metrics)
-        query_result = list(metrics.get("query.table")[0].values())[0]
-        value = configuration["kwargs"].get("value")
-
-        success = query_result == value
-
-        return {
-            "success": success,
-            "result": {"observed_value": query_result},
-        }
-
-    examples = [
+    examples: ClassVar[List[dict]] = [
         {
             "data": [
                 {
@@ -113,6 +123,24 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         "tags": ["query-based"],
         "contributors": ["@austiezr"],
     }
+
+    def _validate(
+        self,
+        metrics: dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
+        metrics = convert_to_json_serializable(data=metrics)
+        query_result = list(metrics.get("query.table")[0].values())[0]
+        value = configuration["kwargs"].get("value")
+
+        success = query_result == value
+
+        return {
+            "success": success,
+            "result": {"observed_value": query_result},
+        }
 
 
 if __name__ == "__main__":
