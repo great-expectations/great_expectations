@@ -385,6 +385,22 @@ class ExpectationValidationResult(SerializableDictDot):
             f"Unrecognized metric name {metric_name}"
         )
 
+    def describe_dict(self) -> dict:
+        describe_dict = {
+            "expectation_type": self.expectation_config.expectation_type,
+            "success": self.success,
+            "kwargs": self.expectation_config.kwargs,
+            "result": self.result,
+        }
+        if self.exception_info.get("raised_exception"):
+            describe_dict["exception_info"] = self.exception_info
+        return describe_dict
+
+    @public_api
+    def describe(self) -> str:
+        """JSON string description of this ExpectationValidationResult"""
+        return json.dumps(self.describe_dict(), indent=4)
+
 
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
@@ -638,6 +654,20 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             statistics=statistics,
             meta=self.meta,
         )
+
+    def describe_dict(self) -> dict:
+        return {
+            "success": self.success,
+            "statistics": self.statistics,
+            "expectations": [
+                expectation.describe_dict() for expectation in self.results
+            ],
+        }
+
+    @public_api
+    def describe(self) -> str:
+        """JSON string description of this ExpectationSuiteValidationResult"""
+        return json.dumps(self.describe_dict(), indent=4)
 
 
 class ExpectationSuiteValidationResultSchema(Schema):
