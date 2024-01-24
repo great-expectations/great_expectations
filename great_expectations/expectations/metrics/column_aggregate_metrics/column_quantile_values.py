@@ -62,7 +62,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
     ):
         (
             selectable,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
@@ -159,7 +159,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
     ):
         (
             df,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
@@ -249,7 +249,7 @@ def _get_column_quantiles_mysql(
     selects: list[sqlalchemy.WithinGroup] = []
     for idx, quantile in enumerate(quantiles):
         # pymysql cannot handle conversion of numpy float64 to float; convert just in case
-        if np.issubdtype(type(quantile), np.float_):
+        if np.issubdtype(type(quantile), np.double):
             quantile = float(quantile)  # noqa: PLW2901
         quantile_column: sqlalchemy.Label = (
             sa.func.first_value(column)

@@ -490,7 +490,7 @@ specified (empty "metric_name" value detected)."""
         ]
         (
             resolved_metrics,
-            aborted_metrics_info,
+            _aborted_metrics_info,
         ) = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
             runtime_configuration=runtime_configuration,

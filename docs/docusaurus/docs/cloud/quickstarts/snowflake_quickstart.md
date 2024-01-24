@@ -11,7 +11,7 @@ In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Asset
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
@@ -39,26 +39,26 @@ You'll need your user access token and organization ID to set your environment v
 
     GX recommends deleting the temporary file after you set the environment variables.
 
-## Set the environment variables and start the GX Cloud agent
+## Set the environment variables and start the GX Agent
 
-Environment variables securely store your GX Cloud and Snowflake access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
+Environment variables securely store your GX Cloud and Snowflake access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
 1. Start the Docker Engine.
 
-2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN`, `GX_CLOUD_ORGANIZATION_ID`, and `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variables, install GX Cloud and its dependencies, and start the GX Cloud agent:
+2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Agent:
 
     ```bash title="Terminal input"
-    docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" greatexpectations/agent
+    docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
     ```
-    Replace `user_access_token`, `organization_id`, and `snowflake_password` with your own values. 
+   Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
 3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
 4. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
-    If you stop the GX Cloud agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
+    If you stop the GX Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
 
-    To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
+    To edit an environment variable, stop the GX Agent, edit the environment variable, save the change, and then restart the GX Agent.
 
 ## Create the Snowflake Data Asset
 
@@ -78,7 +78,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password/environment variable**: Enter `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+    - **Password**: Enter your Snowflake password.
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored. In Snowsight, click **Data** > **Databases**. In the Snowflake Classic Console, click **Databases**.
  
