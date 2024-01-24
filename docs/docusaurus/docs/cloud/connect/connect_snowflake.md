@@ -11,6 +11,8 @@ To validate data stored in a Snowflake data warehouse, you must add the GX Agent
 
 ## Prerequisites
 
+- You have [GX Cloud Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
+
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
 - You have a Snowflake database, schema, and table.

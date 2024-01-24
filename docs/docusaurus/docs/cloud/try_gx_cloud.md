@@ -11,6 +11,8 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 ## Prerequisites
 
+- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+
 - You have a Snowflake database, schema, and table.
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you have SELECT privileges on the table you are validating. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
