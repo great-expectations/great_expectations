@@ -20,7 +20,6 @@ import TipUsingPandasToConnectToDifferentFileTypes from '/docs/components/connec
 import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesystem/_defining_multiple_data_assets.md'
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
-import PrereqInstallGxWithDependencies from '/docs/components/prerequisites/_gx_installed_with_abs_dependencies.md'
 import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
@@ -190,7 +189,7 @@ Connect to a Microsoft Azure Blob Storage Data Source.
 
 <Prerequisites>
 
-- <PrereqInstallGxWithDependencies />
+- <span><a href='../../../../../oss/guides/setup/installation/install_gx'>A working installation of Great Expectations with dependencies for Azure Blob Storage</a></span>
 - Access to data in Azure Blob Storage
 
 </Prerequisites> 
