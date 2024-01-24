@@ -1276,7 +1276,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             header_template_str,
             header_params_with_json_schema,
             chart,
-            chart_container_col_width,
+            _chart_container_col_width,
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(

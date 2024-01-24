@@ -1740,7 +1740,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
 ):
     validator: Validator
     data_assistant_result: DataAssistantResult
-    validator, data_assistant_result = quentin_explicit_instantiation_result_frozen_time
+    (
+        _validator,
+        data_assistant_result,
+    ) = quentin_explicit_instantiation_result_frozen_time
 
     data_assistant_name: str = "test_volume_data_assistant"
 
@@ -2097,7 +2100,10 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
 ):
     validator: Validator
     data_assistant_result: DataAssistantResult
-    validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
+    (
+        _validator,
+        data_assistant_result,
+    ) = quentin_explicit_instantiation_result_actual_time
 
     # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
     assert data_assistant_result.profiler_execution_time > 0.0

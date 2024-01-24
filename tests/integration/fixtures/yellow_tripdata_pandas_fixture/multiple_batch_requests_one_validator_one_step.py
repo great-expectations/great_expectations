@@ -65,7 +65,7 @@ jan_feb_batch_definition_list: list = (
 
 # Get the highest max and lowest min between January and February
 cumulative_max = 0
-cumulative_min = np.Inf
+cumulative_min = np.inf
 for batch_definition in jan_feb_batch_definition_list:
     batch_id: str = batch_definition.id
     current_max = validator.get_metric(
