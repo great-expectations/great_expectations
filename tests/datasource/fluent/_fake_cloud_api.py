@@ -782,9 +782,7 @@ def gx_cloud_api_fake_ctx(
     with responses.RequestsMock(
         assert_all_requests_are_fired=assert_all_requests_are_fired
     ) as resp_mocker:
-        resp_mocker.add_callback(
-            responses.GET, f"{org_url_base}/accounts/me", get_user_id
-        )
+        resp_mocker.add_callback(responses.GET, "accounts/me", get_user_id)
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
