@@ -141,11 +141,11 @@ To learn how to deploy a Docker container image in a specific environment, see t
 
 You can deploy the GX Agent in any environment you create Kubernetes clusters. For example:
 
-- Amazon Elastic Kubernetes Service (EKS)
+- [Amazon Elastic Kubernetes Service (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html)
 
-- Microsoft Azure Kubernetes Service (AKS)
+- [Microsoft Azure Kubernetes Service (AKS)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/containers/aks-start-here)
 
-- Google Kubernetes Engine (GKE)
+- [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/docs)
 
 - Any Kubernetes cluster version 1.21 or greater which uses standard Kubernetes
 
