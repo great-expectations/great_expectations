@@ -1,19 +1,45 @@
 from uuid import UUID
+
 import pytest
-from great_expectations.analytics.config import get_config, update_config, Config, DUMMY_UUID
+
+from great_expectations.analytics.config import (
+    DUMMY_UUID,
+    Config,
+    get_config,
+    update_config,
+)
 from great_expectations.analytics.events import DataContextInitializedEvent
 
 TESTING_UUID = UUID("00000000-c000-0000-0000-000000000000")
 
 
-@pytest.fixture(scope="function", params=[
-    (Config(organization_id=TESTING_UUID, user_id=TESTING_UUID, data_context_id=DUMMY_UUID, oss_id=DUMMY_UUID, cloud_mode=False),
-        TESTING_UUID,
-        {"user_id": TESTING_UUID, "organization_id": TESTING_UUID, "data_context_id": DUMMY_UUID, "oss_id": DUMMY_UUID, "service": "gx-core"}),
-    (Config(),
-        DUMMY_UUID,
-        {"data_context_id": DUMMY_UUID, "oss_id": DUMMY_UUID, "service": "gx-core"}),
-])
+@pytest.fixture(
+    scope="function",
+    params=[
+        (
+            Config(
+                organization_id=TESTING_UUID,
+                user_id=TESTING_UUID,
+                data_context_id=DUMMY_UUID,
+                oss_id=DUMMY_UUID,
+                cloud_mode=False,
+            ),
+            TESTING_UUID,
+            {
+                "user_id": TESTING_UUID,
+                "organization_id": TESTING_UUID,
+                "data_context_id": DUMMY_UUID,
+                "oss_id": DUMMY_UUID,
+                "service": "gx-core",
+            },
+        ),
+        (
+            Config(),
+            DUMMY_UUID,
+            {"data_context_id": DUMMY_UUID, "oss_id": DUMMY_UUID, "service": "gx-core"},
+        ),
+    ],
+)
 def analytics_config(request):
     base_config = get_config()
     update_config(request.param[0])

@@ -46,7 +46,7 @@ class Event:
     @property
     def user_id(self) -> Optional[UUID]:
         return get_config().user_id
-    
+
     @property
     def distinct_id(self) -> UUID:
         """The distinct_id is the primary key for identifying
