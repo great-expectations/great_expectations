@@ -31,22 +31,22 @@ You do not need to re-create a Checkpoint every time you Validate data.  If you 
 
 One of the most powerful features of Checkpoints is that they can be configured to run Actions, which will do some process based on the Validation Results generated when a Checkpoint is run.  Typical uses include sending email, slack, or custom notifications.  Another common use case is updating Data Docs sites.  However, Actions can be created to do anything you are capable of programing in Python.  This gives you an incredibly versatile tool for integrating Checkpoints in your pipeline's workflow!
 
-To set up common Action use cases, see [Configure Actions](/docs/oss/guides/validation/validation_actions/actions_lp).
+To set up common Action use cases, see [Configure Actions](/oss/guides/validation/validation_actions/actions_lp.md).
 
 The classes that implement Checkpoints are in the `great_expectations.checkpoint` module.
 
 ## Create
 
-Creating a Checkpoint is part of the initial setup for data validation.  Checkpoints are reusable and only need to be created once, although you can create multiple Checkpoints to cover multiple Validation use cases. For more information about creating Checkpoints, see [How to create a new Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+Creating a Checkpoint is part of the initial setup for data validation.  Checkpoints are reusable and only need to be created once, although you can create multiple Checkpoints to cover multiple Validation use cases. For more information about creating Checkpoints, see [How to create a new Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
-After you create a Checkpoint, you can use it to Validate data by running it against a Batch or Batches of data.  The Batch Requests used by a Checkpoint during this process may be pre-defined and saved as part of the Checkpoint's configuration, or the Checkpoint can be configured to accept one or more Batch Request at run time. For more information about data validation, see [How to validate data by running a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint).
+After you create a Checkpoint, you can use it to Validate data by running it against a Batch or Batches of data.  The Batch Requests used by a Checkpoint during this process may be pre-defined and saved as part of the Checkpoint's configuration, or the Checkpoint can be configured to accept one or more Batch Request at run time. For more information about data validation, see [How to validate data by running a Checkpoint](/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md).
 
 In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfying the test suite to run, and a `batch_request` identifying the data to test. Checkpoint can be directly directly in Python as follows:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
-For an in-depth guide on Checkpoint creation, see our [guide on how to create a new Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+For an in-depth guide on Checkpoint creation, see our [guide on how to create a new Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
 ## Configure
 
@@ -62,7 +62,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
    Each validation dictionary has three required and three optional keys:
     #### Required keys
         - `batch_request`: a dictionary describing the batch of data to validate (learn more about specifying Batches
-           here: [Batches](/docs/reference/learn/terms/batch))
+           here: [Batches](/reference/learn/terms/batch.md))
         - `expectation_suite_name`: the name of the Expectation Suite to validate the batch of data against
         - `action_list`: a list of actions to perform after each batch is validated
 
@@ -70,7 +70,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
         - `name`: providing a name will allow referencing the validation inside the run by name (e.g. "
            user_table_validation")
         - `evaluation_parameters`: used to define named parameters using Great
-           Expectations [Evaluation Parameter syntax](/docs/reference/learn/terms/evaluation_parameter)
+           Expectations [Evaluation Parameter syntax](/reference/learn/terms/evaluation_parameter.md)
         - `runtime_configuration`: provided to the Validator's `runtime_configuration` (e.g. `result_format`)
 
 ### Optional keys

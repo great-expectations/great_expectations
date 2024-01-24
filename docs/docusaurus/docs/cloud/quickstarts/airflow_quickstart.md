@@ -15,11 +15,11 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 - You have installed Apache Airflow and initialized the database (__airflow db init__).
 
-- You have [connected GX Cloud to a Data Asset on a Data Source](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+- You have [connected GX Cloud to a Data Asset on a Data Source](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
-- You have [created an Expectation Suite](/docs/cloud/expectation_suites/manage_expectation_suites) and [added Expectations](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+- You have [created an Expectation Suite](/cloud/expectation_suites/manage_expectation_suites.md) and [added Expectations](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
-- You have [added a Checkpoint to your Expectation](/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint).
+- You have [added a Checkpoint to your Expectation](/cloud/checkpoints/manage_checkpoints.md#add-a-checkpoint).
 
 
 ## Create a local Airflow project and set dependencies

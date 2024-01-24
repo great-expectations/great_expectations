@@ -55,11 +55,11 @@ For these reasons, it is strongly advised that once you have converted your Ephe
 
 ## Next steps
 
-- [Configure credentials](/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials)
-- [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores)
-- [Configure Validation Result Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_result_stores)
-- [Configure a MetricStore](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
-- [Host and share Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
-- [Connect to a filesystem Data Source](/docs/oss/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
-- [Connect to an in-memory Data Source](/docs/oss/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data)
-- [Connect to a SQL database Data Source](/docs/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
+- [Configure credentials](/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+- [Configure Expectation Stores](/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
+- [Configure Validation Result Stores](/oss/guides/setup/configuring_metadata_stores/configure_result_stores.md)
+- [Configure a MetricStore](/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
+- [Host and share Data Docs](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+- [Connect to a filesystem Data Source](/oss/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data.md)
+- [Connect to an in-memory Data Source](/oss/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data.md)
+- [Connect to a SQL database Data Source](/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
