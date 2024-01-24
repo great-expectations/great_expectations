@@ -274,7 +274,7 @@ class CloudDataContext(SerializableDataContext):
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
         endpoint = (
-            f"{base_url}/organizations/{organization_id}/data-contexti-configuration"
+            f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
 
         access_token = cloud_config.access_token
