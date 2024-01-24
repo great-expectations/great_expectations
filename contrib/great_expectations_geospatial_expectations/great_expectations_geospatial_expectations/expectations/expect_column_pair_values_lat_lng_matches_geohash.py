@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal
 
 import geohash as gh
 import pandas as pd
@@ -6,10 +6,6 @@ import pandas as pd
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
-    InvalidExpectationConfigurationError,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
@@ -44,6 +40,10 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
     digits. For example, dpz8 contains dpz80 (in addition to any other geohash \
     that begins with "dpz8".
     """
+
+    ignore_row_if: Literal[
+        "both_values_are_missing", "either_value_is_missing", "neither"
+    ] = "both_values_are_missing"
 
     examples = [
         {
@@ -96,7 +96,6 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
         "ignore_row_if",
         "mostly",
     )
-    default_kwarg_values = {"mostly": 1.0, "ignore_row_if": "both_values_are_missing"}
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -110,19 +109,6 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
         ],
         "requirements": ["python-geohash", "pandas"],
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert (
-                "column_A" in configuration.kwargs
-                and "column_B" in configuration.kwargs
-            ), "both columns must be provided"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
 
 if __name__ == "__main__":
