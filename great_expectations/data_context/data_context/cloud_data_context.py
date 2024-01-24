@@ -159,11 +159,8 @@ class CloudDataContext(SerializableDataContext):
         )
 
     def _get_cloud_user_id(self) -> uuid.UUID:
-        base_url = self.ge_cloud_config.base_url
-        access_token = self.ge_cloud_config.access_token
-
         response = self._request_cloud_backend(
-            access_token=access_token, endpoint=f"{base_url}/accounts/me"
+            cloud_config=self.ge_cloud_config, uri="accounts/me"
         )
         data = response.json()
         user_id = data["user_id"]
@@ -271,25 +268,21 @@ class CloudDataContext(SerializableDataContext):
 
         :return: the configuration object retrieved from the Cloud API
         """
-        base_url = cloud_config.base_url
-        organization_id = cloud_config.organization_id
-        endpoint = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
-
-        access_token = cloud_config.access_token
-
         response = cls._request_cloud_backend(
-            access_token=access_token, endpoint=endpoint
+            cloud_config=cloud_config, uri="data-context-configuration"
         )
         config = response.json()
         config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod
-    def _request_cloud_backend(cls, access_token: str, endpoint: str) -> Response:
+    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
+        access_token = cloud_config.access_token
+        base_url = cloud_config.base_url
+        organization_id = cloud_config.organization_id
+
         session = create_session(access_token=access_token)
-        response = session.get(endpoint)
+        response = session.get(f"{base_url}/organizations/{organization_id}/{uri}")
 
         try:
             response.raise_for_status()
