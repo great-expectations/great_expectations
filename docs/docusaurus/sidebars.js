@@ -43,15 +43,15 @@ module.exports = {
             },
           ]
         },
-        { type: 'doc', id: 'cloud/quickstarts/snowflake_quickstart' },
+        { type: 'doc', id: 'cloud/try_gx_cloud' },
         {
           type: 'category',
           label: 'Connect GX Cloud',
-          link: { type: 'doc', id: 'cloud/quickstarts/quickstart_lp' },
+          link: { type: 'doc', id: 'cloud/connect/connect_lp' },
           items: [
             'cloud/connect/connect_snowflake',
-            'cloud/quickstarts/airflow_quickstart',
-            'cloud/quickstarts/python_quickstart',
+            'cloud/connect/connect_airflow',
+            'cloud/connect/connect_python',
           ]
         },
         {

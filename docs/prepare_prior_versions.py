@@ -484,7 +484,7 @@ def remove_extension_from_absolute_md_links(
         files.extend(path.glob(f"**/*{extension}"))
 
     files_to_process = [
-        "airflow_quickstart.md",
+        "connect_airflow.md",
     ]
     files = [file for file in files if file.name in files_to_process]
 

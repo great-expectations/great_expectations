@@ -9,7 +9,7 @@ import Tabs from '@theme/Tabs';
 
 If you're the first person in your org to access GX Cloud, you're assigned Admin permissions. You're responsible for generating and recording access tokens, setting environment variables, installing and starting the GX Cloud agent, and inviting users to your org. 
 
-If you're using Snowflake and are ready to create Expectations and run Validations, see [Quickstart for GX Cloud and Snowflake](/docs/cloud/quickstarts/snowflake_quickstart).
+If you're using Snowflake and are ready to create Expectations and run Validations, see [Try GX Cloud](/docs/cloud/try_gx_cloud).
 
 
 <Tabs

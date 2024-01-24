@@ -103,7 +103,7 @@ The following table lists the sequence of tasks that you complete in a typical G
 
 | Task                                     | Description                                                        |
 |------------------------------------------|--------------------------------------------------------------------|
-|[Connect GX Cloud](/docs/cloud/quickstarts/quickstart_lp) | Set up your production environment to get the most out of GX Cloud. Do it once, and you don't need to do it again. If you're not ready to use GX Cloud in your production environment, see [Try GX Cloud](/docs/cloud/quickstarts/snowflake_quickstart).                                   | 
+|[Connect GX Cloud](/docs/cloud/connect/connect_lp) | Set up your production environment to get the most out of GX Cloud. Do it once, and you don't need to do it again. If you're not ready to use GX Cloud in your production environment, see [Try GX Cloud](/docs/cloud/try_gx_cloud).                                   | 
 | [Connect to a Data Asset on a Data Source](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
 | [Create an Expectation](/docs/cloud/expectations/manage_expectations)    | Define verifiable assertions about your data.                       |  
 | [Run Validations](/docs/cloud/validations/manage_validations)                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       |

@@ -14,7 +14,7 @@ To learn more about Data Assets, see [Data Asset](/docs/reference/learn/terms/da
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- The GX Agent is running. See [Try GX Cloud](../set_up_gx_cloud.md) or [Connect GX cloud](/docs/cloud/quickstarts/quickstart_lp)
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX cloud](/docs/cloud/connect/connect_lp).
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 

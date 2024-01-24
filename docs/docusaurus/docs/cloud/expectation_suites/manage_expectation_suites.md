@@ -10,7 +10,7 @@ To learn more about Expectation Suites, see [Expectation Suites](/docs/reference
 
 ## Prerequisites
 
-- You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX cloud](/docs/cloud/connect/connect_lp).
 
 - You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 

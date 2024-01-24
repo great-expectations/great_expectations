@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Try GX Cloud'
 title: 'Try GX Cloud'
-id: snowflake_quickstart
+id: try_gx_cloud
 description: Try GX Cloud features and functionality.
 ---
 
@@ -19,7 +19,7 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
-## Generate your user access token and copy your organization ID
+## Get your user access token and copy your organization ID
 
 You'll need your user access token and organization ID to set your environment variables. Access tokens shouldn't be committed to version control software.
 

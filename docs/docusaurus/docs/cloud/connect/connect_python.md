@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Connect to GX Cloud with Python'
 title: 'Connect to GX Cloud with Python'
-id: python_quickstart
+id: connect_python
 description: Connect to a GX Cloud account and validate data from a Python script.
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'
