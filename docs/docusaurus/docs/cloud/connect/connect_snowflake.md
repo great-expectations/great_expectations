@@ -7,7 +7,7 @@ description: Connect GX cloud to a Snowflake Data Source.
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-To validate data stored in a Snowflake data warehouse, you must add the GX Agent to your production environment. The GX Agent is a containerized image that runs open source and proprietary GX code in your production environment. The GX Agent acts as an intermediary between GX Cloud and Snowflake and allows you to securely access and validate your data in GX Cloud without connecting or interacting with it directly.
+To validate data stored in a Snowflake data warehouse, you must add the GX Agent to your production environment. The GX Agent is a containerized image that runs open source and proprietary GX code. The GX Agent acts as an intermediary between GX Cloud and Snowflake and allows you to securely access and validate your data in GX Cloud without connecting or interacting with it directly.
 
 ## Prerequisites
 
@@ -73,11 +73,7 @@ You'll need your access token and organization ID to set your access credentials
 
 2. In the **User access tokens** pane, click **Create user access token**.
 
-3. Complete the following fields:
-
-   - **Token name** - Enter a name for the token that will help you quickly identify it.
-
-   - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?).
+3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
 
 4. Click **Create**.
 
@@ -93,6 +89,24 @@ You'll need your access token and organization ID to set your access credentials
 
 You deploy and run the GX Agent within your production cloud services environment. You can deploy the GX Agent container in any environment where you can run Docker container images or create Kubernetes clusters.
 
+To learn how to deploy a Docker container image in a specific environment, see the following documentation:
+
+- [Quickstart: Deploy a container instance in Azure using the Azure CLI](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-quickstart)
+
+- [Build and push a Docker image with Google Cloud Build](https://cloud.google.com/build/docs/build-push-docker-image)
+
+- [Deploy Docker Containers on Amazon ECS](https://aws.amazon.com/getting-started/hands-on/deploy-docker-containers/)
+
+You can deploy the GX Agent in any environment in which you create Kubernetes clusters. For example:
+
+- Amazon Elastic Kubernetes Service (EKS)
+
+- Microsoft Azure Kubernetes Service (AKS)
+
+- Google Kubernetes Engine (GKE)
+
+- Any Kubernetes cluster version 1.21 or greater which uses standard Kubernetes
+
 <Tabs
   groupId="connect-snowflake"
   defaultValue='docker'
@@ -102,15 +116,6 @@ You deploy and run the GX Agent within your production cloud services environmen
   ]}>
 <TabItem value="docker">
 
-To learn how to deploy a Docker container image in a specific environment, see the following documentation:
-
-- [Quickstart: Deploy a container instance in Azure using the Azure CLI](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-quickstart)
-
-- [Build and push a Docker image with Google Cloud Build](https://cloud.google.com/build/docs/build-push-docker-image)
-
-- [Deploy Docker Containers on Amazon ECS](https://aws.amazon.com/getting-started/hands-on/deploy-docker-containers/)
-
-
 1. Download the GX Agent Docker container image from [Docker Hub](https://hub.docker.com/r/greatexpectations/agent).
 
 2. After configuring your cloud service to run Docker containers, run the following Docker command to start the GX Agent: 
@@ -118,11 +123,10 @@ To learn how to deploy a Docker container image in a specific environment, see t
    ```bash title="Terminal input"
    docker run -it \
    -e GX_CLOUD_ACCESS_TOKEN= YOUR_ACCESS_TOKEN \ 
-   -e GX_CLOUD_ORGANIZATION_ID= YOUR_ORGANIZATION_ID \ 
-   -e GX_CLOUD_SNOWFLAKE_PW= YOUR_SNOWFLAKE_PASSWORD \ 
+   -e GX_CLOUD_ORGANIZATION_ID= YOUR_ORGANIZATION_ID \  
    greatexpectations/agent:latest
     ```
-    Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously and `YOUR_SNOWFLAKE_PASSWORD` with your Snowflake password. The `YOUR_SNOWFLAKE_PASSWORD` variable is optional, and you can remove it if you prefer to provide the password in GX Cloud.
+    Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously. To store your Snowflake password as an environment variable, add `-e GX_CLOUD_SNOWFLAKE_PW= YOUR_SNOWFLAKE_PASSWORD \` to the Docker command.
 
 3. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
 
@@ -139,6 +143,7 @@ To learn how to deploy a Docker container image in a specific environment, see t
 </TabItem>
 <TabItem value="kubernetes">
 
+<<<<<<< Updated upstream
 You can deploy the GX Agent in any environment you create Kubernetes clusters. For example:
 
 - [Amazon Elastic Kubernetes Service (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html)
@@ -150,6 +155,8 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
 - Any Kubernetes cluster version 1.21 or greater which uses standard Kubernetes
 
 
+=======
+>>>>>>> Stashed changes
 1. Install kubectl. See [Install Tools](https://kubernetes.io/docs/tasks/tools/).
 
 2. Run the following command to provide the access credentials to the Kubernetes container:
@@ -158,9 +165,9 @@ You can deploy the GX Agent in any environment you create Kubernetes clusters. F
    kubectl create secret generic gx-agent-secret \
    --from-literal=GX_CLOUD_ORGANIZATION_ID=YOUR_ORGANIZATION_ID \
    --from-literal=GX_CLOUD_ACCESS_TOKEN=YOUR_ACCESS_TOKEN \
-   --from-literal=GX_CLOUD_SNOWFLAKE_PW=YOUR_SNOWFLAKE_PASSWORD
    ```
-    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously and `YOUR_SNOWFLAKE_PASSWORD` with your Snowflake password. The `YOUR_SNOWFLAKE_PASSWORD` variable is optional, and you can remove it if you provide the password in GX Cloud.
+    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously. To include your Snowflake password as an access credential, add `--from-literal=GX_CLOUD_SNOWFLAKE_PW=YOUR_SNOWFLAKE_PASSWORD` to the command.
+
 
 3. Create and save a file named `deployment.yaml`, with the following configuration:
 

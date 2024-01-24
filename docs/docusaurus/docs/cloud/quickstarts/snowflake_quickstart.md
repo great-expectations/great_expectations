@@ -27,11 +27,7 @@ You'll need your user access token and organization ID to set your environment v
 
 2. In the **Access tokens** pane, click **Create user access token**.
 
-3. Complete the following fields:
-
-    - **Token name** - Enter a name for the token that will help you quickly identify it.
-
-    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?).
+3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
 
 4. Click **Create**.
 
