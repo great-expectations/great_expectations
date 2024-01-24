@@ -143,20 +143,6 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 </TabItem>
 <TabItem value="kubernetes">
 
-<<<<<<< Updated upstream
-You can deploy the GX Agent in any environment you create Kubernetes clusters. For example:
-
-- [Amazon Elastic Kubernetes Service (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html)
-
-- [Microsoft Azure Kubernetes Service (AKS)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/containers/aks-start-here)
-
-- [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/docs)
-
-- Any Kubernetes cluster version 1.21 or greater which uses standard Kubernetes
-
-
-=======
->>>>>>> Stashed changes
 1. Install kubectl. See [Install Tools](https://kubernetes.io/docs/tasks/tools/).
 
 2. Run the following command to provide the access credentials to the Kubernetes container:
