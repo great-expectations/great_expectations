@@ -21,6 +21,7 @@ def analytics_config(request):
     update_config(base_config)
 
 
+@pytest.mark.unit
 def test_event_identifiers(analytics_config):
     """Validate base event properties based on the analytics config."""
     distinct_id, base_properties = analytics_config

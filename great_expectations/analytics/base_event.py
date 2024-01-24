@@ -49,6 +49,10 @@ class Event:
     
     @property
     def distinct_id(self) -> UUID:
+        """The distinct_id is the primary key for identifying
+        anlaytics events. It is the user_id if it is set
+        (e.g. in a Cloud context), otherwise the oss_id.
+        """
         return self.user_id or self.oss_id
 
     _allowed_actions: ClassVar[Optional[List[Action]]] = None
