@@ -11,6 +11,7 @@
 
 @import "typography.scss";
 @import "left_navigation.scss";
+@import "navbar.scss";
 
 /* You can override the default Infima variables here. */
 :root {
@@ -129,34 +130,6 @@ a.pagination-nav__link:hover {
     display: block;
     margin: 0 calc(-1 * var(--ifm-pre-padding));
     padding: 0 var(--ifm-pre-padding);
-}
-
-/* navbar tweaks */
-.navbar--fixed-top {
-    opacity: .95;
-}
-
-.navbar__link {
-    font-weight: 700;
-    font-size: 14px;
-    text-transform: uppercase;
-}
-
-.navbar__brand {
-    width: 190px;
-    height: auto;
-}
-
-.navbar__logo{
-    height: 44px;
-}
-
-.navbar__item {
-    margin-left: 4px;
-}
-
-.navbar__items--right > :last-child {
-    padding-right: 16px;
 }
 
 .header-cloud-link {
