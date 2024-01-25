@@ -87,6 +87,7 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
     assert result == z_score_validation_result
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.spark
 def test_spark_expect_column_value_z_scores_to_be_less_than_impl(
     spark_session, basic_spark_df_execution_engine, z_score_validation_result

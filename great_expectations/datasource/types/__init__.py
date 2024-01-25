@@ -3,12 +3,14 @@ import enum
 from .batch_kwargs import *
 
 
+# noinspection SpellCheckingInspection
 class DatasourceTypes(enum.Enum):
     PANDAS = "pandas"
     SPARK = "spark"
     SQL = "sqlalchemy"
 
 
+# noinspection SpellCheckingInspection
 class SupportedDatabases(enum.Enum):
     MYSQL = "MySQL"
     POSTGRES = "Postgres"

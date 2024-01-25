@@ -122,6 +122,7 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
     return graph
 
 
+# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ValidationGraph_init_no_input_edges() -> None:
     class DummyExecutionEngine:

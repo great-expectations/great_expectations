@@ -44,6 +44,7 @@ SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
+# noinspection PyPep8Naming
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     """
     Assert that two complex structures have almost equal contents.
@@ -461,6 +462,7 @@ def delete_config_from_filesystem(
     )
 
 
+# noinspection PyPep8Naming
 def get_snowflake_connection_url() -> str:
     """Get snowflake connection url from environment variables.
 

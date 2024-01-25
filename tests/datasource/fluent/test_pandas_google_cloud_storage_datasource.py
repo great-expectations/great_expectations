@@ -140,6 +140,7 @@ def test_construct_pandas_gcs_datasource_without_gcs_options():
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -161,6 +162,7 @@ def test_construct_pandas_gcs_datasource_with_filename_in_gcs_options(
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -182,6 +184,7 @@ def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -205,6 +208,7 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -225,6 +229,7 @@ def test_construct_csv_asset_directly(
     assert m1 is not None
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -250,6 +255,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -275,6 +281,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -300,6 +307,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -407,6 +415,7 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error_message)
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"

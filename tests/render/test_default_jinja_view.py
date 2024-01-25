@@ -21,6 +21,7 @@ from great_expectations.render.view import DefaultJinjaPageView
 pytestmark = pytest.mark.big
 
 
+# noinspection PyPep8Naming
 @pytest.mark.filterwarnings(
     "ignore:Cannot get %*::great_expectations.render.renderer.profiling_results_overview_section_renderer"
 )

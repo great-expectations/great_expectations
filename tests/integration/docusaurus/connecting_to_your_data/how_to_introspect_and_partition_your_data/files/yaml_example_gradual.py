@@ -55,6 +55,7 @@ buggy_data_connector_yaml = """
 """
 # </snippet>
 
+# noinspection PyRedeclaration
 buggy_datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
@@ -100,6 +101,7 @@ another_buggy_data_connector_yaml = """
 """
 # </snippet>
 
+# noinspection PyRedeclaration
 buggy_datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
@@ -240,6 +242,7 @@ available_data_asset_names = context.datasources[
 ]
 assert len(available_data_asset_names) == 1
 
+# noinspection PyRedeclaration
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml add granular group_names">
 configured_data_connector_yaml = """
     configured_data_connector_name:

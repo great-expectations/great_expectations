@@ -6,6 +6,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter_name(
     column_Age_domain,
@@ -24,6 +25,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
         )
 
 
+# noinspection PyPep8Naming
 @pytest.mark.parametrize(
     "domain_name,fully_qualified_parameter_name,value,details,use_value_suffix,value_accessor,test_details,",
     [

@@ -46,6 +46,7 @@ def expected_config_dict():
     return config
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
@@ -79,6 +80,7 @@ def test_instantiation_without_args(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
@@ -118,6 +120,7 @@ def test_instantiation_with_filename_arg(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
@@ -157,6 +160,7 @@ def test_instantiation_with_info_arg(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -198,6 +202,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         )
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -244,6 +249,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
         )
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -301,6 +307,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -387,6 +394,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
     ]
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -437,6 +445,7 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -508,6 +517,7 @@ default_regex:
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -571,6 +581,7 @@ default_regex:
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -646,6 +657,7 @@ default_regex:
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -718,6 +730,7 @@ def test_nested_directory_data_asset_name_in_folder(
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -782,6 +795,7 @@ def test_redundant_information_in_naming_convention_random_hash(
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -845,6 +859,7 @@ def test_redundant_information_in_naming_convention_timestamp(
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -909,6 +924,7 @@ def test_redundant_information_in_naming_convention_bucket(
     }
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1033,6 +1049,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     assert expected == sorted_batch_definition_list
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1091,6 +1108,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
         )
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1152,6 +1170,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
         )
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )

@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+# noinspection SpellCheckingInspection
 @public_api
 class DataConnector:
     """The base class for all Data Connectors.

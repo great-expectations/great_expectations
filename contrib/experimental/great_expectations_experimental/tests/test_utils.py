@@ -1,7 +1,10 @@
 import os
 from typing import List
 
+# noinspection PyUnresolvedReferences
 from great_expectations.data_context.util import file_relative_path
+
+# noinspection PyUnresolvedReferences
 
 # constants used by the sql example
 pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")

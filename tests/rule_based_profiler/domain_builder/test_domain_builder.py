@@ -29,6 +29,7 @@ yaml = YAMLHandler()
 pytestmark = pytest.mark.big
 
 
+# noinspection PyPep8Naming
 @pytest.mark.slow  # 1.15s
 def test_table_domain_builder(
     alice_columnar_table_single_batch_context,

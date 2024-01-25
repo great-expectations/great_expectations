@@ -411,6 +411,7 @@ def test_alice_profiler_user_workflow_single_batch(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.slow  # 1.16s
 @pytest.mark.big
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(

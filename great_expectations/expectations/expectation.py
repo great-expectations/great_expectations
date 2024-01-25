@@ -220,6 +220,7 @@ def param_method(param_name: str) -> Callable:
     return _param_method
 
 
+# noinspection PyMethodParameters
 @dataclass_transform(kw_only_default=True, field_specifiers=(Field,))
 class MetaExpectation(ModelMetaclass):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.

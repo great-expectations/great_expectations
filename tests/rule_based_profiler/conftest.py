@@ -29,6 +29,7 @@ RTOL: float = 1.0e-7
 ATOL: float = 5.0e-2
 
 
+# noinspection PyPep8Naming
 @pytest.fixture
 def table_Users_domain():
     return Domain(
@@ -39,6 +40,7 @@ def table_Users_domain():
     )
 
 
+# noinspection PyPep8Naming
 @pytest.fixture
 def column_Age_domain():
     return Domain(
@@ -51,6 +53,7 @@ def column_Age_domain():
     )
 
 
+# noinspection PyPep8Naming
 @pytest.fixture
 def column_Date_domain():
     return Domain(
@@ -397,6 +400,7 @@ def variables_multi_part_name_parameter_container():
     return variables
 
 
+# noinspection PyPep8Naming
 @pytest.fixture
 def rule_without_variables(
     empty_data_context,
@@ -420,6 +424,7 @@ def rule_without_variables(
     return rule
 
 
+# noinspection PyPep8Naming
 @pytest.fixture
 def rule_state_with_domains_and_parameters(
     rule_without_variables,

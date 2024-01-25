@@ -34,6 +34,7 @@ def run_notebook(
     ep.preprocess(nb, {"metadata": {"path": notebook_dir}})
 
 
+# noinspection PyShadowingNames
 def replace_code_in_notebook(
     nb: NotebookNode,
     string_to_be_replaced: Optional[str] = None,
@@ -99,6 +100,7 @@ def load_notebook_from_path(
     return nb
 
 
+# noinspection PyShadowingNames
 def find_code_in_notebook(
     nb: NotebookNode,
     search_string: str,

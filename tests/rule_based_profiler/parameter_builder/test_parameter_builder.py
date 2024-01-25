@@ -183,6 +183,7 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
     ]
 
 
+# noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
@@ -295,6 +296,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     )
 
 
+# noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
@@ -367,6 +369,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     )
 
 
+# noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
