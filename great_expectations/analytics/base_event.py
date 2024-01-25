@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import ClassVar, List, Optional
 from uuid import UUID
 
@@ -89,6 +89,4 @@ class Event:
         Returns:
             A dict representation of the event specific properties
         """
-        props = asdict(self)
-        props.pop("action")
-        return props
+        return {}
