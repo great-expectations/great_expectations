@@ -13,15 +13,15 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 ## Prerequisites
 
-- You have [GX Cloud Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
-
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
 
 - You have a Snowflake database, schema, and table.
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you have SELECT privileges on the table you are validating. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
 
 - You know your Snowflake password.
+
+- You have stopped all local running instances of the GX Agent.
 
 ## Prepare your Snowflake environment
 
