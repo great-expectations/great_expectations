@@ -3683,13 +3683,14 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    context = CloudDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_base_url=custom_ge_cloud_config.base_url,
-        cloud_access_token=custom_ge_cloud_config.access_token,
-        cloud_organization_id=custom_ge_cloud_config.organization_id,
-    )
+    with mock.patch.object(CloudDataContext, "_init_analytics"):
+        context = CloudDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_base_url=custom_ge_cloud_config.base_url,
+            cloud_access_token=custom_ge_cloud_config.access_token,
+            cloud_organization_id=custom_ge_cloud_config.organization_id,
+        )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url
