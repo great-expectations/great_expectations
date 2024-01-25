@@ -251,6 +251,7 @@ class LinkChecker:
         - Relative links that begin with either . or .. and have a .md suffix
         - Relative images with an image suffix
         - Docroot links that begin with a character (neither . or /) are relative to the doc root (ex: /docs) and have a .md suffix
+        - Absolute file paths for markdown files
 
         Args:
             match: A positive match of a markdown link (ex: [...](...)) or image
