@@ -11,7 +11,6 @@ import LinkCard from '/docs/components/LinkCard';
 <p class="DocItem__header-description">Integrate Great Expectations (GX) with AWS Glue, AWS with S3 and Pandas, AWS with S3 and Spark, AWS with Athena, AWS with Redshift, AWS EMR Serverless, and EMR Spark.</p>
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Use Great Expectations with AWS Glue" description="Set up, initialize and run validations against your data on AWS Glue Spark Job" href="/docs/oss/deployment_patterns/how_to_use_great_expectations_in_aws_glue" icon="/img/integrations/aws_glue_icon.svg" />
   <LinkCard topIcon label="Use GX with an Amazon EMR Spark cluster" description="Instantiate a Data Context on an EMR Spark cluster" href="/docs/oss/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster" icon="/img/integrations/spark_icon.png" />
 <LinkCard topIcon label="Use GX with AWS EMR Serverless" description="Use GX with a serverless Amazon EMR deployment" href="/docs/oss/deployment_patterns/how_to_use_great_expectations_in_emr_serverless" icon="/img/integrations/emr_serverless_icon.png" />
   <LinkCard topIcon label="Use GX with AWS using S3 and Pandas" description="Use GX with AWS and cloud storage" href="/docs/oss/deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas" icon="/img/integrations/pandas_icon.png" />
