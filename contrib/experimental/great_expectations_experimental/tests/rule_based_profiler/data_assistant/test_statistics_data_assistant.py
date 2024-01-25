@@ -167,7 +167,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
                 parameter_value = np.asarray([parameter_node.value])
 
             (
-                ndarray_is_datetime_type,
+                _ndarray_is_datetime_type,
                 parameter_value,
             ) = convert_metric_values_to_float_dtype_best_effort(
                 metric_values=parameter_value
@@ -194,7 +194,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
                 parameter_value = np.asarray([parameter_node.value])
 
             (
-                ndarray_is_datetime_type,
+                _ndarray_is_datetime_type,
                 parameter_value,
             ) = convert_metric_values_to_float_dtype_best_effort(
                 metric_values=parameter_value

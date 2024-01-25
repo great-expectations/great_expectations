@@ -16,6 +16,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
@@ -67,6 +68,8 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
 
+    _TExpectation = TypeVar("_TExpectation", bound=Expectation)
+
 logger = logging.getLogger(__name__)
 
 
@@ -101,6 +104,7 @@ class ExpectationSuite(SerializableDictDot):
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
+        notes: str | list[str] | None = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_name: Optional[
             str
@@ -145,6 +149,7 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self.notes = notes
 
         from great_expectations import project_manager
 
@@ -155,7 +160,7 @@ class ExpectationSuite(SerializableDictDot):
         return self.expectation_suite_name
 
     @public_api
-    def add_expectation(self, expectation: Expectation) -> Expectation:
+    def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
         """Add an Expectation to the collection."""
         if expectation.id:
             raise RuntimeError(
@@ -602,7 +607,8 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
                 if expectation.configuration.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
+                    other=expectation_configuration,  # type: ignore[arg-type]
+                    match_type=match_type,
                 ):
                     match_indexes.append(idx)
 
@@ -1147,6 +1153,7 @@ class ExpectationSuiteSchema(Schema):
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
+    notes = fields.Raw(required=False, allow_none=True)
 
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
@@ -1172,10 +1179,12 @@ class ExpectationSuiteSchema(Schema):
 
             if not data.get("meta"):
                 pass
-            elif data.get("meta") is None or data.get("meta") == []:
-                pass
             elif len(data.get("meta")) == 0:
                 data.pop("meta")
+
+            if "notes" in data and not data.get("notes"):
+                data.pop("notes")
+
         return data
 
     # noinspection PyUnusedLocal

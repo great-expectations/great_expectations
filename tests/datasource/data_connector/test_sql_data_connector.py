@@ -631,7 +631,7 @@ def test_get_batch_data_and_markers_sampling_method__limit(
         sql_alchemy_execution_engine=execution_engine,
     )
 
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -674,7 +674,7 @@ def test_get_batch_data_and_markers_sampling_method__random(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     # noinspection PyUnusedLocal
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    _batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -700,7 +700,7 @@ def test_get_batch_data_and_markers_sampling_method__mod(
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -729,7 +729,7 @@ def test_get_batch_data_and_markers_sampling_method__a_list(
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -763,7 +763,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
         sql_alchemy_execution_engine=execution_engine,
     )
 
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -785,7 +785,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
     )
     assert len(validator.head(fetch_all=True)) == 12
 
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -801,7 +801,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
     )
     assert len(validator.head(fetch_all=True)) == 123
 
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
@@ -869,7 +869,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
@@ -925,7 +925,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)
@@ -980,7 +980,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__mod(
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)
@@ -1032,7 +1032,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__a_list(
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)
@@ -1084,7 +1084,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__a_list(
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)
@@ -1136,7 +1136,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)
@@ -1773,7 +1773,7 @@ def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_w
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)
@@ -1833,7 +1833,7 @@ def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnec
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)
@@ -1896,7 +1896,7 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[1]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data)

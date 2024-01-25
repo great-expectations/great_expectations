@@ -3,7 +3,7 @@
 
 S3_BUCKET = "superconductive-public"
 REGION = "us-east-2"
-FILENAME = "oss_docs_versions_20230615.zip"
+FILENAME = "oss_docs_versions_20240118.zip"
 
 S3_URL = f"https://{S3_BUCKET}.s3.{REGION}.amazonaws.com/{FILENAME}"
 

@@ -150,7 +150,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 )
 
                 (
-                    selectable,
+                    _selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(

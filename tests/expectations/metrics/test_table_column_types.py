@@ -100,7 +100,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
         assert batch_data.selectable.name == "table_partitioned_by_date_column__A"
         assert batch_data.selectable.schema is None
 
-        table_columns_metric, results = get_table_columns_metric(
+        _table_columns_metric, results = get_table_columns_metric(
             execution_engine=engine
         )
 
@@ -114,7 +114,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
 
         assert mock_inspect.call_count == 1
 
-        table_columns_metric, results = get_table_columns_metric(
+        _table_columns_metric, results = get_table_columns_metric(
             execution_engine=engine
         )
 
@@ -142,7 +142,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
         )
         assert batch_data.selectable.schema is None
 
-        table_columns_metric, results = get_table_columns_metric(
+        _table_columns_metric, results = get_table_columns_metric(
             execution_engine=engine
         )
 
@@ -177,7 +177,7 @@ def test_table_column_types__sqlalchemy_table_not_found(sa):
     assert batch_data.selectable.schema is None
 
     with pytest.raises(MetricResolutionError) as exc:
-        table_columns_metric, results = get_table_columns_metric(
+        _table_columns_metric, _results = get_table_columns_metric(
             execution_engine=engine
         )
     assert (
