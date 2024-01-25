@@ -141,6 +141,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    ```bash title="Terminal input"
    docker build -t myorg/agent
    ```
+5. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
 </TabItem>
 <TabItem value="kubernetes">
@@ -188,7 +189,12 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    ```sh
    kubectl apply -f deployment.yaml
    ```
-5. Run the following command to terminate running resources gracefully:
+5. Optional. Run the following command to confirm the agent is running:
+
+   ```sh
+   kubectl logs -l app=gx-agent
+   ```
+6. Run the following command to terminate running resources gracefully:
 
    ```sh
    kubectl delete -f deployment.yaml
