@@ -128,7 +128,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    -e GX_CLOUD_ORGANIZATION_ID= YOUR_ORGANIZATION_ID \  
    greatexpectations/agent:latest
     ```
-    Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously. To store your Snowflake password as an environment variable, add `-e GX_CLOUD_SNOWFLAKE_PW= YOUR_SNOWFLAKE_PASSWORD \` to the Docker command.
+    Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously. To optionally store your Snowflake password as an environment variable, add `-e GX_CLOUD_SNOWFLAKE_PW= YOUR_SNOWFLAKE_PASSWORD \` to the Docker command.
 
 3. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
 
@@ -136,7 +136,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    FROM greatexpectations/agent
    RUN echo "custom_commands"
    ```
-4. Run the following command to rebuild the Docker image:
+4. Optional. Run the following command to rebuild the Docker image:
 
    ```bash title="Terminal input"
    docker build -t myorg/agent
@@ -154,7 +154,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    --from-literal=GX_CLOUD_ORGANIZATION_ID=YOUR_ORGANIZATION_ID \
    --from-literal=GX_CLOUD_ACCESS_TOKEN=YOUR_ACCESS_TOKEN \
    ```
-    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously. To include your Snowflake password as an access credential, add `--from-literal=GX_CLOUD_SNOWFLAKE_PW=YOUR_SNOWFLAKE_PASSWORD` to the command.
+    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously. To optionally include your Snowflake password as an access credential, add `--from-literal=GX_CLOUD_SNOWFLAKE_PW=YOUR_SNOWFLAKE_PASSWORD` to the command.
 
 
 3. Create and save a file named `deployment.yaml`, with the following configuration:
