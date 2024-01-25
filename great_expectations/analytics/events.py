@@ -47,8 +47,8 @@ class ExpectationSuiteExpectationCreatedEvent(_ExpectationSuiteExpectationEvent)
     TBD
     """
 
-    expectation_type: str = ("UNKNOWN",)
-    custom_exp_type: bool = (False,)
+    expectation_type: str = "UNKNOWN"
+    custom_exp_type: bool = False
 
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_CREATED,

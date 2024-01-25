@@ -36,7 +36,7 @@ class Event:
         return get_config().data_context_id
 
     @property
-    def organization_id(self) -> UUID:
+    def organization_id(self) -> UUID | None:
         return get_config().organization_id
 
     @property
@@ -44,8 +44,16 @@ class Event:
         return get_config().oss_id
 
     @property
-    def user_id(self) -> UUID:
+    def user_id(self) -> UUID | None:
         return get_config().user_id
+
+    @property
+    def distinct_id(self) -> UUID:
+        """The distinct_id is the primary key for identifying
+        anlaytics events. It is the user_id if it is set
+        (e.g. in a Cloud context), otherwise the oss_id.
+        """
+        return self.user_id or self.oss_id
 
     _allowed_actions: ClassVar[Optional[List[Action]]] = None
 
@@ -82,6 +90,5 @@ class Event:
             A dict representation of the event specific properties
         """
         props = asdict(self)
-        print(props)
         props.pop("action")
         return props
