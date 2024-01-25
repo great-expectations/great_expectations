@@ -94,6 +94,7 @@
     transform: unset;
     width: calc(100% + 2rem);
   }
+
   .gxCard__inner_container {
     gap: 1rem;
     grid-template-areas: "title" "description" "image" "buttons";
