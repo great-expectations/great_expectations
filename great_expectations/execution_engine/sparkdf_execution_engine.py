@@ -337,7 +337,6 @@ illegal.  Please check your config."""
                     schema: your_schema.jsonValue()
                     """
                 )
-            # noinspection PyUnresolvedReferences
             try:
                 if schema:
                     reader = self.spark.read.schema(schema).options(**reader_options)
@@ -544,9 +543,7 @@ illegal.  Please check your config."""
             and "column_B" in domain_kwargs
             and "ignore_row_if" in domain_kwargs
         ):
-            # noinspection PyPep8Naming
             column_A_name = domain_kwargs["column_A"]
-            # noinspection PyPep8Naming
             column_B_name = domain_kwargs["column_B"]
 
             ignore_row_if = domain_kwargs["ignore_row_if"]

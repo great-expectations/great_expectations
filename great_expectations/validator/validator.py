@@ -178,7 +178,6 @@ class Validator:
     }
     RUNTIME_KEYS = DEFAULT_RUNTIME_CONFIGURATION.keys()
 
-    # noinspection PyUnusedLocal
     def __init__(  # noqa: PLR0913
         self,
         execution_engine: ExecutionEngine,
@@ -1339,7 +1338,6 @@ class Validator:
         run_time: Optional[str] = None,
         checkpoint_name: Optional[str] = None,
     ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
-        # noinspection SpellCheckingInspection
         """Run all expectations and return the outcome of the run.
 
         Args:
@@ -1363,7 +1361,6 @@ class Validator:
             ValidationError: If `expectation_suite` is a string, the file it points to must be valid JSON.
 
         """
-        # noinspection PyUnusedLocal
         try:
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -1460,7 +1457,6 @@ class Validator:
                 ):
                     column = expectation.kwargs["column"]
                 else:
-                    # noinspection SpellCheckingInspection
                     column = "_nocolumn"
                 if column not in columns:
                     columns[column] = []
@@ -1609,7 +1605,6 @@ class Validator:
             more information.
         """
 
-        # noinspection SpellCheckingInspection
         argspec = inspect.getfullargspec(function)[0][1:]
 
         new_function = self.expectation(argspec)(function)

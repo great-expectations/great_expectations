@@ -118,7 +118,6 @@ def test_prescriptive_renderer_no_decorator(
         runtime_configuration_with_eval,
     ) = expectation_and_runtime_configuration_with_evaluation_parameters
 
-    # noinspection PyShadowingNames
     def bare_bones_prescriptive_renderer(
         configuration=None,
         runtime_configuration=None,
@@ -187,7 +186,6 @@ def test_prescriptive_renderer_with_decorator(
         runtime_configuration_with_eval,
     ) = expectation_and_runtime_configuration_with_evaluation_parameters
 
-    # noinspection PyShadowingNames
     @render_evaluation_parameter_string
     def bare_bones_prescriptive_renderer(
         configuration=None,
@@ -286,14 +284,12 @@ def test_prescriptive_renderer_with_decorator(
 
     # with no runtime_configuration, throw an error
     with pytest.raises(GreatExpectationsError):
-        # noinspection PyUnusedLocal
         res = bare_bones_prescriptive_renderer(
             configuration=configuration, runtime_configuration={}
         )
 
     # configuration should always be of ExpectationConfiguration-type
     with pytest.raises(AttributeError):
-        # noinspection PyUnusedLocal,PyTypeChecker
         res = bare_bones_prescriptive_renderer(
             configuration={}, runtime_configuration={}
         )

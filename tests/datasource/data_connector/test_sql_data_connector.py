@@ -193,7 +193,6 @@ def test_get_batch_definition_list_from_batch_request(
     assert len(batch_definition_list) == 34
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
@@ -202,13 +201,11 @@ def test_get_batch_definition_list_from_batch_request(
         )
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME")
         )
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest()
         )
@@ -673,7 +670,6 @@ def test_get_batch_data_and_markers_sampling_method__random(
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    # noinspection PyUnusedLocal
     _batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {

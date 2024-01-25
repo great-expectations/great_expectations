@@ -30,7 +30,6 @@ def test_basic_instantiation(glue_titanic_catalog):
     )
     my_data_connector = InferredAssetAWSGlueDataCatalogDataConnector(**config)
 
-    # noinspection PyProtectedMember
     asset_names = my_data_connector.get_available_data_asset_names()
 
     assert len(asset_names) == 2

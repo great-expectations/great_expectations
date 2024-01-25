@@ -170,7 +170,6 @@ def test_return_all_batch_definitions_unsorted():
     )
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list()
 
     # with empty options
@@ -367,7 +366,6 @@ def test_return_all_batch_definitions_unsorted():
 #         prefix="",
 #         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
 #     )
-#     # noinspection PyProtectedMember
 #     my_data_connector._get_data_references_cache()
 #
 #     assert my_data_connector.get_data_reference_count() == 3
@@ -881,7 +879,6 @@ def test_foxtrot():
 #     """,
 #     )
 #     with pytest.raises(gx_exceptions.DataConnectorError):
-#         # noinspection PyUnusedLocal
 #         my_data_connector: S3DataConnector = (
 #             instantiate_class_from_config(
 #                 config=my_data_connector_yaml,

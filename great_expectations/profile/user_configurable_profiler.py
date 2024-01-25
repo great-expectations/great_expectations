@@ -236,7 +236,6 @@ class UserConfigurableProfiler:
         expectation_suite: ExpectationSuite
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:  # type: ignore[union-attr]
             # Only `Validator`` has `get_expectation_suite()`
-            # noinspection PyProtectedMember
             suite_name: str = (
                 self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]
             )
@@ -1041,7 +1040,6 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
 
         return profile_dataset
 
-    # noinspection PyUnusedLocal
     def _build_expectations_string(self, profile_dataset, column):
         """
         Adds a set of string expectations for a given column. Currently does not do anything.
@@ -1191,7 +1189,6 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
                     column, min_value=pct_unique, max_value=pct_unique
                 )
             else:
-                # noinspection PyProtectedMember
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",

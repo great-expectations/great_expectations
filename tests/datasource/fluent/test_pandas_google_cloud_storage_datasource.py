@@ -46,7 +46,6 @@ pytestmark = [
 
 
 class MockGCSClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def list_blobs(
         self,
         bucket_or_name,

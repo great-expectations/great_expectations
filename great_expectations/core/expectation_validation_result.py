@@ -422,7 +422,6 @@ class ExpectationValidationResultSchema(Schema):
         )
     )
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
         data = deepcopy(data)
@@ -448,7 +447,6 @@ class ExpectationValidationResultSchema(Schema):
                 data.pop(key)
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_validation_result(self, data, **kwargs):
         return ExpectationValidationResult(**data)
@@ -685,7 +683,6 @@ class ExpectationSuiteValidationResultSchema(Schema):
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     checkpoint_name = fields.String(required=False, allow_none=True)
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
@@ -709,7 +706,6 @@ class ExpectationSuiteValidationResultSchema(Schema):
             data[attr] = str(uuid_val)
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite_validation_result(self, data, **kwargs):
         data = self._convert_uuids_to_str(data=data)

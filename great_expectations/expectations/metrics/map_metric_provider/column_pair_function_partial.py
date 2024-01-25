@@ -95,9 +95,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
                 values = metric_fn(
@@ -157,9 +155,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
                 column_pair_function = metric_fn(
@@ -219,9 +215,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
                 column_pair_function = metric_fn(

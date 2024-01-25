@@ -317,7 +317,6 @@ class FilePathDataConnector(DataConnector):
             )
 
         data_reference_mapped_element: Tuple[str, Union[List[BatchDefinition], None]]
-        # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
                 filter(
@@ -470,7 +469,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _convert_data_reference_string_to_batch_identifiers_using_regex(
         self, data_reference: str
     ) -> Optional[IDDict]:
-        # noinspection PyUnresolvedReferences
         matches: Optional[re.Match] = self._regex_parser.get_matches(
             target=data_reference
         )

@@ -390,7 +390,6 @@ class ExpectationConfiguration(SerializableDictDot):
             == other_expectation_configuration.get_domain_kwargs()
         )
 
-    # noinspection PyPep8Naming
     def isEquivalentTo(
         self,
         other: Union[dict, ExpectationConfiguration],
@@ -400,7 +399,6 @@ class ExpectationConfiguration(SerializableDictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    # noinspection PyNoneFunctionAssignment
                     other = expectationConfigurationSchema.load(other)
                 except ValidationError:
                     logger.debug(
@@ -641,7 +639,6 @@ class ExpectationConfigurationSchema(Schema):
             data[attr] = str(uuid_val)
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_configuration(self, data: dict, **kwargs):
         data = self._convert_uuids_to_str(data=data)

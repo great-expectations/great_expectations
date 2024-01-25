@@ -127,7 +127,6 @@ def test_add_csv_asset_to_datasource(pandas_dbfs_datasource: PandasDBFSDatasourc
 
 @pytest.mark.filesystem
 def test_construct_csv_asset_directly():
-    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",

@@ -209,7 +209,6 @@ class RuntimeDataConnector(DataConnector):
         sorted_available_assets: List[str] = sorted(available_assets)
         return sorted_available_assets
 
-    # noinspection PyMethodOverriding
     @override
     def get_batch_data_and_metadata(  # type: ignore[override]
         self,
@@ -318,7 +317,6 @@ class RuntimeDataConnector(DataConnector):
         return {"data_asset_name": data_asset_name}
 
     # This method is currently called called only in tests.
-    # noinspection PyMethodOverriding
     @override
     def build_batch_spec(  # type: ignore[return,override]
         self,

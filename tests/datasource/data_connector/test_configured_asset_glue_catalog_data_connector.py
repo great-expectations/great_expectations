@@ -87,7 +87,6 @@ def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
     }
-    # noinspection PyProtectedMember
     assert len(my_data_connector.get_available_data_asset_names()) == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -161,7 +160,6 @@ def test_basic_instantiation(glue_titanic_catalog):
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
     }
-    # noinspection PyProtectedMember
     assert len(my_data_connector.get_available_data_asset_names()) == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
@@ -430,7 +428,6 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
     assert batch_definition_list[0]["batch_identifiers"] == {}
 
     with pytest.raises(KeyError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
@@ -440,7 +437,6 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
         )
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
@@ -449,13 +445,11 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
         )
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME")
         )
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest()
         )
@@ -463,7 +457,6 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
 
 @mock_glue
 def test_instantiation_with_minimal_options():
-    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -515,7 +508,6 @@ def test_instantiation_with_batch_spec_passthrough(
 
 
 def test_instantiation_with_asset_suffix_and_prefix(glue_titanic_catalog):
-    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -536,7 +528,6 @@ def test_instantiation_with_asset_suffix_and_prefix(glue_titanic_catalog):
 def test_instantiation_with_splitter_sampling_and_prefix(
     splitter_method_name_prefix, glue_titanic_catalog
 ):
-    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -628,7 +619,6 @@ def test_build_batch_spec_with_all_options(
 
 
 def test_build_batch_spec_with_minimal_options(glue_titanic_catalog):
-    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -654,7 +644,6 @@ def test_build_batch_spec_with_minimal_options(glue_titanic_catalog):
 
 
 def test_get_unmatched_data_references(glue_titanic_catalog):
-    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -671,7 +660,6 @@ def test_get_unmatched_data_references(glue_titanic_catalog):
 
 
 def test_get_available_data_asset_names(glue_titanic_catalog):
-    # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",

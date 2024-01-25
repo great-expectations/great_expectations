@@ -85,7 +85,6 @@ def test_basic_instantiation():
         # "example_data_reference": {},
     }
 
-    # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
@@ -331,7 +330,6 @@ def test_return_all_batch_definitions_unsorted():
     )
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
@@ -937,7 +935,6 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
     """,
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetS3DataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
@@ -1006,7 +1003,6 @@ def test_return_all_batch_definitions_too_many_sorters():
     """,
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetS3DataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
@@ -1081,7 +1077,6 @@ assets:
             "execution_engine": PandasExecutionEngine(),
         },
     )
-    # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0

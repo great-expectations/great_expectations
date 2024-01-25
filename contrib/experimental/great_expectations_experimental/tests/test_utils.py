@@ -54,7 +54,6 @@ def load_data_into_postgres_database(sa):
     connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    # noinspection SqlDialectInspection,SqlNoDataSourceInspection
     connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
     for data_path in data_paths:
         load_data_into_test_database(
@@ -91,7 +90,6 @@ def load_data_into_postgres_database(sa):
     connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    # noinspection SqlDialectInspection,SqlNoDataSourceInspection
     connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
     for data_path in data_paths:
         load_data_into_test_database(

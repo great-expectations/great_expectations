@@ -20,7 +20,6 @@ def test_semantic_domain_consistency():
     domain: Domain
 
     with pytest.raises(ValueError) as excinfo:
-        # noinspection PyUnusedLocal
         Domain(
             domain_type="column",
             domain_kwargs={"column": "passenger_count"},
@@ -205,7 +204,6 @@ def test_semantic_domain_equivalence():
     )
 
     with pytest.raises(ValueError) as excinfo:
-        # noinspection PyUnusedLocal
         domain_d.to_json_dict()
 
     assert (
@@ -227,7 +225,6 @@ def test_semantic_domain_equivalence():
     )
 
     with pytest.raises(ValueError) as excinfo:
-        # noinspection PyUnusedLocal
         domain_e.to_json_dict()
 
     assert (

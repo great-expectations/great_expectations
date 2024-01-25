@@ -84,7 +84,6 @@ class RegExParser:
         }
 
         element: Tuple[int, str]
-        # noinspection PyTypeChecker
         all_group_index_to_group_name_mapping = dict(
             sorted(
                 all_group_index_to_group_name_mapping.items(),

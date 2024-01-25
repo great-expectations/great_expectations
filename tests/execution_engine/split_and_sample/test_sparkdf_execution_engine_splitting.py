@@ -355,9 +355,7 @@ def test_get_batch_with_split_on_whole_table_filesystem(
 def test_get_batch_with_split_on_whole_table_s3(
     spark_session, basic_spark_df_execution_engine
 ):
-    # noinspection PyUnusedLocal
     def mocked_get_reader_function(*args, **kwargs):
-        # noinspection PyUnusedLocal,PyShadowingNames
         def mocked_reader_function(*args, **kwargs):
             pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
             df = spark_session.createDataFrame(
@@ -392,9 +390,7 @@ def test_get_batch_with_split_on_whole_table_s3(
 def test_get_batch_with_split_on_whole_table_azure(
     spark_session, basic_spark_df_execution_engine
 ):
-    # noinspection PyUnusedLocal
     def mocked_get_reader_function(*args, **kwargs):
-        # noinspection PyUnusedLocal,PyShadowingNames
         def mocked_reader_function(*args, **kwargs):
             pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
             df = spark_session.createDataFrame(
@@ -429,9 +425,7 @@ def test_get_batch_with_split_on_whole_table_azure(
 def test_get_batch_with_split_on_whole_table_gcs(
     spark_session, basic_spark_df_execution_engine
 ):
-    # noinspection PyUnusedLocal
     def mocked_get_reader_function(*args, **kwargs):
-        # noinspection PyUnusedLocal,PyShadowingNames
         def mocked_reader_function(*args, **kwargs):
             pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
             df = spark_session.createDataFrame(
@@ -582,7 +576,6 @@ def test_get_batch_with_split_on_multi_column_values(
         assert val.date == datetime.date(2020, 1, 5)
 
     with pytest.raises(ValueError):
-        # noinspection PyUnusedLocal
         split_df = basic_spark_df_execution_engine.get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,
@@ -604,7 +597,6 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
     basic_spark_df_execution_engine,
 ):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
         _ = basic_spark_df_execution_engine.get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,

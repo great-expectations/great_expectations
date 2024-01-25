@@ -262,7 +262,6 @@ class ValidationGraph:
                 disable = True
 
             if progress_bar is None:
-                # noinspection PyProtectedMember,SpellCheckingInspection
                 progress_bar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
@@ -419,7 +418,6 @@ class ExpectationValidationGraph:
         metric_id: _MetricKey
         metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
         for metric_id, metric_info_item in metric_info.items():  # type: ignore[assignment]  # Incorrect flagging of 'Incompatible types in assignment (expression has type "Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]", variable has type "Union[MetricConfiguration, Set[ExceptionInfo], int]")' in deep "Union" structure.
-            # noinspection PyUnresolvedReferences
             metric_exception_info.update(
                 cast(Set[ExceptionInfo], metric_info_item["exception_info"])  # type: ignore[index]  # Incorrect flagging of 'Value of type "Union[MetricConfiguration, Set[ExceptionInfo], int]" is not indexable' in deep "Union" structure.
             )

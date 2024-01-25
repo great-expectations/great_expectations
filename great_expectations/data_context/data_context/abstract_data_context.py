@@ -2277,7 +2277,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             include_rendered_content=include_rendered_content,
         )
 
-    # noinspection PyUnusedLocal
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,

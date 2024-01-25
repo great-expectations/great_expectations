@@ -76,7 +76,6 @@ def test_meta_not_dict_exception(
     max_user_id: int = 999999999999
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
-        # noinspection PyTypeChecker
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
             condition=condition,
@@ -142,7 +141,6 @@ def test_condition_not_string_exception(
     max_user_id: int = 999999999999
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
-        # noinspection PyTypeChecker
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
             condition=condition,

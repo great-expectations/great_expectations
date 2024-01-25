@@ -51,7 +51,6 @@ class ExpectationSuiteIdentifier(DataContextKey):
 class ExpectationSuiteIdentifierSchema(Schema):
     expectation_suite_name = fields.Str()
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite_identifier(self, data, **kwargs):
         return ExpectationSuiteIdentifier(**data)
@@ -92,7 +91,6 @@ class BatchIdentifierSchema(Schema):
     batch_identifier = fields.Str()
     data_asset_name = fields.Str()
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_batch_identifier(self, data, **kwargs):
         return BatchIdentifier(**data)
@@ -414,7 +412,6 @@ class ValidationResultIdentifierSchema(Schema):
     )
     batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_validation_result_identifier(self, data, **kwargs):
         return ValidationResultIdentifier(**data)
@@ -516,7 +513,6 @@ class ConfigurationIdentifier(DataContextKey):
 class ConfigurationIdentifierSchema(Schema):
     configuration_key = fields.Str()
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_configuration_identifier(self, data, **kwargs):
         return ConfigurationIdentifier(**data)

@@ -146,7 +146,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         "anonymized_name"
     ]
 
-    # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
@@ -159,7 +158,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
             },
         ),
     ]
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
 
@@ -339,12 +337,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     mock_create_quarantine_data = mock.MagicMock()
     mock_create_quarantine_data.run.return_value = True
-    # noinspection PyUnresolvedReferences
     gx.validation_operators.CreateQuarantineData = mock_create_quarantine_data
 
     mock_create_passed_data = mock.MagicMock()
     mock_create_passed_data.run.return_value = True
-    # noinspection PyUnresolvedReferences
     gx.validation_operators.CreatePassedData = mock_create_passed_data
 
     expected_checkpoint_config: dict = {
@@ -1118,7 +1114,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
-    # noinspection PyUnusedLocal
     result = checkpoint.run(
         validations=[
             {"batch_request": batch_request_0},
@@ -1133,7 +1128,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert mock_emit.call_count == 13
 
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
 
     # Since there are two validations, confirming there should be two "data_asset.validate" events

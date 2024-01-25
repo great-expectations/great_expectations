@@ -83,7 +83,6 @@ SELECT EXISTS (
 )
 def test_config_with_yaml_error(mock_emit, caplog, empty_data_context_stats_enabled):
     with pytest.raises(MarkedYAMLError):
-        # noinspection PyUnusedLocal
         empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
@@ -124,7 +123,6 @@ def test_expectations_store_with_filesystem_store_backend(
     with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:  # noqa: PTH118
         f_.write("\n")
 
-    # noinspection PyUnusedLocal
     empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store
@@ -719,7 +717,6 @@ def test_golden_path_sql_datasource_configuration(
             sampling_kwargs:
                 n: 10
     """
-        # noinspection PyUnusedLocal
         report_object = context.test_yaml_config(
             name="my_datasource",
             yaml_config=yaml_config,
@@ -867,7 +864,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
                     - number
     """
 
-        # noinspection PyUnusedLocal
         context.test_yaml_config(
             name="my_directory_datasource",
             yaml_config=yaml_config,
@@ -1081,7 +1077,6 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
                         - checksum
     """
 
-        # noinspection PyUnusedLocal
         context.test_yaml_config(
             name="my_directory_datasource",
             yaml_config=yaml_config,
@@ -1254,7 +1249,6 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
                        - default_identifier_name
            """
 
-        # noinspection PyUnusedLocal
         report_object = context.test_yaml_config(
             name="my_directory_datasource",
             yaml_config=yaml_config,
@@ -1367,7 +1361,6 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
                         - number
         """
 
-        # noinspection PyUnusedLocal
         report_object = context.test_yaml_config(
             name="my_directory_datasource",
             yaml_config=yaml_config,

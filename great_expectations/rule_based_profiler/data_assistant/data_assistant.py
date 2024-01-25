@@ -82,7 +82,6 @@ class MetaDataAssistant(ABCMeta):
         """
         newclass = super().__new__(cls, clsname, bases, attrs)
 
-        # noinspection PyUnresolvedReferences
         if not newclass.is_abstract():
             # Only particular "DataAssistant" implementations must be registered.
             newclass.data_assistant_type = camel_to_snake(name=clsname)
@@ -93,7 +92,6 @@ class MetaDataAssistant(ABCMeta):
                     DataAssistantDispatcher,
                 )
 
-                # noinspection PyTypeChecker
                 DataAssistantDispatcher._register(name=alias, data_assistant=newclass)
 
         return newclass
@@ -641,7 +639,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         pass
 
-    # noinspection PyShadowingNames
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
@@ -654,7 +651,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         domain_key: Domain
 
-        # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = dict(
@@ -688,7 +684,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_metrics_parameter_names: List[str]
 
-        # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain = {
             domain: dict(
                 filter(

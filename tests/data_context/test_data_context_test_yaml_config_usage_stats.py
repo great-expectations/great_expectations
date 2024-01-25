@@ -138,7 +138,6 @@ def test_test_yaml_config_usage_stats_class_name_not_provided(
     If a class_name is not provided, and we have run into an error state in test_yaml_config() (likely because of the missing class_name) then we should report descriptive diagnostic info.
     """
     with pytest.raises((MarkedYAMLError, KeyError)):
-        # noinspection PyUnusedLocal
         empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store

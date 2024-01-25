@@ -630,7 +630,6 @@ specified (empty "metric_name" value detected)."""
 
         metric_values_by_batch_id: Dict[str, MetricValue] = {}
 
-        # noinspection PyTypeChecker
         conditioned_attributed_metric_values: Dict[str, MetricValues] = dict(
             filter(
                 lambda element: element[1] is not None,
@@ -722,7 +721,6 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(
 
         Returns sorted dict of candidate as key and ratio as value
         """
-        # noinspection PyTypeChecker
         return dict(
             sorted(
                 candidate_ratio_dict.items(),

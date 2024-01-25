@@ -259,7 +259,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # 'svv_external_tables'.
         try:
             if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
-                # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 result = self.execution_engine.execute_query(
                     sa.text("select schemaname, tablename from svv_external_tables")
                 ).fetchall()

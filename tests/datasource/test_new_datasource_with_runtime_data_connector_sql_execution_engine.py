@@ -198,7 +198,6 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
@@ -226,7 +225,6 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(

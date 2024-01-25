@@ -121,7 +121,6 @@ def test_batch_data_sparkdf_execution_engine_unknown_datasource(
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
         # Test for an unknown datasource
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
@@ -146,7 +145,6 @@ def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
         # Test for an unknown data_connector
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
@@ -246,7 +244,6 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
@@ -278,7 +275,6 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(

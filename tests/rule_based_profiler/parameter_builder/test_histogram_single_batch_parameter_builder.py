@@ -141,7 +141,6 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
     ):
         with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
             variables: Optional[ParameterContainer] = None
-            # noinspection PyUnusedLocal
             parameter_builder.build_parameters(
                 domain=domain,
                 variables=variables,
@@ -269,7 +268,6 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
 
     variables: Optional[ParameterContainer] = None
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
-        # noinspection PyUnusedLocal
         parameter_builder.build_parameters(
             domain=domain,
             variables=variables,

@@ -115,7 +115,6 @@ def test_add_csv_asset_to_datasource(spark_dbfs_datasource: SparkDBFSDatasource)
 
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
-    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",

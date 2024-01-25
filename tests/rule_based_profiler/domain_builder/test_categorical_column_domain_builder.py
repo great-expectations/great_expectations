@@ -219,7 +219,6 @@ def test_unsupported_cardinality_limit_from_string(
     }
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
         CategoricalColumnDomainBuilder(
             cardinality_limit_mode="&*#$&INVALID&*#$*&",
             data_context=data_context,
@@ -243,7 +242,6 @@ def test_unsupported_cardinality_limit_from_dictionary(
     )
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
         CategoricalColumnDomainBuilder(
             cardinality_limit_mode={
                 "name": "&*#$&INVALID&*#$*&",
@@ -271,7 +269,6 @@ def test_unspecified_cardinality_limit(
     }
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
         _: List[Domain] = CategoricalColumnDomainBuilder(
             data_context=data_context
         ).get_domains(rule_name="my_rule", batch_request=batch_request)

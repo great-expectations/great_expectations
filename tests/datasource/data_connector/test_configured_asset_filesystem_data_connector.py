@@ -72,7 +72,6 @@ def test_basic_instantiation(tmp_path_factory):
         # "example_data_reference": {},
     }
 
-    # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
@@ -308,7 +307,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     )
 
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
@@ -1160,7 +1158,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     """,
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
@@ -1221,7 +1218,6 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
     """,
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
@@ -1287,7 +1283,6 @@ assets:
             "execution_engine": PandasExecutionEngine(),
         },
     )
-    # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
@@ -1602,7 +1597,6 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     assert my_data_connector.get_data_reference_count() == 0
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
-    # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
@@ -1614,7 +1608,6 @@ def test_basic_instantiation_with_empty_datasource(tmp_path_factory):
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )
 
-    # noinspection PyUnusedLocal
     my_data_connector = ConfiguredAssetFilesystemDataConnector(  # noqa: F841
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE",

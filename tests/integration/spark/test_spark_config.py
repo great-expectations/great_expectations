@@ -42,7 +42,6 @@ def test_spark_config_datasource(spark_session_v012):
         spark_config=spark_config, force_reuse_spark_context=False
     )
     spark_session: pyspark.SparkSession = source.spark
-    # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
 
@@ -65,7 +64,6 @@ def test_spark_config_execution_engine(spark_session):
     execution_engine = SparkDFExecutionEngine(spark_config=new_spark_config)
     new_spark_session: pyspark.SparkSession = execution_engine.spark
 
-    # noinspection PyProtectedMember
     sc_stopped: bool = new_spark_session.sparkContext._jsc.sc().isStopped()
 
     assert not sc_stopped

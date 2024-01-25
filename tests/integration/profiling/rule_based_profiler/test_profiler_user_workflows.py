@@ -290,7 +290,6 @@ def test_alice_profiler_user_workflow_single_batch(
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {
@@ -472,7 +471,6 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     )
     assert metric_value == 9000
 
-    # noinspection PyUnresolvedReferences
     pickup_datetime: datetime.datetime = pd.to_datetime(
         validator_latest.head(n_rows=1)["pickup_datetime"][0]
     ).to_pydatetime()
@@ -640,7 +638,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {
@@ -882,7 +879,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {
@@ -1033,7 +1029,6 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {

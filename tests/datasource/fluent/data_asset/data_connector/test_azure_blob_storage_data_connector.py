@@ -35,7 +35,6 @@ class MockContainerClient:
 
 
 class MockBlobServiceClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def get_container_client(self, container: str) -> azure.ContainerClient:
         return cast(azure.ContainerClient, MockContainerClient())
 
@@ -153,7 +152,6 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
     )
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list()
 
     # with empty options
@@ -346,7 +344,6 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #     )
 #     # with missing BatchRequest arguments
 #     with pytest.raises(TypeError):
-#         # noinspection PyArgumentList
 #         my_data_connector.get_batch_definition_list()
 #
 #     # with empty options

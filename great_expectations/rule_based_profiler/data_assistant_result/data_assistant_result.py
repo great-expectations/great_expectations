@@ -4084,7 +4084,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _determine_attributed_metrics_by_domain_type(
         self, metric_domain_type: MetricDomainTypes
     ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
-        # noinspection PyTypeChecker
         attributed_metrics_by_domain: Dict[
             Domain, Dict[str, List[ParameterNode]]
         ] = dict(

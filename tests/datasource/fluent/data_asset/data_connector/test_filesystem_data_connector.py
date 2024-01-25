@@ -56,7 +56,6 @@ def test_basic_instantiation(tmp_path_factory):
 
     # Missing "data_asset_name" argument.
     with pytest.raises(pydantic.ValidationError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="something",
@@ -136,7 +135,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     )
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list()
 
     # with empty options
@@ -896,7 +894,6 @@ def test_relative_base_directory_path(tmp_path_factory):
 #     """,
 #     )
 #     with pytest.raises(gx_exceptions.DataConnectorError):
-#         # noinspection PyUnusedLocal
 #         my_data_connector: FilesystemDataConnector = (
 #             instantiate_class_from_config(
 #                 config=my_data_connector_yaml,

@@ -958,7 +958,6 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
 
     # Ensuring errors for column and column_ pair domains are caught
     with pytest.raises(gx_exceptions.GreatExpectationsError):
-        # noinspection PyUnusedLocal
         data, _compute_kwargs, _accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
@@ -967,7 +966,6 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
             domain_type="column",
         )
     with pytest.raises(gx_exceptions.GreatExpectationsError):
-        # noinspection PyUnusedLocal
         data, _compute_kwargs, _accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
@@ -1043,7 +1041,6 @@ def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
 
     # Expect GreatExpectationsError because parser doesn't exist
     with pytest.raises(gx_exceptions.GreatExpectationsError):
-        # noinspection PyUnusedLocal
         engine.get_domain_records(
             domain_kwargs={
                 "row_condition": "b > 24",
@@ -1085,7 +1082,6 @@ def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
 
     # Ensuring a metric provider error is raised if metric does not exist
     with pytest.raises(gx_exceptions.MetricProviderError) as e:
-        # noinspection PyUnusedLocal
         engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,

@@ -70,7 +70,6 @@ class Anonymizer(BaseAnonymizer):
             StoreBackendAnonymizer,
         ]
 
-        # noinspection PyArgumentList
         self._anonymizers: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {
             strategy: strategy(salt=self._salt, aggregate_anonymizer=self)  # type: ignore[call-arg] # BaseAnonymizer has no kwarg `aggregate_anonymizer`
             for strategy in self._strategies

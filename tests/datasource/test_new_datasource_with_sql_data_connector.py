@@ -62,7 +62,6 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     context: FileDataContext = empty_data_context
 
     sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
-    # noinspection PyUnusedLocal
     conn: sa.engine.base.Connection = sqlite_engine.connect()  # noqa: F841
     datasource_config: str = f"""
         class_name: Datasource
@@ -98,7 +97,6 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     """
 
     try:
-        # noinspection PyUnusedLocal
         my_sql_datasource: Optional[  # noqa: F841
             Union[SimpleSqlalchemyDatasource, LegacyDatasource]
         ] = context.add_datasource(
@@ -840,7 +838,6 @@ introspection:
     }
 
     with pytest.raises(gx_exceptions.DatasourceInitializationError):
-        # noinspection PyUnusedLocal
         my_sql_datasource = context.test_yaml_config(
             f"""
 class_name: SimpleSqlalchemyDatasource

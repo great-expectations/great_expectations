@@ -25,7 +25,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
     )
     condition_value_keys = ("or_equal",)
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         temp_column_A = column_A
@@ -37,7 +36,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         else:
             return temp_column_A > temp_column_B
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
         or_equal: bool = kwargs.get("or_equal") or False
@@ -49,7 +47,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         else:
             return column_A > column_B
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, **kwargs):
         temp_column_A = column_A

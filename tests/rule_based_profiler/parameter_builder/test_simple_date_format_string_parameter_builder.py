@@ -120,7 +120,6 @@ def test_simple_date_format_parameter_builder_alice(
         runtime_configuration=None,
     )
 
-    # noinspection PyTypeChecker
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_date_format"

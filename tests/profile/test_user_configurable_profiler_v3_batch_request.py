@@ -107,7 +107,6 @@ def get_sqlalchemy_runtime_validator_postgresql(
     table_name=None,
 ):
     sa_engine_name = "postgresql"
-    # noinspection PyUnresolvedReferences
     try:
         engine = postgresql_engine
     except (sqlalchemy.OperationalError, ModuleNotFoundError):
@@ -343,12 +342,10 @@ def test__validate_config(cardinality_validator):
     """
 
     with pytest.raises(AssertionError) as e:
-        # noinspection PyTypeChecker
         UserConfigurableProfiler(cardinality_validator, ignored_columns="col_name")
     assert e.typename == "AssertionError"
 
     with pytest.raises(AssertionError) as e:
-        # noinspection PyTypeChecker
         UserConfigurableProfiler(cardinality_validator, table_expectations_only="True")
     assert e.typename == "AssertionError"
 
@@ -363,7 +360,6 @@ def test__validate_semantic_types_dict(cardinality_validator):
 
     bad_semantic_types_dict_type = {"value_set": "col_few"}
     with pytest.raises(AssertionError) as e:
-        # noinspection PyTypeChecker
         UserConfigurableProfiler(
             cardinality_validator, semantic_types_dict=bad_semantic_types_dict_type
         )
@@ -512,7 +508,6 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
 
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
-        # noinspection PyUnusedLocal
         bad_key_profiler = UserConfigurableProfiler(  # noqa: F841
             cardinality_validator,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],

@@ -1546,7 +1546,6 @@ def _assert_quentin_expected_metrics_by_domain_serialized(
     """
     domain: Domain
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-    # noinspection PyTypeChecker
     metrics_by_domain_serialized: Dict[Domain, Dict[str, ParameterNode]] = {
         domain: dict(
             filter(
@@ -1698,7 +1697,6 @@ def test_volume_data_assistant_result_get_expectation_suite(
 
     assert mock_emit.call_count == 1
 
-    # noinspection PyUnresolvedReferences
     actual_events: List[mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
@@ -1930,7 +1928,6 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     domain_key: Domain
 
-    # noinspection PyTypeChecker
     quentin_expected_metrics_by_domain = dict(
         filter(
             lambda element: not any(

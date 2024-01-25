@@ -574,7 +574,6 @@ def check_sql_engine_dialect(
     candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
-        # noinspection PyTypeChecker
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
     except (AttributeError, TypeError):
         return False

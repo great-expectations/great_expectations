@@ -119,7 +119,6 @@ class BaseYamlConfig(SerializableDictDot):
             )
 
         if hasattr(cls.get_config_class(), "_schema_instance"):
-            # noinspection PyProtectedMember
             schema_instance: Optional[Schema] = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
@@ -301,7 +300,6 @@ class SorterConfigSchema(Schema):
     def validate_schema(self, data, **kwargs) -> None:
         pass
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_sorter_config(self, data, **kwargs):
         return SorterConfig(**data)
@@ -483,7 +481,6 @@ class AssetConfigSchema(Schema):
                     ] = schema.jsonValue()
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_asset_config(self, data, **kwargs):
         return AssetConfig(**data)
@@ -733,7 +730,6 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
 
-    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):  # noqa: C901, PLR0912
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
@@ -933,7 +929,6 @@ continue.
                 """
             )
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_data_connector_config(self, data, **kwargs):
         return DataConnectorConfig(**data)
@@ -1060,7 +1055,6 @@ class ExecutionEngineConfigSchema(Schema):
 
     create_temp_table = fields.Boolean(required=False, allow_none=True)
 
-    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
@@ -1085,7 +1079,6 @@ configuration to continue.
                 """
             )
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_execution_engine_config(self, data, **kwargs):
         return ExecutionEngineConfig(**data)
@@ -1266,7 +1259,6 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     )
     limit = fields.Integer(required=False, allow_none=True)
 
-    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
@@ -1296,7 +1288,6 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
                 """
             )
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
         # Add names to data connectors
@@ -1380,14 +1371,12 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
     usage_statistics_url = fields.URL(allow_none=True)
     _explicit_url = fields.Boolean(required=False)
 
-    # noinspection PyUnusedLocal
     @post_load()
     def make_usage_statistics_config(self, data, **kwargs):
         if "data_context_id" in data:
             data["data_context_id"] = str(data["data_context_id"])
         return AnonymizedUsageStatisticsConfig(**data)
 
-    # noinspection PyUnusedLocal
     @post_dump()
     def filter_implicit(self, data, **kwargs):
         if not data.get("_explicit_url") and "usage_statistics_url" in data:
@@ -1575,7 +1564,6 @@ class DataContextConfigSchema(Schema):
         "fluent_datasources",
     ]
 
-    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
         data = copy.deepcopy(data)
@@ -1603,7 +1591,6 @@ class DataContextConfigSchema(Schema):
             message=message,
         )
 
-    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
         if "config_version" not in data:
@@ -2616,7 +2603,6 @@ class CheckpointConfigSchema(Schema):
         cls_or_instance=fields.Dict(), required=False, allow_none=True
     )
 
-    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
         if not (
@@ -2636,7 +2622,6 @@ class CheckpointConfigSchema(Schema):
                     """
                 )
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = copy.deepcopy(data)
@@ -2645,7 +2630,6 @@ class CheckpointConfigSchema(Schema):
 
         return data
 
-    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
         data = copy.deepcopy(data)
@@ -2928,7 +2912,6 @@ class CheckpointConfig(BaseYamlConfig):
         """
         return self.__repr__()
 
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
     def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
         checkpoint: Checkpoint,

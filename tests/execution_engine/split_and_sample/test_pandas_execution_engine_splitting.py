@@ -491,7 +491,6 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
     assert (split_df.dataframe.date == datetime.date(2020, 1, 5)).all()
 
     with pytest.raises(ValueError):
-        # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
@@ -511,7 +510,6 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
 @pytest.mark.big
 def test_get_batch_with_split_on_hashed_column(test_df):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,

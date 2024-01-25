@@ -230,14 +230,12 @@ class MetaExpectation(ModelMetaclass):
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
-        # noinspection PyUnresolvedReferences
         if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
         else:
             newclass.expectation_type = ""
 
-        # noinspection PyUnresolvedReferences
         newclass._register_renderer_functions()
         return newclass
 
@@ -1000,7 +998,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             key_list.extend(list(cls.runtime_keys))
         return tuple(str(key) for key in key_list)
 
-    # noinspection PyUnusedLocal
     def metrics_validate(
         self,
         metrics: dict,

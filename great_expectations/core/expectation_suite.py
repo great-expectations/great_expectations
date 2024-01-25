@@ -282,7 +282,6 @@ class ExpectationSuite(SerializableDictDot):
         )
         self.meta["citations"].append(citation)
 
-    # noinspection PyPep8Naming
     def isEquivalentTo(self, other):
         """
         ExpectationSuite equivalence relies only on expectations and evaluation parameters. It does not include:
@@ -294,7 +293,6 @@ class ExpectationSuite(SerializableDictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    # noinspection PyNoneFunctionAssignment,PyTypeChecker
                     other_dict: dict = expectationSuiteSchema.load(other)
                     other = ExpectationSuite(
                         **other_dict, data_context=self._data_context
@@ -956,7 +954,6 @@ class ExpectationSuite(SerializableDictDot):
 
         return expectation_configurations
 
-    # noinspection PyPep8Naming
     def get_column_pair_expectations(self) -> List[ExpectationConfiguration]:
         """Return a list of column_pair map expectations."""
         expectation_configurations: List[ExpectationConfiguration] = [
@@ -1117,7 +1114,6 @@ class ExpectationSuiteSchema(Schema):
 
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
-    # noinspection PyMethodMayBeStatic
     def clean_empty(self, data):
         if isinstance(data, ExpectationSuite):
             if not hasattr(data, "evaluation_parameters"):
@@ -1147,7 +1143,6 @@ class ExpectationSuiteSchema(Schema):
 
         return data
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)

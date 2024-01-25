@@ -139,7 +139,6 @@ def test_sparkdf(spark_session) -> pyspark.DataFrame:
             start_date.year, start_date.month, start_date.day
         )
         seconds_between_dates = (end_date - start_date).total_seconds()
-        # noinspection PyUnusedLocal
         datetime_list = [
             start_time
             + datetime.timedelta(seconds=random.randrange(int(seconds_between_dates)))
@@ -157,15 +156,12 @@ def test_sparkdf(spark_session) -> pyspark.DataFrame:
         datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list
     ]
 
-    # noinspection PyUnusedLocal
     batch_ids: List[int] = [random.randint(0, 10) for i in range(k)]
     batch_ids.sort()
-    # noinspection PyUnusedLocal
     session_ids: List[int] = [random.randint(2, 60) for i in range(k)]
     session_ids = [i - random.randint(0, 2) for i in session_ids]
     session_ids.sort()
 
-    # noinspection PyUnusedLocal
     spark_df: pyspark.DataFrame = spark_session.createDataFrame(
         data=pd.DataFrame(
             {

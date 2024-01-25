@@ -185,7 +185,6 @@ class GxConfig(FluentBaseModel):
         self.fluent_datasources = list(ds_dicts.values())
         return result
 
-    # noinspection PyNestedDecorators
     @validator(_FLUENT_DATASOURCES_KEY, pre=True)
     @classmethod
     def _load_datasource_subtype(cls, v: List[dict]):
@@ -389,7 +388,6 @@ def _exclude_fields_from_serialization(
     source_dict: Dict[str, Any], exclusions: Set[str]
 ) -> Dict[str, Any]:
     element: Tuple[str, Any]
-    # noinspection PyTypeChecker
     return dict(
         filter(
             lambda element: element[0] not in exclusions,

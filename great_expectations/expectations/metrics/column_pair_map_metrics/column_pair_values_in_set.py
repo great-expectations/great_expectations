@@ -29,7 +29,6 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
         "ignore_row_if",
     )
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         value_pairs_set = kwargs.get("value_pairs_set")
@@ -75,7 +74,6 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         return row_wise_cond
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, **kwargs):
         value_pairs_set = kwargs.get("value_pairs_set")

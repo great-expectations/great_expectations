@@ -77,7 +77,6 @@ def test_sorter_instantiation_custom_list():
     assert isinstance(my_custom, CustomListSorter)
     assert my_custom.name == "custom"
     assert my_custom.reverse is False
-    # noinspection PyProtectedMember
     assert my_custom._reference_list == ["a", "b", "c"]
     # with incorrectly configured reference list
     sorter_params: dict = {
@@ -91,11 +90,9 @@ def test_sorter_instantiation_custom_list():
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
     sorter_params: dict = {"reference_list": None}
     with pytest.raises(gx_exceptions.SorterError):
-        # noinspection PyUnusedLocal
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
     sorter_params: dict = {"reference_list": 1}  # not a list
     with pytest.raises(gx_exceptions.SorterError):
-        # noinspection PyUnusedLocal
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
 
 
@@ -107,7 +104,6 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
         "reference_list": periodic_table_of_elements,
     }
     my_custom_sorter = CustomListSorter(name="element", orderby="asc", **sorter_params)
-    # noinspection PyProtectedMember
     assert my_custom_sorter._reference_list == periodic_table_of_elements
     # This element exists : Hydrogen
     test_batch_def = BatchDefinition(

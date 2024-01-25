@@ -276,7 +276,6 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     group_names = ["name", "timestamp", "price"]
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal,PyTypeChecker
         my_data_reference = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=my_batch_definition,
             regex_pattern=regex_pattern,
@@ -295,7 +294,6 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     group_names = ["i", "wont", "match"]
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     with pytest.raises(KeyError):
-        # noinspection PyUnusedLocal
         my_data_reference = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=my_batch_definition,
             regex_pattern=regex_pattern,

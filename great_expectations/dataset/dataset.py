@@ -671,7 +671,6 @@ class Dataset(MetaDataset):
                 else:
                     return return_success
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["min_value", "max_value"])
     def expect_table_column_count_to_be_between(  # noqa: PLR0913
@@ -755,7 +754,6 @@ class Dataset(MetaDataset):
 
         return {"success": outcome, "result": {"observed_value": column_count}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["value"])
     def expect_table_column_count_to_equal(  # noqa: PLR0913
@@ -812,7 +810,6 @@ class Dataset(MetaDataset):
             "result": {"observed_value": column_count},
         }
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["min_value", "max_value"])
     def expect_table_row_count_to_be_between(  # noqa: PLR0913
@@ -899,7 +896,6 @@ class Dataset(MetaDataset):
 
         return {"success": outcome, "result": {"observed_value": row_count}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["value"])
     def expect_table_row_count_to_equal(  # noqa: PLR0913
@@ -1268,7 +1264,6 @@ class Dataset(MetaDataset):
         catch_exceptions=None,
         meta=None,
     ) -> None:
-        # noinspection PyUnresolvedReferences
         """Expect each column value to be in a given set.
 
         For example:
@@ -1345,7 +1340,6 @@ class Dataset(MetaDataset):
         catch_exceptions=None,
         meta=None,
     ) -> None:
-        # noinspection PyUnresolvedReferences
         """Expect column entries to not be in the set.
 
         For example:
@@ -2280,7 +2274,6 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_distinct_values_to_be_in_set(  # noqa: PLR0913
@@ -2293,7 +2286,6 @@ class Dataset(MetaDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to be contained by a given set.
 
         The success value for this expectation will match that of expect_column_values_to_be_in_set. However,
@@ -2391,7 +2383,6 @@ class Dataset(MetaDataset):
             },
         }
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_distinct_values_to_equal_set(  # noqa: PLR0913
@@ -2404,7 +2395,6 @@ class Dataset(MetaDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to equal a given set.
 
         In contrast to expect_column_distinct_values_to_contain_set() this ensures not only that a certain set of \
@@ -2477,7 +2467,6 @@ class Dataset(MetaDataset):
             },
         }
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_distinct_values_to_contain_set(  # noqa: PLR0913
@@ -2490,7 +2479,6 @@ class Dataset(MetaDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to contain a given set.
 
         In contrast to expect_column_values_to_be_in_set() this ensures not that all column values are members of the
@@ -2565,7 +2553,6 @@ class Dataset(MetaDataset):
             },
         }
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_mean_to_be_between(  # noqa: PLR0913
@@ -2680,7 +2667,6 @@ class Dataset(MetaDataset):
 
         return {"success": success, "result": {"observed_value": column_mean}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_median_to_be_between(  # noqa: PLR0913
@@ -2784,7 +2770,6 @@ class Dataset(MetaDataset):
 
         return {"success": success, "result": {"observed_value": column_median}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_quantile_values_to_be_between(  # noqa: PLR0913
@@ -2797,7 +2782,6 @@ class Dataset(MetaDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # noinspection PyUnresolvedReferences
         """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
         ``quantile_ranges`` must be a dictionary with two keys:
@@ -2924,7 +2908,6 @@ class Dataset(MetaDataset):
             },
         }
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_stdev_to_be_between(  # noqa: PLR0913
@@ -3025,7 +3008,6 @@ class Dataset(MetaDataset):
 
         return {"success": success, "result": {"observed_value": column_stdev}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(  # noqa: PLR0913
@@ -3107,7 +3089,6 @@ class Dataset(MetaDataset):
 
         return {"success": success, "result": {"observed_value": unique_value_count}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(  # noqa: PLR0913
@@ -3220,7 +3201,6 @@ class Dataset(MetaDataset):
 
         return {"success": success, "result": {"observed_value": proportion_unique}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_most_common_value_to_be_in_set(  # noqa: PLR0913
@@ -3292,7 +3272,6 @@ class Dataset(MetaDataset):
 
         return {"success": success, "result": {"observed_value": mode_list}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_sum_to_be_between(  # noqa: PLR0913
@@ -3390,7 +3369,6 @@ class Dataset(MetaDataset):
 
         return {"success": success, "result": {"observed_value": column_sum}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_min_to_be_between(  # noqa: PLR0913, PLR0912
@@ -3522,7 +3500,6 @@ class Dataset(MetaDataset):
                 column_min = str(column_min)
         return {"success": success, "result": {"observed_value": column_min}}
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_max_to_be_between(  # noqa: PLR0913, PLR0912
@@ -3659,7 +3636,6 @@ class Dataset(MetaDataset):
     #
     ###
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_to_be_greater_than(  # noqa: PLR0913
@@ -3880,7 +3856,6 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_kl_divergence_to_be_less_than(  # noqa: PLR0913, PLR0912, PLR0915

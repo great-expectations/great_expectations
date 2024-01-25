@@ -240,10 +240,8 @@ def verify_dynamic_loading_support(
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
-    # noinspection PyUnresolvedReferences
     module_spec: Optional[importlib.machinery.ModuleSpec]
     try:
-        # noinspection PyUnresolvedReferences
         module_spec = importlib.util.find_spec(module_name, package=package_name)
     except ModuleNotFoundError:
         module_spec = None
@@ -831,7 +829,6 @@ def convert_decimal_to_float(d: SupportsFloat) -> float:
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
 
-    # noinspection PyTypeChecker
     return float(d)
 
 
@@ -1181,7 +1178,6 @@ def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
     """
     Leverage on Trino Package to return sqlalchemy sql type
     """
-    # noinspection PyUnresolvedReferences
     potential_type = type_module.parse_sqltype(type_)
     return potential_type
 

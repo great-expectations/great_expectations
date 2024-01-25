@@ -37,7 +37,6 @@ if not google.storage:
 
 
 class MockGCSClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def list_blobs(
         self,
         bucket_or_name,
@@ -126,7 +125,6 @@ def test_construct_spark_gcs_datasource_without_gcs_options():
         bucket_or_name="test_bucket",
         gcs_options={},
     )
-    # noinspection PyUnresolvedReferences
     gcs_client: google.Client = spark_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert spark_gcs_datasource.name == "spark_gcs_datasource"
@@ -148,7 +146,6 @@ def test_construct_spark_gcs_datasource_with_filename_in_gcs_options(
             "filename": "my_filename.csv",
         },
     )
-    # noinspection PyUnresolvedReferences
     gcs_client: google.Client = spark_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert spark_gcs_datasource.name == "spark_gcs_datasource"
@@ -170,7 +167,6 @@ def test_construct_spark_gcs_datasource_with_info_in_gcs_options(
             "info": "{my_csv: my_content,}",
         },
     )
-    # noinspection PyUnresolvedReferences
     gcs_client: google.Client = spark_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert spark_gcs_datasource.name == "spark_gcs_datasource"

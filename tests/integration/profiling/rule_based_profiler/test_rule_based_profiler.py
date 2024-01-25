@@ -181,7 +181,6 @@ def test_profile_includes_citations(
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    # noinspection PyUnresolvedReferences
     actual_events: list[mock._Call] = mock_emit.call_args_list
     assert actual_events[-1][0][0]["event"] == UsageStatsEvents.RULE_BASED_PROFILER_RUN
 
@@ -234,7 +233,6 @@ def test_profile_get_expectation_suite(
 
     assert mock_emit.call_count == 44
 
-    # noinspection PyUnresolvedReferences
     actual_events: list[mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]

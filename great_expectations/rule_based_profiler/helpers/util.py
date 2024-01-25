@@ -1047,7 +1047,6 @@ def get_or_create_expectation_suite(
     if create_expectation_suite:
         if persist:
             try:
-                # noinspection PyUnusedLocal
                 expectation_suite = data_context.get_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )

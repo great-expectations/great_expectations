@@ -105,7 +105,6 @@ def test_new_self_check_after_adding_named_asset_a(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    # noinspection PyUnusedLocal
     res: List[  # noqa: F841
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -251,7 +250,6 @@ def test_error_checking_unknown_datasource(basic_datasource):
 
     # Test for an unknown datasource
     with pytest.raises(ValueError):
-        # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -275,7 +273,6 @@ def test_error_checking_unknown_data_connector(basic_datasource):
 
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
-        # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -297,7 +294,6 @@ def test_error_checking_missing_runtime_parameters(basic_datasource):
 
     # test for missing runtime_parameters arg
     with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal, PyArgumentList
         batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -470,7 +466,6 @@ def test_error_checking_too_many_runtime_parameters(basic_datasource):
 
     # test for too many runtime_parameters keys
     with pytest.raises(gx_exceptions.InvalidBatchRequestError):
-        # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -552,7 +547,6 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
-        # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -585,7 +579,6 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
-        # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -1015,7 +1008,6 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
         "batch_identifiers": batch_identifiers,
     }
     with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
         batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # test that name can be set as "my_data_asset"
@@ -1047,7 +1039,6 @@ def test__get_data_reference_list(basic_datasource):
 
     expected_data_reference_list: List[str] = []
 
-    # noinspection PyProtectedMember
     data_reference_list: List[
         str
     ] = test_runtime_data_connector._get_data_reference_list()
@@ -1078,7 +1069,6 @@ def test__generate_batch_spec_parameters_from_batch_definition(
 
     expected_batch_spec_parameters: dict = {"data_asset_name": "my_data_asset"}
 
-    # noinspection PyProtectedMember
     batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(
         batch_definition=BatchDefinition(
             datasource_name="my_datasource",

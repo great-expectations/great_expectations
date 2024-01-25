@@ -60,7 +60,6 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
         parameter_builder: ParameterBuilder = (  # noqa: F841
             UnexpectedCountStatisticsMultiBatchParameterBuilder(
                 name="my_name",

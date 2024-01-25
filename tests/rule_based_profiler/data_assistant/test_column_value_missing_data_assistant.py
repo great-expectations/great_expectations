@@ -40,7 +40,6 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
     context = ephemeral_context_with_defaults
     datasource = context.sources.add_or_update_pandas("my_datasource")
     asset = datasource.add_dataframe_asset("my_asset")
-    # noinspection PyTypeChecker
     df = pd.DataFrame(
         {
             "non-null": [i for i in range(100)],
@@ -117,7 +116,6 @@ def test_column_value_missing_data_assistant_uses_single_batch_mode_for_single_b
     context = ephemeral_context_with_defaults
     datasource = context.sources.add_or_update_pandas("my_datasource")
     asset = datasource.add_dataframe_asset("my_asset")
-    # noinspection PyTypeChecker
     df = pd.DataFrame(
         {
             "non-null": [i for i in range(100)],

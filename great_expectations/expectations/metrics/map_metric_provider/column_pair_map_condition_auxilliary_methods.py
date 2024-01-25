@@ -67,9 +67,7 @@ def _pandas_column_pair_map_condition_values(
 """
         )
 
-    # noinspection PyPep8Naming
     column_A_name = accessor_domain_kwargs["column_A"]
-    # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
     column_names: List[Union[str, sqlalchemy.quoted_name]] = [
@@ -157,9 +155,7 @@ def _sqlalchemy_column_pair_map_condition_values(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    # noinspection PyPep8Naming
     column_A_name = accessor_domain_kwargs["column_A"]
-    # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
     query = sa.select(
@@ -236,9 +232,7 @@ def _spark_column_pair_map_condition_values(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    # noinspection PyPep8Naming
     column_A_name = accessor_domain_kwargs["column_A"]
-    # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask

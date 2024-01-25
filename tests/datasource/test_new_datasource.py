@@ -503,7 +503,6 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
     with pytest.raises(ValueError):
         batch_request = RuntimeBatchRequest(**batch_request)
 
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
@@ -534,7 +533,6 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
@@ -565,7 +563,6 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
         ] = basic_spark_datasource.get_batch_list_from_batch_request(
@@ -595,7 +592,6 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    # noinspection PyUnusedLocal
     batch_list: List[  # noqa: F841
         Batch
     ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
@@ -715,7 +711,6 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    # noinspection PyUnusedLocal
     batch_list: List[  # noqa: F841
         Batch
     ] = datasource.get_batch_list_from_batch_request(batch_request=batch_request)

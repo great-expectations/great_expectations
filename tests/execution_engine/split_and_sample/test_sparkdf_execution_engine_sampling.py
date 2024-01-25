@@ -111,7 +111,6 @@ def test_sample_using_md5_wrong_hash_function_name(
     test_sparkdf, basic_spark_df_execution_engine
 ):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
         _ = basic_spark_df_execution_engine.get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,

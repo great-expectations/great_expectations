@@ -1702,7 +1702,6 @@ def test_max_metric_column_does_not_exist_pd():
     }
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
-        # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
         )
@@ -1778,7 +1777,6 @@ def test_max_metric_column_does_not_exist_sa(sa):
     }
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
-        # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
         )
@@ -1862,7 +1860,6 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
     }
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
-        # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
         )
@@ -1942,9 +1939,7 @@ def test_map_of_type_sa(sa):
     )
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    # noinspection PyTypeChecker
     assert results[desired_metric.id][0]["name"] == "a"
-    # noinspection PyTypeChecker
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 
@@ -2536,7 +2531,6 @@ def test_map_unique_column_does_not_exist_pd():
     }
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
-        # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
         )
@@ -2669,7 +2663,6 @@ def test_map_unique_column_does_not_exist_sa(sa):
         "table.columns": table_columns_metric,
     }
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
-        # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics
         )
@@ -2854,7 +2847,6 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
     }
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
-        # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics
         )

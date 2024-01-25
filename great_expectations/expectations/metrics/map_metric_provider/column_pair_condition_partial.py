@@ -103,9 +103,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
                 meets_expectation_series = metric_fn(
@@ -173,9 +171,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
@@ -247,9 +243,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
                 expected_condition = metric_fn(

@@ -140,8 +140,6 @@ if GEOGRAPHY:
 
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
-
-    # noinspection PyPep8Naming
     from sqlalchemy.dialects.postgresql import dialect as pgDialect  # noqa: TID251
 
     POSTGRESQL_TYPES = {
@@ -163,8 +161,6 @@ except (ImportError, KeyError):
 
 try:
     import sqlalchemy.dialects.mysql as mysqltypes  # noqa: TID251
-
-    # noinspection PyPep8Naming
     from sqlalchemy.dialects.mysql import dialect as mysqlDialect  # noqa: TID251
 
     MYSQL_TYPES = {
@@ -190,8 +186,6 @@ try:
     # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
     # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
     import sqlalchemy.dialects.mssql as mssqltypes  # noqa: TID251
-
-    # noinspection PyPep8Naming
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect  # noqa: TID251
 
     try:
@@ -199,7 +193,6 @@ try:
     except AttributeError:
         mssqltypes.INT = mssqltypes.INTEGER
 
-    # noinspection PyUnresolvedReferences
     MSSQL_TYPES = {
         "BIGINT": mssqltypes.BIGINT,
         "BINARY": mssqltypes.BINARY,
@@ -494,7 +487,6 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
-                    # noinspection PyUnresolvedReferences
                     type_ = getattr(pd, value)()
                 pandas_schema[key] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
@@ -690,14 +682,12 @@ def _get_test_validator_with_data_pandas(
             try:
                 type_ = np.dtype(value)
             except TypeError:
-                # noinspection PyUnresolvedReferences
                 type_ = getattr(pd, value)()
             pandas_schema[key] = type_
         # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
         df = df.astype(pandas_schema)
 
     if table_name is None:
-        # noinspection PyUnusedLocal
         table_name = generate_test_table_name()
 
     batch_definition = BatchDefinition(
@@ -1022,7 +1012,6 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         df.columns = df.columns.str.replace(" ", "_")
 
     sql_dtypes = {}
-    # noinspection PyTypeHints
     if (
         schemas
         and sa_engine_name in schemas
@@ -1235,7 +1224,6 @@ def build_sa_execution_engine(  # noqa: PLR0913
     dtype: Optional[dict] = None,
     table_name: str = "test",
 ) -> SqlAlchemyExecutionEngine:
-    # noinspection PyUnresolvedReferences
     sqlalchemy_engine: sqlalchemy.Engine = sa.create_engine("sqlite://", echo=False)
     add_dataframe_to_db(
         df=df,
@@ -1635,7 +1623,6 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["mysql"]
 
         if include_mssql:
-            # noinspection PyUnresolvedReferences
             try:
                 engine = sa.create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
@@ -1661,7 +1648,6 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["mssql"]
 
         if include_bigquery:
-            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_bigquery_engine()
                 conn = engine.connect()
@@ -1704,7 +1690,6 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     )
 
         if include_clickhouse:
-            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_clickhouse_engine(db_hostname)
                 conn = engine.connect()
@@ -1722,7 +1707,6 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["clickhouse"]
 
         if include_trino:
-            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_trino_engine(db_hostname)
                 conn = engine.connect()
@@ -1761,7 +1745,6 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
             test_backends += ["azure"]
 
         if include_redshift:
-            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_redshift_engine()
                 conn = engine.connect()
@@ -1779,7 +1762,6 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["redshift"]
 
         if include_athena:
-            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_athena_engine()
                 conn = engine.connect()
@@ -1797,7 +1779,6 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["athena"]
 
         if include_snowflake:
-            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_snowflake_engine()
                 conn = engine.connect()
@@ -1970,7 +1951,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
             datasets = []
 
-            # noinspection PyBroadException,PyExceptClausesOrder
             try:
                 if isinstance(d["data"], list):
                     sqlite_db_path = generate_sqlite_db_path()
@@ -2027,7 +2007,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
                 if "data_alt" in d and d["data_alt"] is not None:
                     # print("There is alternate data to try!!")
-                    # noinspection PyBroadException
                     try:
                         if isinstance(d["data_alt"], list):
                             sqlite_db_path = generate_sqlite_db_path()
@@ -2271,7 +2250,6 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     expectation_suite = ExpectationSuite(
         "json_test_suite", data_context=validator._data_context
     )
-    # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
 

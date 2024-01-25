@@ -36,7 +36,6 @@ class BatchRequestAnonymizer(BaseAnonymizer):
     ) -> Dict[str, Union[dict, List[str]]]:
         anonymized_batch_request_properties_dict: Dict[str, Union[dict, List[str]]] = {}
 
-        # noinspection PyBroadException
         try:
             from great_expectations.core.batch import (
                 BatchRequest,

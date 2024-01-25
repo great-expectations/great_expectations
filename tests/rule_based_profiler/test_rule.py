@@ -15,7 +15,6 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
     with pytest.raises(
         gx_exceptions.ProfilerExecutionError, match=r".+start with \$.*"
     ):
-        # noinspection PyUnusedLocal
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name="mean",
             domain=column_Age_domain,

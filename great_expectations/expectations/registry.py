@@ -65,7 +65,6 @@ def register_renderer(
     parent_class: Union[Type[Expectation], Type[MetricProvider]],
     renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
 ):
-    # noinspection PyUnresolvedReferences
     renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")

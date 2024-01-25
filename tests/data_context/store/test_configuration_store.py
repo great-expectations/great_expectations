@@ -138,7 +138,6 @@ def test_v3_configuration_store(tmp_path_factory):
         assert config == expected_config
 
     with pytest.raises(ValueError):
-        # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
             configuration_store_class_name="SampleConfigurationStore",
             configuration_store_module_name=SampleConfigurationStore.__module__,
@@ -147,7 +146,6 @@ def test_v3_configuration_store(tmp_path_factory):
             configuration_key=configuration_name_0,
         )
     with pytest.raises(gx_exceptions.InvalidKeyError):
-        # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
             configuration_store_class_name="SampleConfigurationStore",
             configuration_store_module_name=SampleConfigurationStore.__module__,

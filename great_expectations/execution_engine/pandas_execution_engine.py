@@ -572,9 +572,7 @@ not {batch_spec.__class__.__name__}"""
             and "column_B" in domain_kwargs
             and "ignore_row_if" in domain_kwargs
         ):
-            # noinspection PyPep8Naming
             column_A_name = domain_kwargs["column_A"]
-            # noinspection PyPep8Naming
             column_B_name = domain_kwargs["column_B"]
 
             ignore_row_if = domain_kwargs["ignore_row_if"]

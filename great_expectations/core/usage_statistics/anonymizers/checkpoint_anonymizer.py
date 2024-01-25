@@ -64,7 +64,6 @@ class CheckpointAnonymizer(BaseAnonymizer):
         )
         return anonymized_info_dict
 
-    # noinspection PyUnusedLocal
     def _anonymize_checkpoint_run(  # noqa: C901, PLR0912, PLR0915
         self, obj: object, **kwargs
     ) -> dict:
@@ -111,7 +110,6 @@ class CheckpointAnonymizer(BaseAnonymizer):
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
         if action_list:
-            # noinspection PyBroadException
             try:
                 anonymized_action_list = [
                     self._aggregate_anonymizer.anonymize(
@@ -157,7 +155,6 @@ class CheckpointAnonymizer(BaseAnonymizer):
                 )
                 anonymized_validation_action_list: Optional[List[dict]] = None
                 if validation_action_list:
-                    # noinspection PyBroadException
                     try:
                         anonymized_validation_action_list = [
                             self._aggregate_anonymizer.anonymize(

@@ -124,7 +124,6 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> Optional[Tuple[str, IDDict]]:
-    # noinspection PyUnresolvedReferences
     pattern = re.compile(regex_pattern)
     matches: Optional[re.Match] = pattern.match(data_reference)
     if matches is None:

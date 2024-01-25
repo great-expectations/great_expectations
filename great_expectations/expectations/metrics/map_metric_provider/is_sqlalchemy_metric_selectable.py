@@ -26,7 +26,6 @@ def _is_sqlalchemy_metric_selectable(
     columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
     unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
     """
-    # noinspection PyUnresolvedReferences
     return (
         hasattr(map_metric_provider, "condition_metric_name")
         and map_metric_provider.condition_metric_name in SQLALCHEMY_SELECTABLE_METRICS

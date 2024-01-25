@@ -11,7 +11,6 @@ class MetaMetricProvider(type):
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
-        # noinspection PyUnresolvedReferences
         newclass._register_metric_functions()
         return newclass
 

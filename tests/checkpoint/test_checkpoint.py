@@ -81,7 +81,6 @@ def batch_request_as_dict() -> Dict[str, str]:
 @pytest.mark.unit
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
     with pytest.raises(AttributeError):
-        # noinspection PyTypeChecker
         Checkpoint(name="my_checkpoint", data_context="foo", config_version=1)
 
 
@@ -126,10 +125,8 @@ def test_basic_checkpoint_config_validation(  # noqa: PLR0915
     """
     config_erroneous = yaml.load(yaml_config_erroneous)
     with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
         checkpoint_config = CheckpointConfig(**config_erroneous)
     with pytest.raises(KeyError):
-        # noinspection PyUnusedLocal
         checkpoint: Checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
@@ -137,9 +134,7 @@ def test_basic_checkpoint_config_validation(  # noqa: PLR0915
 
     assert mock_emit.call_count == 1
 
-    # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call]
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call]
 
     expected_events = [
@@ -159,12 +154,10 @@ def test_basic_checkpoint_config_validation(  # noqa: PLR0915
     """
     config_erroneous = yaml.load(yaml_config_erroneous)
     with pytest.raises(gx_exceptions.InvalidConfigError):
-        # noinspection PyUnusedLocal
         checkpoint_config = CheckpointConfig.from_commented_map(
             commented_map=config_erroneous
         )
     with pytest.raises(KeyError):
-        # noinspection PyUnusedLocal
         checkpoint: Checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
@@ -192,7 +185,6 @@ def test_basic_checkpoint_config_validation(  # noqa: PLR0915
     assert actual_events == expected_events
 
     with pytest.raises(gx_exceptions.InvalidConfigError):
-        # noinspection PyUnusedLocal
         checkpoint: Checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
@@ -232,7 +224,6 @@ def test_basic_checkpoint_config_validation(  # noqa: PLR0915
     name: my_erroneous_checkpoint
     class_name: Checkpoint
     """
-    # noinspection PyUnusedLocal
     checkpoint: Checkpoint = context.test_yaml_config(
         yaml_config=yaml_config_erroneous,
         name="my_erroneous_checkpoint",
@@ -545,7 +536,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         "anonymized_name"
     ]
 
-    # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
@@ -558,7 +548,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
             }
         ),
     ]
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
 
@@ -793,7 +782,6 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
     assert mock_emit.call_count == 6
 
-    # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
@@ -905,7 +893,6 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
             }
         ),
     ]
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
 
@@ -967,12 +954,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     mock_create_quarantine_data = mock.MagicMock()
     mock_create_quarantine_data.run.return_value = True
-    # noinspection PyUnresolvedReferences
     gx.validation_operators.CreateQuarantineData = mock_create_quarantine_data
 
     mock_create_passed_data = mock.MagicMock()
     mock_create_passed_data.run.return_value = True
-    # noinspection PyUnresolvedReferences
     gx.validation_operators.CreatePassedData = mock_create_passed_data
 
     expected_checkpoint_config: dict = {
@@ -1127,7 +1112,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         gx_exceptions.DataContextError,
         match=r'Checkpoint "my_base_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
-        # noinspection PyUnusedLocal
         result: CheckpointResult = data_context.run_checkpoint(
             checkpoint_name=checkpoint.name,
         )
@@ -1761,7 +1745,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
-        # noinspection PyUnusedLocal
         result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
     assert len(context.validations_store.list_keys()) == 0
@@ -1817,7 +1800,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
-        # noinspection PyUnusedLocal
         result = checkpoint.run(
             validations=[
                 {"batch_request": runtime_batch_request},
@@ -1826,7 +1808,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         )
 
     assert mock_emit.call_count == 1
-    # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
@@ -1910,14 +1891,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             }
         )
     ]
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
 
     assert len(context.validations_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
-    # noinspection PyUnusedLocal
     result = checkpoint.run(
         validations=[
             {"batch_request": runtime_batch_request},
@@ -1930,7 +1909,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert mock_emit.call_count == 8
 
-    # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
@@ -2162,7 +2140,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             }
         ),
     ]
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
 
@@ -2219,7 +2196,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
-        # noinspection PyUnusedLocal
         result = checkpoint.run(
             validations=[
                 {"batch_request": runtime_batch_request_1},
@@ -2230,7 +2206,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert len(context.validations_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
-    # noinspection PyUnusedLocal
     result = checkpoint.run(
         validations=[
             {"batch_request": runtime_batch_request_1},

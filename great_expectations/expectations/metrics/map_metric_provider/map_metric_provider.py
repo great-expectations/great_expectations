@@ -140,7 +140,6 @@ class MapMetricProvider(MetricProvider):
                     )
 
                 condition_provider = candidate_metric_fn
-                # noinspection PyUnresolvedReferences
                 metric_name = cls.condition_metric_name
                 metric_domain_keys = cls.condition_domain_keys
                 metric_value_keys = cls.condition_value_keys
@@ -543,7 +542,6 @@ class MapMetricProvider(MetricProvider):
                     )
 
                 map_function_provider = candidate_metric_fn
-                # noinspection PyUnresolvedReferences
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys

@@ -104,7 +104,6 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
         max_value=2,
     )
     suite.add_expectation(expectation=expectation)
-    # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
@@ -141,7 +140,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
         max_value=2,
     )
     suite.add_expectation(expectation)
-    # noinspection PyProtectedMember
     context._save_project_config()
 
     return context
@@ -172,7 +170,6 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
         max_value=2,
     )
     suite.add_expectation(expectation)
-    # noinspection PyProtectedMember
     context._save_project_config()
 
     return context
@@ -308,7 +305,6 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
 
-    # noinspection PyProtectedMember
     context._save_project_config()
 
     return context
@@ -385,7 +381,6 @@ def context_with_single_taxi_csv_spark(
         **config,
     )
 
-    # noinspection PyProtectedMember
     context._save_project_config()
 
     return context
@@ -402,6 +397,5 @@ def context_with_single_csv_spark_and_suite(
         column="pickup_datetime",
     )
     suite.add_expectation(expectation)
-    # noinspection PyProtectedMember
     context._save_project_config()
     return context

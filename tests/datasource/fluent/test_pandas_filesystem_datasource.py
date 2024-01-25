@@ -338,7 +338,6 @@ def test_add_csv_asset_with_batching_regex_to_datasource(
 
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
-    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",

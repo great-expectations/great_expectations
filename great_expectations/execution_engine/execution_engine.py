@@ -58,7 +58,6 @@ class NoOpDict:
     def __setitem__(self, key, value):
         return None
 
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def update(self, value):
         return None
 

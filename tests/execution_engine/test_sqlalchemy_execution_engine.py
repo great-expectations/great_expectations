@@ -1057,7 +1057,6 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
 
     # Ensuring a metric provider error is raised if metric does not exist
     with pytest.raises(gx_exceptions.MetricProviderError) as e:
-        # noinspection PyUnusedLocal
         execution_engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
@@ -1217,7 +1216,6 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
     }
-    # noinspection PyUnusedLocal
     results = execution_engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )

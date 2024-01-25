@@ -97,7 +97,6 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
         pass
 
     # redshift
-    # noinspection PyUnresolvedReferences
     try:
         if hasattr(dialect, "RedshiftDialect") or (
             aws.redshiftdialect
@@ -175,7 +174,6 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # Trino
-        # noinspection PyUnresolvedReferences
         if hasattr(dialect, "TrinoDialect") or (
             trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
@@ -191,7 +189,6 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # Clickhouse
-        # noinspection PyUnresolvedReferences
         if hasattr(dialect, "ClickHouseDialect") or isinstance(
             dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
         ):
@@ -269,7 +266,6 @@ def _get_dialect_type_module(dialect=None):
         return sa
 
     # Redshift does not (yet) export types to top level; only recognize base SA types
-    # noinspection PyUnresolvedReferences
     if aws.redshiftdialect and isinstance(
         dialect,
         aws.redshiftdialect.RedshiftDialect,
@@ -306,12 +302,10 @@ def _get_dialect_type_module(dialect=None):
 
 
 def attempt_allowing_relative_error(dialect):
-    # noinspection PyUnresolvedReferences
     detected_redshift: bool = aws.redshiftdialect and check_sql_engine_dialect(
         actual_sql_engine_dialect=dialect,
         candidate_sql_engine_dialect=aws.redshiftdialect.RedshiftDialect,
     )
-    # noinspection PyTypeChecker
     detected_psycopg2: bool = (
         sqlalchemy_psycopg2 is not None
         and check_sql_engine_dialect(
@@ -459,7 +453,6 @@ def column_reflection_fallback(  # noqa: PLR0915
     # with sqlalchemy_engine.begin() as connection:
     with connection:
         col_info_dict_list: List[Dict[str, str]]
-        # noinspection PyUnresolvedReferences
         if dialect.name.lower() == "mssql":
             # Get column names and types from the database
             # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
@@ -661,7 +654,6 @@ def column_reflection_fallback(  # noqa: PLR0915
             elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
                 query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             else:  # noqa: PLR5501
-                # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
                     query = (
@@ -677,7 +669,6 @@ def column_reflection_fallback(  # noqa: PLR0915
                     )
 
             result_object = connection.execute(query)
-            # noinspection PyProtectedMember
             col_names: List[str] = result_object._metadata.keys
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
@@ -920,14 +911,12 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     except (AttributeError, TypeError):
         pass
 
-    # noinspection PyUnresolvedReferences
     if aws.redshiftdialect and isinstance(dialect, aws.redshiftdialect.RedshiftDialect):
         dialect_supported = True
     else:
         pass
 
     try:
-        # noinspection PyUnresolvedReferences
         if hasattr(dialect, "TrinoDialect") or (
             trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
@@ -936,7 +925,6 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
         pass
 
     try:
-        # noinspection PyUnresolvedReferences
         if hasattr(dialect, "ClickHouseDialect") or isinstance(
             dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
         ):

@@ -1034,7 +1034,6 @@ def data_context_with_connection_to_metrics_db(
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1186,7 +1185,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1599,7 +1597,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_site_names_config,
     )
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1682,7 +1679,6 @@ def deterministic_asset_data_connector_context(
     context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1813,7 +1809,6 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
     _ = asset.build_batch_request(dataframe=df)
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1868,7 +1863,6 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
     _ = asset.build_batch_request(dataframe=spark_df)
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1899,7 +1893,6 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
         name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
     )
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -2208,7 +2201,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_site_names_config,
     )
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -2263,7 +2255,6 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
     asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
     _ = asset.build_batch_request(dataframe=spark_df)
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -2294,7 +2285,6 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled
         name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
     )
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -2853,7 +2843,6 @@ def data_context_with_fluent_datasource(
     empty_data_context.sources.add_pandas_filesystem(
         name="my_pandas_datasource", base_directory=filesystem_csv_2
     )
-    # noinspection PyProtectedMember
     empty_data_context._save_project_config()
     return empty_data_context
 
@@ -7698,7 +7687,6 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
         df = df.sample(
             n=output_file_name_length_map[file_name], replace=False, random_state=1
         )
-        # noinspection PyTypeChecker
         df.to_csv(
             path_or_buf=os.path.join(  # noqa: PTH118
                 context_path, "..", "data", file_name
@@ -7925,7 +7913,6 @@ def multibatch_generic_csv_generator():
             )
             filename = f"csv_batch_{batch_num + 1:03}_of_{num_event_batches:03}.csv"
             file_list.append(filename)
-            # noinspection PyTypeChecker
             df.to_csv(
                 data_path / filename,
                 index_label="intra_batch_index",

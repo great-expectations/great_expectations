@@ -159,7 +159,6 @@ class UsageStatisticsHandler:
         success: bool | None = None,
     ) -> None:
         """send a usage statistics message."""
-        # noinspection PyBroadException
         try:
             message: dict = {
                 "event": event,
@@ -186,7 +185,6 @@ class UsageStatisticsHandler:
             ):
                 return
             self._message_queue.put(message)
-        # noinspection PyBroadException
         except Exception as e:
             # We *always* tolerate *any* error in usage statistics
             log_message: str = (
@@ -282,7 +280,7 @@ def usage_statistics_enabled_method(
 
         return usage_statistics_wrapped_method
     else:
-        # noinspection PyShadowingNames
+
         def usage_statistics_wrapped_method_partial(func):
             return usage_statistics_enabled_method(
                 func,
@@ -320,7 +318,6 @@ def run_validation_operator_usage_statistics(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
     if data_context.usage_statistics_handler:
-        # noinspection PyBroadException
         try:
             anonymizer = data_context.usage_statistics_handler.anonymizer
             payload["anonymized_batches"] = [
@@ -413,7 +410,6 @@ def add_datasource_usage_statistics(
     )
 
     payload = {}
-    # noinspection PyBroadException
     try:
         if not name and datasource:
             name = datasource.name
@@ -446,7 +442,6 @@ def get_batch_list_usage_statistics(
     payload = {}
 
     if data_context.usage_statistics_handler:
-        # noinspection PyBroadException
         try:
             anonymizer = data_context.usage_statistics_handler.anonymizer
             payload = anonymizer.anonymize(*args, **kwargs)
@@ -481,7 +476,6 @@ def get_checkpoint_run_usage_statistics(
     payload = {}
 
     if usage_statistics_handler:
-        # noinspection PyBroadException
         try:
             anonymizer = usage_statistics_handler.anonymizer
 
@@ -523,7 +517,6 @@ def get_profiler_run_usage_statistics(
     payload = {}
 
     if usage_statistics_handler:
-        # noinspection PyBroadException
         try:
             anonymizer = usage_statistics_handler.anonymizer
 
@@ -551,7 +544,6 @@ def send_usage_message(
     success: bool | None = None,
 ) -> None:
     """send a usage statistics message."""
-    # noinspection PyBroadException
     try:
         handler = data_context.usage_statistics_handler
         if handler is not None:
@@ -572,7 +564,6 @@ def send_usage_message_from_handler(
     success: bool | None = None,
 ) -> None:
     """Send a usage statistics message using an already instantiated handler."""
-    # noinspection PyBroadException
     try:
         if handler:
             message: dict = {
@@ -626,7 +617,6 @@ def _handle_expectation_suite_usage_statistics(
         elif isinstance(expectation_suite, dict):
             expectation_suite_name = expectation_suite.get("expectation_suite_name")
 
-    # noinspection PyBroadException
     try:
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
             obj=expectation_suite_name

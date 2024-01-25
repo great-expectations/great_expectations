@@ -56,7 +56,6 @@ class QuantileRange(TypedDict):
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
-    # noinspection PyUnresolvedReferences
     """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
     expect_column_quantile_values_to_be_between is a \

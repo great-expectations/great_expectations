@@ -175,7 +175,6 @@ def test_ExpectationValidationGraph_constructor(
     validation_graph_with_no_edges: ValidationGraph,
 ):
     with pytest.raises(ValueError) as ve:
-        # noinspection PyUnusedLocal,PyTypeChecker
         expectation_validation_graph = ExpectationValidationGraph(
             configuration=None,
             graph=None,
@@ -186,7 +185,6 @@ def test_ExpectationValidationGraph_constructor(
     )
 
     with pytest.raises(ValueError) as ve:
-        # noinspection PyUnusedLocal,PyTypeChecker
         expectation_validation_graph = ExpectationValidationGraph(
             configuration=expect_column_values_to_be_unique_expectation_config,
             graph=None,
@@ -334,7 +332,6 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
     )
 
     class PandasExecutionEngineFake:
-        # noinspection PyUnusedLocal
         @staticmethod
         def resolve_metrics(
             metrics_to_resolve: Iterable[MetricConfiguration],
@@ -467,7 +464,6 @@ def test_progress_bar_config(
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        # noinspection PyUnusedLocal
         _resolved_metrics, _aborted_metrics_info = graph.resolve(**call_args)
         assert mock_tqdm.called is True
         assert mock_tqdm.call_args[1]["disable"] is are_progress_bars_disabled

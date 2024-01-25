@@ -285,14 +285,12 @@ class ValidationOperatorResultSchema(Schema):
     validation_operator_config = fields.Dict()
     success = fields.Bool()
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
         data._run_results = convert_to_json_serializable(data.run_results)
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_validation_operator_result(self, data, **kwargs):
         return ValidationOperatorResult(**data)

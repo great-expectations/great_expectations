@@ -163,7 +163,6 @@ def _get_dialect_type_module(dialect):
 
     # Redshift does not (yet) export types to top level; only recognize base SA types
     if aws.redshiftdialect and isinstance(dialect, aws.redshiftdialect.RedshiftDialect):
-        # noinspection PyUnresolvedReferences
         return dialect.sa
     else:
         pass
@@ -295,7 +294,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     ```
     """
 
-    # noinspection PyUnusedLocal
     def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         name: Optional[str] = None,
@@ -682,7 +680,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
             if domain_kwargs["table"] != data_object.selectable.name:
-                # noinspection PyProtectedMember
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
@@ -764,18 +761,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 SqlAlchemyBatchData, self.batch_manager.active_batch_data
             ).use_quoted_name:
                 # Checking if case-sensitive and using appropriate name
-                # noinspection PyPep8Naming
                 column_A_name = sqlalchemy.quoted_name(
                     domain_kwargs["column_A"], quote=True
                 )
-                # noinspection PyPep8Naming
                 column_B_name = sqlalchemy.quoted_name(
                     domain_kwargs["column_B"], quote=True
                 )
             else:
-                # noinspection PyPep8Naming
                 column_A_name = domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = domain_kwargs["column_B"]
 
             ignore_row_if = domain_kwargs["ignore_row_if"]

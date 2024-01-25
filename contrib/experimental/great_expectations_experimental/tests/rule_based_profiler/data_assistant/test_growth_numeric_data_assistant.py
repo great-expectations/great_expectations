@@ -148,7 +148,6 @@ def test_growth_numeric_data_assistant_result_get_expectation_suite(
 
     assert mock_emit.call_count == 1
 
-    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]

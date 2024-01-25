@@ -269,5 +269,4 @@ def safe_deep_copy(data, memo=None):
             key: safe_deep_copy(data=value, memo=memo) for key, value in data.items()
         }
 
-    # noinspection PyArgumentList
     return copy.deepcopy(data, memo)

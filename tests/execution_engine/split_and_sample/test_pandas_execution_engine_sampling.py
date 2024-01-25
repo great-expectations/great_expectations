@@ -100,7 +100,6 @@ def test_sample_using_a_list(test_df):
 @pytest.mark.unit
 def test_sample_using_md5(test_df):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
         sampled_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,

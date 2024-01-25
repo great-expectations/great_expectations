@@ -236,7 +236,6 @@ def test_filter_properties_dict():
 
     d0_begin: dict = copy.deepcopy(source_dict)
     with pytest.raises(ValueError):
-        # noinspection PyUnusedLocal
         d0_end: dict = filter_properties_dict(
             properties=d0_begin,
             keep_fields={

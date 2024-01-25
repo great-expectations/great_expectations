@@ -426,7 +426,6 @@ def test_add_expectation_configurations(
 
     # Should raise if overwrite_existing=False and a matching expectation is found
     with pytest.raises(DataContextError):
-        # noinspection PyUnusedLocal
         result = single_expectation_suite.add_expectation_configurations(
             expectation_configurations=expectation_configurations,
             send_usage_event=False,

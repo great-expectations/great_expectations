@@ -83,9 +83,7 @@ def test_iddict_is_hashable():
         "c0": "4",
         "c1": "5",
     }
-    # noinspection PyBroadException,PyUnusedLocal
     try:
-        # noinspection PyUnusedLocal
         dictionaries_as_set: set = {  # noqa: F841
             deep_convert_properties_iterable_to_id_dict(source=data_0),
             deep_convert_properties_iterable_to_id_dict(source=data_1),
@@ -98,11 +96,9 @@ def test_iddict_is_hashable():
 
 @pytest.mark.unit
 def test_batch_definition_id():
-    # noinspection PyUnusedLocal,PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
     print(A.id)
 
-    # noinspection PyUnusedLocal,PyPep8Naming
     B = BatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
     print(B.id)
 
@@ -112,10 +108,8 @@ def test_batch_definition_id():
 @pytest.mark.unit
 def test_batch_definition_instantiation():
     with pytest.raises(TypeError):
-        # noinspection PyTypeChecker,PyUnusedLocal,PyPep8Naming
         A = BatchDefinition("A", "a", "aaa", {"id": "A"})
 
-    # noinspection PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     print(A.id)
@@ -123,15 +117,12 @@ def test_batch_definition_instantiation():
 
 @pytest.mark.unit
 def test_batch_definition_equality():
-    # noinspection PyUnusedLocal,PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
-    # noinspection PyUnusedLocal,PyPep8Naming
     B = BatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
 
     assert A != B
 
-    # noinspection PyUnusedLocal,PyPep8Naming
     A2 = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     assert A == A2
@@ -205,7 +196,6 @@ def test_batch_request_instantiation():
 
     # No data_source_name specified
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         BatchRequest(
             data_connector_name="a",
             data_asset_name="aaa",
@@ -214,12 +204,10 @@ def test_batch_request_instantiation():
 
     # No data_source_name and data_connector_name specified
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         BatchRequest(data_asset_name="aaa", data_connector_query={"id": "A"})
 
     # No data_source_name and data_connector_name and data_asset_name specified
     with pytest.raises(TypeError):
-        # noinspection PyArgumentList
         BatchRequest(data_connector_query={"id": "A"})
 
     BatchRequest(datasource_name="A", data_connector_name="a", data_asset_name="aaa")

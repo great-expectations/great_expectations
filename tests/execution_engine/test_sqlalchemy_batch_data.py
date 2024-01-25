@@ -50,7 +50,6 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 
     query: str = "SELECT * FROM test_table_0"
     # If create_temp_table=False, a new temp table should NOT be created
-    # noinspection PyUnusedLocal
     SqlAlchemyBatchData(
         execution_engine=sqlite_view_engine,
         query=query,

@@ -47,7 +47,6 @@ class NotNullSchema(Schema):
 
     """
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_config(self, data: dict, **kwargs) -> Type[DictDot]:
         """Hook to convert the schema object into its respective config type.
@@ -68,10 +67,8 @@ class NotNullSchema(Schema):
                 "The subclass extending NotNullSchema must define its own custom __config_class__"
             )
 
-        # noinspection PyUnresolvedReferences
         return self.__config_class__(**data)
 
-    # noinspection PyUnusedLocal
     @post_dump(pass_original=True)
     def remove_nulls_and_keep_unknowns(
         self, output: dict, original: DictDot, **kwargs
@@ -91,10 +88,8 @@ class NotNullSchema(Schema):
         Returns:
             A cleaned dictionary that has no null values
         """
-        # noinspection PyArgumentList
         for key in original.keys():
             if key not in output and not key.startswith("_"):
-                # noinspection PyUnresolvedReferences
                 output[key] = original[key]
 
         cleaned_output = filter_properties_dict(

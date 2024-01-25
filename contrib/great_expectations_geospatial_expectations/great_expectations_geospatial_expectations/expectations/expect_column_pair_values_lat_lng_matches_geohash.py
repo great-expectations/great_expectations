@@ -23,7 +23,6 @@ def compare(row):
 class ColumnPairValuesLatLngMatchesGeohash(ColumnPairMapMetricProvider):
     condition_metric_name = "column_pair_values.lat_lng_matches_geohash"
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         df = pd.DataFrame(column_A).join(column_B)

@@ -104,7 +104,6 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
         name="my_runtime_sql_datasource", yaml_config=datasource_config
     )
 
-    # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
@@ -291,7 +290,6 @@ data_connectors:
         assets:
             A:
 """
-    # noinspection PyUnusedLocal
     context.test_yaml_config(
         name="my_directory_datasource",
         yaml_config=yaml_config,

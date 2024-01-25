@@ -152,7 +152,6 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
                 for name in column_names
             )
         )
-        # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
                 original_table_clause,
@@ -188,7 +187,6 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
         ]
 
-        # noinspection PyProtectedMember
         row_wise_cond = compound_columns_count_query.c._num_rows < 2  # noqa: PLR2004
 
         return row_wise_cond

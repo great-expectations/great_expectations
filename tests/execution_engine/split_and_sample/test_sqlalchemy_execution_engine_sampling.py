@@ -188,18 +188,15 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             #  and then use it here.
             dialect_name: GXSqlDialect = self._dialect_name
             if dialect_name == GXSqlDialect.ORACLE:
-                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="sqlalchemy.dialects.oracle"
                 ).dialect()
             elif dialect_name == GXSqlDialect.SNOWFLAKE:
-                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="snowflake.sqlalchemy.snowdialect"
                 ).dialect()
             elif dialect_name == GXSqlDialect.DREMIO:
                 # WARNING: Dremio Support is experimental, functionality is not fully under test
-                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="sqlalchemy_dremio.pyodbc"
                 ).dialect()
@@ -210,13 +207,11 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             #         module_name="sqlalchemy_redshift.dialect"
             #     ).RedshiftDialect
             elif dialect_name == GXSqlDialect.BIGQUERY:
-                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name=self._BIGQUERY_MODULE_NAME
                 ).dialect()
             elif dialect_name == GXSqlDialect.TERADATASQL:
                 # WARNING: Teradata Support is experimental, functionality is not fully under test
-                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="teradatasqlalchemy.dialect"
                 ).dialect()

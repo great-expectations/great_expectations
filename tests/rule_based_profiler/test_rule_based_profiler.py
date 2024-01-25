@@ -1452,6 +1452,5 @@ def test_add_rule_bad_rule(
         "expectation_configuration_builder": "expectation_configuration_builder",
     }
     with pytest.raises(AttributeError) as e:
-        # noinspection PyTypeChecker
         profiler.add_rule(rule=not_a_rule)
     assert "'dict' object has no attribute 'name'" in str(e.value)

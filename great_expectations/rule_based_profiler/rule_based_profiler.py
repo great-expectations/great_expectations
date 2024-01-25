@@ -915,7 +915,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule: Rule
         return {rule.name: rule for rule in self.rules}
 
-    # noinspection PyUnusedLocal
     def _apply_runtime_environment(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -1000,7 +999,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rule = rules_as_dict[variables_directives.rule_name]
             rule_variables_configs = convert_variables_to_dict(variables=rule.variables)
             # Filter only those additional/override directives that correspond to keys in "Rule" "variables" settings.
-            # noinspection PyTypeChecker
             variables = dict(
                 filter(
                     lambda element: element[0] in rule_variables_configs,

@@ -68,7 +68,6 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
         base_directory=base_directory,
     )
 
-    # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
     assert my_data_connector.get_data_reference_count() == 4
@@ -131,7 +130,6 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
         base_directory=base_directory,
     )
 
-    # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
     assert my_data_connector.get_data_reference_count() == 4

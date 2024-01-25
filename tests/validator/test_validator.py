@@ -177,7 +177,6 @@ def test_validator_default_expectation_args__sql(
 
     with pytest.raises(gx_exceptions.InvalidDataContextKeyError):
         # expectation_suite_name is a number not str
-        # noinspection PyUnusedLocal
         my_validator = context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
@@ -188,7 +187,6 @@ def test_validator_default_expectation_args__sql(
 
     with pytest.raises(TypeError):
         # expectation_suite is a string not an ExpectationSuite
-        # noinspection PyUnusedLocal
         my_validator = context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
@@ -448,7 +446,6 @@ def test_validator_with_bad_batchrequest(
         data_connector_query={"batch_filter_parameters": {"year": "2019"}},
     )
     with pytest.raises(gx_exceptions.InvalidBatchRequestError):
-        # noinspection PyUnusedLocal
         _: Validator = context.get_validator(
             batch_request=multi_batch_request, expectation_suite=suite
         )
@@ -693,7 +690,6 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     )
 
     with pytest.raises(ValueError) as ve:
-        # noinspection PyUnusedLocal
         _: Validator = context.get_validator(
             batch_request=jan_feb_batch_request,
             batch_request_list=[jan_batch_request, feb_batch_request],
@@ -794,7 +790,6 @@ def test_graph_validate_with_runtime_config(
         kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
     try:
-        # noinspection PyTypeChecker
         result = Validator(
             execution_engine=basic_datasource.execution_engine,
             data_context=in_memory_runtime_context,
@@ -841,7 +836,6 @@ def test_graph_validate_with_runtime_config(
 
 @pytest.mark.big
 def test_graph_validate_with_exception(basic_datasource):
-    # noinspection PyUnusedLocal
     def mock_error(*args, **kwargs):
         raise Exception("Mock Error")
 
@@ -920,7 +914,6 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
             [gx_exceptions.MetricResolutionError, gx_exceptions.ProfilerExecutionError]
         )
     ) as eee:
-        # noinspection PyUnusedLocal
         _ = Validator(
             execution_engine=basic_datasource.execution_engine,
             data_context=in_memory_runtime_context,

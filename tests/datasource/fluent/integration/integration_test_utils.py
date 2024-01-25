@@ -46,7 +46,6 @@ def run_checkpoint_and_data_doc(
     # Define an expectation suite
     suite_name = "my_suite"
     context.add_expectation_suite(expectation_suite_name=suite_name)
-    # noinspection PyTypeChecker
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,

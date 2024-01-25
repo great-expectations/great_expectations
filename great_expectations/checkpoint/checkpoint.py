@@ -295,7 +295,6 @@ class BaseCheckpoint(ConfigPeer):
         with AsyncExecutor(
             self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:
-            # noinspection PyUnresolvedReferences
             async_validation_operator_results: list[
                 AsyncResult[ValidationOperatorResult]
             ] = []

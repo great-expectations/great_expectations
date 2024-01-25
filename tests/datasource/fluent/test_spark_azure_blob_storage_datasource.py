@@ -37,7 +37,6 @@ if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):  #
 
 
 class MockContainerClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def walk_blobs(
         self,
         name_starts_with: str | None = None,
@@ -49,7 +48,6 @@ class MockContainerClient:
 
 
 class MockBlobServiceClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def get_container_client(self, container: str) -> azure.ContainerClient:
         return cast(azure.ContainerClient, MockContainerClient())
 
@@ -131,7 +129,6 @@ def test_construct_spark_abs_datasource_with_account_url_and_credential():
             "credential": "my_credential",
         },
     )
-    # noinspection PyUnresolvedReferences
     azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
@@ -146,7 +143,6 @@ def test_construct_spark_abs_datasource_with_conn_str_and_credential():
             "credential": "my_credential",
         },
     )
-    # noinspection PyUnresolvedReferences
     azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
@@ -161,7 +157,6 @@ def test_construct_spark_abs_datasource_with_valid_account_url_assigns_account_n
             "credential": "my_credential",
         },
     )
-    # noinspection PyUnresolvedReferences
     azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
@@ -176,7 +171,6 @@ def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name
             "credential": "my_credential",
         },
     )
-    # noinspection PyUnresolvedReferences
     azure_client: azure.BlobServiceClient = spark_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert spark_abs_datasource.name == "spark_abs_datasource"
@@ -194,7 +188,6 @@ def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error(
                 "credential": "my_credential",
             },
         )
-        # noinspection PyUnresolvedReferences
         _ = spark_abs_datasource._get_azure_client()
 
 

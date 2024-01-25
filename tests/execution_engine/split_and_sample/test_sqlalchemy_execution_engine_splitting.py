@@ -562,7 +562,6 @@ def test_sqlite_split(
         num_rows: int = batch_data.execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
-        # noinspection PyUnresolvedReferences
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
 

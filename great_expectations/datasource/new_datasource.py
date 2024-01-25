@@ -183,7 +183,6 @@ class BaseDatasource:
             batch_definition = batch_definition_list[0]
             runtime_parameters = batch_request.runtime_parameters
 
-            # noinspection PyArgumentList
             (
                 batch_data,
                 batch_spec,

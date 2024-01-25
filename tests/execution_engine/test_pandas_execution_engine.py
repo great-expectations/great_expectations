@@ -432,9 +432,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     )
     desired_metrics = (mean, stdev)
 
-    # noinspection PyUnusedLocal
     with pytest.raises(gx_exceptions.MetricProviderError):
-        # noinspection PyUnusedLocal
         engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
 

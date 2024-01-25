@@ -331,7 +331,6 @@ def _add_expectations_and_checkpoint(
             clean_falsy=True,
         ),
     )
-    # noinspection PyProtectedMember
     context._save_project_config()
     return context
 

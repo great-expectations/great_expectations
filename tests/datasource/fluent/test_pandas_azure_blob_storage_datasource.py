@@ -52,7 +52,6 @@ pytestmark = [
 
 
 class MockContainerClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def walk_blobs(
         self,
         name_starts_with: str | None = None,
@@ -64,7 +63,6 @@ class MockContainerClient:
 
 
 class MockBlobServiceClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def get_container_client(self, container: str) -> azure.ContainerClient:
         return cast(azure.ContainerClient, MockContainerClient())
 

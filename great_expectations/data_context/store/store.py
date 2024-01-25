@@ -169,11 +169,9 @@ class Store:
     def config(self) -> dict:
         raise NotImplementedError
 
-    # noinspection PyMethodMayBeStatic
     def serialize(self, value: Any) -> Any:
         return value
 
-    # noinspection PyMethodMayBeStatic
     def key_to_tuple(self, key: DataContextKey) -> Tuple[str, ...]:
         if self._use_fixed_length_key:
             return key.to_fixed_length_tuple()
@@ -186,7 +184,6 @@ class Store:
             return self.key_class.from_fixed_length_tuple(tuple_)
         return self.key_class.from_tuple(tuple_)
 
-    # noinspection PyMethodMayBeStatic
     def deserialize(self, value: Any) -> Any:
         return value
 

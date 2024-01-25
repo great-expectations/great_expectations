@@ -28,11 +28,9 @@ class BaseProfiler:
     "load()" method returns "BaseProfiler" type, which is type of class itself (using "fluent" programming style).
     """
 
-    # noinspection PyMethodMayBeStatic,PyMethodParameters
     def load(cls, filepath: str) -> BaseProfiler:
         return cls
 
-    # noinspection PyMethodMayBeStatic
     def report(self, report_options: dict = None) -> dict:
         return {
             "global_stats": {

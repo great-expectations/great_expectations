@@ -128,7 +128,6 @@ def _execute_taxi_splitting_test_cases(
             },
         }
 
-        # noinspection PyTypeChecker
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",

@@ -429,14 +429,12 @@ class CheckpointResultSchema(Schema):
     checkpoint_config = fields.Dict(required=False, allow_none=True)
     success = fields.Boolean(required=False, allow_none=True)
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = copy.deepcopy(data)
         data._run_results = convert_to_json_serializable(data.run_results)
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_checkpoint_result(self, data, **kwargs):
         return CheckpointResult(**data)
