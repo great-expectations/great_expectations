@@ -40,18 +40,18 @@ module.exports = {
           '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
         backgroundColor: '#141432',
         textColor: '#fff',
-        isCloseable: true, 
+        isCloseable: true,
       },
     gxCard: {
-      title: "What is GX Cloud?",
+      title: "Welcome to the Great Expectations Documentation",
       description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
       buttons: {
         primary: {
-          label: "Sign up for GX Cloud",
+          label: "Start using Cloud",
           href: "https://greatexpectations.io/cloud"
         },
         secondary: {
-          label: "Why GX Cloud?",
+          label: "Learn more about GX Cloud",
           href: "https://docs.greatexpectations.io/docs/cloud/why_gx_cloud"
         }
       }

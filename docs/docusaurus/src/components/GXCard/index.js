@@ -17,7 +17,7 @@ export default function gxCard(
   const content = useGXCardConfig();
   return (
     <div className={styles.gxCard} id="gxCard">
-      <h2 className={styles.gxCard__title}>{title || content.title}</h2>
+      <h1 className={styles.gxCard__title}>{title || content.title}</h1>
       <p className={styles.gxCard__description}>{description || content.description}</p>
       <div className={styles.gxCard__buttons}>
         <a className={cn(styles.button)} href={content.buttons.primary.href}>{content.buttons.primary.label}</a>
