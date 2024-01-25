@@ -1,45 +1,73 @@
 .gxCard {
-    background-color: #272763;
-    color: var(--ifm-footer-link-color);
-    margin: 0 0 2rem;
-    padding: 4rem 1.5rem;
-  }
-  
-  .gxCard__title {
-    max-width: 40rem;
-  }
-  
-  .gxCard__buttons {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-  
-  .button {
-    border: 1px solid transparent;
-    cursor: pointer;
-    border-radius: 50rem;
-    font-size: var(--p-font-size);
-    font-weight: var(--ifm-font-weight-semibold);
-    background-color: var(--ifm-color-primary);
-    color: var(--ifm-footer-link-color);
-    padding: 0.5rem 1rem;
-    text-align: center;
-  }
-  
-  .button:hover {
-    background: var(--ifm-color-primary);
-    color: var(--ifm-footer-link-color);
-    text-decoration: none;
-  }
-  
-  .button__outline {
-    border-color: var(--ifm-color-primary);
-    background: none;
-    color: var(--ifm-color-primary);
-  }
+  background-color: #272763;
+  color: var(--ifm-footer-link-color);
+  left: 50%;
+  margin: 0 -50vw 2rem;
+  position: relative;
+  right: 50%;
+  transform: translateX(calc(var(--doc-sidebar-hidden-width) / 2));
+  width: 100vw;
+}
 
-  .button__outline:hover {
-    background: none;
-    color: var(--ifm-color-primary);
-  }
+.gxCard__inner_container {
+  align-items: start;
+  display: grid;
+  gap: 0 1rem;
+  grid-template-areas: "title image" "description image" "buttons image";
+  margin-left: auto;
+  margin-right: auto;
+  max-width: var(--ifm-container-width);
+  padding: 4rem 3rem;
+}
+
+.gxCard__title {
+  grid-area: title;
+  max-width: 40rem;
+}
+
+.gxCard__description {
+  font-weight: normal;
+  grid-area: description;
+  max-width: 40rem;
+}
+
+.gxCard__image {
+  grid-area: image;
+  max-width: 380px;
+}
+
+.gxCard__buttons {
+  grid-area: buttons;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.button {
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 50rem;
+  font-size: var(--p-font-size);
+  font-weight: var(--ifm-font-weight-semibold);
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-footer-link-color);
+  padding: 0.5rem 1rem;
+  text-align: center;
+}
+
+.button:hover {
+  background: var(--ifm-color-primary);
+  color: var(--ifm-footer-link-color);
+  text-decoration: none;
+}
+
+.button__outline {
+  border-color: var(--ifm-color-primary);
+  background: none;
+  color: var(--ifm-color-primary);
+}
+
+.button__outline:hover {
+  background: none;
+  color: var(--ifm-color-primary);
+}
