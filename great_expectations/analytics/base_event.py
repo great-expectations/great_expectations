@@ -76,8 +76,12 @@ class Event:
             "data_context_id": self.data_context_id,
             "organization_id": self.organization_id,
             "oss_id": self.oss_id,
-            "service": "python-client",
+            "service": "gx-core",
         }
+        if self.organization_id is not None:
+            props.update({"organization_id": self.organization_id})
+        if self.user_id is not None:
+            props.update({"user_id": self.user_id})
         return {**props, **self._properties()}
 
     def _properties(self) -> dict:
