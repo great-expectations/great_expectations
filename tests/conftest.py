@@ -3553,13 +3553,14 @@ def empty_base_data_context_in_cloud_mode(
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    context = CloudDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_base_url=ge_cloud_config.base_url,
-        cloud_access_token=ge_cloud_config.access_token,
-        cloud_organization_id=ge_cloud_config.organization_id,
-    )
+    with mock.patch.object(CloudDataContext, "_init_analytics"):
+        context = CloudDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_base_url=ge_cloud_config.base_url,
+            cloud_access_token=ge_cloud_config.access_token,
+            cloud_organization_id=ge_cloud_config.organization_id,
+        )
     set_context(context)
     return context
 
