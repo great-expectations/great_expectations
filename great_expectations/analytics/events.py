@@ -15,6 +15,7 @@ from great_expectations.analytics.base_event import Action, Event
 from great_expectations.compatibility.typing_extensions import override
 
 
+@dataclass
 class DataContextInitializedEvent(Event):
     """
     Emitted when a DataContext is initialized.
@@ -46,12 +47,27 @@ class ExpectationSuiteExpectationCreatedEvent(_ExpectationSuiteExpectationEvent)
     TBD
     """
 
-    expectation_type: str = "UNKNOWN"
-    custom_exp_type: bool = False
+    expectation_type: str = ("UNKNOWN",)
+    custom_exp_type: bool = (False,)
 
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_CREATED,
     ]
+
+    def __init__(
+        self,
+        expectation_id: str | None = None,
+        expectation_suite_id: str | None = None,
+        expectation_type: str = "UNKNOWN",
+        custom_exp_type: bool = False,
+    ):
+        super().__init__(
+            action=EXPECTATION_SUITE_EXPECTATION_CREATED,
+            expectation_id=expectation_id,
+            expectation_suite_id=expectation_suite_id,
+        )
+        self.expectation_type = expectation_type
+        self.custom_exp_type = custom_exp_type
 
     @override
     def _properties(self) -> dict:
@@ -72,6 +88,17 @@ class ExpectationSuiteExpectationUpdatedEvent(_ExpectationSuiteExpectationEvent)
         EXPECTATION_SUITE_EXPECTATION_UPDATED,
     ]
 
+    def __init__(
+        self,
+        expectation_id: str | None = None,
+        expectation_suite_id: str | None = None,
+    ):
+        super().__init__(
+            action=EXPECTATION_SUITE_EXPECTATION_UPDATED,
+            expectation_id=expectation_id,
+            expectation_suite_id=expectation_suite_id,
+        )
+
 
 @dataclass
 class ExpectationSuiteExpectationDeletedEvent(_ExpectationSuiteExpectationEvent):
@@ -82,6 +109,17 @@ class ExpectationSuiteExpectationDeletedEvent(_ExpectationSuiteExpectationEvent)
     _allowed_actions: ClassVar[List[Action]] = [
         EXPECTATION_SUITE_EXPECTATION_DELETED,
     ]
+
+    def __init__(
+        self,
+        expectation_id: str | None = None,
+        expectation_suite_id: str | None = None,
+    ):
+        super().__init__(
+            action=EXPECTATION_SUITE_EXPECTATION_DELETED,
+            expectation_id=expectation_id,
+            expectation_suite_id=expectation_suite_id,
+        )
 
 
 @dataclass
@@ -104,6 +142,12 @@ class ExpectationSuiteCreatedEvent(_ExpectationSuiteEvent):
 
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_CREATED]
 
+    def __init__(self, expectation_suite_id: str | None = None):
+        super().__init__(
+            action=EXPECTATION_SUITE_CREATED,
+            expectation_suite_id=expectation_suite_id,
+        )
+
 
 @dataclass
 class ExpectationSuiteDeletedEvent(_ExpectationSuiteEvent):
@@ -113,3 +157,9 @@ class ExpectationSuiteDeletedEvent(_ExpectationSuiteEvent):
     """
 
     _allowed_actions: ClassVar[List[Action]] = [EXPECTATION_SUITE_DELETED]
+
+    def __init__(self, expectation_suite_id: str | None = None):
+        super().__init__(
+            action=EXPECTATION_SUITE_DELETED,
+            expectation_suite_id=expectation_suite_id,
+        )

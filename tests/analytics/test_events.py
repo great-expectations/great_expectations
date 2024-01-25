@@ -2,7 +2,11 @@ import pytest
 
 from great_expectations.analytics.events import (
     DataContextInitializedEvent,
+    ExpectationSuiteCreatedEvent,
+    ExpectationSuiteDeletedEvent,
     ExpectationSuiteExpectationCreatedEvent,
+    ExpectationSuiteExpectationDeletedEvent,
+    ExpectationSuiteExpectationUpdatedEvent,
 )
 
 
@@ -27,50 +31,46 @@ from great_expectations.analytics.events import (
             },
             id="ExpectationSuiteExpectationCreatedEvent",
         ),
-        # pytest.param(
-        #     ExpectationSuiteExpectationUpdatedEvent,
-        #     {
-        #         "expectation_id": "157abeb6-ffa8-4520-8239-649cf6ca9489",
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     {
-        #         "expectation_id": "157abeb6-ffa8-4520-8239-649cf6ca9489",
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     id="ExpectationSuiteExpectationUpdatedEvent",
-        # ),
-        # pytest.param(
-        #     ExpectationSuiteExpectationDeletedEvent,
-        #     {
-        #         "expectation_id": "157abeb6-ffa8-4520-8239-649cf6ca9489",
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     {
-        #         "expectation_id": "157abeb6-ffa8-4520-8239-649cf6ca9489",
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     id="ExpectationSuiteExpectationDeletedEvent",
-        # ),
-        # pytest.param(
-        #     ExpectationSuiteCreatedEvent,
-        #     {
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     {
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     id="ExpectationSuiteCreatedEvent",
-        # ),
-        # pytest.param(
-        #     ExpectationSuiteDeletedEvent,
-        #     {
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     {
-        #         "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
-        #     },
-        #     id="ExpectationSuiteDeletedEvent",
-        # ),
+        pytest.param(
+            ExpectationSuiteExpectationUpdatedEvent(
+                expectation_id="157abeb6-ffa8-4520-8239-649cf6ca9489",
+                expectation_suite_id="fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            ),
+            {
+                "expectation_id": "157abeb6-ffa8-4520-8239-649cf6ca9489",
+                "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            },
+            id="ExpectationSuiteExpectationUpdatedEvent",
+        ),
+        pytest.param(
+            ExpectationSuiteExpectationDeletedEvent(
+                expectation_id="157abeb6-ffa8-4520-8239-649cf6ca9489",
+                expectation_suite_id="fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            ),
+            {
+                "expectation_id": "157abeb6-ffa8-4520-8239-649cf6ca9489",
+                "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            },
+            id="ExpectationSuiteExpectationDeletedEvent",
+        ),
+        pytest.param(
+            ExpectationSuiteCreatedEvent(
+                expectation_suite_id="fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            ),
+            {
+                "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            },
+            id="ExpectationSuiteCreatedEvent",
+        ),
+        pytest.param(
+            ExpectationSuiteDeletedEvent(
+                expectation_suite_id="fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            ),
+            {
+                "expectation_suite_id": "fbb7ada0-600d-458d-a4f7-c6c30cb759b4",
+            },
+            id="ExpectationSuiteDeletedEvent",
+        ),
     ],
 )
 @pytest.mark.unit
