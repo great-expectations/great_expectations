@@ -4,10 +4,6 @@ from unittest.mock import Mock
 import pytest
 
 from great_expectations import set_context
-from great_expectations.analytics.actions import (
-    EXPECTATION_SUITE_CREATED,
-    EXPECTATION_SUITE_DELETED,
-)
 from great_expectations.analytics.events import (
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,
@@ -227,9 +223,7 @@ class TestSuiteFactoryAnalytics:
 
         # Assert
         mock_submit.assert_called_once_with(
-            event=ExpectationSuiteCreatedEvent(
-                action=EXPECTATION_SUITE_CREATED, expectation_suite_id=suite.ge_cloud_id
-            )
+            event=ExpectationSuiteCreatedEvent(expectation_suite_id=suite.ge_cloud_id)
         )
 
     @pytest.mark.filesystem
@@ -254,7 +248,5 @@ class TestSuiteFactoryAnalytics:
 
         # Assert
         mock_submit.assert_called_once_with(
-            event=ExpectationSuiteDeletedEvent(
-                action=EXPECTATION_SUITE_DELETED, expectation_suite_id=suite.ge_cloud_id
-            )
+            event=ExpectationSuiteDeletedEvent(expectation_suite_id=suite.ge_cloud_id)
         )

@@ -12,10 +12,6 @@ import great_expectations.exceptions.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import set_context
-from great_expectations.analytics.actions import (
-    EXPECTATION_SUITE_EXPECTATION_CREATED,
-    EXPECTATION_SUITE_EXPECTATION_DELETED,
-)
 from great_expectations.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
     ExpectationSuiteExpectationDeletedEvent,
@@ -1419,7 +1415,6 @@ class TestExpectationSuiteAnalytics:
 
         mock_submit.assert_called_once_with(
             event=ExpectationSuiteExpectationCreatedEvent(
-                action=EXPECTATION_SUITE_EXPECTATION_CREATED,
                 expectation_id=None,
                 expectation_suite_id=None,
                 expectation_type="expect_column_values_to_be_between",
@@ -1444,7 +1439,6 @@ class TestExpectationSuiteAnalytics:
 
         mock_submit.assert_called_once_with(
             event=ExpectationSuiteExpectationCreatedEvent(
-                action=EXPECTATION_SUITE_EXPECTATION_CREATED,
                 expectation_id=None,
                 expectation_suite_id=None,
                 expectation_type=mock.ANY,
@@ -1473,7 +1467,6 @@ class TestExpectationSuiteAnalytics:
 
         mock_submit.assert_called_once_with(
             event=ExpectationSuiteExpectationDeletedEvent(
-                action=EXPECTATION_SUITE_EXPECTATION_DELETED,
                 expectation_id=None,
                 expectation_suite_id=None,
             )
