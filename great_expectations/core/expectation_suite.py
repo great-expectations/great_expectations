@@ -30,10 +30,6 @@ from great_expectations._docs_decorators import (
     new_argument,
     public_api,
 )
-from great_expectations.analytics.actions import (
-    EXPECTATION_SUITE_EXPECTATION_CREATED,
-    EXPECTATION_SUITE_EXPECTATION_DELETED,
-)
 from great_expectations.analytics.anonymizer import Anonymizer
 from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import (
@@ -205,7 +201,6 @@ class ExpectationSuite(SerializableDictDot):
 
         submit_event(
             event=ExpectationSuiteExpectationCreatedEvent(
-                action=EXPECTATION_SUITE_EXPECTATION_CREATED,
                 expectation_id=expectation.id,
                 expectation_suite_id=self.ge_cloud_id,
                 expectation_type=expectation_type,
@@ -241,7 +236,6 @@ class ExpectationSuite(SerializableDictDot):
 
         submit_event(
             event=ExpectationSuiteExpectationDeletedEvent(
-                action=EXPECTATION_SUITE_EXPECTATION_DELETED,
                 expectation_id=expectation.id,
                 expectation_suite_id=self.ge_cloud_id,
             )

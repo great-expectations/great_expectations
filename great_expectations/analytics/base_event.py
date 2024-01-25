@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import ClassVar, List, Optional
 from uuid import UUID
 
@@ -36,7 +36,7 @@ class Event:
         return get_config().data_context_id
 
     @property
-    def organization_id(self) -> Optional[UUID]:
+    def organization_id(self) -> UUID:
         return get_config().organization_id
 
     @property
@@ -44,16 +44,8 @@ class Event:
         return get_config().oss_id
 
     @property
-    def user_id(self) -> Optional[UUID]:
+    def user_id(self) -> UUID:
         return get_config().user_id
-
-    @property
-    def distinct_id(self) -> UUID:
-        """The distinct_id is the primary key for identifying
-        anlaytics events. It is the user_id if it is set
-        (e.g. in a Cloud context), otherwise the oss_id.
-        """
-        return self.user_id or self.oss_id
 
     _allowed_actions: ClassVar[Optional[List[Action]]] = None
 
@@ -74,14 +66,10 @@ class Event:
     def properties(self) -> dict:
         props = {
             "data_context_id": self.data_context_id,
+            "organization_id": self.organization_id,
             "oss_id": self.oss_id,
-            "service": "gx-core",
+            "service": "python-client",
         }
-        if self.organization_id is not None:
-            props.update({"organization_id": self.organization_id})
-        if self.user_id is not None:
-            props.update({"user_id": self.user_id})
-
         return {**props, **self._properties()}
 
     def _properties(self) -> dict:
@@ -93,4 +81,7 @@ class Event:
         Returns:
             A dict representation of the event specific properties
         """
-        return {}
+        props = asdict(self)
+        print(props)
+        props.pop("action")
+        return props
