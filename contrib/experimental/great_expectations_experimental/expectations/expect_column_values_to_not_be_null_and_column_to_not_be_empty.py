@@ -107,7 +107,7 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         {
             "data": {
                 "not_has_null": ["test", "foo", "for", "bar", "boo"],
-                "has_null": ["test", "foo", "for", "bar", np.NaN],
+                "has_null": ["test", "foo", "for", "bar", np.nan],
             },
             "tests": [
                 {

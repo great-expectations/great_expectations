@@ -258,6 +258,9 @@ select = [
     "PL", # pylint
     # https://beta.ruff.rs/docs/rules/#ruff-specific-rules-ruf
     "RUF", # custom ruff rules
+    #  https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
+    # "NPY", # NumPy-specific rules TODO: Enable after fixing or ignoring errors
+    "NPY201", # numpy 2.0 compatibility (see https://numpy.org/devdocs/numpy_2_0_migration_guide.html#ruff-plugin) -- Explicitly listed to view preview rule errors
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
