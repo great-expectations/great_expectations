@@ -3620,13 +3620,14 @@ def empty_cloud_data_context(
     project_path.mkdir()
     project_path_name: str = str(project_path)
 
-    context = CloudDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path_name,
-        cloud_base_url=ge_cloud_config.base_url,
-        cloud_access_token=ge_cloud_config.access_token,
-        cloud_organization_id=ge_cloud_config.organization_id,
-    )
+    with mock.patch.object(CloudDataContext, "_init_analytics"):
+        context = CloudDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path_name,
+            cloud_base_url=ge_cloud_config.base_url,
+            cloud_access_token=ge_cloud_config.access_token,
+            cloud_organization_id=ge_cloud_config.organization_id,
+        )
     set_context(context)
     return context
 
