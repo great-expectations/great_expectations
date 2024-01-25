@@ -31,7 +31,6 @@ class DummyDomain(Domain):
         return "my_id"
 
 
-# noinspection PyTypeChecker
 @pytest.fixture
 def empty_domain() -> Domain:
     return DummyDomain()

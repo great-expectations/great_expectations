@@ -65,7 +65,6 @@ def send_slack_notification(
             return "Slack notification succeeded."
 
 
-# noinspection SpellCheckingInspection
 def send_opsgenie_alert(query, suite_name, settings):
     """Creates an alert in Opsgenie."""
     if settings["region"] is not None:
@@ -140,7 +139,6 @@ def send_webhook_notifications(query, webhook, target_platform):
             return f"{target_platform} notification succeeded."
 
 
-# noinspection SpellCheckingInspection
 def send_email(  # noqa: PLR0913
     title,
     html,

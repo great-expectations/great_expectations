@@ -211,7 +211,6 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
     return converted_string
 
 
-# noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
     regex_pattern: re.Pattern | str,
     group_names: List[str],

@@ -237,7 +237,6 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
         _ = pandas_abs_datasource._get_azure_client()
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -262,7 +261,6 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -283,7 +281,6 @@ def test_construct_csv_asset_directly(
     assert m1 is not None
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -310,7 +307,6 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     )
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -337,7 +333,6 @@ def test_csv_asset_with_batching_regex_named_parameters(
     )
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -364,7 +359,6 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     )
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -477,7 +471,6 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error_message)
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"

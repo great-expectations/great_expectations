@@ -126,7 +126,6 @@ def _parse_great_expectations_condition(row_condition: str):
         raise ConditionParserError(f"unable to parse condition: {row_condition}")
 
 
-# noinspection PyUnresolvedReferences
 def parse_condition_to_spark(  # type: ignore[return] # return or raise exists for all branches  # noqa: PLR0911, PLR0912
     row_condition: str,
 ) -> pyspark.Column:

@@ -587,7 +587,6 @@ def datetime_to_int(dt: datetime.date) -> int:
     return int(dt.strftime("%Y%m%d%H%M%S"))
 
 
-# noinspection SpellCheckingInspection
 class AzureUrl:
     """
     Parses an Azure Blob Storage URL into its separate components.
@@ -786,7 +785,6 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
-# noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, Any]] = None,
     force_reuse_spark_context: bool = True,
@@ -849,7 +847,6 @@ def get_or_create_spark_application(
     return spark_session
 
 
-# noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
 ) -> pyspark.SparkSession | None:

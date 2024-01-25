@@ -1279,7 +1279,6 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
     }
 
 
-# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ValidationResultsColumnSectionRenderer_render_table(
     titanic_profiled_name_column_evrs,
@@ -1321,7 +1320,6 @@ def test_ValidationResultsColumnSectionRenderer_render_table(
     )
 
 
-# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():
     evr = ExpectationValidationResult(
@@ -1421,7 +1419,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
     }
 
 
-# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path_with_eval_parameter():
     evr = ExpectationValidationResult(
@@ -1665,7 +1662,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
     }
 
 
-# noinspection PyPep8Naming
 @pytest.mark.filterwarnings(
     "ignore:Cannot get %*::great_expectations.render.renderer.profiling_results_overview_section_renderer"
 )
@@ -1709,7 +1705,6 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
     assert ["unknown", "1"] in types_table
 
 
-# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ProfilingColumnPropertiesTableContentBlockRenderer():
     ge_object = [

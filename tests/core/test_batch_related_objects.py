@@ -225,7 +225,6 @@ def test_batch_request_instantiation():
     BatchRequest(datasource_name="A", data_connector_name="a", data_asset_name="aaa")
 
 
-# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_RuntimeDataBatchSpec():
     with pytest.raises(InvalidBatchSpecError):
