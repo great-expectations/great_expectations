@@ -12,8 +12,10 @@
 @import "typography.scss";
 @import "left_navigation.scss";
 @import "navbar.scss";
+@import "tabs.scss";
 
 /* You can override the default Infima variables here. */
+
 :root {
     --ifm-font-color-base: #404041;
     --ifm-navbar-link-color: #404041;
