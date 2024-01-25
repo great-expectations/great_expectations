@@ -40,7 +40,7 @@ module.exports = {
           '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
         backgroundColor: '#141432',
         textColor: '#fff',
-        isCloseable: true, 
+        isCloseable: true,
       },
     gxCard: {
       title: "What is GX Cloud?",
