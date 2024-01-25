@@ -90,7 +90,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
     """
     # </snippet>
 
-    additional_value: Optional[int] = None
+    additional_value: Optional[float] = None
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
