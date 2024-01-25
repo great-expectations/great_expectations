@@ -196,7 +196,6 @@ class MetaDataset(DataAsset):
         return inner_wrapper
 
 
-# noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type

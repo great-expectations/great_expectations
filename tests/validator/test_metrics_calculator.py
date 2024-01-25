@@ -41,7 +41,6 @@ def integer_and_datetime_sample_dataset() -> dict:
     }
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "backend,",
     [

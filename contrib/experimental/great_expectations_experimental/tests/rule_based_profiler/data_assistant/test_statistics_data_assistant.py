@@ -5,7 +5,6 @@ from typing import Any, Dict, Optional, cast
 import numpy as np
 import pytest
 
-# noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     StatisticsDataAssistantResult,
 )
@@ -31,8 +30,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
-
-# noinspection PyUnresolvedReferences
 
 yaml: YAMLHandler = YAMLHandler()
 

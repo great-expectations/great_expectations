@@ -5,7 +5,6 @@ from contrib.experimental.great_expectations_experimental.expectations.expect_qu
     ExpectQueriedTableRowCountToBe,  # noqa: F401 # needed for expectation registration
 )
 
-# noinspection PyUnresolvedReferences
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import build_in_memory_runtime_context
@@ -120,7 +119,6 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     )
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "success,value,observed,row_condition",
     [
@@ -161,7 +159,6 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     )
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "success,query,value,observed,row_condition",
     [

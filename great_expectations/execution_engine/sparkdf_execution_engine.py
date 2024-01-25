@@ -74,7 +74,6 @@ from great_expectations.validator.metric_configuration import (
 logger = logging.getLogger(__name__)
 
 
-# noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
     assert len(column.columns) == 1, "Expected DataFrame with 1 column"
     col_name = column.columns[0]

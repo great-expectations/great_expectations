@@ -92,7 +92,6 @@ def test_rule_output_get_fully_qualified_parameter_names_by_domain(
     )
 
 
-# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_rule_output_get_fully_qualified_parameter_names_for_domain_id(
     rule_output_for_rule_state_with_domains_and_parameters,
@@ -494,7 +493,6 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by
     )
 
 
-# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
     rule_output_for_rule_state_with_domains_and_parameters,

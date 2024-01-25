@@ -334,7 +334,6 @@ def test_prescriptive_renderer_with_decorator(
     assert len(res) == 2
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.all_backends
 def test_table_column_reflection_fallback(test_backends, sa):
     include_sqlalchemy: bool = "sqlite" in test_backends

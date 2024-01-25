@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# noinspection SpellCheckingInspection
 class DataConnector(ABC):
     """The abstract base class for all Data Connectors.
 

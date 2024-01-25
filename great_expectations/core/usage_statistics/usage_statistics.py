@@ -294,7 +294,6 @@ def usage_statistics_enabled_method(
         return usage_statistics_wrapped_method_partial
 
 
-# noinspection PyUnusedLocal
 def run_validation_operator_usage_statistics(
     data_context: AbstractDataContext,
     validation_operator_name: str,
@@ -335,8 +334,6 @@ def run_validation_operator_usage_statistics(
     return payload
 
 
-# noinspection SpellCheckingInspection
-# noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
     data_context: AbstractDataContext,
     expectation_suite: ExpectationSuite | None = None,
@@ -433,7 +430,6 @@ def add_datasource_usage_statistics(
     return payload
 
 
-# noinspection SpellCheckingInspection
 def get_batch_list_usage_statistics(
     data_context: AbstractDataContext, *args, **kwargs
 ) -> dict:
@@ -462,7 +458,6 @@ def get_batch_list_usage_statistics(
     return payload
 
 
-# noinspection PyUnusedLocal
 def get_checkpoint_run_usage_statistics(
     checkpoint: Checkpoint,
     *args,
@@ -505,7 +500,6 @@ def get_checkpoint_run_usage_statistics(
     return payload
 
 
-# noinspection PyUnusedLocal
 def get_profiler_run_usage_statistics(
     profiler: RuleBasedProfiler,
     variables: dict | None = None,
@@ -593,8 +587,6 @@ def send_usage_message_from_handler(
         )
 
 
-# noinspection SpellCheckingInspection
-# noinspection PyUnusedLocal
 def _handle_expectation_suite_usage_statistics(
     data_context: AbstractDataContext,
     event_arguments_payload_handler_name: str,

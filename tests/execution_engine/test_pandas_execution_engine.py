@@ -8,8 +8,6 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws, azure, google
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
-
-# noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
@@ -543,7 +541,6 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     assert split_df.dataframe.id.max() == 59
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.skipif(
     not (azure.storage and azure.BlobServiceClient),
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',

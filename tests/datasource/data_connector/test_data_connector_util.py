@@ -5,8 +5,6 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.compatibility import google
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
-
-# noinspection PyProtectedMember
 from great_expectations.datasource.data_connector.util import (
     _invert_regex_to_data_reference_template,
     batch_definition_matches_batch_request,
