@@ -37,10 +37,10 @@ module.exports = {
     announcementBar: {
         id: 'cta_bar',
         content:
-          '<b>GX Cloud public preview starts on February 21!</b>  Join us for a community kickoff event, workshop, or both.',
-        backgroundColor: '#20232a',
+          '<a style="font-weight:600" href="">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
+        backgroundColor: '#141432',
         textColor: '#fff',
-        isCloseable: false,
+        isCloseable: true, 
       },
     gxCard: {
       title: "What is GX Cloud?",
