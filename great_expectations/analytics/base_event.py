@@ -74,7 +74,6 @@ class Event:
     def properties(self) -> dict:
         props = {
             "data_context_id": self.data_context_id,
-            "organization_id": self.organization_id,
             "oss_id": self.oss_id,
             "service": "gx-core",
         }
@@ -82,6 +81,7 @@ class Event:
             props.update({"organization_id": self.organization_id})
         if self.user_id is not None:
             props.update({"user_id": self.user_id})
+
         return {**props, **self._properties()}
 
     def _properties(self) -> dict:
