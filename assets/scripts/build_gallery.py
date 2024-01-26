@@ -269,7 +269,6 @@ def install_necessary_requirements(requirements) -> list:
         is_satisfied = any(
             installed_pkg.name in req.name for installed_pkg in installed_packages
         )
-
         if not is_satisfied:
             logger.debug(f"Executing command: 'pip install \"{req}\"'")
             status_code = execute_shell_command(f'pip install "{req}"')
