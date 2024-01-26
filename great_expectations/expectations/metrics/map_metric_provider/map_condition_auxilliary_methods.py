@@ -431,7 +431,7 @@ def _sqlalchemy_map_condition_query(
     """
     (
         unexpected_condition,
-        compute_domain_kwargs,
+        _compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 

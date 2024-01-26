@@ -15,7 +15,6 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
 )
-from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 # module level markers
 pytestmark = pytest.mark.filesystem
@@ -27,54 +26,50 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     context = empty_data_context
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
+            expectation_suite_name="test", notes="*hi*", data_context=context
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*hi*",
+        {
+            "content_block_type": "markdown",
+            "markdown": "*hi*",
+            "styling": {"parent": {}},
+        },
     ]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={"notes": ["*alpha*", "_bravo_", "charlie"]},
+            notes=["*alpha*", "_bravo_", "charlie"],
             data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*alpha*",
-        "_bravo_",
-        "charlie",
+        {
+            "content_block_type": "markdown",
+            "markdown": "*alpha*",
+            "styling": {"parent": {}},
+        },
+        {
+            "content_block_type": "markdown",
+            "markdown": "_bravo_",
+            "styling": {"parent": {}},
+        },
+        {
+            "content_block_type": "markdown",
+            "markdown": "charlie",
+            "styling": {"parent": {}},
+        },
     ]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.STRING,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
-            data_context=context,
-        )
-    )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
-    assert RenderedContent.rendered_content_list_to_json(result.text) == [
-        "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*alpha*",
-        "_bravo_",
-        "charlie",
-    ]
-
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": "*alpha*"}},
+            notes="*alpha*",
             data_context=context,
         )
     )
@@ -99,12 +94,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.MARKDOWN,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
+            notes=["*alpha*", "_bravo_", "charlie"],
             data_context=context,
         )
     )
@@ -159,7 +149,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": ["hi"]}},
+            notes=["hi"],
             data_context=context,
         )
     )

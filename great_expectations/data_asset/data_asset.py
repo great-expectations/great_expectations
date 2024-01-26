@@ -809,7 +809,7 @@ class DataAsset:
                     # A missing parameter will raise an EvaluationParameterError
                     (
                         evaluation_args,
-                        substituted_parameters,
+                        _substituted_parameters,
                     ) = build_evaluation_parameters(
                         expectation.kwargs,
                         runtime_evaluation_parameters,
