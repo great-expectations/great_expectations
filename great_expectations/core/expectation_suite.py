@@ -250,6 +250,7 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
+        # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now
         key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         self._store.update(key=key, value=self)
 
