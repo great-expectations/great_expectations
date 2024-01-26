@@ -139,7 +139,6 @@ class SnippetMover:
             return re.findall(expression, text)
 
     def move_file(self, src: Path, dest: Path) -> None:
-        raise Exception("stop here please")
         os.rename(os.path.join(self._root_dir, src), os.path.join(self._root_dir, dest))
 
     @classmethod
