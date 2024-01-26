@@ -42,6 +42,7 @@ class SnippetMover:
         self._tests_root_dir = os.path.join(gx_root_dir, self._tests_prefix)
         self._orphaned_snippet_paths: set[(str, str)] = set()
         self._general_files_to_update = ("tests/integration/test_script_runner.py",)
+        self._snippets_moved_count = 0
 
     def run(self):
         self.ensure_dir(self._default_snippet_path)
@@ -50,6 +51,11 @@ class SnippetMover:
         self.store_test_path_by_snippet_name()
         # process
         self.move_and_rename_snippets()
+        # doc
+        for snippet_name, code_path in self._orphaned_snippet_paths:
+            print(f"orphaned snippet {snippet_name} at {code_path} was not moved")
+        print(f"Total of {len(self._orphaned_snippet_paths)} orphaned snippets found.")
+        print(f"Moved {self._snippets_moved_count} snippets.")
 
     def store_test_path_by_snippet_name(self):
         """Find snippets in tests and store the path by snippet_name.
@@ -123,6 +129,7 @@ class SnippetMover:
                     path=path, old_str=str(code_path), new_str=str(snippet_dest)
                 )
             self.move_file(src=code_path, dest=snippet_dest)
+            self._snippets_moved_count += 1
 
     @classmethod
     def get_all_files_by_match(cls, root_dir: str, match: str) -> list[str]:
