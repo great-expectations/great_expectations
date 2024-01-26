@@ -132,23 +132,6 @@ a.pagination-nav__link:hover {
     padding: 0 var(--ifm-pre-padding);
 }
 
-.header-cloud-link {
-    border: none;
-    border-radius: 35px;
-    color: #fff;
-    font-size: var(--p-font-size);
-    font-weight: var(--ifm-font-weight-semibold);
-    padding: 8px 16px;
-    background: var(--ifm-link-color);
-    text-align: center;
-    text-transform: none;
-}
-
-.header-cloud-link:hover {
-    color: #FFF;
-    background-color: #DE550A;
-}
-
 /*footer*/
 
 .footer__items {
