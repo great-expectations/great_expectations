@@ -342,7 +342,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _init_analytics(self) -> None:
         init_analytics(
-            user_id=None,
             data_context_id=uuid.UUID(self._data_context_id),
             oss_id=self._get_oss_id(),
         )

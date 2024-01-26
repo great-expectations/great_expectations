@@ -123,8 +123,8 @@ Environment variables securely store your GX Cloud access credentials.
 ## Related documentation
 
 
-- [Install GX in a specific environment with a specific Data Source](/docs/oss/guides/setup/installation/install_gx)
-- [Initialize, instantiate, and save a Data Context](/docs/oss/guides/setup/configure_data_contexts_lp)
-- [Connect to Data Sources](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp)
-- [Create and manage Expectations and Expectation Suites](/docs/oss/guides/expectations/expectations_lp/)
-- [Create, manage, and run Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp/)
+- [Install GX in a specific environment with a specific Data Source](/oss/guides/setup/installation/install_gx.md)
+- [Initialize, instantiate, and save a Data Context](/oss/guides/setup/configure_data_contexts_lp.md)
+- [Connect to Data Sources](/oss/guides/connecting_to_your_data/connect_to_data_lp.md)
+- [Create and manage Expectations and Expectation Suites](/oss/guides/expectations/expectations_lp.md)
+- [Create, manage, and run Checkpoints](/oss/guides/validation/checkpoints/checkpoint_lp.md)

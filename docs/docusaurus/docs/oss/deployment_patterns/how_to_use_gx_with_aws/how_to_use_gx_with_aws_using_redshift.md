@@ -277,7 +277,7 @@ If you have already instantiated your `DataContext` in a previous step, this ste
 
 We recommend that database credentials be stored in the `config_variables.yml` file, which is located in the `uncommitted/` folder by default, and is not part of source control.
 
-For additional options on configuring the `config_variables.yml` file or additional environment variables, please see our guide on [how to configure credentials](/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials).
+For additional options on configuring the `config_variables.yml` file or additional environment variables, please see our guide on [how to configure credentials](/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).
 
 :::
 
