@@ -35,9 +35,7 @@ def parse_requirements_files_to_strings(files: list[pathlib.Path]) -> dict:
             filter_lines = list(filter(lambda line: line[0] != "#", f.readlines()))
             lines = [Requirement(line) for line in filter_lines]
             req_set_dict[key] = {
-                f'{line.name}","{line.specifier!s}'
-                for line in lines
-                if line.specifier
+                f'{line.name}","{line.specifier!s}' for line in lines if line.specifier
             }
 
     return req_set_dict
