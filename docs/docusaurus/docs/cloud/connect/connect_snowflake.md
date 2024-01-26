@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Connect GX Cloud to Snowflake'
 title: 'Connect GX Cloud to Snowflake'
-description: Connect GX cloud to a Snowflake Data Source.
+description: Connect GX Cloud to a Snowflake Data Source.
 ---
 
 import TabItem from '@theme/TabItem';

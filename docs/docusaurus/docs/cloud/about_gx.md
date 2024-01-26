@@ -8,7 +8,7 @@ toc_max_heading_level: 2
 
 GX Cloud builds on the innovative features of GX open source software (OSS). Its easy-to-use web interface lets you quickly validate your data without creating and running complex Python code. With GX Cloud you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.
 
-While it is possible to design and deploy a functioning data quality ecosystem with GX OSS, GX Cloud simplifies infrastructure and deployment significantly. With GX cloud, you'll save time, money, and effort implementing your data quality management and monitoring solution.
+While it is possible to design and deploy a functioning data quality ecosystem with GX OSS, GX Cloud simplifies infrastructure and deployment significantly. With GX Cloud, you'll save time, money, and effort implementing your data quality management and monitoring solution.
 
 Here are just a few of the benefits you'll get with GX Cloud:
 

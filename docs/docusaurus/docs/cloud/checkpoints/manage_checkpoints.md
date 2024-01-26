@@ -10,7 +10,7 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
 
 ## Prerequisites
 
-- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX cloud](../connect/connect_lp.md).
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
 
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
