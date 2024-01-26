@@ -1,7 +1,6 @@
 import os
 import re
 from collections import defaultdict
-from os.path import join
 from pathlib import Path
 from glob import glob
 from typing import Pattern
@@ -37,8 +36,10 @@ class SnippetMover:
         self._default_snippet_path = Path(
             os.path.join(gx_root_dir, "docs/docusaurus/docs/snippets")
         )
-        self._docs_root_dir = os.path.join(gx_root_dir, "docs")
-        self._tests_root_dir = os.path.join(gx_root_dir, "tests")
+        self._docs_prefix = "docs"
+        self._docs_root_dir = os.path.join(gx_root_dir, self._docs_prefix)
+        self._tests_prefix = "tests"
+        self._tests_root_dir = os.path.join(gx_root_dir, self._tests_prefix)
         self._orphaned_snippet_paths: set[(str, str)] = set()
         self._general_files_to_update = ("tests/integration/test_script_runner.py",)
 
@@ -56,11 +57,16 @@ class SnippetMover:
         Snippets also exist in the codebase, but we can't move them.
         """
         code_match = "**/*.py"  # this should maybe be updated to be more permissive
-        code_files = self.get_all_files_by_match(self._tests_root_dir, match=code_match)
+        code_paths = self.get_all_files_by_match(self._tests_root_dir, match=code_match)
+        # add the tests prefix so paths are relative to root_dir
+        code_paths = [
+            os.path.join(self._tests_prefix, code_path) for code_path in code_paths
+        ]
         code_snippet_expression = re.compile(r"snippet name=\"(.*)\"")
-        for code_path in code_files:
+        for code_path in code_paths:
             snippet_names = self.search_file_for_snippets(
-                path=code_path, expression=code_snippet_expression
+                path=os.path.join(self._root_dir, code_path),
+                expression=code_snippet_expression,
             )
             code_path = Path(code_path)
             for snippet_name in snippet_names:
@@ -73,13 +79,18 @@ class SnippetMover:
     def store_doc_paths_by_snippet_name(self):
         """find snippets in docs and store the path by snippet name"""
         markdown_match = "**/*.md"
-        doc_files = self.get_all_files_by_match(
+        doc_paths = self.get_all_files_by_match(
             self._docs_root_dir, match=markdown_match
         )
+        # add the docs prefix so paths are relative to root_dir
+        doc_paths = [
+            os.path.join(self._docs_prefix, doc_path) for doc_path in doc_paths
+        ]
         doc_snippet_expression = re.compile(r"```\w* name=\"(.*)\"")
-        for doc_path in doc_files:
+        for doc_path in doc_paths:
             snippet_names = self.search_file_for_snippets(
-                path=doc_path, expression=doc_snippet_expression
+                path=os.path.join(self._root_dir, doc_path),
+                expression=doc_snippet_expression,
             )
             doc_path = Path(doc_path)
             for snippet_name in snippet_names:
@@ -92,34 +103,44 @@ class SnippetMover:
                 self._orphaned_snippet_paths.add((snippet_name, code_path))
                 continue
             if len(doc_paths) > 1:
+                # this snippet is referenced by multiple docs, so we move it to the default dir
                 snippet_dest_dir = self._default_snippet_path
             else:
+                # this snippet is referenced by a single doc, so we move it next to the doc
                 snippet_dest_dir = list(doc_paths)[0].parent
+            # keep the filename the same
             snippet_dest = Path(os.path.join(snippet_dest_dir, code_path.parts[-1]))
-            self.move_file(src=code_path, dest=snippet_dest)
-            for path in (code_path, *doc_paths, *self._general_files_to_update):
+            paths_to_update = [
+                os.path.join(self._root_dir, code_path),
+                *[os.path.join(self._root_dir, doc_path) for doc_path in doc_paths],
+                *[
+                    os.path.join(self._root_dir, gen_path)
+                    for gen_path in self._general_files_to_update
+                ],
+            ]
+            for path in paths_to_update:
                 self.find_and_replace_text_in_file(
                     path=path, old_str=str(code_path), new_str=str(snippet_dest)
                 )
+            self.move_file(src=code_path, dest=snippet_dest)
 
     @classmethod
     def get_all_files_by_match(cls, root_dir: str, match: str) -> list[str]:
         """Build a list of all filenames that match a given string within the root directory."""
-        files = glob(pathname=match, recursive=True, root_dir=root_dir)
-        return [join(root_dir, filename) for filename in files]
+        return glob(pathname=match, recursive=True, root_dir=root_dir)
 
-    @classmethod
-    def search_file_for_snippets(cls, path: str, expression: Pattern[str]) -> list[str]:
+    def search_file_for_snippets(
+        self, path: str, expression: Pattern[str]
+    ) -> list[str]:
         """Build a list of all snippets referenced within a doc."""
-        with open(path, "r") as file:
+        absolute_path = os.path.join(self._root_dir, path)
+        with open(absolute_path, "r") as file:
             text = file.read()
-            res = re.findall(expression, text)
-            return res
+            return re.findall(expression, text)
 
-    @classmethod
-    def move_file(cls, src: Path, dest: Path) -> None:
+    def move_file(self, src: Path, dest: Path) -> None:
         raise Exception("stop here please")
-        os.rename(src, dest)
+        os.rename(os.path.join(self._root_dir, src), os.path.join(self._root_dir, dest))
 
     @classmethod
     def ensure_dir(cls, path: Path) -> None:
@@ -127,19 +148,20 @@ class SnippetMover:
         if not path.is_dir():
             os.makedirs(path)
 
-    @classmethod
     def find_and_replace_text_in_file(
-        cls, path: Path, old_str: str, new_str: str
+        self, path: Path, old_str: str, new_str: str
     ) -> None:
-        with open(path, "rw") as file:
+        absolute_path = os.path.join(self._root_dir, path)
+        with open(absolute_path, "r") as file:
             text = file.read()
-            re.sub(old_str, new_str, text)
+        text = re.sub(old_str, new_str, text)
+        with open(absolute_path, "w") as file:
             file.write(text)
 
 
 if __name__ == "__main__":
     GX_ROOT_DIR = os.getcwd()
     if not Path(os.path.join(GX_ROOT_DIR, "great_expectations")).is_dir():
-        raise Exception("SnippetMover must be invoked from the root directory.")
+        raise RuntimeError("SnippetMover must be invoked from the GX root directory.")
     snippet_mover = SnippetMover(gx_root_dir=GX_ROOT_DIR)
     snippet_mover.run()
