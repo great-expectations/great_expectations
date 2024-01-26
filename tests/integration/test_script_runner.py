@@ -10,9 +10,9 @@ import logging
 import os
 import pathlib
 import shutil
+from importlib.metadata import distributions
 from typing import List
 
-from importlib.metadata import distributions
 import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from flaky import flaky
