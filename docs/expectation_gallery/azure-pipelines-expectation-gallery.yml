@@ -52,7 +52,16 @@ variables:
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
+  - stage: block_pipeline
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      -job: ThisFails
+      steps:
+        - bash: ls this_file_does_not_exist_so_this_will_fail
+
   - stage: scope_check
+    dependsOn: block_pipeline
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
@@ -76,7 +85,7 @@ stages:
                 assets/scripts/**
 
   - stage: exp_tests_on_all_backends
-    dependsOn: scope_check
+    dependsOn: [scope_check, block_pipeline]
     condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-20.04'
@@ -614,65 +623,8 @@ stages:
               filesAcl: 'public-read'
 
 
-#     - job: athena
-#       timeoutInMinutes: 180
-#       variables:
-#         python.version: '3.8'
-#
-#       steps:
-#         - task: UsePythonVersion@0
-#           inputs:
-#             versionSpec: '$(python.version)'
-#           displayName: 'Use Python $(python.version)'
-#
-#         - bash: python -m pip install --upgrade pip
-#           displayName: 'Update pip'
-#
-#         - script: |
-#             pip install \
-#               --requirement reqs/requirements-dev-all-contrib-expectations.txt \
-#               --editable ".[spark, athena]" \
-#               --constraint constraints-dev.txt
-#           displayName: 'Install dependencies'
-#
-#         - bash: python ./build_gallery.py --backends "athena" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'build_gallery.py partial run'
-#           env:
-#             # Athena credentials
-#             ATHENA_DB_NAME: $(ATHENA_DB_NAME)
-#             ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
-#             ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
-#             ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
-#             # AWS credentials
-#             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-#             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-#             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-#             # Azure credentials
-#             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
-#             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
-#
-#         - bash: cat testing-error-messages.txt
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'Show testing errors'
-#
-#         - bash: cat gallery-tracebacks.txt
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'Show gallery tracebacks'
-#
-#         - task: S3Upload@1
-#           inputs:
-#             regionName: 'us-east-2'
-#             awsCredentials: 'aws-ci-great-expectations'
-#             bucketName: 'superconductive-public'
-#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-#             globExpressions: '*.json'
-#             targetFolder: 'static/gallery/'
-#             filesAcl: 'public-read'
-
-
   - stage: build_gallery_staging
-    dependsOn: exp_tests_on_all_backends
+    dependsOn: [exp_tests_on_all_backends, block_pipeline]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -763,60 +715,8 @@ stages:
               filesAcl: 'public-read'
 
 
-# Don't do build_package_gallery.py stuff...
-#   - Currently, this script will call the run_diagnostics method on every Expectation
-#     that exists in each package for all backends (even though this was already done
-#     by the build_gallery.py script)
-#   - The build_gallery.py script is now package aware
-#   - The Expectation Gallery site can now accept a URL that has a filter applied to
-#     limit results to a specific package, so no need to bundle them in the "packages" tab
-#
-#
-# - stage: build_package_gallery
-#   dependsOn: build_gallery_staging
-#   condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-#   pool:
-#     vmImage: 'ubuntu-20.04'
-#
-#   jobs:
-#     - job: build_package_gallery
-#       timeoutInMinutes: 180
-#       variables:
-#         python.version: '3.8'
-#
-#       steps:
-#         - task: UsePythonVersion@0
-#           inputs:
-#             versionSpec: '$(python.version)'
-#           displayName: 'Use Python $(python.version)'
-#
-#         - bash: python -m pip install --upgrade pip
-#           displayName: 'Update pip'
-#
-#         - script: |
-#             pip install \
-#               --editable "contrib/cli" \
-#               --editable "." \
-#               --constraint constraints-dev.txt
-#           displayName: 'Install dependencies'
-#
-#         - bash: python ./build_package_gallery.py
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'Build Package Gallery'
-#
-#         - task: S3Upload@1
-#           inputs:
-#             regionName: 'us-east-2'
-#             awsCredentials: 'aws-ci-great-expectations'
-#             bucketName: 'superconductive-public'
-#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-#             globExpressions: '*.json'
-#             targetFolder: 'static/gallery/'
-#             filesAcl: 'public-read'
-#
-
   - stage: update_algolia_indexes
-    dependsOn: [exp_tests_on_all_backends, build_gallery_staging]
+    dependsOn: [exp_tests_on_all_backends, build_gallery_staging, block_pipeline]
     pool:
       vmImage: 'ubuntu-20.04'
 
