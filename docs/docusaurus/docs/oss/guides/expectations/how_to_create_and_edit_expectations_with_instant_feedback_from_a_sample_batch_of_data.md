@@ -38,7 +38,7 @@ Run the following code to import Great Expectations and instantiate a Data Conte
 
 :::info Data Contexts and persisting data
 
-If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
 :::
 
@@ -51,7 +51,7 @@ Add the following method to retrieve a previously configured Data Asset from the
 
 :::info Limit the Batches returned by a Batch Request
 
-You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset).
+You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md).
 
 :::
 
@@ -122,4 +122,4 @@ Ephemeral Data Contexts don't persist beyond the current Python session.  If you
 
 ## Next steps
 
-Now that you have created and saved an Expectation Suite, you can [Validate your data](/docs/oss/guides/validation/validate_data_overview).
+Now that you have created and saved an Expectation Suite, you can [Validate your data](/oss/guides/validation/validate_data_overview.md).
