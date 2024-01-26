@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import itertools
 from copy import copy, deepcopy
@@ -15,6 +17,7 @@ from great_expectations import set_context
 from great_expectations.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
     ExpectationSuiteExpectationDeletedEvent,
+    ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -25,6 +28,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -1402,12 +1406,22 @@ def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuit
 
 
 class TestExpectationSuiteAnalytics:
-    @pytest.mark.unit
-    def test_add_expectation_emits_event(self, empty_suite):
-        suite = empty_suite
-        expectation = gxe.ExpectColumnValuesToBeBetween(
+    @pytest.fixture
+    def empty_suite(self, in_memory_runtime_context) -> ExpectationSuite:
+        return in_memory_runtime_context.add_expectation_suite("my_suite")
+
+    @pytest.fixture
+    def expect_column_values_to_be_between(self) -> Expectation:
+        return gxe.ExpectColumnValuesToBeBetween(
             column="passenger_count", min_value=1, max_value=6
         )
+
+    @pytest.mark.unit
+    def test_add_expectation_emits_event(
+        self, empty_suite, expect_column_values_to_be_between
+    ):
+        suite = empty_suite
+        expectation = expect_column_values_to_be_between
 
         with mock.patch(
             "great_expectations.core.expectation_suite.submit_event"
@@ -1416,8 +1430,8 @@ class TestExpectationSuiteAnalytics:
 
         mock_submit.assert_called_once_with(
             event=ExpectationSuiteExpectationCreatedEvent(
-                expectation_id=None,
-                expectation_suite_id=None,
+                expectation_id=mock.ANY,
+                expectation_suite_id=mock.ANY,
                 expectation_type="expect_column_values_to_be_between",
                 custom_exp_type=False,
             )
@@ -1440,8 +1454,8 @@ class TestExpectationSuiteAnalytics:
 
         mock_submit.assert_called_once_with(
             event=ExpectationSuiteExpectationCreatedEvent(
-                expectation_id=None,
-                expectation_suite_id=None,
+                expectation_id=mock.ANY,
+                expectation_suite_id=mock.ANY,
                 expectation_type=mock.ANY,
                 custom_exp_type=True,
             )
@@ -1453,11 +1467,11 @@ class TestExpectationSuiteAnalytics:
         assert not expectation_type.startswith("expect_")
 
     @pytest.mark.unit
-    def test_delete_expectation_emits_event(self, empty_suite):
+    def test_delete_expectation_emits_event(
+        self, empty_suite, expect_column_values_to_be_between
+    ):
         suite = empty_suite
-        expectation = gxe.ExpectColumnValuesToBeBetween(
-            column="passenger_count", min_value=1, max_value=6
-        )
+        expectation = expect_column_values_to_be_between
 
         suite.add_expectation(expectation)
 
@@ -1468,7 +1482,29 @@ class TestExpectationSuiteAnalytics:
 
         mock_submit.assert_called_once_with(
             event=ExpectationSuiteExpectationDeletedEvent(
-                expectation_id=None,
-                expectation_suite_id=None,
+                expectation_id=mock.ANY,
+                expectation_suite_id=mock.ANY,
+            )
+        )
+
+    @pytest.mark.unit
+    def test_expectation_save_callback_emits_event(
+        self, empty_suite, expect_column_values_to_be_between
+    ):
+        suite = empty_suite
+        expectation = expect_column_values_to_be_between
+
+        expectation = suite.add_expectation(expectation)
+        expectation.column = "fare_amount"
+
+        with mock.patch(
+            "great_expectations.core.expectation_suite.submit_event"
+        ) as mock_submit:
+            expectation.save()
+
+        mock_submit.assert_called_once_with(
+            event=ExpectationSuiteExpectationUpdatedEvent(
+                expectation_id=mock.ANY,
+                expectation_suite_id=mock.ANY,
             )
         )
