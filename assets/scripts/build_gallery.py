@@ -10,12 +10,12 @@ import re
 import sys
 import traceback
 from glob import glob
+from importlib.metadata import distributions
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
 from typing import Dict, Final, List, Optional, Tuple
 
 import click
-from importlib.metadata import distributions
 from packaging.requirements import Requirement
 
 from great_expectations.compatibility import pydantic
