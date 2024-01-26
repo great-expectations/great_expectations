@@ -13,7 +13,7 @@ import LinkCard from '/docs/components/LinkCard';
 
 <p class="DocItem__header-description">GX Cloud is the fastest and most reliable way to validate your data. Connect, test, and validate Data Assets in a web-based UI.
 <br /> 
-To learn how its fast setup, collaboration-forward approach, and accessibility to technical and nontechnical stakeholders could be the perfect solution for your organization, see <a href='/docs/cloud/why_gx_cloud'>Why GX Cloud</a>.
+To learn how its fast setup, collaboration-forward approach, and accessibility to technical and nontechnical stakeholders could be the perfect solution for your organization, see <a href='why_gx_cloud'>Why GX Cloud</a>.
 </p>
 
 ### Get started
@@ -27,10 +27,10 @@ To learn how its fast setup, collaboration-forward approach, and accessibility t
 ### Manage
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Manage Data Assets" description="Create, edit, or delete a Data Asset." href="/docs/cloud/data_assets/manage_data_assets" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage Expectations" description="Create, edit, or delete an Expectation." href="/docs/cloud/expectations/manage_expectations" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage Expectation Suites" description="Create or delete Expectation Suites." href="/docs/cloud/expectation_suites/manage_expectation_suites" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." href="/docs/cloud/validations/manage_validations" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." href="/docs/cloud/checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." href="/docs/cloud/users/manage_users" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage Data Assets" description="Create, edit, or delete a Data Asset." href="data_assets/manage_data_assets" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage Expectations" description="Create, edit, or delete an Expectation." href="expectations/manage_expectations" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage Expectation Suites" description="Create or delete Expectation Suites." href="expectation_suites/manage_expectation_suites" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." href="validations/manage_validations" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." href="checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." href="users/manage_users" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
