@@ -35,6 +35,7 @@ from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
     ExpectationSuiteExpectationDeletedEvent,
+    ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
@@ -259,7 +260,15 @@ class ExpectationSuite(SerializableDictDot):
         return self._store.has_key(key=key)
 
     def _save_expectation(self, expectation) -> Expectation:
-        return self._store.update_expectation(suite=self, expectation=expectation)
+        expectation = self._store.update_expectation(
+            suite=self, expectation=expectation
+        )
+        submit_event(
+            event=ExpectationSuiteExpectationUpdatedEvent(
+                expectation_id=expectation.id, expectation_suite_id=self.ge_cloud_id
+            )
+        )
+        return expectation
 
     @property
     def expectation_configurations(self) -> list[ExpectationConfiguration]:
