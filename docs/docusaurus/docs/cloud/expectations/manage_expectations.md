@@ -6,13 +6,13 @@ description: Create and manage Expectations in GX Cloud.
 
 An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. An Expectation Suite contains multiple Expectations.
 
-To learn more about Expectations, see [Expectation](/docs/reference/learn/terms/expectation).
+To learn more about Expectations, see [Expectation](/reference/learn/terms/expectation.md).
 
 ## Prerequisites
 
 - The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX cloud](/docs/cloud/connect/connect_lp).
 
-- You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+- You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
 ## Available Expectations
 
@@ -54,7 +54,7 @@ The following table lists the available GX Cloud Expectations.
 
 8. Optional. Repeat steps 1 to 4 to add additional Expectations.
 
-9. Optional. Run a Validation. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+9. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Edit an Expectation
 

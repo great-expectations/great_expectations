@@ -19,17 +19,18 @@ def submit(event: Event) -> None:
     """
 
     try:
-        if event.organization_id is not None:
-            posthog.capture(
-                str(event.distinct_id),
-                str(event.action),
-                event.properties(),
-                groups={"organization": event.organization_id},
-            )
-        else:
-            posthog.capture(
-                str(event.distinct_id), str(event.action), event.properties()
-            )
+        groups = {
+            "data_context": event.data_context_id,
+        }
+        if event.organization_id:
+            groups.update({"organization": event.organization_id})
+
+        posthog.capture(
+            str(event.distinct_id),
+            str(event.action),
+            event.properties(),
+            groups=groups,
+        )
     except Exception as _:
         # failure to send an analytics event should not be propagated to user
         # TODO: figure out what to do about undeliverable events
