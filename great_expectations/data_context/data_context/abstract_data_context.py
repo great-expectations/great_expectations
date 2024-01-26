@@ -42,6 +42,7 @@ from great_expectations._docs_decorators import (
     new_method_or_class,
     public_api,
 )
+from great_expectations.analytics.anonymizer import Anonymizer
 from great_expectations.analytics.events import DataContextInitializedEvent
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
@@ -337,6 +338,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._attach_fluent_config_datasources_and_build_data_connectors(
             self.fluent_config
         )
+        self._anonymizer = Anonymizer(salt=self._data_context_id)
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
 
@@ -489,6 +491,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     # Properties
+    @property
+    def anonymizer(self) -> Anonymizer:
+        return self._anonymizer
+
     @property
     def instance_id(self) -> str:
         instance_id: Optional[str] = self.config_variables.get("instance_id")
