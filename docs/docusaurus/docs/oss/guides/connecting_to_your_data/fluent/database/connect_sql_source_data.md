@@ -41,7 +41,7 @@ Connect GX to a Snowflake database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a Snowflake database
 
 </Prerequisites> 
@@ -155,7 +155,7 @@ Connect GX to a PostgreSQL database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with PostgreSQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with PostgreSQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a PostgreSQL database
 
 </Prerequisites> 
@@ -242,7 +242,7 @@ Connect GX to a SQLite database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQLite](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQLite](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a SQLite database
 
 </Prerequisites> 
@@ -320,7 +320,7 @@ Connect GX to Databricks to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a Databricks cluster
 
 </Prerequisites> 
@@ -408,7 +408,7 @@ The following scripts and configuration files are used in the examples:
 
 <Prerequisites>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx).
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md).
 - Familiarity with Google Cloud Platform features and functionality.
 - A GCP project with a running Google Cloud Storage container that is accessible from your region.
 - Read/write access to a BigQuery database.
@@ -847,7 +847,7 @@ Connect GX to a SQL database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a SQL database
 
 </Prerequisites> 
@@ -933,11 +933,11 @@ Repeat the previous steps to add additional Data Assets.
 
 ## Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
+- [How to organize Batches in a SQL based Data Asset](/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
 
-- [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
+- [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
 
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 - [Configure Expectation Stores](../../../setup/configuring_metadata_stores/configure_expectation_stores.md)
 

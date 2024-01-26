@@ -12,9 +12,9 @@ title: <!-- Add the topic title here -->
 
 <!-- List the existing knowledge a user should have before they start the tutorial. Link to relevant information if it's available. What follows is an example provided for your reference. If existing knowledge isn't required, remove this section.-->
 
-- [An understanding of Great Expectations functionality](/docs/oss/guides/setup/setup_overview)
-- [How to connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp)
-- [How to create an Expectation Suite](/docs/oss/guides/expectations/create_expectations_overview)
+- [An understanding of Great Expectations functionality](/oss/guides/setup/setup_overview.md)
+- [How to connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md)
+- [How to create an Expectation Suite](/oss/guides/expectations/create_expectations_overview.md)
 
 ## First task 
 
@@ -79,7 +79,7 @@ title: <!-- Add the topic title here -->
 
 <!-- List the secondary resources that can help a user get a better understanding of the subject matter discussed in this tutorial. Don't add an introductory statement for the list. If a user needs to complete additional tasks to complete this process, use a Next steps section instead. What follows is an example provided for your reference. If there aren't any related documents, remove this section.-->
 
-- [Install Great Expectations with Data Source dependencies](/docs/oss/guides/setup/installation/install_gx)
+- [Install Great Expectations with Data Source dependencies](/oss/guides/setup/installation/install_gx.md)
 - [Instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
 - [Use Great Expectations with Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
@@ -87,4 +87,4 @@ title: <!-- Add the topic title here -->
 
 <!-- If this tutorial is the first step in a process and there are other tasks the user must complete to finish the process, list the topics here with links to the relevant information. If you want to link to related information, use a Related topics section instead. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't next steps, remove this section.-->
 
-- [Install Great Expectations with Data Source dependencies](/docs/oss/guides/setup/installation/install_gx)
+- [Install Great Expectations with Data Source dependencies](/oss/guides/setup/installation/install_gx.md)

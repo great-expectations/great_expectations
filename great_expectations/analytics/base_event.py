@@ -36,7 +36,7 @@ class Event:
         return get_config().data_context_id
 
     @property
-    def organization_id(self) -> Optional[UUID]:
+    def organization_id(self) -> UUID | None:
         return get_config().organization_id
 
     @property
@@ -44,7 +44,7 @@ class Event:
         return get_config().oss_id
 
     @property
-    def user_id(self) -> Optional[UUID]:
+    def user_id(self) -> UUID | None:
         return get_config().user_id
 
     @property
@@ -77,10 +77,10 @@ class Event:
             "oss_id": self.oss_id,
             "service": "gx-core",
         }
-        if self.organization_id is not None:
-            props.update({"organization_id": self.organization_id})
         if self.user_id is not None:
-            props.update({"user_id": self.user_id})
+            props.update(
+                {"user_id": self.user_id, "organization_id": self.organization_id}
+            )
 
         return {**props, **self._properties()}
 

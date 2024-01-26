@@ -20,7 +20,6 @@ import TipUsingPandasToConnectToDifferentFileTypes from '/docs/components/connec
 import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesystem/_defining_multiple_data_assets.md'
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
-import PrereqInstallGxWithDependencies from '/docs/components/prerequisites/_gx_installed_with_abs_dependencies.md'
 import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
@@ -57,7 +56,7 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <Prerequisites>
 
-- [An installation of GX set up to work with S3](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with S3](/oss/guides/setup/installation/install_gx.md)
 - Access to data on a S3 bucket
 
 </Prerequisites> 
@@ -116,7 +115,7 @@ The following examples connect to .csv data.
 
 <Prerequisites>
 
-- [An installation of GX set up to work with S3](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with S3](/oss/guides/setup/installation/install_gx.md)
 - Access to data on a S3 bucket
 
 </Prerequisites> 
@@ -190,7 +189,7 @@ Connect to a Microsoft Azure Blob Storage Data Source.
 
 <Prerequisites>
 
-- <PrereqInstallGxWithDependencies />
+- <span><a href='../../../../../oss/guides/setup/installation/install_gx'>A working installation of Great Expectations with dependencies for Azure Blob Storage</a></span>
 - Access to data in Azure Blob Storage
 
 </Prerequisites> 
@@ -217,7 +216,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```
 
     :::tip Where did that connection string come from?
-    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/oss/guides/setup/installation/install_gx).
+    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/oss/guides/setup/installation/install_gx.md).
     :::
 
 ### Add data to the Data Source as a Data Asset
@@ -271,7 +270,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```
 
     :::tip Where did that connection string come from?
-    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/oss/guides/setup/installation/install_gx).
+    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/oss/guides/setup/installation/install_gx.md).
     :::
 
 ### Add data to the Data Source as a Data Asset
@@ -313,7 +312,7 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with GCS](/oss/guides/setup/installation/install_gx.md)
 - Access to data in a GCS bucket
 
 </Prerequisites> 
@@ -371,7 +370,7 @@ Use Spark to connect to a GCS Data Source.  The following examples connect to .c
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with GCS](/oss/guides/setup/installation/install_gx.md)
 - Access to data on a GCS bucket
 
 </Prerequisites> 
@@ -646,4 +645,4 @@ A Data Asset requires the following information to be defined:
 
 ## Related documentation
 
-For more information about storing credentials for use with GX, see [How to configure credentials](/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials).
+For more information about storing credentials for use with GX, see [How to configure credentials](/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).
