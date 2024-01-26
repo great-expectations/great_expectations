@@ -9,7 +9,7 @@ import Tabs from '@theme/Tabs';
 
 To validate data stored in a Snowflake data warehouse, you must add the GX Agent to your production environment. The GX Agent is a containerized image that runs open source and proprietary GX code. The GX Agent acts as an intermediary between GX Cloud and Snowflake and allows you to securely access and validate your data in GX Cloud without connecting or interacting with it directly.
 
-New to GX Cloud and not sure that it's the right solution for your organization? See [Try GX cloud](/docs/cloud/try_gx_cloud).
+New to GX Cloud and not sure that it's the right solution for your organization? See [Try GX Cloud](../try_gx_cloud.md).
 
 ## Prerequisites
 

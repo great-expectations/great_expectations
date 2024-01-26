@@ -10,7 +10,7 @@ To learn more about Validations, see [Validator](/reference/learn/terms/validato
 
 ## Prerequisites
 
-- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX cloud](/docs/cloud/connect/connect_lp).
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
 
 - You have created an [Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
