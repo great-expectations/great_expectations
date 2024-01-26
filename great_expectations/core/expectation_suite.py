@@ -197,10 +197,9 @@ class ExpectationSuite(SerializableDictDot):
         else:
             custom_exp_type = True
             if self._data_context:
-                salt = self._data_context.data_context_id
+                anonymizer = self._data_context.anonymizer
             else:
-                salt = None
-            anonymizer = Anonymizer(salt=salt)
+                anonymizer = Anonymizer()
             expectation_type = anonymizer.anonymize(expectation.expectation_type)
 
         submit_event(

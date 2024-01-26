@@ -217,7 +217,8 @@ class TestCRUDMethods:
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
 
-        created_expectation = suite.add_expectation(expectation=expectation)
+        with mock.patch.object(ExpectationSuite, "_submit_expectation_created_event"):
+            created_expectation = suite.add_expectation(expectation=expectation)
 
         assert (
             created_expectation
