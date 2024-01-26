@@ -75,7 +75,7 @@ In the above example, the named group "`year`" will match any four numeric chara
 
 By naming the group in your `batching_regex` you make it something you can reference in the future.  When requesting data from this Data Asset, you can use the names of your regular expression groups to limit the Batches that are returned.
 
-For more information, please see: [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
+For more information, please see: [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
 
 :::
 
@@ -123,6 +123,6 @@ Because a Batch List contains a lot of metadata, it will be easiest to verify wh
 
 ## Related documentation
 
-- [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 

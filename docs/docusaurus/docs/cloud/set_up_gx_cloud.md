@@ -8,7 +8,7 @@ To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account,
 
 Currently, the GX Cloud user interface is configured for Snowflake. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectation Suites and Expectations, run Validations, or create Checkpoints. 
 
-If you're using Snowflake and are ready to create Expectations and run Validations, see [Quickstart for GX Cloud and Snowflake](/docs/cloud/quickstarts/snowflake_quickstart).
+If you're using Snowflake and are ready to create Expectations and run Validations, see [Quickstart for GX Cloud and Snowflake](/cloud/quickstarts/snowflake_quickstart.md).
 
 ## Request a GX Cloud Beta account
 
@@ -86,4 +86,4 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
 
 ## Next steps
 
- - [Create a Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset)
+ - [Create a Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset)

@@ -19,9 +19,9 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- List the items that need to be present or completed by the user before they start the tasks. Link to relevant information if it's available. What follows is an example provided for your reference. If there aren't any prerequisites, remove this section. -->
 
-- [A Great Expectations instance](/docs/oss/guides/setup/setup_overview)
-- [A Data Connection](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp)
-- [An Expectation Suite](/docs/oss/guides/expectations/create_expectations_overview)
+- [A Great Expectations instance](/oss/guides/setup/setup_overview.md)
+- [A Data Connection](/oss/guides/connecting_to_your_data/connect_to_data_lp.md)
+- [An Expectation Suite](/oss/guides/expectations/create_expectations_overview.md)
 
 
 ## First task 
@@ -88,6 +88,6 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- List the secondary resources that can help the user get a better understanding of the subject matter discussed in this how-to. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't any related documents, remove this section.-->
 
-- [Install Great Expectations with Data Source dependencies](/docs/oss/guides/setup/installation/install_gx)
+- [Install Great Expectations with Data Source dependencies](/oss/guides/setup/installation/install_gx.md)
 - [Instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
 - [Use Great Expectations with Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
