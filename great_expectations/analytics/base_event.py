@@ -36,7 +36,7 @@ class Event:
         return get_config().data_context_id
 
     @property
-    def organization_id(self) -> Optional[UUID]:
+    def organization_id(self) -> UUID | None:
         return get_config().organization_id
 
     @property
@@ -44,7 +44,7 @@ class Event:
         return get_config().oss_id
 
     @property
-    def user_id(self) -> Optional[UUID]:
+    def user_id(self) -> UUID | None:
         return get_config().user_id
 
     @property
