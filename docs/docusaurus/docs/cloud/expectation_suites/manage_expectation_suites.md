@@ -6,13 +6,13 @@ description: Create and manage Expectation Suites in GX Cloud.
 
 Expectation Suites contain multiple Expectations for a single Data Asset. Like Expectations, they can help you better understand your data and help you improve data quality. A default Expectation Suite is created when you create a Data Asset. 
 
-To learn more about Expectation Suites, see [Expectation Suites](/docs/reference/learn/terms/expectation_suite).
+To learn more about Expectation Suites, see [Expectation Suites](/reference/learn/terms/expectation_suite.md).
 
 ## Prerequisites
 
 - You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
 
-- You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+- You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
 ## Automatically create an Expectation Suite that tests for missing data
 
@@ -32,7 +32,7 @@ Automatically create an Expectation Suite that you can use to determine if your 
 
     It might take several minutes to create the Expectation Suite. When the process is complete, a new Expectation Suite appears in the **Expectation Suites** pane.
 
-7. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+7. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Create an empty Expectation Suite
 
@@ -50,9 +50,9 @@ If you have specific business requirements, or you want to examine specific data
 
 6. Click **Generate Expectations**. 
 
-7. Add Expectations to the Expectation Suite. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+7. Add Expectations to the Expectation Suite. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
-8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Edit an Expectation Suite name
 
@@ -66,7 +66,7 @@ If you have specific business requirements, or you want to examine specific data
 
 ## Delete an Expectation Suite
 
-1. In GX Cloud, delete all Checkpoints associated with the Expectation Suite. See [Delete a Checkpoint](/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint). 
+1. In GX Cloud, delete all Checkpoints associated with the Expectation Suite. See [Delete a Checkpoint](/cloud/checkpoints/manage_checkpoints.md#delete-a-checkpoint). 
 
 2. Click **Expectation Suites**.
 

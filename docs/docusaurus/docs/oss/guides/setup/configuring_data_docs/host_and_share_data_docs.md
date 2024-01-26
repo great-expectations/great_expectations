@@ -65,7 +65,7 @@ Host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Doc
 
 <Prerequisites>
 
-- [A working deployment of Great Expectations](/docs/oss/guides/setup/setup_overview)
+- [A working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
 - Permissions to create and configure an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage)
 
 </Prerequisites>
@@ -296,7 +296,7 @@ Host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Doc
 
 <Prerequisites>
 
-- [A Great Expectations instance](/docs/oss/guides/setup/setup_overview)
+- [A Great Expectations instance](/oss/guides/setup/setup_overview.md)
 
 </Prerequisites>
 

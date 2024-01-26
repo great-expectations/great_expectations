@@ -6,15 +6,15 @@ description: Create and manage Checkpoints in GX Cloud.
 
 A Checkpoint validates Expectation Suite data. After you create a Checkpoint to validate data, you can save and reuse the Checkpoint. 
 
-To learn more about Checkpoints, see [Checkpoint](/docs/reference/learn/terms/checkpoint).
+To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpoint.md).
 
 ## Prerequisites
 
 - You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
 
-- You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+- You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
-- You have created an [Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+- You have created an [Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 ## Add a Checkpoint
 
@@ -51,7 +51,7 @@ To learn more about Checkpoints, see [Checkpoint](/docs/reference/learn/terms/ch
         }],
     } 
     ```
-    Replace `data_source_name` and `data_asset_name` with the names of an existing Data Source and Data Asset. If you haven't connected to a Data Source and created a Data Asset, see [Manage Data Assets](/docs/cloud/data_assets/manage_data_assets).
+    Replace `data_source_name` and `data_asset_name` with the names of an existing Data Source and Data Asset. If you haven't connected to a Data Source and created a Data Asset, see [Manage Data Assets](/cloud/data_assets/manage_data_assets.md).
 
 5. Run the following code to add the Checkpoint:
 

@@ -77,10 +77,10 @@ class Event:
             "oss_id": self.oss_id,
             "service": "gx-core",
         }
-        if self.organization_id is not None:
-            props.update({"organization_id": self.organization_id})
         if self.user_id is not None:
-            props.update({"user_id": self.user_id})
+            props.update(
+                {"user_id": self.user_id, "organization_id": self.organization_id}
+            )
 
         return {**props, **self._properties()}
 

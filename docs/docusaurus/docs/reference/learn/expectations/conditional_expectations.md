@@ -49,7 +49,7 @@ This returns:
 ```
 
 :::note
-To get a Validator object, see [How to create Expectations interactively in Python](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+To get a Validator object, see [How to create Expectations interactively in Python](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 :::
 
 It is possible to add multiple Expectations of the same type to the Expectation Suite for a single column. One Expectation can be unconditional while an arbitrary number of Expectations (each with a different condition) can be conditional. For example:
@@ -151,4 +151,4 @@ While conditions can be attached to most Expectations, the following Expectation
 * ```expect_table_column_count_to_be_between```
 * ```expect_table_column_count_to_equal```
 
-For more information, see the [Data Docs](/docs/reference/learn/terms/data_docs).
+For more information, see the [Data Docs](/reference/learn/terms/data_docs.md).
