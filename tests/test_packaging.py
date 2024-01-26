@@ -5,7 +5,7 @@ import pathlib
 from typing import List
 
 import pytest
-import requirements as rp
+from packaging.requirements import Requirement
 
 
 def collect_requirements_files() -> List[pathlib.Path]:
@@ -32,10 +32,12 @@ def parse_requirements_files_to_strings(files: list[pathlib.Path]) -> dict:
         abs_path = req_file.absolute().as_posix()
         key = abs_path.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
+            filter_lines = list(filter(lambda line: line[0] != "#", f.readlines()))
+            lines = [Requirement(line) for line in filter_lines]
             req_set_dict[key] = {
-                f'{line.name}{",".join(["".join(spec) for spec in line.specs])}'
-                for line in rp.parse(f)
-                if line.specs
+                f'{line.name}","{str(line.specifier)}'
+                for line in lines
+                if line.specifier
             }
 
     return req_set_dict
@@ -55,8 +57,13 @@ def parse_requirements_files_to_specs(files: list[pathlib.Path]) -> dict:
         abs_path = req_file.absolute().as_posix()
         key = abs_path.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
+            filter_lines = list(filter(lambda line: line[0] != "#", f.readlines()))
+            lines = [Requirement(line) for line in filter_lines]
+
             req_set_dict[key] = {
-                line.name: line.specs for line in rp.parse(f) if line.specs
+                line.name: [(spec.operator, spec.version) for spec in line.specifier]
+                for line in lines
+                if line.specifier
             }
 
     return req_set_dict
