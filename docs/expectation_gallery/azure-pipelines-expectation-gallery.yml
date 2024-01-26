@@ -15,6 +15,8 @@ schedules:
     - develop
   always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
 
+# The 'resources' block is commented since we are currently blocking the pipeline until we decide
+#   on a plan for hosting the gallery for 1.0. We will uncomment it when we unblock the pipeline.
 #resources:
 #  containers:
 #  - container: postgres
@@ -58,10 +60,11 @@ stages:
     jobs:
       - job: ThisFails
         steps:
-          - bash: ls this_file_does_not_exist_so_this_will_fail
+          - bash: echo "Block pipeline"
 
   - stage: scope_check
     dependsOn: block_pipeline
+    condition: failed('block_pipeline')
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
@@ -86,7 +89,7 @@ stages:
 
   - stage: exp_tests_on_all_backends
     dependsOn: [scope_check, block_pipeline]
-    condition: and(succeeded('block_pipeline'), or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true)))
+    condition: and(failed('block_pipeline'), or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true)))
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -625,6 +628,7 @@ stages:
 
   - stage: build_gallery_staging
     dependsOn: [exp_tests_on_all_backends, block_pipeline]
+    condition: failed('block_pipeline')
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -717,6 +721,7 @@ stages:
 
   - stage: update_algolia_indexes
     dependsOn: [exp_tests_on_all_backends, build_gallery_staging, block_pipeline]
+    condition: failed('block_pipeline')
     pool:
       vmImage: 'ubuntu-20.04'
 
