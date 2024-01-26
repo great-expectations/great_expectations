@@ -10,7 +10,7 @@ This guide will help you set up Opsgenie alert notifications when running Great 
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](/docs/oss/guides/setup/setup_overview)
+  - [Set up a working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
   - An Opsgenie account
   - Created a <TechnicalTag tag="checkpoint" text="Checkpoint" /> that will be configured with the notification Action.
 
