@@ -103,6 +103,8 @@ class SnippetMover:
                 self._doc_paths_by_snippet_name[snippet_name].add(doc_path)
 
     def move_and_rename_snippets(self):
+        snippets_dest_by_code_path: dict[Path, Path] = {}
+        # first, rename all files, since we need them to be in a stable place
         for snippet_name, code_path in self._code_path_by_snippet_name.items():
             doc_paths = self._doc_paths_by_snippet_name.get(snippet_name)
             if not doc_paths:
@@ -128,6 +130,15 @@ class SnippetMover:
                 self.find_and_replace_text_in_file(
                     path=path, old_str=str(code_path), new_str=str(snippet_dest)
                 )
+            if snippets_dest_by_code_path.get(code_path, snippet_dest) != snippet_dest:
+                raise RuntimeError(
+                    f"Fatal error - Snippet at {code_path} must be moved to both "
+                    f"{snippets_dest_by_code_path.get(code_path, snippet_dest)} and {snippet_dest}."
+                )
+            snippets_dest_by_code_path[code_path] = snippet_dest
+
+        # now that all references have been renamed, move the snippet files
+        for code_path, snippet_dest in snippets_dest_by_code_path.items():
             self.move_file(src=code_path, dest=snippet_dest)
             self._snippets_moved_count += 1
 
