@@ -58,7 +58,7 @@ stages:
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
-      - job: ThisFails
+      - job: BlockPipeline
         steps:
           - bash: echo "Block pipeline"
 
