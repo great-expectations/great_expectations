@@ -163,7 +163,6 @@ class CloudDataContext(SerializableDataContext):
             cloud_config=self.ge_cloud_config, uri="accounts/me"
         )
         data = response.json()
-        print("CHETANS USER ID", data)
         user_id = data["user_id"]
         return uuid.UUID(user_id)
 
