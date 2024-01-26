@@ -15,35 +15,35 @@ schedules:
     - develop
   always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
 
-resources:
-  containers:
-  - container: postgres
-    image: postgres:11
-    ports:
-    - 5432:5432
-    env:
-      POSTGRES_DB: "test_ci"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-  - container: mysql
-    image: mysql:8.0.20
-    ports:
-      - 3306:3306
-    env:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: test_ci
-  - container: mssql
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    env:
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
-      MSSQL_DB: test_ci
-      MSSQL_PID: Developer
-    ports:
-      - 1433:1433
-  - container: trino
-    image: trinodb/trino:400
-    ports:
-      - 8088:8080
+#resources:
+#  containers:
+#  - container: postgres
+#    image: postgres:11
+#    ports:
+#    - 5432:5432
+#    env:
+#      POSTGRES_DB: "test_ci"
+#      POSTGRES_HOST_AUTH_METHOD: "trust"
+#  - container: mysql
+#    image: mysql:8.0.20
+#    ports:
+#      - 3306:3306
+#    env:
+#      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+#      MYSQL_DATABASE: test_ci
+#  - container: mssql
+#    image: mcr.microsoft.com/mssql/server:2019-latest
+#    env:
+#      ACCEPT_EULA: Y
+#      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+#      MSSQL_DB: test_ci
+#      MSSQL_PID: Developer
+#    ports:
+#      - 1433:1433
+#  - container: trino
+#    image: trinodb/trino:400
+#    ports:
+#      - 8088:8080
 
 # The pipeline is run under two primary conditions: if cutting a release or as scheduled by the above cron job.
 variables:
