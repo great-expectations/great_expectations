@@ -9,6 +9,17 @@
   width: 100vw;
 }
 
+.gxCard::before {
+  background: url('/img/repeating_hex_homepage.png');
+  bottom: 0;
+  content: '';
+  left: 0;
+  opacity: 0.4;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
 .gxCard__inner_container {
   align-items: start;
   display: grid;
@@ -18,10 +29,13 @@
   margin-right: auto;
   max-width: var(--ifm-container-width);
   padding: 4rem 3rem;
+  position: relative;
+  z-index: 1;
 }
 
-.gxCard__title {
+.gxCard h1.gxCard__title {
   grid-area: title;
+  margin-bottom: 0;
   max-width: 40rem;
 }
 
@@ -39,7 +53,7 @@
 .gxCard__buttons {
   grid-area: buttons;
   display: flex;
-  gap: 0.75rem;
+  gap: 1.5em;
   flex-wrap: wrap;
 }
 
@@ -56,7 +70,7 @@
 }
 
 .button:hover {
-  background: var(--ifm-color-primary);
+  background: #DE550A;
   color: var(--ifm-footer-link-color);
   text-decoration: none;
 }
@@ -68,6 +82,25 @@
 }
 
 .button__outline:hover {
-  background: none;
+  background: #272763;
   color: var(--ifm-color-primary);
+}
+
+@media (max-width: 996px) {
+  .gxCard {
+    left: 0;
+    margin-left: -1rem;
+    margin-right: 0;
+    transform: unset;
+    width: calc(100% + 2rem);
+  }
+  .gxCard__inner_container {
+    gap: 1rem;
+    grid-template-areas: "title" "description" "image" "buttons";
+    justify-content: center;
+  }
+
+  .gxCard__image {
+    justify-self: center;
+  }
 }
