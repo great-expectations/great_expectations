@@ -56,9 +56,9 @@ stages:
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
-      -job: ThisFails
-      steps:
-        - bash: ls this_file_does_not_exist_so_this_will_fail
+      - job: ThisFails
+        steps:
+          - bash: ls this_file_does_not_exist_so_this_will_fail
 
   - stage: scope_check
     dependsOn: block_pipeline
