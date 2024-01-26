@@ -5,11 +5,11 @@ description: Create Expectations with a Python interpreter or a script and then 
 keywords: [Expectations, Interactive Mode, Interactive]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrerequisiteQuickstartGuideComplete from '/docs/components/prerequisites/_quickstart_completed.mdx'
-import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
-import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
-import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
+import Prerequisites from '../../../components/_prerequisites.jsx'
+import PrerequisiteQuickstartGuideComplete from '../../../components/prerequisites/_quickstart_completed.mdx'
+import IfYouStillNeedToSetupGX from '../../../components/prerequisites/_if_you_still_need_to_setup_gx.md'
+import DataContextInitializeQuickOrFilesystem from '../../../components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
+import ConnectingToDataFluently from '../../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 
 To Validate data we must first define a set of Expectations for that data to be Validated against.  In this guide, you'll learn how to create Expectations and interactively edit them with feedback from Validating each against a Batch of data. Validating your Expectations as you define them allows you to quickly determine if the Expectations are suitable for our data, and identify where changes might be necessary.
 

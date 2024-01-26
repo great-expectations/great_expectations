@@ -4,7 +4,7 @@ title: Evaluation Parameter
 hoverText: A dynamic value used during Validation of an Expectation which is populated by evaluating simple expressions or by referencing previously generated metrics.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 An Evaluation Parameter is a dynamic value used during <TechnicalTag relative="../" tag="validation" text="Validation" /> of an <TechnicalTag relative="../" tag="expectation" text="Expectation" /> which is populated by evaluating simple expressions or by referencing previously generated <TechnicalTag relative="../" tag="metric" text="Metrics" />.
 

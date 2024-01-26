@@ -3,7 +3,7 @@ id: data_docs
 title: Data Docs
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 Data Docs translate <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and other metadata into human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs keeps your documentation current.
 
