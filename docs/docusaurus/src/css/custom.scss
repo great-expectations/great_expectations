@@ -355,4 +355,8 @@ li p + ol {
   margin-top: calc( -1 * var(--ifm-paragraph-margin-bottom) + 0.5em);
 }
 
+.theme-doc-version-badge {
+  display: none;
+}
+
 @import "api_docs/api_docs.scss";

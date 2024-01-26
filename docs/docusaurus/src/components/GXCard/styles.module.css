@@ -2,7 +2,7 @@
   background-color: #272763;
   color: var(--ifm-footer-link-color);
   left: 50%;
-  margin: 0 -50vw 2rem;
+  margin: -1rem -50vw 2rem;
   position: relative;
   right: 50%;
   transform: translateX(calc(var(--doc-sidebar-hidden-width) / 2));
