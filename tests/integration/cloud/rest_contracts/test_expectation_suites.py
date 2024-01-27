@@ -80,13 +80,12 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "expectation_suite_name": pact.Like("no_checkpoint_suite"),
                 "expectations": [
                     {
-                        "expectation_type": "expect_column_values_to_be_between",
+                        "expectation_type": "expect_column_min_to_be_between",
                         "ge_cloud_id": pact.Format().uuid,
                         "kwargs": {
                             "column": "passenger_count",
                             "max_value": 5,
                             "min_value": 0,
-                            "mostly": 0.97,
                         },
                         "meta": {},
                     }
