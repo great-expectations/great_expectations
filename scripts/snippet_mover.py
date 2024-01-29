@@ -199,22 +199,34 @@ class SnippetMover:
                 if snippet.moved
             ]
         )
+        unmoved_files = set(
+            [
+                snippet.original_path
+                for snippet in self._snippet_lookup.values()
+                if not snippet.moved and not snippet.orphaned
+            ]
+        )
+        total_files = set(
+            [snippet.original_path for snippet in self._snippet_lookup.values()]
+        )
         shared_snippets = [
             snippet for snippet in moved_snippets if len(snippet.doc_paths) > 1
         ]
-        spacer = "\n\n"
+        spacer = "\n"
         section_divider = (spacer * 4) + ("*" * 78) + spacer * 4
         text = (
-            f"Total snippet count: {total_snippets}\n"
-            + f"Moved snippet count: {len(moved_snippets)}\n"
+            f"Total snippet file count: {len(total_files)}\n"
             + f"Moved file count: {len(moved_files)}\n"
+            + f"Unmoved file count: {len(unmoved_files)}\n"
+            + f"Total snippet count: {total_snippets}\n"
+            + f"Moved snippet count: {len(moved_snippets)}\n"
             + f"Shared snippet count: {len(shared_snippets)}\n"
             + section_divider
             + f"{len(orphaned_snippets)} Orphaned Snippets:"
-            + spacer.join([str(snippet) for snippet in orphaned_snippets])
+            + spacer.join([snippet.name for snippet in orphaned_snippets])
             + section_divider
             + f"{len(unmoved_snippets)} Unmoved Snippets:"
-            + spacer.join([str(snippet) for snippet in unmoved_snippets])
+            + spacer.join([snippet.name for snippet in unmoved_snippets])
         )
         with open(self._report_path, "w") as file:
             file.write(text)
