@@ -23,6 +23,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import init as init_analytics
+from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
@@ -158,7 +159,10 @@ class CloudDataContext(SerializableDataContext):
             cloud_mode=True,
         )
 
-    def _get_cloud_user_id(self) -> uuid.UUID:
+    def _get_cloud_user_id(self) -> uuid.UUID | None:
+        if not ENV_CONFIG.gx_analytics_enabled:
+            return None
+
         response = self._request_cloud_backend(
             cloud_config=self.ge_cloud_config, uri="accounts/me"
         )
