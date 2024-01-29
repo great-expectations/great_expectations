@@ -90,7 +90,7 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
                         "meta": {},
                     }
                 ],
-                "ge_cloud_id": GET_EXPECTATION_SUITE_ID,
+                "ge_cloud_id": pact.Like("b6edf86b-633a-4d7b-9b18-ba47ab44e961"),
                 "meta": {"great_expectations_version": "0.18.3"},
             },
         },
