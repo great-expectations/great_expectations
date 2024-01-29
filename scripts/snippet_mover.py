@@ -109,6 +109,7 @@ class SnippetMover:
         doc_paths = [
             os.path.join(self._docs_prefix, doc_path) for doc_path in doc_paths
         ]
+        assert "docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md" in doc_paths
         doc_snippet_expression = re.compile(r"```\w* name=\"(.*)\"")
         for doc_path in doc_paths:
             snippet_names = self.search_file_for_snippets(
