@@ -1,8 +1,8 @@
 import os
 import re
 from collections import defaultdict
-from pathlib import Path
 from glob import glob
+from pathlib import Path
 from typing import Pattern
 
 from pydantic import BaseModel, Field
@@ -224,7 +224,7 @@ class SnippetMover:
     ) -> list[str]:
         """Build a list of all snippets referenced within a doc."""
         absolute_path = os.path.join(self._root_dir, path)
-        with open(absolute_path, "r") as file:
+        with open(absolute_path) as file:
             text = file.read()
             return re.findall(expression, text)
 
@@ -241,7 +241,7 @@ class SnippetMover:
         self, path: Path, old_str: str, new_str: str
     ) -> None:
         absolute_path = os.path.join(self._root_dir, path)
-        with open(absolute_path, "r") as file:
+        with open(absolute_path) as file:
             text = file.read()
         text = re.sub(old_str, new_str, text)
         with open(absolute_path, "w") as file:
