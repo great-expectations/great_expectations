@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from '@docusaurus/Link';
 import VersionedLink from '@site/src/components/VersionedLink'
 
 /**
@@ -35,7 +36,7 @@ export default class Prerequisites extends React.Component {
     return [
       <li key={0.1}>
         <li><VersionedLink to='/oss/tutorials/quickstart'>Completed the Quickstart guide</VersionedLink></li>
-        <li><VersionedLink to='/oss/contributing/contributing_setup'>Set up your dev environment</VersionedLink></li>
+        <li><Link to='/docs/contributing/contributing_setup'>Set up your dev environment</Link></li>
         <li>Created a <VersionedLink to='/oss/guides/expectations/custom_expectations_lp'>Custom Expectation</VersionedLink></li>
       </li>]
   }
