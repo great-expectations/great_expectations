@@ -101,6 +101,6 @@
   }
 
   .gxCard__image {
-    justify-self: center;
+    display: none;
   }
 }
