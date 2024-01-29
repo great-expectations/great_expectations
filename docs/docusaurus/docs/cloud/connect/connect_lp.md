@@ -14,6 +14,6 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 <LinkCardGrid>
   <LinkCard topIcon label="Connect GX Cloud to Snowflake" description="Quickly start using GX Cloud with Snowflake." href="connect_snowflake" icon="/img/snowflake_icon.png" />
-  <LinkCard topIcon label="Connect GX Cloud to Airflow" description="Quickly start using GX Cloud with Airflow." href="connect_airflow" icon="/img/airflow_icon.png" />
+  <LinkCard topIcon label="Connect GX Cloud and Airflow" description="Use Airflow to run scheduled GX Cloud validations." href="connect_airflow" icon="/img/airflow_icon.png" />
   <LinkCard topIcon label="Connect to GX Cloud with Python" description="Quickly start using GX Cloud with Python." href="connect_python" icon="/img/python_icon.svg" />
 </LinkCardGrid>

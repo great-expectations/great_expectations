@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Connect GX Cloud to Airflow'
-title: 'Connect GX Cloud to Airflow'
+sidebar_label: 'Connect GX Cloud and Airflow'
+title: 'Connect GX Cloud and Airflow'
 id: connect_airflow
 description: Connect GX Cloud to an Airflow Orchestrator.
 ---
