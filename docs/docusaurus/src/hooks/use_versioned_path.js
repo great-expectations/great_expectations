@@ -19,7 +19,7 @@ export const useVersionedPath = (path) => {
     const {versions} = usePluginData('docusaurus-plugin-content-docs');
     for (const version of Object.values(versions)) {
         if (version.path === '/docs') {
-            // Skip the "current" version, since it matches all acses
+            // Skip the "current" version, since it matches all cases
             continue;
         }
 
