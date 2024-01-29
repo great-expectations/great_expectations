@@ -222,10 +222,8 @@ def test_invalid_instantiation(glue_titanic_catalog):
     assert "table_name" in str(excinfo.value)
 
 
-def test_instantiation_from_a_config(
-    empty_data_context_stats_enabled, glue_titanic_catalog
-):
-    context = empty_data_context_stats_enabled
+def test_instantiation_from_a_config(empty_data_context, glue_titanic_catalog):
+    context = empty_data_context
     report_object = context.test_yaml_config(
         """
     module_name: great_expectations.datasource.data_connector

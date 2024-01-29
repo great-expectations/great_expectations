@@ -1409,12 +1409,6 @@ class Validator:
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )
-                if handler := getattr(data_context, "_usage_statistics_handler", None):
-                    handler.send_usage_message(
-                        event="data_asset.validate",
-                        event_payload=handler.anonymizer.anonymize(obj=self),
-                        success=False,
-                    )
                 return ExpectationValidationResult(success=False)
 
             # Evaluation parameter priority is
@@ -1517,22 +1511,10 @@ class Validator:
 
             self._data_context = validation_data_context
         except Exception:
-            if handler := getattr(data_context, "_usage_statistics_handler", None):
-                handler.send_usage_message(
-                    event="data_asset.validate",
-                    event_payload=handler.anonymizer.anonymize(obj=self),
-                    success=False,
-                )
             raise
         finally:
             self._active_validation = False
 
-        if handler := getattr(data_context, "_usage_statistics_handler", None):
-            handler.send_usage_message(
-                event="data_asset.validate",
-                event_payload=handler.anonymizer.anonymize(obj=self),
-                success=True,
-            )
         return result
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):

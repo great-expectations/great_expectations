@@ -24,7 +24,6 @@ from great_expectations.data_context.data_context_variables import (
     FileDataContextVariables,
 )
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
     DataContextConfig,
     GXCloudConfig,
@@ -33,9 +32,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-)
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
 )
 
 yaml = YAMLHandler()
@@ -65,11 +61,6 @@ def data_context_config_dict() -> dict:
             },
         },
         "data_docs_sites": {},
-        "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
-            enabled=True,
-            data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url=USAGE_STATISTICS_QA_URL,
-        ),
         "concurrency": None,
         "progress_bars": None,
         "include_rendered_content": {
@@ -194,13 +185,6 @@ def data_docs_sites() -> dict:
 
 
 @pytest.fixture
-def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
-    return AnonymizedUsageStatisticsConfig(
-        enabled=False,
-    )
-
-
-@pytest.fixture
 def concurrency() -> ConcurrencyConfig:
     return ConcurrencyConfig(enabled=True)
 
@@ -258,10 +242,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics getter",
         ),
         pytest.param(
             DataContextVariableSchema.CONCURRENCY,
@@ -371,11 +351,6 @@ def test_data_context_variables_get_with_substitutions(
             data_docs_sites,
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites setter",
-        ),
-        pytest.param(
-            anonymous_usage_statistics,
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics setter",
         ),
         pytest.param(
             concurrency,

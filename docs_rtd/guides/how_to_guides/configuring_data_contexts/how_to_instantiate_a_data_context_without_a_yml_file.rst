@@ -176,9 +176,6 @@ Steps
                         },
                     ],
                 }
-            },
-            anonymous_usage_statistics={
-              "enabled": True
             }
         )
 

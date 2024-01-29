@@ -45,7 +45,7 @@ stages:
                 --bigquery \
                 --junitxml=junit/test-results.xml \
                  --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
-                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+                --ignore=tests/cli
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
@@ -106,7 +106,7 @@ stages:
                 --bigquery \
                 --junitxml=junit/test-results.xml \
                 --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
-                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+                --ignore=tests/cli
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)

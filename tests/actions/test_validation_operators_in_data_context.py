@@ -11,8 +11,8 @@ from great_expectations.self_check.util import expectationSuiteSchema
 
 
 @pytest.fixture()
-def parameterized_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def parameterized_expectation_suite(empty_data_context):
+    context = empty_data_context
     fixture_path = file_relative_path(
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",

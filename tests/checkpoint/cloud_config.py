@@ -95,10 +95,6 @@ def make_send_slack_notifications(counter: CallCounter):
 
 def _cloud_config(data_dir):
     return {
-        "anonymous_usage_statistics": {
-            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-            "enabled": True,
-        },
         "checkpoint_store_name": "default_checkpoint_store",
         "concurrency": {"enabled": False},
         "config_variables_file_path": "uncommitted/config_variables.yml",

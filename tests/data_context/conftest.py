@@ -39,9 +39,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 yaml = YAMLHandler()
 
@@ -184,11 +181,6 @@ def basic_data_context_config():
                     "class_name": "ActionListValidationOperator",
                     "action_list": [],
                 }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
     )
@@ -337,11 +329,6 @@ def data_context_config_with_datasources(conn_string_password):
                     "action_list": [],
                 }
             },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
         }
     )
 
@@ -415,11 +402,6 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                     "class_name": "ActionListValidationOperator",
                     "action_list": [],
                 }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
     )

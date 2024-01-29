@@ -392,31 +392,30 @@ new directory or use this template:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/data_docs/local_site/
 
-.. _Usage Statistics:
+.. _Analytics Data:
 
 #################
-Usage Statistics
+Analytics Data
 #################
 
-To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. Our `blog post from April 2020 <https://greatexpectations.io/blog/anonymized-usage-statistics/>`_ explains a little bit more about what we want to capture with usage statistics and why! The usage statistics include things like the OS and python version, and which GX features are used. You can see the exact
-schemas for all of our messages `here <https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py>`_.
+To help us improve the tool, by default we track usage data.
 
-While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the
+While we hope you'll leave them on, you can disable analytics data collection for a Data Context by adding the
 following to your data context configuration:
 
 .. code-block:: yaml
 
-    anonymous_usage_statistics:
+    analytics_data:
       data_context_id: <randomly-generated-uuid>
       enabled: false
 
-You can also disable usage statistics system-wide by setting the ``GE_USAGE_STATS`` environment variable to
+You can also disable analytics data collection system-wide by setting the ``gx_analytics_enabled`` environment variable to
 ``FALSE`` or adding the following code block to a file called ``great_expectations.conf`` located in ``/etc/`` or
 ``~/.great_expectations``:
 
 .. code-block::
 
-    [anonymous_usage_statistics]
+    [analytics_data]
     enabled=FALSE
 
 As always, please reach out `on Slack <https://greatexpectations.io/slack>`__ if you have any questions or comments.

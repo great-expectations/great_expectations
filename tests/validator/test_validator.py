@@ -43,7 +43,6 @@ from great_expectations.validator.validator import Validator
 @pytest.fixture()
 def yellow_trip_pandas_data_context(
     tmp_path_factory,
-    monkeypatch,
 ) -> FileDataContext:
     """
     Provides a data context with a data_connector for a pandas datasource which can connect to three months of
@@ -51,8 +50,6 @@ def yellow_trip_pandas_data_context(
     where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
     batch_filter_parameters is set to "01", "02", or "03"
     """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(  # noqa: PTH118
@@ -200,9 +197,9 @@ def test_validator_default_expectation_args__sql(
 
 @pytest.mark.big
 def test_columns(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
 ):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -228,9 +225,9 @@ def test_columns(
 
 @pytest.mark.big
 def test_head(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
 ):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -352,21 +349,17 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.data_context.data_context.AbstractDataContext.get_expectation_suite"
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
     mock_expectation_store_update,
-    mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
     unset_gx_env_variables,
     multi_batch_taxi_validator_ge_cloud_mode,
-    empty_data_context_stats_enabled,
+    empty_data_context,
 ):
     """
     This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
@@ -374,7 +367,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GX Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
     """
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     mock_suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
@@ -572,28 +565,6 @@ def test_custom_filter_function(
         v.batch_identifiers["month"] for v in jan_feb_batch_definition_list
     }
     assert batch_definitions_months_set == {"01", "02"}
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.big
-def test_adding_expectation_to_validator_not_send_usage_message(
-    mock_emit, multi_batch_taxi_validator
-):
-    """
-    What does this test and why?
-
-    When an Expectation is called using a Validator, it validates the dataset using the implementation of
-    the Expectation. As part of the process, it also adds the Expectation to the active
-    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
-    (ie not calling add_expectations() directly) does not emit a usage_stats event.
-    """
-    multi_batch_taxi_validator.expect_column_values_to_be_between(
-        column="trip_distance", min_value=11, max_value=22
-    )
-    assert mock_emit.call_count == 0
-    assert mock_emit.call_args_list == []
 
 
 @pytest.mark.big

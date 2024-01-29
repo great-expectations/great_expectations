@@ -42,7 +42,6 @@ from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -734,19 +733,7 @@ class ExpectationSuite(SerializableDictDot):
                 )
             )
 
-        if send_usage_event:
-            self.send_usage_event(success=True)
-
         return expectation_configuration
-
-    def send_usage_event(self, success: bool) -> None:
-        usage_stats_event_payload: dict = {}
-        if self._data_context is not None:
-            self._data_context.send_usage_message(
-                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
-                event_payload=usage_stats_event_payload,
-                success=success,
-            )
 
     def add_expectation_configurations(
         self,

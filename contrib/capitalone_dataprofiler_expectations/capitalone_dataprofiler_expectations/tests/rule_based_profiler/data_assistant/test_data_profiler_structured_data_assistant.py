@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import os
-import unittest
-from typing import TYPE_CHECKING, Dict, List, Optional, cast
-from unittest import mock
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 import pytest
 from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
@@ -17,7 +15,6 @@ from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_res
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
@@ -36,7 +33,7 @@ test_root_path: str = os.path.dirname(  # noqa: PTH120
 
 
 @pytest.fixture
-def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
+def bobby_profile_data_profiler_deterministic_structured_data_assistant_result(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
     context: FileDataContext = (
@@ -142,30 +139,17 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
 
 
 @pytest.mark.big
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 7.34s
 def test_profile_data_profiler_structured_data_assistant_result_get_expectation_suite(
-    mock_emit,
-    bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled: DataProfilerStructuredDataAssistantResult,
+    bobby_profile_data_profiler_deterministic_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+    suite: ExpectationSuite = bobby_profile_data_profiler_deterministic_structured_data_assistant_result.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
 
     assert suite is not None and len(suite.expectations) > 0
-
-    assert mock_emit.call_count == 1
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
-    )
 
 
 @pytest.mark.big

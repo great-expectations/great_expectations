@@ -8,7 +8,6 @@ import pytest
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import build_test_backends_list
 from tests.conftest import (  # noqa: F401  # registers implicitly used fixture and prevents removal of "unused" import
@@ -128,11 +127,6 @@ def pytest_addoption(parser):
         help="If set, execute tests against snowflake",
     )
     parser.addoption(
-        "--aws-integration",
-        action="store_true",
-        help="If set, run aws integration tests for usage_statistics",
-    )
-    parser.addoption(
         "--docs-tests",
         action="store_true",
         help="If set, run integration tests for docs",
@@ -169,10 +163,6 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     tmp_path_factory,
     monkeypatch,
 ) -> FileDataContext:
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
-    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
-
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103

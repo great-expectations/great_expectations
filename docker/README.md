@@ -12,8 +12,7 @@ they are invoked in the root directory of this repo.
 The template docker command for building an image is:
 ```
 docker buildx build -f docker/Dockerfile.tests --tag <name>:<tag> --target <target> \
-    --build-arg PYTHON_VERSION=<version> --build-arg SOURCE=<src> --build-arg BRANCH=<branch_name> \
-    --build-arg GE_USAGE_STATISTICS_URL="<url>".
+    --build-arg PYTHON_VERSION=<version> --build-arg SOURCE=<src> --build-arg BRANCH=<branch_name>
 ```
 
 `<name>` and `<tag>` are arbitrary. Examples: `gx39_dev:develop`, `gx37_dev:mybranch`.

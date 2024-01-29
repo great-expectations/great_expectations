@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import enum
 import logging
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
@@ -23,7 +24,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import DataContextStore
     from great_expectations.data_context.types.base import (
-        AnonymizedUsageStatisticsConfig,
         ConcurrencyConfig,
         DataContextConfig,
         IncludeRenderedContentConfig,
@@ -53,7 +53,7 @@ class DataContextVariableSchema(str, enum.Enum):
     DATA_DOCS_SITES = "data_docs_sites"
     NOTEBOOKS = "notebooks"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
+    DATA_CONTEXT_ID = "data_context_id"
     CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
     INCLUDE_RENDERED_CONTENT = "include_rendered_content"
@@ -237,19 +237,8 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
 
     @property
-    def anonymous_usage_statistics(
-        self,
-    ) -> Optional[AnonymizedUsageStatisticsConfig]:
-        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
-
-    @anonymous_usage_statistics.setter
-    def anonymous_usage_statistics(
-        self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
-    ) -> None:
-        self._set(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            anonymous_usage_statistics,
-        )
+    def data_context_id(self) -> uuid.UUID:
+        return self._get(DataContextVariableSchema.DATA_CONTEXT_ID)
 
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:

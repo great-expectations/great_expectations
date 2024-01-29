@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, cast
 
-from marshmallow import Schema, fields, post_dump
+from marshmallow import Schema, fields
 
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -49,19 +49,6 @@ class ConfigurationBundle:
     @property
     def data_context_id(self) -> str:
         return self._context_id
-
-    def is_usage_stats_enabled(self) -> bool:
-        """Determine whether usage stats are enabled.
-
-        Also returns false if there are no usage stats settings provided.
-
-        Returns: Boolean of whether the usage statistics are enabled.
-
-        """
-        if self._data_context_variables.anonymous_usage_statistics:
-            return self._data_context_variables.anonymous_usage_statistics.enabled
-        else:
-            return False
 
     @property
     def data_context_variables(self) -> DataContextVariables:
@@ -150,12 +137,6 @@ class ConfigurationBundleSchema(Schema):
         ),
         required=True,
     )
-
-    @post_dump
-    def clean_up(self, data, **kwargs) -> dict:
-        data_context_variables = data.get("data_context_variables", {})
-        data_context_variables.pop("anonymous_usage_statistics", None)
-        return data
 
 
 class ConfigurationBundleJsonSerializer:

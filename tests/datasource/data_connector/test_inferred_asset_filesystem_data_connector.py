@@ -1,5 +1,4 @@
 from typing import List
-from unittest import mock
 
 import pytest
 
@@ -292,13 +291,8 @@ def test_self_check(tmp_path_factory):
     }
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_test_yaml_config(
-    mock_emit, empty_data_context_stats_enabled, tmp_path_factory
-):
-    context = empty_data_context_stats_enabled
+def test_test_yaml_config(empty_data_context, tmp_path_factory):
+    context = empty_data_context
 
     base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
     create_files_in_directory(
@@ -362,32 +356,12 @@ default_regex:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
-    assert mock_emit.call_count == 1
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "InferredAssetFilesystemDataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_yaml_config_excluding_non_regex_matching_files(
-    mock_emit, empty_data_context_stats_enabled, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp("test_yaml_config_excluding_non_regex_matching_files")
@@ -460,23 +434,6 @@ default_regex:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
-    assert mock_emit.call_count == 1
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "InferredAssetFilesystemDataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 def test_nested_directory_data_asset_name_in_folder(

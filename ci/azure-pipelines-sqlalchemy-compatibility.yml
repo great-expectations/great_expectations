@@ -32,9 +32,6 @@ resources:
     ports:
       - 1433:1433
 
-variables:
-  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-
 
 stages:
   - stage: scope_check
@@ -153,7 +150,6 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
           - task: PublishTestResults@2
@@ -211,7 +207,6 @@ stages:
 
             displayName: 'pytest'
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
           - task: PublishTestResults@2

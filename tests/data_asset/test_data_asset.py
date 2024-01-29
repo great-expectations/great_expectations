@@ -54,8 +54,8 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
 
 
 @pytest.mark.filesystem
-def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def test_data_asset_expectation_suite(empty_data_context):
+    context = empty_data_context
     asset = DataAsset()
     default_suite = ExpectationSuite(
         expectation_suite_name="default",

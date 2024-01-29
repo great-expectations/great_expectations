@@ -1,5 +1,4 @@
 import datetime
-from unittest import mock
 
 import boto3
 import pytest
@@ -14,10 +13,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -309,17 +304,12 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     assert test_utils.validate_uuid4(my_store.store_backend_id)
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
 @pytest.mark.big
-def test_instantiation_with_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
-    empty_data_context_stats_enabled.test_yaml_config(
+def test_instantiation_with_test_yaml_config(empty_data_context):
+    empty_data_context.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.validations_store
 class_name: ValidationsStore
@@ -328,30 +318,6 @@ store_backend:
     base_directory: uncommitted/validations/
 """
     )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ValidationsStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.cloud

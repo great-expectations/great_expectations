@@ -14,9 +14,7 @@ from great_expectations.self_check.util import get_dataset
 
 
 @pytest.fixture
-def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+def titanic_data_context_modular_api(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103

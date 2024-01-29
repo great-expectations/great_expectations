@@ -8,10 +8,8 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import CloudMigrator
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.migrator.cloud_migrator import MigrationResponse
-from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from tests.data_context.migrator.conftest import StubBaseDataContext
 
 
@@ -60,10 +58,7 @@ def mock_successful_migration(
             CloudMigrator,
             "_migrate_to_cloud",
             return_value=None,
-        ), mock.patch(
-            f"{CloudMigrator.__module__}.send_usage_message",
-            autospec=True,
-        ) as mock_send_usage_message:
+        ) as mock_migrator:
             CloudMigrator.migrate(
                 context=context,
                 test_migrate=test_migrate,
@@ -72,7 +67,7 @@ def mock_successful_migration(
                 cloud_organization_id=ge_cloud_organization_id,
             )
 
-        return mock_send_usage_message
+        return mock_migrator
 
     return _build_mock_migrate
 
@@ -91,10 +86,7 @@ def mock_failed_migration(
             "_migrate_to_cloud",
             return_value=None,
             side_effect=gx_exceptions.MigrationError,
-        ), mock.patch(
-            f"{CloudMigrator.__module__}.send_usage_message",
-            autospec=True,
-        ) as mock_send_usage_message:
+        ) as mock_migrator:
             with pytest.raises(gx_exceptions.MigrationError):
                 CloudMigrator.migrate(
                     context=context,
@@ -104,7 +96,7 @@ def mock_failed_migration(
                     cloud_organization_id=ge_cloud_organization_id,
                 )
 
-        return mock_send_usage_message
+        return mock_migrator
 
     return _build_mock_migrate
 
@@ -192,55 +184,6 @@ def test__send_validation_results_sends_valid_http_request(
 
 
 @pytest.mark.cloud
-class TestUsageStats:
-    def test_migrate_successful_event(
-        self, ge_cloud_organization_id: str, mock_successful_migration: Callable
-    ):
-        """Test that send_usage_message is called with the right params."""
-
-        mock_send_usage_message = mock_successful_migration(test_migrate=False)
-
-        mock_send_usage_message.assert_called_once_with(
-            data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE,
-            event_payload={"organization_id": ge_cloud_organization_id},
-            success=True,
-        )
-
-    def test_migrate_failed_event(
-        self, ge_cloud_organization_id: str, mock_failed_migration: Callable
-    ):
-        """Test that send_usage_message is called with the right params."""
-
-        mock_send_usage_message = mock_failed_migration(test_migrate=False)
-
-        mock_send_usage_message.assert_called_once_with(
-            data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE,
-            event_payload={"organization_id": ge_cloud_organization_id},
-            success=False,
-        )
-
-    def test_no_event_sent_for_migrate_test_run(
-        self, mock_successful_migration: Callable
-    ):
-        """No event should be sent for a successful test run."""
-
-        mock_send_usage_message = mock_successful_migration(test_migrate=True)
-
-        mock_send_usage_message.assert_not_called()
-
-    def test_no_event_sent_for_migrate_test_run_failure(
-        self, mock_failed_migration: Callable
-    ):
-        """No event should be sent for a failed test run."""
-
-        mock_send_usage_message = mock_failed_migration(test_migrate=True)
-
-        mock_send_usage_message.assert_not_called()
-
-
-@pytest.mark.cloud
 @pytest.mark.parametrize("test_migrate", [True, False])
 @pytest.mark.parametrize("include_datasources", [True, False])
 @pytest.mark.parametrize("enable_usage_stats", [True, False])
@@ -251,13 +194,9 @@ def test__migrate_to_cloud_outputs_warnings(
     enable_usage_stats: bool,
     caplog,
 ):
-    anonymized_usage_statistics_config = AnonymizedUsageStatisticsConfig(
-        enabled=enable_usage_stats
-    )
     datasource_names = ("my_datasource",) if include_datasources else tuple()
 
     context = StubBaseDataContext(
-        anonymized_usage_statistics_config=anonymized_usage_statistics_config,
         datasource_names=datasource_names,
     )
 

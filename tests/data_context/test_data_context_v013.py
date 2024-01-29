@@ -20,9 +20,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.validator.validator import Validator
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
 
 yaml = YAMLHandler()
@@ -65,7 +62,7 @@ def basic_data_context_v013_config():
             "anonymous_usage_statistics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
+                "usage_statistics_url": "http://localhost",
             },
         }
     )
@@ -435,9 +432,9 @@ data_connectors:
 @pytest.mark.filesystem
 @pytest.mark.slow  # 1.06s
 def test_in_memory_data_context_configuration(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
+    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.get_config(
         mode=ConfigOutputModes.DICT
     )
     project_config_dict["plugins_directory"] = None
@@ -468,7 +465,7 @@ def test_in_memory_data_context_configuration(
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
     data_context = get_context(
         project_config=project_config,
-        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.root_directory,
+        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.root_directory,
     )
 
     my_validator: Validator = data_context.get_validator(
@@ -582,9 +579,9 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
 )
 def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     sa,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
@@ -657,9 +654,9 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
 @pytest.mark.filesystem
 def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connector(
     sa,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )

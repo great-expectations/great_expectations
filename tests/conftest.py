@@ -40,9 +40,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
@@ -66,7 +63,6 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 )
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
@@ -493,12 +489,6 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(marker)
 
 
-@pytest.fixture(autouse=True)
-def no_usage_stats(monkeypatch):
-    # Do not generate usage stats from test runs
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
-
-
 @pytest.fixture(scope="session", autouse=True)
 def preload_latest_gx_cache():
     """
@@ -668,8 +658,8 @@ def spark_session_v012(test_backends):
 
 
 @pytest.fixture
-def basic_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def basic_expectation_suite(empty_data_context):
+    context = empty_data_context
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={},
@@ -1041,13 +1031,9 @@ def data_context_with_connection_to_metrics_db(
 
 
 @pytest.fixture
-def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store(
     tmp_path_factory,
-    monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -1080,7 +1066,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
             str(
                 pathlib.Path(
                     "test_fixtures",
-                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                    "great_expectations_v013_no_datasource.yml",
                 )
             ),
         ),
@@ -1193,12 +1179,12 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
 
 @pytest.fixture
-def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
     tmp_path_factory,
     monkeypatch,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
 
     project_dir: str = context.root_directory
     data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
@@ -1227,14 +1213,14 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 
 
 @pytest.fixture
-def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store(
     sa,
-    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store,
     tmp_path_factory,
     test_backends,
     monkeypatch,
 ):
-    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store
 
     project_dir: str = context.root_directory
     data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
@@ -1282,24 +1268,24 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
 
 
 @pytest.fixture
-def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store(
     sa,
     spark_session,
-    titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store,
     tmp_path_factory,
     test_backends,
     monkeypatch,
 ):
-    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store
     project_manager.set_project(context)
     return context
 
 
 @pytest.fixture
-def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
 
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
@@ -1610,9 +1596,6 @@ def deterministic_asset_data_connector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -1626,7 +1609,7 @@ def deterministic_asset_data_connector_context(
             str(
                 pathlib.Path(
                     "test_fixtures",
-                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                    "great_expectations_v013_no_datasource.yml",
                 )
             ),
         ),
@@ -1689,13 +1672,9 @@ def deterministic_asset_data_connector_context(
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store(
     tmp_path_factory,
-    monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -1711,7 +1690,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
             str(
                 pathlib.Path(
                     "test_fixtures",
-                    "great_expectations_no_block_no_fluent_datasources_stats_enabled.yml",
+                    "great_expectations_no_block_no_fluent_datasources.yml",
                 )
             ),
         ),
@@ -1820,12 +1799,12 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
-    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store,
     spark_df_from_pandas_df,
     spark_session,
 ):
-    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store
     context_path: str = context.root_directory
     path_to_folder_containing_csv_files = pathlib.Path(
         context_path,
@@ -1875,12 +1854,12 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
-    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store,
     db_file,
     sa,
 ):
-    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store
 
     datasource_name = "my_sqlite_datasource"
     connection_string = f"sqlite:///{db_file}"
@@ -1906,10 +1885,10 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates(
-    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store
 
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
@@ -2215,12 +2194,12 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates(
-    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_templates,
     spark_df_from_pandas_df,
     spark_session,
 ):
-    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_templates
     context_path: str = context.root_directory
     path_to_folder_containing_csv_files = pathlib.Path(
         context_path,
@@ -2270,12 +2249,12 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates(
-    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_templates,
     db_file,
     sa,
 ):
-    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_templates
 
     datasource_name = "my_sqlite_datasource"
     connection_string = f"sqlite:///{db_file}"
@@ -2313,19 +2292,6 @@ def empty_context_with_checkpoint(empty_data_context):
     )
     shutil.copy(fixture_path, checkpoints_file)
     assert os.path.isfile(checkpoints_file)  # noqa: PTH113
-    project_manager.set_project(context)
-    return context
-
-
-@pytest.fixture
-def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
-    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
-    os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     project_manager.set_project(context)
     return context
 
@@ -2418,40 +2384,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 
 @pytest.fixture
-def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
-    os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
-    )
-    os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
-    )
-    data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
-    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
-    )
-    shutil.copy(
-        titanic_yml_path,
-        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
-    )
-    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
-    shutil.copy(
-        titanic_csv_path,
-        str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
-    )
-    context = get_context(context_root_dir=context_path)
-    project_manager.set_project(context)
-    return context
-
-
-@pytest.fixture
-def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+def titanic_data_context_config_version_2(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -2480,9 +2413,7 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 
 @pytest.fixture
-def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+def titanic_data_context_config_version_3(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -2586,8 +2517,8 @@ def titanic_sqlite_db_connection_string(sa):
 
 
 @pytest.fixture
-def titanic_expectation_suite(empty_data_context_stats_enabled):
-    data_context = empty_data_context_stats_enabled
+def titanic_expectation_suite(empty_data_context):
+    data_context = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="Titanic.warning",
         meta={},
@@ -2791,9 +2722,9 @@ def data_context_simple_expectation_suite(tmp_path_factory):
 
 @pytest.fixture()
 def filesystem_csv_data_context_with_validation_operators(
-    titanic_data_context_stats_enabled, filesystem_csv_2
+    titanic_data_context, filesystem_csv_2
 ):
-    titanic_data_context_stats_enabled.add_datasource(
+    titanic_data_context.add_datasource(
         "rad_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
@@ -2804,7 +2735,7 @@ def filesystem_csv_data_context_with_validation_operators(
             }
         },
     )
-    return titanic_data_context_stats_enabled
+    return titanic_data_context
 
 
 @pytest.fixture()
@@ -4421,19 +4352,10 @@ def alice_columnar_table_single_batch(empty_data_context):
 @pytest.fixture
 def alice_columnar_table_single_batch_context(
     monkeypatch,
-    empty_data_context_stats_enabled,
+    empty_data_context,
     alice_columnar_table_single_batch,
 ):
-    context = empty_data_context_stats_enabled
-    # We need our salt to be consistent between runs to ensure idempotent anonymized values
-    # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
-    # (ie. adjusted to be context._usage_statistics_handler)
-    context._usage_statistics_handler = UsageStatisticsHandler(
-        data_context=context,
-        data_context_id="00000000-0000-0000-0000-00000000a004",
-        usage_statistics_url="N/A",
-        oss_id=None,
-    )
+    context = empty_data_context
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(  # noqa: PTH118
@@ -7380,12 +7302,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 def bobby_columnar_table_multi_batch_deterministic_data_context(
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     tmp_path_factory,
-    monkeypatch,
 ) -> FileDataContext:
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
-
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -7628,15 +7545,11 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
 @pytest.fixture
 def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     tmp_path_factory,
-    monkeypatch,
 ) -> FileDataContext:
     """
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
-    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(  # noqa: PTH118
@@ -7816,15 +7729,11 @@ def quentin_columnar_table_multi_batch():
 @pytest.fixture
 def quentin_columnar_table_multi_batch_data_context(
     tmp_path_factory,
-    monkeypatch,
 ) -> FileDataContext:
     """
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of each batch being equal to the original number per log file (10,000 rows).
     """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(  # noqa: PTH118

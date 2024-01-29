@@ -1307,96 +1307,6 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
         return DatasourceConfig(**data)
 
 
-class AnonymizedUsageStatisticsConfig(DictDot):
-    def __init__(
-        self, enabled=True, data_context_id=None, usage_statistics_url=None
-    ) -> None:
-        self._enabled = enabled
-
-        if data_context_id is None:
-            data_context_id = str(uuid.uuid4())
-            self._explicit_id = False
-        else:
-            self._explicit_id = True
-
-        self._data_context_id = data_context_id
-
-        if usage_statistics_url is None:
-            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
-            self._explicit_url = False
-        else:
-            self._explicit_url = True
-
-        self._usage_statistics_url = usage_statistics_url
-
-    @property
-    def enabled(self) -> bool:
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, enabled) -> None:
-        if not isinstance(enabled, bool):
-            raise ValueError("usage statistics enabled property must be boolean")
-
-        self._enabled = enabled
-
-    @property
-    def data_context_id(self) -> str:
-        return self._data_context_id
-
-    @data_context_id.setter
-    def data_context_id(self, data_context_id) -> None:
-        try:
-            uuid.UUID(data_context_id)
-        except ValueError:
-            raise gx_exceptions.InvalidConfigError(
-                "data_context_id must be a valid uuid"
-            )
-
-        self._data_context_id = data_context_id
-        self._explicit_id = True
-
-    @property
-    def explicit_id(self) -> bool:
-        return self._explicit_id
-
-    @property
-    def explicit_url(self) -> bool:
-        return self._explicit_url
-
-    @property
-    def usage_statistics_url(self) -> str:
-        return self._usage_statistics_url
-
-    @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url) -> None:
-        self._usage_statistics_url = usage_statistics_url
-        self._explicit_url = True
-
-
-class AnonymizedUsageStatisticsConfigSchema(Schema):
-    data_context_id = fields.UUID()
-    enabled = fields.Boolean(default=True)
-    usage_statistics_url = fields.URL(allow_none=True)
-    _explicit_url = fields.Boolean(required=False)
-
-    # noinspection PyUnusedLocal
-    @post_load()
-    def make_usage_statistics_config(self, data, **kwargs):
-        if "data_context_id" in data:
-            data["data_context_id"] = str(data["data_context_id"])
-        return AnonymizedUsageStatisticsConfig(**data)
-
-    # noinspection PyUnusedLocal
-    @post_dump()
-    def filter_implicit(self, data, **kwargs):
-        if not data.get("_explicit_url") and "usage_statistics_url" in data:
-            del data["usage_statistics_url"]
-        if "_explicit_url" in data:
-            del data["_explicit_url"]
-        return data
-
-
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
@@ -1555,7 +1465,7 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Dict(), allow_none=True
     )
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    data_context_id = fields.UUID()
     progress_bars = fields.Nested(
         ProgressBarsConfigSchema, required=False, allow_none=True
     )
@@ -2298,8 +2208,8 @@ class DataContextConfig(BaseYamlConfig):
         notebooks (Optional[NotebookConfig]): Configurations for Jupyter Notebooks associated with DataContext, such as
             the `suite_edit` Notebook.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
-        anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
-            anonymous usage statistics for GX.
+
+        data_context_id (Optional[UUID]): id for DataContext.
         store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
             For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
             and you may be able to specify fewer parameters.
@@ -2335,7 +2245,8 @@ class DataContextConfig(BaseYamlConfig):
         notebooks: Optional[Any] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
+        data_context_id: Optional[uuid.UUID] = None,
+        anonymous_usage_statistics: Optional[dict] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
@@ -2344,6 +2255,12 @@ class DataContextConfig(BaseYamlConfig):
     ) -> None:
         if notebooks:
             warnings.warn("The `notebooks` parameter no longer supported.", UserWarning)
+
+        if anonymous_usage_statistics:
+            warnings.warn(
+                "The `anonymous_usage_statistics` parameter is no longer supported.",
+                UserWarning,
+            )
 
         # Set defaults
         if config_version is None:
@@ -2388,13 +2305,8 @@ class DataContextConfig(BaseYamlConfig):
         self.stores = stores or {}
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
+        if data_context_id is None:
+            self.data_context_id = uuid.uuid4()
         if isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency = concurrency
@@ -3051,7 +2963,6 @@ executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
-anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

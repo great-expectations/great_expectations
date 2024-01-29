@@ -1,10 +1,7 @@
-import configparser
-import copy
 import json
 import os
 import pathlib
 import shutil
-import uuid
 from collections import OrderedDict
 from typing import Dict, List, Union
 
@@ -22,16 +19,12 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
-from great_expectations.data_context.data_context.ephemeral_data_context import (
-    EphemeralDataContext,
-)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
 )
@@ -1178,9 +1171,9 @@ def test_get_checkpoint(empty_context_with_checkpoint):
 
 @pytest.mark.big
 def test_run_checkpoint_new_style(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     # add Checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -1247,9 +1240,9 @@ def test_run_checkpoint_new_style(
 
 @pytest.mark.filesystem
 def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context_stats_enabled, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1441,13 +1434,8 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_add_expectation_to_expectation_suite(
-    mock_emit, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
+def test_add_expectation_to_expectation_suite(empty_data_context):
+    context = empty_data_context
 
     expectation_suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
@@ -1457,23 +1445,10 @@ def test_add_expectation_to_expectation_suite(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        )
-    ]
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
+def test_add_checkpoint_from_yaml(empty_data_context):
     """
     What does this test and why?
     We should be able to add a checkpoint directly from a valid yaml configuration.
@@ -1482,7 +1457,7 @@ def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
     Note: This tests multiple items and could stand to be broken up.
     """
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
     checkpoint_name: str = "my_new_checkpoint"
 
     assert checkpoint_name not in context.list_checkpoints()
@@ -1666,18 +1641,13 @@ expectation_suite_ge_cloud_id:
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(
-    mock_emit, empty_data_context_stats_enabled
-):
+def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(empty_data_context):
     """
     What does this test and why?
     Checkpoint yaml should have a valid class_name
     """
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
     checkpoint_name: str = "my_new_checkpoint"
 
     assert checkpoint_name not in context.list_checkpoints()
@@ -1708,29 +1678,15 @@ validations:
 
     assert checkpoint_name not in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 0
-    assert mock_emit.call_count == 1
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {},
-                "success": False,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
+def test_add_datasource_from_yaml(empty_data_context):
     """
     What does this test and why?
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
     """
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -1754,57 +1710,10 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     datasource_from_test_yaml_config = context.test_yaml_config(
         example_yaml, name=datasource_name
     )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-        "event_payload"
-    ]["anonymized_execution_engine"]["anonymized_name"]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "Datasource",
-                    "anonymized_execution_engine": {
-                        "anonymized_name": anonymized_execution_engine_name,
-                        "parent_class": "PandasExecutionEngine",
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetFilesystemDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
-    assert mock_emit.call_count == 2
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.add_datasource",
-                    "event_payload": {},
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
     assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
 
@@ -1841,30 +1750,13 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
     assert datasource_name in context.get_config()["datasources"]
-    assert mock_emit.call_count == 3
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.__init__",
-                    "event_payload": {},
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
-    mock_emit,
+def test_add_datasource_from_yaml_sql_datasource(
     sa,
     test_backends,
-    empty_data_context_stats_enabled,
+    empty_data_context,
 ):
     """
     What does this test and why?
@@ -1874,7 +1766,7 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     if "postgresql" not in test_backends:
         pytest.skip("test_add_datasource_from_yaml_sql_datasource requires postgresql")
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -1899,52 +1791,10 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     datasource_from_test_yaml_config = context.test_yaml_config(
         example_yaml, name=datasource_name
     )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "SimpleSqlalchemyDatasource",
-                    "anonymized_execution_engine": {
-                        "parent_class": "SqlAlchemyExecutionEngine"
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetSqlDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
+
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
-    assert mock_emit.call_count == 2
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.add_datasource",
-                    "event_payload": {},
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
     # .config not implemented for SimpleSqlalchemyDatasource
     assert datasource_from_test_yaml_config.config == {}
@@ -2036,27 +1886,11 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
         [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
     )
     assert datasource_config.module_name == "great_expectations.datasource"
-    assert mock_emit.call_count == 3
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.__init__",
-                    "event_payload": {},
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_add_datasource_from_yaml_sql_datasource_with_credentials(
-    mock_emit, sa, test_backends, empty_data_context_stats_enabled
+    sa, test_backends, empty_data_context
 ):
     """
     What does this test and why?
@@ -2069,7 +1903,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "test_add_datasource_from_yaml_sql_datasource_with_credentials requires postgresql"
         )
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2101,63 +1935,6 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
     datasource_from_test_yaml_config = context.test_yaml_config(
         example_yaml, name=datasource_name
     )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-        "event_payload"
-    ]["anonymized_execution_engine"]["anonymized_name"]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    anonymized_data_connector_name_1 = mock_emit.call_args_list[0][0][0][
-        "event_payload"
-    ]["anonymized_data_connectors"][1]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "Datasource",
-                    "anonymized_execution_engine": {
-                        "anonymized_name": anonymized_execution_engine_name,
-                        "parent_class": "SqlAlchemyExecutionEngine",
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetSqlDataConnector",
-                        },
-                        {
-                            "anonymized_name": anonymized_data_connector_name_1,
-                            "parent_class": "RuntimeDataConnector",
-                        },
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
-    datasource_from_yaml = context.add_datasource(
-        name=datasource_name, **yaml.load(example_yaml)
-    )
-    assert mock_emit.call_count == 2
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.add_datasource",
-                    "event_payload": {},
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
     assert datasource_from_test_yaml_config.config == {
         "execution_engine": {
@@ -2188,6 +1965,10 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
         "id": None,
         "name": "my_datasource",
     }
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
     assert datasource_from_yaml.config == {
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
@@ -2255,23 +2036,17 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
         ]
     )
 
-    # No other usage stats calls detected
-    assert mock_emit.call_count == 2
-
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_add_datasource_from_yaml_with_substitution_variables(
-    mock_emit, empty_data_context_stats_enabled, monkeypatch
+    empty_data_context, monkeypatch
 ):
     """
     What does this test and why?
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string containing substitution variables should work as expected.
     """
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2298,56 +2073,9 @@ def test_add_datasource_from_yaml_with_substitution_variables(
         example_yaml, name=datasource_name
     )
 
-    assert mock_emit.call_count == 1
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-        "event_payload"
-    ]["anonymized_execution_engine"]["anonymized_name"]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "Datasource",
-                    "anonymized_execution_engine": {
-                        "anonymized_name": anonymized_execution_engine_name,
-                        "parent_class": "PandasExecutionEngine",
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetFilesystemDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
-    assert mock_emit.call_count == 2
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.add_datasource",
-                    "event_payload": {},
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
     assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
 
@@ -2384,19 +2112,6 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
     assert datasource_name in context.get_config()["datasources"]
-    assert mock_emit.call_count == 3
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.__init__",
-                    "event_payload": {},
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @pytest.mark.filesystem
@@ -2497,56 +2212,6 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     assert context.plugins_directory and context.plugins_directory.endswith(
         config_var_value
     )
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_finds_diff(
-    empty_data_context_stats_enabled,
-    data_context_config_with_datasources: DataContextConfig,
-) -> None:
-    """
-    What does this test do and why?
-
-    During DataContext instantiation, if the project config used to create the object
-    and the actual config assigned to self.config differ in terms of their usage statistics
-    values, we want to be able to identify that and persist values accordingly.
-    """
-    context = empty_data_context_stats_enabled
-    project_config = data_context_config_with_datasources
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is True
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_does_not_find_diff(
-    empty_data_context_stats_enabled,
-) -> None:
-    """
-    What does this test do and why?
-
-    During DataContext instantiation, if the project config used to create the object
-    and the actual config assigned to self.config differ in terms of their usage statistics
-    values, we want to be able to identify that and persist values accordingly.
-    """
-    context = empty_data_context_stats_enabled
-    project_config = copy.deepcopy(context.config)  # Using same exact config
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is False
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
-    empty_data_context,
-    data_context_config_with_datasources: DataContextConfig,
-) -> None:
-    context = empty_data_context
-    project_config = data_context_config_with_datasources
-    project_config.anonymous_usage_statistics.enabled = False
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is False
 
 
 class ExpectSkyToBeColor(BatchExpectation):
@@ -2778,45 +2443,3 @@ def test_file_backed_context_updates_existing_gitignore(tmp_path: pathlib.Path):
     contents = gitignore.read_text()
     assert existing_value in contents
     assert FileDataContext.GX_UNCOMMITTED_DIR in contents
-
-
-@pytest.mark.unit
-def test_set_oss_id_with_empty_config(in_memory_runtime_context: EphemeralDataContext):
-    context = in_memory_runtime_context
-    config = configparser.ConfigParser()
-
-    oss_id = context._set_oss_id(config)
-
-    assert config.sections() == ["anonymous_usage_statistics"]
-    assert list(config["anonymous_usage_statistics"]) == ["oss_id"]
-    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])
-
-
-@pytest.mark.unit
-def test_set_oss_id_with_existing_config(
-    in_memory_runtime_context: EphemeralDataContext,
-):
-    context = in_memory_runtime_context
-
-    # Set up existing config
-    # [anonymous_usage_statistics]
-    # usage_statistics_url=https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-    config = configparser.ConfigParser()
-    config["anonymous_usage_statistics"] = {}
-    usage_statistics_url = (
-        "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-    )
-    config["anonymous_usage_statistics"]["usage_statistics_url"] = usage_statistics_url
-
-    oss_id = context._set_oss_id(config)
-
-    assert config.sections() == ["anonymous_usage_statistics"]
-    assert list(config["anonymous_usage_statistics"]) == [
-        "usage_statistics_url",
-        "oss_id",
-    ]
-    assert (
-        usage_statistics_url
-        == config["anonymous_usage_statistics"]["usage_statistics_url"]
-    )
-    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])

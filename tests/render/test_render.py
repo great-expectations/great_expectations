@@ -78,8 +78,8 @@ def titanic_dataset_profiler_expectations_with_distribution(
 
 
 @pytest.fixture
-def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def titanic_profiled_expectations_1(empty_data_context):
+    context = empty_data_context
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"

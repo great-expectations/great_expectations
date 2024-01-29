@@ -403,14 +403,14 @@ def test_deduplicate_evaluation_parameter_dependencies():
     ],
 )
 def test_evaluation_parameters_for_between_expectations_parse_correctly(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
     dataframe: pd.DataFrame,
     evaluation_parameters: Dict[str, Any],
     expectation_type: str,
     expectation_kwargs: Dict[str, dict],
     expected_expectation_validation_result: ExpectationValidationResult,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
 
     expectation_suite_name = "test_suite"
     context.suites.add(ExpectationSuite(name=expectation_suite_name))

@@ -3,7 +3,6 @@ import itertools
 import json
 import os
 import tempfile
-from unittest import mock
 
 import pytest
 from ruamel.yaml.error import MarkedYAMLError
@@ -20,10 +19,6 @@ from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import get_sqlalchemy_url, load_class
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 from tests.test_utils import create_files_in_directory, set_directory
 
 
@@ -78,13 +73,10 @@ SELECT EXISTS (
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_config_with_yaml_error(mock_emit, caplog, empty_data_context_stats_enabled):
+def test_config_with_yaml_error(caplog, empty_data_context):
     with pytest.raises(MarkedYAMLError):
         # noinspection PyUnusedLocal
-        empty_data_context_stats_enabled.test_yaml_config(
+        empty_data_context.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -94,30 +86,11 @@ store_backend:
 EGREGIOUS FORMATTING ERROR
 """
         )
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {"diagnostic_info": ["__yaml_parse_error__"]},
-                "success": False,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 1.61s
-def test_expectations_store_with_filesystem_store_backend(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
+def test_expectations_store_with_filesystem_store_backend(caplog, empty_data_context):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:  # noqa: PTH118
         f_.write("\n")
@@ -125,7 +98,7 @@ def test_expectations_store_with_filesystem_store_backend(
         f_.write("\n")
 
     # noinspection PyUnusedLocal
-    empty_data_context_stats_enabled.test_yaml_config(
+    empty_data_context.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store
 class_name: ExpectationsStore
@@ -135,43 +108,16 @@ store_backend:
     base_directory: {tmp_dir}
 """
     )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ExpectationsStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        )
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_checkpoint_store_with_filesystem_store_backend(
-    mock_emit, caplog, empty_data_context_stats_enabled, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
     )
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     yaml_config: str = f"""
     store_name: my_checkpoint_store
@@ -187,61 +133,11 @@ def test_checkpoint_store_with_filesystem_store_backend(
         yaml_config=yaml_config,
         return_mode="instantiated_class",
     )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized_name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "CheckpointStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
 
     report_object: dict = context.test_yaml_config(
         yaml_config=yaml_config,
         return_mode="report_object",
     )
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "CheckpointStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "CheckpointStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
     assert my_checkpoint_store.config == report_object["config"]
 
     expected_checkpoint_store_config: dict
@@ -293,173 +189,10 @@ def test_checkpoint_store_with_filesystem_store_backend(
         ]
         == expected_checkpoint_store_config
     )
-    # No other usage stats calls
-    assert mock_emit.call_count == 2
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.filesystem
-@pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_empty_store2(mock_emit, caplog, empty_data_context_stats_enabled):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-class_name: ValidationsStore
-store_backend:
-
-    module_name: "great_expectations.data_context.store.store_backend"
-    class_name: InMemoryStoreBackend
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized_name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ValidationsStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "InMemoryStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
-
-@pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_datasource_config(mock_emit, caplog, empty_data_context_stats_enabled):
-    temp_dir = str(tempfile.mkdtemp())
-    create_files_in_directory(
-        directory=temp_dir,
-        file_name_list=[
-            "alex_20200809_1000.csv",
-            "eugene_20200809_1500.csv",
-            "james_20200811_1009.csv",
-            "abe_20200809_1040.csv",
-            "will_20200809_1002.csv",
-            "james_20200713_1567.csv",
-            "eugene_20201129_1900.csv",
-            "will_20200810_1001.csv",
-            "james_20200810_1003.csv",
-            "alex_20200819_1300.csv",
-        ],
-    )
-    print(temp_dir)
-
-    return_obj = empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config=f"""
-class_name: Datasource
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    my_filesystem_data_connector:
-        # class_name: ConfiguredAssetFilesystemDataConnector
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: {temp_dir}
-        glob_directive: '*.csv'
-        default_regex:
-            pattern: (.+)_(\\d+)\\.csv
-            group_names:
-            - letter
-            - number
-""",
-        return_mode="report_object",
-    )
-
-    # Test usage stats messages
-    assert mock_emit.call_count == 1
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-        "event_payload"
-    ]["anonymized_execution_engine"]["anonymized_name"]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "Datasource",
-                    "anonymized_execution_engine": {
-                        "anonymized_name": anonymized_execution_engine_name,
-                        "parent_class": "PandasExecutionEngine",
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetFilesystemDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        )
-    ]
-
-    print(json.dumps(return_obj, indent=2))
-
-    assert set(return_obj.keys()) == {"execution_engine", "data_connectors"}
-    return_obj["data_connectors"]["my_filesystem_data_connector"]
-    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-    # sub_obj.pop("example_data_reference")
-    # assert sub_obj == {
-    #     "class_name": "InferredAssetFilesystemDataConnector",
-    #     "data_asset_count": 1,
-    #     "example_data_asset_names": ["DEFAULT_ASSET_NAME"],
-    #     "data_assets": {
-    #         "DEFAULT_ASSET_NAME": {
-    #             "batch_definition_count": 10,
-    #             "example_data_references": [
-    #                 "abe_20200809_1040.csv",
-    #                 "alex_20200809_1000.csv",
-    #                 "alex_20200819_1300.csv",
-    #             ],
-    #         }
-    #     },
-    #     "example_unmatched_data_references": [],
-    #     "unmatched_data_reference_count": 0,
-    # }
-    # No other usage stats calls
-    assert mock_emit.call_count == 1
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
-
-@pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_error_states(mock_emit, caplog, empty_data_context_stats_enabled):
+def test_error_states(empty_data_context):
     first_config: str = """
 class_name: Datasource
 
@@ -468,40 +201,17 @@ execution_engine:
 """
 
     with pytest.raises(gx_exceptions.DatasourceInitializationError):
-        empty_data_context_stats_enabled.test_yaml_config(yaml_config=first_config)
+        empty_data_context.test_yaml_config(yaml_config=first_config)
         # print(excinfo.value.message)
         # shortened_message_len = len(excinfo.value.message)
         # print("="*80)
 
-    assert mock_emit.call_count == 1
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {"parent_class": "Datasource"},
-                "success": False,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
-
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
-    empty_data_context_stats_enabled.test_yaml_config(
+    empty_data_context.test_yaml_config(
         yaml_config=first_config,
         shorten_tracebacks=True,
     )
-    assert mock_emit.call_count == 2
-    expected_call_args_list.append(
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {"parent_class": "Datasource"},
-                "success": False,
-            }
-        ),
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
 
     # For good measure, do it again, with a different config and a different type of error
     # Note this erroneous key/value does not cause an error and is removed from the Datasource config
@@ -526,61 +236,16 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    datasource = empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config=second_config
-    )
+    datasource = empty_data_context.test_yaml_config(yaml_config=second_config)
     assert (
         "NOT_A_REAL_KEY"
         not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
     )
-    assert mock_emit.call_count == 3
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[2][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_execution_engine_name = mock_emit.call_args_list[2][0][0][
-        "event_payload"
-    ]["anonymized_execution_engine"]["anonymized_name"]
-    anonymized_data_connector_name = mock_emit.call_args_list[2][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list.append(
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "Datasource",
-                    "anonymized_execution_engine": {
-                        "anonymized_name": anonymized_execution_engine_name,
-                        "parent_class": "PandasExecutionEngine",
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetFilesystemDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_config_variables_in_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled, sa
-):
-    context = empty_data_context_stats_enabled
+def test_config_variables_in_test_yaml_config(empty_data_context, sa):
+    context = empty_data_context
 
     db_file = file_relative_path(
         __file__,
@@ -615,36 +280,6 @@ introspection:
         "test_cases_for_sql_data_connector.db"
         in my_datasource.execution_engine.connection_string
     )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "SimpleSqlalchemyDatasource",
-                    "anonymized_execution_engine": {
-                        "parent_class": "SqlAlchemyExecutionEngine"
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetSqlDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
     report_object = context.test_yaml_config(first_config, return_mode="report_object")
     print(json.dumps(report_object, indent=2))
@@ -653,48 +288,16 @@ introspection:
         "count",
         "${data_connector_name}",
     }
-    assert mock_emit.call_count == 2
-    expected_call_args_list.append(
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "SimpleSqlalchemyDatasource",
-                    "anonymized_execution_engine": {
-                        "parent_class": "SqlAlchemyExecutionEngine"
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetSqlDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_golden_path_sql_datasource_configuration(
-    mock_emit,
-    caplog,
-    empty_data_context_stats_enabled,
+    empty_data_context,
     sa,
     test_connectable_postgresql_db,
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     with set_directory(context.root_directory):
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
@@ -725,39 +328,6 @@ def test_golden_path_sql_datasource_configuration(
             yaml_config=yaml_config,
             return_mode="report_object",
         )
-        assert mock_emit.call_count == 2
-        # Substitute anonymized names since it changes for each run
-        anonymized_datasource_name = mock_emit.call_args_list[1][0][0]["event_payload"][
-            "anonymized_name"
-        ]
-        anonymized_data_connector_name = mock_emit.call_args_list[1][0][0][
-            "event_payload"
-        ]["anonymized_data_connectors"][0]["anonymized_name"]
-        expected_call_args_list = [
-            mock.call(
-                {"event_payload": {}, "event": "data_context.__init__", "success": True}
-            ),
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "anonymized_name": anonymized_datasource_name,
-                        "parent_class": "SimpleSqlalchemyDatasource",
-                        "anonymized_execution_engine": {
-                            "parent_class": "SqlAlchemyExecutionEngine"
-                        },
-                        "anonymized_data_connectors": [
-                            {
-                                "anonymized_name": anonymized_data_connector_name,
-                                "parent_class": "InferredAssetSqlDataConnector",
-                            }
-                        ],
-                    },
-                    "success": True,
-                }
-            ),
-        ]
-        assert mock_emit.call_args_list == expected_call_args_list
 
         print(json.dumps(report_object, indent=2))
         print(context.datasources)
@@ -798,20 +368,13 @@ def test_golden_path_sql_datasource_configuration(
         # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
         # assert my_evr.success
 
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
 def test_golden_path_inferred_asset_pandas_datasource_configuration(
-    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -839,13 +402,12 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     with set_directory(context.root_directory):
         import great_expectations as gx
 
         context = gx.get_context()
-        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
     class_name: Datasource
@@ -875,40 +437,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         )
         # print(json.dumps(report_object, indent=2))
         # print(context.datasources)
-        assert mock_emit.call_count == 1
-        # Substitute anonymized names since it changes for each run
-        anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-            "anonymized_name"
-        ]
-        anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-            "event_payload"
-        ]["anonymized_execution_engine"]["anonymized_name"]
-        anonymized_data_connector_name = mock_emit.call_args_list[0][0][0][
-            "event_payload"
-        ]["anonymized_data_connectors"][0]["anonymized_name"]
-        expected_call_args_list = [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "anonymized_name": anonymized_datasource_name,
-                        "parent_class": "Datasource",
-                        "anonymized_execution_engine": {
-                            "anonymized_name": anonymized_execution_engine_name,
-                            "parent_class": "PandasExecutionEngine",
-                        },
-                        "anonymized_data_connectors": [
-                            {
-                                "anonymized_name": anonymized_data_connector_name,
-                                "parent_class": "InferredAssetFilesystemDataConnector",
-                            }
-                        ],
-                    },
-                    "success": True,
-                }
-            ),
-        ]
-        assert mock_emit.call_args_list == expected_call_args_list
 
         my_batch_list = context.get_batch_list(
             datasource_name="my_directory_datasource",
@@ -928,7 +456,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         )
         my_batch = my_batch_list[0]
         assert my_batch.batch_definition["data_asset_name"] == "A"
-        assert mock_emit.call_count == 2
 
         df_data = my_batch.data.dataframe
         assert df_data.shape == (10, 10)
@@ -952,7 +479,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
             data_asset_name="DOES_NOT_EXIST",
         )
         assert len(batch_list) == 0
-        assert mock_emit.call_count == 3
 
         my_validator = context.get_validator(
             datasource_name="my_directory_datasource",
@@ -971,7 +497,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
                 },
             },
         )
-        assert mock_emit.call_count == 4
 
         my_evr = my_validator.expect_column_values_to_be_between(
             column="d", min_value=1, max_value=31
@@ -982,24 +507,13 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
         # assert my_evr.success
 
-        # No other usage stats calls detected
-        # assert mock_emit.call_count == 1
-        assert mock_emit.call_count == 4
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
 def test_golden_path_configured_asset_pandas_datasource_configuration(
-    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -1029,13 +543,12 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     with set_directory(context.root_directory):
         import great_expectations as gx
 
         context = gx.get_context()
-        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
     class_name: Datasource
@@ -1089,40 +602,6 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         )
         # print(json.dumps(report_object, indent=2))
         # print(context.datasources)
-        assert mock_emit.call_count == 1
-        # Substitute anonymized names since it changes for each run
-        anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-            "anonymized_name"
-        ]
-        anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-            "event_payload"
-        ]["anonymized_execution_engine"]["anonymized_name"]
-        anonymized_data_connector_name = mock_emit.call_args_list[0][0][0][
-            "event_payload"
-        ]["anonymized_data_connectors"][0]["anonymized_name"]
-        expected_call_args_list = [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "anonymized_name": anonymized_datasource_name,
-                        "parent_class": "Datasource",
-                        "anonymized_execution_engine": {
-                            "anonymized_name": anonymized_execution_engine_name,
-                            "parent_class": "PandasExecutionEngine",
-                        },
-                        "anonymized_data_connectors": [
-                            {
-                                "anonymized_name": anonymized_data_connector_name,
-                                "parent_class": "ConfiguredAssetFilesystemDataConnector",
-                            }
-                        ],
-                    },
-                    "success": True,
-                }
-            ),
-        ]
-        assert mock_emit.call_args_list == expected_call_args_list
 
         my_batch_list = context.get_batch_list(
             datasource_name="my_directory_datasource",
@@ -1142,7 +621,6 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         )
         my_batch = my_batch_list[0]
         assert my_batch.batch_definition["data_asset_name"] == "A"
-        assert mock_emit.call_count == 2
 
         my_batch.head()
 
@@ -1168,7 +646,6 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             data_asset_name="DOES_NOT_EXIST",
         )
         assert len(batch_list) == 0
-        assert mock_emit.call_count == 3
 
         my_validator = context.get_validator(
             datasource_name="my_directory_datasource",
@@ -1189,25 +666,14 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             column="d", min_value=1, max_value=31
         )
         assert my_evr.success
-        assert mock_emit.call_count == 4
 
         # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
         # assert my_evr.success
 
-        # No other usage stats calls detected
-        assert mock_emit.call_count == 4
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
-    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
@@ -1233,13 +699,12 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     with set_directory(context.root_directory):
         import great_expectations as gx
 
         context = gx.get_context()
-        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = """
            class_name: Datasource
@@ -1288,17 +753,10 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
             == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
         )
 
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_datasource_configuration(
-    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with InferredAssetDataConnector
@@ -1335,13 +793,12 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     with set_directory(context.root_directory):
         import great_expectations as gx
 
         context = gx.get_context()
-        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
         yaml_config = f"""
         class_name: Datasource
@@ -1420,19 +877,10 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
             "example_unmatched_data_references": [],
         }
 
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_rule_based_profiler_integration(
-    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
-):
-    context = empty_data_context_stats_enabled
+def test_rule_based_profiler_integration(empty_data_context, test_df, tmp_path_factory):
+    context = empty_data_context
     yaml_config = """
     name: my_profiler
     class_name: RuleBasedProfiler
@@ -1458,10 +906,6 @@ def test_rule_based_profiler_integration(
     # Ensure valid return type and content
     assert isinstance(instantiated_class, RuleBasedProfiler)
     assert instantiated_class.name == "my_profiler"
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.filesystem
@@ -1507,10 +951,10 @@ def test_test_yaml_config_supported_types_have_self_check():
 
 @pytest.mark.filesystem
 def test_test_yaml_config_on_datasource_sanitizes_instantiated_objs_config(
-    empty_data_context_stats_enabled,
+    empty_data_context,
     monkeypatch,
 ):
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
     validator = _YamlConfigValidator(context)
 
     variable = "DATA_DIR"
@@ -1552,9 +996,9 @@ data_connectors:
 
 @pytest.mark.filesystem
 def test_test_yaml_config_on_datasources_persists_object_id(
-    empty_data_context_stats_enabled,
+    empty_data_context,
 ):
-    context = empty_data_context_stats_enabled
+    context = empty_data_context
 
     name = "test_datasource"
     id = "6f48a6be-5fc1-4205-80a9-2061059e125a"

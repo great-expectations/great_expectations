@@ -83,11 +83,9 @@ def test_basic_instantiation(glue_titanic_catalog):
     }
 
 
-def test_instantiation_from_a_config(
-    glue_titanic_catalog, empty_data_context_stats_enabled
-):
+def test_instantiation_from_a_config(glue_titanic_catalog, empty_data_context):
     random.seed(0)
-    report_object = empty_data_context_stats_enabled.test_yaml_config(
+    report_object = empty_data_context.test_yaml_config(
         f"""
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetAWSGlueDataCatalogDataConnector

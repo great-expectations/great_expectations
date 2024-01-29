@@ -1,4 +1,4 @@
-from typing import Dict, Final, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -8,23 +8,11 @@ from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
 )
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
-
-
-class StubUsageStats:
-    def __init__(
-        self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ):
-        self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
-
-    @property
-    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
-        return self._anonymized_usage_statistics_config
 
 
 class StubCheckpointStore:
@@ -71,9 +59,6 @@ class StubConfigurationProvider:
         return config
 
 
-_ANONYMIZED_USAGE_STATS_CONFIG: Final = AnonymizedUsageStatisticsConfig(enabled=True)
-
-
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
@@ -81,34 +66,16 @@ class StubBaseDataContext:
 
     def __init__(
         self,
-        anonymized_usage_statistics_config: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = _ANONYMIZED_USAGE_STATS_CONFIG,
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
         validation_results_keys: Tuple[Optional[str]] = ("some_key",),
         datasource_names: Tuple[Optional[str]] = ("my_datasource",),
     ):
-        """Set the configuration of the stub data context.
-
-        Args:
-            anonymized_usage_statistics_config: Config to use for anonymous usage statistics
-        """
-        self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
+        """Set the configuration of the stub data context."""
         self._checkpoint_names = checkpoint_names
         self._expectation_suite_names = expectation_suite_names
         self._validation_results_keys = validation_results_keys
         self._datasource_names = datasource_names
-
-    @property
-    def _data_context_variables(self) -> StubUsageStats:
-        return StubUsageStats(
-            anonymized_usage_statistics_config=self._anonymized_usage_statistics_config
-        )
-
-    @property
-    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
-        return self.variables.anonymous_usage_statistics
 
     @property
     def data_context_id(self) -> str:
@@ -116,9 +83,7 @@ class StubBaseDataContext:
 
     @property
     def variables(self) -> DataContextVariables:
-        config = DataContextConfig(
-            anonymous_usage_statistics=self._anonymized_usage_statistics_config
-        )
+        config = DataContextConfig()
         return EphemeralDataContextVariables(
             config=config, config_provider=StubConfigurationProvider()
         )
@@ -156,25 +121,7 @@ class StubBaseDataContext:
 
 @pytest.fixture
 def stub_base_data_context() -> StubBaseDataContext:
-    return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=True)
-    )
-
-
-@pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
-    StubBaseDataContext
-):
-    return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
-            enabled=False
-        )
-    )
-
-
-@pytest.fixture
-def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymized_usage_statistics_config=None)
+    return StubBaseDataContext()
 
 
 @pytest.fixture

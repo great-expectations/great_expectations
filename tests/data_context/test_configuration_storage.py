@@ -38,9 +38,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(  # noqa: PTH118
-            fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
-        ),
+        os.path.join(fixture_dir, "great_expectations_v013_basic.yml"),  # noqa: PTH118
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
@@ -188,13 +186,6 @@ validation_operators:
         action:
           class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
-anonymous_usage_statistics:
-  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-  enabled: false
-  data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
-
-
-
 """
 
     print("++++++++++++++++ expected +++++++++++++++++++++++")

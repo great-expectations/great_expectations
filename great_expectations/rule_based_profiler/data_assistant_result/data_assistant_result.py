@@ -33,12 +33,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-    get_expectation_suite_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     in_jupyter_notebook,
@@ -185,8 +179,6 @@ class DataAssistantResult(SerializableDictDot):
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
-    # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
-    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @property
     def metric_expectation_map(self) -> Dict[Union[str, tuple[str, ...]], str]:
@@ -262,7 +254,7 @@ class DataAssistantResult(SerializableDictDot):
                 component_name: str = self.__class__.__name__
                 expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
 
-            return self._get_expectation_suite_with_usage_statistics(
+            return self._get_expectation_suite_without_usage_statistics(
                 expectation_suite_name=expectation_suite_name,
                 include_profiler_config=include_profiler_config,
             )
@@ -505,24 +497,6 @@ class DataAssistantResult(SerializableDictDot):
                 )
 
         return auxiliary_info
-
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE,
-        args_payload_fn=get_expectation_suite_usage_statistics,
-    )
-    def _get_expectation_suite_with_usage_statistics(
-        self,
-        expectation_suite_name: Optional[str] = None,
-        include_profiler_config: bool = False,
-    ) -> ExpectationSuite:
-        """
-        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
-        Side Effects: One usage statistics event (specified in "usage_statistics_enabled_method" decorator) is emitted.
-        """
-        return self._get_expectation_suite_without_usage_statistics(
-            expectation_suite_name=expectation_suite_name,
-            include_profiler_config=include_profiler_config,
-        )
 
     def _get_expectation_suite_without_usage_statistics(
         self,

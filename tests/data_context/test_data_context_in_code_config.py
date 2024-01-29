@@ -8,9 +8,6 @@ from moto import mock_s3
 from great_expectations.data_context import get_context
 from great_expectations.data_context.store import StoreBackend, TupleS3StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 
 def build_in_code_data_context_project_config(
@@ -107,7 +104,7 @@ def build_in_code_data_context_project_config(
         anonymous_usage_statistics={
             "enabled": True,
             # NOTE: No data_context_id set here
-            "usage_statistics_url": USAGE_STATISTICS_QA_URL,
+            "usage_statistics_url": "http://localhost",
         },
     )
     return project_config
@@ -268,10 +265,6 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     when instantiating the DataContext,
     and also that this data_context_id is used to configure the expectations_store.store_backend_id
     """
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-
     bucket = "leakybucket"
     expectations_store_prefix = "expectations_store_prefix"
     validations_store_prefix = "validations_store_prefix"

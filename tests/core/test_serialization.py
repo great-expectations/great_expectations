@@ -347,7 +347,7 @@ def test_batch_request_deepcopy():
 
 @pytest.mark.filesystem
 def test_checkpoint_config_deepcopy(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
     monkeypatch,
 ):
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
@@ -355,7 +355,7 @@ def test_checkpoint_config_deepcopy(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -481,7 +481,7 @@ def test_checkpoint_config_deepcopy(
 
 @pytest.mark.filesystem
 def test_checkpoint_config_print(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
     monkeypatch,
 ):
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
@@ -489,7 +489,7 @@ def test_checkpoint_config_print(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 

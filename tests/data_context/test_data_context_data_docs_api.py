@@ -383,8 +383,8 @@ def test_get_site_names_with_no_sites(tmpdir, basic_data_context_config):
 
 
 @pytest.mark.unit
-def test_get_site_names_with_site(titanic_data_context_stats_enabled_config_version_3):
-    context = titanic_data_context_stats_enabled_config_version_3
+def test_get_site_names_with_site(titanic_data_context_config_version_3):
+    context = titanic_data_context_config_version_3
     assert context.get_site_names() == ["local_site"]
 
 

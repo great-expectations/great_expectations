@@ -13,7 +13,6 @@ from great_expectations.self_check.util import expectationSuiteValidationResultS
 
 @pytest.fixture(scope="module")
 def empty_data_context_module_scoped(tmp_path_factory):
-    # Re-enable GE_USAGE_STATS
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118

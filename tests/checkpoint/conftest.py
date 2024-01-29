@@ -92,10 +92,10 @@ def fluent_batch_request(batch_request_as_dict: Dict[str, str]) -> FluentBatchRe
 
 
 @pytest.fixture
-def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_pandas_data_context_and_expectation_suite_with_one_expectation(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     # create expectation suite
     suite = context.suites.add(ExpectationSuite("my_expectation_suite"))
     expectation = gxe.ExpectColumnValuesToBeBetween(
@@ -110,10 +110,10 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation(
-    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_data_context_with_fluent_pandas_datasources_and_expectation_suite_with_one_expectation(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store
 
     datasource_name = "my_pandas_filesystem_datasource"
     datasource = context.get_datasource(datasource_name=datasource_name)
@@ -148,10 +148,10 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation(
-    titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_and_expectation_suite_with_one_expectation(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store
 
     datasource_name = "my_pandas_filesystem_datasource"
     datasource = context.get_datasource(datasource_name=datasource_name)
@@ -179,14 +179,10 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
 
 @pytest.fixture
-def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store(
     tmp_path_factory,
-    monkeypatch,
     spark_session,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -202,7 +198,7 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
             os.path.join(  # noqa: PTH118
                 "..",
                 "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+                "great_expectations_v013_no_datasource.yml",
             ),
         ),
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118

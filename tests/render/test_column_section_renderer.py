@@ -43,8 +43,8 @@ def titanic_expectations(empty_data_context_module_scoped):
 
 
 @pytest.fixture
-def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def titanic_profiled_name_column_expectations(empty_data_context):
+    context = empty_data_context
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"

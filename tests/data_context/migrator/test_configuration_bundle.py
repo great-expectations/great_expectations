@@ -24,43 +24,11 @@ class TestConfigurationBundleCreate:
 
         config_bundle = ConfigurationBundle(context)
 
-        assert config_bundle.is_usage_stats_enabled()
         assert config_bundle._data_context_variables is not None
         assert len(config_bundle.expectation_suites) == 1
         assert len(config_bundle.checkpoints) == 1
         assert len(config_bundle.validation_results) == 1
         assert len(config_bundle.datasources) == 1
-
-    def test_is_usage_statistics_key_set_if_key_not_present(
-        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
-    ):
-        """What does this test and why?
-
-        The ConfigurationBundle should handle a context that has not set the config for
-         anonymous_usage_statistics.
-        """
-        context = stub_base_data_context_no_anonymous_usage_stats
-
-        config_bundle = ConfigurationBundle(context)
-
-        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
-        # DataContextConfig and enabled by default.
-        assert config_bundle.is_usage_stats_enabled()
-
-    def test_configuration_bundle_created_usage_stats_disabled(
-        self,
-        stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
-    ):
-        """What does this test and why?
-
-        Make sure the configuration bundle successfully parses the usage stats settings.
-        """
-
-        context = stub_base_data_context_anonymous_usage_stats_present_but_disabled
-
-        config_bundle = ConfigurationBundle(context)
-
-        assert not config_bundle.is_usage_stats_enabled()
 
 
 @pytest.mark.cloud

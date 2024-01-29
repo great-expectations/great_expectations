@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pathlib
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, cast
-from unittest import mock
 
 import altair as alt
 import nbconvert
@@ -20,7 +19,6 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -1398,28 +1396,6 @@ def bobby_volume_data_assistant_result(
 
 
 @pytest.fixture
-def bobby_volume_data_assistant_result_usage_stats_enabled(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
-) -> VolumeDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request,
-        estimation="flag_outliers",
-    )
-
-    return cast(VolumeDataAssistantResult, data_assistant_result)
-
-
-@pytest.fixture
 def quentin_explicit_instantiation_result_actual_time(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
@@ -1678,32 +1654,17 @@ def test_volume_data_assistant_result_serialization(
     assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 1.06s
 def test_volume_data_assistant_result_get_expectation_suite(
-    mock_emit,
-    bobby_volume_data_assistant_result_usage_stats_enabled: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = (
-        bobby_volume_data_assistant_result_usage_stats_enabled.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
+    suite: ExpectationSuite = bobby_volume_data_assistant_result.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
     )
 
     assert suite is not None and len(suite.expectations) > 0
-
-    assert mock_emit.call_count == 1
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
-    )
 
 
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
