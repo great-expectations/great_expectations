@@ -41,7 +41,6 @@ from great_expectations._docs_decorators import (
     new_method_or_class,
     public_api,
 )
-from great_expectations.analytics.anonymizer import Anonymizer
 from great_expectations.analytics.client import init as init_analytics
 from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import DataContextInitializedEvent
