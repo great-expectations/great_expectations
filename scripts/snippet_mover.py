@@ -166,15 +166,20 @@ class SnippetMover:
 
     def move_snippets(self):
         """Move the original code snippet to its new location."""
+        moved_files: set[Path] = set()
         for snippet in self._snippet_lookup.values():
             if not snippet.new_path or snippet.orphaned:
                 # can't move this snippet
+                continue
+            elif snippet.original_path in moved_files:
+                # already moved this file
                 continue
             self.move_file(
                 src=snippet.original_path,
                 dest=snippet.new_path,
             )
             snippet.moved = True
+            moved_files.add(snippet.original_path)
 
     def build_report(self):
         moved_snippets = [
