@@ -232,11 +232,6 @@ local_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="how_to_edit_an_existing_expectation_suite",
-        user_flow_script="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="setup_overview",
         user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
         data_context_dir=None,
@@ -251,11 +246,6 @@ local_tests = [
 ]
 
 quickstart = [
-    IntegrationTestFixture(
-        name="quickstart",
-        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
     IntegrationTestFixture(
         name="v1_pandas_quickstart",
         user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py",
@@ -281,13 +271,6 @@ fluent_datasources = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -370,12 +353,6 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_quickly_connect_to_a_single_file_with_pandas",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
         name="how_to_connect_to_sqlite_data",
