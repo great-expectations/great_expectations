@@ -98,10 +98,12 @@ class SnippetMover:
         """find all snippet references in the docs and associate them with their source.
 
         A single code snippet can be referenced by multiple docs."""
-        markdown_match = "**/*.md"
-        doc_paths = self.get_all_files_by_match(
-            self._docs_root_dir, match=markdown_match
-        )
+        md_match = "**/*.md"
+        mdx_match = "**/*.mdx"
+        doc_paths = [
+            *self.get_all_files_by_match(self._docs_root_dir, match=md_match),
+            *self.get_all_files_by_match(self._docs_root_dir, match=mdx_match),
+        ]
         # add the docs prefix so paths are relative to root_dir
         doc_paths = [
             os.path.join(self._docs_prefix, doc_path) for doc_path in doc_paths
