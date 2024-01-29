@@ -1,3 +1,3 @@
 # Each line is a file pattern followed by one or more owners.
 
-sidebars.js @great-expectations/fe-cop-codeowners
+sidebars.js @great-expectations/docs
