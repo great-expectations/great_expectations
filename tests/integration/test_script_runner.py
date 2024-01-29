@@ -243,6 +243,12 @@ local_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
+        name="airflow_cloud_integration",
+        user_flow_script="tests/integration/docusaurus/setup/airflow_cloud_integration.py",
+        data_context_dir=None,
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
         name="expectation_management",
         user_flow_script="tests/integration/docusaurus/expectations/expectation_management.py",
         data_context_dir=None,
