@@ -1,7 +1,6 @@
 import os
 import re
 from glob import glob
-from itertools import count
 from pathlib import Path
 from typing import Pattern
 
