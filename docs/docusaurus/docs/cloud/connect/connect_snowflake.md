@@ -27,7 +27,7 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 You can use an existing Snowflake warehouse, but GX recommends creating a separate warehouse for GX Cloud to simplify cost management and optimize performance.
 
-1. In Snowflake Snowinsight, click **Worksheets** > **Add** > **SQL Worksheet**.
+1. In Snowflake Snowsight, click **Worksheets** > **Add** > **SQL Worksheet**.
 
 2. Copy and paste the following code into the SQL worksheet:
 
@@ -43,7 +43,7 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
     ![Snowflake Run All](/img/run_all.png)
 
- 5. Copy the following code and paste it into the SQL worksheet:
+5. Copy the following code and paste it into the SQL worksheet:
 
    ```sh
    create warehouse gx_wh
@@ -56,18 +56,20 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 6. Select **Run All** to create a new warehouse (`gx_wh`) for the GX Agent.
 
-7. Copy the following code and paste it into the SQL worksheet:
+7. Optional. To allow a user assigned the `gx_role` role to access data and run validations on a specific Snowflake database and schema:
 
-   ```sh
-   grant usage, operate on warehouse gx_wh to role gx_role;
-   grant usage on database "database_name" to role gx_role;
-   grant usage on schema "database_name.schema_name" to role gx_role;
-   grant select on all tables in schema "database_name.schema_name" to role gx_role;
-   grant select on future tables in schema "database_name.schema_name" to role gx_role; 
-   ```
-8. Replace `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
+   - Copy the following code and paste it into the SQL worksheet:
 
-9. Select **Run All** to allow the user with the `gx_role` role to access data on the Snowflake database and schema.
+      ```sh
+      grant usage, operate on warehouse gx_wh to role gx_role;
+      grant usage on database "database_name" to role gx_role;
+      grant usage on schema "database_name.schema_name" to role gx_role;
+      grant select on all tables in schema "database_name.schema_name" to role gx_role;
+      grant select on future tables in schema "database_name.schema_name" to role gx_role; 
+      ```
+   - Replace `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
+
+   - Select **Run All** to allow the user with the `gx_role` role to access data on the Snowflake database and schema.
 
 ## Get your GX Cloud access token and organization ID
 
@@ -132,18 +134,20 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
     ```
     Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously.
 
-3. Optional. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
+3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+
+4. Optional. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
 
    ```bash title="Terminal input"
    FROM greatexpectations/agent
    RUN echo "custom_commands"
    ```
-4. Optional. Run the following command to rebuild the Docker image:
+5. Optional. Run the following command to rebuild the Docker image:
 
    ```bash title="Terminal input"
    docker build -t myorg/agent
    ```
-5. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
+6. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
 </TabItem>
 <TabItem value="kubernetes">
@@ -159,8 +163,9 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    ```
     Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously.
 
+3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
-3. Create and save a file named `deployment.yaml`, with the following configuration:
+4. Create and save a file named `deployment.yaml`, with the following configuration:
 
    ```yaml
    apiVersion: apps/v1
@@ -186,17 +191,17 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
         secretRef:
          name: gx-agent-secret
    ```
-4. Run the following command to use the `deployment.yaml`configuration file to deploy the GX Agent:
+5. Run the following command to use the `deployment.yaml`configuration file to deploy the GX Agent:
 
    ```sh
    kubectl apply -f deployment.yaml
    ```
-5. Optional. Run the following command to confirm the agent is running:
+6. Optional. Run the following command to confirm the agent is running:
 
    ```sh
    kubectl logs -l app=gx-agent
    ```
-6. Optional. Run the following command to terminate running resources gracefully:
+7. Optional. Run the following command to terminate running resources gracefully:
 
    ```sh
    kubectl delete -f deployment.yaml
