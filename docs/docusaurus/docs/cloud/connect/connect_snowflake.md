@@ -65,7 +65,7 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
    grant select on all tables in schema "database_name.schema_name" to role gx_role;
    grant select on future tables in schema "database_name.schema_name" to role gx_role; 
    ```
-   `grant select on future tables in schema "database_name.schema_name" to role gx_role;` is optional and gives the user with the `gx_role` role access to existing and future tables in the defined schema.
+   `grant select on future tables in schema "database_name.schema_name" to role gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
 
 8. Replace `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
 
