@@ -6,7 +6,6 @@ keywords: [Expectations, Interactive Mode, Interactive]
 ---
 
 import Prerequisites from '../../../components/_prerequisites.jsx'
-import PrerequisiteQuickstartGuideComplete from '../../../components/prerequisites/_quickstart_completed.mdx'
 import IfYouStillNeedToSetupGX from '../../../components/prerequisites/_if_you_still_need_to_setup_gx.md'
 import DataContextInitializeQuickOrFilesystem from '../../../components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
 import ConnectingToDataFluently from '../../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
