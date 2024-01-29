@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 from collections import defaultdict
@@ -247,7 +248,7 @@ class SnippetMover:
             + f"{len(unmoved_snippets)} Unmoved Snippets:\n"
             + spacer.join([snippet.name for snippet in unmoved_snippets])
         )
-        with open(self._report_path, "w") as file:
+        with open(f"{self._report_path}_{datetime.datetime.utcnow()}", "w") as file:
             file.write(text)
 
     @classmethod
