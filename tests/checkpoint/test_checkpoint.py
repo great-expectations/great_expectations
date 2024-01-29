@@ -4673,11 +4673,6 @@ def _fake_cloud_context_setup(tmp_path, monkeypatch):
         cloud_config.make_retrieve_data_context_config_from_cloud(data_dir),
     )
     monkeypatch.setattr(
-        gx.data_context.CloudDataContext,
-        "_init_analytics",
-        lambda _: None,
-    )
-    monkeypatch.setattr(
         gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
         "_set",
         cloud_config.store_set,

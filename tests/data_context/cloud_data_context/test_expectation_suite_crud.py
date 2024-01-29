@@ -262,15 +262,14 @@ def test_list_expectation_suites(
 ) -> None:
     project_path_name = "foo/bar/baz"
 
-    with mock.patch.object(CloudDataContext, "_init_analytics"):
-        context = get_context(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path_name,
-            cloud_base_url=ge_cloud_config.base_url,
-            cloud_access_token=ge_cloud_config.access_token,
-            cloud_organization_id=ge_cloud_config.organization_id,
-            cloud_mode=True,
-        )
+    context = get_context(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path_name,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_mode=True,
+    )
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
         mock_get.return_value = mock.Mock(

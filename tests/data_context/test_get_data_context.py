@@ -157,9 +157,6 @@ def test_cloud_context_env(
         CloudDataContext,
         "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
-    ), mock.patch.object(
-        CloudDataContext,
-        "_init_analytics",
     ):
         assert isinstance(
             gx.get_context(cloud_mode=ge_cloud_mode),
@@ -191,7 +188,7 @@ def test_cloud_context_params(monkeypatch, empty_ge_cloud_data_context_config, p
         CloudDataContext,
         "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
-    ), mock.patch.object(CloudDataContext, "_init_analytics"):
+    ):
         assert isinstance(
             gx.get_context(**params),
             CloudDataContext,
@@ -206,7 +203,7 @@ def test_cloud_context_with_in_memory_config_overrides(
         CloudDataContext,
         "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
-    ), mock.patch.object(CloudDataContext, "_init_analytics"):
+    ):
         context = gx.get_context(
             cloud_base_url="http://hello.com",
             cloud_organization_id="bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
@@ -275,10 +272,7 @@ def test_get_context_with_mode_equals_cloud_returns_cloud_data_context(
         CloudDataContext,
         "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
-    ) as mock_retrieve_config, mock.patch.object(
-        CloudDataContext,
-        "_init_analytics",
-    ):
+    ) as mock_retrieve_config:
         context = gx.get_context(mode="cloud")
 
     mock_retrieve_config.assert_called_once()
@@ -294,9 +288,6 @@ def test_cloud_context_include_rendered_content(
         CloudDataContext,
         "retrieve_data_context_config_from_cloud",
         return_value=empty_ge_cloud_data_context_config,
-    ), mock.patch.object(
-        CloudDataContext,
-        "_init_analytics",
     ):
         context = gx.get_context(cloud_mode=ge_cloud_mode)
         assert isinstance(

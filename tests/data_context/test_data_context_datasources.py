@@ -7,9 +7,6 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.data_context import get_context
-from great_expectations.data_context.data_context.cloud_data_context import (
-    CloudDataContext,
-)
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -67,15 +64,14 @@ def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
     # Clear datasources to improve test performance in DataContext._init_datasources
     data_context_config_with_datasources.datasources = {}
 
-    with mock.patch.object(CloudDataContext, "_init_analytics"):
-        context = get_context(
-            project_config=data_context_config_with_datasources,
-            context_root_dir=str(project_path),
-            cloud_base_url=ge_cloud_config.base_url,
-            cloud_access_token=ge_cloud_config.access_token,
-            cloud_organization_id=ge_cloud_config.organization_id,
-            cloud_mode=True,
-        )
+    context = get_context(
+        project_config=data_context_config_with_datasources,
+        context_root_dir=str(project_path),
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_mode=True,
+    )
 
     assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
 

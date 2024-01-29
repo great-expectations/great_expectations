@@ -796,15 +796,14 @@ def test_list_checkpoints(
 ) -> None:
     project_path_name = "foo/bar/baz"
 
-    with mock.patch.object(CloudDataContext, "_init_analytics"):
-        context = get_context(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path_name,
-            cloud_base_url=ge_cloud_config.base_url,
-            cloud_access_token=ge_cloud_config.access_token,
-            cloud_organization_id=ge_cloud_config.organization_id,
-            cloud_mode=True,
-        )
+    context = get_context(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path_name,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_mode=True,
+    )
 
     checkpoint_1, checkpoint_2 = checkpoint_names_and_ids
     checkpoint_name_1, checkpoint_id_1 = checkpoint_1
