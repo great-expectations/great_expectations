@@ -6,7 +6,6 @@ keywords: [Expectations, Domain Knowledge]
 ---
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrerequisiteQuickstartGuideComplete from '/docs/components/prerequisites/_quickstart_completed.mdx'
 import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
 import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
 import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
