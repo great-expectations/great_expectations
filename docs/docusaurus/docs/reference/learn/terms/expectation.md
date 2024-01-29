@@ -4,7 +4,7 @@ id: expectation
 hoverText: A verifiable assertion about data.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 An Expectation is a verifiable assertion about data. Expectations *enhance communication* about your data and *improve quality* for data applications. They help you take the implicit assumptions about your data and make them explicit. Using Expectations helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 

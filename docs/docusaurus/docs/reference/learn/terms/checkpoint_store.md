@@ -2,7 +2,7 @@
 title: "Checkpoint Store"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Checkpoint Store is a connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
 

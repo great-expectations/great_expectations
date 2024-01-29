@@ -5,8 +5,8 @@ id: add_features_custom_expectations_lp
 description: Add additional functionality to your Custom Expectations.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '../../../components/LinkCardGrid';
+import LinkCard from '../../../components/LinkCard';
 
 <p class="DocItem__header-description">Add additional functionality to your Custom Expectations.</p>
 

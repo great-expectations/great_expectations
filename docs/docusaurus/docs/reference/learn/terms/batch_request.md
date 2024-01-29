@@ -2,7 +2,7 @@
 title: "Batch Request"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Batch Request specifies a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 It can be created by using the `build_batch_request` method found on a <TechnicalTag relative="../" tag="data_asset" text="Data Asset" />.

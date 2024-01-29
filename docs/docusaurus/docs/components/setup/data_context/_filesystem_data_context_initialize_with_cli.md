@@ -1,4 +1,4 @@
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 We can create a new <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> without opening a Python interpreter by using Great Expectations' <TechnicalTag tag="cli" text="CLI" />.
 

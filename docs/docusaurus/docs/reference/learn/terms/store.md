@@ -4,7 +4,7 @@ id: store
 hoverText: A connector to store and retrieve information about metadata in Great Expectations.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 
 A Store is a connector to store and retrieve information about metadata in Great Expectations. Stores are available from your Data Context.

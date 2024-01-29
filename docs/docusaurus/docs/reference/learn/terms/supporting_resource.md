@@ -4,7 +4,7 @@ title: Supporting Resources
 hoverText: A resource external to the Great Expectations code base which Great Expectations utilizes.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Supporting Resource is a resource external to the Great Expectations code base which Great Expectations utilizes.
 

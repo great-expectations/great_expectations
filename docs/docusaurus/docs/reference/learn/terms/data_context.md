@@ -4,7 +4,7 @@ id: data_context
 hoverText: The primary entry point for a GX deployment, with configurations and methods for all supporting components.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Data Context is the primary entry point for a Great Expectations (GX) deployment, and it provides the configurations and methods for all supporting GX components.
 

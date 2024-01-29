@@ -4,7 +4,7 @@ title: Metric
 hoverText: A computed attribute of data such as the mean of a column.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Metric is a computed attribute of data such as the mean of a column.
 

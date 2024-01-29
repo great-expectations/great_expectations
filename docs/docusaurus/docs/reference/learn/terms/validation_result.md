@@ -4,7 +4,7 @@ title: Validation Result
 hoverText: An object generated when data is Validated against an Expectation or Expectation Suite.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Validation Result is an object generated when data is validated against an <TechnicalTag relative="../" tag="expectation" text="Expectation" /> or <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />.
 
