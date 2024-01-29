@@ -5,6 +5,17 @@ from pathlib import Path
 from glob import glob
 from typing import Pattern
 
+from pydantic import BaseModel, Field
+
+
+class Snippet(BaseModel):
+    name: str
+    original_path: Path | None
+    new_path: Path | None = None
+    doc_paths: set[Path] = Field(default_factory=set)
+    orphaned: bool = False
+    moved: bool = False
+
 
 class SnippetMover:
     """
@@ -31,6 +42,7 @@ class SnippetMover:
 
     def __init__(self, gx_root_dir: str):
         self._root_dir = gx_root_dir
+        self._snippet_lookup: dict[str, Snippet] = {}
         self._doc_paths_by_snippet_name: dict[str, set[Path]] = defaultdict(set)
         self._code_path_by_snippet_name: dict[str, Path] = {}
         self._default_snippet_path = Path("docs/docusaurus/docs/snippets")
@@ -38,29 +50,26 @@ class SnippetMover:
         self._docs_root_dir = os.path.join(gx_root_dir, self._docs_prefix)
         self._tests_prefix = "tests"
         self._tests_root_dir = os.path.join(gx_root_dir, self._tests_prefix)
-        self._orphaned_snippet_paths: set[(str, str)] = set()
         self._general_files_to_update = ("tests/integration/test_script_runner.py",)
-        self._snippets_moved_count = 0
+        self._report_path = os.path.join(gx_root_dir, "snippet_mover_report.txt")
+        # make sure we have a valid dir to put snippets referenced by multiple docs
+        self.ensure_dir(Path(os.path.join(self._root_dir, self._default_snippet_path)))
 
     def run(self):
-        self.ensure_dir(Path(os.path.join(self._root_dir, self._default_snippet_path)))
-        # preprocess
-        self.store_doc_paths_by_snippet_name()
-        self.store_test_path_by_snippet_name()
-        # process
-        self.move_and_rename_snippets()
-        # doc
-        for snippet_name, code_path in self._orphaned_snippet_paths:
-            print(f"orphaned snippet {snippet_name} at {code_path} was not moved")
-        print(f"Total of {len(self._orphaned_snippet_paths)} orphaned snippets found.")
-        print(f"Moved {self._snippets_moved_count} snippets.")
+        """High level business logic"""
+        self.find_snippet_references_in_tests()
+        self.find_snippet_references_in_docs()
+        self.calculate_snippet_destinations()
+        self.rename_snippets()
+        self.move_snippets()
+        self.build_report()
 
-    def store_test_path_by_snippet_name(self):
-        """Find snippets in tests and store the path by snippet_name.
+    def find_snippet_references_in_tests(self):
+        """Find snippets defined in tests and catalog them.
 
         Snippets also exist in the codebase, but we can't move them.
         """
-        code_match = "**/*.py"  # this should maybe be updated to be more permissive
+        code_match = "**/*.py"  # should this be more permissive?
         code_paths = self.get_all_files_by_match(self._tests_root_dir, match=code_match)
         # add the tests prefix so paths are relative to root_dir
         code_paths = [
@@ -74,14 +83,18 @@ class SnippetMover:
             )
             code_path = Path(code_path)
             for snippet_name in snippet_names:
-                if self._code_path_by_snippet_name.get(snippet_name):
+                if self._snippet_lookup.get(snippet_name):
                     raise Exception(
-                        "found the same snippet name in multiple code paths"
+                        "found the same snippet name defined in multiple code paths"
                     )
-                self._code_path_by_snippet_name[snippet_name] = code_path
+                self._snippet_lookup[snippet_name] = Snippet(
+                    name=snippet_name, original_path=code_path
+                )
 
-    def store_doc_paths_by_snippet_name(self):
-        """find snippets in docs and store the path by snippet name"""
+    def find_snippet_references_in_docs(self):
+        """find all snippet references in the docs and associate them with their source.
+
+        A single code snippet can be referenced by multiple docs."""
         markdown_match = "**/*.md"
         doc_paths = self.get_all_files_by_match(
             self._docs_root_dir, match=markdown_match
@@ -98,36 +111,47 @@ class SnippetMover:
             )
             doc_path = Path(doc_path)
             for snippet_name in snippet_names:
-                self._doc_paths_by_snippet_name[snippet_name].add(doc_path)
+                snippet = self._snippet_lookup.get(snippet_name)
+                if not snippet:
+                    # this snippet is referenced in code, not tests, so we can't move it
+                    snippet = Snippet(name=snippet_name, original_path=None)
+                    self._snippet_lookup[snippet_name] = snippet
+                snippet.doc_paths.add(doc_path)
 
-    def move_and_rename_snippets(self):
-        snippets_dest_by_code_path: dict[Path, Path] = {}
-        # rename the path in snippet names before moving the files
-        for snippet_name, code_path in self._code_path_by_snippet_name.items():
-            doc_paths = self._doc_paths_by_snippet_name.get(snippet_name)
-            if not doc_paths:
-                self._orphaned_snippet_paths.add((snippet_name, code_path))
+    def calculate_snippet_destinations(self):
+        """Determine where each snippet should be moved."""
+        for snippet in self._snippet_lookup.values():
+            if not snippet.original_path:
+                # can't move this file
                 continue
-            if len(doc_paths) > 1:
+            elif not len(snippet.doc_paths):
+                # this snippet is defined in tests but not referenced in the docs, so it should be removed
+                snippet.orphaned = True
+                continue
+
+            if len(snippet.doc_paths) > 1:
                 # this snippet is referenced by multiple docs, so we'll move it to the default dir
                 snippet_dest_dir = self._default_snippet_path
             else:
-                # this snippet is referenced by a single doc, so we'll move it next to the doc
-                snippet_dest_dir = list(doc_paths)[0].parent
-            # change the path, not the snippet filename
-            snippet_dest = Path(os.path.join(snippet_dest_dir, code_path.parts[-1]))
+                # this snippet is referenced by a single doc, so we'll move it adjacent to the doc
+                snippet_dest_dir = list(snippet.doc_paths)[0].parent
+            # keep the snippet's original filename the same
+            snippet.new_path = Path(
+                os.path.join(snippet_dest_dir, snippet.original_path.parts[-1])
+            )
 
-            # if we already saved a dest for this code path, and its different than the one
-            # we just calculated, something went wrong:
-            if snippets_dest_by_code_path.get(code_path, snippet_dest) != snippet_dest:
-                raise RuntimeError(
-                    f"Fatal error - Snippet at {code_path} must be moved to both "
-                    f"{snippets_dest_by_code_path.get(code_path, snippet_dest)} and {snippet_dest}."
-                )
-
+    def rename_snippets(self):
+        """Replace any references to the snippet's old path with the new one."""
+        for snippet in self._snippet_lookup.values():
+            if not snippet.new_path or snippet.orphaned:
+                # can't move this snippet, so don't rename anything
+                continue
             paths_to_update = [
-                os.path.join(self._root_dir, code_path),
-                *[os.path.join(self._root_dir, doc_path) for doc_path in doc_paths],
+                os.path.join(self._root_dir, snippet.original_path),
+                *[
+                    os.path.join(self._root_dir, doc_path)
+                    for doc_path in snippet.doc_paths
+                ],
                 *[
                     os.path.join(self._root_dir, gen_path)
                     for gen_path in self._general_files_to_update
@@ -135,17 +159,40 @@ class SnippetMover:
             ]
             for path in paths_to_update:
                 self.find_and_replace_text_in_file(
-                    path=path, old_str=str(code_path), new_str=str(snippet_dest)
+                    path=path,
+                    old_str=str(snippet.original_path),
+                    new_str=str(snippet.new_path),
                 )
 
-            snippets_dest_by_code_path[code_path] = snippet_dest
-
-        # now that all references have been renamed, move the snippet files
-        for code_path, snippet_dest in snippets_dest_by_code_path.items():
+    def move_snippets(self):
+        """Move the original code snippet to its new location."""
+        for snippet in self._snippet_lookup.values():
+            if not snippet.new_path or snippet.orphaned:
+                # can't move this snippet
+                continue
             self.move_file(
-                src=code_path, dest=Path(os.path.join(self._root_dir, snippet_dest))
+                src=snippet.original_path,
+                dest=snippet.new_path,
             )
-            self._snippets_moved_count += 1
+            snippet.moved = True
+
+    def build_report(self):
+        orphaned_snippets = [
+            snippet for snippet in self._snippet_lookup.values() if snippet.orphaned
+        ]
+        unmoved_snippets = [
+            snippet for snippet in self._snippet_lookup.values() if not snippet.moved
+        ]
+        spacer = "\n\n"
+        text = (
+            f"{len(orphaned_snippets)} Orphaned Snippets:"
+            + spacer.join(str(orphaned_snippets))
+            + ("*" * 78)
+            + f"{len(unmoved_snippets)} Unmoved Snippets:"
+            + spacer.join(str(unmoved_snippets))
+        )
+        with open(self._report_path, "w") as file:
+            file.write(text)
 
     @classmethod
     def get_all_files_by_match(cls, root_dir: str, match: str) -> list[str]:
