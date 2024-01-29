@@ -8,8 +8,8 @@ slug: '/cloud/'
 displayed_sidebar: gx_cloud
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '../components/LinkCardGrid';
+import LinkCard from '../components/LinkCard';
 
 <p class="DocItem__header-description">GX Cloud is the fastest and most reliable way to validate your data. Connect, test, and validate Data Assets in a web-based UI.
 <br /> 

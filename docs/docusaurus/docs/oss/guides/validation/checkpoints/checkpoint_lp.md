@@ -5,8 +5,8 @@ id: checkpoint_lp
 description: Add validation data, create and configure Checkpoints, and pass in-mameory DataFrames.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '../../../../components/LinkCardGrid';
+import LinkCard from '../../../../components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find information about managing your Checkpoints including adding validation data, creating and configuring Checkpoints, and passing in-memory DataFrames.</p>
 

@@ -3,7 +3,7 @@ title: Batch
 id: batch
 hoverText: A selection of records from a Data Asset.
 ---
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Batch is a selection of records from a <TechnicalTag relative="../" tag="data_asset" text="Data Asset" />.
 

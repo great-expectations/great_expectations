@@ -11,7 +11,6 @@ import {useLocation} from '@docusaurus/router';
  *   outputs `/docs/1.1.1/my-doc` if the current version is "1.1.1"
  */
 export const useVersionedPath = (path) => {
-    console.log({path})
     if (!path.startsWith('/')) {
         throw Error("paths to useVersionedLink must start with a slash")
     }

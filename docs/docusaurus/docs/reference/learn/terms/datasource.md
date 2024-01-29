@@ -3,7 +3,7 @@ title: Data Source
 id: datasource
 hoverText: Provides a standard API for accessing and interacting with data from a wide variety of source systems.
 ---
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Data Source provides a standard API for accessing and interacting with data from a wide variety of source systems.
 

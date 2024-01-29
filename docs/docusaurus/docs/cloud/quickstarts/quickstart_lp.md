@@ -4,8 +4,8 @@ title: 'Quickstarts'
 description: Quickly start using GX Cloud with some of the most common data applications.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '../../components/LinkCardGrid';
+import LinkCard from '../../components/LinkCard';
 
 <p class="DocItem__header-description">Learn how to quickly start using GX Cloud with some of the most common data applications. Great Expectations (GX) is rapidly adding new GX Cloud integrations, so check back often for our latest solution.</p>
 

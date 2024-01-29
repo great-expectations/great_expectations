@@ -2,7 +2,7 @@
 title: "Data Docs Store"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Data Docs Store is a connector to store and retrieve information pertaining to human-readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
 

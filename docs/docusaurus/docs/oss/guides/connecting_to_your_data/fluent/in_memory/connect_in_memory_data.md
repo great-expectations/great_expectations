@@ -7,9 +7,9 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import AfterCreateInMemoryDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_in_memory_data_asset.md'
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import AfterCreateInMemoryDataAsset from '../../../../../components/connect_to_data/next_steps/_after_create_in_memory_data_asset.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 

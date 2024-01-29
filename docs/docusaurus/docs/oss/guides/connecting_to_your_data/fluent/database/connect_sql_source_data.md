@@ -7,11 +7,11 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import AfterCreateSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_sql_datasource.md'
-import PostgreSqlConfigureCredentialsInConfigVariablesYml from '/docs/components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import AfterCreateSqlDatasource from '../../../../../components/connect_to_data/next_steps/_after_create_sql_datasource.md'
+import PostgreSqlConfigureCredentialsInConfigVariablesYml from '../../../../../components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md'
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
 
 
 import TabItem from '@theme/TabItem';

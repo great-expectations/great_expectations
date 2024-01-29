@@ -4,7 +4,7 @@ title: Metric Store
 hoverText: A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Metric Store is a connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 

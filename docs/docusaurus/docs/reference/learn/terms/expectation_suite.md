@@ -4,7 +4,7 @@ title: Expectation Suite
 hoverText: A collection of verifiable assertions about data.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 An Expectation Suite is a collection of verifiable assertions about data.
 
