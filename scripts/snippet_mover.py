@@ -205,10 +205,10 @@ class SnippetMover:
         spacer = "\n\n"
         section_divider = (spacer * 4) + ("*" * 78) + spacer * 4
         text = (
-            f"Total snippet count: {total_snippets}"
-            + f"Moved snippet count: {len(moved_snippets)}"
-            + f"Moved file count: {len(moved_files)}"
-            + f"Shared snippet count: {len(shared_snippets)}"
+            f"Total snippet count: {total_snippets}\n"
+            + f"Moved snippet count: {len(moved_snippets)}\n"
+            + f"Moved file count: {len(moved_files)}\n"
+            + f"Shared snippet count: {len(shared_snippets)}\n"
             + section_divider
             + f"{len(orphaned_snippets)} Orphaned Snippets:"
             + spacer.join([str(snippet) for snippet in orphaned_snippets])
