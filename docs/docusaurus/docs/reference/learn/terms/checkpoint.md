@@ -43,7 +43,7 @@ After you create a Checkpoint, you can use it to Validate data by running it aga
 
 In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfying the test suite to run, and a `batch_request` identifying the data to test. Checkpoint can be directly directly in Python as follows:
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
+```python name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
 For an in-depth guide on Checkpoint creation, see our [guide on how to create a new Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
@@ -120,12 +120,12 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml"
+```yaml name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py no_nesting just the yaml"
 ```
 
 **runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py run_checkpoint"
 ```
 
 </TabItem>
@@ -134,17 +134,17 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml"
+```yaml name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py nesting_with_defaults just the yaml"
 ```
 
 **Runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py run_checkpoint_2"
 ```
 
 **Results**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py validation_results_suites_data_assets"
 ```
 
 </TabItem>
@@ -153,17 +153,17 @@ This configuration omits the "validations" key from the YAML, which means a "val
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime just the yaml"
+```yaml name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py keys_passed_at_runtime just the yaml"
 ```
 
 **Runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_3"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py run_checkpoint_3"
 ```
 
 **Results**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_2"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py validation_results_suites_data_assets_2"
 ```
 
 </TabItem>
@@ -172,17 +172,17 @@ This configuration references the Checkpoint detailed in the previous example ("
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template just the yaml"
+```yaml name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py using_template just the yaml"
 ```
 
 **Runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_4"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py run_checkpoint_4"
 ```
 
 **Results**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_3"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py validation_results_suites_data_assets_3"
 ```
 
 </TabItem>
@@ -200,9 +200,9 @@ Below is an example of a `CheckpointResult` object which itself contains `Valida
 
 ### Example CheckpointResult
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py results"
+```python name="docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py results"
 ```
 
 ## Example script
 
-To view the full script used in this page, see [checkpoints_and_actions.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py)
+To view the full script used in this page, see [checkpoints_and_actions.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/reference/learn/terms/checkpoints_and_actions.py)

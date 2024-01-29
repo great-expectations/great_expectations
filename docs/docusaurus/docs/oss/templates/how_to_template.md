@@ -31,14 +31,14 @@ To qualify as a step, the things within it must either:
 
 Run this code to {do a thing}.
 
-```python name="tests/integration/docusaurus/template/script_example.py first import"
+```python name="docs/docusaurus/docs/oss/templates/script_example.py first import"
 ```
 
 ### 2. Next do this.
 
 {Concise description of what the user is going to do}.
 
-```python name="tests/integration/docusaurus/template/script_example.py assert"
+```python name="docs/docusaurus/docs/oss/templates/script_example.py assert"
 ```
 
 ### 3. Finally, do this.
@@ -51,7 +51,7 @@ Next, do {concise description of what the user is going to do} using either {cho
 
 Run this code in Python.
 
-```python name="tests/integration/docusaurus/template/script_example.py imports"
+```python name="docs/docusaurus/docs/oss/templates/script_example.py imports"
 ```
 
 ## Additional Notes
