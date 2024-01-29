@@ -50,7 +50,10 @@ class SnippetMover:
         self._docs_root_dir = os.path.join(gx_root_dir, self._docs_prefix)
         self._tests_prefix = "tests"
         self._tests_root_dir = os.path.join(gx_root_dir, self._tests_prefix)
-        self._general_files_to_update = ("tests/integration/test_script_runner.py",)
+        self._general_files_to_update = (
+            "tests/integration/test_script_runner.py",
+            "ci/checks/check_name_tag_snippets_referenced.py",
+        )
         self._report_path = os.path.join(gx_root_dir, "snippet_mover_report.txt")
         # make sure we have a valid dir to put snippets referenced by multiple docs
         self.ensure_dir(Path(os.path.join(self._root_dir, self._default_snippet_path)))
@@ -203,7 +206,7 @@ class SnippetMover:
             [
                 snippet.original_path
                 for snippet in self._snippet_lookup.values()
-                if not snippet.moved and not snippet.orphaned
+                if not snippet.moved
             ]
         )
         total_files = set(
