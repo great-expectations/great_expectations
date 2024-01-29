@@ -18,7 +18,6 @@ from great_expectations.validator.validator import BridgeValidator
 yaml = YAMLHandler()
 
 
-@pytest.mark.filesystem
 @pytest.fixture(scope="module")
 def test_parquet_folder_connection_path(tmp_path_factory):
     pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
