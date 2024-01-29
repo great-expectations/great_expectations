@@ -7,7 +7,7 @@ description: Connect GX Cloud to a Snowflake Data Source.
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-To validate data stored in a Snowflake data warehouse, you must add the GX Agent to your production environment. The GX Agent is a containerized image that runs open source and proprietary GX code. The GX Agent acts as an intermediary between GX Cloud and Snowflake and allows you to securely access and validate your data in GX Cloud without connecting or interacting with it directly.
+To validate data stored in a Snowflake data warehouse from GX Cloud, you must add the GX Agent to your production environment. The GX Agent acts as an intermediary between GX Cloud and Snowflake and allows you to securely access and validate your data in GX Cloud.
 
 New to GX Cloud and not sure that it's the right solution for your organization? See [Try GX Cloud](../try_gx_cloud.md).
 
@@ -56,20 +56,20 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 6. Select **Run All** to create a new warehouse (`gx_wh`) for the GX Agent.
 
-7. Optional. To allow a user assigned the `gx_role` role to access data and run validations on a specific Snowflake database and schema:
+7. Copy the following code and paste it into the SQL worksheet:
 
-   - Copy the following code and paste it into the SQL worksheet:
+   ```sh
+   grant usage, operate on warehouse gx_wh to role gx_role;
+   grant usage on database "database_name" to role gx_role;
+   grant usage on schema "database_name.schema_name" to role gx_role;
+   grant select on all tables in schema "database_name.schema_name" to role gx_role;
+   grant select on future tables in schema "database_name.schema_name" to role gx_role; 
+   ```
+   `grant select on future tables in schema "database_name.schema_name" to role gx_role;` is optional and gives the user with the `gx_role` role access to existing and future tables in the defined schema.
 
-      ```sh
-      grant usage, operate on warehouse gx_wh to role gx_role;
-      grant usage on database "database_name" to role gx_role;
-      grant usage on schema "database_name.schema_name" to role gx_role;
-      grant select on all tables in schema "database_name.schema_name" to role gx_role;
-      grant select on future tables in schema "database_name.schema_name" to role gx_role; 
-      ```
-   - Replace `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
+8. Replace `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
 
-   - Select **Run All** to allow the user with the `gx_role` role to access data on the Snowflake database and schema.
+9. Select **Run All** to allow the user with the `gx_role` role to access data on the Snowflake database and schema.
 
 ## Get your GX Cloud access token and organization ID
 
