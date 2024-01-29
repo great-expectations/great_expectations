@@ -79,7 +79,7 @@ class SnippetMover:
         code_paths = [
             os.path.join(self._tests_prefix, code_path) for code_path in code_paths
         ]
-        code_snippet_expression = re.compile(r"snippet name=\"(.*)\"")
+        code_snippet_expression = re.compile(r"snippet\W+name=\"(.*)\"")
         for code_path in code_paths:
             snippet_names = self.search_file_for_snippets(
                 path=os.path.join(self._root_dir, code_path),
@@ -109,7 +109,7 @@ class SnippetMover:
         doc_paths = [
             os.path.join(self._docs_prefix, doc_path) for doc_path in doc_paths
         ]
-        doc_snippet_expression = re.compile(r"```\w* name=\"(.*)\"")
+        doc_snippet_expression = re.compile(r"```\w*\W+name=\"(.*)\"")
         for doc_path in doc_paths:
             snippet_names = self.search_file_for_snippets(
                 path=os.path.join(self._root_dir, doc_path),
