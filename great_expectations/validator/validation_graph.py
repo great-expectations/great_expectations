@@ -126,7 +126,7 @@ class ValidationGraph:
         metric_provider: Callable
         (
             metric_impl_klass,
-            metric_provider,
+            _metric_provider,
         ) = self.set_metric_configuration_default_kwargs_if_absent(
             metric_configuration=metric_configuration
         )

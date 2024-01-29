@@ -1,14 +1,14 @@
 ---
 title: Configure credentials
 ---
-import Prerequisites from '@site/docs/components/_prerequisites.jsx'
+import Prerequisites from '../../../../components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 This guide will explain how to populate credentials either through an environment variable, or configure your Great Expectations project to load credentials from either a YAML file or a secret manager.
 
-If your Great Expectations deployment is in an environment without a file system, refer to [Instantiate an Ephemeral Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+If your Great Expectations deployment is in an environment without a file system, refer to [Instantiate an Ephemeral Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
 ## Prerequisites
 
@@ -241,7 +241,7 @@ Configure your Great Expectations project to substitute variables from the Azure
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/oss/guides/setup/setup_overview)
+- [Set up a working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
 - Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
 
 </Prerequisites>

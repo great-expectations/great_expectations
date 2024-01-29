@@ -14,8 +14,8 @@ import ApplyThePolicy from './components_how_to_host_and_share_data_docs_on_amaz
 import AddANewS3SiteToTheDataDocsSitesSectionOfYourGreatExpectationsYml from './components_how_to_host_and_share_data_docs_on_amazon_s3/_add_a_new_s3_site_to_the_data_docs_sites_section_of_your_great_expectationsyml.mdx'
 import TestThatYourConfigurationIsCorrectByBuildingTheSite from './components_how_to_host_and_share_data_docs_on_amazon_s3/_test_that_your_configuration_is_correct_by_building_the_site.mdx'
 import AdditionalNotes from './components_how_to_host_and_share_data_docs_on_amazon_s3/_additional_notes.mdx'
-import Prerequisites from '@site/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -65,7 +65,7 @@ Host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Doc
 
 <Prerequisites>
 
-- [A working deployment of Great Expectations](/docs/oss/guides/setup/setup_overview)
+- [A working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
 - Permissions to create and configure an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage)
 
 </Prerequisites>
@@ -296,7 +296,7 @@ Host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Doc
 
 <Prerequisites>
 
-- [A Great Expectations instance](/docs/oss/guides/setup/setup_overview)
+- [A Great Expectations instance](/oss/guides/setup/setup_overview.md)
 
 </Prerequisites>
 

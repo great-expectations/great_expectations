@@ -8,13 +8,13 @@ toc_max_heading_level: 2
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, SQL]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
-import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
-import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
-import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
-import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import SetupAndInstallForSqlData from '../../../../../components/setup/link_lists/_setup_and_install_for_sql_data.md'
+import ConnectingToSqlDatasourcesFluently from '../../../../../components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
+import AfterRequestDataFromADataAsset from '../../../../../components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
+import AfterCreateAndConfigureDataAsset from '../../../../../components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -50,7 +50,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a SQL database
 - A SQL-based Data Source
 
@@ -82,9 +82,9 @@ To connect to additional tables in the same SQL Database, repeat the previous st
 
 ### Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
-- [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [How to organize Batches in a SQL based Data Asset](/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 </TabItem>
 <TabItem value="query">
@@ -99,7 +99,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx).
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md).
 - Source data stored in a SQL database.
 
 </Prerequisites> 
@@ -128,9 +128,9 @@ To connect to the contents of additional queries in the same SQL Database, repea
 
 ### Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
-- [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [How to organize Batches in a SQL based Data Asset](/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 </TabItem>
 <TabItem value="batches">
@@ -192,16 +192,16 @@ A Batch List can contain a lot of metadata. To verify which files were included 
 
 ### Related documentation
 
-- [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 </TabItem>
 </Tabs>
 
 ## Related documentation
 
-- [How to set up GX to work with SQL databases](/docs/oss/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
-- [How to connect to SQL data](/docs/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
-- [How to connect to PostgreSQL data](/docs/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
-- [How to connect to SQLite data](/docs/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
+- [How to set up GX to work with SQL databases](/oss/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
+- [How to connect to SQL data](/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
+- [How to connect to PostgreSQL data](/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
+- [How to connect to SQLite data](/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
 

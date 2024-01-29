@@ -77,7 +77,7 @@ Row Expectations was considered as an alternative name for Map Expectations, but
 
 ## Subclasses
 
-Beyond the `[Domain][Approach]Expectation` naming convention, the specialized subclasses `RegexBasedColumnMapExpectation` and `SetBasedColumnMapExpectation` are supported. These extend `ColumnMapExpectation` and make it easier to define Expectations based on regexes and sets. For more information, see [How to create a Custom Regex-Based Column Map Expectation](/docs/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations) and [How to create a Custom Set-Based Column Map Expectation](/docs/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations).
+Beyond the `[Domain][Approach]Expectation` naming convention, the specialized subclasses `RegexBasedColumnMapExpectation` and `SetBasedColumnMapExpectation` are supported. These extend `ColumnMapExpectation` and make it easier to define Expectations based on regexes and sets. For more information, see [How to create a Custom Regex-Based Column Map Expectation](/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations.md) and [How to create a Custom Set-Based Column Map Expectation](/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations.md).
 
 ## BatchExpectations
 
@@ -113,12 +113,12 @@ Now that you've learned about Expectation classes, you can use the following res
 
 - [Explore Expectations](https://greatexpectations.io/expectations/?filterType=Backend%20support&gotoPage=1&showFilters=true&viewType=Summary)
 
-- [How to create and edit Expectations based on domain knowledge, without inspecting data directly](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly)
+- [How to create and edit Expectations based on domain knowledge, without inspecting data directly](/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)
 
-- [Create and manage Custom Expectations](/docs/oss/guides/expectations/custom_expectations_lp)
+- [Create and manage Custom Expectations](/oss/guides/expectations/custom_expectations_lp.md)
 
-- [Expectations naming conventions](/docs/oss/contributing/style_guides/code_style#expectations)
+- [Expectations naming conventions](/oss/contributing/style_guides/code_style.md#expectations)
 
-- [Standard arguments for Expectations](/docs/reference/learn/expectations/standard_arguments)
+- [Standard arguments for Expectations](/reference/learn/expectations/standard_arguments.md)
 
-- [Result format](/docs/reference/learn/expectations/result_format)
+- [Result format](/reference/learn/expectations/result_format.md)

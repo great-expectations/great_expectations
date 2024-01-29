@@ -201,7 +201,7 @@ def test_limit_included_in_head_query(
             runtime_configuration={},
         )
 
-        args, kwargs = mock_node.call_args
+        _args, kwargs = mock_node.call_args
         mock_node.assert_called_once()
 
         assert ("limit" in str(kwargs["sql"]).lower()) == (fetch_all is not True)

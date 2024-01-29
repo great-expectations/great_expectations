@@ -4,7 +4,7 @@ title: Create a Custom Query Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 **`QueryExpectations`** are a type of <TechnicalTag tag="expectation" text="Expectation"/>, enabled for SQL and Spark, that enable a higher-complexity type of workflow
 when compared with core Expectation classes such as **`ColumnAggregate`**, **`ColumnMap`**, and **`Table`**.
@@ -95,7 +95,7 @@ Completeness checklist for ExpectQueryToMatchSomeCriteria:
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/oss/contributing/contributing_maturity#expectation-contributions) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/oss/contributing/contributing_maturity.md#expectation-contributions) at an Experimental level.
 
 ## Change the Expectation class name and add a docstring
 
@@ -373,7 +373,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/oss/contributing/contributing_maturity#expectation-contributions) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/oss/contributing/contributing_maturity.md#expectation-contributions) at an Experimental level.
 
 ## Change the Expectation class name and add a docstring
 
@@ -622,7 +622,7 @@ would become
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
 - [expect_queried_table_row_count_to_be.py](https://github.com/great-expectations/great_expectations/blob/develop/contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py)

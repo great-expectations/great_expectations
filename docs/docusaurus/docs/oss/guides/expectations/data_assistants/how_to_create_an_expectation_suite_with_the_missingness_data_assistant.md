@@ -2,12 +2,12 @@
 title: Create an Expectation Suite with the Missingness Data Assistant
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 :::caution
 
-Missingness Data Assistant functionality is [Experimental](/docs/oss/contributing/contributing_maturity).
+Missingness Data Assistant functionality is [Experimental](/oss/contributing/contributing_maturity.md).
 
 :::
 
@@ -19,7 +19,7 @@ All the code used in the examples is available in GitHub at this location: [how_
 
 <Prerequisites>
 
-- A [configured Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+- A [configured Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
@@ -108,4 +108,4 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 The Missingness Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary.  You might have some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
 
-To edit your new Expectation Suite, see [Edit an existing Expectation Suite](/docs/oss/guides/expectations/how_to_edit_an_existing_expectationsuite).
+To edit your new Expectation Suite, see [Edit an existing Expectation Suite](/oss/guides/expectations/how_to_edit_an_existing_expectationsuite.md).

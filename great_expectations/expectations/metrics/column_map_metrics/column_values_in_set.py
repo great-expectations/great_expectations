@@ -69,7 +69,7 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
                     "name" in column_info
                     and column_info["name"] == column.name
                     and "type" in column_info
-                    and type(column_info["type"]) == sa.Boolean
+                    and isinstance(column_info["type"], sa.Boolean)
                 ):
                     return sa.or_(*[column == value for value in value_set])
         return column.in_(value_set)

@@ -5,12 +5,11 @@ description: Create ExpectationConfigurations based on domain knowledge.
 keywords: [Expectations, Domain Knowledge]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrerequisiteQuickstartGuideComplete from '/docs/components/prerequisites/_quickstart_completed.mdx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
-import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
-import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
-import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
+import Prerequisites from '../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../reference/learn/term_tags/_tag.mdx';
+import IfYouStillNeedToSetupGX from '../../../components/prerequisites/_if_you_still_need_to_setup_gx.md'
+import DataContextInitializeQuickOrFilesystem from '../../../components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
+import ConnectingToDataFluently from '../../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 
 This guide shows how to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> without a sample <TechnicalTag tag="batch" text="Batch" />.
 
@@ -50,7 +49,7 @@ Run the following code to import Great Expectations and instantiate a Data Conte
 
 :::info Data Contexts and persisting data
 
-If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
 :::
 
@@ -97,4 +96,4 @@ Ephemeral Data Contexts don't persist beyond the current Python session.  If you
 
 ## Next steps
 
-Now that you have created and saved an Expectation Suite, you can [Validate your data](/docs/oss/guides/validation/validate_data_overview).
+Now that you have created and saved an Expectation Suite, you can [Validate your data](/oss/guides/validation/validate_data_overview.md).

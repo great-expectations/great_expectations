@@ -239,7 +239,7 @@ class ExpectationsStore(Store):
                 # cloud_suite = ExpectationSuite(
                 #     **result.response["data"]["attributes"]["suite"]
                 # )
-                suite_identifier, cloud_suite = self._refresh_suite(value)
+                _suite_identifier, cloud_suite = self._refresh_suite(value)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,

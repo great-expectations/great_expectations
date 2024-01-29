@@ -2,8 +2,8 @@
 title: Collect OpenLineage metadata using an Action
 ---
 
-import Prerequisites from '/docs/oss/guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 [OpenLineage](https://openlineage.io) is an open framework for collection and analysis of data lineage. It tracks the movement of data over time, tracing relationships between datasets. Data engineers can use data lineage metadata to determine the root cause of failures, identify performance bottlenecks, and simulate the effects of planned changes.
 
@@ -62,7 +62,7 @@ Our [guide on how to Validate data by running a Checkpoint](../checkpoints/how_t
 
 ## Related documentation
 
-- [Checkpoints overview page](/docs/reference/learn/terms/checkpoint)
-- [Actions overview page](/docs/reference/learn/terms/action)
+- [Checkpoints overview page](/reference/learn/terms/checkpoint.md)
+- [Actions overview page](/reference/learn/terms/action.md)
 - The [OpenLineage Spec](https://github.com/OpenLineage/OpenLineage/blob/main/spec/OpenLineage.md)
 - Blog: [Expecting Great Quality with OpenLineage Facets](https://openlineage.io/blog/dataquality_expectations_facet/)

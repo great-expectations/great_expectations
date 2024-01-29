@@ -1,4 +1,4 @@
-import ReleaseVersionBox from '/docs/components/versions/_gx_version_code_box.mdx'
+import ReleaseVersionBox from '../versions/_gx_version_code_box.mdx'
 
 You can verify that GX installed successfully with the CLI command:
 

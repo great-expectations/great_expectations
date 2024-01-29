@@ -3,10 +3,10 @@ sidebar_label: 'Get started with GX and Databricks'
 title: Get started with Great Expectations and Databricks
 ---
 
-import Prerequisites from '@site/docs/components/_prerequisites.jsx'
+import Prerequisites from '../../components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../reference/learn/term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use Great Expectations (GX) with [Databricks](https://databricks.com/).
 
