@@ -19,6 +19,10 @@
   font-weight: bold;
 }
 
+.menu__list-item {
+  border-left: 4px solid transparent;
+}
+
 .menu__list-item-collapsible--active,
 .menu__list-item-collapsible--active:hover,
 .menu__link--active:not(.menu__link--sublist) {
@@ -48,8 +52,8 @@ nav.menu {
 }
 
 .menu__caret {
-  padding-left: 9px;
-  padding-right: 9px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .menu__caret:before {
