@@ -292,7 +292,7 @@ class _YamlConfigValidator:
 
     def _test_instantiation_of_store_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Tuple[Store, dict]:
+    ) -> Store:
         """
         See `test_yaml_config` for more details.
         """

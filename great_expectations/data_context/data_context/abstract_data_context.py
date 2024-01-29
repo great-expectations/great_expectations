@@ -3492,7 +3492,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         }
 
     @property
-    def data_context_id(self) -> str:
+    def data_context_id(self) -> uuid.UUID:
         return self.variables.data_context_id
 
     def _init_primary_stores(

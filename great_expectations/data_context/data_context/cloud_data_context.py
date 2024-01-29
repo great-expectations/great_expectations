@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import uuid
 import warnings
 from typing import (
     TYPE_CHECKING,
@@ -462,14 +463,14 @@ class CloudDataContext(SerializableDataContext):
         return variables
 
     @override
-    def _construct_data_context_id(self) -> str:
+    def _construct_data_context_id(self) -> uuid.UUID:
         """
         Choose the id of the currently-configured expectations store, if available and a persistent store.
         If not, it should choose the id stored in DataContextConfig.
         Returns:
             UUID to use as the data_context_id
         """
-        return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
+        return uuid.UUID(self.ge_cloud_config.organization_id)  # type: ignore[return-value,union-attr]
 
     @override
     def get_config_with_variables_substituted(
