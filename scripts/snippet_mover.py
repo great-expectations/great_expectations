@@ -1,6 +1,7 @@
 import os
 import re
 from glob import glob
+from itertools import count
 from pathlib import Path
 from typing import Pattern
 
@@ -77,8 +78,14 @@ class SnippetMover:
 
         Snippets also exist in the codebase, but we can't move them.
         """
-        code_match = "**/*.py"  # should this be more permissive?
-        code_paths = self.get_all_files_by_match(self._tests_root_dir, match=code_match)
+        py_code_match = "**/*.py"
+        yml_code_match = "**/*.yml"
+        yaml_code_match = "**/*.yaml"
+        code_paths = [
+            *self.get_all_files_by_match(self._tests_root_dir, match=py_code_match),
+            *self.get_all_files_by_match(self._tests_root_dir, match=yml_code_match),
+            *self.get_all_files_by_match(self._tests_root_dir, match=yaml_code_match),
+        ]
         # add the tests prefix so paths are relative to root_dir
         code_paths = [
             os.path.join(self._tests_prefix, code_path) for code_path in code_paths
@@ -215,10 +222,13 @@ class SnippetMover:
             if len(snippet.doc_paths) > 1
         ]
 
+        snippet_total = len([snippet for snippet in self._snippet_lookup.values()])
+
         spacer = "\n"
         section_divider = (spacer * 4) + ("*" * 78) + spacer * 4
         text = (
             f"Total snippet module count: {total_snippets}\n"
+            + f"Total snippets found: {snippet_total}\n"
             + f"Moved snippet module count: {len(moved_snippets)}\n"
             + f"Shared snippet count: {len(shared_snippets)}\n"
             + section_divider
