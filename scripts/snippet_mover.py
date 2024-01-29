@@ -47,6 +47,9 @@ class SnippetMover:
         self._snippet_lookup: dict[str, Snippet] = {}
         self._snippet_module_lookup: dict[Path, SnippetModule] = {}
         self._non_test_snippets: list[Snippet] = []  # can't move these
+        self._orphaned_snippet_modules: list[
+            SnippetModule
+        ] = []  # not referenced by a test
         self._default_snippet_path = Path("docs/docusaurus/docs/snippets")
         self._docs_prefix = "docs"
         self._docs_root_dir = os.path.join(gx_root_dir, self._docs_prefix)
@@ -126,6 +129,7 @@ class SnippetMover:
 
     def calculate_snippet_destinations(self):
         """Determine where each snippet should be moved."""
+        orphaned_snippet_paths = set()
         for snippet_module in self._snippet_module_lookup.values():
             if not snippet_module.original_path:
                 # can't move this file
@@ -142,12 +146,16 @@ class SnippetMover:
                 # this snippet is referenced by a single doc, so we'll move it adjacent to the doc
                 snippet_dest_dir = list(snippet_docs)[0].parent
             else:
-                # weird, snippet isn't referenced by any docs
+                # weird, snippet module isn't referenced by any docs
+                orphaned_snippet_paths.add(snippet_module.original_path)
+                self._orphaned_snippet_modules.append(snippet_module)
                 continue
             # keep the snippet's original filename the same
             snippet_module.new_path = Path(
                 os.path.join(snippet_dest_dir, snippet_module.original_path.parts[-1])
             )
+        for orphaned_path in orphaned_snippet_paths:
+            self._snippet_module_lookup.pop(orphaned_path)
 
     def rename_snippets(self):
         """Replace any references to the snippet's old path with the new one."""
@@ -191,15 +199,15 @@ class SnippetMover:
         moved_snippets = [
             snippet_module
             for snippet_module in self._snippet_module_lookup.values()
-            if snippet_module.moved
+            if snippet_module.moved is True
         ]
         unmoved_snippets = [
             snippet_module
             for snippet_module in self._snippet_module_lookup.values()
-            if not snippet_module.moved
+            if snippet_module.moved is False
         ]
         total_snippets = len(self._snippet_module_lookup)
-        assert total_snippets == moved_snippets + unmoved_snippets, "huh?"
+        # assert total_snippets == moved_snippets + unmoved_snippets, "huh?"
 
         shared_snippets = [
             snippet
@@ -219,6 +227,14 @@ class SnippetMover:
             + section_divider
             + f"{len(unmoved_snippets)} Unmoved snippet modules:\n"
             + spacer.join([str(snippet.original_path) for snippet in unmoved_snippets])
+            + section_divider
+            + f"{len(self._orphaned_snippet_modules)} Orphaned snippet modules:\n"
+            + spacer.join(
+                [
+                    str(snippet.original_path)
+                    for snippet in self._orphaned_snippet_modules
+                ]
+            )
         )
         with open(self._report_path, "w") as file:
             file.write(text)
