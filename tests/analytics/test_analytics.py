@@ -74,13 +74,31 @@ def test_event_identifiers(analytics_config):
         assert "organization_id" not in properties
 
 
+@pytest.mark.unit
+def test_local_context_init(monkeypatch):
+    monkeypatch.setenv("GE_USAGE_STATS", "True")  # Enable usage stats
+
+    with mock.patch(
+        "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
+    ) as mock_init, mock.patch("posthog.capture") as mock_submit:
+        _ = gx.get_context(mode="ephemeral")
+
+    mock_init.assert_called_once_with(data_context_id=mock.ANY, oss_id=mock.ANY)
+    mock_submit.assert_called_once_with(
+        mock.ANY,
+        "data_context.initialized",
+        {"data_context_id": mock.ANY, "oss_id": mock.ANY, "service": "gx-core"},
+        groups={"data_context": mock.ANY},
+    )
+
+
 @pytest.mark.cloud
 def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "True")  # Enable usage stats
 
     with mock.patch(
         "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
-    ) as mock_init:
+    ) as mock_init, mock.patch("posthog.capture") as mock_submit:
         _ = gx.get_context(
             cloud_access_token=cloud_details.access_token,
             cloud_organization_id=cloud_details.org_id,
@@ -89,8 +107,14 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
         )
 
     mock_init.assert_called_once_with(
-        user_id=FAKE_USER_ID,  # Should be consistent with the fake Cloud API
+        user_id=UUID(FAKE_USER_ID),  # Should be consistent with the fake Cloud API
         data_context_id=mock.ANY,
         oss_id=mock.ANY,
         cloud_mode=True,
+    )
+    mock_submit.assert_called_once_with(
+        FAKE_USER_ID,
+        "data_context.initialized",
+        {"data_context_id": mock.ANY, "oss_id": mock.ANY, "service": "gx-core"},
+        groups={"data_context": mock.ANY},
     )
