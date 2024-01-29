@@ -33,9 +33,7 @@ class SnippetMover:
         self._root_dir = gx_root_dir
         self._doc_paths_by_snippet_name: dict[str, set[Path]] = defaultdict(set)
         self._code_path_by_snippet_name: dict[str, Path] = {}
-        self._default_snippet_path = Path(
-            os.path.join(gx_root_dir, "docs/docusaurus/docs/snippets")
-        )
+        self._default_snippet_path = Path("docs/docusaurus/docs/snippets")
         self._docs_prefix = "docs"
         self._docs_root_dir = os.path.join(gx_root_dir, self._docs_prefix)
         self._tests_prefix = "tests"
@@ -45,7 +43,7 @@ class SnippetMover:
         self._snippets_moved_count = 0
 
     def run(self):
-        self.ensure_dir(self._default_snippet_path)
+        self.ensure_dir(Path(os.path.join(self._root_dir, self._default_snippet_path)))
         # preprocess
         self.store_doc_paths_by_snippet_name()
         self.store_test_path_by_snippet_name()
@@ -104,20 +102,29 @@ class SnippetMover:
 
     def move_and_rename_snippets(self):
         snippets_dest_by_code_path: dict[Path, Path] = {}
-        # first, rename all files, since we need them to be in a stable place
+        # rename the path in snippet names before moving the files
         for snippet_name, code_path in self._code_path_by_snippet_name.items():
             doc_paths = self._doc_paths_by_snippet_name.get(snippet_name)
             if not doc_paths:
                 self._orphaned_snippet_paths.add((snippet_name, code_path))
                 continue
             if len(doc_paths) > 1:
-                # this snippet is referenced by multiple docs, so we move it to the default dir
+                # this snippet is referenced by multiple docs, so we'll move it to the default dir
                 snippet_dest_dir = self._default_snippet_path
             else:
-                # this snippet is referenced by a single doc, so we move it next to the doc
+                # this snippet is referenced by a single doc, so we'll move it next to the doc
                 snippet_dest_dir = list(doc_paths)[0].parent
-            # keep the filename the same
+            # change the path, not the snippet filename
             snippet_dest = Path(os.path.join(snippet_dest_dir, code_path.parts[-1]))
+
+            # if we already saved a dest for this code path, and its different than the one
+            # we just calculated, something went wrong:
+            if snippets_dest_by_code_path.get(code_path, snippet_dest) != snippet_dest:
+                raise RuntimeError(
+                    f"Fatal error - Snippet at {code_path} must be moved to both "
+                    f"{snippets_dest_by_code_path.get(code_path, snippet_dest)} and {snippet_dest}."
+                )
+
             paths_to_update = [
                 os.path.join(self._root_dir, code_path),
                 *[os.path.join(self._root_dir, doc_path) for doc_path in doc_paths],
@@ -130,16 +137,14 @@ class SnippetMover:
                 self.find_and_replace_text_in_file(
                     path=path, old_str=str(code_path), new_str=str(snippet_dest)
                 )
-            if snippets_dest_by_code_path.get(code_path, snippet_dest) != snippet_dest:
-                raise RuntimeError(
-                    f"Fatal error - Snippet at {code_path} must be moved to both "
-                    f"{snippets_dest_by_code_path.get(code_path, snippet_dest)} and {snippet_dest}."
-                )
+
             snippets_dest_by_code_path[code_path] = snippet_dest
 
         # now that all references have been renamed, move the snippet files
         for code_path, snippet_dest in snippets_dest_by_code_path.items():
-            self.move_file(src=code_path, dest=snippet_dest)
+            self.move_file(
+                src=code_path, dest=Path(os.path.join(self._root_dir, snippet_dest))
+            )
             self._snippets_moved_count += 1
 
     @classmethod
