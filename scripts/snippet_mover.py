@@ -16,7 +16,7 @@ class Snippet(BaseModel):
 class SnippetModule(BaseModel):
     snippets: list[Snippet] = Field(default_factory=list)
     moved: bool = False
-    original_path: Path | None
+    original_path: Path
     new_path: Path | None = None
 
 
@@ -90,7 +90,7 @@ class SnippetMover:
         code_paths = [
             os.path.join(self._tests_prefix, code_path) for code_path in code_paths
         ]
-        code_snippet_expression = re.compile(r"snippet\W+name=\"(.*)\"")
+        code_snippet_expression = re.compile(r"snippet\Wname=\"(.*)\"")
         for code_path in code_paths:
             snippet_module = SnippetModule(original_path=Path(code_path))
             self._snippet_module_lookup[snippet_module.original_path] = snippet_module
@@ -138,9 +138,6 @@ class SnippetMover:
         """Determine where each snippet should be moved."""
         orphaned_snippet_paths = set()
         for snippet_module in self._snippet_module_lookup.values():
-            if not snippet_module.original_path:
-                # can't move this file
-                continue
             snippet_docs = {
                 doc_path
                 for snippet in snippet_module.snippets
