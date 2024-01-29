@@ -497,7 +497,8 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
+    monkeypatch.setenv("GE_USAGE_STATS", "False")  # v0.18 and before
+    monkeypatch.setenv("GX_ANALYTICS_ENABLED", "False")  # v1.0 and after
 
 
 @pytest.fixture(scope="session", autouse=True)
