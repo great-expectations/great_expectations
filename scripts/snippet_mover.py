@@ -217,20 +217,34 @@ class SnippetMover:
         shared_snippets = [
             snippet for snippet in moved_snippets if len(snippet.doc_paths) > 1
         ]
+        snippets_by_module: dict[Path, list[Snippet]] = defaultdict(list)
+        for snippet in self._snippet_lookup.values():
+            snippets_by_module[snippet.original_path].append(snippet)
+
+        orphaned_files = [
+            name
+            for name, snippet_list in snippets_by_module.items()
+            if all(snippet.orphaned for snippet in snippet_list)
+        ]
+
         spacer = "\n"
         section_divider = (spacer * 4) + ("*" * 78) + spacer * 4
         text = (
             f"Total snippet file count: {len(total_files)}\n"
             + f"Moved file count: {len(moved_files)}\n"
             + f"Unmoved file count: {len(unmoved_files)}\n"
+            + f"Orphaned file count: {len(orphaned_files)}\n"
             + f"Total snippet count: {total_snippets}\n"
             + f"Moved snippet count: {len(moved_snippets)}\n"
             + f"Shared snippet count: {len(shared_snippets)}\n"
             + section_divider
-            + f"{len(orphaned_snippets)} Orphaned Snippets:"
+            + "Orphaned files\n"
+            + spacer.join(str(f) for f in orphaned_files)
+            + section_divider
+            + f"{len(orphaned_snippets)} Orphaned Snippets:\n"
             + spacer.join([snippet.name for snippet in orphaned_snippets])
             + section_divider
-            + f"{len(unmoved_snippets)} Unmoved Snippets:"
+            + f"{len(unmoved_snippets)} Unmoved Snippets:\n"
             + spacer.join([snippet.name for snippet in unmoved_snippets])
         )
         with open(self._report_path, "w") as file:
