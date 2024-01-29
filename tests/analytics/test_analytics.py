@@ -75,8 +75,8 @@ def test_event_identifiers(analytics_config):
 
 
 @pytest.mark.unit
-def test_local_context_init(monkeypatch):
-    monkeypatch.setenv("GE_USAGE_STATS", "True")  # Enable usage stats
+def test_ephemeral_context_init(monkeypatch):
+    monkeypatch.setenv("GX_ANALYTICS_ENABLED", "True")  # Enable usage stats
 
     with mock.patch(
         "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
@@ -94,7 +94,7 @@ def test_local_context_init(monkeypatch):
 
 @pytest.mark.cloud
 def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
-    monkeypatch.setenv("GE_USAGE_STATS", "True")  # Enable usage stats
+    monkeypatch.setenv("GX_ANALYTICS_ENABLED", "True")  # Enable usage stats
 
     with mock.patch(
         "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
