@@ -339,8 +339,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.fluent_config
         )
         self._anonymizer = Anonymizer(salt=self._data_context_id)
-        self._init_analytics()
-        submit_event(event=DataContextInitializedEvent())
+
+        # TODO: Need to determine V1 mechanism for usage stats opt-out
+        if self._is_usage_stats_enabled():
+            self._init_analytics()
+            submit_event(event=DataContextInitializedEvent())
 
     def _init_analytics(self) -> None:
         init_analytics(
