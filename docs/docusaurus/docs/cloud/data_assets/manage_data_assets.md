@@ -37,7 +37,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password**: Enter the password for the Snowflake account you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
+    - **Password**: Enter the password for the Snowflake user you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored. In Snowsight, click **Data** > **Databases**. In the Snowflake Classic Console, click **Databases**.
  
@@ -170,7 +170,7 @@ Currently, you can only edit Snowflake Data Source settings.
 
     - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password**: Enter the password for the Snowflake account you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
+    - **Password**: Enter the password for the Snowflake user you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
     - **Database**: Enter a new Snowflake database name.
  
