@@ -422,6 +422,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectation_type: str,
         expectation_config: ExpectationConfiguration | None = None,
     ) -> Callable | None:
+        # Prioritize `description` param on Expectation before falling back to renderer
         content_block_fn = cls._get_content_block_fn_from_expectation_description(
             expectation_config=expectation_config,
         )
