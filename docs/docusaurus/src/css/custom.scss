@@ -359,4 +359,10 @@ li p + ol {
   display: none;
 }
 
+.linkCard_docs-components-LinkCard-styles-module{
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  box-shadow: 0 3px 6px -1px var(--gray-300);
+}
 @import "api_docs/api_docs.scss";
