@@ -233,7 +233,7 @@ class SnippetMover:
             + f"{len(unmoved_snippets)} Unmoved snippet modules:\n"
             + spacer.join([str(snippet.original_path) for snippet in unmoved_snippets])
             + section_divider
-            + f"{len(self._orphaned_snippet_modules)} Orphaned snippet modules:\n"
+            + f"{len(self._orphaned_snippet_modules)} modules contain snippets but are not referenced by the docs:\n"
             + spacer.join(
                 [
                     str(snippet.original_path)
