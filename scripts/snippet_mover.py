@@ -40,13 +40,16 @@ class SnippetMover:
             Path("ci/checks/check_integration_test_gets_run.py"),
         )
         self._custom_cases: dict[Path, Path] = {
-            # these are custom overrides for naming when things get wonky
+            # these are custom overrides for how to rename specific files if things get wonky
             Path(
                 "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py"
-            ): Path("inferred_and_runtime_yaml_example_spark.py"),
+            ): Path("inferred_and_runtime_yaml_example_spark_azure.py"),
             Path(
                 "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py"
-            ): Path("inferred_and_runtime_yaml_example_pandas.py"),
+            ): Path("inferred_and_runtime_yaml_example_pandas_gcs.py"),
+            Path(
+                "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py"
+            ): Path("inferred_and_runtime_yaml_example_spark_s3.py"),
         }
         self._report_path = gx_root_dir / Path("scripts/snippet_mover_report.txt")
         # make sure we have a valid dir to put snippets referenced by multiple docs
