@@ -1,16 +1,19 @@
 ---
 sidebar_label: 'Connect GX Cloud'
 title: 'Connect GX Cloud'
+hide_title: true
 description: Connect GX Cloud to your deployment environment.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">When you're finished testing GX Cloud features and functionality and you've determined it's the right solution for your organization, it's time to connect GX Cloud to your deployment environment. Great Expectations (GX) is rapidly adding new GX Cloud integrations, so check back often for our latest solution.
-
-New to GX Cloud and not sure that it's the right solution for your organization? See [Try GX Cloud](../try_gx_cloud.md)</p>
-
+<OverviewCard title={frontMatter.title}>
+  When you've determined that GX Cloud is the right solution for your organization, it's time to connect GX Cloud to your production environment.
+  <br/>
+  Haven’t determined whether GX Cloud is the right solution for your organization? See <a href="/docs/try_gx_cloud">Try GX Cloud</a>.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Connect GX Cloud to PostgreSQL" description="Quickly start using GX Cloud with PostgreSQL." to="/cloud/connect/connect_postgresql" icon="/img/postgresql_icon.svg" />

@@ -1,5 +1,6 @@
 ---
 title: 'GX Cloud'
+hide_title: true
 description: Get started with GX Cloud and learn more about GX Cloud features and functionality.
 hide_table_of_contents: true
 pagination_next: null
@@ -10,11 +11,11 @@ displayed_sidebar: gx_cloud
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">GX Cloud is the fastest and most reliable way to validate your data. Connect, test, and validate Data Assets in a web-based UI.
-<br /> 
-To learn how its fast setup, collaboration-forward approach, and accessibility to technical and nontechnical stakeholders could be the perfect solution for your organization, see <a href='/docs/cloud/why_gx_cloud'>Why GX Cloud</a>.
-</p>
+<OverviewCard title={frontMatter.title}>
+  GX Cloud is the fastest and most reliable way to validate your data. Connect, test, and validate Data Assets in a web-based UI. See Why GX Cloud to learn how GX Cloud is the perfect solution for your organization.
+</OverviewCard>
 
 ### Get started
 

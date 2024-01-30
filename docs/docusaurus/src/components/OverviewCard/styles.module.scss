@@ -1,0 +1,28 @@
+.overviewCard {
+  background-color: #404041;
+  color: var(--ifm-footer-link-color);
+  padding: 3rem 4rem 2rem;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.overviewCard::before {
+  background: url('/img/repeating_hex_homepage2.png');
+  bottom: 0;
+  content: '';
+  left: 0;
+  opacity: 0.2;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.overviewCard__inner_container {
+  position: relative;
+  z-index: 1;
+}
+
+.overviewCard__description {
+  font-weight: normal;
+}
