@@ -8,22 +8,20 @@ slug: '/cloud/'
 displayed_sidebar: gx_cloud
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '../components/LinkCardGrid';
+import LinkCard from '../components/LinkCard';
 
 <p class="DocItem__header-description">GX Cloud is the fastest and most reliable way to validate your data. Connect, test, and validate Data Assets in a web-based UI.
 <br /> 
 To learn how its fast setup, collaboration-forward approach, and accessibility to technical and nontechnical stakeholders could be the perfect solution for your organization, see <a href='why_gx_cloud'>Why GX Cloud</a>.
-<br />
-If you're ready to get started and using Snowflake to store your data, try the <a href='quickstarts/snowflake_quickstart'>Quickstart for GX Cloud and Snowflake</a>.
 </p>
 
 ### Get started
 
 <LinkCardGrid>
   <LinkCard topIcon label="About GX Cloud" description="Learn more about GX Cloud features and functionality and why it's the best choice for data validation." href="about_gx" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Set up GX Cloud" description="To get the most from GX Cloud, configure your environment first." href="set_up_gx_cloud" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Quickstarts" description="Quickly start using GX Cloud with data platforms and orchestration tools." href="quickstarts/quickstart_lp" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Try GX Cloud" description="New to GX Cloud? Start here to learn how you can quickly connect to your Data Assets and validate your data." href="try_gx_cloud" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Connect GX Cloud" description="Ready to integrate GX Cloud with your production enviornment? Connect GX Cloud to popular data platforms and orchestration tools." href="connect/connect_lp" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
 ### Manage

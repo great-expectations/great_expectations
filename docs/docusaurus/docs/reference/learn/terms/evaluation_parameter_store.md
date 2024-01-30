@@ -2,7 +2,7 @@
 title: "Evaluation Parameter Store (Metric Store)"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 An Evaluation Parameter Store is a connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated metrics.
 

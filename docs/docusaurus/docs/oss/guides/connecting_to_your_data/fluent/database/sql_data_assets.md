@@ -8,13 +8,13 @@ toc_max_heading_level: 2
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, SQL]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
-import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
-import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
-import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
-import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import SetupAndInstallForSqlData from '../../../../../components/setup/link_lists/_setup_and_install_for_sql_data.md'
+import ConnectingToSqlDatasourcesFluently from '../../../../../components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
+import AfterRequestDataFromADataAsset from '../../../../../components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
+import AfterCreateAndConfigureDataAsset from '../../../../../components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -59,7 +59,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource"
 ```
 
 ### Add a table to the Data Source as a Data Asset
@@ -68,7 +68,7 @@ You create a Data Asset to identify the table to connect to.
 
 Run the following Python code to define the `name` and `table_name` variables:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource"
 ```
 
 ### Add additional tables (Optional)

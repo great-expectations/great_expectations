@@ -5,22 +5,22 @@ description: A technical guide demonstrating how to split the data returned by a
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, SQL]
 ---
 
-import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
 
-import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
+import AfterRequestDataFromADataAsset from '../../../../../components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
 
 <!-- ## Introduction -->
 
 <!-- ## Prerequisites -->
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
-import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import SetupAndInstallForSqlData from '../../../../../components/setup/link_lists/_setup_and_install_for_sql_data.md'
+import ConnectingToSqlDatasourcesFluently from '../../../../../components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
 
 <!-- ### Import GX and instantiate a Data Context -->
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
 <!-- ## Next steps -->
-import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
+import AfterCreateAndConfigureDataAsset from '../../../../../components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
 
 In this guide we will demonstrate the ways in which Batches can be organized in a SQL-based Data Asset.  We will discuss how to use Splitters to divide the data in a table or query based on the contents of a provided field.  We will also show how to add Batch Sorters to a Data Asset in order to specify the order in which Batches are returned.
 

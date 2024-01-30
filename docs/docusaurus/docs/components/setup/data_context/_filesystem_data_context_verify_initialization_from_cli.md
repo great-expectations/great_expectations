@@ -1,4 +1,4 @@
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 You can verify that your Filesystem Data Context was initialized correctly by checking the contents of the folder it was initialized in. This is what the directory structure should like:
 

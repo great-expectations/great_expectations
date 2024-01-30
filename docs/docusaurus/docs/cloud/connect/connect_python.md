@@ -1,13 +1,13 @@
 ---
-sidebar_label: 'Quickstart for GX Cloud and Python'
-title: 'Quickstart for GX Cloud and Python'
-id: python_quickstart
+sidebar_label: 'Connect to GX Cloud with Python'
+title: 'Connect to GX Cloud with Python'
+id: connect_python
 description: Connect to a GX Cloud account and validate data from a Python script.
 ---
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrereqPython from '/docs/components/prerequisites/_python_version.md'
-import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
-import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
+import Prerequisites from '../../components/_prerequisites.jsx'
+import PrereqPython from '../../components/prerequisites/_python_version.md'
+import SetupAndInstallGx from '../../components/setup/link_lists/_setup_and_install_gx.md'
+import DataContextInitializeInstantiateSave from '../../components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
 In this quickstart, you'll learn how to use GX Cloud from a Python script or interpreter, such as a Jupyter Notebook. You'll install Great Expectations, configure your GX Cloud environment variables, connect to sample data, build your first Expectation, validate data, and review the validation results through Python code.
 
@@ -41,11 +41,7 @@ You'll need your user access token and organization ID to set your environment v
 
 2. In the **User access tokens** pane, click **Create user access token**.
 
-3. Complete the following fields:
-
-    - **Token name** - Enter a name for the token that will help you quickly identify it.
-
-    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?) .
+3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
 
 4. Click **Create**.
 

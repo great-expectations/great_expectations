@@ -4,10 +4,10 @@ tag: [how-to, setup]
 keywords: [Great Expectations, Ephemeral Data Context, Filesystem Data Context]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import IfYouStillNeedToSetupGx from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
-import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
-import SetupConfigurations from '/docs/components/setup/link_lists/_setup_configurations.md'
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import IfYouStillNeedToSetupGx from '../../../../components/prerequisites/_if_you_still_need_to_setup_gx.md'
+import ConnectingToDataFluently from '../../../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
+import SetupConfigurations from '../../../../components/setup/link_lists/_setup_configurations.md'
 
 An Ephemeral Data Context is a temporary, in-memory Data Context that will not persist beyond the current Python session.  However, if you decide you would like to save the contents of an Ephemeral Data Context for future use you can do so by converting it to a Filesystem Data Context.
 

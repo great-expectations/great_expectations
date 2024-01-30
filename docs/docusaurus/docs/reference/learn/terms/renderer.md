@@ -2,7 +2,7 @@
 title: Renderer
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Renderer is a class for converting <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, etc. into <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> or other output such as email notifications or Slack messages.
 

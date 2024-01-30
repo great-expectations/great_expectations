@@ -426,3 +426,10 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/team_templates/*  /docs/oss/team_templates/:splat
 /docs/templates/*   /docs/oss/templates/:splat
 /docs/tutorials/*   /docs/oss/tutorials/:splat
+
+# GX Cloud redirects
+
+/docs/cloud/quickstarts/quickstart_lp /docs/cloud/connect/connect_lp
+/docs/cloud/quickstarts/snowflake_quickstart /docs/cloud/try_gx_cloud
+/docs/cloud/quickstarts/airflow_quickstart /docs/cloud/connect/connect_airflow
+/docs/cloud/quickstarts/python_quickstart /docs/cloud/connect/connect_python

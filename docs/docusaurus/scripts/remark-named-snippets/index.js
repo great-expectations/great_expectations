@@ -24,7 +24,7 @@ const constructSnippetMap = require('./snippet')
 
 function getDirs () {
   // Get all directories that should be processed
-  const manualDirs = ['../../great_expectations', '../../tests']
+  const manualDirs = ['../../great_expectations', '../../tests', './docs']
   const versionDirs = glob.sync('versioned_code/*/')
   // remove v0.14.13 from processing since it does not use named snippets
   const index = versionDirs.indexOf('versioned_code/version-0.14.13/')

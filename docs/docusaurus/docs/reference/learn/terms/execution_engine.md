@@ -4,7 +4,7 @@ title: Execution Engine
 hoverText: A system capable of processing data to compute Metrics
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 An Execution Engine is a system capable of processing data to compute <TechnicalTag relative="../" tag="metric" text="Metrics" />.
 

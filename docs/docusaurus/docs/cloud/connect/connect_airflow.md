@@ -1,7 +1,7 @@
 ---
-sidebar_label: 'Quickstart for GX Cloud and Airflow'
-title: 'Quickstart for GX Cloud and Airflow'
-id: airflow_quickstart
+sidebar_label: 'Connect GX Cloud and Airflow'
+title: 'Connect GX Cloud and Airflow'
+id: connect_airflow
 description: Connect GX Cloud to an Airflow Orchestrator.
 ---
 
@@ -64,7 +64,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
     # Replace <YOUR_ACCESS_TOKEN> and <YOUR_CLOUD_ORGANIZATION_ID> with your credentials.
     # To get your user access token and organization ID, see:
-    # (https://docs.greatexpectations.io/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
+    # (https://docs.greatexpectations.io/docs/cloud/try_gx_cloud#get-your-user-access-token-and-organization-id).
 
     GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
     GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"

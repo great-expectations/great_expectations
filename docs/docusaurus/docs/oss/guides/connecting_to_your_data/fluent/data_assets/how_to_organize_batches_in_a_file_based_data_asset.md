@@ -5,22 +5,22 @@ description: A technical guide demonstrating how to organize Batches of data in 
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, GCS, Google Cloud Storage, AWS S3, Amazon Web Services S3, Azure Blob Storage, Local Filesystem]
 ---
 
-import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
 
 
 <!-- ## Introduction -->
 
 <!-- ## Prerequisites -->
-import Prerequisites from '/docs/components/_prerequisites.jsx'
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
 
 <!-- ### Import GX and instantiate a Data Context -->
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
 <!-- ### 1. Create a `batching_regex` -->
-import TipFilesystemDatasourceNestedSourceDataFolders from '/docs/components/connect_to_data/filesystem/_tip_filesystem_datasource_nested_source_data_folders.md'
+import TipFilesystemDatasourceNestedSourceDataFolders from '../../../../../components/connect_to_data/filesystem/_tip_filesystem_datasource_nested_source_data_folders.md'
 
 <!-- ## Next steps -->
-import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
+import AfterCreateAndConfigureDataAsset from '../../../../../components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
 
 This guide demonstrates how to organize Batches in a file-based Data Asset. This includes how to use a regular expression to indicate which files should be returned as Batches and how to add Batch Sorters to a Data Asset to specify the order in which Batches are returned.
 
