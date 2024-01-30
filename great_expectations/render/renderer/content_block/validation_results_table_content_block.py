@@ -114,7 +114,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 expectation_type
             )
         if expectation_string_fn is None:
-            expectation_string_fn = cls._missing_content_block_fn
+            expectation_string_fn = cls._missing_content_block_fn  # type: ignore[assignment]
 
         # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(
