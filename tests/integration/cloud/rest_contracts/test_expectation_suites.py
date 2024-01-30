@@ -76,7 +76,6 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
             "created_by_id": pact.Format().uuid,
             "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             "suite": {
-                "data_asset_type": None,
                 "expectation_suite_name": pact.Like("no_checkpoint_suite"),
                 "expectations": [
                     {
