@@ -2,8 +2,8 @@
 title: Create Expectations that span multiple Batches using Evaluation Parameters
 ---
 
-import Prerequisites from '/docs/oss/guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 This guide will help you create <TechnicalTag tag="expectation" text="Expectations" /> that span multiple <TechnicalTag tag="batch" text="Batches" /> of data using <TechnicalTag tag="evaluation_parameter" text="Evaluation Parameters" /> (see also <TechnicalTag tag="evaluation_parameter_store" text="Evaluation Parameter Stores" />). This pattern is useful for things like verifying that row counts between tables stay consistent.
 
@@ -53,7 +53,7 @@ Disabling interactive evaluation allows you to declare an Expectation even when 
 ```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py add expectation with evaluation parameter"
 ```
 
-The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during <TechnicalTag tag="validation" text="Validation" />, it will replace the ``URN`` with a value retrieved from an Evaluation Parameter Store or <TechnicalTag tag="metric_store" text="Metrics Store" /> (see also [How to configure a MetricsStore](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)).
+The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during <TechnicalTag tag="validation" text="Validation" />, it will replace the ``URN`` with a value retrieved from an Evaluation Parameter Store or <TechnicalTag tag="metric_store" text="Metrics Store" /> (see also [How to configure a MetricsStore](/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)).
 
 When executed in the notebook, this Expectation will generate a Validation Result. Most values will be missing, since interactive evaluation was disabled.
 

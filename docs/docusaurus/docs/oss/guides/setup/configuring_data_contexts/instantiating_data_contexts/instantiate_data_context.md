@@ -7,11 +7,11 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
-import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
-import AdmonitionConvertToFileContext from '/docs/components/setup/data_context/_admonition_convert_to_file_context.md'
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import GxImport from '../../../../../components/setup/python_environment/_gx_import.md'
+import DataContextVerifyContents from '../../../../../components/setup/data_context/_data_context_verify_contents.md'
+import AdmonitionConvertToFileContext from '../../../../../components/setup/data_context/_admonition_convert_to_file_context.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -176,7 +176,7 @@ The `get_context(...)` method instantiates and returns the newly initialized Dat
 
 An Ephemeral Data Context is a temporary, in-memory Data Context.  They are ideal for doing data exploration and initial analysis when you do not want to save anything to an existing project, or for when you need to work in a hosted environment such as an EMR Spark Cluster.
 
-An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [How to convert an Ephemeral Data Context to a Filesystem Data Context](/docs/oss/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context).
+An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [How to convert an Ephemeral Data Context to a Filesystem Data Context](/oss/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md).
 
 ### Prerequisites
 
@@ -233,10 +233,10 @@ Now that you have an Ephemeral Data Context you can connect GX to your Data Sour
 
 To customize a Data Context configuration for Metadata Stores and Data Docs, see:
 
-- [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores)
-- [Configure Validation Result Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_result_stores)
-- [How to configure and use a Metric Store](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
-- [How to host and share Data Docs on a filesystem](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
+- [Configure Expectation Stores](/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
+- [Configure Validation Result Stores](/oss/guides/setup/configuring_metadata_stores/configure_result_stores.md)
+- [How to configure and use a Metric Store](/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
+- [How to host and share Data Docs on a filesystem](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 
 To connect GX to a Data Source:
 

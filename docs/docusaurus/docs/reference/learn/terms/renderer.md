@@ -2,7 +2,7 @@
 title: Renderer
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Renderer is a class for converting <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, etc. into <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> or other output such as email notifications or Slack messages.
 
@@ -28,6 +28,6 @@ When looking for Renderers with Expectations, you will find them specified as pa
 
 If you need instructions on how to configure the renderer portion of an Action to send a message or alert, please see the relevant guide:
 
-- [How to trigger email as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action)
-- [How to trigger Slack notifications as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action)
-- [How to trigger Opsgenie notifications as a Validation Action](/docs/oss/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action)
+- [How to trigger email as a Validation Action](/oss/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action.md)
+- [How to trigger Slack notifications as a Validation Action](/oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
+- [How to trigger Opsgenie notifications as a Validation Action](/oss/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action.md)

@@ -6,7 +6,7 @@
 </summary>
 
 While some Data Sources provide their own means of configuring credentials through environment variables, you can also configure GX to populate credentials from either a YAML file or a secret manager.  For more information, see:
-- [How to configure credentials](/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+- [How to configure credentials](/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 
 </details>
 
@@ -17,7 +17,7 @@ While some Data Sources provide their own means of configuring credentials throu
 
 </summary>
 
-- [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores)
+- [Configure Expectation Stores](/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
 
 </details>
 
@@ -28,7 +28,7 @@ While some Data Sources provide their own means of configuring credentials throu
 
 </summary>
 
-- [Configure Validation Result Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_result_stores)
+- [Configure Validation Result Stores](/oss/guides/setup/configuring_metadata_stores/configure_result_stores.md)
 
 </details>
 
@@ -39,7 +39,7 @@ While some Data Sources provide their own means of configuring credentials throu
 
 </summary>
 
-- [How to configure and use a Metric Store](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
+- [How to configure and use a Metric Store](/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
 
 </details>
 
@@ -50,9 +50,9 @@ While some Data Sources provide their own means of configuring credentials throu
 
 </summary>
 
-- [How to host and share Data Docs on Amazon S3](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
-- [How to host and share Data Docs on Azure Blob Storage](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
-- [How to host and share Data Docs on GCS](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
-- [How to host and share Data Docs on a filesystem](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
+- [How to host and share Data Docs on Amazon S3](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+- [How to host and share Data Docs on Azure Blob Storage](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+- [How to host and share Data Docs on GCS](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+- [How to host and share Data Docs on a filesystem](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 
 </details>

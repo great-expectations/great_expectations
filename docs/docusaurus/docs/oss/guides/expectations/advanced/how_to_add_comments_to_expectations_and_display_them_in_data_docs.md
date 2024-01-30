@@ -1,8 +1,8 @@
 ---
 title: Add comments to Expectations and display them in Data Docs
 ---
-import Prerequisites from '@site/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 This guide will help you add descriptive comments (or notes, here used interchangeably) to <TechnicalTag tag="expectation" text="Expectations" /> and display those comments in <TechnicalTag tag="data_docs" text="Data Docs" />. In these comments you can add some clarification or motivation to the Expectation definition to help you communicate more clearly with your team about specific Expectations. Markdown is supported in these comments.
 
@@ -10,9 +10,9 @@ This guide will help you add descriptive comments (or notes, here used interchan
 
 <Prerequisites>
 
-- [A working Great Expectations deployment](/docs/oss/guides/setup/setup_overview)
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
-- [An Expectations Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [A working Great Expectations deployment](/oss/guides/setup/setup_overview.md)
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md)
+- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 </Prerequisites>
 

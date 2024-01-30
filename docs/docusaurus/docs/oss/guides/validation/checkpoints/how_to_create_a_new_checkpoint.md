@@ -2,7 +2,7 @@
 title: Create a new Checkpoint
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 import Preface from './components_how_to_create_a_new_checkpoint/_preface.mdx'
 import StepsForCheckpoints from './components_how_to_create_a_new_checkpoint/_steps_for_checkpoints_.mdx'
 import AdditionalResources from './components_how_to_create_a_new_checkpoint/_additional_resources.mdx'
@@ -18,7 +18,7 @@ To modify the following code for your use case, replace `batch_request` and `exp
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
-For other Checkpoint configuration options, see [Manage Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp).
+For other Checkpoint configuration options, see [Manage Checkpoints](/oss/guides/validation/checkpoints/checkpoint_lp.md).
 
 
 ## Run your Checkpoint (Optional)

@@ -2,7 +2,7 @@
 title: "Data Validation workflow"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../reference/learn/term_tags/_tag.mdx';
 
 Great Expectations recommends using Checkpoints to validate data.  Checkpoints validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally, create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  A Checkpoint can be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can create and configure additional Checkpoints for different business requirements.
 
@@ -12,7 +12,7 @@ After you've created your Checkpoint, configured it, and specified the Actions y
 
 ## Prerequisites
 
-- Completion of the [Quickstart guide](/docs/oss/tutorials/quickstart)
+- Completion of the [Quickstart guide](/oss/tutorials/quickstart.md)
 
 ## Create a Checkpoint
 
@@ -20,7 +20,7 @@ See [How to create a new Checkpoint](./checkpoints/how_to_create_a_new_checkpoin
 
 ## Configure your Checkpoint
 
-When you configure your Checkpoint you can add additional validation data, or specify that validation data must be specified at run time.  You can add additional <TechnicalTag tag="expectation_suite" text="Expectation Suites" />, and you can add Actions which the Checkpoint executes when it finishes Validating data.  To learn more about Checkpoint configuration, see [Checkpoints](/docs/reference/learn/terms/checkpoint) and [Actions](/docs/reference/learn/terms/action).
+When you configure your Checkpoint you can add additional validation data, or specify that validation data must be specified at run time.  You can add additional <TechnicalTag tag="expectation_suite" text="Expectation Suites" />, and you can add Actions which the Checkpoint executes when it finishes Validating data.  To learn more about Checkpoint configuration, see [Checkpoints](/reference/learn/terms/checkpoint.md) and [Actions](/reference/learn/terms/action.md).
 
 ### Checkpoints, Batch Requests, and Expectation Suites
 

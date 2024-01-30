@@ -30,7 +30,7 @@ The example code is located in the [primary_keys_in_validation_results GitHub re
 
 ## Prerequisites
 
-- [A working installation of Great Expectations](/docs/oss/guides/setup/setup_overview).
+- [A working installation of Great Expectations](/oss/guides/setup/setup_overview.md).
 
 <Tabs
   groupId="identify_failed_rows_expectations"

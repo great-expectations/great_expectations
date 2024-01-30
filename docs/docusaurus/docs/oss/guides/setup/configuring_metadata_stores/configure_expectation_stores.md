@@ -14,8 +14,8 @@ import IdentifyYourDataContextExpectationsStore from './components_how_to_config
 import UpdateYourConfigurationFileToIncludeANewStoreForExpectationsOnS from './components_how_to_configure_an_expectation_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_expectations_on_s.mdx'
 import CopyExistingExpectationJsonFilesToTheSBucketThisStepIsOptional from './components_how_to_configure_an_expectation_store_in_amazon_s3/_copy_existing_expectation_json_files_to_the_s_bucket_this_step_is_optional.mdx'
 import ConfirmList from './components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
-import Prerequisites from '@site/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -68,8 +68,8 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
 - An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/host_and_share_data_docs.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
@@ -179,8 +179,8 @@ To view all the code used in this topic, see [how_to_configure_an_expectation_st
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Expectations.
 
@@ -265,8 +265,8 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectation Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectation Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - A storage location for Expectations. This can be a local path, or a path to a network filesystem.
     
 </Prerequisites>
@@ -374,8 +374,8 @@ Use the information provided here to configure an Expectations store in a Postgr
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 
 </Prerequisites>
