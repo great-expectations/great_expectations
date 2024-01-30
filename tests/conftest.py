@@ -21,6 +21,7 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations import project_manager, set_context
+from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.checkpoint.configurator import (
     ActionDetails,
     ActionDict,
@@ -497,7 +498,7 @@ def pytest_collection_modifyitems(config, items):
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
     monkeypatch.setenv("GE_USAGE_STATS", "False")  # v0.18 and before
-    monkeypatch.setenv("GX_ANALYTICS_ENABLED", "False")  # v1.0 and after
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", False)  # v1.0 and after
 
 
 @pytest.fixture(scope="session", autouse=True)

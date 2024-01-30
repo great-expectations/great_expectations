@@ -6,6 +6,7 @@ import pytest
 import great_expectations as gx
 from great_expectations.analytics.config import (
     DUMMY_UUID,
+    ENV_CONFIG,
     Config,
     get_config,
     update_config,
@@ -76,7 +77,7 @@ def test_event_identifiers(analytics_config):
 
 @pytest.mark.unit
 def test_ephemeral_context_init(monkeypatch):
-    monkeypatch.setenv("GX_ANALYTICS_ENABLED", "True")  # Enable usage stats
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
     with mock.patch(
         "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
@@ -94,7 +95,7 @@ def test_ephemeral_context_init(monkeypatch):
 
 @pytest.mark.cloud
 def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
-    monkeypatch.setenv("GX_ANALYTICS_ENABLED", "True")  # Enable usage stats
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
     with mock.patch(
         "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
