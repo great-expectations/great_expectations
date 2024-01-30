@@ -89,14 +89,16 @@ class SnippetMover:
         code_paths = [
             os.path.join(self._tests_prefix, code_path) for code_path in code_paths
         ]
-        code_snippet_expression = re.compile(r"snippet\Wname=\"(.*)\"")
+        code_snippet_expression = re.compile(r"snippet\W*name=\"(.*)\"")
         for code_path in code_paths:
-            snippet_module = SnippetModule(original_path=Path(code_path))
-            self._snippet_module_lookup[snippet_module.original_path] = snippet_module
             snippet_names = self.search_file_for_snippets(
                 path=os.path.join(self._root_dir, code_path),
                 expression=code_snippet_expression,
             )
+            if not len(snippet_names):
+                continue  # no snippets in this file
+            snippet_module = SnippetModule(original_path=Path(code_path))
+            self._snippet_module_lookup[snippet_module.original_path] = snippet_module
             for snippet_name in snippet_names:
                 snippet = Snippet(
                     name=snippet_name,
@@ -118,7 +120,7 @@ class SnippetMover:
         doc_paths = [
             os.path.join(self._docs_prefix, doc_path) for doc_path in doc_paths
         ]
-        doc_snippet_expression = re.compile(r"```\w*\W+name=\"(.*)\"")
+        doc_snippet_expression = re.compile(r"```\W*\w*\W*name=\"(.*)\"")
         for doc_path in doc_paths:
             snippet_names = self.search_file_for_snippets(
                 path=os.path.join(self._root_dir, doc_path),
