@@ -21,7 +21,7 @@ To learn how its fast setup, collaboration-forward approach, and accessibility t
 <LinkCardGrid>
   <LinkCard topIcon label="About GX Cloud" description="Learn more about GX Cloud features and functionality and why it's the best choice for data validation." href="about_gx" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Try GX Cloud" description="New to GX Cloud? Start here to learn how you can quickly connect to your Data Assets and validate your data." href="try_gx_cloud" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Connect GX Cloud" description="Ready to integrate GX Cloud with your production enviornment? Connect GX Cloud to popular data platforms and orchestration tools." href="connect/connect_lp" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Connect GX Cloud" description="Ready to integrate GX Cloud with your deployment enviornment? Connect GX Cloud to popular data platforms and orchestration tools." href="connect/connect_lp" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
 ### Manage
