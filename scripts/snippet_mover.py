@@ -119,14 +119,19 @@ class SnippetMover:
                 for snippet in snippet_module.snippets
                 for doc_path in snippet.doc_paths
             }
-            if "reference" in snippet_module.original_path.parts:
-                snippet_dest_dir = self._default_snippet_path
-            elif len(snippet_docs) > 1:
+            if len(snippet_docs) > 1:
                 # this snippet is referenced by multiple docs, so we'll move it to the default dir
                 snippet_dest_dir = self._default_snippet_path
             elif len(snippet_docs) == 1:
                 # this snippet is referenced by a single doc, so we'll move it adjacent to the doc
                 snippet_dest_dir = list(snippet_docs)[0].parent
+                # except that random gitignored dir, of course, where snippets go to vanish ;(
+                BLACK_HOLE_PATH = Path("docs/docusaurus/docs/reference")
+                if (
+                    snippet_dest_dir.parts[: len(BLACK_HOLE_PATH.parts)]
+                    == BLACK_HOLE_PATH.parts
+                ):
+                    snippet_dest_dir = self._default_snippet_path
             else:
                 # weird, snippet module isn't referenced by any docs
                 orphaned_snippet_paths.add(snippet_module.original_path)
