@@ -3,6 +3,6 @@ If you already have an instance of your Data Asset stored in a Python variable, 
 
 In this example we will use a previously defined Data Source named `my_datasource` and a previously defined Data Asset named `my_asset`.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_asset"
+```python name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_asset"
 ```
 
