@@ -40,7 +40,7 @@ html[data-announcement-bar-initially-dismissed='true'] .announcementBar {
 
 @media print {
   .announcementBar {
-    display: none;
+    display: block;
   }
 }
 
