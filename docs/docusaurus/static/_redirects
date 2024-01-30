@@ -1,6 +1,7 @@
 # Old docs (0.16 and below; note that 'legacy' is 0.13 and below)
-https://old.docs.greatexpectations.io/* https://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/:splat 200!
-http://old.docs.greatexpectations.io/* http://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/:splat 200!
+/docs/0.16.50/* https://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/docs/0.16.16/:splat 200!
+/docs/0.15.50/* https://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/docs/0.15.50/:splat 200!
+/docs/0.14.13/* https://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/docs/0.14.13/:splat 200!
 
 # Redirect from what the browser serves
 
