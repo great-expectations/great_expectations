@@ -1,4 +1,5 @@
 import re
+from glob import glob
 from pathlib import Path
 from typing import Pattern
 
@@ -223,7 +224,8 @@ class SnippetMover:
     @classmethod
     def get_all_files_by_match(cls, root_dir: Path, match: str) -> list[str]:
         """Build a list of all filenames that match a given string within the root directory."""
-        return [str(file) for file in root_dir.rglob(pattern=match)]
+        # glob.glob and Path.glob don't have exactly the same behavior - we need relative paths returned, so we use glob
+        return glob(pathname=match, recursive=True, root_dir=root_dir)  # noqa: PTH207
 
     def search_file_for_snippets(
         self, path: Path, expression: Pattern[str]
