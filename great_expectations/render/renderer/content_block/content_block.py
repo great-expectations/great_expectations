@@ -232,11 +232,22 @@ diagnose and repair the underlying issue.  Detailed information follows:
     ) -> Any:
         """Helper method to render non-list render_objects - refer to `render` for more context"""
         expectation_type = cls._get_expectation_type(render_object)
-
-        content_block_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
+        expectation_config = (
+            render_object.expectation_config
+            if isinstance(render_object, ExpectationValidationResult)
+            else render_object
         )
-        content_block_fn = content_block_fn[1] if content_block_fn else None
+
+        content_block_fn = cls._get_content_block_fn(
+            expectation_type=expectation_type, expectation_config=expectation_config
+        )
+        if not content_block_fn:
+            renderer_impl = get_renderer_impl(
+                object_name=expectation_type,
+                renderer_type=LegacyRendererType.PRESCRIPTIVE,
+            )
+            content_block_fn = renderer_impl[1] if renderer_impl else None
+
         if content_block_fn is not None and not exception_list_content_block:
             try:
                 if isinstance(render_object, ExpectationValidationResult):
