@@ -1,5 +1,4 @@
 import re
-from glob import glob
 from pathlib import Path
 from typing import Pattern
 
@@ -101,7 +100,6 @@ class SnippetMover:
                 path=self._root_dir / doc_path,
                 expression=doc_snippet_expression,
             )
-            doc_path = Path(doc_path)
             for snippet_name in snippet_names:
                 snippet = self._snippet_lookup.get(snippet_name)
                 if not snippet:
@@ -188,7 +186,6 @@ class SnippetMover:
             if snippet_module.moved is False
         ]
         total_snippets = len(self._snippet_module_lookup)
-        # assert total_snippets == moved_snippets + unmoved_snippets, "huh?"
 
         shared_snippets = [
             snippet
