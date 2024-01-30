@@ -72,6 +72,7 @@ def numeric_array():
     idx: int
     return [idx for idx in range(4)]
 
+
 @pytest.mark.unit
 def test_gen_directory_tree_str(tmpdir):
     project_dir = str(tmpdir.mkdir("project_dir"))
