@@ -2,7 +2,7 @@
 title: "Data Asset"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Data Asset is a collection of records within a <TechnicalTag relative="../" tag="datasource" text="Data Source" /> which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 

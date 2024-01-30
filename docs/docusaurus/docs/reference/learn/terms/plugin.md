@@ -3,7 +3,7 @@ id: plugin
 title: Plugin
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 Plugins extend Great Expectations' components and/or functionality.
 

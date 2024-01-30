@@ -2,7 +2,7 @@
 title: "Custom Expectation"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Custom Expectation is an extension of the `Expectation` class, developed outside the Great Expectations library.  When you create a Custom Expectation, you can tailor it your specific needs.
 

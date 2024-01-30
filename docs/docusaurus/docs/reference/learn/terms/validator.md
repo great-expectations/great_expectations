@@ -2,7 +2,7 @@
 title: Validator
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Validator is the object responsible for running an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> against data.
 

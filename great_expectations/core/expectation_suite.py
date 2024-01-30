@@ -30,7 +30,7 @@ from great_expectations._docs_decorators import (
     new_argument,
     public_api,
 )
-from great_expectations.analytics.anonymizer import Anonymizer
+from great_expectations.analytics.anonymizer import anonymize
 from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
@@ -197,11 +197,7 @@ class ExpectationSuite(SerializableDictDot):
             expectation_type = expectation.expectation_type
         else:
             custom_exp_type = True
-            if self._data_context:
-                anonymizer = self._data_context.anonymizer
-            else:
-                anonymizer = Anonymizer()
-            expectation_type = anonymizer.anonymize(expectation.expectation_type)
+            expectation_type = anonymize(expectation.expectation_type)
 
         submit_event(
             event=ExpectationSuiteExpectationCreatedEvent(

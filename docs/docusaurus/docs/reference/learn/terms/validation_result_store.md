@@ -2,7 +2,7 @@
 title: "Validation Result Store"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Validation Result Store is a connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
 

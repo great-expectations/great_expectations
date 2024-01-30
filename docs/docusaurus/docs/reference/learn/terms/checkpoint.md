@@ -4,7 +4,7 @@ title: Checkpoint
 hoverText: The primary means for validating data in a production deployment of Great Expectations.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
 A Checkpoint is the primary means for validating data in a production deployment of Great Expectations.

@@ -2,7 +2,7 @@
 title: "Expectation Store"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 An Expectation Store is a connector to store and retrieve information about collections of verifiable assertions about data.
 
