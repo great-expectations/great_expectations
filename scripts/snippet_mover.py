@@ -118,7 +118,9 @@ class SnippetMover:
                 for snippet in snippet_module.snippets
                 for doc_path in snippet.doc_paths
             }
-            if len(snippet_docs) > 1:
+            if "reference" in snippet_module.original_path.parts:
+                snippet_dest_dir = self._default_snippet_path
+            elif len(snippet_docs) > 1:
                 # this snippet is referenced by multiple docs, so we'll move it to the default dir
                 snippet_dest_dir = self._default_snippet_path
             elif len(snippet_docs) == 1:
