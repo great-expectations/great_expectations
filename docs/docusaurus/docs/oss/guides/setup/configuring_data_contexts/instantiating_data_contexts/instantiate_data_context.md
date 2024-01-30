@@ -231,7 +231,7 @@ Now that you have an Ephemeral Data Context you can connect GX to your Data Sour
 
 ## Next steps
 
-- [Customize the Data Context configuration for Metadata Stores](/guides/setup/setup_overview_lp.md#install-and-configure)
+- [Customize the Data Context configuration for Metadata Stores](/oss/guides/setup/setup_overview_lp.md#install-and-configure)
 - [Customize the Data Context configuration for hosting and sharing Data Docs](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - [Connect GX to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md)
 
