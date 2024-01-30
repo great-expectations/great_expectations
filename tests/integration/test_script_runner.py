@@ -158,12 +158,6 @@ local_tests = [
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
-        name="docusaurus_template_script_example",
-        user_flow_script="tests/integration/docusaurus/template/script_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="how_to_choose_which_dataconnector_to_use",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",

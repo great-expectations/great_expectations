@@ -436,3 +436,4 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/cloud/quickstarts/snowflake_quickstart /docs/cloud/try_gx_cloud
 /docs/cloud/quickstarts/airflow_quickstart /docs/cloud/connect/connect_airflow
 /docs/cloud/quickstarts/python_quickstart /docs/cloud/connect/connect_python
+/docs/cloud/set_up_gx_cloud#* /docs/cloud/try_gx_cloud#:splat

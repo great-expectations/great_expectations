@@ -231,17 +231,8 @@ Now that you have an Ephemeral Data Context you can connect GX to your Data Sour
 
 ## Next steps
 
-To customize a Data Context configuration for Metadata Stores and Data Docs, see:
-
-- [Configure Expectation Stores](/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
-- [Configure Validation Result Stores](/oss/guides/setup/configuring_metadata_stores/configure_result_stores.md)
-- [How to configure and use a Metric Store](/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
-- [How to host and share Data Docs on a filesystem](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
-
-To connect GX to a Data Source:
-
-- [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
-- [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
+- [Customize the Data Context configuration for Metadata Stores](/oss/guides/setup/setup_overview_lp.md#install-and-configure)
+- [Customize the Data Context configuration for hosting and sharing Data Docs](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+- [Connect GX to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md)
 
 
