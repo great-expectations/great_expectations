@@ -37,6 +37,7 @@ class SnippetMover:
         self._general_files_to_update = (
             Path("tests/integration/test_script_runner.py"),
             Path("ci/checks/check_name_tag_snippets_referenced.py"),
+            Path("ci/checks/check_integration_test_gets_run.py"),
         )
         self._report_path = gx_root_dir / Path("scripts/snippet_mover_report.txt")
         # make sure we have a valid dir to put snippets referenced by multiple docs
