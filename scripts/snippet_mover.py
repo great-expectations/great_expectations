@@ -172,6 +172,7 @@ class SnippetMover:
 
     def move_snippets(self):
         """Move the original code snippet to its new location."""
+
         for snippet_module in self._snippet_module_lookup.values():
             if not snippet_module.new_path:
                 # can't move this snippet
