@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.core import (
     ExpectationSuite,
 )
@@ -1192,6 +1193,46 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
     )
     print(result_json)
     assert result_json == expected_result_json
+
+
+@pytest.mark.unit
+def test_ExpectationSuiteColumnSectionRenderer_render_expectation_with_description():
+    class ExpectColumnAgesToBeLegalAdult(gxe.ExpectColumnValuesToBeBetween):
+        column: str = "ages"
+        min_value: int = 18
+        description: str = "column values must be a legal adult age"
+
+    expectation = ExpectColumnAgesToBeLegalAdult()
+    result = ExpectationSuiteColumnSectionRenderer().render([expectation.configuration])
+
+    content_block = result.content_blocks[1]
+    content = content_block.bullet_list[0]
+    template = content.string_template["template"]
+
+    assert template == expectation.description
+
+
+@pytest.mark.unit
+def test_ExpectationSuiteColumnSectionRenderer_render_expectation_with_description_variable_substitution():
+    class ExpectColumnAgesToBeLegalAdult(gxe.ExpectColumnValuesToBeBetween):
+        column: str = "ages"
+        min_value: int = 18
+        # Explicitly use $VAR syntax to reference param within description
+        description: str = (
+            "column values must be a legal adult age ($min_value and above)"
+        )
+
+    expectation = ExpectColumnAgesToBeLegalAdult()
+    result = ExpectationSuiteColumnSectionRenderer().render([expectation.configuration])
+
+    content_block = result.content_blocks[1]
+    content = content_block.bullet_list[0]
+    template = content.string_template["template"]
+
+    expected_description = expectation.description.replace(
+        "$min_value", str(expectation.min_value)
+    )
+    assert template == expected_description
 
 
 @pytest.mark.unit
