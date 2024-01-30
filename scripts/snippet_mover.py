@@ -39,6 +39,15 @@ class SnippetMover:
             Path("ci/checks/check_name_tag_snippets_referenced.py"),
             Path("ci/checks/check_integration_test_gets_run.py"),
         )
+        self._custom_cases: dict[Path, Path] = {
+            # these are custom overrides for naming when things get wonky
+            Path(
+                "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py"
+            ): Path("inferred_and_runtime_yaml_example_spark.py"),
+            Path(
+                "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py"
+            ): Path("inferred_and_runtime_yaml_example_pandas.py"),
+        }
         self._report_path = gx_root_dir / Path("scripts/snippet_mover_report.txt")
         # make sure we have a valid dir to put snippets referenced by multiple docs
         self.ensure_dir(self._root_dir / self._default_snippet_path)
@@ -114,6 +123,7 @@ class SnippetMover:
         """Determine where each snippet should be moved."""
         orphaned_snippet_paths = set()
         for snippet_module in self._snippet_module_lookup.values():
+            # which dir should we move this module to?
             snippet_docs = {
                 doc_path
                 for snippet in snippet_module.snippets
@@ -137,10 +147,24 @@ class SnippetMover:
                 orphaned_snippet_paths.add(snippet_module.original_path)
                 self._orphaned_snippet_modules.append(snippet_module)
                 continue
-            # keep the snippet's original filename the same
-            snippet_module.new_path = (
+
+            # what should the module be named?
+            if snippet_module.original_path in self._custom_cases:
+                # this allows us to manually override this naming for edge cases such as duplicate filenames
+                snippet_module.new_path = (
+                    snippet_dest_dir / self._custom_cases[snippet_module.original_path]
+                )
+            elif Path(
                 snippet_dest_dir / snippet_module.original_path.parts[-1]
-            )
+            ).is_file():
+                raise RuntimeError(
+                    f"Error: moving {snippet_module.original_path} to {snippet_dest_dir / snippet_module.original_path.parts[-1]} would overwrite another module."
+                )
+            else:
+                # keep the snippet's original filename
+                snippet_module.new_path = (
+                    snippet_dest_dir / snippet_module.original_path.parts[-1]
+                )
 
         for orphaned_path in orphaned_snippet_paths:
             self._snippet_module_lookup.pop(orphaned_path)
