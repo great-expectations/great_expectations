@@ -8,7 +8,7 @@ toc_max_heading_level: 2
 
 GX Cloud builds on the innovative features of GX open source software (OSS). Its easy-to-use web interface lets you quickly validate your data without creating and running complex Python code. With GX Cloud you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.
 
-While it is possible to design and deploy a functioning data quality ecosystem with GX OSS, GX Cloud simplifies infrastructure and deployment significantly. With GX cloud, you'll save time, money, and effort implementing your data quality management and monitoring solution.
+While it is possible to design and deploy a functioning data quality ecosystem with GX OSS, GX Cloud simplifies infrastructure and deployment significantly. With GX Cloud, you'll save time, money, and effort implementing your data quality management and monitoring solution.
 
 Here are just a few of the benefits you'll get with GX Cloud:
 
@@ -103,11 +103,11 @@ The following table lists the sequence of tasks that you complete in a typical G
 
 | Task                                     | Description                                                        |
 |------------------------------------------|--------------------------------------------------------------------|
-|[Set up GX Cloud](/cloud/set_up_gx_cloud.md) | Set up your environment to get the most out of GX Cloud. Do it once, and you don't need to do it again.                                    | 
-| [Connect to a Data Asset on a Data Source](/cloud/data_assets/manage_data_assets.md#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
-| [Create an Expectation](/cloud/expectations/manage_expectations.md)    | Define verifiable assertions about your data.                       |  
-| [Run Validations](/cloud/validations/manage_validations.md)                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       |
-| (Optional) [Add and run Checkpoints](/cloud/checkpoints/manage_checkpoints.md)       | Add and run Checkpoints to refine and confirm your Data Validations. |
+|[Connect GX Cloud](connect/connect_lp.md) | Set up your production environment to get the most out of GX Cloud. Do it once, and you don't need to do it again. If you're not ready to use GX Cloud in your production environment, see [Try GX Cloud](./try_gx_cloud.md).                                   | 
+| [Connect to a Data Asset on a Data Source](./data_assets/manage_data_assets.md#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
+| [Create an Expectation](./expectations/manage_expectations.md)    | Define verifiable assertions about your data.                       |  
+| [Run Validations](./validations/manage_validations.md)                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       |
+| (Optional) [Add and run Checkpoints](./checkpoints/manage_checkpoints.md)       | Add and run Checkpoints to refine and confirm your Data Validations. |
 
 ## Roles and responsibilities
 
@@ -116,7 +116,7 @@ How you interact with GX Cloud is dependent on the role you're assigned by your 
 | Role          | Responsibilities                                  |
 |---------------|---------------------------------------------------|
 | Viewer        | View Checkpoints and Validation Results           | 
-| Editor        | Create and edit Expectations<br/>Create access tokens |
+| Editor        | Create Data Assets<br/>Create and edit Expectations<br/>Create access tokens<br/>Create and edit Checkpoints |
 | Admin         | Full access<br/>Perform all GX Cloud administrative functions including user and role assignment |
 
 ## Supported browsers
