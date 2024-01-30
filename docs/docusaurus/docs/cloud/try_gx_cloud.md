@@ -1,21 +1,27 @@
 ---
-sidebar_label: 'Quickstart for GX Cloud and Snowflake'
-title: 'Quickstart for GX Cloud and Snowflake'
-id: snowflake_quickstart
-description: Connect GX Cloud to Snowflake Data Assets.
+sidebar_label: 'Try GX Cloud'
+title: 'Try GX Cloud'
+id: try_gx_cloud
+description: Try GX Cloud features and functionality.
 ---
 
-In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Assets.
+If you're new to GX Cloud, start here to learn how you can quickly connect to your Data Assets and validate data.
+
+If you've tested GX Cloud features and functionality and discovered it's a great solution for your organization, see [Connect GX Cloud](./connect/connect_lp.md).
 
 ## Prerequisites
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
+- You have a Snowflake database, schema, and table.
+
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you have SELECT privileges on the table you are validating. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
+
+- You know your Snowflake password.
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
-## Generate your user access token and copy your organization ID
+## Get your user access token and copy your organization ID
 
 You'll need your user access token and organization ID to set your environment variables. Access tokens shouldn't be committed to version control software.
 
@@ -23,11 +29,7 @@ You'll need your user access token and organization ID to set your environment v
 
 2. In the **Access tokens** pane, click **Create user access token**.
 
-3. Complete the following fields:
-
-    - **Token name** - Enter a name for the token that will help you quickly identify it.
-
-    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?).
+3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
 
 4. Click **Create**.
 
@@ -78,7 +80,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password**: Enter your Snowflake password.
+    - **Password**: Enter a Snowflake password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored. In Snowsight, click **Data** > **Databases**. In the Snowflake Classic Console, click **Databases**.
  
