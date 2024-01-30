@@ -99,6 +99,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 if isinstance(obj_, ExpectationValidationResult)
                 else obj_
             )
+
             content_block_fn = cls._get_content_block_fn(
                 expectation_type=expectation_type, expectation_config=expectation_config
             )
@@ -303,7 +304,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _render_expectation_description(
         cls, configuration: ExpectationConfiguration, runtime_configuration: dict
-    ) -> RenderedStringTemplateContent:
+    ) -> list[RenderedStringTemplateContent]:
         expectation = configuration.to_domain_obj()
         description = expectation.description
         return [
@@ -404,17 +405,28 @@ diagnose and repair the underlying issue.  Detailed information follows:
         cls,
         expectation_type: str,
         expectation_config: ExpectationConfiguration | None = None,
-    ):
-        if expectation_config:
-            expectation = expectation_config.to_domain_obj()
-            description = expectation.description
-            if description:
-                return cls._render_expectation_description
+    ) -> Callable | None:
+        content_block_fn = cls._get_content_block_fn_from_expectation_description(
+            expectation_config=expectation_config,
+        )
+        if content_block_fn:
+            return content_block_fn
 
         content_block_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         return content_block_fn[1] if content_block_fn else None
+
+    @classmethod
+    def _get_content_block_fn_from_expectation_description(
+        cls, expectation_config: ExpectationConfiguration | None
+    ) -> Callable | None:
+        if expectation_config:
+            expectation = expectation_config.to_domain_obj()
+            description = expectation.description
+            if description:
+                return cls._render_expectation_description
+        return None
 
     @classmethod
     def list_available_expectations(cls):

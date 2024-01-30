@@ -4,7 +4,7 @@ import logging
 import traceback
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.registry import get_renderer_impl
@@ -93,7 +93,17 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             content_block.styling = styling
 
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):
+    def _get_content_block_fn(  # noqa: PLR0915
+        cls,
+        expectation_type: str,
+        expectation_config: ExpectationConfiguration | None = None,
+    ) -> Callable | None:
+        content_block_fn = cls._get_content_block_fn_from_expectation_description(
+            expectation_config=expectation_config,
+        )
+        if content_block_fn:
+            return content_block_fn
+
         expectation_string_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
