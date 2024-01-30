@@ -105,12 +105,10 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if content_block_fn:
             return content_block_fn
 
-        expectation_string_fn = get_renderer_impl(
+        renderer_impl = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
-        expectation_string_fn = (
-            expectation_string_fn[1] if expectation_string_fn else None
-        )
+        expectation_string_fn = renderer_impl[1] if renderer_impl else None
         if expectation_string_fn is None:
             expectation_string_fn = cls._get_legacy_v2_api_style_expectation_string_fn(
                 expectation_type
