@@ -35,7 +35,7 @@ export default class Prerequisites extends React.Component {
     return [
       <li key={0.1}>
         <li><VersionedLink to='/oss/tutorials/quickstart'>Completion of the Quickstart.</VersionedLink></li>
-        <li><a href='/docs/contributing/contributing_setup'>A configured and functional development environment.</a></li>
+        <li><a href='../../../../../contributing/contributing_setup'>A configured and functional development environment.</a></li>
       </li>]
   }
 
