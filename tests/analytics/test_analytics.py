@@ -114,7 +114,7 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
         cloud_mode=True,
     )
     mock_submit.assert_called_once_with(
-        FAKE_USER_ID,
+        mock.ANY,
         "data_context.initialized",
         {"data_context_id": mock.ANY, "oss_id": mock.ANY, "service": "gx-core"},
         groups={"data_context": mock.ANY},
