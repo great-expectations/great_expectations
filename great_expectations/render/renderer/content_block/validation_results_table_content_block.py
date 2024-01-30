@@ -92,6 +92,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
             content_block.styling = styling
 
+    @override
     @classmethod
     def _get_content_block_fn(  # noqa: PLR0915
         cls,
