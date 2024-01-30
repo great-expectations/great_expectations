@@ -312,7 +312,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 content_block_type="string_template",
                 string_template={
                     "template": description,
-                    "params": configuration.kwargs,
+                    # If we want to support $VAR substitution, params should be `expectation.configuration`
+                    # Keeping this simple to limit scope of this feature for the time being
+                    "params": {},
                     "styling": runtime_configuration.get("styling", {}),
                 },
             )
