@@ -51,7 +51,7 @@ module.exports = {
           href: "https://greatexpectations.io/cloud"
         },
         secondary: {
-          label: "Learn why GX Cloud is the leading data quality solution",
+          label: "Why GX Cloud?",
           href: "https://docs.greatexpectations.io/docs/cloud/why_gx_cloud"
         }
       }
