@@ -14,7 +14,6 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation import (
     Expectation,
-    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -29,7 +28,6 @@ from great_expectations.render.renderer.content_block import (
     ProfilingColumnPropertiesTableContentBlockRenderer,
     ValidationResultsTableContentBlockRenderer,
 )
-from great_expectations.render.renderer.renderer import renderer
 from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
@@ -86,17 +84,6 @@ def fake_expectation_with_description() -> Expectation:
         column: str = "ages"
         min_value: int = 18
         description: str = "column values must be a legal adult age"
-
-        @classmethod
-        @renderer(renderer_type="renderer.prescriptive")
-        @render_evaluation_parameter_string
-        def _prescriptive_renderer(
-            cls,
-            **_,
-        ):
-            assert (
-                False
-            ), "Expectation `description` should take precedence over `prescriptive_renderer`"
 
     return ExpectColumnAgesToBeLegalAdult()
 
