@@ -314,7 +314,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _render_expectation_description(
-        cls, configuration: ExpectationConfiguration, runtime_configuration: dict
+        cls,
+        configuration: ExpectationConfiguration,
+        runtime_configuration: dict,
+        **kwargs,
     ) -> list[RenderedStringTemplateContent]:
         expectation = configuration.to_domain_obj()
         description = expectation.description

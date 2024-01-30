@@ -13,6 +13,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation import (
+    Expectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
@@ -77,6 +78,27 @@ def titanic_validation_results():
         file_relative_path(__file__, "../test_sets/expected_cli_results_default.json"),
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
+
+
+@pytest.fixture
+def fake_expectation_with_description() -> Expectation:
+    class ExpectColumnAgesToBeLegalAdult(gxe.ExpectColumnValuesToBeBetween):
+        column: str = "ages"
+        min_value: int = 18
+        description: str = "column values must be a legal adult age"
+
+        @classmethod
+        @renderer(renderer_type="renderer.prescriptive")
+        @render_evaluation_parameter_string
+        def _prescriptive_renderer(
+            cls,
+            **_,
+        ):
+            assert (
+                False
+            ), "Expectation `description` should take precedence over `prescriptive_renderer`"
+
+    return ExpectColumnAgesToBeLegalAdult()
 
 
 @pytest.mark.smoketest
@@ -1200,24 +1222,10 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
 
 
 @pytest.mark.unit
-def test_ExpectationSuiteColumnSectionRenderer_render_expectation_with_description():
-    class ExpectColumnAgesToBeLegalAdult(gxe.ExpectColumnValuesToBeBetween):
-        column: str = "ages"
-        min_value: int = 18
-        description: str = "column values must be a legal adult age"
-
-        @classmethod
-        @renderer(renderer_type="renderer.prescriptive")
-        @render_evaluation_parameter_string
-        def _prescriptive_renderer(
-            cls,
-            **_,
-        ):
-            assert (
-                False
-            ), "Expectation `description` should take precedence over `prescriptive_renderer`"
-
-    expectation = ExpectColumnAgesToBeLegalAdult()
+def test_ExpectationSuiteColumnSectionRenderer_render_expectation_with_description(
+    fake_expectation_with_description: Expectation,
+):
+    expectation = fake_expectation_with_description
     result = ExpectationSuiteColumnSectionRenderer().render([expectation.configuration])
 
     assert len(result.content_blocks) == 2
@@ -1699,6 +1707,27 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         "header_row_options": {"Status": {"sortable": True}},
         "table_options": {"search": True, "icon-size": "sm"},
     }
+
+
+@pytest.mark.unit
+def test_ValidationResultsTableContentBlockRenderer_render_evr_with_description(
+    fake_expectation_with_description: Expectation,
+):
+    expectation = fake_expectation_with_description
+    evr = ExpectationValidationResult(
+        success=True,
+        expectation_config=expectation.configuration,
+    )
+    result = ValidationResultsColumnSectionRenderer().render([evr])
+
+    assert len(result.content_blocks) == 2
+    content_block = result.content_blocks[1]
+
+    assert len(content_block.table) == 1
+    content = content_block.table[0]
+
+    template = content.string_template["template"]
+    assert template == expectation.description
 
 
 # noinspection PyPep8Naming
