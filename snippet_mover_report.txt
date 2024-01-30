@@ -1,0 +1,78 @@
+Total snippet module count: 91
+Total snippets found: 934
+Moved snippet module count: 91
+Shared snippet count: 45
+
+
+
+
+******************************************************************************
+
+
+
+12 snippets not found in tests:
+tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Datasource dict config
+great_expectations/checkpoint/actions.py empty dict
+great_expectations/checkpoint/actions.py get_docs_sites_urls
+great_expectations/checkpoint/actions.py iterate
+full config for pandas runtime Data Source with blank data asset identifiers
+full pandas runtime Data Source configuration
+full configuration for sql runtime Data Source
+full configuration for sql configured Data Source
+full configuration for sql inferred Data Source
+spark Data Source configuration up to adding an empty runtime data connector
+spark Data Source configuration up to adding an empty inferred data connector
+spark Data Source configuration up to adding an empty configured data connector
+
+
+
+******************************************************************************
+
+
+
+0 Unmoved snippet modules:
+
+
+
+
+******************************************************************************
+
+
+
+36 Orphaned snippet modules:
+tests/integration/docusaurus/setup/setup_overview.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py
+tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py
+tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/full_datasource_configurations.py
+tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py
+tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py
+tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py
+tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py
+tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py
+tests/integration/docusaurus/tutorials/getting-started/getting_started.py
+tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py
+tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml
