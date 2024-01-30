@@ -1,10 +1,9 @@
-import os
 import re
 from glob import glob
 from pathlib import Path
 from typing import Pattern
 
-from pydantic import BaseModel, Field
+from great_expectations.compatibility.pydantic import BaseModel, Field
 
 
 class Snippet(BaseModel):
@@ -20,30 +19,10 @@ class SnippetModule(BaseModel):
 
 
 class SnippetMover:
-    """
-    Move snippets used in docs from the tests directory to the docs directory.
+    """Move snippets used in docs from the tests directory to the docs directory."""
 
-    How it works
-    preprocess:
-    - search docs for snippets, and store doc path by snippet name
-        if snippet_name already exists (presumably with a different doc path),
-        put it in a generic snippets dir, but might not be necessary
-    - search tests for snippets, and store a list of snippet names by code path
-
-    process:
-    - for each code_path, make a set of the doc_paths for each snippet_name.
-        presumably, that's just a single doc_path, and we now have a target
-        save to {code_path: target_dir}
-    - for each code_path: target_dir
-        move the file
-        if any of the snippet names include code_path, update them:
-            code_path
-            doc_path
-            test_script_runner
-    """
-
-    def __init__(self, gx_root_dir: str):
-        self._root_dir = Path(gx_root_dir)
+    def __init__(self, gx_root_dir: Path):
+        self._root_dir = gx_root_dir
         self._snippet_lookup: dict[str, Snippet] = {}
         self._snippet_module_lookup: dict[Path, SnippetModule] = {}
         self._non_test_snippets: list[Snippet] = []  # can't move these
@@ -247,7 +226,7 @@ class SnippetMover:
     @classmethod
     def get_all_files_by_match(cls, root_dir: Path, match: str) -> list[str]:
         """Build a list of all filenames that match a given string within the root directory."""
-        return glob(pathname=match, recursive=True, root_dir=root_dir)
+        return [str(file) for file in root_dir.rglob(pattern=match)]
 
     def search_file_for_snippets(
         self, path: Path, expression: Pattern[str]
@@ -259,13 +238,13 @@ class SnippetMover:
             return re.findall(expression, text)
 
     def move_file(self, src: Path, dest: Path) -> None:
-        os.rename(self._root_dir / src, self._root_dir / dest)
+        Path.rename(self._root_dir / src, self._root_dir / dest)
 
     @classmethod
     def ensure_dir(cls, path: Path) -> None:
         """Check that a directory exists at the given path, and if not, create one."""
         if not path.is_dir():
-            os.makedirs(path)
+            Path.mkdir(path, parents=True)
 
     def find_and_replace_text_in_file(
         self, path: Path, old_str: str, new_str: str
@@ -279,7 +258,7 @@ class SnippetMover:
 
 
 if __name__ == "__main__":
-    GX_ROOT_DIR = os.getcwd()
+    GX_ROOT_DIR = Path.cwd()
     if not Path(GX_ROOT_DIR / Path("great_expectations")).is_dir():
         raise RuntimeError("SnippetMover must be invoked from the GX root directory.")
     snippet_mover = SnippetMover(gx_root_dir=GX_ROOT_DIR)
