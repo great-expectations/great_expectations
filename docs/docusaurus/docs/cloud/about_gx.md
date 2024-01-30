@@ -32,52 +32,60 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 ### GX Cloud components
 
-- **GX Cloud data storage** - Stores your Data Source, Data Asset, Expectation Suite, and Checkpoint configurations and your Validation run histories and Data Asset descriptive metrics.
+- **GX Cloud data storage** - Stores your organization's Data Source, Data Asset, Expectation Suite, and Checkpoint configurations and your organization's Validation run histories and Data Asset descriptive metrics.
 
-- **GX Cloud web UI** - Manages and validates your data without running Python code, and provides shared visibility into your Validation Results and Checkpoint run history. It's browser- and platform-independent.
+- **GX Cloud web UI** - Provides a portal to manage and validate your organization's data quality without running Python code, and enables shared visibility into your organization's Validation Results and Checkpoint run history. It's browser- and platform-independent.
 
-- **GX Cloud API** - Provides a REST API to programmatically access and manage GX Cloud data and configurations. Both the GX open source software (OSS) client and the GX Agent use the GX Cloud API to query data from and send data to GX Cloud. Documentation for the GX Cloud API is not currently available, and it is not yet intended for use outside the GX OSS client.
+- **GX Cloud API** - Provides a REST API to programmatically access and manage GX Cloud data and configurations. Both the GX open source software (OSS) client and the GX Agent use the GX Cloud API to query data from and send data to GX Cloud. Documentation for the GX Cloud API is not currently available, and it is not yet intended for use outside the GX OSS client and the GX Agent.
 
-- **GX Cloud message broker** - Enables communication between GX Cloud and your local GX Agent.
+- **GX Cloud message broker** - Enables communication between GX Cloud and the GX Agent.
 
-### Local components
+### Local and deployment components
 
-- **GX OSS client** - The Python library that powers GX Cloud and provides a Python client for GX Cloud when you're using GX OSS locally. GX OSS contains the logic needed to test and document your data, and you can also use it to create, manage, and interact with GX Cloud components.
+- **GX OSS client** - The Python library that powers GX Cloud and provides a Python client for programmatic access to GX Cloud. GX OSS contains the logic needed to test and document your organization's data, and you can also use it to create, manage, and interact with GX Cloud components.
 
-- **GX Agent** - A utility that runs locally in your environment. When it's running, the GX Agent can receive tasks generated from the GX Cloud web UI, such as running a Checkpoint or fetching Column Descriptive Metrics, and execute these tasks against your Data Assets.
+- **GX Agent** - A utility that runs in your organization's deployment environment. While running, the GX Agent can receive tasks generated from the GX Cloud web UI, such as running a Checkpoint or fetching Column Descriptive Metrics, and execute these tasks against your Data Assets.
+
+## GX Agent
+
+The GX Agent serves as an intermediary between GX Cloud and your organization's data stores. The GX Agent performs jobs initiated from the GX Cloud web UI; GX Cloud does not connect directly to your data. All data access occurs within the Agent, and the results of jobs are sent from the Agent to GX Cloud.
+
+The GX Agent is [typically deployed in your organization's cloud services environment](./connect/connect_snowflake#deploy-the-gx-agent) and serves all GX Cloud users within your organization. It can be run as part of development or production workflows.
 
 ## GX Cloud deployment patterns
 
-GX Cloud deployments can be tailored to meet your specific business requirements. The following factors determine what deployment pattern is best for your organization:
+GX Cloud deployments can be tailored to meet your specific business requirements. The following factors determine what deployment pattern is most suited for your organization:
 
-- Whether you want to interact with the GX OSS client locally, or use only the GX Cloud web UI.
+- Whether your users want to interact with the GX OSS client locally, or use only the GX Cloud web UI.
 
-- Where and how you want to run the GX Agent. The GX Agent can be run in your local environment as a Docker container (the recommended approach), or as a Python program.
+- The deployment environment in which you run the GX Agent - for example, development or production.
 
-### Run the GX Agent locally and interact with the GX Cloud web UI only
+- Whether you choose to integrate GX Cloud into your data pipeline infrastructure via an orchestrator.
 
-GX Cloud supports the creation of Snowflake Data Sources and Data Assets. If you're using GX Cloud to test and validate Snowflake data, a deployment pattern that allows you to run the GX Agent locally and use the GX Cloud web UI to manage your GX workflows is recommended.
+### Users interact with the GX Cloud web UI only
 
-![GX deployment in which you create and manage Snowflake Data Assets only, interact with the GX Cloud web UI only, and run the GX Agent locally](./architecture_deployment_images/deployment_web_ui_only_snowflake.png)
+GX Cloud supports the creation of multiple types or Data Sources and Data Assets within the web UI. If your organization is using GX Cloud to test and validate data from these sources, a deployment pattern in which the GX Agent runs in your organization's deployment environment and users leverage the GX Cloud web UI to manage GX workflows is recommended.
 
-### Run the GX Agent locally and interact with the GX Cloud web UI and GX OSS client
+![GX deployment in which users interact with the GX Cloud web UI only and the GX Agent is run in a deployment environment](./architecture_deployment_images/deployment_web_ui_only.png)
 
-If you need to use GX to connect to, test, and validate multiple Data Sources supported by GX OSS, a deployment pattern that allows you to interact with the GX Cloud web UI and with the GX OSS client locally is recommended.
+### Users interact with both the GX Cloud web UI and GX OSS client
 
-![GX deployment in which you use the GX OSS client to create and manage GX Cloud content, access the GX Cloud web UI to manage and monitor GX workflows, and run the GX Agent locally](./architecture_deployment_images/deployment_local_gx_oss_client.png)
+If your organization needs to use GX to connect to, test, and validate multiple Data Sources supported by GX OSS, a deployment pattern that allows users to interact with the GX Cloud web UI and with the GX OSS client locally is recommended.
+
+![GX deployment in which users use the GX OSS client to create and manage GX Cloud content, access the GX Cloud web UI to manage and monitor GX workflows, and the GX Agent is  in a deployment environment](./architecture_deployment_images/deployment_local_gx_oss_client.png)
 
 
 ### Run GX OSS within an orchestrator
 
-If you need to integrate GX Cloud with an orchestrator, or you need to run GX Cloud workflows on a schedule, you can run the GX OSS client within your data pipeline and store the test and validation results in GX Cloud for shared viewing in the GX Cloud web UI.
+If your organization needs to integrate GX Cloud with an orchestrator, or needs to run GX Cloud workflows on a schedule, you can run the GX OSS client within your organization's data pipeline and store the test and validation results in GX Cloud for shared viewing in the GX Cloud web UI.
 
-![GX deployment in which you you use the GX OSS client to create and manage GX Cloud content and run in an orchestrator pipeline that accesses your data sources](./architecture_deployment_images/deployment_orchestrator.png)
+![GX deployment in which you users use the GX OSS client to create and manage GX Cloud content and run in an orchestrator pipeline that accesses organization data sources](./architecture_deployment_images/deployment_orchestrator.png)
 
 ### Custom deployment patterns
 
-The deployment patterns described previously are not an exhaustive collection of the ways you can deploy GX Cloud. Instead, these patterns are meant to illustrate the building blocks of a GX Cloud deployment and how you can configure and connect those blocks to form a functioning data quality ecosystem.
+The deployment patterns described previously are not an exhaustive collection of the ways you can deploy GX Cloud. Instead, these patterns are meant to illustrate the building blocks of a GX Cloud deployment and how your organization can configure and connect those blocks to form a functioning data quality ecosystem.
 
-For example, you might opt to run and interact with the GX OSS client locally to define your Data Sources, Data Assets, Expectation Suites, and Checkpoints, run the GX OSS client in your Airflow pipeline to execute Checkpoints on a regular schedule, run the GX Agent locally as a Python program to fetch Data Asset metrics from the GX Cloud web UI, and access the GX Cloud web UI to view Validation and Checkpoint run histories.
+For example, you might opt to run and interact with the GX OSS client locally to define your Data Sources, Data Assets, Expectation Suites, and Checkpoints, run the GX OSS client in your Airflow pipeline to execute Checkpoints on a regular schedule, run the GX Agent in your production environment to fetch Data Asset metrics from the GX Cloud web UI, and access the GX Cloud web UI to view Validation and Checkpoint run histories.
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
 
