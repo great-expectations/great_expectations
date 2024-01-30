@@ -69,7 +69,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/experimental/datasource/fabric.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/profile/base.py Name: validate",
     "File: great_expectations/render/renderer/email_renderer.py Name: EmailRenderer",
-    "File: great_expectations/render/renderer/microsoft_teams_renderer.py Name: MicrosoftTeamsRenderer",
     "File: great_expectations/render/renderer/opsgenie_renderer.py Name: OpsgenieRenderer",
     "File: great_expectations/render/renderer/renderer.py Name: renderer",
     "File: great_expectations/render/renderer/site_builder.py Name: DefaultSiteIndexBuilder",
