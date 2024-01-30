@@ -94,8 +94,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
         )
         for obj_ in render_object:
             expectation_type = cls._get_expectation_type(obj_)
-
-            content_block_fn = cls._get_content_block_fn(expectation_type)
+            expectation_config = (
+                obj_.expectation_config
+                if isinstance(obj_, ExpectationValidationResult)
+                else obj_
+            )
+            content_block_fn = cls._get_content_block_fn(
+                expectation_type=expectation_type, expectation_config=expectation_config
+            )
 
             if isinstance(obj_, ExpectationValidationResult) and not obj_.success:
                 has_failed_evr = True
@@ -295,6 +301,23 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
+    def _render_expectation_description(
+        cls, configuration: ExpectationConfiguration, runtime_configuration: dict
+    ) -> RenderedStringTemplateContent:
+        expectation = configuration.to_domain_obj()
+        description = expectation.description
+        return [
+            RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": description,
+                    "params": configuration.kwargs,
+                    "styling": runtime_configuration.get("styling", {}),
+                },
+            )
+        ]
+
+    @classmethod
     def _render_expectation_notes(
         cls, expectation_config: ExpectationConfiguration
     ) -> CollapseContent:
@@ -377,7 +400,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
             content_block.header = header
 
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):
+    def _get_content_block_fn(
+        cls,
+        expectation_type: str,
+        expectation_config: ExpectationConfiguration | None = None,
+    ):
+        if expectation_config:
+            expectation = expectation_config.to_domain_obj()
+            description = expectation.description
+            if description:
+                return cls._render_expectation_description
+
         content_block_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
