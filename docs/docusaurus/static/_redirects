@@ -433,3 +433,7 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/cloud/quickstarts/snowflake_quickstart /docs/cloud/try_gx_cloud
 /docs/cloud/quickstarts/airflow_quickstart /docs/cloud/connect/connect_airflow
 /docs/cloud/quickstarts/python_quickstart /docs/cloud/connect/connect_python
+
+# Old docs (0.16 and below; note that 'legacy' is 0.13 and below)
+https://old.docs.greatexpectations.io/* https://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/:splat 200
+http://old.docs.greatexpectations.io/* http://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/:splat 200
