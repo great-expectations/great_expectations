@@ -36,7 +36,7 @@ export default class Prerequisites extends React.Component {
     return [
       <li key={0.1}>
         <li><VersionedLink to='/oss/tutorials/quickstart'>Completed the Quickstart guide</VersionedLink></li>
-        <li><a href='../../../contributing/contributing_setup'>Set up your dev environment</a></li>
+        <li><a href='/docs/contributing/contributing_setup'>Set up your dev environment</a></li>
         <li>Created a <VersionedLink to='/oss/guides/expectations/custom_expectations_lp'>Custom Expectation</VersionedLink></li>
       </li>]
   }
