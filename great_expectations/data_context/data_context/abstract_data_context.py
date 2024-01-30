@@ -66,7 +66,6 @@ from great_expectations.core.serializer import (
     DictConfigSerializer,
 )
 from great_expectations.core.suite_factory import SuiteFactory
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset
@@ -120,12 +119,6 @@ from great_expectations.validator.validator import BridgeValidator, Validator
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
-    add_datasource_usage_statistics,
-    get_batch_list_usage_statistics,
-    run_validation_operator_usage_statistics,
-    save_expectation_suite_usage_statistics,
-    send_usage_message,
-    usage_statistics_enabled_method,
 )
 from great_expectations.analytics.client import init as init_analytics
 from great_expectations.analytics.client import submit as submit_event
@@ -251,9 +244,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     # instance attribute type annotations
     fluent_config: GxConfig
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
-    )
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
@@ -411,10 +401,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     @deprecated_method_or_class(
         version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
         self,
@@ -823,10 +809,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         argument_name="datasource",
         version="0.15.49",
         message="Pass in an existing Datasource instead of individual constructor arguments",
-    )
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
-        args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
         self,
@@ -1922,9 +1904,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="To be used in place of `expectation_suite_ge_cloud_id`",
     )
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
-    )
     def run_checkpoint(  # noqa: PLR0913
         self,
         checkpoint_name: str | None = None,
@@ -2340,10 +2319,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return validator
 
     @public_api
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
-        args_payload_fn=get_batch_list_usage_statistics,
-    )
     def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -2665,12 +2640,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
-    # A future effort will add more granular event names
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
     def update_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -2743,12 +2712,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
-    # A future effort will add more granular event names
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
     def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
@@ -2931,10 +2894,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
-        args_payload_fn=run_validation_operator_usage_statistics,
-    )
     def run_validation_operator(  # noqa: PLR0913
         self,
         validation_operator_name: str,
@@ -3176,9 +3135,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return batch_kwargs
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
-    )
     def open_data_docs(
         self,
         resource_identifier: Optional[str] = None,
@@ -4266,21 +4222,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                             "this validation result.".format(metric_name)
                         )
 
-    def send_usage_message(
-        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ) -> None:
-        """helper method to send a usage method using DataContext. Used when sending usage events from
-            classes like ExpectationSuite.
-            event
-        Args:
-            event (str): str representation of event
-            event_payload (dict): optional event payload
-            success (bool): optional success param
-        Returns:
-            None
-        """
-        send_usage_message(self, event, event_payload, success)
-
     def _determine_if_expectation_suite_include_rendered_content(
         self, include_rendered_content: Optional[bool] = None
     ) -> bool:
@@ -4368,9 +4309,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             shorten_tracebacks=shorten_tracebacks,
         )
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
-    )
     @public_api
     def build_data_docs(
         self,

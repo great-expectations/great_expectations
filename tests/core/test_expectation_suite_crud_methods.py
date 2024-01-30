@@ -1,5 +1,4 @@
 from copy import deepcopy
-from unittest import mock
 
 import pytest
 
@@ -438,11 +437,7 @@ def test_add_expectation_configurations(
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_add_expectation(
-    mock_emit,
     exp2,
     exp4,
     single_expectation_suite,
@@ -481,48 +476,9 @@ def test_add_expectation(
     with pytest.raises(InvalidExpectationConfigurationError):
         single_expectation_suite.add_expectation_configuration(config)
 
-    # Turn this on once we're ready to enforce strict typing.
-    # with pytest.raises(TypeError):
-    #     single_expectation_suite.append_expectation(exp1.to_json_dict())
-    assert mock_emit.call_count == 4
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": False,
-            }
-        ),
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": False,
-            }
-        ),
-    ]
-
 
 @pytest.mark.cloud
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_add_expectation_with_ge_cloud_id(
-    mock_emit,
     single_expectation_suite_with_expectation_ge_cloud_id,
 ):
     """
@@ -561,18 +517,6 @@ def test_add_expectation_with_ge_cloud_id(
         33,
         44,
         55,
-    ]
-
-    # ensure usage statistics are being emitted correctly
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        )
     ]
 
 

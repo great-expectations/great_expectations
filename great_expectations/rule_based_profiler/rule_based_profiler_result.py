@@ -9,12 +9,6 @@ from great_expectations.core import (
     ExpectationSuite,  # noqa: TCH001
 )
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-    get_expectation_suite_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
@@ -29,6 +23,9 @@ from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
+    from great_expectations.core.usage_statistics.usage_statistics import (
+        UsageStatisticsHandler,
+    )
 
 
 @public_api
@@ -121,10 +118,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
         return self.to_dict()
 
     @public_api
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE,
-        args_payload_fn=get_expectation_suite_usage_statistics,
-    )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
         Retrieve the `ExpectationSuite` generated during the `RuleBasedProfiler` run.

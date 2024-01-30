@@ -45,11 +45,6 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    get_checkpoint_run_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -132,11 +127,6 @@ class BaseCheckpoint(ConfigPeer):
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
-    @public_api
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.CHECKPOINT_RUN,
-        args_payload_fn=get_checkpoint_run_usage_statistics,
-    )
     @new_argument(
         argument_name="expectation_suite_ge_cloud_id",
         version="0.13.33",
