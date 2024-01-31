@@ -89,14 +89,14 @@ For example, you might opt to run and interact with the GX OSS client locally to
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
 
-## GX Cloud deployment options
+## Deployment options
 
-Your data quality testing and morntoring requirements determine what deployment option is best for you or your organzation. The following table lists the available GX Cloud deployment options.
+Your data quality testing and morntoring requirements determine what deployment option is best for you or your organzation. The following table lists the available GX Cloud and GX OSS deployment options.
 
 | Deployment Option          | Description                                                               | GX Cloud       | GX OSS        |
 |----------------------------|---------------------------------------------------------------------------|----------------|---------------|
-| Self-hosted                | The GX Agent or GX OSS Client is deployed locally for testing.            |     ✔️️         |      ✔️️      |
-| Deployed                   | The GX Agent or GX OSS Client is deployed in your deployment environment. |     ✔️️         |      ✔️️      |
+| Self-hosted                | The GX Agent or GX OSS Client is deployed locally for testing.            | ![Yes](/img/simple_orange_circle.svg)️ |  ![Yes](/img/simple_orange_circle.svg)️️    |
+| Org-hosted                 | The GX Agent or GX OSS Client is deployed in your rganization's deployment environment. |     ✔️️         |      ✔️️      |
 | Programmatic               | You interact with GX Cloud or GX OSS programatically with Python.         |     ✔️️         |      ✔️️      |
 
 ## Workflow optimization
