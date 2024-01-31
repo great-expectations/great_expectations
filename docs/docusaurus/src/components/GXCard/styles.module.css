@@ -104,3 +104,9 @@
     display: none;
   }
 }
+
+@media (max-width: 768px) {
+  .gxCard__buttons .button {
+    width: 100%;
+  }
+}

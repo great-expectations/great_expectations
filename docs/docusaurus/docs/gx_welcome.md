@@ -13,9 +13,6 @@ import GXCard from '@site/src/components/GXCard';
 
 <GXCard />
 
-<p className="DocItem__header-description">Learn everything you need to know about GX Cloud and GX Open Source Software (OSS)</p>
-
-
 ## What do you want to do today?
 
 <LinkCardGrid>
