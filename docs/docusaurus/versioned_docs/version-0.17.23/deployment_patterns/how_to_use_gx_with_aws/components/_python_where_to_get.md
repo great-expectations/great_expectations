@@ -1,0 +1,1 @@
+If you do not have Python 3 installed, go to [python.org](https://www.python.org/downloads/) for the current downloads and installation guidance.

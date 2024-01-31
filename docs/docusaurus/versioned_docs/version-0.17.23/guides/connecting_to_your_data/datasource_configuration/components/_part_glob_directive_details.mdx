@@ -1,0 +1,19 @@
+The `glob_directive` parameter is provided to give the `DataConnector` information about the directory structure to expect when identifying source data files to check against each Data Asset's `default_regex`.  If you do not specify a value for `glob_directive` a default value of `"*"` will be used. This will cause your Data Asset to check all files in the folder specified by `base_directory` to determine which should be returned as Batches for the Data Asset, but will ignore any files in subdirectories.
+
+Overriding the `glob_directive` by providing your own value will allow your Data Connector to traverse subdirectories or otherwise alter which source data files are compared against your Data Connector's `default_regex`.
+
+For example, assume your source data is in files contained by subdirectories of your `base_folder`, like so:
+- 2019/yellow_taxidata_2019_01.csv
+- 2020/yellow_taxidata_2020_01.csv
+- 2021/yellow_taxidata_2021_01.csv
+- 2022/yellow_taxidata_2022_01.csv
+
+To include all of these files, you would need to tell the Data connector to look for files that are nested one level deeper than the `base_directory` itself.
+
+ You would do this by setting the `glob_directive` key in your Data Connector config to a value of `"*/*"`.  This value will cause the Data Connector to look for regex matches against the file names for all files found in any subfolder of your `base_directory`.  Such an entry would look like:
+
+```python name="datasource_configuration_glob_directive"
+```
+
+The `glob_directive` parameter works off of regex.  You can also use it to limit the files that will be compared against the Data Connector's `default_regex` for a match.  For example, to only permit `.csv` files to be checked for a match, you could specify the `glob_directive` as `"*.csv"`.  To only check for matches against the `.csv` files in subdirectories, you would use the value `*/*.csv`, and so forth.
+
