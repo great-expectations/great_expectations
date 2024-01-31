@@ -50,7 +50,7 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 The GX Agent serves as an intermediary between GX Cloud and your organization's data stores. The GX Agent performs jobs initiated from the GX Cloud web UI; GX Cloud does not connect directly to your data. All data access occurs within the Agent, and the results of jobs are sent from the Agent to GX Cloud.
 
-The GX Agent is [typically deployed in your organization's cloud services environment](./connect/connect_snowflake#deploy-the-gx-agent) and serves all GX Cloud users within your organization. It can be run as part of development or production workflows.
+The GX Agent is [typically deployed in your organization's cloud services environment](./connect/connect_snowflake.md#deploy-the-gx-agent) and serves all GX Cloud users within your organization. It can be run as part of development or production workflows.
 
 ## GX Cloud deployment patterns
 
