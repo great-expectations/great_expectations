@@ -5,8 +5,8 @@ id: validate_data_lp
 description: Validate Data, save Validation Results, run Actions, and create Data Docs.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">Validate Data, save Validation Results, run Actions, and create Data Docs.</p>
 
