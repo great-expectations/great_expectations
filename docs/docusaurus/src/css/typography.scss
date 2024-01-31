@@ -1,14 +1,10 @@
 :root {
     --ifm-font-family-base: 'Source Sans Pro', 'Open Sans', Montserrat, Verdana, sans‑serif;
 
+    /* Variables based on style guide. */
     --h1-font-size: 3rem;
     --h2-font-size: 2rem;
     --h3-font-size: 1.75rem;
-
-    --ifm-h1-font-size: var(--h1-font-size);
-    --ifm-h2-font-size: var(--h2-font-size);
-    --ifm-h3-font-size: var(--h3-font-size);
-
     --h4-font-size: 1.5rem;
     --h5-font-size: 1.25rem;
 
@@ -18,8 +14,14 @@
     --p-sm-font-size: 0.875rem;
     --p-tiny-font-size: 0.75rem;
 
-    --ifm-heading-line-height: 1.25;
     --p-line-height: 1.5;
+
+    /* Var Overwrites */
+    --ifm-h1-font-size: var(--h1-font-size);
+    --ifm-h2-font-size: var(--h2-font-size);
+    --ifm-h3-font-size: var(--h3-font-size);
+
+    --ifm-heading-line-height: 1.25;
 
     --ifm-font-weight-semibold: 600;
 
@@ -32,21 +34,24 @@
 }
 
 /* override huge h1 */
+/* TODO: this rule should probably be deleted but we need to check if it is still necessary */
 .h1Heading_node_modules-\@docusaurus-theme-classic-lib-next-theme-Heading-styles-module {
     font-size: var(--ifm-h1-font-size) !important;
 }
 
-.markdown > h1 {
-    --ifm-h1-font-size: var(--h1-font-size);
-}
+.markdown {
+   h1 {
+     --ifm-h1-font-size: var(--h1-font-size);
+   }
 
-.markdown > h2 {
-    --ifm-h2-font-size: var(--h2-font-size);
-}
+   h2 {
+     --ifm-h2-font-size: var(--h2-font-size);
+   }
 
-.markdown > h3 {
-    --ifm-h3-font-size: var(--h3-font-size);
-}
+   h3 {
+     --ifm-h3-font-size: var(--h3-font-size);
+   }
+ }
 
 h4 {
     font-size: var(--h4-font-size);
