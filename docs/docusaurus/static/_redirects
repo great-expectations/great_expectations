@@ -440,4 +440,4 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 
 # Broken link redirect
 
-/docs/reference/expectations/standard_arguments/#mostly /docs/reference/learn/expectations/standard_arguments#mostly
+/docs/reference/expectations/standard_arguments/* /docs/reference/learn/expectations/standard_arguments/:splat
