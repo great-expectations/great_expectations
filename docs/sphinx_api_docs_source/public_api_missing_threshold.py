@@ -75,4 +75,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/rule_based_profiler/rule_based_profiler.py Name: run",
     "File: great_expectations/rule_based_profiler/rule_based_profiler.py Name: to_json_dict",
     "File: great_expectations/validator/validation_graph.py Name: resolve",
+    "File: great_expectations/data_context/store/checkpoint_store.py Name: CheckpointStore",
+    "File: great_expectations/data_context/store/metric_store.py Name: EvaluationParameterStore",
+    "File: great_expectations/data_context/store/query_store.py Name: SqlAlchemyQueryStore",
 ]
