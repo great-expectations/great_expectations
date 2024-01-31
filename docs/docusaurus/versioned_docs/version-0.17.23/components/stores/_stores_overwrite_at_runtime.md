@@ -1,0 +1,3 @@
+You may have additional Stores configured in `great_expectations.yml`, but the `great_expectations store list` command won't display them.  If you wish to change the store that is being used, you must either update `great_expectations.yml`.  You can also overwrite the default at runtime by passing in the `project_config` parameter with a different Store specified when you initialize your Data Context.
+
+For more information on using the `project_config` parameter, please see our guide on [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
