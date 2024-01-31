@@ -4,7 +4,7 @@ The reference fails, and was being silently resolved here, which broke when we
 moved snippets out of tests. This can be deleted once we remove support for 0.15/0/16 docs.
 """
 
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/ge_checkpoint_gcs.py full">
+# <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full">
 from datetime import timedelta
 
 import airflow

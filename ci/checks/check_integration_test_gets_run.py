@@ -62,7 +62,7 @@ IGNORED_VIOLATIONS = [
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml",
     "docs/docusaurus/docs/oss/guides/expectations/advanced/great_expectations.yml",
     "docs/docusaurus/docs/oss/guides/expectations/advanced/config_variables.yml",
-    "tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py",
+    "docs/docusaurus/docs/snippets/ge_checkpoint_gcs.py",
 ]
 
 
