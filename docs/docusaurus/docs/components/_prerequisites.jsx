@@ -1,5 +1,5 @@
 import React from 'react'
-import GxData from '/docs/components/_data.jsx'
+import GxData from './_data.jsx'
 import VersionedLink from '@site/src/components/VersionedLink'
 
 /**
