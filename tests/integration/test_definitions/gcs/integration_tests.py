@@ -52,20 +52,20 @@ how_to_configure_metadata_store = [
     #                     They should be re-enabled once they have been updated.
     # IntegrationTestFixture(
     #     name="how_to_configure_an_expectation_store_in_gcs",
-    #     user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[BackendDependencies.GCS],
     # ),
     # IntegrationTestFixture(
     #     name="how_to_host_and_share_data_docs_on_gcs",
-    #     user_flow_script="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
+    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[BackendDependencies.GCS],
     # ),
     # IntegrationTestFixture(
     #     name="how_to_configure_a_validation_result_store_in_gcs",
-    #     user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[BackendDependencies.GCS],
@@ -79,7 +79,7 @@ sample_data = []
 deployment_patterns = [
     IntegrationTestFixture(
         name="deployment_patterns_file_gcs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py",
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.GCS],
     ),
@@ -88,7 +88,7 @@ deployment_patterns = [
 fluent_datasources = [
     IntegrationTestFixture(
         name="how_to_connect_to_data_on_gcs_using_pandas",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_pandas.py",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.GCS],
     ),
