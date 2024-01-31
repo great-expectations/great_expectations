@@ -1,6 +1,3 @@
-# Documentation build
 __MACOSX
-versioned_*
 oss_docs_versions.zip
 docs/reference
-versions.json

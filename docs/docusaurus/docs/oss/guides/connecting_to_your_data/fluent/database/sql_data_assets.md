@@ -23,11 +23,6 @@ A Data Asset is a collection of records within a Data Source that define how Gre
 
  Great Expectations (GX) uses SQLAlchemy to connect to SQL Data Assets, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
-:::caution Data Sources defined with the block-config method
-
-If you're using a Data Source created with the block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
-
-:::
 
 
 <Tabs

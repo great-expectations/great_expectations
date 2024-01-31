@@ -1,0 +1,38 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PartBatchSpecPassthrough from '../components/_part_batch_spec_passthrough.mdx'
+
+<PartBatchSpecPassthrough />
+
+And your full configuration will look like:
+
+<Tabs
+  groupId="data-asset-type"
+  defaultValue='inferred'
+  values={[
+  {label: 'InferredAssetFilesystemDataConnector', value:'inferred'},
+  {label: 'ConfiguredAssetDataConnector', value:'configured'},
+  {label: 'RuntimeDataConnector', value:'runtime'},
+  ]}>
+
+  <TabItem value="inferred">
+
+```python name="inferred spark datasource_config post batch_spec_passthrough definition"
+```
+
+  </TabItem>
+  <TabItem value="configured">
+
+```python name="configured spark datasource_config post batch_spec_passthrough definition"
+```
+
+      
+  </TabItem>
+  <TabItem value="runtime">
+
+```python name="runtime spark datasource_config post batch_spec_passthrough definition"
+```
+
+
+  </TabItem>
+  </Tabs>
