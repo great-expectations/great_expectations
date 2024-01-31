@@ -37,7 +37,7 @@ module.exports = {
     announcementBar: {
         id: 'cta_bar',
         content:
-          '<a style="font-weight:600" href="">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
+          '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
         backgroundColor: '#141432',
         textColor: '#fff',
         isCloseable: true, 
@@ -51,7 +51,7 @@ module.exports = {
           href: "https://greatexpectations.io/cloud"
         },
         secondary: {
-          label: "Learn why GX Cloud is the leading data quality solution",
+          label: "Why GX Cloud?",
           href: "https://docs.greatexpectations.io/docs/cloud/why_gx_cloud"
         }
       }

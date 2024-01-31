@@ -49,6 +49,7 @@ DUMMY_JWT_TOKEN: Final[
 ] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 # Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
 # https://github.com/getsentry/responses/tree/master#dynamic-responses
+FAKE_USER_ID: Final[str] = "00000000-0000-0000-0000-000000000000"
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
 FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
@@ -108,6 +109,7 @@ FakeDBTypedDict = TypedDict(
     # using alternative syntax for creating type dict because of key names with hyphens
     # https://peps.python.org/pep-0589/#alternative-syntax
     {
+        "me": Dict[str, str],
         "data-context-configuration": Dict[str, Union[str, dict]],
         "DATASOURCE_NAMES": Set[str],
         "datasources": Dict[str, dict],
@@ -149,6 +151,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         datasources_by_id[id] = ds_response_json
 
     return {
+        "me": {"user_id": FAKE_USER_ID},
         "DATASOURCE_NAMES": datasource_names,
         "datasources": datasources_by_id,
         "EXPECTATION_SUITE_NAMES": set(),
@@ -219,6 +222,15 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
 
 # WARNING: this dict should always be cleared during test teardown
 _CLOUD_API_FAKE_DB: FakeDBTypedDict = {}  # type: ignore[typeddict-item] # will be assigned in `create_fake_db_seed_data`
+
+
+def get_user_id(request: PreparedRequest) -> CallbackResult:
+    if not request.url:
+        raise NotImplementedError("request.url should not be empty")
+    LOGGER.debug(f"{request.method} {request.url}")
+    resource_path: str = request.url.split("/")[-1]
+    user_dict = _CLOUD_API_FAKE_DB.get(resource_path)
+    return CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(user_dict))
 
 
 def get_dc_configuration_cb(
@@ -761,6 +773,7 @@ def gx_cloud_api_fake_ctx(
     """Mock the GX Cloud API for the lifetime of the context manager."""
     org_url_base = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
+    me_url = f"{org_url_base}/accounts/me"
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
     _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(fds_config))
@@ -770,6 +783,7 @@ def gx_cloud_api_fake_ctx(
     with responses.RequestsMock(
         assert_all_requests_are_fired=assert_all_requests_are_fired
     ) as resp_mocker:
+        resp_mocker.add_callback(responses.GET, me_url, get_user_id)
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
