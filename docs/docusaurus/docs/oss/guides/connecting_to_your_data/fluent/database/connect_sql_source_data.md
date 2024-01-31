@@ -7,11 +7,11 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import AfterCreateSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_sql_datasource.md'
-import PostgreSqlConfigureCredentialsInConfigVariablesYml from '/docs/components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import AfterCreateSqlDatasource from '../../../../../components/connect_to_data/next_steps/_after_create_sql_datasource.md'
+import PostgreSqlConfigureCredentialsInConfigVariablesYml from '../../../../../components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md'
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
 
 
 import TabItem from '@theme/TabItem';
@@ -41,7 +41,7 @@ Connect GX to a Snowflake database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a Snowflake database
 
 </Prerequisites> 
@@ -155,7 +155,7 @@ Connect GX to a PostgreSQL database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with PostgreSQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with PostgreSQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a PostgreSQL database
 
 </Prerequisites> 
@@ -242,7 +242,7 @@ Connect GX to a SQLite database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQLite](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQLite](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a SQLite database
 
 </Prerequisites> 
@@ -320,7 +320,7 @@ Connect GX to Databricks to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a Databricks cluster
 
 </Prerequisites> 
@@ -408,7 +408,7 @@ The following scripts and configuration files are used in the examples:
 
 <Prerequisites>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx).
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md).
 - Familiarity with Google Cloud Platform features and functionality.
 - A GCP project with a running Google Cloud Storage container that is accessible from your region.
 - Read/write access to a BigQuery database.
@@ -529,8 +529,6 @@ Run the following code to add the name of your GCS bucket to the `add_pandas_gcs
 
 In the example, you've added a Data Source that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
 
-For more information about configuring a Data Source, see [How to connect to data on GCS using Pandas](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas).
-
 </TabItem>
 <TabItem value="bigquery">
 
@@ -546,8 +544,6 @@ Run the following code to create a Data Source that connects to data in BigQuery
 ```
 
 In the example, you created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passed it in a connection string.
-
-To configure the BigQuery Data Source, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
@@ -628,8 +624,6 @@ In the following example, a query `Asset` named `my_query_asset` is built by sub
     ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
     ```
 
-To configure the RuntimeBatchRequest and learn how you can load data by specifying a GCS path to a single CSV, see [How to connect to data on GCS using Pandas](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas).
-
 </TabItem>
 <TabItem value="bigquery">
 
@@ -654,8 +648,6 @@ To configure the RuntimeBatchRequest and learn how you can load data by specifyi
 
     ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
     ```
-
-To configure the BatchRequest and learn how you can load data by specifying a table name, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
@@ -847,7 +839,7 @@ Connect GX to a SQL database to access Data Assets.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/oss/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/oss/guides/setup/installation/install_gx.md)
 - Source data stored in a SQL database
 
 </Prerequisites> 
@@ -933,11 +925,11 @@ Repeat the previous steps to add additional Data Assets.
 
 ## Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
+- [How to organize Batches in a SQL based Data Asset](/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
 
-- [How to request data from a Data Asset](/docs/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
+- [How to request data from a Data Asset](/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
 
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 - [Configure Expectation Stores](../../../setup/configuring_metadata_stores/configure_expectation_stores.md)
 

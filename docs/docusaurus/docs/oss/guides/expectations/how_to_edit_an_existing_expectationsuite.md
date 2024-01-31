@@ -5,7 +5,7 @@ description: Modify specific Expectations in an Expectation Suite.
 keywords: [Expectations, ExpectationsSuite]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
+import Prerequisites from '../../../components/_prerequisites.jsx'
 
 Use the information provided here to learn how to edit an Expectation Suite. Editing Expectations does not edit or alter the Batch data.
 

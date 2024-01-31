@@ -38,19 +38,15 @@ With Admin permissions, you can add users, edit organization roles, and delete u
 
 ## Create a user access token
 
-You'll need your user access token and organization ID when you set your environment variables. See [Set up GX Cloud](../set_up_gx_cloud.md).
+You'll need your user access token and organization ID when you set your environment variables.
 
 Access tokens shouldn't be committed to version control software.
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
-2. In the **Access tokens** pane, click **Create user access token**.
+2. In the **User access tokens** pane, click **Create user access token**.
 
-3. Complete the following fields:
-
-    - **Token name** - Enter a name for the user access token that will help you quickly identify it.
-
-    - **Role** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Checkpoints and Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
+3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
 
 4. Click **Create**.
 
@@ -66,11 +62,7 @@ Organization access tokens are typically required for external application authe
 
 2. In the **Organization access tokens** pane, click **Create organization access token**.
 
-3. Complete the following fields:
-
-    - **Token name** - Enter a name for the organization access token that will help you quickly identify it.
-
-    - **Role level** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Checkpoints and Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
+3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
 
 4. Click **Create**.
 

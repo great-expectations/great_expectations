@@ -10,7 +10,7 @@ The components in the ``great_expectations.yml`` file define the Validation Resu
 
 ## Configure your Data Context
  
-To use code to create a Data Context, see [Instantiate an Ephemeral Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+To use code to create a Data Context, see [Instantiate an Ephemeral Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
 To configure a Data Context for a specific environment, see one of the following resources:
 
@@ -19,7 +19,7 @@ To configure a Data Context for a specific environment, see one of the following
 
 ## Create Expectation Suites and add Expectations
 
-To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
+To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md?sql-database-type=postgresql).
 
 To add Expectations to your Suite individually, use the following code:
 
@@ -28,12 +28,12 @@ validator.expect_column_values_to_not_be_null("my_column")
 validator.save_expectation_suite(discard_failed_expectations=False)
 ```
 
-To configure your Expectation store to load a Suite at a later time, see [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores).
+To configure your Expectation store to load a Suite at a later time, see [Configure Expectation Stores](/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
 
 ## Run validation
 
-To create and run a Checkpoint in code, see [How to create a new Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint).  In a hosted environment you will not be able to store the Checkpoint for repeated use across Python sessions, but you can recreate it each time your scripts run.
+To create and run a Checkpoint in code, see [How to create a new Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).  In a hosted environment you will not be able to store the Checkpoint for repeated use across Python sessions, but you can recreate it each time your scripts run.
 
 ## Use Data Docs
 
-To build and view Data Docs in your environment, see [Options for hosting Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs).
+To build and view Data Docs in your environment, see [Options for hosting Data Docs](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md).

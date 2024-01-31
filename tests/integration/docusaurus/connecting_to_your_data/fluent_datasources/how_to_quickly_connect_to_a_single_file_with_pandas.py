@@ -11,12 +11,16 @@ context = gx.get_context()
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py get_validator">
-batch = context.sources.pandas_default.read_csv(
+validator = context.sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
 
-assert set(batch.columns()) == {
+batches = list(validator.batches.values())
+# assert len(validator.batches) == 1
+
+assert len(batches) == 1
+assert set(batches[0].columns()) == {
     "vendor_id",
     "pickup_datetime",
     "dropoff_datetime",

@@ -1,8 +1,8 @@
 ---
 title: Trigger Opsgenie notifications as an Action
 ---
-import Prerequisites from '@site/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 This guide will help you set up Opsgenie alert notifications when running Great Expectations. This is useful as it can provide alerting when Great Expectations is run, or certain <TechnicalTag tag="expectation" text="Expectations" /> begin failing (or passing!).
 
@@ -10,7 +10,7 @@ This guide will help you set up Opsgenie alert notifications when running Great 
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](/docs/oss/guides/setup/setup_overview)
+  - [Set up a working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
   - An Opsgenie account
   - Created a <TechnicalTag tag="checkpoint" text="Checkpoint" /> that will be configured with the notification Action.
 

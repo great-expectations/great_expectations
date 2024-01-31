@@ -8,20 +8,20 @@ toc_max_heading_level: 2
 
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
 
-To learn more about Data Assets, see [Data Asset](/docs/reference/learn/terms/data_asset).
+To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_asset.md).
 
 ## Prerequisites
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have [set up GX Cloud](../set_up_gx_cloud.md) and the GX Agent is running. 
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
@@ -37,7 +37,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password**: Enter your Snowflake password.
+    - **Password**: Enter the password for the Snowflake user you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored. In Snowsight, click **Data** > **Databases**. In the Snowflake Classic Console, click **Databases**.
  
@@ -69,7 +69,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 11. Click **Finish**.
 
-12. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+12. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 ## View Data Asset metrics
 
@@ -122,7 +122,7 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
     - To add an Expectation to an existing Expectation Suite, click the **Existing Suite** tab and then select an existing Expectation Suite.
 
-6. Select an Expectation type. See [Available Expectation types](/docs/cloud/expectations/manage_expectations#available-expectation-types).
+6. Select an Expectation type. See [Available Expectation types](/cloud/expectations/manage_expectations.md#available-expectation-types).
 
 7. Complete the fields in the **Create Expectation** pane.
 
@@ -170,7 +170,7 @@ Currently, you can only edit Snowflake Data Source settings.
 
     - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password/environment variable**: Enter a Snowflake password or `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
+    - **Password**: Enter the password for the Snowflake user you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
     - **Database**: Enter a new Snowflake database name.
  
@@ -198,7 +198,7 @@ Currently, you can only edit Snowflake Data Assets.
 
 ## Secure your GX API Data Source connection strings
 
-When you use the GX API and not GX Cloud to connect to Data Sources, you must obfuscate your sensitive Data Source credentials in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
+When you use the GX API and not GX Cloud to connect to Data Sources, you can obfuscate sensitive Data Source credentials in your connection string as an additional security measure.
 
 1. Store your credential value as an environment variable by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
 

@@ -3,7 +3,7 @@ title: Batch
 id: batch
 hoverText: A selection of records from a Data Asset.
 ---
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Batch is a selection of records from a <TechnicalTag relative="../" tag="data_asset" text="Data Asset" />.
 
@@ -23,7 +23,7 @@ Batches are also used by <TechnicalTag relative="../" tag="validator" text="Vali
 
 ## Use Cases
 
-When creating Expectations interactively, a <TechnicalTag relative="../" tag="validator" text="Validator" /> needs access to a specific Batch of data against which to check Expectations. The [how to guide on interactively creating expectations](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data) covers using a Batch in this use case.
+When creating Expectations interactively, a <TechnicalTag relative="../" tag="validator" text="Validator" /> needs access to a specific Batch of data against which to check Expectations. The [how to guide on interactively creating expectations](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) covers using a Batch in this use case.
 
 During Validation, a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> checks a Batch of data against Expectations from an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />. You must specify a Batch Request for the Checkpoint to run.
 
@@ -31,7 +31,7 @@ During Validation, a <TechnicalTag relative="../" tag="checkpoint" text="Checkpo
 
 A Batch is always part of a Data Asset. A Data Asset can be configured to slice its data into batches in many ways. For example, it can be based on an arbitrary field, including datetimes, from the data.
 
-A Batch is always built using a Batch Request. See [Batch Request](./batch_request.md) or [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp).
+A Batch is always built using a Batch Request. See [Batch Request](./batch_request.md) or [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md).
 
 Once a Data Asset identifies the specific data that will be included in a Batch based on the Batch Request, it creates a reference to the data and adds metadata to including the parameters used in the Batch Request.
 

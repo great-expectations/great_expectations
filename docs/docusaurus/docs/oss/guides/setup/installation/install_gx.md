@@ -12,27 +12,27 @@ import CheckPythonVersion from './components_local/_check_python_version.mdx'
 import ChooseInstallationMethod from './components_local/_choose_installation_method.mdx'
 import InstallGreatExpectations from './components_local/_install_great_expectations.mdx'
 import VerifyGeInstallSucceeded from './components_local/_verify_ge_install_succeeded.mdx'
-import NextSteps from '/docs/oss/guides/setup/components/install_nextsteps.md'
-import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrereqInstalledAwsCli from '/docs/components/prerequisites/_aws_installed_the_aws_cli.mdx'
-import PrereqAwsConfiguredCredentials from '/docs/components/prerequisites/_aws_configured_your_credentials.mdx'
-import AwsVerifyInstallation from '/docs/components/setup/dependencies/_aws_verify_installation.md'
-import AwsVerifyCredentialsConfiguration from '/docs/components/setup/dependencies/_aws_verify_installation.md'
-import PythonCheckVersion from '/docs/components/setup/python_environment/_python_check_version.mdx'
-import PythonCreateVenv from '/docs/components/setup/python_environment/_python_create_venv.md'
-import TipPythonOrPython3Executable from '/docs/components/setup/python_environment/_tip_python_or_python3_executable.md'
-import S3InstallDependencies from '/docs/components/setup/dependencies/_s3_install_dependencies.md'
-import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation.md'
-import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_after_installing_gx.md'
-import PrereqGcpServiceAccount from '/docs/components/prerequisites/_gcp_service_account.md'
-import GcpVerifyCredentials from '/docs/components/setup/dependencies/_gcp_verify_credentials_configuration.md'
-import GcpInstallDependencies from '/docs/components/setup/dependencies/_gcp_install_dependencies.md'
-import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'
-import AbsInstallDependencies from '/docs/components/setup/dependencies/_abs_install_dependencies.md'
-import AbsConfigureCredentialsInDataContext from '/docs/components/setup/dependencies/_abs_configure_credentials_in_data_context.md'
-import AbsFurtherConfiguration from '/docs/components/setup/next_steps/_links_for_adding_azure_blob_storage_configurations_to_data_context.md'
-import InstallDependencies from '/docs/components/setup/dependencies/_sql_install_dependencies.mdx'
+import NextSteps from '../components/install_nextsteps.md'
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import PrereqInstalledAwsCli from '../../../../components/prerequisites/_aws_installed_the_aws_cli.mdx'
+import PrereqAwsConfiguredCredentials from '../../../../components/prerequisites/_aws_configured_your_credentials.mdx'
+import AwsVerifyInstallation from '../../../../components/setup/dependencies/_aws_verify_installation.md'
+import AwsVerifyCredentialsConfiguration from '../../../../components/setup/dependencies/_aws_verify_installation.md'
+import PythonCheckVersion from '../../../../components/setup/python_environment/_python_check_version.mdx'
+import PythonCreateVenv from '../../../../components/setup/python_environment/_python_create_venv.md'
+import TipPythonOrPython3Executable from '../../../../components/setup/python_environment/_tip_python_or_python3_executable.md'
+import S3InstallDependencies from '../../../../components/setup/dependencies/_s3_install_dependencies.md'
+import GxVerifyInstallation from '../../../../components/setup/_gx_verify_installation.md'
+import LinksAfterInstallingGx from '../../../../components/setup/next_steps/_links_after_installing_gx.md'
+import PrereqGcpServiceAccount from '../../../../components/prerequisites/_gcp_service_account.md'
+import GcpVerifyCredentials from '../../../../components/setup/dependencies/_gcp_verify_credentials_configuration.md'
+import GcpInstallDependencies from '../../../../components/setup/dependencies/_gcp_install_dependencies.md'
+import PrereqAbsConfiguredAnAbsAccount from '../../../../components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'
+import AbsInstallDependencies from '../../../../components/setup/dependencies/_abs_install_dependencies.md'
+import AbsConfigureCredentialsInDataContext from '../../../../components/setup/dependencies/_abs_configure_credentials_in_data_context.md'
+import AbsFurtherConfiguration from '../../../../components/setup/next_steps/_links_for_adding_azure_blob_storage_configurations_to_data_context.md'
+import InstallDependencies from '../../../../components/setup/dependencies/_sql_install_dependencies.mdx'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -274,7 +274,7 @@ The above pip instruction will install GX with basic SQL support through SqlAlch
 
 Different SQL dialects have different requirements for connection strings and methods of configuring credentials.  By default, GX allows you to define credentials as environment variables or as values in your Data Context. See [Instantiate a Data Context](../configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
-There may also be third party utilities for setting up credentials of a given SQL database type.  For more information on setting up credentials for a given source database, please reference the official documentation for that SQL dialect as well as our guide on [how to set up credentials](/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials).
+There may also be third party utilities for setting up credentials of a given SQL database type.  For more information on setting up credentials for a given source database, please reference the official documentation for that SQL dialect as well as our guide on [how to set up credentials](/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).
 
 ### Next steps
 

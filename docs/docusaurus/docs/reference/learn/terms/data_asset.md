@@ -2,7 +2,7 @@
 title: "Data Asset"
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Data Asset is a collection of records within a <TechnicalTag relative="../" tag="datasource" text="Data Source" /> which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 
@@ -90,4 +90,4 @@ You will not need to manually create a Data Asset.  Instead, they will be create
 
 ## Configure
 
-Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling their methods for adding splitters. To configure Data Assets for various environments and Data Sources, see [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp).
+Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling their methods for adding splitters. To configure Data Assets for various environments and Data Sources, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md).

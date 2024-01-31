@@ -63,7 +63,7 @@ class DocsBuilder:
     def create_version(self, version: Version) -> None:
         self.logger.print_header(f"Creating version {version}")
         MIN_PYTHON_VERSION = 3.8
-        MAX_PYTHON_VERSION = 3.8
+        MAX_PYTHON_VERSION = 3.11
 
         # load state of code for given version and process it
         # we'll end up checking this branch out as well, but need the data in versioned_code for prepare_prior_version
@@ -182,21 +182,9 @@ class DocsBuilder:
         """Invokes the invoke api-docs command.
         If this is a non-PR running on netlify, we use the latest tag. Otherwise, we use the current branch.
         """
-        if self._is_pull_request or self._is_local:
-            self.logger.print_header(
-                "Building locally or from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview."
-            )
-        else:
-            self._run(f"git checkout {self._latest_tag}")
-            self._run("git pull")
-            self.logger.print_header(
-                f"Not in a pull request. Using latest released version {self._latest_tag} at {self._current_commit} to build API docs."
-            )
-        self.logger.print(
-            "Building API docs for current version. Please ignore sphinx docstring errors in red/pink, for example: ERROR: Unexpected indentation."
-        )
+        self.logger.print("Invoking api-docs...")
 
-        # TODO: not this
+        # TODO: not this: we should do this all in python
         self._run("(cd ../../; invoke api-docs)")
 
     def _checkout_correct_branch(self) -> None:
@@ -221,7 +209,7 @@ class DocsBuilder:
             file.write(content)
 
     def _run(self, command: str) -> Optional[str]:
-        result = self._context.run(command)
+        result = self._context.run(command, echo=True)
         if not result:
             return None
         elif not result.ok:
