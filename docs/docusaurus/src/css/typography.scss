@@ -42,6 +42,11 @@
 .markdown {
    h1 {
      --ifm-h1-font-size: var(--h1-font-size);
+
+     &:first-child {
+       --ifm-h1-font-size: var(--h1-font-size);
+       margin-bottom: var(--ifm-heading-margin-bottom);
+     }
    }
 
    h2 {
@@ -51,6 +56,15 @@
    h3 {
      --ifm-h3-font-size: var(--h3-font-size);
    }
+
+  li,
+  li p {
+    font-size: var(--p-font-size);
+  }
+
+  li p:only-child {
+    margin: 0;
+  }
  }
 
 h4 {
@@ -68,18 +82,4 @@ h4, h5 {
 p {
     font-size: var(--p-font-size);
     line-height: var(--p-line-height);
-}
-
-.markdown h1:first-child {
-    --ifm-h1-font-size: var(--h1-font-size);
-    margin-bottom: var(--ifm-heading-margin-bottom);
-}
-
-.markdown li,
-.markdown li p {
-    font-size: var(--p-font-size);
-}
-
-.markdown li p:only-child {
-    margin: 0;
 }
