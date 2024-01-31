@@ -575,7 +575,7 @@ The URL to your app appears and opens in a new browser window. You can view the 
 
 ### Connect to source data
 
-Connect to source data stored on a GCS or .
+Connect to source data stored on GCS or BigQuery.
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
