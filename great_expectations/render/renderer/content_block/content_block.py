@@ -419,8 +419,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
             content_block_fn = cls._get_content_block_fn_from_expectation_description(
                 expectation_config=expectation_config,
             )
-        if content_block_fn:
-            return content_block_fn
+            if content_block_fn:
+                return content_block_fn
 
         content_block_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE

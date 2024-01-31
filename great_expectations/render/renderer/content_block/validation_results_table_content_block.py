@@ -10,7 +10,6 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
-    LegacyRendererType,
     RenderedTableContent,
 )
 from great_expectations.render.renderer.content_block.expectation_string import (
@@ -99,16 +98,13 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         expectation_type: str,
         expectation_config: ExpectationConfiguration | None = None,
     ) -> Callable | None:
-        content_block_fn = cls._get_content_block_fn_from_expectation_description(
-            expectation_config=expectation_config,
+        content_block_fn = super()._get_content_block_fn(
+            expectation_type=expectation_type, expectation_config=expectation_config
         )
-        if content_block_fn:
+        if content_block_fn == cls._render_expectation_description:
             return content_block_fn
 
-        renderer_impl = get_renderer_impl(
-            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
-        )
-        expectation_string_fn = renderer_impl[1] if renderer_impl else None
+        expectation_string_fn = content_block_fn
         if expectation_string_fn is None:
             expectation_string_fn = cls._get_legacy_v2_api_style_expectation_string_fn(
                 expectation_type
