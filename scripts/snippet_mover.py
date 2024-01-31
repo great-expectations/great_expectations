@@ -38,6 +38,23 @@ class SnippetMover:
             Path("tests/integration/test_script_runner.py"),
             Path("ci/checks/check_name_tag_snippets_referenced.py"),
             Path("ci/checks/check_integration_test_gets_run.py"),
+            Path("tests/integration/test_definitions/postgresql/integration_tests.py"),
+            Path("tests/integration/test_definitions/abs/integration_tests.py"),
+            Path("tests/integration/test_definitions/athena/integration_tests.py"),
+            Path("tests/integration/test_definitions/aws_glue/integration_tests.py"),
+            Path("tests/integration/test_definitions/bigquery/integration_tests.py"),
+            Path("tests/integration/test_definitions/gcs/integration_tests.py"),
+            Path("tests/integration/test_definitions/mssql/integration_tests.py"),
+            Path(
+                "tests/integration/test_definitions/multiple_backend/integration_tests.py"
+            ),
+            Path("tests/integration/test_definitions/mysql/integration_tests.py"),
+            Path("tests/integration/test_definitions/redshift/integration_tests.py"),
+            Path("tests/integration/test_definitions/s3/integration_tests.py"),
+            Path("tests/integration/test_definitions/snowflake/integration_tests.py"),
+            Path("tests/integration/test_definitions/spark/integration_tests.py"),
+            Path("tests/integration/test_definitions/sqlite/integration_tests.py"),
+            Path("tests/integration/test_definitions/trino/integration_tests.py"),
         )
         self._custom_cases: dict[Path, Path] = {
             # these are custom overrides for how to rename specific files if things get wonky
