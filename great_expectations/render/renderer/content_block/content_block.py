@@ -79,6 +79,21 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
+    def _get_content_block_fn_from_render_object(
+        cls, obj_: ExpectationConfiguration | ExpectationValidationResult
+    ):
+        expectation_type = cls._get_expectation_type(obj_)
+        expectation_config = (
+            obj_.expectation_config
+            if isinstance(obj_, ExpectationValidationResult)
+            else obj_
+        )
+
+        return cls._get_content_block_fn(
+            expectation_type=expectation_type, expectation_config=expectation_config
+        )
+
+    @classmethod
     def _render_list(  # noqa: PLR0913, PLR0912
         cls,
         render_object: list,
@@ -93,16 +108,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             False if isinstance(render_object[0], ExpectationValidationResult) else None
         )
         for obj_ in render_object:
-            expectation_type = cls._get_expectation_type(obj_)
-            expectation_config = (
-                obj_.expectation_config
-                if isinstance(obj_, ExpectationValidationResult)
-                else obj_
-            )
-
-            content_block_fn = cls._get_content_block_fn(
-                expectation_type=expectation_type, expectation_config=expectation_config
-            )
+            content_block_fn = cls._get_content_block_fn_from_render_object(obj_)
 
             if isinstance(obj_, ExpectationValidationResult) and not obj_.success:
                 has_failed_evr = True
@@ -231,23 +237,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         kwargs: dict,
     ) -> Any:
         """Helper method to render non-list render_objects - refer to `render` for more context"""
-        expectation_type = cls._get_expectation_type(render_object)
-        expectation_config = (
-            render_object.expectation_config
-            if isinstance(render_object, ExpectationValidationResult)
-            else render_object
-        )
-
-        content_block_fn = cls._get_content_block_fn(
-            expectation_type=expectation_type, expectation_config=expectation_config
-        )
-        if not content_block_fn:
-            renderer_impl = get_renderer_impl(
-                object_name=expectation_type,
-                renderer_type=LegacyRendererType.PRESCRIPTIVE,
-            )
-            content_block_fn = renderer_impl[1] if renderer_impl else None
-
+        content_block_fn = cls._get_content_block_fn_from_render_object(render_object)
         if content_block_fn is not None and not exception_list_content_block:
             try:
                 if isinstance(render_object, ExpectationValidationResult):
@@ -321,6 +311,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
     ) -> list[RenderedStringTemplateContent]:
         expectation = configuration.to_domain_obj()
         description = expectation.description
+        if not description:
+            raise ValueError("Cannot render an expectation with no description.")
         return [
             RenderedStringTemplateContent(
                 content_block_type="string_template",
@@ -423,9 +415,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectation_config: ExpectationConfiguration | None = None,
     ) -> Callable | None:
         # Prioritize `description` param on Expectation before falling back to renderer
-        content_block_fn = cls._get_content_block_fn_from_expectation_description(
-            expectation_config=expectation_config,
-        )
+        if expectation_config:
+            content_block_fn = cls._get_content_block_fn_from_expectation_description(
+                expectation_config=expectation_config,
+            )
         if content_block_fn:
             return content_block_fn
 
@@ -436,13 +429,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _get_content_block_fn_from_expectation_description(
-        cls, expectation_config: ExpectationConfiguration | None
+        cls, expectation_config: ExpectationConfiguration
     ) -> Callable | None:
-        if expectation_config:
-            expectation = expectation_config.to_domain_obj()
-            description = expectation.description
-            if description:
-                return cls._render_expectation_description
+        description = expectation_config.kwargs.get("description")
+        if description:
+            return cls._render_expectation_description
         return None
 
     @classmethod
