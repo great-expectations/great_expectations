@@ -309,8 +309,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         runtime_configuration: dict,
         **kwargs,
     ) -> list[RenderedStringTemplateContent]:
-        expectation = configuration.to_domain_obj()
-        description = expectation.description
+        description = configuration.kwargs.get("description")
         if not description:
             raise ValueError("Cannot render an expectation with no description.")
         return [
