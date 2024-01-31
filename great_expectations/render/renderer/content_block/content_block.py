@@ -309,7 +309,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
         runtime_configuration: dict,
         **kwargs,
     ) -> list[RenderedStringTemplateContent]:
-        description = configuration.kwargs.get("description")
+        expectation = configuration.to_domain_obj()
+        description = expectation.description
         if not description:
             raise ValueError("Cannot render an expectation with no description.")
         return [
@@ -430,7 +431,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _get_content_block_fn_from_expectation_description(
         cls, expectation_config: ExpectationConfiguration
     ) -> Callable | None:
-        description = expectation_config.kwargs.get("description")
+        expectation = expectation_config.to_domain_obj()
+        description = expectation.description
         if description:
             return cls._render_expectation_description
         return None
