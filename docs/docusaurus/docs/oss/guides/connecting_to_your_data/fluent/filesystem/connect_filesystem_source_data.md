@@ -189,7 +189,7 @@ Connect to a Microsoft Azure Blob Storage Data Source.
 
 <Prerequisites>
 
-- <span><a href='../../../../../oss/guides/setup/installation/install_gx'>A working installation of Great Expectations with dependencies for Azure Blob Storage</a></span>
+- <PrereqInstallGxWithDependencies />
 - Access to data in Azure Blob Storage
 
 </Prerequisites> 
