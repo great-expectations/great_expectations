@@ -902,33 +902,39 @@ def generate_public_api_report(write_to_file: bool = False) -> None:
     missing_threshold = len(
         public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
     )  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
-    if len(missing_from_the_public_api) != missing_threshold:
-        error_msg_prefix = f"There are {len(missing_from_the_public_api)} items missing from the public API, we currently allow {missing_threshold}."
-        if len(missing_from_the_public_api) > missing_threshold:
-            logger.error(f"{error_msg_prefix} Please add to the public API.")
-            difference = set(missing_from_the_public_api) - set(
-                public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
-            )
-            logger.error(
-                f"The {len(difference)} items missing from the public API that are not accounted for are as follows:"
-            )
-            for item in difference:
-                logger.error(item)
-        else:
-            logger.error(f"{error_msg_prefix} Please reduce the threshold.")
-            difference = set(
-                public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
-            ) - set(missing_from_the_public_api)
-            logger.error(
-                f"The {len(difference)} items that are now accounted for and should be removed from the threshold list in docs/sphinx_api_docs_source/public_api_missing_threshold.py are:"
-            )
-            for item in difference:
-                logger.error(item)
-        sys.exit(1)
-    else:
-        logger.info(
-            "All of the missing items are accounted for in the missing threshold, but this threshold should be reduced to 0 over time."
+
+    has_errors = False
+    undocumented_and_unignored = set(missing_from_the_public_api) - set(
+        public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+    )
+    documented_and_ignored = set(
+        public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+    ) - set(missing_from_the_public_api)
+
+    error_msg_prefix = f"There are {len(missing_from_the_public_api)} items missing from the public API, we currently allow {missing_threshold}."
+    if undocumented_and_unignored:
+        logger.error(f"{error_msg_prefix} Please add to the public API.")
+        logger.error(
+            f"The {len(undocumented_and_unignored)} items missing from the public API that are not accounted for are as follows:"
         )
+        for item in sorted(undocumented_and_unignored):
+            logger.error(item)
+        has_errors = True
+    if documented_and_ignored:
+        logger.error(f"{error_msg_prefix} Please reduce the threshold.")
+        logger.error(
+            f"The {len(documented_and_ignored)} items that are now accounted for and should be removed from the threshold list in docs/sphinx_api_docs_source/public_api_missing_threshold.py are:"
+        )
+        for item in sorted(documented_and_ignored):
+            logger.error(item)
+        has_errors = True
+
+    if has_errors:
+        sys.exit(1)
+
+    logger.info(
+        "All of the missing items are accounted for in the missing threshold, but this threshold should be reduced to 0 over time."
+    )
 
     if write_to_file:
         public_api_report.write_printable_definitions_to_file(
