@@ -4000,7 +4000,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
         # _add_expectation().
         expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {
@@ -5342,7 +5342,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
         expected_expectation_suite_quantiles_estimator._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {

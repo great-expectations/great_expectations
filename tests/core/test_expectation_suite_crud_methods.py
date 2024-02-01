@@ -412,7 +412,6 @@ def test_add_expectation_configurations(
     assert not single_expectation_suite.isEquivalentTo(different_suite)
     result = single_expectation_suite.add_expectation_configurations(
         expectation_configurations=expectation_configurations,
-        send_usage_event=False,
         match_type="domain",
         overwrite_existing=True,
     )
@@ -426,7 +425,6 @@ def test_add_expectation_configurations(
         # noinspection PyUnusedLocal
         result = single_expectation_suite.add_expectation_configurations(
             expectation_configurations=expectation_configurations,
-            send_usage_event=False,
             match_type="domain",
             overwrite_existing=False,
         )

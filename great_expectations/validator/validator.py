@@ -1257,7 +1257,7 @@ class Validator:
 
         expectation_suite.expectations = []
         expectation_suite.add_expectation_configurations(
-            expectation_configurations=expectations, send_usage_event=False
+            expectation_configurations=expectations
         )
         if not suppress_logging:
             logger.info(message + settings_message)

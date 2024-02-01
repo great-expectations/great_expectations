@@ -4,7 +4,6 @@ import copy
 import datetime
 import json
 import os
-import uuid
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from typing import (
@@ -52,8 +51,6 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
     PlotResult,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
-    TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX,
-    TEMPORARY_EXPECTATION_SUITE_NAME_STEM,
     get_or_create_expectation_suite,
     sanitize_parameter_name,
 )
@@ -198,7 +195,6 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
-        send_usage_event: bool = True,
     ) -> None:
         """
         Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
@@ -207,7 +203,6 @@ class DataAssistantResult(SerializableDictDot):
         self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
-            send_usage_event=send_usage_event,
         ).show_expectations_by_domain_type()
 
     @public_api
@@ -215,7 +210,6 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
-        send_usage_event: bool = True,
     ) -> None:
         """Populates an `ExpectationSuite` and displays `ExpectationConfiguration` list grouped by `expectation_type`.
 
@@ -223,12 +217,10 @@ class DataAssistantResult(SerializableDictDot):
             expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
             include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to
                 generate the Expectation Suite.
-            send_usage_event: Set to False to disable sending usage events for this method.
         """
         self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
-            send_usage_event=send_usage_event,
         ).show_expectations_by_expectation_type()
 
     @public_api
@@ -236,29 +228,17 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
-        send_usage_event: bool = True,
     ) -> ExpectationSuite:
         """Get Expectation Suite from "DataAssistantResult" object.
 
         Args:
             expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
             include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to generate the Expectation Suite.
-            send_usage_event: Set to False to disable sending usage events for this method.
 
         Returns:
             ExpectationSuite object.
 
         """
-        if send_usage_event:
-            if not expectation_suite_name:
-                component_name: str = self.__class__.__name__
-                expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
-
-            return self._get_expectation_suite_without_usage_statistics(
-                expectation_suite_name=expectation_suite_name,
-                include_profiler_config=include_profiler_config,
-            )
-
         return self._get_expectation_suite_without_usage_statistics(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
@@ -518,7 +498,6 @@ class DataAssistantResult(SerializableDictDot):
             expectation_configurations=self.expectation_configurations
             if self.expectation_configurations
             else [],
-            send_usage_event=False,
             match_type="domain",
             overwrite_existing=True,
         )
