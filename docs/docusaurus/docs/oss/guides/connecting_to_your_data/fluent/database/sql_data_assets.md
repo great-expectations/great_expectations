@@ -23,11 +23,6 @@ A Data Asset is a collection of records within a Data Source that define how Gre
 
  Great Expectations (GX) uses SQLAlchemy to connect to SQL Data Assets, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
-:::caution Data Sources defined with the block-config method
-
-If you're using a Data Source created with the block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
-
-:::
 
 
 <Tabs
@@ -64,7 +59,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource"
 ```
 
 ### Add a table to the Data Source as a Data Asset
@@ -73,7 +68,7 @@ You create a Data Asset to identify the table to connect to.
 
 Run the following Python code to define the `name` and `table_name` variables:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource"
 ```
 
 ### Add additional tables (Optional)

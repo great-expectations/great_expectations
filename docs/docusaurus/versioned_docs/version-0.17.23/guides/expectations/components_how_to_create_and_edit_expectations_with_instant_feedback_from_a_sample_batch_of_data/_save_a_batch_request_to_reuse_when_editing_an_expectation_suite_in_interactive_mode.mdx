@@ -1,0 +1,25 @@
+
+When in the Interactive Mode, the initialization cell of your Jupyter Notebook will contain the ``batch_request`` dictionary.  You can convert it to JSON and save that JSON in a file for future use.  The contents of this file would look something like this:
+:::
+
+```bash title="File contents"
+{
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_data_connector",
+    "data_asset_name": "my_asset"
+}
+```
+
+You can then utilize this saved `batch_request` (containing any refinements you may have made to it in your notebook) and skip the steps of selecting its components:
+
+```bash title="Terminal input"
+> great_expectations suite new --interactive --batch-request my_saved_batch_request_file.json
+```
+
+Unless you specify the name of the Expectation Suite on the command line (using the ``--expectation_suite MY_SUITE`` syntax), the command will ask you to name your new Expectation Suite and offer you a default name for you to simply accept, or provide your own.
+
+You can extend the previous example to specify the name of the Expectation Suite on the command line as follows:
+
+```bash title="Terminal input"
+> great_expectations suite new --expectation-suite my_suite --interactive --batch-request my_saved_batch_request.json
+```

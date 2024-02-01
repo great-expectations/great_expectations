@@ -17,9 +17,13 @@ from typing import (
     overload,
 )
 
+from requests import HTTPError, Response
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.client import init as init_analytics
+from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
@@ -144,12 +148,32 @@ class CloudDataContext(SerializableDataContext):
         checker.check_if_using_latest_gx()
 
     @override
+    def _init_analytics(self) -> None:
+        init_analytics(
+            user_id=self._get_cloud_user_id(),
+            data_context_id=uuid.UUID(self._data_context_id),
+            oss_id=self._get_oss_id(),
+            cloud_mode=True,
+        )
+
+    def _get_cloud_user_id(self) -> uuid.UUID | None:
+        if not ENV_CONFIG.gx_analytics_enabled:
+            return None
+
+        response = self._request_cloud_backend(
+            cloud_config=self.ge_cloud_config, uri="accounts/me"
+        )
+        data = response.json()
+        user_id = data["user_id"]
+        return uuid.UUID(user_id)
+
+    @override
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
         if project_config is None:
             project_config = self.retrieve_data_context_config_from_cloud(
-                cloud_config=self._cloud_config,
+                cloud_config=self.ge_cloud_config,
             )
 
         project_data_context_config = (
@@ -168,7 +192,7 @@ class CloudDataContext(SerializableDataContext):
         """
         super()._register_providers(config_provider)
         config_provider.register_provider(
-            _CloudConfigurationProvider(self._cloud_config)
+            _CloudConfigurationProvider(self.ge_cloud_config)
         )
 
     @classmethod
@@ -238,22 +262,30 @@ class CloudDataContext(SerializableDataContext):
 
         :return: the configuration object retrieved from the Cloud API
         """
-        base_url = cloud_config.base_url
-        organization_id = cloud_config.organization_id
-        cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
+        response = cls._request_cloud_backend(
+            cloud_config=cloud_config, uri="data-context-configuration"
         )
-
-        session = create_session(access_token=cloud_config.access_token)
-
-        response = session.get(cloud_url)
-        if response.status_code != 200:  # noqa: PLR2004
-            raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}", response=response
-            )
         config = response.json()
         config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
+
+    @classmethod
+    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
+        access_token = cloud_config.access_token
+        base_url = cloud_config.base_url
+        organization_id = cloud_config.organization_id
+
+        session = create_session(access_token=access_token)
+        response = session.get(f"{base_url}/organizations/{organization_id}/{uri}")
+
+        try:
+            response.raise_for_status()
+        except HTTPError:
+            raise gx_exceptions.GXCloudError(
+                f"Bad request made to GX Cloud; {response.text}", response=response
+            )
+
+        return response
 
     @classmethod
     def get_cloud_config(
@@ -393,9 +425,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
             "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,
         }
 
         datasource_store = DatasourceStore(
@@ -413,9 +445,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_ASSET,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,
         }
 
         data_asset_store = DataAssetStore(
@@ -444,14 +476,14 @@ class CloudDataContext(SerializableDataContext):
         return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
 
     @property
-    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
+    def ge_cloud_config(self) -> GXCloudConfig:
         return self._cloud_config
 
     @override
     def _init_variables(self) -> CloudDataContextVariables:
-        ge_cloud_base_url: str = self._cloud_config.base_url
-        ge_cloud_organization_id: str = self._cloud_config.organization_id  # type: ignore[assignment]
-        ge_cloud_access_token: str = self._cloud_config.access_token
+        ge_cloud_base_url: str = self.ge_cloud_config.base_url
+        ge_cloud_organization_id: str = self.ge_cloud_config.organization_id  # type: ignore[assignment]
+        ge_cloud_access_token: str = self.ge_cloud_config.access_token
 
         variables = CloudDataContextVariables(
             config=self._project_config,
@@ -478,7 +510,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
+        in order of precedence: cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
         be optional in GX Cloud mode).
         """
