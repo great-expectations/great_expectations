@@ -5,8 +5,8 @@ id: reference_overview
 description: Supplemental information that will help you get the most out of Great Expectations.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find supplemental information that will help you get the most out of Great Expectations (GX).</p>
 
