@@ -50,7 +50,8 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 The GX Agent is an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data, all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
 
-The GX Agent is [typically deployed in your organization's deployment environment](./connect/connect_lp) and serves all GX Cloud users within your organization. It can be run as part of your development or production workflows.
+The GX Agent is typically deployed in your organization's deployment environment, for example, in a development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. See [Connect GX Cloud](./connect/connect_lp) for setup instructions.
+
 
 ## GX Cloud deployment patterns
 
@@ -69,8 +70,8 @@ The following table shows how users can access GX Cloud.
 | Access method | GX Cloud | GX OSS client |
 | :-- | :--: | :--: |
 | UI | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | |
-| Programmatic | | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div>  |
-| UI and programmatic | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> |
+| Python API | | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div>  |
+| UI and Python API | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> |
 
 
 ### Org-hosted deployment pattern
