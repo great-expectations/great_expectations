@@ -5,8 +5,8 @@ id: data_assistants_lp
 description: Use the Onboarding Data Assistant to create Expectation Suites.
 ---
 
-import LinkCardGrid from '../../../components/LinkCardGrid';
-import LinkCard from '../../../components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">Use the Onboarding Data Assistant to create Expectation Suites.</p>
 

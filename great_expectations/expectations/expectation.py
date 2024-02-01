@@ -284,6 +284,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     meta: Union[dict, None] = None
     notes: Union[str, List[str], None] = None
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
+    description: ClassVar[Union[str, None]] = None
 
     catch_exceptions: bool = False
     rendered_content: Optional[List[RenderedAtomicContent]] = None
@@ -1228,13 +1229,14 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         meta = kwargs.pop("meta", None)
         notes = kwargs.pop("notes", None)
         id = kwargs.pop("id", None)
+        rendered_content = kwargs.pop("rendered_content", None)
         return ExpectationConfiguration(
             expectation_type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
             meta=meta,
             notes=notes,
             ge_cloud_id=id,
-            rendered_content=self.rendered_content,
+            rendered_content=rendered_content,
         )
 
     def __copy__(self):
