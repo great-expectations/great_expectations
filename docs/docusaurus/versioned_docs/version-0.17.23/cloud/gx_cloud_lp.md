@@ -4,8 +4,8 @@ title: 'GX Cloud'
 description: Get started with GX Cloud and learn more about GX Cloud features and functionality.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">GX Cloud is the fastest and most reliable way to validate your data. Connect, test, and validate Data Assets in a web-based UI. If you're ready to get started and have a Snowflake instance, try the <a href='/docs/cloud/quickstarts/snowflake_quickstart'>Quickstart for GX Cloud and Snowflake</a>.
 

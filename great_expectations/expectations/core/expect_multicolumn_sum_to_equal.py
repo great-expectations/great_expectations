@@ -82,7 +82,6 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

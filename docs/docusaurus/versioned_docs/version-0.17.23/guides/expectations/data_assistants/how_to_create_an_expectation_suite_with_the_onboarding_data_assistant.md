@@ -15,7 +15,7 @@ All the code used in the examples is available in GitHub at this location: [how_
 
 - A [configured Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
-- An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
+- An understanding of how to [configure a Batch Request](../../../connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md).
 
 </Prerequisites>
 

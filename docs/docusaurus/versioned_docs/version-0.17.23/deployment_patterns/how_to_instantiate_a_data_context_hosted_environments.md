@@ -19,7 +19,7 @@ To configure a Data Context for a specific environment, see one of the following
 
 ## Create Expectation Suites and add Expectations
 
-To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
+To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/guides/connecting_to_your_data/database/connect_sql_source_data.md?sql-database-type=postgresql).
 
 To add Expectations to your Suite individually, use the following code:
 
@@ -36,4 +36,4 @@ To create and run a Checkpoint in code, see [How to create a new Checkpoint](../
 
 ## Use Data Docs
 
-To build and view Data Docs in your environment, see [Options for hosting Data Docs](../reference/customize_your_deployment.md#options-for-hosting-data-docs).
+To build and view Data Docs in your environment, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).

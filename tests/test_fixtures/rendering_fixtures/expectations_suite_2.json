@@ -2531,14 +2531,14 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "x",
       "column_B": "w"
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "x",
       "column_B": "z",
@@ -2546,7 +2546,7 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "w",
       "column_B": "z",
@@ -2554,7 +2554,7 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "w",
       "column_B": "z",
@@ -2563,7 +2563,7 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "a",
       "column_B": "b",
