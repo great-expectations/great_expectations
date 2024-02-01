@@ -556,7 +556,6 @@ class Validator:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite._add_expectation(
                         expectation_configuration=configuration.get_raw_configuration(),
-                        send_usage_event=False,
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.
