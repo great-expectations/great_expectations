@@ -231,17 +231,6 @@ Now that you have an Ephemeral Data Context you can connect GX to your data. See
 
 ## Next steps
 
-To customize a Data Context configuration for Metadata Stores and Data Docs, see:
-
-- [Configure Expectation Stores](/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores)
-- [Configure Validation Result Stores](/docs/guides/setup/configuring_metadata_stores/configure_result_stores)
-- [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
-- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
-
-To connect GX to source data:
-
-- [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
-- [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
-
+- [Customize a Data Context configuration for Metadata Stores and Data Docs](../../../../guides/setup/setup_overview_lp.md)
+- [Connect GX to data](../../../../guides/connecting_to_your_data/connect_to_data_lp.md)
 

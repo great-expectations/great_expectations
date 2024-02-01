@@ -1,5 +1,5 @@
 ---
-title: How to Use Great Expectations with Airflow
+title: Use Great Expectations with Airflow
 sidebar_label: "Airflow"
 description: "Run a Great Expectations checkpoint in Apache Airflow"
 id: how_to_use_great_expectations_with_airflow

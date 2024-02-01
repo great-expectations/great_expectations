@@ -5,8 +5,8 @@ id: expectations_lp
 description: Create and manage Expectations and Expectation Suites.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">Create and manage Expectations and Expectation Suites. An Expectation is a verifiable assertion about your data, and an  Expectation Suite is a collection of Expectations.</p>
 
