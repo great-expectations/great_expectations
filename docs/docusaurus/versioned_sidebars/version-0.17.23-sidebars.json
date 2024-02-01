@@ -466,7 +466,6 @@
       },
       "items": [
         "contributing/contributing_maturity",
-        "reference/customize_your_deployment",
         "reference/usage_statistics",
         {
           "type": "category",
@@ -495,7 +494,6 @@
             "terms/batch_request",
             "terms/custom_expectation",
             "terms/checkpoint",
-            "terms/cli",
             "terms/datasource",
             "terms/data_context",
             "terms/data_asset",

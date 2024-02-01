@@ -593,8 +593,6 @@ Run the following code to add the name of your GCS bucket to the `add_pandas_gcs
 
 In the example, you've added a Data Source that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
 
-For more information about configuring a Data Source, see [How to connect to data on GCS using Pandas](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas).
-
 </TabItem>
 <TabItem value="bigquery">
 
@@ -610,8 +608,6 @@ Run the following code to create a Data Source that connects to data in BigQuery
 ```
 
 In the example, you created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passed it in a connection string.
-
-To configure the BigQuery Data Source, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
@@ -692,8 +688,6 @@ In the following example, a query `Asset` named `my_query_asset` is built by sub
     ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
     ```
 
-To configure the RuntimeBatchRequest and learn how you can load data by specifying a GCS path to a single CSV, see [How to connect to data on GCS using Pandas](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas).
-
 </TabItem>
 <TabItem value="bigquery">
 
@@ -718,8 +712,6 @@ To configure the RuntimeBatchRequest and learn how you can load data by specifyi
 
     ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
     ```
-
-To configure the BatchRequest and learn how you can load data by specifying a table name, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
