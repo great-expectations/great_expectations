@@ -138,7 +138,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -204,7 +204,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -252,7 +252,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -324,7 +324,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -424,7 +424,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -463,7 +463,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -514,7 +514,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -586,7 +586,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -652,7 +652,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -834,7 +834,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -900,7 +900,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -1139,7 +1139,7 @@ def test_serialize_profiler_config(
     ).to_json_dict() == {
         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
         "class_name": "DefaultExpectationConfigurationBuilder",
-        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
         "validation_parameter_builder_configs": None,
         "column_A": "$domain.domain_kwargs.column_A",
         "column_B": "$domain.domain_kwargs.column_B",
@@ -1206,7 +1206,7 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                 },
             ],
         }

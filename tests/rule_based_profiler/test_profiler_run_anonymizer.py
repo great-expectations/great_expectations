@@ -39,7 +39,7 @@ def test_anonymize_profiler_run(
                 "anonymized_expectation_configuration_builders": [
                     {
                         "parent_class": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
@@ -109,7 +109,7 @@ def test_anonymize_profiler_run_multiple_rules(
                 "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                         "parent_class": "DefaultExpectationConfigurationBuilder",
                     }
                 ],
@@ -237,7 +237,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                 },
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                         "parent_class": "DefaultExpectationConfigurationBuilder",
                     }
                 ],
@@ -284,7 +284,7 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
                 "anonymized_expectation_configuration_builders": [
                     {
                         "anonymized_condition": "553b1c035d9b602798d64d23d63abd32",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                         "parent_class": "DefaultExpectationConfigurationBuilder",
                     }
                 ],
