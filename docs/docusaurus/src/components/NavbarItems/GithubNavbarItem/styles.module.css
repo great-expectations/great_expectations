@@ -6,6 +6,10 @@
     padding-right: 2rem;
 }
 
+.githubBadgeNoErrors {
+    min-width: 8.5rem;
+}
+
 a {
     color: var(--ifm-menu-color);
     text-decoration: none;

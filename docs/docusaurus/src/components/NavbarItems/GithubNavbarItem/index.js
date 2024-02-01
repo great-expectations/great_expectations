@@ -5,7 +5,7 @@ export default function GithubNavbarItem({ owner, repository }) {
 
     const [starsCount, setStarsCount] = useState('0')
     const [forksCount, setForksCount] = useState('0')
-    const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(false)
+    const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true)
 
     useEffect(() => {
         fetch(`https://api.github.com/repos/${owner}/${repository}`)
@@ -24,27 +24,28 @@ export default function GithubNavbarItem({ owner, repository }) {
         return formatter.format(number).toLowerCase();
     }
 
-    let githubMarkImg = useBaseUrl(`img/github-mark.svg`);
-    let githubLogoImg = useBaseUrl(`img/github.svg`);
-    let starIcon = useBaseUrl(`img/star.svg`);
-    let forkIcon = useBaseUrl(`img/code-branch.svg`);
+    const githubMarkImg = useBaseUrl(`img/github-mark.svg`);
+    const githubLogoImg = useBaseUrl(`img/github.svg`);
+    const starIcon = useBaseUrl(`img/star.svg`);
+    const forkIcon = useBaseUrl(`img/code-branch.svg`);
 
     return repository && (
-        <a href={`https://github.com/${owner}/${repository}`} target="_blank" className={styles.githubBadge}>
+        <a href={`https://github.com/${owner}/${repository}`} target="_blank"
+           className={styles.githubBadge + ' ' + (showGithubBadgeInfo ? styles.githubBadgeNoErrors : '')}>
             <img src={githubMarkImg} className={styles.githubMark}
                  alt="Github Invertocat Logo"/>
             { showGithubBadgeInfo && (<div className={styles.githubBadgeInfo}>
                 <img src={githubLogoImg} className={styles.githubLogo}
                      alt="Github Logo"/>
                 <div className={styles.githubStats}>
-                    <div>
+                    <span>
                         <img src={starIcon} alt="Github Stargazers Count"/>
                         {starsCount}
-                    </div>
-                    <div>
+                    </span>
+                    <span>
                         <img src={forkIcon} alt="Github Forks Count"/>
                         {forksCount}
-                    </div>
+                    </span>
                 </div>
             </div>)}
         </a>
