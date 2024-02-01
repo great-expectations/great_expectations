@@ -151,7 +151,7 @@ class CloudDataContext(SerializableDataContext):
     def _init_analytics(self) -> None:
         init_analytics(
             user_id=self._get_cloud_user_id(),
-            data_context_id=uuid.UUID(self._data_context_id),
+            data_context_id=self._data_context_id,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
         )
@@ -502,7 +502,7 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             UUID to use as the data_context_id
         """
-        return uuid.UUID(self.ge_cloud_config.organization_id)  # type: ignore[return-value,union-attr]
+        return uuid.UUID(self.ge_cloud_config.organization_id)
 
     @override
     def get_config_with_variables_substituted(

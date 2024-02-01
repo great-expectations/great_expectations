@@ -3495,7 +3495,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def data_context_id(self) -> uuid.UUID:
-        return self.variables.data_context_id
+        return self._data_context_id
 
     def _init_primary_stores(
         self, store_configs: Dict[str, StoreConfigTypedDict]
@@ -4239,7 +4239,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _view_validation_result(self, result: CheckpointResult) -> None:
         validation_result_identifier = result.list_validation_result_identifiers()[0]
-        self.open_data_docs(resource_identifier=validation_result_identifier)
+        self.open_data_docs(resource_identifier=validation_result_identifier)  # type: ignore[arg-type]
 
     def escape_all_config_variables(
         self,

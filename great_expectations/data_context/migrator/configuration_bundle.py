@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 class ConfigurationBundle:
     def __init__(self, context: AbstractDataContext) -> None:
         self._context = context
-        self._context_id = context.data_context_id
+        self._context_id = str(context.data_context_id)
 
         self._data_context_variables: DataContextVariables = context.variables
 
