@@ -1,3 +1,7 @@
+# Old docs (0.16 and below; note that 'legacy' is 0.13 and below)
+https://old.docs.greatexpectations.io/* https://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/:splat 200!
+http://old.docs.greatexpectations.io/* http://648b46c2ec119e00089c4318--niobium-lead-7998.netlify.app/:splat 200!
+
 # Redirect from what the browser serves
 
 /v2 https://legacy.docs.greatexpectations.io/en/latest/
@@ -335,8 +339,7 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 /docs/contributing/style_guides/cli_and_notebooks_style /docs/0.15.50/contributing/style_guides/cli_and_notebooks_style
 /docs/guides/miscellaneous/how_to_use_the_great_expectations_cli /docs/0.15.50/guides/miscellaneous/how_to_use_the_great_expectations_cli
 /docs/guides/miscellaneous/how_to_use_the_project_check_config_command /docs/0.15.50/guides/miscellaneous/how_to_use_the_project_check_config_command
-/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli 
-/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/instantiate_data_context
+/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli /docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
 
 ## Redircet UserConfigurableProfiler doc to v 0.15.50 docs
 
@@ -354,12 +357,12 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 /docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
 /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
 /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
-docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3 /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3 /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
 /docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
 /docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
-docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
 /docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
-docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3 /docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3  /docs/guides/setup/configuring_metadata_stores/configure_result_stores
 /docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage /docs/guides/setup/configuring_metadata_stores/configure_result_stores
 /docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs /docs/guides/setup/configuring_metadata_stores/configure_result_stores
 /docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem /docs/guides/setup/configuring_metadata_stores/configure_result_stores
@@ -433,3 +436,8 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/cloud/quickstarts/snowflake_quickstart /docs/cloud/try_gx_cloud
 /docs/cloud/quickstarts/airflow_quickstart /docs/cloud/connect/connect_airflow
 /docs/cloud/quickstarts/python_quickstart /docs/cloud/connect/connect_python
+/docs/cloud/set_up_gx_cloud#* /docs/cloud/try_gx_cloud#:splat
+
+# Broken link redirect
+
+/docs/reference/expectations/standard_arguments/* /docs/reference/learn/expectations/standard_arguments/:splat
