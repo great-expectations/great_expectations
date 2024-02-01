@@ -21,6 +21,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -40,9 +43,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 yaml = YAMLHandler()
 
