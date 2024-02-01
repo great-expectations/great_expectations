@@ -1,0 +1,54 @@
+:root {
+  --ifm-alert-border-left-width: 6px;
+  --ifm-alert-border-width: 1px;
+
+  --ifm-color-info-contrast-background: #E9ECF5;
+  --ifm-color-info-dark: #223F99;
+
+  --ifm-color-success-contrast-background: #F8F9EC;
+  --ifm-color-success-dark: #B6C647;
+
+  --ifm-color-warning-contrast-background: #FEFBF3;
+  --ifm-color-warning-dark: #F5CE4A;
+
+  --ifm-color-danger-contrast-background: #FEF6F9;
+  --ifm-color-danger-dark: #E54F54;
+
+  --ifm-color-secondary-contrast-background: transparent;
+  --ifm-color-secondary-dark: var(--ifm-color-primary);
+}
+
+.alert {
+  border-width: 1px;
+  border-left-width: var(--ifm-alert-border-left-width);
+  box-shadow: none;
+
+  div:first-child {
+    font-size: var(--p-font-size);
+
+    & span {
+      font-size: var(--p-sm-font-size);
+    }
+  }
+
+  &--info {
+    --ifm-alert-background-color-highlight: rgba(34, 63, 153, 0.1);
+  }
+
+  &--success {
+    --ifm-alert-background-color-highlight: rgba(182, 198, 71, 0.2);
+  }
+
+  &--warning {
+    --ifm-alert-background-color-highlight: rgba(245, 206, 74, 0.2);
+  }
+
+  &--danger {
+    --ifm-alert-background-color-highlight: rgba(229, 79, 84, 0.15);
+  }
+
+  &--secondary {
+    border-width: 3px;
+    border-left-width: var(--ifm-alert-border-left-width);
+  }
+}

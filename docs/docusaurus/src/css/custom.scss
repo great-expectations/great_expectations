@@ -14,6 +14,7 @@
 @import "navbar.scss";
 @import "tabs.scss";
 @import "searchBar.scss";
+@import "alerts.scss";
 
 /* You can override the default Infima variables here. */
 :root {
@@ -118,10 +119,10 @@ h3 {
 }
 
 .pagination-nav__link {
-    border: none;
-    color: #fff;
+    border: 1px solid var(--ifm-link-color);;
+    color: var(--ifm-color-primary);
     padding: var(--ifm-pagination-nav-padding);
-    background: var(--ifm-link-color);
+    background: transparent;
     text-align: center;
 }
 
