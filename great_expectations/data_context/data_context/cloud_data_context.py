@@ -7,7 +7,6 @@ import warnings
 from typing import (
     TYPE_CHECKING,
     Callable,
-    Dict,
     List,
     Mapping,
     Optional,
@@ -87,11 +86,13 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 # TODO Migrate to BaseSettings and support conffile
 class GxCloudConfigEnvVars(BaseModel):
     GX_CLOUD_BASE_URL: Optional[HttpUrl] = CLOUD_DEFAULT_BASE_URL
     GX_CLOUD_ACCESS_TOKEN: SecretStr
     GX_CLOUD_ORGANIZATION_ID: UUID
+
 
 def _extract_fluent_datasources(config_dict: dict) -> dict:
     """
@@ -243,7 +244,7 @@ class CloudDataContext(SerializableDataContext):
                 cloud_access_token=cloud_access_token,
                 cloud_organization_id=cloud_organization_id,
             )
-        except ValueError as e:
+        except ValueError:
             return False
         return True
 
@@ -334,7 +335,6 @@ class CloudDataContext(SerializableDataContext):
             GXCloudError if a GX Cloud variable is missing
         """
         try:
-
             cloud_config_env_vars = cls._get_cloud_config(
                 cloud_base_url=cloud_base_url,
                 cloud_access_token=cloud_access_token,
@@ -386,7 +386,7 @@ class CloudDataContext(SerializableDataContext):
             conf_file_section="ge_cloud_config",
             conf_file_option="access_token",
         )
-        config_dict ={
+        config_dict = {
             GXCloudEnvironmentVariable.BASE_URL: cloud_base_url,
             GXCloudEnvironmentVariable.ORGANIZATION_ID: cloud_organization_id,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: cloud_access_token,
