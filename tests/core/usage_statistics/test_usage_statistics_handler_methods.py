@@ -140,7 +140,7 @@ def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -179,7 +179,7 @@ def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
                 "anonymized_domain_builder": {"parent_class": "ColumnDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                         "parent_class": "DefaultExpectationConfigurationBuilder",
                     },
                     {

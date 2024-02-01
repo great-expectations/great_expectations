@@ -308,7 +308,7 @@ def test_anonymized_rule_based_profiler_validation():
                 "anonymized_expectation_configuration_builders": [
                     {
                         "parent_class": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
