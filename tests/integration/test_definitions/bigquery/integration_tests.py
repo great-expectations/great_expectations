@@ -151,7 +151,7 @@ sample_data = [
 deployment_patterns = [
     IntegrationTestFixture(
         name="deployment_patterns_file_bigquery",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py",
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.BIGQUERY],
     ),

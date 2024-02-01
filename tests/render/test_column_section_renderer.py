@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.core import (
     ExpectationSuite,
 )
@@ -11,6 +12,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation import (
+    Expectation,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -72,6 +76,16 @@ def titanic_validation_results():
         file_relative_path(__file__, "../test_sets/expected_cli_results_default.json"),
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
+
+
+@pytest.fixture
+def fake_expectation_with_description() -> Expectation:
+    class ExpectColumnAgesToBeLegalAdult(gxe.ExpectColumnValuesToBeBetween):
+        column: str = "ages"
+        min_value: int = 18
+        description: str = "column values must be a legal adult age"
+
+    return ExpectColumnAgesToBeLegalAdult()
 
 
 @pytest.mark.smoketest
@@ -1195,6 +1209,20 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
 
 
 @pytest.mark.unit
+def test_ExpectationSuiteColumnSectionRenderer_render_expectation_with_description(
+    fake_expectation_with_description: Expectation,
+):
+    expectation = fake_expectation_with_description
+    result = ExpectationSuiteColumnSectionRenderer().render([expectation.configuration])
+
+    content_block = result.content_blocks[1]
+    content = content_block.bullet_list[0]
+    template = content.string_template["template"]
+
+    assert template == expectation.description
+
+
+@pytest.mark.unit
 def test_ValidationResultsColumnSectionRenderer_render_header(
     titanic_profiled_name_column_evrs,
 ):
@@ -1663,6 +1691,24 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         "header_row_options": {"Status": {"sortable": True}},
         "table_options": {"search": True, "icon-size": "sm"},
     }
+
+
+@pytest.mark.unit
+def test_ValidationResultsTableContentBlockRenderer_render_evr_with_description(
+    fake_expectation_with_description: Expectation,
+):
+    expectation = fake_expectation_with_description
+    evr = ExpectationValidationResult(
+        success=True,
+        expectation_config=expectation.configuration,
+    )
+    result = ValidationResultsColumnSectionRenderer().render([evr])
+
+    content_block = result.content_blocks[1]
+    content = content_block.table[0]
+    template = content.string_template["template"]
+
+    assert template == expectation.description
 
 
 # noinspection PyPep8Naming
