@@ -5,8 +5,8 @@ id: setup_overview_lp
 description: Configure GX in your specific environment.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find information for setting up Great Expectations (GX) in your specific environment.</p>
 

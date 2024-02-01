@@ -546,7 +546,11 @@ class ExpectationConfiguration(SerializableDictDot):
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(
-            id=self.ge_cloud_id, meta=self.meta, notes=self.notes, **self.kwargs
+            id=self.ge_cloud_id,
+            meta=self.meta,
+            notes=self.notes,
+            rendered_content=self.rendered_content,
+            **self.kwargs,
         )
 
     def get_domain_type(self) -> MetricDomainTypes:
