@@ -81,7 +81,6 @@ def test_all_expectations_using_test_definitions():
         "expect_column_pair_cramers_phi_value_to_be_less_than",
         "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
         "expect_column_chisquare_test_p_value_to_be_greater_than",
-        "expect_column_pair_values_A_to_be_greater_than_B",
     }
 
     # Loop over all test_files, datasets, and tests:
