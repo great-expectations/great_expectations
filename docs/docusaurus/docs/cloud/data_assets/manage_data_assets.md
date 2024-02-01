@@ -33,6 +33,8 @@ Create a Data Asset to define the data you want GX Cloud to access. To connect t
   ]}>
 <TabItem value="Snowflake">
 
+Define the data you want GX Cloud to access within Snowflake. 
+
 ### Prerequisites
 
 - You have a Snowflake database, schema, and table.
@@ -42,8 +44,6 @@ Create a Data Asset to define the data you want GX Cloud to access. To connect t
 - You know your Snowflake password.
 
 ### Connect to a Snowflake Data Asset
-
-Create a Data Asset to define the data you want GX Cloud to access within Snowflake. 
 
 1. In GX Cloud, click **Data Assets** > **New Data Asset**.
 
@@ -95,6 +95,8 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
 </TabItem>
 <TabItem value="PostgreSQL">
+
+Define the data you want GX Cloud to access within PostgreSQL.
 
 ### Prerequisites
 
