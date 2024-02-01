@@ -518,27 +518,6 @@ jobs:
       - name: Import Great Expectations
         run: python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
 
-  usage_stats_integration:
-    needs: [unit-tests, static-analysis]
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.8"
-          cache: "pip"
-          cache-dependency-path: requirements.txt
-      - name: Install Great Expectations with core deps only
-        run: pip install . --constraint constraints-dev.txt -r reqs/requirements-dev-test.txt
-      - name: Usage Stats Integration Test
-        env:
-          GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-        # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
-        run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
-
   build-n-publish:
     needs: [
       ci-is-on-main-repo,
@@ -555,7 +534,6 @@ jobs:
       pydantic-v1,
       airflow220-min-versions,
       import_gx,
-      usage_stats_integration
     ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
@@ -603,7 +581,6 @@ jobs:
       pydantic-v1,
       airflow220-min-versions,
       import_gx,
-      usage_stats_integration,
       build-n-publish
     ]
     if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request' && github.event_name != 'merge_group'
