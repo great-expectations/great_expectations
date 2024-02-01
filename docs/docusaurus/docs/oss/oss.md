@@ -8,8 +8,8 @@ slug: '/oss/'
 displayed_sidebar: gx_oss
 ---
 
-import LinkCardGrid from '../components/LinkCardGrid';
-import LinkCard from '../components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">Use GX OSS to connect, test, and validate your Data Assets. If you're ready to get started see <a href='/docs/oss/guides/setup/get_started_lp'>Get started with GX OSS</a>.
 

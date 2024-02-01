@@ -5,8 +5,8 @@ id: manage_data_assets_lp
 description: Request data from a Data Source and organize Batches in file-based and SQL Data Assets.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find information for managing your Data Assets. A Data Asset is a collection of records within a Data Source that define how Great Expectations (GX) organizes data into Batches </p>
 

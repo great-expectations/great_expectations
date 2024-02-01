@@ -3727,7 +3727,7 @@ def profiler_rules() -> dict:
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
