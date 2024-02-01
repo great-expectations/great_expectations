@@ -87,6 +87,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# TODO Migrate to BaseSettings and support conffile
+class GxCloudConfigEnvVars(BaseModel):
+    GX_CLOUD_BASE_URL: Optional[HttpUrl] = CLOUD_DEFAULT_BASE_URL
+    GX_CLOUD_ACCESS_TOKEN: SecretStr
+    GX_CLOUD_ORGANIZATION_ID: UUID
 
 def _extract_fluent_datasources(config_dict: dict) -> dict:
     """
@@ -232,12 +237,15 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             bool: Is all the information needed to build a cloud_config is available?
         """
-        cloud_config_dict = cls._get_cloud_config_dict(
-            cloud_base_url=cloud_base_url,
-            cloud_access_token=cloud_access_token,
-            cloud_organization_id=cloud_organization_id,
-        )
-        return all(val for val in cloud_config_dict.values())
+        try:
+            _ = cls._get_cloud_config(
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
+            )
+        except ValueError as e:
+            return False
+        return True
 
     @classmethod
     def determine_context_root_directory(
@@ -325,44 +333,37 @@ class CloudDataContext(SerializableDataContext):
         Raises:
             GXCloudError if a GX Cloud variable is missing
         """
-        cloud_config_dict = cls._get_cloud_config_dict(
-            cloud_base_url=cloud_base_url,
-            cloud_access_token=cloud_access_token,
-            cloud_organization_id=cloud_organization_id,
-        )
+        try:
 
-        missing_keys = []
-        for key, val in cloud_config_dict.items():
-            if not val:
-                missing_keys.append(key)
-        if len(missing_keys) > 0:
-            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            cloud_config_env_vars = cls._get_cloud_config(
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
+            )
+
+        except ValueError as e:
             global_config_path_str = [
                 f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
             ]
             raise DataContextError(
-                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                # TODO Consider adding in missing keys
+                f"arg(s) required for ge_cloud_mode but neither provided nor found in "
                 f"environment or in global configs ({(', ').join(global_config_path_str)})."
-            )
-
-        base_url = cloud_config_dict[GXCloudEnvironmentVariable.BASE_URL]
-        assert base_url is not None
-        access_token = cloud_config_dict[GXCloudEnvironmentVariable.ACCESS_TOKEN]
-        organization_id = cloud_config_dict[GXCloudEnvironmentVariable.ORGANIZATION_ID]
+            ) from e
 
         return GXCloudConfig(
-            base_url=base_url,
-            access_token=access_token,
-            organization_id=organization_id,
+            base_url=cloud_config_env_vars.GX_CLOUD_BASE_URL,
+            access_token=cloud_config_env_vars.ACCESS_TOKEN,
+            organization_id=cloud_config_env_vars.GX_CLOUD_ORGANIZATION_ID,
         )
 
     @classmethod
-    def _get_cloud_config_dict(
+    def _get_cloud_config(
         cls,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-    ) -> Dict[GXCloudEnvironmentVariable, Optional[str]]:
+    ) -> GxCloudConfigEnvVars:
         cloud_base_url = (
             cloud_base_url
             or cls._get_cloud_env_var(
@@ -385,11 +386,16 @@ class CloudDataContext(SerializableDataContext):
             conf_file_section="ge_cloud_config",
             conf_file_option="access_token",
         )
-        return {
+        config_dict ={
             GXCloudEnvironmentVariable.BASE_URL: cloud_base_url,
             GXCloudEnvironmentVariable.ORGANIZATION_ID: cloud_organization_id,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: cloud_access_token,
         }
+        try:
+            config = GxCloudConfigEnvVars(**config_dict)
+        except ValidationError as e:
+            raise ValueError("Invalid GX Cloud configuration") from e
+        return config
 
     @classmethod
     def _get_cloud_env_var(
