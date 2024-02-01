@@ -1,13 +1,5 @@
-.tabs-container .margin-vert--md{
-  margin-top: 0 !important;
-}
-
 div[role="tabpanel"]{
   --ifm-code-background: var(--ifm-alert-background-color-highlight);
-  border-radius: 0;
-  box-shadow:none;
-  border-top: 0;
-  padding: 0;
 }
 
 .tabs {
