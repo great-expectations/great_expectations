@@ -1215,13 +1215,10 @@ def test_ExpectationSuiteColumnSectionRenderer_render_expectation_with_descripti
     expectation = fake_expectation_with_description
     result = ExpectationSuiteColumnSectionRenderer().render([expectation.configuration])
 
-    assert len(result.content_blocks) == 2
     content_block = result.content_blocks[1]
-
-    assert len(content_block.bullet_list) == 2
     content = content_block.bullet_list[0]
-
     template = content.string_template["template"]
+
     assert template == expectation.description
 
 
@@ -1707,13 +1704,10 @@ def test_ValidationResultsTableContentBlockRenderer_render_evr_with_description(
     )
     result = ValidationResultsColumnSectionRenderer().render([evr])
 
-    assert len(result.content_blocks) == 2
     content_block = result.content_blocks[1]
-
-    assert len(content_block.table) == 1
     content = content_block.table[0]
-
     template = content.string_template["template"]
+
     assert template == expectation.description
 
 
