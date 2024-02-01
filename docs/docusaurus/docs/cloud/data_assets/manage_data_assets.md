@@ -124,7 +124,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique within a Data Source.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
