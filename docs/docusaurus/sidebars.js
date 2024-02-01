@@ -18,11 +18,6 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Workflow optimization',
-              href: '/docs/cloud/about_gx#workflow-optimization',
-            },
-            {
-              type: 'link',
               label: 'GX Cloud workflow',
               href: '/docs/cloud/about_gx#gx-cloud-workflow',
             },

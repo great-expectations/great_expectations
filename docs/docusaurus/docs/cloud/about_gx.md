@@ -81,18 +81,6 @@ For example, you might opt to run and interact with the GX OSS client locally to
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
 
-## Workflow optimization
-
-GX Cloud helps you get started faster and simplifies your data Validation workflows. Here's how:
-
-- You can identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
-
-- You can reuse or modify your Expectations as your business requirements change. No need to create new Expectations every time you need to validate your data.
-
-- You can execute Validations with the click of a button and get your results immediately.
-
-- You can share Validation data quickly and make it accessible to all users regardless of their technical knowledge.
-
 ## GX Cloud workflow
 
 The GX Cloud workflow is a sequence of tasks you complete to perform Data Validations. 
@@ -103,7 +91,7 @@ The following table lists the sequence of tasks that you complete in a typical G
 
 | Task                                     | Description                                                        |
 |------------------------------------------|--------------------------------------------------------------------|
-|[Connect GX Cloud](connect/connect_lp.md) | Set up your deployment environment to get the most out of GX Cloud. Do it once, and you don't need to do it again. If you're not ready to use GX Cloud in your deployment environment, see [Try GX Cloud](./try_gx_cloud.md).                                   | 
+|[Connect GX Cloud](./connect/connect_lp.md) | Set up your deployment environment to get the most out of GX Cloud. Do it once, and you don't need to do it again. If you're not ready to use GX Cloud in your deployment environment, see [Try GX Cloud](./try_gx_cloud.md).                                   | 
 | [Connect to a Data Asset on a Data Source](./data_assets/manage_data_assets.md#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
 | [Create an Expectation](./expectations/manage_expectations.md)    | Define verifiable assertions about your data.                       |  
 | [Run Validations](./validations/manage_validations.md)                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       |
