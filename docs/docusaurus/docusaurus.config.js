@@ -137,6 +137,29 @@ module.exports = {
           position: 'right'
         },
         {
+          type: 'dropdown',
+          label: 'Resources',
+          items: [
+            {
+              label: 'How to get support',
+              to: '/docs/how_to_get_support'
+            },
+            {
+              label: 'Expectations Gallery',
+              to: 'https://greatexpectations.io/expectations'
+            },
+            {
+              label: 'Integration Support Policy',
+              to: '/docs/application_integration_support'
+            },
+            {
+              label: 'Community',
+              to: 'https://greatexpectations.io/community'
+            }
+          ],
+          position: 'right'
+        },
+        {
           to: 'https://greatexpectations.io/cloud',
           label: 'Sign up for GX Cloud',
           position: 'left',

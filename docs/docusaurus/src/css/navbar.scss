@@ -46,6 +46,7 @@
 }
 
 .navbar__items--right {
+  align-items: end;
   background-color: var(--navbar-background-color);
   border-bottom: 1px solid var(--gray-200);
   grid-row-start: 2;
@@ -54,11 +55,19 @@
 
   .navbar__item {
     margin: 0 0.5em;
-    padding: 0.75em var(--ifm-navbar-padding-horizontal) 0.5em;
+    padding: 0.5em var(--ifm-navbar-padding-horizontal);
+
+    &:last-child {
+      margin-left: auto;
+    }
+  }
+
+  .navbar__link {
+    text-transform: unset;
   }
 }
 
-.navbar__item.dropdown {
+.navbar__inner > div:first-child .navbar__item.dropdown {
   border: 1px solid var(--ifm-color-primary);
   border-radius: 6px;
   margin-right: auto;
