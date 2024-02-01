@@ -1,5 +1,5 @@
 {
-  "expectation_type" : "expect_column_pair_values_A_to_be_greater_than_B",
+  "expectation_type" : "expect_column_pair_values_a_to_be_greater_than_b",
   "datasets" : [{
     "dataset_name": "expect_column_pair_values_A_to_be_greater_than_B_1",
     "data" : {

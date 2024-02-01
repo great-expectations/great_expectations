@@ -5,8 +5,8 @@ id: actions_lp
 description: Configure Actions to send Validation Result notifications, update Data Docs, and store Validation Results.
 ---
 
-import LinkCardGrid from '../../../../components/LinkCardGrid';
-import LinkCard from '../../../../components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find information about using Actions to send Validation Result notifications, update Data Docs, and store Validation Results.</p>
 

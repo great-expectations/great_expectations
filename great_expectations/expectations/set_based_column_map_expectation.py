@@ -265,7 +265,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
