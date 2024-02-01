@@ -4,13 +4,12 @@ import logging
 import traceback
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
-    LegacyRendererType,
     RenderedTableContent,
 )
 from great_expectations.render.renderer.content_block.expectation_string import (
@@ -92,14 +91,20 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
             content_block.styling = styling
 
+    @override
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
+    def _get_content_block_fn(  # noqa: PLR0915
+        cls,
+        expectation_type: str,
+        expectation_config: ExpectationConfiguration | None = None,
+    ) -> Callable | None:
+        content_block_fn = super()._get_content_block_fn(
+            expectation_type=expectation_type, expectation_config=expectation_config
         )
-        expectation_string_fn = (
-            expectation_string_fn[1] if expectation_string_fn else None
-        )
+        if content_block_fn == cls._render_expectation_description:
+            return content_block_fn
+
+        expectation_string_fn = content_block_fn
         if expectation_string_fn is None:
             expectation_string_fn = cls._get_legacy_v2_api_style_expectation_string_fn(
                 expectation_type
