@@ -135,7 +135,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 4. Connect to your Data
 
-The remaining sections in Part 1 contain descriptions of [how to connect to your data in Google Cloud Storage (GCS) or BigQuery](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data) and build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that you'll migrate to Google Cloud Composer. 
+The remaining sections in Part 1 contain descriptions of [how to connect to your data in Google Cloud Storage (GCS) or BigQuery](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data) and build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that you'll migrate to Google Cloud Composer. 
 
 More details can be found in the corresponding How to Guides, which have been linked.
 
@@ -173,7 +173,7 @@ Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Cont
 
 In the example, we have created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
 
-To configure the BigQuery Data Source, see [How to connect to a BigQuery database](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
+To configure the BigQuery Data Source, see [How to connect to a BigQuery database](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
 
 </TabItem>
 </Tabs>
