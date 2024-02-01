@@ -40,7 +40,7 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 - **GX Cloud message broker** - Enables communication between GX Cloud and the GX Agent.
 
-### Local and deployment components
+### Deployment components
 
 - **GX OSS client** - The Python library that powers GX Cloud and provides a Python client for programmatic access to GX Cloud. GX OSS contains the logic needed to test and document your organization's data, and you can also use it to create, manage, and interact with GX Cloud components.
 
@@ -50,17 +50,17 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 The GX Agent is an intermediary between GX Cloud and your organization's data stores. The GX Agent performs jobs initiated from the GX Cloud web UI; GX Cloud does not connect directly to your data. All data access occurs within the GX Agent, and the GX Agent sends job results to GX Cloud.
 
-The GX Agent is [typically deployed in your organization's cloud services environment](./connect/connect_snowflake.md#deploy-the-gx-agent) and serves all GX Cloud users within your organization. It can be run as part of development or production workflows.
+The GX Agent is [typically deployed in your organization's deployment environment](./connect/connect_lp) and serves all GX Cloud users within your organization. It can be run as part of your development or production workflows.
 
 ## GX Cloud deployment patterns
 
-GX Cloud deployments can be tailored to meet your specific business requirements. The two factors that determine the deployment pattern and GX architectural components most suitable for your organization are:
-* The intermediary between GX Cloud and your data, and the environment in which it runs
-* How your users interact with GX Cloud
+GX Cloud deployments can be tailored to meet your specific business requirements. To determine which deployment pattern and GX architectural components are most suitable for your organization, consider the following:
+* Do you want the GX Agent to be self-hosted or org-hosted?
+* How do you want users to interact with GX Cloud?
 
 ### GX Cloud intermediary access to data
 
-| Access | GX Agent | GX OSS client |
+| Deployment method | GX Agent | GX OSS client |
 | :-- | :--: | :--: |
 | Org-hosted | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> (Deployment environment) | |
 | Self-hosted | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> (Local environment) | |
@@ -69,25 +69,25 @@ GX Cloud deployments can be tailored to meet your specific business requirements
 
 ### User interaction with GX Cloud
 
-| Interaction | GX Cloud web UI | GX OSS client |
+| Access Method | GX Cloud | GX OSS client |
 | :-- | :--: | :--: |
-| UI-based | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | |
+| UI | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | |
 | Programmatic | | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div>  |
-| UI-based and programmatic | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> |
+| UI and programmatic | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> |
 
 
 ### Org-hosted deployment pattern
-In an org-hosted deployment, you run the GX Agent in your organization's deployment environment, such as development or production. The GX Agent serves as an intermediary between GX Cloud and your organization data stores available in the deployment environment. Organization users interact with GX Cloud using the web UI and/or using the GX OSS client.
+In an org-hosted deployment, you run the GX Agent in your organization's deployment development or production environment. The GX Agent is an intermediary between GX Cloud and your organization's deployment environment data stores. Organization users can interact with GX Cloud using the web UI, the GX OSS client, or both.
 
 ![GX Cloud org-hosted deployment](./architecture_deployment_images/org_hosted_deployment.png)
 
 ### Self-hosted deployment pattern
-In a self-hosted deployment, you run the GX Agent in your local environment, such as on a laptop, using Docker. The GX Agent serves as an intermediary between GX Cloud and your locally available data stores. You can interact with GX Cloud using the web UI, the GX OSS client, or both.
+In a self-hosted deployment, you use Docker to run the GX Agent in your local environment. The GX Agent is an intermediary between GX Cloud and your local data stores. You can interact with GX Cloud using the web UI, the GX OSS client, or both.
 
 ![GX Cloud self-hosted deployment](./architecture_deployment_images/self_hosted_deployment.png)
 
 ### Orchestrated deployment pattern
-In an orchestrated deployment pattern, you use the GX OSS client as an intermediary to access your organization's data stores and to store job results in GX Cloud. The GX OSS client can be run using an orchestrator to integrate GX Cloud into your existing data pipeline. Users can interact with GX Cloud using the web UI and/or using the GX OSS client.
+In an orchestrated deployment pattern, you use an orchestrator to integrate GX Cloud into your existing data pipeline. You use the GX OSS client to access your organization's data stores and to store job results in GX Cloud. Users can interact with GX Cloud using the web UI, the GX OSS client, or both.
 
 ![GX Cloud orchestrated deployment](./architecture_deployment_images/orchestrated_deployment.png)
 

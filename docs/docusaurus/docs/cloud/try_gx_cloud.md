@@ -21,9 +21,9 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
-## Self-hosted deployment pattern
+## Self-hosted deployment
 
-To try GX Cloud, you will use a [self-hosted deployment pattern](./about_gx#self-hosted-deployment-pattern) to run the GX Agent locally via Docker, connect the GX Agent to your target data stores, and use the GX Cloud web UI to define your Data Assets and validate your data. This architecture is suited for an exploratory use case and differs from the recommended production setup, in which the GX Agent [runs in your organization's deployment environment](./about_gx.md#org-hosted-deployment-pattern).
+To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX cloud features and functionality and it differs from the recommended [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern), in which the GX Agent runs in your organization's deployment environment.
 
 ## Get your user access token and copy your organization ID
 
