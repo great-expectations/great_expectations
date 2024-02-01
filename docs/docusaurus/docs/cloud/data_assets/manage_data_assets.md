@@ -6,6 +6,9 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
+import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs';
+
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
 
 To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_asset.md).
