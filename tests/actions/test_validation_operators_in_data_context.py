@@ -40,7 +40,7 @@ def validation_operators_data_context(
             }
         },
     )
-    data_context.suites.add(ExpectationSuite("f1.foo"))
+    data_context.add_expectation_suite("f1.foo")
 
     df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
@@ -55,10 +55,10 @@ def validation_operators_data_context(
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
     failure_expectations.expectation_suite_name = "f1.failure"
-    data_context.suites.add(ExpectationSuite(name=failure_expectations))
+    data_context.add_expectation_suite(expectation_suite=failure_expectations)
 
     warning_expectations.expectation_suite_name = "f1.warning"
-    data_context.suites.add(ExpectationSuite(name=warning_expectations))
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
 
     return data_context
 
