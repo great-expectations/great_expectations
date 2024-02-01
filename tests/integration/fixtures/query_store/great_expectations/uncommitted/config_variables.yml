@@ -1,0 +1,7 @@
+my_query_store_creds:
+  drivername: postgresql
+  host: localhost
+  port: 5432
+  username: postgres
+  password:
+  database: test_ci
