@@ -13,7 +13,7 @@ Missingness Data Assistant functionality is [Experimental](/oss/contributing/con
 
 Use the information provided here to learn how you can use the Missingness Data Assistant to profile your data and automate the creation of an Expectation Suite.
 
-All the code used in the examples is available in GitHub at this location: [how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py).
+All the code used in the examples is available in GitHub at this location: [how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py).
 
 ## Prerequisites
 
@@ -31,12 +31,12 @@ In the following examples, you'll be using existing New York taxi trip data to c
 
 This is the `Data Source` configuration:
  
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py datasource_config"
+```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py datasource_config"
 ```
 
 This is the `Validator` configuration:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py validator"
+```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py validator"
 ```
 
 :::caution
@@ -49,12 +49,12 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. T
 
 1. Run the following code to define the columns to exclude:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py exclude_column_names"
+  ```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py exclude_column_names"
   ```
 
 2. Run the following code to run the Missingness Data Assistant:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py data_assistant_result"
+  ```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py data_assistant_result"
   ```
 
   In this example, `context` is your Data Context instance.
@@ -75,13 +75,13 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. T
 
 After executing the Missingness Data Assistant's `run(...)` method and generating Expectations for your data, run the following code to generate an Expectation Suite and save it to your Validator:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_validator"
+  ```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_validator"
   ```
 ## Test your Expectation Suite
 
 Run the following code to use a Checkpoint to operate with the Expectation Suite and Validator that you defined:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
+  ```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
   ```
 
 You can check the `"success"` key of the Checkpoint's results to verify that your Expectation Suite worked.
@@ -90,7 +90,7 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 1. Run the following code to view Batch-level visualizations of the Metrics computed by the Missingness Data Assistant:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_metrics"
+  ```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_metrics"
   ```
 
   ![Plot Metrics](/docs/oss/images/data_assistant_plot_metrics.png)
@@ -101,7 +101,7 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 2. Run the following command to view the Expectations produced and grouped by Expectation type:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_expectation_type"
+  ```python name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_expectation_type"
   ```
 
 ## Edit your Expectation Suite (Optional)
