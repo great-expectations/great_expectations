@@ -13,7 +13,7 @@ All the code used in the examples is available in GitHub at this location: [how_
 
 <Prerequisites>
 
-- A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+- A [configured Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
@@ -132,5 +132,5 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 The Onboarding Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary. It is also possible that you may possess some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
 
-To edit an existing Expectation Suite, see [Edit an Expectation Suite](/docs/guides/expectations/how_to_edit_an_existing_expectationsuite).
+To edit an existing Expectation Suite, see [Edit an Expectation Suite](/guides/expectations/how_to_edit_an_existing_expectationsuite.md).
 

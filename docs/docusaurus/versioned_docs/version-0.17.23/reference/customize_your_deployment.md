@@ -27,7 +27,7 @@ The simplest way to manage your Great Expectations configuration is usually by c
 Here’s how to handle each of those cases:
 
 * [Configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
-* [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
+* [Instantiate an Ephemeral Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md)
 
 ## Options for storing Expectations
 
