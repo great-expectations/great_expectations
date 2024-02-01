@@ -110,7 +110,7 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
     data = {
         "class_name": "ExpectationConfigurationBuilder",
-        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     }
     schema = ExpectationConfigurationBuilderConfigSchema()
     config = schema.load(data)
@@ -124,7 +124,7 @@ def test_expectation_configuration_builder_config_successfully_loads_with_requir
 
 def test_expectation_configuration_builder_config_successfully_loads_with_optional_args():
     data = {
-        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
         "class_name": "ExpectationConfigurationBuilder",
         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
         "mostly": 0.9,
@@ -158,7 +158,7 @@ def test_rule_config_successfully_loads_with_required_args():
         "expectation_configuration_builders": [
             {
                 "class_name": "ExpectationConfigurationBuilder",
-                "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
             }
         ],
     }
@@ -201,7 +201,7 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
                 "expectation_configuration_builders": [
                     {
                         "class_name": "ExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     }
                 ],
             },
@@ -229,7 +229,7 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
                 "expectation_configuration_builders": [
                     {
                         "class_name": "ExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     }
                 ],
             },
@@ -272,7 +272,7 @@ def test_rule_based_profiler_from_commented_map():
                 "expectation_configuration_builders": [
                     {
                         "class_name": "ExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     }
                 ],
             },

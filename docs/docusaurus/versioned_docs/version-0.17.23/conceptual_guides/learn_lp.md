@@ -5,8 +5,8 @@ id: learn_lp
 description: Longer format conceptual information about Great Expectations features and functionality.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">Use longer format conceptual information to learn more about Great Expectations (GX) features and functionality.</p>
 
