@@ -1,0 +1,155 @@
+/* CSS for the Feedback Card */
+
+.feedbackCard {
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    box-shadow: 0 3px 6px -1px var(--gray-300);
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin: auto;
+    padding: 1rem;
+    width: 40%;
+}
+
+.feedbackCardTitle {
+    margin: auto;
+}
+
+.feedbackCardBody {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    margin: auto;
+}
+
+.feedbackIcon {
+    border: 1px solid var(--ifm-color-primary);
+    border-radius: 50%;
+    height: 50px;
+    padding: 5px;
+}
+
+.feedbackIcon:hover {
+    background-color: var(--orange-200);
+    cursor: pointer;
+}
+
+/* CSS for the Feedback Modal */
+
+.darkBackground {
+    background-color: rgba(0, 0, 0, 0.3);
+    height: 100vh;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100vw;
+    z-index: 0;
+}
+
+.centered {
+    left: 50%;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+}
+
+.modal {
+    background: var(--white);
+    border: 3px solid #272763;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px -1px rgb(0,0,0,0.1);
+    color: var(--white);
+}
+
+.modalHeader {
+    align-items: center;
+    background-color: #272763;
+    color: white;
+    display: flex;
+    margin: 0;
+    overflow: hidden;
+    padding: 10px;
+}
+
+.modalHeaderTitle {
+    flex: 1;
+    text-align: center;
+}
+
+.modalHeaderCloseButton {
+    align-self: flex-end;
+    cursor: pointer;
+    height: 8px;
+    margin: auto;
+}
+
+.modalContent {
+    padding: 1rem 2rem;
+    color: var(--ifm-font-color-base);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.textInputs{
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+}
+
+.modalTextContainer {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    flex: 1;
+}
+
+.modalTextLabel {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--gray-700);
+    margin-bottom: 0.25rem;
+}
+
+.modalTextInput {
+    border: 1px solid var(--gray-700);
+    border-radius: 20px;
+    height: 2.25rem;
+    padding: 0.75rem;
+    outline: none;
+    color: var(--ifm-font-color-base);
+}
+
+.modalTextareaInput {
+    min-height: 10rem;
+}
+
+.modalTextInput:active, .modalTextInput:focus, .modalTextInput:hover {
+    border: 1px solid var(--ifm-color-primary);
+}
+
+.modalActions {
+    display: flex;
+}
+
+.submitButton {
+    flex: 1;
+    border-radius: 20px;
+    background-color: var(--ifm-color-primary);
+    font-weight: bold;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    padding: 0.75rem;
+    margin: 1rem 2rem 2rem;
+
+}
+
+.submitButton:hover {
+    background-color: #DE550A;
+}

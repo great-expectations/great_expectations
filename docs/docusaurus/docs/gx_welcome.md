@@ -10,6 +10,7 @@ slug: /home/
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
 import GXCard from '@site/src/components/GXCard';
+import FeedbackModal from '@site/src/components/FeedbackModal';
 
 # Great Expectations documentation
 
@@ -27,3 +28,5 @@ import GXCard from '@site/src/components/GXCard';
   <LinkCard topIcon label="View GX APIs" description="View our available APIs." to="/reference/api" icon="/img/api_icon.svg" />
   <LinkCard topIcon label="Learn more about GX OSS features" description="Use tutorials and conceptual topics to learn everything you need to know about GX OSS features and functionality." to="/reference/learn" icon="/img/overview_icon.svg" />
 </LinkCardGrid>
+
+<FeedbackModal/>
