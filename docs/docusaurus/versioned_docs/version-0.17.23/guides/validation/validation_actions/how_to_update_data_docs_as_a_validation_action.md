@@ -3,7 +3,7 @@ title: Update Data Docs after Validating a Checkpoint
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new <TechnicalTag tag="validation_result" text="Validation Results" /> from running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 

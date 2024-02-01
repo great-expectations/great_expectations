@@ -6,14 +6,14 @@ keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration m
 ---
 
 <!-- ## Prerequisites -->
-import Prerequisites from '/docs/components/_prerequisites.jsx'
+import Prerequisites from '../../../../components/_prerequisites.jsx'
 
 <!-- ### Import GX and instantiate a Data Context -->
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import ImportGxAndInstantiateADataContext from '../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
 
 <!-- ### Retrieve existing DataAsset from existing Datsource -->
-import GetExistingDataAssetFromExistingDatasource from '/docs/components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
+import GetExistingDataAssetFromExistingDatasource from '../../../../components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
 
 Learn how you can request data from a Data Source that has been defined with the `context.sources.add_*` method.
 

@@ -3,7 +3,7 @@ title: Validate data with Expectations and Checkpoints
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 This guide will help you pass an in-memory DataFrame to a <TechnicalTag tag="checkpoint" text="Checkpoint" /> that is defined at runtime. This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
 

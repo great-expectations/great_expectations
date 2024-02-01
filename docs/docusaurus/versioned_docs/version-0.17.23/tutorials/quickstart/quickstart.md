@@ -3,10 +3,10 @@ sidebar_label: 'Quickstart'
 title: Quickstart
 tag: [tutorial, getting started]
 ---
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrereqPython from '/docs/components/prerequisites/_python_version.md'
-import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
-import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
+import Prerequisites from '../../components/_prerequisites.jsx'
+import PrereqPython from '../../components/prerequisites/_python_version.md'
+import SetupAndInstallGx from '../../components/setup/link_lists/_setup_and_install_gx.md'
+import DataContextInitializeInstantiateSave from '../../components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
 Use this quickstart to install GX, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](../getting_started/how_to_use_great_expectations_in_databricks.md) or [Get Started with GX and SQL](../getting_started/how_to_use_great_expectations_with_sql.md).
 

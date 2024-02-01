@@ -2,7 +2,7 @@
 title: Use Data Docs URLs in custom Validation Actions
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 To create a custom Validation Action that includes a link to the <TechnicalTag tag="data_docs" text="Data Docs"/>,
 you get the Data Docs URL for the <TechnicalTag tag="validation_result" text="Validation Results"/> page from your Validation Results after you run a <TechnicalTag tag="checkpoint" text="Checkpoint"/>. This method returns the URLs for any type of Data Docs site setup including S3 or a local setup.
