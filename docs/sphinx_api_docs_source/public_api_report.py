@@ -892,8 +892,16 @@ def generate_public_api_report(write_to_file: bool = False) -> None:
 
     missing_from_the_public_api = public_api_report.generate_printable_definitions()
 
-    num_missing_msg = f"There are {len(missing_from_the_public_api)} items referenced in documentation that are not marked with the @public_api decorator and thus not rendered as part of our public API documentation."
-    logger.info(num_missing_msg)
+    missing_threshold = len(
+        public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+    )  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
+
+    logger.info(
+        f"Number of items referenced in docs not decorated with @public_api: {len(missing_from_the_public_api)}"
+    )
+    logger.info(
+        f"Number of items we allow to to be missing the decorator: {missing_threshold}."
+    )
     # The missing_threshold should be reduced and kept at 0. Please do
     # not increase this threshold, but instead add to the public API by decorating
     # any methods or classes you are adding to documentation with the @public_api
@@ -911,22 +919,19 @@ def generate_public_api_report(write_to_file: bool = False) -> None:
         public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
     ) - set(missing_from_the_public_api)
 
-    error_msg_prefix = f"There are {len(missing_from_the_public_api)} items missing from the public API, we currently allow {missing_threshold}."
     if undocumented_and_unignored:
-        logger.error(f"{error_msg_prefix} Please add to the public API.")
         logger.error(
-            f"The {len(undocumented_and_unignored)} items missing from the public API that are not accounted for are as follows:"
+            f"Items are missing from the public API: {len(undocumented_and_unignored)}"
         )
         for item in sorted(undocumented_and_unignored):
-            logger.error(item)
+            logger.error(" - " + item)
         has_errors = True
     if documented_and_ignored:
-        logger.error(f"{error_msg_prefix} Please reduce the threshold.")
         logger.error(
-            f"The {len(documented_and_ignored)} items that are now accounted for and should be removed from the threshold list in docs/sphinx_api_docs_source/public_api_missing_threshold.py are:"
+            f"Items that should be removed from public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API: {len(documented_and_ignored)}"
         )
         for item in sorted(documented_and_ignored):
-            logger.error(item)
+            logger.error(" - " + item)
         has_errors = True
 
     if has_errors:
