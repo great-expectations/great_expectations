@@ -64,6 +64,4 @@ GX provides the following resources for questions and support:
 
 - If you've found a bug, open an issue in one of the [GX GitHub repositories](https://github.com/great-expectations).
 
-- You can email us at [support@greatexpectations.io](mailto:support@greatexpectations.io).
-
 
