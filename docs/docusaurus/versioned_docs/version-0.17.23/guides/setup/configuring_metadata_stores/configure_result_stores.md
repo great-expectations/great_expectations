@@ -14,7 +14,7 @@ import IdentifyYourDataContextValidationResultsStore from './components_how_to_c
 import UpdateYourConfigurationFileToIncludeANewStoreForValidationResultsOnS from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
 import CopyExistingValidationResultsToTheSBucketThisStepIsOptional from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_copy_existing_validation_results_to_the_s_bucket_this_step_is_optional.mdx'
 import ConfirmThatTheValidationsResultsStoreHasBeenCorrectlyConfigured from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_validations_results_store_has_been_correctly_configured.mdx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -72,9 +72,9 @@ Use the information provided here to configure a new storage location for Valida
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+- [A Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+- [A Checkpoint](/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
 - An Azure Blob container. If you want to [host and share Data Docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/host_and_share_data_docs.md), you can set this up first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
 - A prefix (folder) to store Validation Results. You don't need to create the folder, the prefix is just part of the Blob name.
@@ -153,7 +153,7 @@ To make Great Expectations look for Validation Results on the Azure store, set t
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint) to store results in the new Validation Results Store on Azure Blob and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
+[Run a Checkpoint](/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md) to store results in the new Validation Results Store on Azure Blob and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 
 </TabItem>
 <TabItem value="gcs">
@@ -168,9 +168,9 @@ To view all the code used in this topic, see [how_to_configure_a_validation_resu
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+- [A Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+- [A Checkpoint](/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Validation Results.
 
@@ -223,7 +223,7 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/docs/guides/validation//checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
+[Run a Checkpoint](/guides/validation//checkpoints/how_to_create_a_new_checkpoint.md#run-your-checkpoint-optional) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/terms/data_docs.md).
 
 </TabItem>
 <TabItem value="filesystem">
@@ -236,8 +236,8 @@ Use the information provided here to configure a new storage location for Valida
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectation Suite ](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectation Suite ](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [A Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - A new storage location to store Validation Results. This can be a local path, or a path to a secure network filesystem.
 
@@ -288,7 +288,7 @@ stores:
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
+Run a [Checkpoint](/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md#run-your-checkpoint-optional) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
 
 </TabItem>
 <TabItem value="postgresql">
@@ -301,9 +301,9 @@ Use the information provided here to configure Great Expectations to store Valid
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+- [A Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+- [A Checkpoint](/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - [A PostgreSQL database](https://www.postgresql.org/) with appropriate credentials.
 
 </Prerequisites>
@@ -399,7 +399,7 @@ store_backend:
 
 ### Confirm the Validation Results Store is configured correctly
 
-[Run a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
+[Run a Checkpoint](/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md#run-your-checkpoint-optional) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 
 Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
 

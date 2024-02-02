@@ -97,10 +97,6 @@ module.exports = {
       },
       items: [
         {
-          type: 'search',
-          position: 'right',
-        },
-        {
           type: 'docsVersionDropdown',
           position: 'left',
           dropdownItemsAfter: [
@@ -112,29 +108,38 @@ module.exports = {
           dropdownActiveClassDisabled: true,
         },
         {
-          label: 'HOME',
-          to: '/docs/home/',
+          type: 'search',
+          position: 'left',
         },
         {
-          label: 'GX CLOUD',
+          label: 'Home',
+          to: '/docs/home/',
+          position: 'right'
+        },
+        {
+          label: 'GX Cloud',
           to: '/docs/cloud/',
+          position: 'right'
         },
         {
           label: 'GX OSS',
           to: '/docs/oss/',
+          position: 'right'
         },
         {
-          label: 'GX API',
-          to: '/docs/reference/api',
-        },
-        {
-          label: 'LEARN',
+          label: 'Learn',
           to: '/docs/reference/learn/',
+          position: 'right'
+        },
+        {
+          label: 'API',
+          to: '/docs/reference/api',
+          position: 'right'
         },
         {
           to: 'https://greatexpectations.io/cloud',
           label: 'Sign up for GX Cloud',
-          position: 'right',
+          position: 'left',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
         },

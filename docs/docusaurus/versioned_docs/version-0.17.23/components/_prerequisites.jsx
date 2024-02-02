@@ -1,6 +1,6 @@
 import React from 'react'
-import GxData from '/docs/components/_data.jsx'
 import VersionedLink from '@site/src/components/VersionedLink'
+import GxData from './_data.jsx'
 
 /**
  * A flexible Prerequisites admonition block.
