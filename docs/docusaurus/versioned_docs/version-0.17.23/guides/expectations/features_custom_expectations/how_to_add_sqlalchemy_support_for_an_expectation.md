@@ -4,7 +4,7 @@ title: Add SQLAlchemy support for Custom Expectations
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 This guide will help you implement native SQLAlchemy support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />.
 

@@ -2,7 +2,7 @@
 id: data_assistant
 title: Data Assistant
 ---
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Data Assistant is a pre-configured utility that simplifies the creation of <TechnicalTag tag="expectation" text="Expectations" />. A Data Assistant can help you determine a starting point when working with a large, new, or complex dataset by asking questions and then building a list of relevant <TechnicalTag tag="metric" text="Metrics" /> from the answers to those questions. Branching question paths based on your responses ensure that additional, relevant Metrics are not missed. The result is a comprehensive collection of Metrics that can be saved, reviewed as graphical plots, or used by the Data Assistant to generate a set of proposed Expectations.
 
