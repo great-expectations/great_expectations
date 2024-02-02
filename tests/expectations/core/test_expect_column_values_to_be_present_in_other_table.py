@@ -3,7 +3,7 @@ from typing import Final
 import pandas as pd
 import pytest
 from contrib.experimental.great_expectations_experimental.expectations.expect_column_values_to_be_present_in_other_table import (
-    ExpectColumnValuesToBePresentInAnotherTable,  # needed for expectation registration
+    ExpectColumnValuesToBePresentInOtherTable,  # needed for expectation registration
 )
 
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
@@ -80,7 +80,7 @@ def test_successful_expectation_run(sqlite_datasource):
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_1")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     res = batch.validate(
-        ExpectColumnValuesToBePresentInAnotherTable(
+        ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="CUSTOMER_ID",
             foreign_table="customer_table",
             foreign_table_key_column="CUSTOMER_ID",
@@ -96,7 +96,7 @@ def test_failed_expectation_run(sqlite_datasource):
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     res = batch.validate(
-        ExpectColumnValuesToBePresentInAnotherTable(
+        ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="CUSTOMER_ID",
             foreign_table="customer_table",
             foreign_table_key_column="CUSTOMER_ID",
@@ -122,7 +122,7 @@ def test_configuration_invalid_column_name(sqlite_datasource):
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     res = batch.validate(
-        ExpectColumnValuesToBePresentInAnotherTable(
+        ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="I_DONT_EXIST",
             foreign_table="customer_table",
             foreign_table_key_column="CUSTOMER_ID",
@@ -138,7 +138,7 @@ def test_configuration_invalid_column_name(sqlite_datasource):
 
 @pytest.mark.unit
 def test_template_dict_creation():
-    expectation = ExpectColumnValuesToBePresentInAnotherTable(
+    expectation = ExpectColumnValuesToBePresentInOtherTable(
         foreign_key_column="CUSTOMER_ID",
         foreign_table="customer_table",
         foreign_table_key_column="CUSTOMER_ID",

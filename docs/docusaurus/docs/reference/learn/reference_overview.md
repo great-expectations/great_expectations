@@ -8,8 +8,8 @@ displayed_sidebar: 'learn'
 hide_table_of_contents: true
 ---
 
-import LinkCardGrid from '../../components/LinkCardGrid';
-import LinkCard from '../../components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find supplemental information that will help you get the most out of Great Expectations (GX).</p>
 
