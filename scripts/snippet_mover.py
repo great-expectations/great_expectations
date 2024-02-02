@@ -211,9 +211,11 @@ class SnippetMover:
                 ],
             ]
             for path in paths_to_update:
+                # account for the version prefix
+                version_prefix_len = len(str(self._version_prefix)) + 1
                 self.find_and_replace_text_in_file(
                     path=path,
-                    old_str=str(snippet_module.original_path),
+                    old_str=str(snippet_module.original_path)[version_prefix_len:],
                     new_str=str(snippet_module.new_path),
                 )
 
