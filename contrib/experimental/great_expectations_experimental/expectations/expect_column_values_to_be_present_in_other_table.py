@@ -24,7 +24,7 @@ from great_expectations.compatibility.pydantic import (
 )
 
 
-class ExpectColumnValuesToBePresentInAnotherTable(QueryExpectation):
+class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
     """Expect the values in a column to be present in another table.
 
     This is an Expectation that allows for the validation of referential integrity, that a foreign key exists in
