@@ -3,11 +3,11 @@ sidebar_label: 'Quickstart'
 title: Quickstart
 tag: [tutorial, getting started]
 ---
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrereqPython from '/docs/components/prerequisites/_python_version.md'
-import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
-import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../components/_prerequisites.jsx'
+import PrereqPython from '../../components/prerequisites/_python_version.md'
+import SetupAndInstallGx from '../../components/setup/link_lists/_setup_and_install_gx.md'
+import DataContextInitializeInstantiateSave from '../../components/setup/link_lists/_data_context_initialize_instatiate_save.md'
+import TechnicalTag from '../../reference/learn/term_tags/_tag.mdx';
 
 Use this quickstart to install GX, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](./getting_started/how_to_use_great_expectations_in_databricks.md) or [Get Started with GX and SQL](./getting_started/how_to_use_great_expectations_with_sql.md).
 
@@ -126,8 +126,8 @@ click 7 "#validate-data"
 
 If you're ready to continue your GX journey, the following topics can help you implement a solution for your specific environment and business requirements:
 
-- [Install GX in a specific environment with support for a specific Data Source](/docs/oss/guides/setup/installation/install_gx).
-- [Initialize, instantiate, and save a Data Context](/docs/oss/guides/setup/configure_data_contexts_lp).
-- [Connect to Data Sources](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp).
-- [Create and manage Expectations and Expectation Suites](/docs/oss/guides/expectations/expectations_lp/).
-- [Create, manage, and run Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp/).
+- [Install GX in a specific environment with support for a specific Data Source](/oss/guides/setup/installation/install_gx.md).
+- [Initialize, instantiate, and save a Data Context](/oss/guides/setup/configure_data_contexts_lp.md).
+- [Connect to Data Sources](/oss/guides/connecting_to_your_data/connect_to_data_lp.md).
+- [Create and manage Expectations and Expectation Suites](/oss/guides/expectations/expectations_lp.md).
+- [Create, manage, and run Checkpoints](/oss/guides/validation/checkpoints/checkpoint_lp.md).

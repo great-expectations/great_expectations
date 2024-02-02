@@ -7,11 +7,11 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import TechnicalTag from '/docs/reference/learn/term_tags/_tag.mdx';
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
-import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
-import AdmonitionConvertToFileContext from '/docs/components/setup/data_context/_admonition_convert_to_file_context.md'
+import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import GxImport from '../../../../../components/setup/python_environment/_gx_import.md'
+import DataContextVerifyContents from '../../../../../components/setup/data_context/_data_context_verify_contents.md'
+import AdmonitionConvertToFileContext from '../../../../../components/setup/data_context/_admonition_convert_to_file_context.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -87,7 +87,7 @@ A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost 
 
 Run the following command to initialize your Filesystem Data Context in an empty folder:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
 ```
 
 ### Create a context
@@ -96,7 +96,7 @@ You provide the path for your empty folder to the GX library's `FileDataContext.
 
 For convenience, the `FileDataContext.create(...)` method instantiates and returns the newly initialized Data Context, which you can keep in a Python variable.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py initialize_filesystem_data_context"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.py initialize_filesystem_data_context"
 ```
 
 :::info What if the folder is not empty?
@@ -132,14 +132,14 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 Each Filesystem Data Context has a root folder in which it was initialized.  This root folder identifies the specific Filesystem Data Context to instantiate.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root"
 ```
 
 ### Run the `get_context(...)` method
 
 You provide the path for your empty folder to the GX library's `get_context(...)` method as the `project_root_dir` parameter. Because you are providing a path to an empty folder, the `get_context(...)` method instantiates and return the Data Context at that location.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
 ```
 
 :::info Project root vs context root
@@ -176,7 +176,7 @@ The `get_context(...)` method instantiates and returns the newly initialized Dat
 
 An Ephemeral Data Context is a temporary, in-memory Data Context.  They are ideal for doing data exploration and initial analysis when you do not want to save anything to an existing project, or for when you need to work in a hosted environment such as an EMR Spark Cluster.
 
-An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [How to convert an Ephemeral Data Context to a Filesystem Data Context](/docs/oss/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context).
+An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [How to convert an Ephemeral Data Context to a Filesystem Data Context](/oss/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md).
 
 ### Prerequisites
 
@@ -192,26 +192,26 @@ To create your Data Context, you'll create a configuration that uses in-memory M
 
 1. Run the following command to import the `DataContextConfig` and the `InMemoryStoreBackendDefaults` classes:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend"
+    ```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend"
     ```
 
 2. Run the following command to import the `EphemeralDataContext` class:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context"
+    ```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context"
     ```
 
 ### Create the Data Context configuration
 
 Run the following command to create a Data Context configuration that specifies the use of in-memory Metadata Stores and pass in an instance of the `InMemoryStoreBackendDefaults` class as a parameter when initializing an instance of the `DataContextConfig` class:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend"
+```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend"
 ```
 
 ### Instantiate an Ephemeral Data Context
 
 Run the following command to initialize the `EphemeralDataContext` class while passing in the `DataContextConfig` instance you created as the value of the `project_config` parameter.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context"
+```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context"
 ```
 
 :::info Saving the contents of an Ephemeral Data Context for future use
@@ -231,17 +231,8 @@ Now that you have an Ephemeral Data Context you can connect GX to your Data Sour
 
 ## Next steps
 
-To customize a Data Context configuration for Metadata Stores and Data Docs, see:
-
-- [Configure Expectation Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_expectation_stores)
-- [Configure Validation Result Stores](/docs/oss/guides/setup/configuring_metadata_stores/configure_result_stores)
-- [How to configure and use a Metric Store](/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
-- [How to host and share Data Docs on a filesystem](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs)
-
-To connect GX to a Data Source:
-
-- [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
-- [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
+- [Customize the Data Context configuration for Metadata Stores](/oss/guides/setup/setup_overview_lp.md#install-and-configure)
+- [Customize the Data Context configuration for hosting and sharing Data Docs](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+- [Connect GX to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md)
 
 

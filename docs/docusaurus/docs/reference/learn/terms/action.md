@@ -1,7 +1,7 @@
 ---
 title: Action
 ---
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 An Action is a Python class with a `run()` method that takes a <TechnicalTag relative="../" tag="validation_result" text="Validation Result" /> and does something with it.
 
@@ -87,4 +87,4 @@ action_list:
     class_name: UpdateDataDocsAction
 ```
 
-To configure Actions in a Checkpoint, see [Configure Actions](/docs/oss/guides/validation/validation_actions/actions_lp).
+To configure Actions in a Checkpoint, see [Configure Actions](/oss/guides/validation/validation_actions/actions_lp.md).

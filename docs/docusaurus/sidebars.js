@@ -13,6 +13,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'GX Agent',
+              href: '/docs/cloud/about_gx#gx-agent',
+            },
+            {
+              type: 'link',
               label: 'GX Cloud deployment patterns',
               href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
             },
@@ -43,46 +48,15 @@ module.exports = {
             },
           ]
         },
+        { type: 'doc', id: 'cloud/try_gx_cloud' },
         {
           type: 'category',
-          label: 'Set up GX Cloud',
-          link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
+          label: 'Connect GX Cloud',
+          link: { type: 'doc', id: 'cloud/connect/connect_lp' },
           items: [
-            {
-              type: 'link',
-              label: 'Request a GX Cloud Beta account',
-              href: '/docs/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account',
-            },
-            {
-              type: 'link',
-              label: 'Prepare your environment',
-              href: '/docs/cloud/set_up_gx_cloud#prepare-your-environment',
-            },
-            {
-              type: 'link',
-              label: 'Get your user access token and organization ID',
-              href: '/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id',
-            },
-            {
-              type: 'link',
-              label: 'Set the environment variables and start the GX Cloud agent',
-              href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
-            },
-            {
-              type: 'link',
-              label: 'Secure your GX API Data Source connection strings',
-              href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Quickstarts',
-          link: { type: 'doc', id: 'cloud/quickstarts/quickstart_lp' },
-          items: [
-            'cloud/quickstarts/snowflake_quickstart',
-            'cloud/quickstarts/airflow_quickstart',
-            'cloud/quickstarts/python_quickstart',
+            'cloud/connect/connect_snowflake',
+            'cloud/connect/connect_airflow',
+            'cloud/connect/connect_python',
           ]
         },
         {
@@ -119,6 +93,11 @@ module.exports = {
               type: 'link',
               label: 'Edit a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Secure your GX API Data Source connection strings',
+              href: '/docs/cloud/data_assets/manage_data_assets#secure-your-gx-api-data-source-connection-strings',
             },
             {
               type: 'link',
@@ -447,9 +426,7 @@ module.exports = {
                 id: 'oss/deployment_patterns/aws_lp',
               },
               items: [
-                'oss/deployment_patterns/how_to_use_great_expectations_in_aws_glue',
                 'oss/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
-                'oss/deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
                 'oss/deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas',
                 'oss/deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark',
                 'oss/deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena',
@@ -458,16 +435,9 @@ module.exports = {
             },
             'oss/deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
             'oss/deployment_patterns/how_to_use_great_expectations_with_airflow',
-            'oss/integrations/integration_datahub',
-            'oss/deployment_patterns/how_to_use_great_expectations_in_deepnote',
-            'oss/deployment_patterns/how_to_use_great_expectations_in_flyte',
-            'oss/deployment_patterns/how_to_use_great_expectations_with_meltano',
             'oss/deployment_patterns/how_to_use_great_expectations_with_prefect',
-            'oss/deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
-            'oss/integrations/integration_zenml',
           ]
         },
-        { type: 'doc', id: 'oss/guides/miscellaneous/migration_guide' },
         { type: 'doc', id: 'oss/troubleshooting' },
         'oss/contributing/contributing',
         'oss/get_support',

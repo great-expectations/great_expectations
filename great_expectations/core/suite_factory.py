@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.events import (
+    ExpectationSuiteCreatedEvent,
+    ExpectationSuiteDeletedEvent,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.exceptions import DataContextError
 
@@ -31,6 +36,13 @@ class SuiteFactory:
                 f"Cannot add ExpectationSuite with name {suite.name} because it already exists."
             )
         self._store.add(key=key, value=suite)
+
+        submit_event(
+            event=ExpectationSuiteCreatedEvent(
+                expectation_suite_id=suite.ge_cloud_id,
+            )
+        )
+
         return suite
 
     @public_api
@@ -49,6 +61,13 @@ class SuiteFactory:
                 f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
             )
         self._store.remove_key(key=key)
+
+        submit_event(
+            event=ExpectationSuiteDeletedEvent(
+                expectation_suite_id=suite.ge_cloud_id,
+            )
+        )
+
         return suite
 
     @public_api

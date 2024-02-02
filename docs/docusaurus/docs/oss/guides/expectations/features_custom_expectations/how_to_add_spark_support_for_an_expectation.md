@@ -4,7 +4,7 @@ title: Add Spark support for Custom Expectations
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 This guide will help you implement native Spark support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />. 
 
@@ -29,7 +29,7 @@ To avoid surprises and help clearly define your Custom Expectation, it can be he
 
 Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to use for testing. If a backend is not specified, Great Expectations attempts testing on all supported backends. Run the following command to add entries corresponding to the functionality you want to add: 
     
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -70,7 +70,7 @@ The decorated method takes in a Spark `Column` object and will either return a `
 
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to leverage PySpark's `max` SQL Function and the `@column_aggregate_partial` decorator.
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _spark"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py _spark"
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
@@ -115,7 +115,7 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to implement the `@metric_partial` decorator, 
 specifying the type of value we're computing (`MAP_CONDITION_FN`) and the domain over which we're computing (`COLUMN`):
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_definition"
+```python name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_definition"
 ```
 
 The decorated method takes in a valid Execution Engine and relevant `kwargs`,
@@ -128,12 +128,12 @@ These will be used to execute our query and compute the results of our metric.
 
 To do this, we need to access our Compute Domain directly:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_selectable"
+```python name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_selectable"
 ```
 
 This allows us to build and return a query to be executed, providing the result of our metric:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_query"
+```python name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_query"
 ```
 
 :::note
@@ -177,9 +177,9 @@ For full acceptance into the Great Expectations codebase at a Production level, 
 If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure your Custom Expectation meets these standards.
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
-- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py)
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py)
 :::

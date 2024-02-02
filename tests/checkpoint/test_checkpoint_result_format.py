@@ -9,6 +9,7 @@ import great_expectations.expectations as gxe
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
@@ -318,14 +319,11 @@ def _add_expectations_and_checkpoint(
         checkpoint_config["runtime_configuration"] = dict_to_update_checkpoint
 
     context = data_context
-    context.add_expectation_suite(expectation_suite_name="metrics_exp")
+    context.suites.add(ExpectationSuite(name="metrics_exp"))
     animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
     for expectation in expectations_list:
         animals_suite.add_expectation(expectation=expectation)
-    animals_suite.expectation_suite_name = "metrics_exp"
-    context.add_or_update_expectation_suite(
-        expectation_suite=animals_suite,
-    )
+
     checkpoint_config = CheckpointConfig(**checkpoint_config)
     context.add_checkpoint(
         **filter_properties_dict(
@@ -3513,7 +3511,7 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
 ):
     context = empty_data_context
     expectation_suite_name = "metrics_exp"
-    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.suites.add(ExpectationSuite(name=expectation_suite_name))
 
     data_frame_asset = context.sources.add_pandas(
         name="pandas_datasource"
@@ -3608,8 +3606,10 @@ def test_rendered_content_bool_only_respected(
     )
     batch_request = csv_asset.build_batch_request()
     expectation_suite_name = "test_result_format_suite"
-    context.add_or_update_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
+    context.suites.add(
+        ExpectationSuite(
+            name=expectation_suite_name,
+        )
     )
     validator = context.get_validator(
         batch_request=batch_request,

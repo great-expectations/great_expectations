@@ -3,6 +3,7 @@ import pathlib
 import pytest
 
 from docs.prepare_prior_versions import (
+    Version,
     _prepend_version_info_for_md_absolute_links,
     _prepend_version_info_to_name_for_md_relative_links,
     _prepend_version_info_to_name_for_md_relative_links_to_index_files,
@@ -232,3 +233,31 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
             contents, version
         )
         assert updated_contents == expected_contents
+
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (Version(0, 0, 0), Version(0, 0, 1), True),
+        (Version(0, 0, 0), Version(0, 1, 0), True),
+        (Version(1, 0, 0), Version(0, 1, 0), False),
+    ],
+)
+@pytest.mark.unit
+def test_version__lt(a: Version, b: Version, expected: bool):
+    output = a < b
+    assert output == expected
+
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (Version(0, 0, 0), Version(0, 0, 0), True),
+        (Version(1, 1, 1), Version(1, 1, 1), True),
+        (Version(0, 1, 1), Version(1, 1, 0), False),
+    ],
+)
+@pytest.mark.unit
+def test_version__eq(a: Version, b: Version, expected: bool):
+    output = a == b
+    assert output == expected

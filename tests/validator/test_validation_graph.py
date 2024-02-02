@@ -382,7 +382,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]
-    resolved_metrics, aborted_metrics_info = graph.resolve(
+    _resolved_metrics, aborted_metrics_info = graph.resolve(
         runtime_configuration=runtime_configuration,
         min_graph_edges_pbar_enable=0,
         show_progress_bars=True,
@@ -469,7 +469,7 @@ def test_progress_bar_config(
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
         # noinspection PyUnusedLocal
-        resolved_metrics, aborted_metrics_info = graph.resolve(**call_args)
+        _resolved_metrics, _aborted_metrics_info = graph.resolve(**call_args)
         assert mock_tqdm.called is True
         assert mock_tqdm.call_args[1]["disable"] is are_progress_bars_disabled
 

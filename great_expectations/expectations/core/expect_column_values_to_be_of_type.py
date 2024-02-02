@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
@@ -76,7 +75,6 @@ except (ImportError, KeyError):
     ch_types = None
 
 
-@public_api
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     """Expect a column to contain values of a specified data type.
 
@@ -130,7 +128,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     type_: str
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

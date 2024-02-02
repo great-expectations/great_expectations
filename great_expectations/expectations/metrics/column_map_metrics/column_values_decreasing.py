@@ -77,7 +77,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             compute_domain_kwargs = metric_domain_kwargs
 
         (
-            df,
+            _df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(

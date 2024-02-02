@@ -10,7 +10,6 @@ To show task help page `invoke <NAME> --help`
 """
 from __future__ import annotations
 
-import json
 import logging
 import os
 import pathlib
@@ -22,7 +21,6 @@ from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
-from docs.docs_build import DocsBuilder
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
@@ -324,50 +322,6 @@ def type_check(  # noqa: PLR0913, PLR0912
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-@invoke.task(aliases=["get-stats"])
-def get_usage_stats_json(ctx: Context):
-    """
-    Dump usage stats event examples to json file
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    events = usage_stats_utils.get_usage_stats_example_events()
-    version = usage_stats_utils.get_gx_version()
-
-    outfile = f"v{version}_example_events.json"
-    with open(outfile, "w") as f:
-        json.dump(events, f)
-
-    print(f"File written to '{outfile}'.")
-
-
-@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx: Context):
-    """
-    Use databricks-cli lib to move usage stats event examples to dbfs:/
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    version = usage_stats_utils.get_gx_version()
-    outfile = f"v{version}_example_events.json"
-    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
-    cmd = cmd.format(outfile)
-    ctx.run(cmd)
-    print(f"'{outfile}' copied to dbfs.")
-
-
 UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
@@ -651,14 +605,16 @@ def api_docs(ctx: Context):
         "lint": "Run the linter",
     },
 )
-def docs(
+def docs(  # noqa: PLR0913
     ctx: Context,
     build: bool = False,
     clean: bool = False,
     start: bool = False,
     lint: bool = False,
+    version: str | None = None,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    from docs.docs_build import DocsBuilder, Version
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -676,12 +632,6 @@ def docs(
     )
     is_pull_request = pull_request == "true"
     is_local = not pull_request
-    docs_builder = DocsBuilder(
-        ctx,
-        docusaurus_dir,
-        is_pull_request=is_pull_request,
-        is_local=is_local,
-    )
 
     if clean:
         rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
@@ -696,10 +646,24 @@ def docs(
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
+    elif version:
+        docs_builder = DocsBuilder(
+            ctx,
+            docusaurus_dir,
+            is_pull_request=is_pull_request,
+            is_local=is_local,
+        )
+        docs_builder.create_version(version=Version.from_string(version))
     else:  # noqa: PLR5501
         if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
+            docs_builder = DocsBuilder(
+                ctx,
+                docusaurus_dir,
+                is_pull_request=is_pull_request,
+                is_local=is_local,
+            )
             print("Making sure docusaurus dependencies are installed.")
             ctx.run(" ".join(["yarn install"]), echo=True)
 

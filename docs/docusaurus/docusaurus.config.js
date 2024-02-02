@@ -34,6 +34,14 @@ module.exports = {
   ],
 
   themeConfig: {
+    announcementBar: {
+        id: 'cta_bar',
+        content:
+          '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
+        backgroundColor: '#141432',
+        textColor: '#fff',
+        isCloseable: true, 
+      },
     gxCard: {
       title: "What is GX Cloud?",
       description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
@@ -43,8 +51,8 @@ module.exports = {
           href: "https://greatexpectations.io/cloud"
         },
         secondary: {
-          label: "Learn about Great Expectations",
-          href: "https://greatexpectations.io/company"
+          label: "Why GX Cloud?",
+          href: "https://docs.greatexpectations.io/docs/cloud/why_gx_cloud"
         }
       }
     },
@@ -89,10 +97,6 @@ module.exports = {
       },
       items: [
         {
-          type: 'search',
-          position: 'right',
-        },
-        {
           type: 'docsVersionDropdown',
           position: 'left',
           dropdownItemsAfter: [
@@ -104,29 +108,38 @@ module.exports = {
           dropdownActiveClassDisabled: true,
         },
         {
-          label: 'HOME',
-          to: '/docs/home/',
+          type: 'search',
+          position: 'left',
         },
         {
-          label: 'GX CLOUD',
+          label: 'Home',
+          to: '/docs/home/',
+          position: 'right'
+        },
+        {
+          label: 'GX Cloud',
           to: '/docs/cloud/',
+          position: 'right'
         },
         {
           label: 'GX OSS',
           to: '/docs/oss/',
+          position: 'right'
         },
         {
-          label: 'GX API',
-          to: '/docs/reference/api',
-        },
-        {
-          label: 'LEARN',
+          label: 'Learn',
           to: '/docs/reference/learn/',
+          position: 'right'
+        },
+        {
+          label: 'API',
+          to: '/docs/reference/api',
+          position: 'right'
         },
         {
           to: 'https://greatexpectations.io/cloud',
           label: 'Sign up for GX Cloud',
-          position: 'right',
+          position: 'left',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
         },

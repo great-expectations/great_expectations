@@ -7,6 +7,9 @@ import pytest
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.core.usage_statistics.usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
@@ -20,9 +23,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.validator.validator import Validator
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
 
 yaml = YAMLHandler()
@@ -213,8 +213,8 @@ def test_get_config(empty_data_context):
     context = empty_data_context
 
     # We can call get_config in several different modes
-    assert type(context.get_config()) == DataContextConfig
-    assert type(context.get_config(mode=ConfigOutputModes.TYPED)) == DataContextConfig
+    assert type(context.get_config()) is DataContextConfig
+    assert type(context.get_config(mode=ConfigOutputModes.TYPED)) is DataContextConfig
     assert type(context.get_config(mode=ConfigOutputModes.DICT)) == dict  # noqa: E721
     assert type(context.get_config(mode=ConfigOutputModes.YAML)) == str  # noqa: E721
     assert type(context.get_config(mode="yaml")) == str  # noqa: E721

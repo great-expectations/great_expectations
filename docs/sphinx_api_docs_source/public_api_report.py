@@ -828,7 +828,7 @@ def _repo_root() -> pathlib.Path:
 
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
-    base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
+    base_directory = _repo_root() / "docs" / "docusaurus" / "docs"
     paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
     return {pathlib.Path(p) for p in paths}
 
@@ -892,8 +892,16 @@ def generate_public_api_report(write_to_file: bool = False) -> None:
 
     missing_from_the_public_api = public_api_report.generate_printable_definitions()
 
-    num_missing_msg = f"There are {len(missing_from_the_public_api)} items referenced in documentation that are not marked with the @public_api decorator and thus not rendered as part of our public API documentation."
-    logger.info(num_missing_msg)
+    missing_threshold = len(
+        public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+    )  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
+
+    logger.info(
+        f"Number of items referenced in docs not decorated with @public_api: {len(missing_from_the_public_api)}"
+    )
+    logger.info(
+        f"Number of items we allow to to be missing the decorator: {missing_threshold}."
+    )
     # The missing_threshold should be reduced and kept at 0. Please do
     # not increase this threshold, but instead add to the public API by decorating
     # any methods or classes you are adding to documentation with the @public_api
@@ -902,33 +910,36 @@ def generate_public_api_report(write_to_file: bool = False) -> None:
     missing_threshold = len(
         public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
     )  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
-    if len(missing_from_the_public_api) != missing_threshold:
-        error_msg_prefix = f"There are {len(missing_from_the_public_api)} items missing from the public API, we currently allow {missing_threshold}."
-        if len(missing_from_the_public_api) > missing_threshold:
-            logger.error(f"{error_msg_prefix} Please add to the public API.")
-            difference = set(missing_from_the_public_api) - set(
-                public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
-            )
-            logger.error(
-                f"The {len(difference)} items missing from the public API that are not accounted for are as follows:"
-            )
-            for item in difference:
-                logger.error(item)
-        else:
-            logger.error(f"{error_msg_prefix} Please reduce the threshold.")
-            difference = set(
-                public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
-            ) - set(missing_from_the_public_api)
-            logger.error(
-                f"The {len(difference)} items that are now accounted for and should be removed from the threshold list in docs/sphinx_api_docs_source/public_api_missing_threshold.py are:"
-            )
-            for item in difference:
-                logger.error(item)
-        sys.exit(1)
-    else:
-        logger.info(
-            "All of the missing items are accounted for in the missing threshold, but this threshold should be reduced to 0 over time."
+
+    has_errors = False
+    undocumented_and_unignored = set(missing_from_the_public_api) - set(
+        public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+    )
+    documented_and_ignored = set(
+        public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+    ) - set(missing_from_the_public_api)
+
+    if undocumented_and_unignored:
+        logger.error(
+            f"Items are missing from the public API: {len(undocumented_and_unignored)}"
         )
+        for item in sorted(undocumented_and_unignored):
+            logger.error(" - " + item)
+        has_errors = True
+    if documented_and_ignored:
+        logger.error(
+            f"Items that should be removed from public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API: {len(documented_and_ignored)}"
+        )
+        for item in sorted(documented_and_ignored):
+            logger.error(" - " + item)
+        has_errors = True
+
+    if has_errors:
+        sys.exit(1)
+
+    logger.info(
+        "All of the missing items are accounted for in the missing threshold, but this threshold should be reduced to 0 over time."
+    )
 
     if write_to_file:
         public_api_report.write_printable_definitions_to_file(

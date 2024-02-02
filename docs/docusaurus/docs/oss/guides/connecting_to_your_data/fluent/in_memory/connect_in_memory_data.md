@@ -7,9 +7,9 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import AfterCreateInMemoryDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_in_memory_data_asset.md'
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import AfterCreateInMemoryDataAsset from '../../../../../components/connect_to_data/next_steps/_after_create_in_memory_data_asset.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -44,7 +44,7 @@ pandas can read many types of data into its DataFrame class, but the following e
 
 Run the following Python code to create a Pandas Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
 
 ### Read your data into a Pandas DataFrame
@@ -53,7 +53,7 @@ In the following example, a parquet file is read into a Pandas DataFrame that wi
 
 Run the following Python code to create the Pandas DataFrame:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
 ```
 
 ### Add a Data Asset to the Data Source
@@ -68,17 +68,17 @@ The DataFrame you created previously is the value you'll enter for `dataframe` p
 
 1. Run the following Python code to define the `name` parameter and store it as a Python variable:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py name"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py name"
     ```
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py data_asset"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py data_asset"
     ```
 
     For `dataframe` Data Assets, the `dataframe` is always specified as the argument of one API method. For example:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
     ```
 
 ### Next steps
@@ -113,7 +113,7 @@ Connect to in-memory Data Assets using Spark.
 
 Run the following Python code to create a Spark Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py datasource"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py datasource"
 ```
 
 ### Read your data into a Spark DataFrame
@@ -122,7 +122,7 @@ In the following example, you'll create a simple Spark DataFrame that is used in
 
 Run the following Python code to create the Spark DataFrame:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py dataframe"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py dataframe"
 ```
 
 ### Add a Data Asset to the Data Source
@@ -137,17 +137,17 @@ The DataFrame you created previously is the value you'll enter for `dataframe` p
 
 1. Run the following Python code to define the `name` parameter and store it as a Python variable:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py name"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py name"
     ```
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py data_asset"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py data_asset"
     ```
 
     For `dataframe` Data Assets, the `dataframe` is always specified as the argument of one API method. For example:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py build_batch_request_with_dataframe"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py build_batch_request_with_dataframe"
     ```
 
 ## Next steps

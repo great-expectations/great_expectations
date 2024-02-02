@@ -3,7 +3,7 @@ title: Add input validation and type checking for a Custom Expectation
 ---
 
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ To do this, we're going to write a series of `assert` statements to catch invali
 
 To begin with, we want to create our `validate_configuration(...)` method and ensure that a configuration is set:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config"
 ```
 
 Next, we're going to implement the logic for validating the four parameters we identified above.
@@ -52,34 +52,34 @@ Next, we're going to implement the logic for validating the four parameters we i
 
 First we need to access the parameters to be evaluated:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_params"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_params"
 ```
 
 Now we can begin writing the assertions to validate these parameters. 
 
 We're going to ensure that at least one of `min_value` or `max_value` is set:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_values"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_values"
 ```
 
 Check that `min_value` and `max_value` are of the correct type:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_types"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_types"
 ```
 
 Verify that, if both `min_value` and `max_value` are set, `min_value` does not exceed `max_value`:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_comparison"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_comparison"
 ```
 
 And assert that `strict_min` and `strict_max`, if provided, are of the correct type:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_none"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_none"
 ```
 
 If any of these fail, we raise an exception:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_except"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_except"
 ```
 
 Putting this all together, our `validate_configuration(...)` method should verify that all necessary inputs have been provided, 
@@ -110,8 +110,8 @@ The method implemented in this guide is an optional feature for Experimental Exp
 If you would like to contribute your Custom Expectation to the Great Expectations codebase, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls).
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py)
 :::

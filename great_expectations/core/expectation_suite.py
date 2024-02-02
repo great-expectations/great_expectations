@@ -16,6 +16,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
@@ -28,6 +29,13 @@ from great_expectations._docs_decorators import (
     deprecated_argument,
     new_argument,
     public_api,
+)
+from great_expectations.analytics.anonymizer import anonymize
+from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.events import (
+    ExpectationSuiteExpectationCreatedEvent,
+    ExpectationSuiteExpectationDeletedEvent,
+    ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
@@ -56,6 +64,8 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
+
+    _TExpectation = TypeVar("_TExpectation", bound=Expectation)
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +101,7 @@ class ExpectationSuite(SerializableDictDot):
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
+        notes: str | list[str] | None = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_name: Optional[
             str
@@ -135,6 +146,7 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self.notes = notes
 
         from great_expectations import project_manager
 
@@ -145,7 +157,7 @@ class ExpectationSuite(SerializableDictDot):
         return self.expectation_suite_name
 
     @public_api
-    def add_expectation(self, expectation: Expectation) -> Expectation:
+    def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
         """Add an Expectation to the collection."""
         if expectation.id:
             raise RuntimeError(
@@ -174,7 +186,27 @@ class ExpectationSuite(SerializableDictDot):
                     raise exc
 
         expectation.register_save_callback(save_callback=self._save_expectation)
+
+        self._submit_expectation_created_event(expectation=expectation)
+
         return expectation
+
+    def _submit_expectation_created_event(self, expectation: Expectation) -> None:
+        if expectation.__module__.startswith("great_expectations."):
+            custom_exp_type = False
+            expectation_type = expectation.expectation_type
+        else:
+            custom_exp_type = True
+            expectation_type = anonymize(expectation.expectation_type)
+
+        submit_event(
+            event=ExpectationSuiteExpectationCreatedEvent(
+                expectation_id=expectation.id,
+                expectation_suite_id=self.ge_cloud_id,
+                expectation_type=expectation_type,
+                custom_exp_type=custom_exp_type,
+            )
+        )
 
     @public_api
     def delete_expectation(self, expectation: Expectation) -> Expectation:
@@ -202,11 +234,19 @@ class ExpectationSuite(SerializableDictDot):
                 self.expectations.append(expectation)
                 raise exc
 
+        submit_event(
+            event=ExpectationSuiteExpectationDeletedEvent(
+                expectation_id=expectation.id,
+                expectation_suite_id=self.ge_cloud_id,
+            )
+        )
+
         return expectation
 
     @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
+        # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now
         key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
         self._store.update(key=key, value=self)
 
@@ -217,7 +257,15 @@ class ExpectationSuite(SerializableDictDot):
         return self._store.has_key(key=key)
 
     def _save_expectation(self, expectation) -> Expectation:
-        return self._store.update_expectation(suite=self, expectation=expectation)
+        expectation = self._store.update_expectation(
+            suite=self, expectation=expectation
+        )
+        submit_event(
+            event=ExpectationSuiteExpectationUpdatedEvent(
+                expectation_id=expectation.id, expectation_suite_id=self.ge_cloud_id
+            )
+        )
+        return expectation
 
     @property
     def expectation_configurations(self) -> list[ExpectationConfiguration]:
@@ -562,7 +610,8 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
                 if expectation.configuration.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
+                    other=expectation_configuration,  # type: ignore[arg-type]
+                    match_type=match_type,
                 ):
                     match_indexes.append(idx)
 
@@ -1107,6 +1156,7 @@ class ExpectationSuiteSchema(Schema):
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
+    notes = fields.Raw(required=False, allow_none=True)
 
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
@@ -1132,10 +1182,12 @@ class ExpectationSuiteSchema(Schema):
 
             if not data.get("meta"):
                 pass
-            elif data.get("meta") is None or data.get("meta") == []:
-                pass
             elif len(data.get("meta")) == 0:
                 data.pop("meta")
+
+            if "notes" in data and not data.get("notes"):
+                data.pop("notes")
+
         return data
 
     # noinspection PyUnusedLocal

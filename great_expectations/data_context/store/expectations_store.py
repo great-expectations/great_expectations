@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import TYPE_CHECKING, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, TypeVar, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -27,6 +27,8 @@ from great_expectations.util import (
 
 if TYPE_CHECKING:
     from great_expectations.expectations.expectation import Expectation
+
+    _TExpectation = TypeVar("_TExpectation", bound=Expectation)
 
 
 class ExpectationsStore(Store):
@@ -115,8 +117,8 @@ class ExpectationsStore(Store):
         return suite_dict
 
     def add_expectation(
-        self, suite: ExpectationSuite, expectation: Expectation
-    ) -> Expectation:
+        self, suite: ExpectationSuite, expectation: _TExpectation
+    ) -> _TExpectation:
         suite_identifier, fetched_suite = self._refresh_suite(suite)
 
         # we need to find which ID has been added by the backend
@@ -237,7 +239,7 @@ class ExpectationsStore(Store):
                 # cloud_suite = ExpectationSuite(
                 #     **result.response["data"]["attributes"]["suite"]
                 # )
-                suite_identifier, cloud_suite = self._refresh_suite(value)
+                _suite_identifier, cloud_suite = self._refresh_suite(value)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,

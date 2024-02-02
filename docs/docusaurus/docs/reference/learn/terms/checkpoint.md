@@ -4,7 +4,7 @@ title: Checkpoint
 hoverText: The primary means for validating data in a production deployment of Great Expectations.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
 A Checkpoint is the primary means for validating data in a production deployment of Great Expectations.
@@ -31,22 +31,22 @@ You do not need to re-create a Checkpoint every time you Validate data.  If you 
 
 One of the most powerful features of Checkpoints is that they can be configured to run Actions, which will do some process based on the Validation Results generated when a Checkpoint is run.  Typical uses include sending email, slack, or custom notifications.  Another common use case is updating Data Docs sites.  However, Actions can be created to do anything you are capable of programing in Python.  This gives you an incredibly versatile tool for integrating Checkpoints in your pipeline's workflow!
 
-To set up common Action use cases, see [Configure Actions](/docs/oss/guides/validation/validation_actions/actions_lp).
+To set up common Action use cases, see [Configure Actions](/oss/guides/validation/validation_actions/actions_lp.md).
 
 The classes that implement Checkpoints are in the `great_expectations.checkpoint` module.
 
 ## Create
 
-Creating a Checkpoint is part of the initial setup for data validation.  Checkpoints are reusable and only need to be created once, although you can create multiple Checkpoints to cover multiple Validation use cases. For more information about creating Checkpoints, see [How to create a new Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+Creating a Checkpoint is part of the initial setup for data validation.  Checkpoints are reusable and only need to be created once, although you can create multiple Checkpoints to cover multiple Validation use cases. For more information about creating Checkpoints, see [How to create a new Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
-After you create a Checkpoint, you can use it to Validate data by running it against a Batch or Batches of data.  The Batch Requests used by a Checkpoint during this process may be pre-defined and saved as part of the Checkpoint's configuration, or the Checkpoint can be configured to accept one or more Batch Request at run time. For more information about data validation, see [How to validate data by running a Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint).
+After you create a Checkpoint, you can use it to Validate data by running it against a Batch or Batches of data.  The Batch Requests used by a Checkpoint during this process may be pre-defined and saved as part of the Checkpoint's configuration, or the Checkpoint can be configured to accept one or more Batch Request at run time. For more information about data validation, see [How to validate data by running a Checkpoint](/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md).
 
 In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfying the test suite to run, and a `batch_request` identifying the data to test. Checkpoint can be directly directly in Python as follows:
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
+```python name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
-For an in-depth guide on Checkpoint creation, see our [guide on how to create a new Checkpoint](/docs/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+For an in-depth guide on Checkpoint creation, see our [guide on how to create a new Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
 ## Configure
 
@@ -62,7 +62,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
    Each validation dictionary has three required and three optional keys:
     #### Required keys
         - `batch_request`: a dictionary describing the batch of data to validate (learn more about specifying Batches
-           here: [Batches](/docs/reference/learn/terms/batch))
+           here: [Batches](/reference/learn/terms/batch.md))
         - `expectation_suite_name`: the name of the Expectation Suite to validate the batch of data against
         - `action_list`: a list of actions to perform after each batch is validated
 
@@ -70,7 +70,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
         - `name`: providing a name will allow referencing the validation inside the run by name (e.g. "
            user_table_validation")
         - `evaluation_parameters`: used to define named parameters using Great
-           Expectations [Evaluation Parameter syntax](/docs/reference/learn/terms/evaluation_parameter)
+           Expectations [Evaluation Parameter syntax](/reference/learn/terms/evaluation_parameter.md)
         - `runtime_configuration`: provided to the Validator's `runtime_configuration` (e.g. `result_format`)
 
 ### Optional keys
@@ -120,12 +120,12 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml"
+```yaml name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py no_nesting just the yaml"
 ```
 
 **runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint"
 ```
 
 </TabItem>
@@ -134,17 +134,17 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml"
+```yaml name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py nesting_with_defaults just the yaml"
 ```
 
 **Runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_2"
 ```
 
 **Results**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets"
 ```
 
 </TabItem>
@@ -153,17 +153,17 @@ This configuration omits the "validations" key from the YAML, which means a "val
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime just the yaml"
+```yaml name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py keys_passed_at_runtime just the yaml"
 ```
 
 **Runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_3"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_3"
 ```
 
 **Results**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_2"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets_2"
 ```
 
 </TabItem>
@@ -172,17 +172,17 @@ This configuration references the Checkpoint detailed in the previous example ("
 
 **YAML**:
 
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template just the yaml"
+```yaml name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py using_template just the yaml"
 ```
 
 **Runtime**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_4"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_4"
 ```
 
 **Results**:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_3"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets_3"
 ```
 
 </TabItem>
@@ -200,9 +200,9 @@ Below is an example of a `CheckpointResult` object which itself contains `Valida
 
 ### Example CheckpointResult
 
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py results"
+```python name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py results"
 ```
 
 ## Example script
 
-To view the full script used in this page, see [checkpoints_and_actions.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py)
+To view the full script used in this page, see [checkpoints_and_actions.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/snippets/checkpoints_and_actions.py)

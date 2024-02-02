@@ -1,7 +1,7 @@
-import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
-import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/_setup_and_install_for_filesystem_data.md'
-import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
-import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
+import SetupAndInstallForSqlData from './_setup_and_install_for_sql_data.md'
+import SetupAndInstallForFilesystemData from './_setup_and_install_for_filesystem_data.md'
+import SetupAndInstallForHostedData from './_setup_and_install_for_hosted_data.md'
+import SetupAndInstallForCloudData from './_setup_and_install_for_cloud_data.md'
 
 <details>
 <summary>

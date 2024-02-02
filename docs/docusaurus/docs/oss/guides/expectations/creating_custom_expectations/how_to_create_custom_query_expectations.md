@@ -4,7 +4,7 @@ title: Create a Custom Query Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 **`QueryExpectations`** are a type of <TechnicalTag tag="expectation" text="Expectation"/>, enabled for SQL and Spark, that enable a higher-complexity type of workflow
 when compared with core Expectation classes such as **`ColumnAggregate`**, **`ColumnMap`**, and **`Table`**.
@@ -95,7 +95,7 @@ Completeness checklist for ExpectQueryToMatchSomeCriteria:
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/oss/contributing/contributing_maturity#expectation-contributions) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/oss/contributing/contributing_maturity.md#expectation-contributions) at an Experimental level.
 
 ## Change the Expectation class name and add a docstring
 
@@ -104,23 +104,23 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py ExpectQueriedTableRowCountToBe class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py ExpectQueriedTableRowCountToBe class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py docstring"
 ```
 
 with something like:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring"
 ```
 
 Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py print_diagnostic_checklist"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py print_diagnostic_checklist"
 ```
 
 with this one:
@@ -204,12 +204,12 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py sql_query"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py sql_query"
 ```
 
 Becomes something like this:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query"
 ```
 
 :::warning
@@ -237,12 +237,12 @@ To connect this Metric to our Custom Expectation, we'll need to include the `met
 
 This tuple:
 
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py metric_dependencies"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py metric_dependencies"
 ```
 
 Becomes:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies"
 ```
 
 ### Other parameters
@@ -373,7 +373,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/oss/contributing/contributing_maturity#expectation-contributions) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/oss/contributing/contributing_maturity.md#expectation-contributions) at an Experimental level.
 
 ## Change the Expectation class name and add a docstring
 
@@ -382,23 +382,23 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py docstring"
 ```
 
 with something like:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py print_diagnostic_checklist"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py print_diagnostic_checklist"
 ```
 
 with this one:
@@ -481,12 +481,12 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py sql_query"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py sql_query"
 ```
 
 Becomes something like this:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query"
 ```
 
 :::warning
@@ -517,12 +517,12 @@ In this case, we'll be using the `query.column` Metric, allowing us to parameter
 
 This tuple:
 
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py metric_dependencies"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py metric_dependencies"
 ```
 
 Becomes:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies"
 ```
 
 ### Other parameters
@@ -611,7 +611,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py library_metadata"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py library_metadata"
 ```
 
 would become
@@ -622,7 +622,7 @@ would become
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
 - [expect_queried_table_row_count_to_be.py](https://github.com/great-expectations/great_expectations/blob/develop/contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py)

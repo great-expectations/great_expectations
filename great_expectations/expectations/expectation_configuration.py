@@ -152,6 +152,7 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_type: str,
         kwargs: dict,
         meta: Optional[dict] = None,
+        notes: str | list[str] | None = None,
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
@@ -174,6 +175,7 @@ class ExpectationConfiguration(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self.notes = notes
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
@@ -543,7 +545,13 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
-        return expectation_impl(id=self.ge_cloud_id, meta=self.meta, **self.kwargs)
+        return expectation_impl(
+            id=self.ge_cloud_id,
+            meta=self.meta,
+            notes=self.notes,
+            rendered_content=self.rendered_content,
+            **self.kwargs,
+        )
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this expectation."""
@@ -586,6 +594,10 @@ class ExpectationConfigurationSchema(Schema):
         required=False,
         allow_none=True,
     )
+    notes = fields.Raw(
+        required=False,
+        allow_none=True,
+    )
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema,
@@ -600,7 +612,12 @@ class ExpectationConfigurationSchema(Schema):
         )
     )
 
-    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
+    REMOVE_KEYS_IF_NONE = [
+        "ge_cloud_id",
+        "expectation_context",
+        "rendered_content",
+        "notes",
+    ]
 
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):

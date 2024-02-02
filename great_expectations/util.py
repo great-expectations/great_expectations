@@ -1073,19 +1073,6 @@ def is_list_of_strings(_list) -> TypeGuard[List[str]]:
     return isinstance(_list, list) and all(isinstance(site, str) for site in _list)
 
 
-def generate_library_json_from_registered_expectations():
-    """Generate the JSON object used to populate the public gallery"""
-    from great_expectations.expectations.registry import _registered_expectations
-
-    library_json = {}
-
-    for expectation_name, expectation in _registered_expectations.items():
-        report_object = expectation().run_diagnostics()
-        library_json[expectation_name] = report_object
-
-    return library_json
-
-
 def generate_temporary_table_name(
     default_table_name_prefix: str = "gx_temp_",
     num_digits: int = 8,
@@ -1162,7 +1149,7 @@ def import_make_url():
 
 def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
     ch_type = type_
-    if type(ch_type) is str:  # noqa: E721
+    if type(ch_type) is str:
         if type_.lower() in ("decimal", "decimaltype()"):
             ch_type = type_module.types.Decimal
         elif type_.lower() in ("fixedstring"):

@@ -14,8 +14,8 @@ import IdentifyYourDataContextExpectationsStore from './components_how_to_config
 import UpdateYourConfigurationFileToIncludeANewStoreForExpectationsOnS from './components_how_to_configure_an_expectation_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_expectations_on_s.mdx'
 import CopyExistingExpectationJsonFilesToTheSBucketThisStepIsOptional from './components_how_to_configure_an_expectation_store_in_amazon_s3/_copy_existing_expectation_json_files_to_the_s_bucket_this_step_is_optional.mdx'
 import ConfirmList from './components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
-import Prerequisites from '@site/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -68,8 +68,8 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
 - An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/host_and_share_data_docs.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
@@ -173,14 +173,14 @@ If your Expectations have not been copied to Azure Blob Storage, the message "No
 
 Use the information provided here to configure a new storage location for Expectations in GCS.
 
-To view all the code used in this topic, see [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py).
+To view all the code used in this topic, see [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py).
 
 ### Prerequisites
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Expectations.
 
@@ -200,7 +200,7 @@ For more information about validating your GCP authentication credentials, see [
 
 The configuration for your Expectations <TechnicalTag tag="store" text="Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry: 
 
-```yaml name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py expected_existing_expectations_store_yaml"
+```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py expected_existing_expectations_store_yaml"
 ```
 
 This configuration tells Great Expectations to look for Expectations in the ``expectations_store`` Store. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
@@ -209,7 +209,7 @@ This configuration tells Great Expectations to look for Expectations in the ``ex
 
 In the following example, `expectations_store_name` is set to ``expectations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Expectations are stored.
 
-```yaml name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py configured_expectations_store_yaml"
+```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py configured_expectations_store_yaml"
 ```
 
 :::warning
@@ -220,12 +220,12 @@ If you are also storing [Validations in GCS](./configure_result_stores.md) or [D
 
 Use the ``gsutil cp`` command to copy Expectations into GCS. For example, the following command copies the Expectation ```my_expectation_suite`` from a local folder into a GCS bucket:
 
-```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_command"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_command"
 ```
 
 The following confirmation message is returned:
 
-```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_output"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_output"
 ```
 
 Additional methods for copying Expectations into GCS are available. See [Upload objects from a filesystem](https://cloud.google.com/storage/docs/uploading-objects).
@@ -249,7 +249,7 @@ A list of Expectation Suites you copied to GCS is returned. Expectation Suites t
 
 Run the following command to confirm your Expectations were copied to GCS:
 
-```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_command"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_command"
 ```
 
 If your Expectations were not copied to Azure Blob Storage, a message indicating no Expectations were found is returned.
@@ -265,8 +265,8 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectation Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectation Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - A storage location for Expectations. This can be a local path, or a path to a network filesystem.
     
 </Prerequisites>
@@ -374,8 +374,8 @@ Use the information provided here to configure an Expectations store in a Postgr
 
 <Prerequisites>
 
-- [A Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [An Expectations Suite](/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 
 </Prerequisites>

@@ -19,10 +19,12 @@ from typing import (
 )
 
 import pytest
+from moto import mock_s3
 from pytest import MonkeyPatch
 from typing_extensions import override
 
 import great_expectations as gx
+from great_expectations.compatibility import aws
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
@@ -53,10 +55,10 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
 if TYPE_CHECKING:
     import responses
+    from botocore.client import BaseClient as BotoBaseClient
     from pytest import FixtureRequest
 
     from great_expectations.data_context import CloudDataContext
-
 
 FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
@@ -233,6 +235,30 @@ def fluent_gx_config_yml() -> pathlib.Path:
 @pytest.fixture(scope="session")
 def fluent_gx_config_yml_str(fluent_gx_config_yml: pathlib.Path) -> str:
     return fluent_gx_config_yml.read_text()
+
+
+@pytest.fixture()
+def aws_region_name() -> str:
+    return "us-east-1"
+
+
+@pytest.fixture(scope="function")
+def aws_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Monkeypatch ENV AWS Credentials for moto."""
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
+    monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "testing")
+
+
+@pytest.fixture
+def s3_mock(
+    aws_credentials, aws_region_name: str
+) -> Generator[BotoBaseClient, None, None]:
+    with mock_s3():
+        client = aws.boto3.client("s3", region_name=aws_region_name)
+        yield client
 
 
 class _TestClientDummy:

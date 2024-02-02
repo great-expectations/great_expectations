@@ -4,7 +4,7 @@ id: data_context
 hoverText: The primary entry point for a GX deployment, with configurations and methods for all supporting components.
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Data Context is the primary entry point for a Great Expectations (GX) deployment, and it provides the configurations and methods for all supporting GX components.
 
@@ -18,15 +18,15 @@ Your Data Context provides you with the methods to configure your Stores, plugin
 
 ![What your Data Context does for you throughout using GX](/docs/oss/guides/images/overview_illustrations/data_context_does_for_you.png)
 
-When you configure your GX environment, you'll instantiate a Data Context. See [Instantiate a Data Context](/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+When you configure your GX environment, you'll instantiate a Data Context. See [Instantiate a Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
-You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  To configure Stores, see [Configure your GX environment](/docs/oss/guides/setup/setup_overview_lp). To host and share Data Docs, see [Host and share Data Docs](/docs/oss/guides/setup/configuring_data_docs/host_and_share_data_docs).
+You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  To configure Stores, see [Configure your GX environment](/oss/guides/setup/setup_overview_lp.md). To host and share Data Docs, see [Host and share Data Docs](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md).
 
-When you connect to data, you use your Data Context to create and configure Data Sources.  For more information on how to create and configure Data Sources, see [Connect to a Data Source](/docs/oss/guides/connecting_to_your_data/connect_to_data_lp).
+When you connect to data, you use your Data Context to create and configure Data Sources.  For more information on how to create and configure Data Sources, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md).
 
-When creating Expectations, you'll use your Data Context to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, and then save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />. The Data Context also manages Metrics and Validation Results. The Data Context manages the content of your Data Docs (displaying such things as the Validation Results and Expectations).  For more information about creating Expectations, see [Create Expectations](/docs/oss/guides/expectations/expectations_lp). 
+When creating Expectations, you'll use your Data Context to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, and then save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />. The Data Context also manages Metrics and Validation Results. The Data Context manages the content of your Data Docs (displaying such things as the Validation Results and Expectations).  For more information about creating Expectations, see [Create Expectations](/oss/guides/expectations/expectations_lp.md). 
 
-When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, see [Validate Data](/docs/oss/guides/validation/validate_data_lp). 
+When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, see [Validate Data](/oss/guides/validation/validate_data_lp.md). 
 
 ## Access to APIs
 
@@ -50,10 +50,10 @@ Because your Data Context contains the entirety of your GX project, GX Cloud can
 
 After you've created a Data Context, you'll likely start future work by instantiating a `DataContext` in Python. For example:
 
-```python title="Import GX" name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import gx"
+```python title="Import GX" name="docs/docusaurus/docs/snippets/pandas_yaml_example.py import gx"
 ```
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context"
+```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py get_context"
 ```
 
 Alternatively, you can use the `context_root_dir` parameter if you want to specify a specific directory
@@ -65,18 +65,18 @@ If you’re using GX Cloud, you set up the cloud environment variables before ca
 The code standards for GX strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you run the following code:
 
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import BatchRequest"
+```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py import BatchRequest"
 ```
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with batch request"
+```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with batch request"
 ```
 
 If you prefer untyped inputs, you run code similar to the following examples:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters data_asset_name"
+```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with parameters data_asset_name"
 ```
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters"
+```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with parameters"
 ```
 
 In the example code, the `get_batch()` method is responsible for inferring your intended types, and passing it through to the correct internal methods.

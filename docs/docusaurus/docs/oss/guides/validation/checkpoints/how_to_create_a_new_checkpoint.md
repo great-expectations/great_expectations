@@ -2,7 +2,7 @@
 title: Create a new Checkpoint
 ---
 
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 import Preface from './components_how_to_create_a_new_checkpoint/_preface.mdx'
 import StepsForCheckpoints from './components_how_to_create_a_new_checkpoint/_steps_for_checkpoints_.mdx'
 import AdditionalResources from './components_how_to_create_a_new_checkpoint/_additional_resources.mdx'
@@ -15,15 +15,15 @@ import AdditionalResources from './components_how_to_create_a_new_checkpoint/_ad
 
 To modify the following code for your use case, replace `batch_request` and `expectation_suite_name` with your own paremeters.
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
+```python name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
-For other Checkpoint configuration options, see [Manage Checkpoints](/docs/oss/guides/validation/checkpoints/checkpoint_lp).
+For other Checkpoint configuration options, see [Manage Checkpoints](/oss/guides/validation/checkpoints/checkpoint_lp.md).
 
 
 ## Run your Checkpoint (Optional)
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py run checkpoint batch_request"
+```python name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py run checkpoint batch_request"
 ```
 
 The returned `checkpoint_result` contains information about the checkpoint run.
@@ -32,14 +32,14 @@ The returned `checkpoint_result` contains information about the checkpoint run.
 
 Run the following Python code to build <TechnicalTag tag="data_docs" text="Data Docs" /> with the latest checkpoint run results:
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py build data docs"
+```python name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py build data docs"
 ```
 
 ## Retrieve your Checkpoint (Optional)
 
 Run the following Python code to retrieve the Checkpoint:
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py get checkpoint"
+```python name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py get checkpoint"
 ```
 
 ## Related documentation

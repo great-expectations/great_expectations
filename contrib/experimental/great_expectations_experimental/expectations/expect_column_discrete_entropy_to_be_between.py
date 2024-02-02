@@ -78,9 +78,9 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
         runtime_configuration: Dict,
     ):
         (
-            df,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
+            _df,
+            _compute_domain_kwargs,
+            _accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )

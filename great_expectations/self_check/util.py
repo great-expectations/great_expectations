@@ -1342,7 +1342,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_A_to_be_greater_than_B",
+            "expect_column_pair_values_a_to_be_greater_than_b",
             "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
@@ -1429,7 +1429,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
         "expect_column_values_to_not_match_like_pattern_list",
         "expect_column_values_to_not_match_regex",
         "expect_column_values_to_not_match_regex_list",
-        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_a_to_be_greater_than_b",
         "expect_column_pair_values_to_be_equal",
         "expect_column_pair_values_to_be_in_set",
         "expect_compound_columns_to_be_unique",
@@ -1453,7 +1453,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
         # "expect_column_max_to_be_between",
         # "expect_column_min_to_be_between",
         # "expect_column_sum_to_be_between",
-        # "expect_column_pair_values_A_to_be_greater_than_B",
+        # "expect_column_pair_values_a_to_be_greater_than_b",
         # "expect_column_pair_values_to_be_equal",
         # "expect_column_pair_values_to_be_in_set",
         # "expect_multicolumn_sum_to_equal",
@@ -2219,7 +2219,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
                 key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
             )
         # if python built-in class has __lt__ then sorting can always work this way
-        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+        elif type(test_value_list[0].__lt__(test_value_list[0])) is not type(
             NotImplemented
         ):
             test_value_list = sorted(test_value_list, key=lambda x: str(x))

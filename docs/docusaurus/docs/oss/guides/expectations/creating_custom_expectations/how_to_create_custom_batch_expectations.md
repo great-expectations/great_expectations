@@ -2,7 +2,7 @@
 title: Create a Custom Batch Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/reference/learn/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
 
 **`BatchExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation"/>. 
 They are evaluated for an entire Batch, and answer a semantic question about the Batch itself. For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer how many columns and rows are in your Batch.
@@ -55,7 +55,7 @@ python expect_batch_columns_to_be_unique.py
 ```
 
 The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
-This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/docs/oss/contributing/contributing_maturity#expectation-contributions) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/oss/contributing/contributing_maturity.md#expectation-contributions) at an Experimental level.
 
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
@@ -76,27 +76,27 @@ By convention, your <TechnicalTag tag="metric" text="Metric"/> class is defined 
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py ExpectBatchToMeetSomeCriteria class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py ExpectBatchToMeetSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py ExpectBatchColumnsToBeUnique class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py ExpectBatchColumnsToBeUnique class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py docstring"
 ```
 
 with something like:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py docstring"
 ```
 
 Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py diagnostics"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py diagnostics"
 ```
 
 with this one:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py diagnostics"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
@@ -126,7 +126,7 @@ You're going to search for `examples = []` in your file, and replace it with at 
 
 Your examples will look similar to this example:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py examples"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -175,7 +175,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to find the unique columns of a Batch with the PandasExecutionEngine.
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py pandas"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py pandas"
 ```
 
 :::note
@@ -198,22 +198,22 @@ The remainder of the Metric Identifier simply describes what the Metric computes
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py metric_name"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py metric_name"
 ```
 
 with
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_name"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_name"
 ```
 
 Second, in the Expectation class, replace
 
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py metric_dependencies"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py metric_dependencies"
 ```
 
 with
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_dependencies"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_dependencies"
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -222,12 +222,12 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py BatchMeetsSomeCriteria class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py BatchMeetsSomeCriteria class_def"
 ```
 
 with 
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py BatchColumnsUnique class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py BatchColumnsUnique class_def"
 ```
 
 ## Validate
@@ -236,7 +236,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py validate"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py validate"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -245,7 +245,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `table.columns.unique` Metric against our success keys:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py validate"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py validate"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -295,19 +295,19 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py library_metadata"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py library_metadata"
 ```
 
 would become
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py library_metadata"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](/docs/oss/contributing/contributing_maturity#expectation-contributions) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_batch_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py)
+- [expect_batch_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py)
 :::
