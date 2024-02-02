@@ -91,8 +91,8 @@
     
 }
 
-.main-wrapper {
-  overflow-x: hidden;
+.main-wrapper > div:has(#gxCard) {
+    overflow-x: hidden;
 }
 
 p > a {
