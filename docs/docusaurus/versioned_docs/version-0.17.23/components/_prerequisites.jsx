@@ -68,11 +68,11 @@ export default class Prerequisites extends React.Component {
       returnItems.push(<li>Access to data stored in a SQL database.</li>)
     }
     if (this.props.requireDatasource === 'Pandas') {
-      returnItems.push(<li><a href='/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource'>A Datasource configured to access your source data.</a></li>)
+      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === 'Spark') {
-      returnItems.push(<li><a href='/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'>A Datasource configured to access your source data.</a></li>)
+      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === 'SQL') {
-      returnItems.push(<li><a href='/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource'>A Datasource configured to access your source data.</a></li>)
+      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === true) {
       returnItems.push(<li><VersionedLink to='/guides/connecting_to_your_data/connect_to_data_lp'>A Datasource configured to access your source data</VersionedLink></li>)
     }
