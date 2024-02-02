@@ -1,0 +1,9 @@
+# <snippet name="tests/integration/fixtures/query_store/great_expectations/uncommitted/config_variables.yml my_query_store_creds">
+my_query_store_creds:
+  drivername: postgresql
+  host: localhost
+  port: 5432
+  username: postgres
+  password:
+  database: test_ci
+# </snippet>
