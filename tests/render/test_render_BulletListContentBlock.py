@@ -76,15 +76,26 @@ def test_all_expectations_using_test_definitions():
         len(test_files) == 61
     ), "Something went wrong when collecting JSON Expectation test fixtures"
 
+    # Not ported over to V1 so ignore for purposes of this test
+    UNSUPPORTED_EXPECTATIONS = {
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
+        "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+        "expect_column_chisquare_test_p_value_to_be_greater_than",
+    }
+
     # Loop over all test_files, datasets, and tests:
     test_results = defaultdict(list)
     for filename in test_files:
         test_definitions = json.load(open(filename))
-
+        if test_definitions["expectation_type"] in UNSUPPORTED_EXPECTATIONS:
+            continue
         for dataset in test_definitions["datasets"]:
             for test in dataset["tests"]:
                 # Construct an expectation from the test.
                 if type(test["in"]) == dict:  # noqa: E721
+                    # Skip tests with invalid configurations
+                    if test["in"].get("catch_exceptions"):
+                        continue
                     fake_expectation = ExpectationConfiguration(
                         expectation_type=test_definitions["expectation_type"],
                         kwargs=test["in"],

@@ -5,8 +5,8 @@ id: configure_data_contexts_lp
 description: Instantiate and convert a Data Context.
 ---
 
-import LinkCardGrid from '../../../components/LinkCardGrid';
-import LinkCard from '../../../components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find information for instantiating and converting a Data Context.</p>
 

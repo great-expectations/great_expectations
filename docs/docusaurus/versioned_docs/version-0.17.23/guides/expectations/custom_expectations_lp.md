@@ -5,8 +5,8 @@ id: custom_expectations_lp
 description: Create and manage Custom Expectations.
 ---
 
-import LinkCardGrid from '/docs/components/LinkCardGrid';
-import LinkCard from '/docs/components/LinkCard';
+import LinkCardGrid from '@site/src/components/LinkCardGrid';
+import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">Create Custom Expectations to extend the functionality of Great Expectations (GX) and satisfy your unique business requirements. To contribute new Expectations to the open source project, see <a href="https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md">Contribute Custom Expectations</a>.
 </p>
