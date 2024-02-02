@@ -242,29 +242,6 @@ table.borderless tr:nth-child(2n) {
     width: 75%;
 }
 
-.tabs-container .margin-vert--md{
-    margin-top: 0 !important;
-}
-
-.tabs-container .tabs {
-  font-size: var(--p-font-size);
-  font-weight: var(--ifm-font-weight-normal);
-  line-height: var(--p-line-height);
-
-  & .tabs__item--active {
-    font-weight: var(--ifm-font-weight-bold);
-  }
-}
-
-
-div[role="tabpanel"]{
-   --ifm-code-background: var(--ifm-alert-background-color-highlight);
-    border-radius: 0;
-    box-shadow:none;
-    border-top: 0;
-    padding: 0;
-}
-
 .tooltip {
   position: relative;
   display: inline-block;
