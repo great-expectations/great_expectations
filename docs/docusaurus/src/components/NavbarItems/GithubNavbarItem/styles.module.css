@@ -2,7 +2,7 @@
     display: flex;
     gap: 0.25rem;
     align-items: flex-start;
-    font-size: 0.75rem;
+    font-size: var(--p-tiny-font-size);
     padding-right: 2rem;
 }
 

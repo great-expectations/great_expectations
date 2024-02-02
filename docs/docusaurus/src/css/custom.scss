@@ -13,9 +13,9 @@
 @import "left_navigation.scss";
 @import "navbar.scss";
 @import "tabs.scss";
+@import "searchBar.scss";
 
 /* You can override the default Infima variables here. */
-
 :root {
     --ifm-font-color-base: #404041;
     --ifm-navbar-link-color: #404041;
@@ -41,8 +41,6 @@
 
     /* enlarge the sidebar width */
     --doc-sidebar-width: 350px !important;
-
-    --ifm-navbar-height: 6rem;
     
      /* Colors */
       --white: #fff;
@@ -240,6 +238,29 @@ table.borderless tr:nth-child(2n) {
     margin-left: auto;
     margin-right: auto;
     width: 75%;
+}
+
+.tabs-container .margin-vert--md{
+    margin-top: 0 !important;
+}
+
+.tabs-container .tabs {
+  font-size: var(--p-font-size);
+  font-weight: var(--ifm-font-weight-normal);
+  line-height: var(--p-line-height);
+
+  & .tabs__item--active {
+    font-weight: var(--ifm-font-weight-bold);
+  }
+}
+
+
+div[role="tabpanel"]{
+   --ifm-code-background: var(--ifm-alert-background-color-highlight);
+    border-radius: 0;
+    box-shadow:none;
+    border-top: 0;
+    padding: 0;
 }
 
 .tooltip {

@@ -92,7 +92,7 @@ module.exports = {
     navbar: {
       logo: {
         alt: 'Great Expectations',
-        src: 'img/gx-logo.svg',
+        src: 'img/GXDocs.svg',
         href: 'https://greatexpectations.io',
       },
       items: [
@@ -110,6 +110,13 @@ module.exports = {
         {
           type: 'search',
           position: 'left',
+          className: 'custom-search-bar'
+        },
+        {
+          type: 'custom-githubNavbarItem',
+          position: 'left',
+          owner: 'great-expectations',
+          repository: 'great_expectations'
         },
         {
           label: 'Home',
