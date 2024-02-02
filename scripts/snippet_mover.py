@@ -29,43 +29,45 @@ class SnippetMover:
         self._orphaned_snippet_modules: list[
             SnippetModule
         ] = []  # not referenced by a test
-        self._default_snippet_path = Path("docs/docusaurus/docs/snippets")
-        self._docs_prefix = Path("docs")
+        self._version_prefix = "version-0.17.23"
+        self._docs_prefix = Path("docs/docusaurus/versioned_docs") / Path(self._version_prefix)
+        self._default_snippet_path = self._docs_prefix / Path("snippets")
         self._docs_root_dir = gx_root_dir / self._docs_prefix
-        self._tests_prefix = Path("tests")
+        self._code_namespace = Path("great_expectations-0.17.23")
+        self._tests_prefix = self._code_namespace / Path("tests")
         self._tests_root_dir = gx_root_dir / self._tests_prefix
         self._general_files_to_update = (
-            Path("tests/integration/test_script_runner.py"),
-            Path("ci/checks/check_name_tag_snippets_referenced.py"),
-            Path("ci/checks/check_integration_test_gets_run.py"),
-            Path("tests/integration/test_definitions/postgresql/integration_tests.py"),
-            Path("tests/integration/test_definitions/abs/integration_tests.py"),
-            Path("tests/integration/test_definitions/athena/integration_tests.py"),
-            Path("tests/integration/test_definitions/aws_glue/integration_tests.py"),
-            Path("tests/integration/test_definitions/bigquery/integration_tests.py"),
-            Path("tests/integration/test_definitions/gcs/integration_tests.py"),
-            Path("tests/integration/test_definitions/mssql/integration_tests.py"),
-            Path(
-                "tests/integration/test_definitions/multiple_backend/integration_tests.py"
+            self._tests_prefix / Path("integration/test_script_runner.py"),
+            self._code_namespace / Path("ci/checks/check_name_tag_snippets_referenced.py"),
+            self._code_namespace / Path("ci/checks/check_integration_test_gets_run.py"),
+            self._tests_prefix / Path("integration/test_definitions/postgresql/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/abs/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/athena/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/aws_glue/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/bigquery/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/gcs/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/mssql/integration_tests.py"),
+            self._tests_prefix / Path(
+                "integration/test_definitions/multiple_backend/integration_tests.py"
             ),
-            Path("tests/integration/test_definitions/mysql/integration_tests.py"),
-            Path("tests/integration/test_definitions/redshift/integration_tests.py"),
-            Path("tests/integration/test_definitions/s3/integration_tests.py"),
-            Path("tests/integration/test_definitions/snowflake/integration_tests.py"),
-            Path("tests/integration/test_definitions/spark/integration_tests.py"),
-            Path("tests/integration/test_definitions/sqlite/integration_tests.py"),
-            Path("tests/integration/test_definitions/trino/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/mysql/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/redshift/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/s3/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/snowflake/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/spark/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/sqlite/integration_tests.py"),
+            self._tests_prefix / Path("integration/test_definitions/trino/integration_tests.py"),
         )
         self._custom_cases: dict[Path, Path] = {
             # these are custom overrides for how to rename specific files if things get wonky
-            Path(
-                "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py"
+            self._tests_prefix / Path(
+                "integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py"
             ): Path("inferred_and_runtime_yaml_example_spark_azure.py"),
-            Path(
-                "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py"
+            self._tests_prefix / Path(
+                "integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py"
             ): Path("inferred_and_runtime_yaml_example_pandas_gcs.py"),
-            Path(
-                "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py"
+            self._tests_prefix / Path(
+                "integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py"
             ): Path("inferred_and_runtime_yaml_example_spark_s3.py"),
         }
         self._report_path = gx_root_dir / Path("scripts/snippet_mover_report.txt")
@@ -156,12 +158,13 @@ class SnippetMover:
                 # this snippet is referenced by a single doc, so we'll move it adjacent to the doc
                 snippet_dest_dir = list(snippet_docs)[0].parent
                 # except that random gitignored dir, of course, where snippets go to vanish ;(
-                BLACK_HOLE_PATH = Path("docs/docusaurus/docs/reference")
-                if (
-                    snippet_dest_dir.parts[: len(BLACK_HOLE_PATH.parts)]
-                    == BLACK_HOLE_PATH.parts
-                ):
-                    snippet_dest_dir = self._default_snippet_path
+                # shouldn't be applicable to a legacy build
+                # BLACK_HOLE_PATH = Path("docs/docusaurus/docs/reference")
+                # if (
+                #     snippet_dest_dir.parts[: len(BLACK_HOLE_PATH.parts)]
+                #     == BLACK_HOLE_PATH.parts
+                # ):
+                #     snippet_dest_dir = self._default_snippet_path
             else:
                 # weird, snippet module isn't referenced by any docs
                 orphaned_snippet_paths.add(snippet_module.original_path)
@@ -208,10 +211,11 @@ class SnippetMover:
                 ],
             ]
             for path in paths_to_update:
+                versioned_new_path = f"{self._version_prefix} {snippet_module.new_path}"
                 self.find_and_replace_text_in_file(
                     path=path,
                     old_str=str(snippet_module.original_path),
-                    new_str=str(snippet_module.new_path),
+                    new_str=versioned_new_path,
                 )
 
     def move_snippets(self):
