@@ -13,7 +13,7 @@ The code used in this topic is available on GitHub here: [actions.py](https://gi
 
 <Prerequisites>
 
-  - [An Expectation Suite for Validation](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+  - [An Expectation Suite for Validation](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
   - [Familiarity with Validation Actions](../../../terms/action.md)
 
 </Prerequisites>
