@@ -1,4 +1,5 @@
 import React from 'react'
+import VersionedLink from '@site/src/components/VersionedLink'
 
 /**
  * A flexible Prerequisites admonition block.
@@ -27,7 +28,7 @@ export default class Prerequisites extends React.Component {
 
   defaultPrerequisiteItems () {
     return [
-      <li key={0.1}><a href='/docs/tutorials/quickstart'>Completed the Quickstart guide</a></li>
+      <li key={0.1}><VersionedLink to='/tutorials/quickstart'>Completed the Quickstart guide</VersionedLink></li>
     ]
   }
 
