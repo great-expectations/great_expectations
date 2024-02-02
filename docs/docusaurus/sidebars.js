@@ -505,6 +505,9 @@ module.exports = {
         'reference/learn/terms/validation_result'
       ]
     },
+  ],
+  resources: [
+    'resources/get_support',
   ]
 }
 
