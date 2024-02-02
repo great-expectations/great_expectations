@@ -18,6 +18,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
 )
 
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
@@ -92,7 +93,7 @@ class ExpectationSuite(SerializableDictDot):
         ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
     """
 
-    expectations: Sequence[Expectation]
+    expectations: list[Expectation]
 
     def __init__(  # noqa: PLR0913
         self,
@@ -130,6 +131,7 @@ class ExpectationSuite(SerializableDictDot):
 
         if all(isinstance(exp, Expectation) for exp in expectations):
             for expectation in expectations:
+                cast(Expectation, expectation)
                 if expectation.id:
                     raise ValueError(
                         "Expectations in parameter `expectations` must not belong to another ExpectationSuite. "
@@ -139,6 +141,11 @@ class ExpectationSuite(SerializableDictDot):
             self.expectations = expectations
         else:
             # legacy code path, remove once param `expectations` type is narrowed to just Expectation
+            for expectation in expectations:
+                if isinstance(expectation, Expectation):
+                    raise ValueError(
+                        "Parameter expectations cannot contain mixed types."
+                    )
             expectation_configurations = [
                 ExpectationConfiguration(**expectation)
                 if isinstance(expectation, dict)
