@@ -25,7 +25,7 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 ## Prepare your PostgreSQL environment
 
-You can use an existing PostgreSQL warehouse, but GX recommends creating a separate warehouse for GX Cloud to simplify cost management and optimize performance.
+You can use an existing PostgreSQL database, but GX recommends creating a separate warehouse for GX Cloud to simplify cost management and optimize performance.
 
 
 

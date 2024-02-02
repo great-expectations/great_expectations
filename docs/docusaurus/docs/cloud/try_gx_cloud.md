@@ -157,7 +157,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
 
-4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
+4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
 5. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
