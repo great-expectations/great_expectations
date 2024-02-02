@@ -122,7 +122,7 @@ module.exports = {
           position: 'right'
         },
         {
-          label: 'GX Core',
+          label: 'GX OSS',
           to: '/docs/oss/',
           position: 'right'
         },

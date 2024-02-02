@@ -4,12 +4,12 @@ tag: [tutorial, getting started, quickstart, cloud]
 ---
 # Quickstart with Great Expectations Cloud
 
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
-import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/_setup_and_install_for_filesystem_data.md'
-import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
-import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
-import Prerequisites from '/docs/components/_prerequisites.jsx'
+import TechnicalTag from '../../../term_tags/_tag.mdx';
+import SetupAndInstallForSqlData from '../../../components/setup/link_lists/_setup_and_install_for_sql_data.md'
+import SetupAndInstallForFilesystemData from '../../../components/setup/link_lists/_setup_and_install_for_filesystem_data.md'
+import SetupAndInstallForHostedData from '../../../components/setup/link_lists/_setup_and_install_for_hosted_data.md'
+import SetupAndInstallForCloudData from '../../../components/setup/link_lists/_setup_and_install_for_cloud_data.md'
+import Prerequisites from '../../../components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 

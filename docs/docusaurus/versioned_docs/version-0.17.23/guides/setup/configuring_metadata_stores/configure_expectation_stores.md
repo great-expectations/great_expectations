@@ -15,7 +15,7 @@ import UpdateYourConfigurationFileToIncludeANewStoreForExpectationsOnS from './c
 import CopyExistingExpectationJsonFilesToTheSBucketThisStepIsOptional from './components_how_to_configure_an_expectation_store_in_amazon_s3/_copy_existing_expectation_json_files_to_the_s_bucket_this_step_is_optional.mdx'
 import ConfirmList from './components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 

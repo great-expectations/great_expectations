@@ -2,7 +2,7 @@
 title: Validate multiple Batches from a Batch Request with a single Checkpoint
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx';
+import Prerequisites from '../../../components/_prerequisites.jsx';
 
 
 

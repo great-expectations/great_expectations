@@ -7,21 +7,21 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import Introduction from '/docs/components/connect_to_data/filesystem/_intro_connect_to_one_or_more_files_pandas_or_spark.mdx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import InfoUsingPandasToConnectToDifferentFileTypes from '/docs/components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
-import AfterCreateValidator from '/docs/components/connect_to_data/next_steps/_after_create_validator.md'
-import InfoFilesystemDatasourceRelativeBasePaths from '/docs/components/connect_to_data/filesystem/_info_filesystem_datasource_relative_base_paths.md'
-import TipFilesystemDatasourceNestedSourceDataFolders from '/docs/components/connect_to_data/filesystem/_tip_filesystem_datasource_nested_source_data_folders.md'
-import TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles from '/docs/components/connect_to_data/filesystem/_tip_filesystem_data_asset_if_batching_regex_matches_multiple_files.md'
-import TipUsingPandasToConnectToDifferentFileTypes from '/docs/components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
-import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesystem/_defining_multiple_data_assets.md'
-import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
-import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
-import PrereqInstallGxWithDependencies from '/docs/components/prerequisites/_gx_installed_with_abs_dependencies.md'
-import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import Introduction from '../../../../components/connect_to_data/filesystem/_intro_connect_to_one_or_more_files_pandas_or_spark.mdx'
+import ImportGxAndInstantiateADataContext from '../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import InfoUsingPandasToConnectToDifferentFileTypes from '../../../../components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
+import AfterCreateValidator from '../../../../components/connect_to_data/next_steps/_after_create_validator.md'
+import InfoFilesystemDatasourceRelativeBasePaths from '../../../../components/connect_to_data/filesystem/_info_filesystem_datasource_relative_base_paths.md'
+import TipFilesystemDatasourceNestedSourceDataFolders from '../../../../components/connect_to_data/filesystem/_tip_filesystem_datasource_nested_source_data_folders.md'
+import TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles from '../../../../components/connect_to_data/filesystem/_tip_filesystem_data_asset_if_batching_regex_matches_multiple_files.md'
+import TipUsingPandasToConnectToDifferentFileTypes from '../../../../components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
+import DefiningMultipleDataAssets from '../../../../components/connect_to_data/filesystem/_defining_multiple_data_assets.md'
+import AfterCreateNonSqlDatasource from '../../../../components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
+import BatchingRegexExplaination from '../../../../components/connect_to_data/cloud/_batching_regex_explaination.mdx'
+import PrereqInstallGxWithDependencies from '../../../../components/prerequisites/_gx_installed_with_abs_dependencies.md'
+import AbsFluentAddDataAssetConfigKeys from '../../../../components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 

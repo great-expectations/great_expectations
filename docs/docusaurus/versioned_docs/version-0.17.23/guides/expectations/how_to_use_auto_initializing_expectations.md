@@ -3,7 +3,7 @@ title: Use auto-initializing Expectations
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you create Expectations interactively using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
