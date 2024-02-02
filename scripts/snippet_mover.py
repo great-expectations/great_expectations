@@ -211,11 +211,10 @@ class SnippetMover:
                 ],
             ]
             for path in paths_to_update:
-                versioned_new_path = f"{self._version_prefix} {snippet_module.new_path}"
                 self.find_and_replace_text_in_file(
                     path=path,
                     old_str=str(snippet_module.original_path),
-                    new_str=versioned_new_path,
+                    new_str=str(snippet_module.new_path),
                 )
 
     def move_snippets(self):
