@@ -92,6 +92,8 @@ class ExpectationSuite(SerializableDictDot):
         ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
     """
 
+    expectations: Sequence[Expectation]
+
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
