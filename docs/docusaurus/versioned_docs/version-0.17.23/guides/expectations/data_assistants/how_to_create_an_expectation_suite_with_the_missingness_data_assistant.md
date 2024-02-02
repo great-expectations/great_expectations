@@ -7,7 +7,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 :::caution
 
-Missingness Data Assistant functionality is [Experimental](/docs/contributing/contributing_maturity).
+Missingness Data Assistant functionality is [Experimental](/contributing/contributing_maturity.md).
 
 :::
 
@@ -19,7 +19,7 @@ All the code used in the examples is available in GitHub at this location: [how_
 
 <Prerequisites>
 
-- A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+- A [configured Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](../../../connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md).
 

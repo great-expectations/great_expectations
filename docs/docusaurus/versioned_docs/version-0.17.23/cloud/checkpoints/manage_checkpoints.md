@@ -12,9 +12,9 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 
 - You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
 
-- You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+- You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
-- You have created an [Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+- You have created an [Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 ## Add a Checkpoint
 

@@ -18,6 +18,10 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
+## Self-hosted deployment
+
+To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX cloud features and functionality and it differs from the recommended [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern), in which the GX Agent runs in your organization's deployment environment.
+
 ## Get your user access token and copy your organization ID
 
 You'll need your user access token and organization ID to set your environment variables. Access tokens shouldn't be committed to version control software.

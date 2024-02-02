@@ -10,7 +10,7 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 <Prerequisites>
 
-- [A Great Expectations instance](/docs/guides/setup/setup_overview).
+- [A Great Expectations instance](/guides/setup/setup_overview.md).
 - A Checkpoint.
 
 </Prerequisites>

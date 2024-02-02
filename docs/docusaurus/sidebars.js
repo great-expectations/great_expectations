@@ -13,6 +13,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'GX Agent',
+              href: '/docs/cloud/about_gx#gx-agent',
+            },
+            {
+              type: 'link',
               label: 'GX Cloud deployment patterns',
               href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
             },

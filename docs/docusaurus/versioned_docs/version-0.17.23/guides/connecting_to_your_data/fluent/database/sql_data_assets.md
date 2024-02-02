@@ -44,7 +44,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md)
 - Source data stored in a SQL database
 - A SQL-based Data Source
 
@@ -76,10 +76,10 @@ To connect to additional tables in the same SQL Database, repeat the previous st
 
 ### Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [How to organize Batches in a SQL based Data Asset](/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 </TabItem>
 <TabItem value="query">
@@ -94,7 +94,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx).
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md).
 - Source data stored in a SQL database.
 
 </Prerequisites> 
@@ -123,10 +123,10 @@ To connect to the contents of additional queries in the same SQL Database, repea
 
 ### Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [How to organize Batches in a SQL based Data Asset](/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 </TabItem>
 <TabItem value="batches">
@@ -188,17 +188,17 @@ A Batch List can contain a lot of metadata. To verify which files were included 
 
 ### Related documentation
 
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 </TabItem>
 </Tabs>
 
 ## Related documentation
 
-- [How to set up GX to work with SQL databases](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
-- [How to connect to SQL data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
-- [How to connect to PostgreSQL data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
-- [How to connect to SQLite data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
+- [How to set up GX to work with SQL databases](/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
+- [How to connect to SQL data](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
+- [How to connect to PostgreSQL data](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
+- [How to connect to SQLite data](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
 
