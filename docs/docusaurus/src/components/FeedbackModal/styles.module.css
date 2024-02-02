@@ -39,22 +39,14 @@
 
 /* CSS for the Feedback Modal */
 
-.darkBackground {
+.overlay {
     background-color: rgba(0, 0, 0, 0.3);
     height: 100vh;
     left: 0;
     position: fixed;
     top: 0;
     width: 100vw;
-    z-index: 0;
-}
-
-.centered {
-    left: 50%;
-    position: fixed;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 50%;
+    z-index: calc(var(--ifm-z-index-fixed) + 1);
 }
 
 .modal {
@@ -63,6 +55,15 @@
     border-radius: 10px;
     box-shadow: 0 3px 6px -1px rgb(0,0,0,0.1);
     color: var(--white);
+
+    left: 50%;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 700px;
+    max-height: 80vh;
+    z-index: calc(var(--ifm-z-index-fixed) + 2);
 }
 
 .modalHeader {
@@ -71,8 +72,8 @@
     color: white;
     display: flex;
     margin: 0;
-    overflow: hidden;
     padding: 10px;
+    overflow: hidden;
 }
 
 .modalHeaderTitle {
@@ -97,6 +98,7 @@
 
 .textInputs{
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     gap: 2rem;
 }
@@ -132,12 +134,14 @@
     border: 1px solid var(--ifm-color-primary);
 }
 
-.modalActions {
-    display: flex;
+.box__dragndrop,
+.box__uploading,
+.box__success,
+.box__error {
+    display: none;
 }
 
 .submitButton {
-    flex: 1;
     border-radius: 20px;
     background-color: var(--ifm-color-primary);
     font-weight: bold;
@@ -146,10 +150,15 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
     padding: 0.75rem;
-    margin: 1rem 2rem 2rem;
-
+    margin: 1rem 0 2rem;
 }
 
 .submitButton:hover {
     background-color: #DE550A;
+}
+
+@media (max-width: 960px) {
+    .centered {
+        max-height: 100vh;
+    }
 }
