@@ -96,7 +96,9 @@ class ExpectationSuite(SerializableDictDot):
         self,
         name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
+        expectations: Optional[
+            Sequence[Union[dict, ExpectationConfiguration, Expectation]]
+        ] = None,
         evaluation_parameters: Optional[dict] = None,
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
@@ -107,6 +109,7 @@ class ExpectationSuite(SerializableDictDot):
             str
         ] = None,  # for backwards compatibility - remove
     ) -> None:
+        from great_expectations.expectations.expectation import Expectation
         from great_expectations.expectations.expectation_configuration import (
             ExpectationConfiguration,
         )
@@ -122,15 +125,28 @@ class ExpectationSuite(SerializableDictDot):
 
         if expectations is None:
             expectations = []
-        expectation_configurations = [
-            ExpectationConfiguration(**expectation)
-            if isinstance(expectation, dict)
-            else expectation
-            for expectation in expectations
-        ]
-        self.expectations: list[Expectation] = [
-            self._build_expectation(config) for config in expectation_configurations
-        ]
+
+        if all(isinstance(exp, Expectation) for exp in expectations):
+            for expectation in expectations:
+                if expectation.id:
+                    raise ValueError(
+                        "Expectations in parameter `expectations` must not belong to another ExpectationSuite. "
+                        "Instead, please use copies of Expectations, by calling `copy.copy(expectation)`."
+                    )
+                expectation.register_save_callback(save_callback=self._save_expectation)
+            self.expectations = expectations
+        else:
+            # legacy code path, remove once param `expectations` type is narrowed to just Expectation
+            expectation_configurations = [
+                ExpectationConfiguration(**expectation)
+                if isinstance(expectation, dict)
+                else expectation
+                for expectation in expectations
+            ]
+            self.expectations: list[Expectation] = [
+                self._build_expectation(config) for config in expectation_configurations
+            ]
+
         if evaluation_parameters is None:
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
