@@ -12,7 +12,7 @@
   bottom: 0;
   content: '';
   left: 0;
-  opacity: 0.2;
+  opacity: 0.15;
   position: absolute;
   right: 0;
   top: 0;
@@ -25,4 +25,10 @@
 
 .overviewCard__description {
   font-weight: normal;
+}
+
+@media (max-width: 996px) {
+  .overviewCard {
+    padding: 3rem 2rem 2rem;
+  }
 }
