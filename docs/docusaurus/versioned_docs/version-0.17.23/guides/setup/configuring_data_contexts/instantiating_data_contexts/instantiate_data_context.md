@@ -7,11 +7,11 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
-import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
-import AdmonitionConvertToFileContext from '/docs/components/setup/data_context/_admonition_convert_to_file_context.md'
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import GxImport from '../../../../components/setup/python_environment/_gx_import.md'
+import DataContextVerifyContents from '../../../../components/setup/data_context/_data_context_verify_contents.md'
+import AdmonitionConvertToFileContext from '../../../../components/setup/data_context/_admonition_convert_to_file_context.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 

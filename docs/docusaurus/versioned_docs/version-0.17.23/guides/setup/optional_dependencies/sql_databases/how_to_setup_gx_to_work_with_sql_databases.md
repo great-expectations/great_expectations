@@ -7,26 +7,26 @@ keywords: [Great Expectations, SQL]
 
 # How to set up Great Expectations to work with general SQL databases
 
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
-import Prerequisites from '/docs/components/_prerequisites.jsx'
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
 
 <!-- ## Prerequisites -->
 
 <!-- ### 1. Check your Python version -->
-import PythonCheckVersion from '/docs/components/setup/python_environment/_python_check_version.mdx'
+import PythonCheckVersion from '../../../../components/setup/python_environment/_python_check_version.mdx'
 
 <!-- ### 2. Create a Python virtual environment -->
-import PythonCreateVenv from '/docs/components/setup/python_environment/_python_create_venv.md'
-import TipPythonOrPython3Executable from '/docs/components/setup/python_environment/_tip_python_or_python3_executable.md'
+import PythonCreateVenv from '../../../../components/setup/python_environment/_python_create_venv.md'
+import TipPythonOrPython3Executable from '../../../../components/setup/python_environment/_tip_python_or_python3_executable.md'
 
 <!-- ### 3. Install GX with optional dependencies for databases -->
-import InstallDependencies from '/docs/components/setup/dependencies/_sql_install_dependencies.mdx'
+import InstallDependencies from '../../../../components/setup/dependencies/_sql_install_dependencies.mdx'
 
 <!-- ### 4. Verify that GX has been installed correctly -->
-import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation.md'
+import GxVerifyInstallation from '../../../../components/setup/_gx_verify_installation.md'
 
 <!-- ## Next steps -->
-import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_after_installing_gx.md'
+import LinksAfterInstallingGx from '../../../../components/setup/next_steps/_links_after_installing_gx.md'
 
 
 This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with SQL databases.

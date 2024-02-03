@@ -2,7 +2,7 @@
 title: Trigger Slack notifications as an Action
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
