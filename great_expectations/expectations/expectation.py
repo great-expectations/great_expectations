@@ -1227,7 +1227,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def configuration(self) -> ExpectationConfiguration:
         kwargs = self.dict(exclude_defaults=True)
 
-        # Always add back domain-specific keys (even if they are defaults)
+        # Always add back domain-specific keys if there's a value associated with them (even if they are defaults)
         for key in self.domain_keys:
             if key not in kwargs and key in self.__fields__:
                 default = self.__fields__[key].default
