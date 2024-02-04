@@ -85,7 +85,18 @@ def fake_expectation_with_description() -> Expectation:
         min_value: int = 18
         description: str = "column values must be a legal adult age"
 
-    return ExpectColumnAgesToBeLegalAdult()
+    expectation = ExpectColumnAgesToBeLegalAdult()
+    try:
+        kwargs = expectation.configuration.kwargs
+        assert kwargs.get("column") == "ages"
+        assert kwargs.get("min_value") is None
+        assert kwargs.get("description") is None
+    except AssertionError as e:
+        raise AssertionError(
+            "The Expectation.configuration property should discard default values EXCEPT when dealing with domain keys."
+        ) from e
+
+    return expectation
 
 
 @pytest.mark.smoketest
