@@ -1718,6 +1718,9 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
+    def __init__(self, column: str, **kwargs):
+        super().__init__(column=column, **kwargs)
+
 
 @public_api
 class ColumnMapExpectation(BatchExpectation, ABC):
@@ -1757,6 +1760,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
+
+    def __init__(self, column: str, **kwargs):
+        super().__init__(column=column, **kwargs)
 
     @classmethod
     @override
@@ -2016,6 +2022,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     domain_type = MetricDomainTypes.COLUMN_PAIR
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
 
+    def __init__(self, column_A: str, column_B: str, **kwargs):
+        super().__init__(column_A=column_A, column_B=column_B, **kwargs)
+
     @classmethod
     @override
     def is_abstract(cls) -> bool:
@@ -2261,6 +2270,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type = MetricDomainTypes.MULTICOLUMN
     success_keys = ("mostly",)
+
+    def __init__(self, column_list: list[str], **kwargs):
+        super().__init__(column_list=column_list, **kwargs)
 
     @classmethod
     @override
