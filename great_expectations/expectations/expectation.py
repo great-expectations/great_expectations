@@ -284,10 +284,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     meta: Union[dict, None] = None
     notes: Union[str, List[str], None] = None
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
-    batch_id: Union[str, None] = None
-    row_condition: Union[str, None] = None
-    condition_parser: Union[str, None] = None
-    mostly: float = Field(default=1.0, ge=0.0, le=1.0)
     description: ClassVar[Union[str, None]] = None
 
     catch_exceptions: bool = False
@@ -1229,14 +1225,17 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @property
     def configuration(self) -> ExpectationConfiguration:
-        kwargs = self.dict()
+        kwargs = self.dict(exclude_defaults=True)
+
+        # Always add back domain-specific keys (even if they are defaults)
+        for key in self.domain_keys:
+            if key not in kwargs and key in self.__fields__:
+                kwargs[key] = self.__fields__[key].default
+
         meta = kwargs.pop("meta", None)
         notes = kwargs.pop("notes", None)
         id = kwargs.pop("id", None)
         rendered_content = kwargs.pop("rendered_content", None)
-
-        kwargs = self._remove_base_class_defaults(kwargs)
-
         return ExpectationConfiguration(
             expectation_type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
@@ -1245,14 +1244,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             ge_cloud_id=id,
             rendered_content=rendered_content,
         )
-
-    @classmethod
-    def _remove_base_class_defaults(cls, kwargs: dict) -> dict:
-        for name, field in Expectation.__fields__.items():
-            if name in kwargs and kwargs[name] == field.default:
-                kwargs.pop(name)
-
-        return kwargs
 
     def __copy__(self):
         return self.copy(update={"id": None}, deep=True)
@@ -1485,6 +1476,11 @@ class BatchExpectation(Expectation, ABC):
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
             expectation.
     """
+
+    batch_id: Union[str, None] = None
+    row_condition: Union[str, None] = None
+    condition_parser: Union[str, None] = None
+    mostly: float = Field(default=1.0, ge=0.0, le=1.0)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1755,10 +1751,12 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
     column: str
 
+    catch_exceptions: bool = True
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
-        "table",
+        "table",  # Why is this here???
         "column",
         "row_condition",
         "condition_parser",
@@ -2010,10 +2008,12 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     column_A: str
     column_B: str
 
+    catch_exceptions: bool = True
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
-        "table",
+        "table",  # Why is this here???
         "column_A",
         "column_B",
         "row_condition",
@@ -2254,11 +2254,12 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     ignore_row_if: Literal[
         "all_values_are_missing", "any_value_is_missing", "never"
     ] = "all_values_are_missing"
+    catch_exceptions: bool = True
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
-        "table",
+        "table",  # Why is this here???
         "column_list",
         "row_condition",
         "condition_parser",

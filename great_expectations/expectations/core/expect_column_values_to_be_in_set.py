@@ -105,7 +105,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field([])
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
