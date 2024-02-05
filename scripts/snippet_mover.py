@@ -30,7 +30,9 @@ class SnippetMover:
             SnippetModule
         ] = []  # not referenced by a test
         self._version_prefix = "version-0.17.23"
-        self._docs_prefix = Path("docs/docusaurus/versioned_docs") / Path(self._version_prefix)
+        self._docs_prefix = Path("docs/docusaurus/versioned_docs") / Path(
+            self._version_prefix
+        )
         self._default_snippet_path = self._docs_prefix / Path("snippets")
         self._docs_root_dir = gx_root_dir / self._docs_prefix
         self._code_namespace = Path("great_expectations-0.17.23")
