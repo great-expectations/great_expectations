@@ -9,14 +9,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
+@import "typography.scss";
+@import "left_navigation.scss";
+@import "navbar.scss";
+@import "tabs.scss";
+
 /* You can override the default Infima variables here. */
+
 :root {
     --ifm-font-color-base: #404041;
     --ifm-navbar-link-color: #404041;
     --ifm-menu-color: #404041;
     --ifm-footer-title-color: #FF8D3A;
     --ifm-footer-link-color: #F8F8F8;
-    --ifm-dropdown-font-weight: 700;
     --ifm-footer-background-color: #404041;
     --ifm-color-primary: #ff6310;
     --ifm-color-primary-dark: #fd326b;
@@ -25,23 +30,19 @@
     --ifm-color-primary-light: #fd749b;
     --ifm-color-primary-lighter: #fe85a7;
     --ifm-color-primary-lightest: #feb7cb;
+    --color-primary-10: rgba(255, 99, 16, .1);
     --ifm-code-font-size: 95%;
-
-    /* sync up some of the typography */
-    --ifm-heading-line-height: 1;
-    --ifm-h1-font-size: 48px;
-    --ifm-h2-font-size: 20px;
-    --ifm-font-family-base: Montserrat, 'Open Sans', Verdana, sans‑serif;
-    --ifm-dropdown-font-weight: bold;
-    --ifm-heading-margin-bottom: 0;
-    --ifm-heading-vertical-rhythm-bottom: 0;
 
     /* make pagination look like the nice buttons */
     --ifm-pagination-nav-border-radius: 35px;
     --ifm-pagination-nav-padding: 16px;
 
+    --ifm-tabs-padding-vertical: 0.7em;
+
     /* enlarge the sidebar width */
     --doc-sidebar-width: 350px !important;
+
+    --ifm-navbar-height: 6rem;
     
      /* Colors */
       --white: #fff;
@@ -94,36 +95,12 @@
     
 }
 
-/* override huge h1 */
-.h1Heading_node_modules-\@docusaurus-theme-classic-lib-next-theme-Heading-styles-module {
-    font-size: var(--ifm-h1-font-size) !important;
-}
-
 p > a {
     text-decoration: underline;
 }
 
-h1, h2, h3 {
-    line-height: 1.4;
-    font-family: Monteserrat, sans-serif;
-}
-
-h4, h5, h6 {
-    line-height: 1.5;
-    font-family: Monteserrat, sans-serif;
-}
-
-p {
-    line-height: 1.5;
-    font-family: 'Source Sans Pro', sans-serif;
-}
-
 h3 {
     color: #404041;
-}
-
-.markdown p {
-    line-height: 1.8;
 }
 
 /* pagination overrides */
@@ -160,54 +137,7 @@ a.pagination-nav__link:hover {
     padding: 0 var(--ifm-pre-padding);
 }
 
-/* navbar tweaks */
-.navbar--fixed-top {
-    opacity: .95;
-}
-
-.navbar__link {
-    font-weight: 700;
-    font-size: 14px;
-    text-transform: uppercase;
-}
-
-.navbar__brand {
-    width: 190px;
-    height: auto;
-}
-
-.navbar__logo{
-    height: 44px;
-}
-
-.navbar__item {
-    margin-left: 4px;
-}
-
-.navbar__items--right > :last-child {
-    padding-right: 16px;
-}
-
-.header-cloud-link {
-    border: none;
-    border-radius: 35px;
-    color: #fff;
-    padding: 8px 16px;
-    background: var(--ifm-link-color);
-    text-align: center;
-    text-transform: none;
-}
-
-.header-cloud-link:hover {
-    color: #FFF;
-    background-color: #DE550A;
-}
-
 /*footer*/
-
-.footer {
-    font-family:'Source Sans Pro', sans-serif ;
-}
 
 .footer__items {
     box-sizing: border-box;
@@ -224,7 +154,6 @@ a.pagination-nav__link:hover {
 
 .footer__item {
     padding: 3px 0;
-    font-family:'Source Sans Pro', sans-serif ;
 }
 
 @media (max-width: 996px) {
@@ -313,19 +242,6 @@ table.borderless tr:nth-child(2n) {
     width: 75%;
 }
 
-.tabs-container .margin-vert--md{
-    margin-top: 0 !important;
-}
-
-
-div[role="tabpanel"]{
-   --ifm-code-background: var(--ifm-alert-background-color-highlight);
-    border-radius: 0;
-    box-shadow:none;
-    border-top: 0;
-    padding: 0;
-}
-
 .tooltip {
   position: relative;
   display: inline-block;
@@ -353,6 +269,22 @@ div[role="tabpanel"]{
     .main-wrapper {
         overflow: hidden;
     }
+}
+
+.table-of-contents {
+  font-size: var(--p-sm-font-size);
+  line-height: var(--p-line-height)
+}
+
+/* overrides to keep margin consistent in edge cases when there are lists inside list subitems */
+li ul,
+li ol {
+  margin-top: var(--ifm-list-item-margin);
+}
+
+li p + ul,
+li p + ol {
+  margin-top: calc( -1 * var(--ifm-paragraph-margin-bottom) + 0.5em);
 }
 
 @import "api_docs/api_docs.scss";

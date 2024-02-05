@@ -11,5 +11,5 @@ import LinkCard from '@site/src/components/LinkCard';
 
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Quickstart for GX Cloud and Snowflake" description="Quickly start using GX Cloud with Snowflake." href="/docs/cloud/quickstarts/snowflake_quickstart" icon="/img/snowflake_icon.png" />
+  <LinkCard topIcon label="Quickstart for GX Cloud and Snowflake" description="Quickly start using GX Cloud with Snowflake." to="/cloud/quickstarts/snowflake_quickstart" icon="/img/snowflake_icon.png" />
 </LinkCardGrid>

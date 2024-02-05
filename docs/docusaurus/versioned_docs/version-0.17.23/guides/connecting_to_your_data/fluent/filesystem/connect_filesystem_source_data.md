@@ -7,21 +7,21 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import Introduction from '/docs/components/connect_to_data/filesystem/_intro_connect_to_one_or_more_files_pandas_or_spark.mdx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import InfoUsingPandasToConnectToDifferentFileTypes from '/docs/components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
-import AfterCreateValidator from '/docs/components/connect_to_data/next_steps/_after_create_validator.md'
-import InfoFilesystemDatasourceRelativeBasePaths from '/docs/components/connect_to_data/filesystem/_info_filesystem_datasource_relative_base_paths.md'
-import TipFilesystemDatasourceNestedSourceDataFolders from '/docs/components/connect_to_data/filesystem/_tip_filesystem_datasource_nested_source_data_folders.md'
-import TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles from '/docs/components/connect_to_data/filesystem/_tip_filesystem_data_asset_if_batching_regex_matches_multiple_files.md'
-import TipUsingPandasToConnectToDifferentFileTypes from '/docs/components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
-import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesystem/_defining_multiple_data_assets.md'
-import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
-import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
-import PrereqInstallGxWithDependencies from '/docs/components/prerequisites/_gx_installed_with_abs_dependencies.md'
-import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import Introduction from '../../../../components/connect_to_data/filesystem/_intro_connect_to_one_or_more_files_pandas_or_spark.mdx'
+import ImportGxAndInstantiateADataContext from '../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import InfoUsingPandasToConnectToDifferentFileTypes from '../../../../components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
+import AfterCreateValidator from '../../../../components/connect_to_data/next_steps/_after_create_validator.md'
+import InfoFilesystemDatasourceRelativeBasePaths from '../../../../components/connect_to_data/filesystem/_info_filesystem_datasource_relative_base_paths.md'
+import TipFilesystemDatasourceNestedSourceDataFolders from '../../../../components/connect_to_data/filesystem/_tip_filesystem_datasource_nested_source_data_folders.md'
+import TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles from '../../../../components/connect_to_data/filesystem/_tip_filesystem_data_asset_if_batching_regex_matches_multiple_files.md'
+import TipUsingPandasToConnectToDifferentFileTypes from '../../../../components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
+import DefiningMultipleDataAssets from '../../../../components/connect_to_data/filesystem/_defining_multiple_data_assets.md'
+import AfterCreateNonSqlDatasource from '../../../../components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
+import BatchingRegexExplaination from '../../../../components/connect_to_data/cloud/_batching_regex_explaination.mdx'
+import PrereqInstallGxWithDependencies from '../../../../components/prerequisites/_gx_installed_with_abs_dependencies.md'
+import AbsFluentAddDataAssetConfigKeys from '../../../../components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -57,7 +57,7 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <Prerequisites>
 
-- [An installation of GX set up to work with S3](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with S3](/guides/setup/installation/install_gx.md)
 - Access to data on a S3 bucket
 
 </Prerequisites> 
@@ -116,7 +116,7 @@ The following examples connect to .csv data.
 
 <Prerequisites>
 
-- [An installation of GX set up to work with S3](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with S3](/guides/setup/installation/install_gx.md)
 - Access to data on a S3 bucket
 
 </Prerequisites> 
@@ -217,7 +217,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```
 
     :::tip Where did that connection string come from?
-    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/installation/install_gx).
+    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/guides/setup/installation/install_gx.md).
     :::
 
 ### Add data to the Data Source as a Data Asset
@@ -271,7 +271,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```
 
     :::tip Where did that connection string come from?
-    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/installation/install_gx).
+    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/guides/setup/installation/install_gx.md).
     :::
 
 ### Add data to the Data Source as a Data Asset
@@ -313,7 +313,7 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with GCS](/guides/setup/installation/install_gx.md)
 - Access to data in a GCS bucket
 
 </Prerequisites> 
@@ -371,7 +371,7 @@ Use Spark to connect to source data stored on GCS.  The following examples conne
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with GCS](/guides/setup/installation/install_gx.md)
 - Access to data on a GCS bucket
 
 </Prerequisites> 
@@ -646,4 +646,4 @@ A Data Asset requires the following information to be defined:
 
 ## Related documentation
 
-For more information about storing credentials for use with GX, see [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials).
+For more information about storing credentials for use with GX, see [How to configure credentials](/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).

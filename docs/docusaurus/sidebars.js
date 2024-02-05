@@ -13,6 +13,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'GX Agent',
+              href: '/docs/cloud/about_gx#gx-agent',
+            },
+            {
+              type: 'link',
               label: 'GX Cloud deployment patterns',
               href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
             },
@@ -135,13 +140,8 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Automatically create an Expectation Suite that tests for missing data',
-              href: '/docs/cloud/expectation_suites/manage_expectation_suites#automatically-create-an-expectation-suite-that-tests-for-missing-data',
-            },
-            {
-              type: 'link',
-              label: 'Create an empty Expectation Suite ',
-              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-empty-expectation-suite',
+              label: 'Create an Expectation Suite ',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
             },
             {
               type: 'link',

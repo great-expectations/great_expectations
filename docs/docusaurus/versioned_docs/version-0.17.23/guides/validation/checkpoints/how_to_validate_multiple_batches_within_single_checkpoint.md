@@ -2,7 +2,7 @@
 title: Validate multiple Batches from a Batch Request with a single Checkpoint
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx';
+import Prerequisites from '../../../components/_prerequisites.jsx';
 
 
 
@@ -12,9 +12,9 @@ By default, a Checkpoint only validates the last Batch included in a Batch Reque
 
 <Prerequisites>
 
-- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- [A Data Asset with multiple Batches](/docs/guides/connecting_to_your_data/connect_to_data_lp).
-- [An Expectation Suite](/docs/guides/expectations/expectations_lp). 
+- [A configured Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
+- [A Data Asset with multiple Batches](/guides/connecting_to_your_data/connect_to_data_lp.md).
+- [An Expectation Suite](/guides/expectations/expectations_lp.md). 
 
 </Prerequisites>
 
@@ -32,7 +32,7 @@ When working with a Filesystem Data Source and organizing Batches, the `batching
 
 SQL Data source data Assets include a single Batch by default. You can use splitters to split the single Batch into multiple Batches.
 
-For more information on partitioning a Data Asset into Batches, see [Manage Data Assets](/docs/guides/connecting_to_your_data/manage_data_assets_lp).
+For more information on partitioning a Data Asset into Batches, see [Manage Data Assets](/guides/connecting_to_your_data/manage_data_assets_lp.md).
 :::
 
 ## Get a list of Batches from the Batch Request
