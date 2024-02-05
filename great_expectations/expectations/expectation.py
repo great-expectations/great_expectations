@@ -1592,6 +1592,31 @@ representation."""
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
+class SqlExpectation(BatchExpectation, ABC):
+    unexpected_rows_query: str
+
+    @pydantic.validator("unexpected_rows_query")
+    def _validate_unexpected_rows_query(cls, v):
+        pass
+
+    def _validate(
+        self,
+        metrics: dict,
+        runtime_configuration: dict | None = None,
+        execution_engine: ExecutionEngine = None,
+    ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
+        query_result = list(metrics.get("query.table")[0].values())[0]
+        value = configuration.kwargs.get("value")
+
+        success = query_result == value
+
+        return {
+            "success": success,
+            "result": {"observed_value": query_result},
+        }
+
+
 @public_api
 class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
