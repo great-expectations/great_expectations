@@ -1595,6 +1595,8 @@ representation."""
 class SqlExpectation(BatchExpectation, ABC):
     unexpected_rows_query: str
 
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
+
     @pydantic.validator("unexpected_rows_query")
     def _validate_unexpected_rows_query(cls, v):
         pass
