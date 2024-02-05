@@ -30,9 +30,7 @@ class SnippetMover:
             SnippetModule
         ] = []  # not referenced by a test
         self._version_prefix = "version-0.17.23"
-        self._docs_prefix = Path("docs/docusaurus/versioned_docs") / Path(
-            self._version_prefix
-        )
+        self._docs_prefix = Path("docs/docusaurus/versioned_docs") / Path(self._version_prefix)
         self._default_snippet_path = self._docs_prefix / Path("snippets")
         self._docs_root_dir = gx_root_dir / self._docs_prefix
         self._code_namespace = Path("great_expectations-0.17.23")
@@ -235,8 +233,8 @@ class SnippetMover:
                 versioned_new_path = f"{self._version_prefix} {snippet_module.new_path}"
                 self.find_and_replace_text_in_file(
                     path=path,
-                    old_str=str(snippet_module.original_path),
-                    new_str=str(snippet_module.new_path),
+                    old_str=str(Path(*snippet_module.original_path.parts[1:])),
+                    new_str=versioned_new_path,
                 )
 
     def move_snippets(self):
