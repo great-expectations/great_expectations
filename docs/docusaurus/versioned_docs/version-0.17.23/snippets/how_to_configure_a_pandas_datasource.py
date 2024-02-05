@@ -82,7 +82,7 @@ def is_subset(subset, superset):
 
 
 def get_full_pandas_inferred_datasource_single_batch():
-    # <snippet name="pandas_inferred_datasource_single_batch_full_snippet">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_configure_a_pandas_datasource.py pandas_inferred_datasource_single_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -114,7 +114,7 @@ def get_full_pandas_inferred_datasource_single_batch():
 
 
 def get_full_pandas_inferred_datasource_multi_batch():
-    # <snippet name="pandas_inferred_datasource_multi_batch_full_snippet">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_configure_a_pandas_datasource.py pandas_inferred_datasource_multi_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -146,7 +146,7 @@ def get_full_pandas_inferred_datasource_multi_batch():
 
 
 def get_full_pandas_configured_datasource_single_batch():
-    # <snippet name="pandas_configured_datasource_single_batch_full_snippet">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_configure_a_pandas_datasource.py pandas_configured_datasource_single_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -180,7 +180,7 @@ def get_full_pandas_configured_datasource_single_batch():
 
 
 def get_full_pandas_configured_datasource_multi_batch():
-    # <snippet name="pandas_configured_datasource_multi_batch_full_snippet">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_configure_a_pandas_datasource.py pandas_configured_datasource_multi_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
