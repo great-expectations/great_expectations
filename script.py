@@ -3,6 +3,7 @@ from great_expectations.expectations.expectation import SqlExpectation
 
 
 class ExpectPassengerCountToBeReasonable(SqlExpectation):
+    # TODO: Need to change {active_batch} syntax
     query: str = "SELECT * FROM {active_batch} WHERE passenger_count > 6"
 
 

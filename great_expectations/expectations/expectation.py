@@ -1593,6 +1593,7 @@ representation."""
 
 
 class SqlExpectation(BatchExpectation, ABC):
+    # TODO: Need to rename to unexpected_rows_query (and make corresponding metric change)
     query: str
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
@@ -1605,6 +1606,7 @@ class SqlExpectation(BatchExpectation, ABC):
 
     @pydantic.validator("query")
     def _validate_unexpected_rows_query(cls, v):
+        # TODO: Need to validate proper SQL query structure and presence of {active_batch}
         pass
 
     def _validate(
