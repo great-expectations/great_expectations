@@ -2,6 +2,7 @@
 Purpose: To ensure that no docs snippets use the file and line number convention,
 only the named snippets convention.
 """
+
 import pathlib
 import re
 import shutil

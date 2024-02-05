@@ -29,9 +29,9 @@ class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
     def _pandas(cls, column, value, index, **kwargs):
         # print(column, str(type(column)))
         return column.apply(
-            lambda element: element[index] == value
-            if str(element) == element
-            else False
+            lambda element: (
+                element[index] == value if str(element) == element else False
+            )
         )
 
         # return column == 3
@@ -188,7 +188,7 @@ class ExpectValueAtIndex(ColumnMapExpectation):
         ],
         "contributors": [
             "@prem1835213",
-            "@YaosenLin"
+            "@YaosenLin",
             # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
         ],

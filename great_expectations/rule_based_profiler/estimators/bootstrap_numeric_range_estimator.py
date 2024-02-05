@@ -95,12 +95,14 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
 
-        quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
-            quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
-            round_decimals=self.configuration.round_decimals,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
+        quantile_statistic_interpolation_method: str = (
+            get_quantile_statistic_interpolation_method_from_rule_state(
+                quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
+                round_decimals=self.configuration.round_decimals,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
         )
         if quantile_statistic_interpolation_method is None:
             quantile_statistic_interpolation_method = (
@@ -108,27 +110,27 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             )
 
         # Obtain quantile_bias_correction override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_correction: Optional[
-            bool
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.configuration.quantile_bias_correction,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        quantile_bias_correction: Optional[bool] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.configuration.quantile_bias_correction,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
         if quantile_bias_correction is None:
             quantile_bias_correction = False
 
         # Obtain quantile_bias_std_error_ratio_threshold override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_std_error_ratio_threshold: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        quantile_bias_std_error_ratio_threshold: Optional[float] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
         if quantile_bias_std_error_ratio_threshold is None:
             quantile_bias_std_error_ratio_threshold = (

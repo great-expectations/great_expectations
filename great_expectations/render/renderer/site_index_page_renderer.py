@@ -254,9 +254,9 @@ class SiteIndexPageRenderer(Renderer):
                     ),
                     "_expectation_suite_name_sort": dict_.get("expectation_suite_name"),
                     "_table_row_link_path": dict_.get("filepath"),
-                    "_validation_success_text": "Success"
-                    if dict_.get("validation_success")
-                    else "Failed",
+                    "_validation_success_text": (
+                        "Success" if dict_.get("validation_success") else "Failed"
+                    ),
                     "asset_name": dict_.get("asset_name"),
                 }
             )
@@ -355,19 +355,21 @@ class SiteIndexPageRenderer(Renderer):
                         "params": {
                             "validation_success": {
                                 "tag": "i",
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success",
-                                    "ge-success-icon",
-                                ]
-                                if validation_success
-                                else [
-                                    "fas",
-                                    "fa-times",
-                                    "text-danger",
-                                    "ge-failed-icon",
-                                ],
+                                "classes": (
+                                    [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                        "ge-success-icon",
+                                    ]
+                                    if validation_success
+                                    else [
+                                        "fas",
+                                        "fa-times",
+                                        "text-danger",
+                                        "ge-failed-icon",
+                                    ]
+                                ),
                             }
                         },
                         "classes": ["ge-index-page-table-validation-links-item"],

@@ -546,15 +546,15 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         == fixture_expectation_suite.expectation_configurations
     )
 
-    profiled_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, List[str]
-    ] = profiler.get_fully_qualified_parameter_names_by_domain()
+    profiled_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
+        profiler.get_fully_qualified_parameter_names_by_domain()
+    )
 
-    fixture_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, List[str]
-    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
-        "expected_fixture_fully_qualified_parameter_names_by_domain"
-    ]
+    fixture_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
+        bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
+            "expected_fixture_fully_qualified_parameter_names_by_domain"
+        ]
+    )
 
     assert (
         profiled_fully_qualified_parameter_names_by_domain
@@ -566,17 +566,15 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         rule_name="row_count_range_rule",
     )
 
-    profiled_fully_qualified_parameter_names_for_domain_id: List[
-        str
-    ] = profiler.get_fully_qualified_parameter_names_for_domain_id(domain.id)
+    profiled_fully_qualified_parameter_names_for_domain_id: List[str] = (
+        profiler.get_fully_qualified_parameter_names_for_domain_id(domain.id)
+    )
 
-    fixture_fully_qualified_parameter_names_for_domain_id: List[
-        str
-    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
-        "expected_fixture_fully_qualified_parameter_names_by_domain"
-    ][
-        domain
-    ]
+    fixture_fully_qualified_parameter_names_for_domain_id: List[str] = (
+        bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
+            "expected_fixture_fully_qualified_parameter_names_by_domain"
+        ][domain]
+    )
 
     assert (
         profiled_fully_qualified_parameter_names_for_domain_id
@@ -587,9 +585,9 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         Domain, Dict[str, ParameterNode]
     ] = profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
 
-    fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, Dict[str, ParameterNode]
-    ] = bobby_columnar_table_multi_batch[
+    fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: (
+        Dict[Domain, Dict[str, ParameterNode]]
+    ) = bobby_columnar_table_multi_batch[
         "test_configuration_quantiles_estimator"
     ][
         "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
@@ -787,9 +785,9 @@ def restore_profiler_config(
         yield
     finally:
         expectation.default_profiler_config = original_default_profiler_config
-        expectation.default_kwarg_values[
-            "profiler_config"
-        ] = original_default_profiler_config
+        expectation.default_kwarg_values["profiler_config"] = (
+            original_default_profiler_config
+        )
 
 
 @pytest.mark.skipif(

@@ -10,7 +10,6 @@ ephemeral assets.
 iterative process for trying and refining expectations.
 """
 
-
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe

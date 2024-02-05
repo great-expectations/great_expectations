@@ -183,9 +183,9 @@ def test_load_config_variables_file(
         "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
-    basic_data_context_v013_config[
-        "config_variables_file_path"
-    ] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    basic_data_context_v013_config["config_variables_file_path"] = (
+        "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    )
 
     try:
         # We should be able to load different files based on an environment variable
@@ -437,8 +437,10 @@ data_connectors:
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
-        mode=ConfigOutputModes.DICT
+    project_config_dict: dict = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
+            mode=ConfigOutputModes.DICT
+        )
     )
     project_config_dict["plugins_directory"] = None
     project_config_dict["validation_operators"] = {

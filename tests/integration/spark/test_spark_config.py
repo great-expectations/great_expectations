@@ -70,9 +70,9 @@ def test_spark_config_execution_engine(spark_session):
 
     assert not sc_stopped
 
-    current_spark_config: List[
-        tuple
-    ] = execution_engine.spark.sparkContext.getConf().getAll()
+    current_spark_config: List[tuple] = (
+        execution_engine.spark.sparkContext.getConf().getAll()
+    )
     assert old_app_id == execution_engine.spark.sparkContext.applicationId
     assert ("spark.sql.catalogImplementation", "hive") in current_spark_config
     # Confirm that "spark.app.name" was not changed upon "SparkDFExecutionEngine" instantiation (from original value).

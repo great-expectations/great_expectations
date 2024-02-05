@@ -1878,15 +1878,15 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 elif _engine == "spark" and "spark" in engines_implemented:
                     engines_to_include[_engine] = True
     else:
-        engines_to_include[
-            "pandas"
-        ] = execution_engine_diagnostics.PandasExecutionEngine
-        engines_to_include[
-            "spark"
-        ] = execution_engine_diagnostics.SparkDFExecutionEngine
-        engines_to_include[
-            "sqlalchemy"
-        ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        engines_to_include["pandas"] = (
+            execution_engine_diagnostics.PandasExecutionEngine
+        )
+        engines_to_include["spark"] = (
+            execution_engine_diagnostics.SparkDFExecutionEngine
+        )
+        engines_to_include["sqlalchemy"] = (
+            execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        )
         if (
             engines_to_include.get("sqlalchemy") is True
             and raise_exceptions_for_backends is False
@@ -1940,9 +1940,11 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
             _debug(f"Getting validators with data: {c}")
 
             tests_suppressed_for_backend = [
-                c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES)
-                if sup
-                else False
+                (
+                    c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES)
+                    if sup
+                    else False
+                )
                 for sup in suppress_test_fors
             ]
             only_fors_ok = []

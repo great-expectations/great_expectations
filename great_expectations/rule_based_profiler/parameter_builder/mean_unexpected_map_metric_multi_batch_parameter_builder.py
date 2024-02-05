@@ -43,15 +43,16 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
     Compute mean unexpected count ratio (as a fraction) of specified map-style metric across every Batch of data given.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
-        "metric_name",
-        "single_batch_mode",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricMultiBatchParameterBuilder.exclude_field_names
+        | {
+            "metric_name",
+            "single_batch_mode",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -152,14 +153,14 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         ]
 
         # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        null_count_parameter_builder_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.null_count_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        null_count_parameter_builder_name: Optional[str] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.null_count_parameter_builder_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
@@ -177,12 +178,14 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 f"{RAW_PARAMETER_KEY}{null_count_parameter_builder_name}"
             )
             # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-            null_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_null_count_parameter_builder_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
+            null_count_parameter_node: ParameterNode = (
+                get_parameter_value_and_validate_return_type(
+                    domain=domain,
+                    parameter_reference=fully_qualified_null_count_parameter_builder_name,
+                    expected_return_type=None,
+                    variables=variables,
+                    parameters=parameters,
+                )
             )
             null_count_values = null_count_parameter_node[
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY

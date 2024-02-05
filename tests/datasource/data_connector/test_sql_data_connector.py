@@ -837,23 +837,25 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
         sql_alchemy_execution_engine=execution_engine,
     )
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        assets={
-            "my_asset": {
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": f"{sampler_method_name_prefix}sample_using_limit",
-                "sampling_kwargs": {"n": 20},
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "splitter_method": "_split_on_whole_table",
+                    "splitter_kwargs": {},
+                    "sampling_method": f"{sampler_method_name_prefix}sample_using_limit",
+                    "sampling_kwargs": {"n": 20},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
             },
-        },
+        )
     )
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -893,23 +895,25 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        assets={
-            "my_asset": {
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": f"{sampler_method_name_prefix}sample_using_random",
-                "sampling_kwargs": {"p": 1.0},
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "splitter_method": "_split_on_whole_table",
+                    "splitter_kwargs": {},
+                    "sampling_method": f"{sampler_method_name_prefix}sample_using_random",
+                    "sampling_kwargs": {"p": 1.0},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
             },
-        },
+        )
     )
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -997,26 +1001,28 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__a_list(
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        assets={
-            "my_asset": {
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
-                "sampling_kwargs": {
-                    "column_name": "id",
-                    "value_list": [10, 20, 30, 40],
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "splitter_method": "_split_on_whole_table",
+                    "splitter_kwargs": {},
+                    "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
+                    "sampling_kwargs": {
+                        "column_name": "id",
+                        "value_list": [10, 20, 30, 40],
+                    },
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
                 },
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
             },
-        },
+        )
     )
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -1101,26 +1107,28 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        sampling_method=f"{sampler_method_name_prefix}sample_using_random",
-        sampling_kwargs={"p": 1.0},
-        assets={
-            "my_asset": {
-                "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
-                "sampling_kwargs": {
-                    "column_name": "id",
-                    "value_list": [10, 20, 30, 40],
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            sampling_method=f"{sampler_method_name_prefix}sample_using_random",
+            sampling_kwargs={"p": 1.0},
+            assets={
+                "my_asset": {
+                    "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
+                    "sampling_kwargs": {
+                        "column_name": "id",
+                        "value_list": [10, 20, 30, 40],
+                    },
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
                 },
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
             },
-        },
+        )
     )
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -1528,33 +1536,37 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=mock_sql_alchemy_execution_engine,
-        assets={
-            "table_partitioned_by_date_column__A": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {"column_name": "date"},
-                "include_schema_name": True,
-                "schema_name": "main",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=mock_sql_alchemy_execution_engine,
+            assets={
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                },
             },
-        },
+        )
     )
     assert "main.table_partitioned_by_date_column__A" in my_data_connector.assets
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=mock_sql_alchemy_execution_engine,
-        assets={
-            "table_partitioned_by_date_column__A": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {"column_name": "date"},
-                "include_schema_name": False,
-                "schema_name": "main",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=mock_sql_alchemy_execution_engine,
+            assets={
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": False,
+                    "schema_name": "main",
+                },
             },
-        },
+        )
     )
     assert "table_partitioned_by_date_column__A" in my_data_connector.assets
 
@@ -1567,20 +1579,22 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=mock_sql_alchemy_execution_engine,
-        assets={
-            "table_partitioned_by_date_column__A": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {"column_name": "date"},
-                "include_schema_name": True,
-                "schema_name": "main",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=mock_sql_alchemy_execution_engine,
+            assets={
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
             },
-        },
+        )
     )
     assert (
         "taxi__main.table_partitioned_by_date_column__A__asset"
@@ -1596,21 +1610,23 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=mock_sql_alchemy_execution_engine,
-        assets={
-            "my_asset": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {"column_name": "date"},
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=mock_sql_alchemy_execution_engine,
+            assets={
+                "my_asset": {
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
             },
-        },
+        )
     )
     assert "taxi__main.my_asset__asset" in my_data_connector.assets
 
@@ -1624,21 +1640,23 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        assets={
-            "my_asset": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {"column_name": "date"},
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
             },
-        },
+        )
     )
     assert "taxi__main.my_asset__asset" in my_data_connector.assets
 
@@ -1704,23 +1722,25 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
-        splitter_kwargs={"column_name": "date"},
-        assets={
-            "my_asset": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
-                "splitter_kwargs": {},
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
+            splitter_kwargs={"column_name": "date"},
+            assets={
+                "my_asset": {
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
+                    "splitter_kwargs": {},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
             },
-        },
+        )
     )
     assert "taxi__main.my_asset__asset" in my_data_connector.assets
 
@@ -1792,30 +1812,32 @@ def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnec
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
-        splitter_kwargs={"column_name": "date"},
-        sampling_method=f"{sampler_method_name_prefix}sample_using_random",
-        sampling_kwargs={"p": 1.0},
-        assets={
-            "my_asset": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
-                "sampling_kwargs": {
-                    "column_name": "id",
-                    "value_list": [10, 20, 30, 40],
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
+            splitter_kwargs={"column_name": "date"},
+            sampling_method=f"{sampler_method_name_prefix}sample_using_random",
+            sampling_kwargs={"p": 1.0},
+            assets={
+                "my_asset": {
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
+                    "splitter_kwargs": {},
+                    "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
+                    "sampling_kwargs": {
+                        "column_name": "id",
+                        "value_list": [10, 20, 30, 40],
+                    },
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
                 },
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
             },
-        },
+        )
     )
     assert "taxi__main.my_asset__asset" in my_data_connector.assets
 

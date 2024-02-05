@@ -83,22 +83,22 @@ class DefaultJinjaView:
         )
 
         self.env.filters["render_string_template"] = self.render_string_template
-        self.env.filters[
-            "render_styling_from_string_template"
-        ] = self.render_styling_from_string_template
+        self.env.filters["render_styling_from_string_template"] = (
+            self.render_styling_from_string_template
+        )
         self.env.filters["render_styling"] = self.render_styling
         self.env.filters["render_content_block"] = self.render_content_block
         self.env.filters["render_markdown"] = self.render_markdown
-        self.env.filters[
-            "get_html_escaped_json_string_from_dict"
-        ] = self.get_html_escaped_json_string_from_dict
+        self.env.filters["get_html_escaped_json_string_from_dict"] = (
+            self.get_html_escaped_json_string_from_dict
+        )
         self.env.filters["generate_html_element_uuid"] = self.generate_html_element_uuid
-        self.env.filters[
-            "attributes_dict_to_html_string"
-        ] = self.attributes_dict_to_html_string
-        self.env.filters[
-            "render_bootstrap_table_data"
-        ] = self.render_bootstrap_table_data
+        self.env.filters["attributes_dict_to_html_string"] = (
+            self.attributes_dict_to_html_string
+        )
+        self.env.filters["render_bootstrap_table_data"] = (
+            self.render_bootstrap_table_data
+        )
         self.env.globals["ge_version"] = ge_version
         self.env.filters["add_data_context_id_to_url"] = self.add_data_context_id_to_url
 

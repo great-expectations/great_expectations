@@ -111,9 +111,9 @@ class BaseCheckpoint(ConfigPeer):
     instantiated directly (only its descendants, such as "Checkpoint", should be instantiated).
     """
 
-    DEFAULT_ACTION_LIST: ClassVar[
-        Sequence[ActionDict]
-    ] = ActionDicts.DEFAULT_ACTION_LIST
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
+        ActionDicts.DEFAULT_ACTION_LIST
+    )
 
     def __init__(
         self,
@@ -478,9 +478,9 @@ class BaseCheckpoint(ConfigPeer):
 
             validator: Validator = self._validator or self.data_context.get_validator(
                 batch_request=batch_request,
-                expectation_suite_name=expectation_suite_name
-                if not self._using_cloud_context
-                else None,
+                expectation_suite_name=(
+                    expectation_suite_name if not self._using_cloud_context else None
+                ),
                 expectation_suite_ge_cloud_id=(
                     expectation_suite_ge_cloud_id if self._using_cloud_context else None
                 ),

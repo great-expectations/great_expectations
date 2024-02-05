@@ -9,6 +9,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
  context = gx.get_context()
  context.test_yaml_config(my_config)
 """
+
 from __future__ import annotations
 
 import traceback
@@ -510,9 +511,9 @@ class _YamlConfigValidator:
 
         profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config: Union[
-            RuleBasedProfilerConfig, dict
-        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        profiler_config: Union[RuleBasedProfilerConfig, dict] = (
+            RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        )
         profiler_config = profiler_config.to_json_dict()  # type: ignore[union-attr]
         profiler_config.update({"name": profiler_name})
 
@@ -609,9 +610,9 @@ class _YamlConfigValidator:
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )
-            checkpoint_config_dict: dict[
-                str, JSONValues
-            ] = checkpoint_config.to_json_dict()
+            checkpoint_config_dict: dict[str, JSONValues] = (
+                checkpoint_config.to_json_dict()
+            )
             checkpoint_config_dict.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
                 obj=checkpoint_config_dict, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
@@ -630,10 +631,9 @@ class _YamlConfigValidator:
         else:
             # If class_name is not a supported type or subclass of a supported type,
             # mark it as custom with no additional information since we can't anonymize
-            usage_stats_event_payload[
-                "diagnostic_info"
-            ] = usage_stats_event_payload.get("diagnostic_info", []) + [
-                "__custom_subclass_not_core_ge__"
-            ]
+            usage_stats_event_payload["diagnostic_info"] = (
+                usage_stats_event_payload.get("diagnostic_info", [])
+                + ["__custom_subclass_not_core_ge__"]
+            )
 
         return instantiated_class, usage_stats_event_payload

@@ -865,9 +865,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
                     run_id,
-                    result_format=result_format
-                    if result_format
-                    else self.result_format,
+                    result_format=(
+                        result_format if result_format else self.result_format
+                    ),
                     evaluation_parameters=evaluation_parameters,
                 )
                 failure_run_result_obj["validation_result"] = failure_validation_result
@@ -912,9 +912,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
                     run_id,
-                    result_format=result_format
-                    if result_format
-                    else self.result_format,
+                    result_format=(
+                        result_format if result_format else self.result_format
+                    ),
                     evaluation_parameters=evaluation_parameters,
                 )
                 warning_run_result_obj["validation_result"] = warning_validation_result

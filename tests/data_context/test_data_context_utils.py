@@ -293,17 +293,23 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):  # noqa: PLR0912, P
 
 @pytest.mark.unit
 def test_sanitize_config_azure_blob_store():
-    azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    azure_url: str = (
+        "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    )
     assert (
         PasswordMasker.mask_db_url(azure_url)
         == "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=***;EndpointSuffix=core.windows.net"
     )
 
-    azure_wrong_url: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    azure_wrong_url: str = (
+        "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    )
     with pytest.raises(StoreConfigurationError):
         PasswordMasker.mask_db_url(azure_wrong_url)
 
-    azure_missing_fields: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;EndpointSuffix=core.windows.net"
+    azure_missing_fields: str = (
+        "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;EndpointSuffix=core.windows.net"
+    )
     with pytest.raises(StoreConfigurationError):
         PasswordMasker.mask_db_url(azure_missing_fields)
 

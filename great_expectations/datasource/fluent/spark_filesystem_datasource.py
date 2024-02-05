@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 @public_api
 class SparkFilesystemDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[FilesystemDataConnector]
-    ] = FilesystemDataConnector
+    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = (
+        FilesystemDataConnector
+    )
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "base_directory",

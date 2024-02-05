@@ -143,12 +143,12 @@ class ValidationResultsPageRenderer(Renderer):
             **{
                 "renderer_type": "ValidationResultsPageRenderer",
                 "page_title": page_title,
-                "batch_kwargs": batch_kwargs
-                if "batch_kwargs" in validation_results.meta
-                else None,
-                "batch_spec": batch_kwargs
-                if "batch_spec" in validation_results.meta
-                else None,
+                "batch_kwargs": (
+                    batch_kwargs if "batch_kwargs" in validation_results.meta else None
+                ),
+                "batch_spec": (
+                    batch_kwargs if "batch_spec" in validation_results.meta else None
+                ),
                 "expectation_suite_name": expectation_suite_name,
                 "sections": sections,
                 "utm_medium": "validation-results-page",
@@ -195,9 +195,9 @@ class ValidationResultsPageRenderer(Renderer):
         meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
             if meta_properties_to_render is not None:
-                evr.expectation_config.kwargs[
-                    "meta_properties_to_render"
-                ] = meta_properties_to_render
+                evr.expectation_config.kwargs["meta_properties_to_render"] = (
+                    meta_properties_to_render
+                )
             if "column" in evr.expectation_config.kwargs:
                 column = evr.expectation_config.kwargs["column"]
             else:
@@ -983,12 +983,12 @@ class ProfilingResultsPageRenderer(Renderer):
                 "page_title": page_title,
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "profiling-results-page",
-                "batch_kwargs": batch_kwargs
-                if "batch_kwargs" in validation_results.meta
-                else None,
-                "batch_spec": batch_kwargs
-                if "batch_spec" in validation_results.meta
-                else None,
+                "batch_kwargs": (
+                    batch_kwargs if "batch_kwargs" in validation_results.meta else None
+                ),
+                "batch_spec": (
+                    batch_kwargs if "batch_spec" in validation_results.meta else None
+                ),
                 "sections": [
                     self._overview_section_renderer.render(
                         validation_results, section_name="Overview"

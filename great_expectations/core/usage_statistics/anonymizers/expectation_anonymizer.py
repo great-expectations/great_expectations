@@ -43,9 +43,9 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
             expectation_suite.expectation_suite_name
         )
         anonymized_info_dict["expectation_count"] = len(expectations)
-        anonymized_info_dict[
-            "anonymized_expectation_counts"
-        ] = anonymized_expectation_counts
+        anonymized_info_dict["anonymized_expectation_counts"] = (
+            anonymized_expectation_counts
+        )
 
         return anonymized_info_dict
 

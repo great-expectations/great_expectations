@@ -119,12 +119,14 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             )
         )
 
-        profile_report_accepted_filtering_values: str = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=f"{VARIABLES_KEY}profile_report_accepted_filtering_values",
-            expected_return_type=list,
-            variables=variables,
-            parameters=None,
+        profile_report_accepted_filtering_values: str = (
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=f"{VARIABLES_KEY}profile_report_accepted_filtering_values",
+                expected_return_type=list,
+                variables=variables,
+                parameters=None,
+            )
         )
 
         # get metrics and profile path from variables and then pass them into here

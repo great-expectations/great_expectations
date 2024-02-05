@@ -174,13 +174,13 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list()
 
     # with empty options
-    unsorted_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list(
-        BatchRequest(
-            datasource_name="my_file_path_datasource",
-            data_asset_name="my_s3_data_asset",
-            options={},
+    unsorted_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_s3_data_asset",
+                options={},
+            )
         )
     )
     expected: List[BatchDefinition] = [
@@ -602,13 +602,13 @@ def test_return_only_unique_batch_definitions():
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
 
-    unsorted_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list(
-        BatchRequest(
-            datasource_name="my_file_path_datasource",
-            data_asset_name="my_s3_data_asset",
-            options={},
+    unsorted_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_s3_data_asset",
+                options={},
+            )
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -812,9 +812,9 @@ def test_foxtrot():
         data_asset_name="my_s3_data_asset",
         options={},
     )
-    my_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    my_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    )
     assert len(my_batch_definition_list) == 3
 
 

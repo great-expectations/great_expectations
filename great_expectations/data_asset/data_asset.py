@@ -1074,11 +1074,13 @@ class DataAsset:
             finally:
                 return_obj["result"].update(
                     {
-                        "partial_unexpected_index_list": unexpected_index_list[
-                            : result_format["partial_unexpected_count"]
-                        ]
-                        if unexpected_index_list is not None
-                        else None,
+                        "partial_unexpected_index_list": (
+                            unexpected_index_list[
+                                : result_format["partial_unexpected_count"]
+                            ]
+                            if unexpected_index_list is not None
+                            else None
+                        ),
                         "partial_unexpected_counts": partial_unexpected_counts,
                     }
                 )

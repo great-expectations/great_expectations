@@ -3027,15 +3027,15 @@ class CheckpointConfig(BaseYamlConfig):
             validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
                 "expectation_suite_name"
             )
-            validation_dict[
-                "expectation_suite_name"
-            ] = validation_expectation_suite_name
+            validation_dict["expectation_suite_name"] = (
+                validation_expectation_suite_name
+            )
             validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(  # type: ignore[assignment]
                 "expectation_suite_ge_cloud_id"
             )
-            validation_dict[
-                "expectation_suite_ge_cloud_id"
-            ] = validation_expectation_suite_ge_cloud_id
+            validation_dict["expectation_suite_ge_cloud_id"] = (
+                validation_expectation_suite_ge_cloud_id
+            )
             validation_action_list: list = substituted_validation_dict.get(  # type: ignore[assignment]
                 "action_list"
             )

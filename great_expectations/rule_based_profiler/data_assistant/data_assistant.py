@@ -413,7 +413,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
                     evaluation_parameter_builder_configs[0].name
                 )
 
-            name: str = f"{metric_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}range"
+            name: str = (
+                f"{metric_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}range"
+            )
             name = sanitize_parameter_name(name=name, suffix=suffix)
             return NumericMetricRangeMultiBatchParameterBuilder(
                 name=name,
@@ -523,9 +525,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
                 Domain(
-                    domain_type=rule.domain_builder.domain_type
-                    if rule.domain_builder
-                    else "",
+                    domain_type=(
+                        rule.domain_builder.domain_type if rule.domain_builder else ""
+                    ),
                     rule_name=rule.name,
                 )
             ] = (
@@ -847,14 +849,18 @@ def build_map_metric_rule(  # noqa: PLR0913
     ] = None
 
     if map_metric_name == "column_values.unique":
-        column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: (
+            ParameterBuilder
+        ) = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder()
         )
         parameter_builders.append(
             column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         )
     elif map_metric_name == "column_values.null":
-        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: (
+            ParameterBuilder
+        ) = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
         )
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
@@ -862,7 +868,9 @@ def build_map_metric_rule(  # noqa: PLR0913
             column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         )
     elif map_metric_name == "column_values.nonnull":
-        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: (
+            ParameterBuilder
+        ) = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
         )
         parameter_builders.append(

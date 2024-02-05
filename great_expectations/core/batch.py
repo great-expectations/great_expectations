@@ -837,9 +837,11 @@ class Batch(SerializableDictDot):
         dict_obj: dict = {
             "data": str(self.data),
             "batch_request": self.batch_request.to_dict(),
-            "batch_definition": self.batch_definition.to_json_dict()
-            if isinstance(self.batch_definition, BatchDefinition)
-            else {},
+            "batch_definition": (
+                self.batch_definition.to_json_dict()
+                if isinstance(self.batch_definition, BatchDefinition)
+                else {}
+            ),
             "batch_spec": self.batch_spec,
             "batch_markers": self.batch_markers,
         }
@@ -943,11 +945,13 @@ def materialize_batch_request(
 
 
 def batch_request_contains_batch_data(
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict
-    | None = None,
+    batch_request: (
+        BatchRequestBase
+        | FluentBatchRequest
+        | dict
+        | BlockConfigBatchRequestTypedDict
+        | None
+    ) = None,
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
@@ -956,11 +960,13 @@ def batch_request_contains_batch_data(
 
 
 def batch_request_contains_runtime_parameters(
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict
-    | None = None,
+    batch_request: (
+        BatchRequestBase
+        | FluentBatchRequest
+        | dict
+        | BlockConfigBatchRequestTypedDict
+        | None
+    ) = None,
 ) -> bool:
     return (
         batch_request is not None
@@ -971,27 +977,26 @@ def batch_request_contains_runtime_parameters(
 
 @overload
 def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with None
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict = ...,
-) -> dict:
-    ...
+    batch_request: (
+        BatchRequestBase | FluentBatchRequest | dict | BlockConfigBatchRequestTypedDict
+    ) = ...,
+) -> dict: ...
 
 
 @overload
 def get_batch_request_as_dict(
     batch_request: None = ...,
-) -> None:
-    ...
+) -> None: ...
 
 
 def get_batch_request_as_dict(
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict
-    | None = None,
+    batch_request: (
+        BatchRequestBase
+        | FluentBatchRequest
+        | dict
+        | BlockConfigBatchRequestTypedDict
+        | None
+    ) = None,
 ) -> dict | None:
     if batch_request is None:
         return None

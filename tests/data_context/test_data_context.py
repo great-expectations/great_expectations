@@ -1014,9 +1014,9 @@ def test_load_config_variables_property(
         "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
-    basic_data_context_config[
-        "config_variables_file_path"
-    ] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    basic_data_context_config["config_variables_file_path"] = (
+        "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    )
 
     try:
         # We should be able to load different files based on an environment variable
@@ -2730,9 +2730,9 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         ),
     ]
 
-    expectation_suite.expectation_configurations[
-        0
-    ].rendered_content = legacy_rendered_content
+    expectation_suite.expectation_configurations[0].rendered_content = (
+        legacy_rendered_content
+    )
 
     actual_rendered_content: List[RenderedAtomicContent] = []
     for expectation_configuration in expectation_suite.expectation_configurations:

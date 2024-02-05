@@ -341,9 +341,9 @@ Bucket: {error}"""
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             reader_fn = self._get_reader_fn(reader_method)
-            reader_fn_result: pd.DataFrame | list[
-                pd.DataFrame
-            ] = execute_pandas_reader_fn(reader_fn, reader_options)
+            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = (
+                execute_pandas_reader_fn(reader_fn, reader_options)
+            )
             if isinstance(reader_fn_result, list):
                 if len(reader_fn_result) > 1:
                     raise gx_exceptions.ExecutionEngineError(
@@ -453,14 +453,12 @@ not {batch_spec.__class__.__name__}"""
     @overload
     def _get_reader_fn(
         self, reader_method: str = ..., path: Optional[str] = ...
-    ) -> DataFrameFactoryFn:
-        ...
+    ) -> DataFrameFactoryFn: ...
 
     @overload
     def _get_reader_fn(
         self, reader_method: None = ..., path: str = ...
-    ) -> DataFrameFactoryFn:
-        ...
+    ) -> DataFrameFactoryFn: ...
 
     def _get_reader_fn(
         self, reader_method: Optional[str] = None, path: Optional[str] = None

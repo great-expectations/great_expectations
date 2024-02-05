@@ -5,6 +5,7 @@ The data should pass a kstest with the cdf parameter=distribution and a=0.05,
 e.g. kstest(data_column, "distribution name", p-value=0.05) == True
 
 """
+
 import numpy as np
 import pandas as pd
 from scipy import stats

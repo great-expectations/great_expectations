@@ -197,12 +197,14 @@ def init_expectation_configuration_builder(
             expectation_configuration_builder_config.to_dict()
         )
 
-    expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(
-        config=expectation_configuration_builder_config,
-        runtime_environment={"data_context": data_context},
-        config_defaults={
-            "class_name": "DefaultExpectationConfigurationBuilder",
-            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-        },
+    expectation_configuration_builder: ExpectationConfigurationBuilder = (
+        instantiate_class_from_config(
+            config=expectation_configuration_builder_config,
+            runtime_environment={"data_context": data_context},
+            config_defaults={
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+            },
+        )
     )
     return expectation_configuration_builder

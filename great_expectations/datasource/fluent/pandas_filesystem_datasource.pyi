@@ -175,6 +175,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         kwargs: Optional[dict] = ...,
     ) -> FWFAsset:
         """Add a fixed-width-file asset to the catalog."""  # noqa: PYI021
+
     def add_hdf_asset(  # noqa: PLR0913
         self,
         name: str,

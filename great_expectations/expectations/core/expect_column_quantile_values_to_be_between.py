@@ -162,9 +162,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     ) -> Optional[QuantileRange]:
         try:
             assert all(
-                True
-                if None in x
-                else x == sorted([val for val in x if val is not None])
+                (
+                    True
+                    if None in x
+                    else x == sorted([val for val in x if val is not None])
+                )
                 for x in quantile_ranges["value_ranges"]
             ), "quantile_ranges must consist of ordered pairs"
         except AssertionError as e:
@@ -540,13 +542,17 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                     {
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": quantile_string
-                            if quantile_string
-                            else f"{quantile:3.2f}",
+                            "template": (
+                                quantile_string
+                                if quantile_string
+                                else f"{quantile:3.2f}"
+                            ),
                             "tooltip": {
-                                "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
-                                if quantile == 0.50  # noqa: PLR2004
-                                else "expect_column_quantile_values_to_be_between"
+                                "content": (
+                                    "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
+                                    if quantile == 0.50  # noqa: PLR2004
+                                    else "expect_column_quantile_values_to_be_between"
+                                )
                             },
                         },
                     },

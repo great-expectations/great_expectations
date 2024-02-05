@@ -51,9 +51,9 @@ else:
     "fields_or_struct_type,serialized_output", struct_type_test_params
 )
 def test_serializable_struct_type(
-    fields_or_struct_type: pyspark_types.StructType
-    | list[pyspark_types.StructField]
-    | None,
+    fields_or_struct_type: (
+        pyspark_types.StructType | list[pyspark_types.StructField] | None
+    ),
     serialized_output: dict,
     skip_if_spark_not_selected: None,
 ):
@@ -69,9 +69,9 @@ def test_serializable_struct_type(
     struct_type_test_params,
 )
 def test_serializable_struct_type_validate(
-    fields_or_struct_type: pyspark_types.StructType
-    | list[pyspark_types.StructField]
-    | None,
+    fields_or_struct_type: (
+        pyspark_types.StructType | list[pyspark_types.StructField] | None
+    ),
     serialized_output: dict,
     skip_if_spark_not_selected: None,
 ):

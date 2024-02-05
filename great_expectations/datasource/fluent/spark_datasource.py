@@ -125,8 +125,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         return dataframe
 
     @override
-    def test_connection(self) -> None:
-        ...
+    def test_connection(self) -> None: ...
 
     @property
     @override
@@ -278,8 +277,7 @@ class SparkDatasource(_SparkDatasource):
     assets: List[DataFrameAsset] = []
 
     @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        ...
+    def test_connection(self, test_assets: bool = True) -> None: ...
 
     @public_api
     @deprecated_argument(

@@ -5709,9 +5709,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         profiler_config=expected_effective_profiler_config,
     )
 
-    expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator: Dict[
-        Domain, List[str]
-    ] = {
+    expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator: (
+        Dict[Domain, List[str]]
+    ) = {
         Domain(
             **{
                 "domain_type": MetricDomainTypes.TABLE,
@@ -7586,17 +7586,19 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         "bobster_columnar_table_multi_batch_bootstrap_estimator"
     )
 
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
-        5000
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
-        1.0e3
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
-        3.00
-    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: (
+        int
+    ) = 5000
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: (
+        float
+    ) = 1.0e3
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: (
+        float
+    ) = 3.00
 
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: (
+        int
+    ) = round(
         float(
             my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
         )
@@ -7606,7 +7608,9 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         )
     )
 
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value: int = round(
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value: (
+        int
+    ) = round(
         float(
             my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
         )

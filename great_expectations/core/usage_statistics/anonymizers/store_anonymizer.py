@@ -35,9 +35,9 @@ class StoreAnonymizer(BaseAnonymizer):
             anonymized_info_dict=anonymized_info_dict,
         )
 
-        anonymized_info_dict[
-            "anonymized_store_backend"
-        ] = self._anonymize_store_backend_info(store_backend_obj=store_backend_obj)
+        anonymized_info_dict["anonymized_store_backend"] = (
+            self._anonymize_store_backend_info(store_backend_obj=store_backend_obj)
+        )
 
         return anonymized_info_dict
 

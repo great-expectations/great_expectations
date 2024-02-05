@@ -160,8 +160,7 @@ class TableFactory(Protocol):
         gx_engine: SqlAlchemyExecutionEngine,
         table_names: set[str],
         schema_name: str | None = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @pytest.fixture(scope="module")
@@ -184,9 +183,9 @@ def table_factory() -> Iterator[TableFactory]:
         LOGGER.info(
             f"Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
         )
-        created_tables: list[
-            dict[Literal["table_name", "schema_name"], str | None]
-        ] = []
+        created_tables: list[dict[Literal["table_name", "schema_name"], str | None]] = (
+            []
+        )
 
         with gx_engine.get_connection() as conn:
             transaction = conn.begin()

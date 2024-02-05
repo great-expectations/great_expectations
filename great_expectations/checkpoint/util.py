@@ -491,9 +491,11 @@ def convert_validations_list_to_checkpoint_validation_configs(
     if not validations:
         return []
     return [
-        CheckpointValidationConfig(**validation)
-        if isinstance(validation, dict)
-        else validation
+        (
+            CheckpointValidationConfig(**validation)
+            if isinstance(validation, dict)
+            else validation
+        )
         for validation in validations
     ]
 

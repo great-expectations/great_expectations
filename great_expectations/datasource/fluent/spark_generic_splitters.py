@@ -143,9 +143,9 @@ class SplitterYearAndMonth(_SplitterDatetime):
 
 class SplitterYearAndMonthAndDay(_SplitterDatetime):
     column_name: str
-    method_name: Literal[
+    method_name: Literal["split_on_year_and_month_and_day"] = (
         "split_on_year_and_month_and_day"
-    ] = "split_on_year_and_month_and_day"
+    )
 
     @property
     @override
@@ -277,9 +277,9 @@ class SplitterColumnValue(_SplitterOneColumnOneParam):
 
 class SplitterMultiColumnValue(FluentBaseModel):
     column_names: List[str]
-    method_name: Literal[
+    method_name: Literal["split_on_multi_column_values"] = (
         "split_on_multi_column_values"
-    ] = "split_on_multi_column_values"
+    )
 
     @property
     def columns(self):

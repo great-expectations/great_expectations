@@ -457,7 +457,9 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config: str = """
     name: my_fancy_checkpoint
@@ -591,7 +593,9 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
     checkpoint: Checkpoint
 
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config: str = """
     name: my_fancy_checkpoint
@@ -709,7 +713,9 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 ):
     checkpoint: Checkpoint
 
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config: str = """
     name: airflow_checkpoint
@@ -924,7 +930,9 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config: str = """
     name: airflow_users_node_3
@@ -1063,7 +1071,9 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     expected_checkpoint_config: dict
     result: CheckpointResult
 
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config = """
     name: my_base_checkpoint
@@ -1257,7 +1267,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -1300,7 +1312,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     store_validation_result_action,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     checkpoint_name: str = "test_checkpoint_name"
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -1456,7 +1470,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     context.suites.add(ExpectationSuite("my_expectation_suite"))
 
@@ -1629,7 +1645,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = context.get_validator(
@@ -1660,7 +1678,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     # add checkpoint config
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -1783,7 +1803,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -2488,7 +2510,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -2534,7 +2558,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
@@ -2587,7 +2613,9 @@ def test_newstyle_checkpoint_config_substitution_simple(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    )
 
     simplified_checkpoint_config = CheckpointConfig(
         name="my_simplified_checkpoint",
@@ -2667,9 +2695,11 @@ def test_newstyle_checkpoint_config_substitution_simple(
     substituted_config_template_only: dict = (
         simplified_checkpoint.get_substituted_config()
     )
-    filtered_expected_substituted_checkpoint_config_template_only: dict = deep_filter_properties_iterable(
-        properties=expected_substituted_checkpoint_config_template_only.to_json_dict(),
-        clean_falsy=True,
+    filtered_expected_substituted_checkpoint_config_template_only: dict = (
+        deep_filter_properties_iterable(
+            properties=expected_substituted_checkpoint_config_template_only.to_json_dict(),
+            clean_falsy=True,
+        )
     )
     assert (
         deep_filter_properties_iterable(
@@ -2848,7 +2878,9 @@ def test_newstyle_checkpoint_config_substitution_nested(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    )
 
     nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
@@ -3227,7 +3259,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -3272,7 +3306,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
@@ -3318,7 +3354,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -3363,7 +3401,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
@@ -3671,7 +3711,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -3721,7 +3763,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
@@ -3772,7 +3816,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -3823,7 +3869,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
@@ -3912,7 +3960,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -3981,7 +4031,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -4055,7 +4107,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -4143,7 +4197,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -4218,7 +4274,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -4388,7 +4446,9 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -4420,7 +4480,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -4467,7 +4529,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -4628,7 +4692,9 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
 ) -> None:
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     context.add_checkpoint(**checkpoint_config_dict)

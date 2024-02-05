@@ -1151,7 +1151,9 @@ def quentin_expected_expectation_suite(
     quentin_expected_rule_based_profiler_configuration,
 ) -> Callable:
     def _expectation_suite(name: str) -> ExpectationSuite:
-        expected_expect_table_row_count_to_be_between_expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+        expected_expect_table_row_count_to_be_between_expectation_configuration: (
+            ExpectationConfiguration
+        ) = ExpectationConfiguration(
             **{
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "kwargs": {
@@ -1709,9 +1711,9 @@ def test_volume_data_assistant_result_get_expectation_suite(
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_volume_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_volume_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -2060,9 +2062,11 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     rule_config: dict
     assert all(
-        rule_config["variables"]["estimator"] == "exact"
-        if "estimator" in rule_config["variables"]
-        else True
+        (
+            rule_config["variables"]["estimator"] == "exact"
+            if "estimator" in rule_config["variables"]
+            else True
+        )
         for rule_config in data_assistant_result.profiler_config.rules.values()
     )
 
@@ -2128,9 +2132,9 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     validator: Validator
     data_assistant_result: DataAssistantResult
     validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        data_assistant_result.metrics_by_domain
+    )
 
     batch: Batch
     expected_batch_ids: List[str] = [batch.id for batch in validator.batches.values()]

@@ -195,9 +195,11 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
                     column_name: str
                     semantic_type: Union[str, SemanticDomainTypes]
                     value = {  # noqa: PLW2901
-                        column_name: SemanticDomainTypes(semantic_type.lower()).value
-                        if isinstance(semantic_type, str)
-                        else semantic_type.value
+                        column_name: (
+                            SemanticDomainTypes(semantic_type.lower()).value
+                            if isinstance(semantic_type, str)
+                            else semantic_type.value
+                        )
                         for column_name, semantic_type in value.items()
                     }
 

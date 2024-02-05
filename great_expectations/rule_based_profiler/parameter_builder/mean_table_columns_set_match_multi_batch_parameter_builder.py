@@ -45,15 +45,16 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
     Step-4: Compute mean value of match scores as "success_ratio" (divide sum of scores by number of Batch objects).
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
-        "metric_name",
-        "single_batch_mode",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricMultiBatchParameterBuilder.exclude_field_names
+        | {
+            "metric_name",
+            "single_batch_mode",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -138,10 +139,12 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         mean_table_columns_set_match: np.float64 = np.mean(
             np.asarray(
                 [
-                    1
-                    if one_batch_table_columns_names_set
-                    == multi_batch_table_columns_names_as_set
-                    else 0
+                    (
+                        1
+                        if one_batch_table_columns_names_set
+                        == multi_batch_table_columns_names_as_set
+                        else 0
+                    )
                     for one_batch_table_columns_names_set in multi_batch_table_columns_names_sets_as_list
                 ]
             )

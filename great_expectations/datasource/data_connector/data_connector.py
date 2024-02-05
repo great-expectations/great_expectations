@@ -261,7 +261,7 @@ class DataConnector:
             "class_name": self.__class__.__name__,
             "data_asset_count": len_asset_names,
             "example_data_asset_names": asset_names[:max_examples],
-            "data_assets": {}
+            "data_assets": {},
             # "data_reference_count": self.
         }
 
@@ -365,11 +365,11 @@ class DataConnector:
         if pretty_print:
             print("\n\t\tFetching batch data...")
 
-        batch_definition_list: List[
-            BatchDefinition
-        ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
-            data_reference=example_data_reference,
-            data_asset_name=data_asset_name,
+        batch_definition_list: List[BatchDefinition] = (
+            self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
+                data_reference=example_data_reference,
+                data_asset_name=data_asset_name,
+            )
         )
         assert len(batch_definition_list) == 1
         batch_definition: BatchDefinition = batch_definition_list[0]

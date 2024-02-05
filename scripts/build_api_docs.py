@@ -9,6 +9,7 @@
      API documentation category under Reference, replacing the existing content of this list.
         3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
 """
+
 import importlib
 import inspect
 import pydoc
@@ -168,9 +169,9 @@ def _get_dictionary_from_block_in_docstring(
                 key, value = line.strip().split(":", 1)
                 block_dict[key] = _escape_markdown_special_characters(value.strip())
             elif _get_indentation(line) > base_indent:
-                block_dict[
-                    key
-                ] = f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
+                block_dict[key] = (
+                    f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
+                )
             elif key is None:
                 raise BlockFormatError(block_heading_text, block_contents, line)
             else:

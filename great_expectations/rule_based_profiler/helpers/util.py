@@ -207,18 +207,18 @@ def build_batch_request(
         return None
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    effective_batch_request: Optional[
-        Union[BatchRequestBase, dict]
-    ] = get_parameter_value_and_validate_return_type(
-        domain=domain,
-        parameter_reference=batch_request,
-        expected_return_type=(BatchRequestBase, dict),
-        variables=variables,
-        parameters=parameters,
+    effective_batch_request: Optional[Union[BatchRequestBase, dict]] = (
+        get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=batch_request,
+            expected_return_type=(BatchRequestBase, dict),
+            variables=variables,
+            parameters=parameters,
+        )
     )
-    materialized_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest]
-    ] = materialize_batch_request(batch_request=effective_batch_request)
+    materialized_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = (
+        materialize_batch_request(batch_request=effective_batch_request)
+    )
 
     return materialized_batch_request
 
@@ -454,13 +454,15 @@ def build_domains_from_column_names(
                 "column": column_name,
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    column_name: table_column_name_to_inferred_semantic_domain_type_map[
-                        column_name
-                    ],
-                }
-                if table_column_name_to_inferred_semantic_domain_type_map
-                else None,
+                INFERRED_SEMANTIC_TYPE_KEY: (
+                    {
+                        column_name: table_column_name_to_inferred_semantic_domain_type_map[
+                            column_name
+                        ],
+                    }
+                    if table_column_name_to_inferred_semantic_domain_type_map
+                    else None
+                ),
             },
             rule_name=rule_name,
         )
@@ -473,14 +475,14 @@ def build_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables_as_dict: Optional[
-        Union[ParameterNode, Dict[str, Any]]
-    ] = get_parameter_value_and_validate_return_type(
-        domain=None,
-        parameter_reference=VARIABLES_PREFIX,
-        expected_return_type=None,
-        variables=variables,
-        parameters=None,
+    variables_as_dict: Optional[Union[ParameterNode, Dict[str, Any]]] = (
+        get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=VARIABLES_PREFIX,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
     )
     if isinstance(variables_as_dict, ParameterNode):
         return variables_as_dict.to_dict()
@@ -707,19 +709,19 @@ def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
             n_resamples,
         )
 
-    lower_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
-        metric_values_gaussian_sample,
-        q=lower_quantile_pct,
-        method=quantile_statistic_interpolation_method,
+    lower_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
+        numpy.numpy_quantile(
+            metric_values_gaussian_sample,
+            q=lower_quantile_pct,
+            method=quantile_statistic_interpolation_method,
+        )
     )
-    upper_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
-        metric_values_gaussian_sample,
-        q=upper_quantile_pct,
-        method=quantile_statistic_interpolation_method,
+    upper_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
+        numpy.numpy_quantile(
+            metric_values_gaussian_sample,
+            q=upper_quantile_pct,
+            method=quantile_statistic_interpolation_method,
+        )
     )
 
     return build_numeric_range_estimation_result(
@@ -1096,8 +1098,7 @@ def sanitize_parameter_name(
 
 class _NumericIterableWithDtype(Iterable, Protocol):
     @property
-    def dtype(self) -> Any:
-        ...
+    def dtype(self) -> Any: ...
 
 
 def _is_iterable_of_numeric_dtypes(

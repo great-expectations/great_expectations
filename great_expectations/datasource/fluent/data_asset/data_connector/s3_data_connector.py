@@ -181,7 +181,9 @@ class S3DataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        test_connection_error_message_template: str = (
+            'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        )
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,

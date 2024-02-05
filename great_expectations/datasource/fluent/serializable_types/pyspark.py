@@ -10,9 +10,9 @@ class SerializableStructType(dict):
 
     def __init__(
         self,
-        fields_or_struct_type: pyspark.sql.types.StructType
-        | list[pyspark.sql.types.StructField]
-        | None,
+        fields_or_struct_type: (
+            pyspark.sql.types.StructType | list[pyspark.sql.types.StructField] | None
+        ),
     ):
         # Store a copy of the instantiated type as an instance variable
         if isinstance(fields_or_struct_type, pyspark.sql.types.StructType):
@@ -29,9 +29,9 @@ class SerializableStructType(dict):
     @classmethod
     def validate(
         cls,
-        fields_or_struct_type: pyspark.sql.types.StructType
-        | list[pyspark.sql.types.StructField]
-        | None,
+        fields_or_struct_type: (
+            pyspark.sql.types.StructType | list[pyspark.sql.types.StructField] | None
+        ),
     ):
         """If already StructType then return otherwise try to create a StructType."""
         if isinstance(fields_or_struct_type, pyspark.sql.types.StructType):

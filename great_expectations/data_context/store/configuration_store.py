@@ -33,7 +33,6 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigurationStore(Store):
-
     """
     Configuration Store provides a way to store any Marshmallow Schema compatible Configuration (using the YAML format).
     """

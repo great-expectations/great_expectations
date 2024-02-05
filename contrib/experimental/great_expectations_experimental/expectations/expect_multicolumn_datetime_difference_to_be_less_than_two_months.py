@@ -54,7 +54,6 @@ class MulticolumnDatetimeDifferenceToBeLessThanTwoMonths(MulticolumnMapMetricPro
 class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
     MulticolumnMapExpectation
 ):
-
     """Expect the difference of 2 datetime columns to be less than or equal to 2 months.
 
     This means that for each row, we expect end_datetime - start_datetime <= 2 (in months)

@@ -26,9 +26,9 @@ class SnippetMover:
         self._snippet_lookup: dict[str, Snippet] = {}
         self._snippet_module_lookup: dict[Path, SnippetModule] = {}
         self._non_test_snippets: list[Snippet] = []  # can't move these
-        self._orphaned_snippet_modules: list[
-            SnippetModule
-        ] = []  # not referenced by a test
+        self._orphaned_snippet_modules: list[SnippetModule] = (
+            []
+        )  # not referenced by a test
         self._default_snippet_path = Path("docs/docusaurus/docs/snippets")
         self._docs_prefix = Path("docs")
         self._docs_root_dir = gx_root_dir / self._docs_prefix

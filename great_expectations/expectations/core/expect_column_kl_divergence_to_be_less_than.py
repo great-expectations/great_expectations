@@ -920,9 +920,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             return {
                 "content_block_type": "table",
                 "header": header,
-                "header_row": ["Interval", "Fraction"]
-                if partition_object.get("bins")
-                else ["Value", "Fraction"],
+                "header_row": (
+                    ["Interval", "Fraction"]
+                    if partition_object.get("bins")
+                    else ["Value", "Fraction"]
+                ),
                 "table": table_rows,
                 "styling": {
                     "classes": ["table-responsive"],
@@ -948,9 +950,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         else:
             return {
                 "content_block_type": "table",
-                "header_row": ["Interval", "Fraction"]
-                if partition_object.get("bins")
-                else ["Value", "Fraction"],
+                "header_row": (
+                    ["Interval", "Fraction"]
+                    if partition_object.get("bins")
+                    else ["Value", "Fraction"]
+                ),
                 "table": table_rows,
                 "styling": {
                     "classes": ["table-responsive"],
@@ -1218,9 +1222,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         header_params_with_json_schema = {
             "observed_value": {
                 "schema": {"type": "string"},
-                "value": str(observed_value)
-                if observed_value
-                else "None (-infinity, infinity, or NaN)",
+                "value": (
+                    str(observed_value)
+                    if observed_value
+                    else "None (-infinity, infinity, or NaN)"
+                ),
             }
         }
 
@@ -1350,9 +1356,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 "string_template": {
                     "template": "KL Divergence: $observed_value",
                     "params": {
-                        "observed_value": str(observed_value)
-                        if observed_value
-                        else "None (-infinity, infinity, or NaN)",
+                        "observed_value": (
+                            str(observed_value)
+                            if observed_value
+                            else "None (-infinity, infinity, or NaN)"
+                        ),
                     },
                     "styling": {"classes": ["mb-2"]},
                 },

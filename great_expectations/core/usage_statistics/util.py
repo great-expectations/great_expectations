@@ -48,9 +48,9 @@ def aggregate_all_core_expectation_types() -> Set[str]:
         el for el in Dataset.__dict__.keys() if el.startswith("expect_")
     ]
 
-    v3_batchrequest_api_supported_expectation_types: List[
-        str
-    ] = list_registered_expectation_implementations()
+    v3_batchrequest_api_supported_expectation_types: List[str] = (
+        list_registered_expectation_implementations()
+    )
 
     return set(v2_batchkwargs_api_supported_expectation_types).union(
         set(v3_batchrequest_api_supported_expectation_types)

@@ -105,9 +105,11 @@ class DataConnectorStorageDataReferenceResolver:
         template_arguments: dict,
     ):
         """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-            data_connector_name
-        ]
+        storage_name: str = (
+            DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+                data_connector_name
+            ]
+        )
         return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
             (storage_name, execution_engine_name)
         ](

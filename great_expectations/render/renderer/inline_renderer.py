@@ -92,12 +92,12 @@ class InlineRenderer(Renderer):
             renderer_types=renderer_types,
         )
 
-        rendered_content: List[
-            RenderedAtomicContent
-        ] = self._get_atomic_rendered_content_from_renderer_names(
-            render_object=render_object,
-            renderer_names=renderer_names,
-            expectation_type=expectation_type,
+        rendered_content: List[RenderedAtomicContent] = (
+            self._get_atomic_rendered_content_from_renderer_names(
+                render_object=render_object,
+                renderer_names=renderer_names,
+                expectation_type=expectation_type,
+            )
         )
 
         return rendered_content
@@ -137,9 +137,9 @@ class InlineRenderer(Renderer):
     @staticmethod
     def _get_renderer_atomic_rendered_content(
         render_object: ExpectationConfiguration | ExpectationValidationResult,
-        renderer_name: str
-        | AtomicDiagnosticRendererType
-        | AtomicPrescriptiveRendererType,
+        renderer_name: (
+            str | AtomicDiagnosticRendererType | AtomicPrescriptiveRendererType
+        ),
         expectation_type: str,
     ) -> RenderedAtomicContent:
         renderer_impl: Optional[RendererImpl]
@@ -166,7 +166,9 @@ class InlineRenderer(Renderer):
             error_message = f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {e!s}".'
             logger.info(error_message)
 
-            failure_renderer: AtomicPrescriptiveRendererType | AtomicDiagnosticRendererType
+            failure_renderer: (
+                AtomicPrescriptiveRendererType | AtomicDiagnosticRendererType
+            )
             if renderer_name.startswith(AtomicRendererType.PRESCRIPTIVE):
                 failure_renderer = AtomicPrescriptiveRendererType.FAILED
                 failure_renderer_message = f'Renderer "{failure_renderer}" will be used to render prescriptive content.'
@@ -198,9 +200,9 @@ class InlineRenderer(Renderer):
         renderer_impl: RendererImpl,
         render_object: ExpectationConfiguration | ExpectationValidationResult,
     ) -> RenderedAtomicContent:
-        renderer_fn: Callable[
-            ..., RenderedAtomicContent | RenderedContent
-        ] = renderer_impl.renderer
+        renderer_fn: Callable[..., RenderedAtomicContent | RenderedContent] = (
+            renderer_impl.renderer
+        )
         if isinstance(render_object, ExpectationConfiguration):
             renderer_rendered_content = renderer_fn(configuration=render_object)
         else:
@@ -216,9 +218,9 @@ class InlineRenderer(Renderer):
         Returns:
             RenderedAtomicContent for a given object.
         """
-        render_object: Union[
-            ExpectationConfiguration, ExpectationValidationResult
-        ] = self._render_object
+        render_object: Union[ExpectationConfiguration, ExpectationValidationResult] = (
+            self._render_object
+        )
 
         return self._get_atomic_rendered_content_for_object(render_object=render_object)
 

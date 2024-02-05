@@ -133,16 +133,26 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: (
+            ParameterBuilder
+        ) = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
         )
-        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: (
+            ParameterBuilder
+        ) = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
         )
 
-        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
-        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
-        total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
+        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: (
+            ParameterBuilder
+        ) = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: (
+            ParameterBuilder
+        ) = column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
+        total_count_metric_multi_batch_parameter_builder_for_evaluations: (
+            ParameterBuilder
+        ) = (
             DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
         )
 
@@ -169,7 +179,9 @@ class ColumnValueMissingDataAssistant(DataAssistant):
 
         mode = "unexpected_count_fraction_values"
 
-        column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: (
+            ParameterBuilder
+        ) = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -184,7 +196,9 @@ class ColumnValueMissingDataAssistant(DataAssistant):
 
         expectation_type = "expect_column_values_to_not_be_null"
 
-        column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: (
+            ParameterBuilder
+        ) = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -233,7 +247,9 @@ class ColumnValueMissingDataAssistant(DataAssistant):
 
         mode = "unexpected_count_fraction_values"
 
-        column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: (
+            ParameterBuilder
+        ) = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -248,7 +264,9 @@ class ColumnValueMissingDataAssistant(DataAssistant):
 
         expectation_type = "expect_column_values_to_be_null"
 
-        column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: (
+            ParameterBuilder
+        ) = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,

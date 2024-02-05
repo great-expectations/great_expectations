@@ -65,7 +65,9 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config: str = """
     name: my_fancy_checkpoint
@@ -193,7 +195,9 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
     checkpoint: Checkpoint
 
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config: str = """
     name: my_fancy_checkpoint
@@ -299,7 +303,9 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config: str = """
     name: airflow_users_node_3
@@ -431,7 +437,9 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     expected_checkpoint_config: dict
     result: CheckpointResult
 
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     yaml_config = """
     name: my_base_checkpoint
@@ -594,7 +602,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -631,7 +641,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     store_validation_result_action,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     checkpoint_name: str = "test_checkpoint_name"
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -685,7 +697,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     fluent_batch_request,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: FluentBatchRequest = fluent_batch_request
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
@@ -714,7 +728,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     fluent_batch_request,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: FluentBatchRequest = fluent_batch_request
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
@@ -744,7 +760,9 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -775,7 +793,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -821,7 +841,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -976,7 +998,9 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
 ) -> None:
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     data_context.add_checkpoint(**checkpoint_config_dict)
@@ -998,7 +1022,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     batch_request = FluentBatchRequest(
         datasource_name="my_pandas_dataframes_datasource",
@@ -1025,7 +1051,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     batch_request = FluentBatchRequest(
         datasource_name="my_spark_dataframes_datasource",
@@ -1053,7 +1081,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1089,7 +1119,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
 
@@ -1150,7 +1182,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1189,7 +1223,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1219,7 +1255,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1250,7 +1288,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1282,7 +1322,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1312,7 +1354,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1347,7 +1391,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1383,7 +1429,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1418,7 +1466,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1454,7 +1504,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1491,7 +1543,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1527,7 +1581,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1557,7 +1613,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1589,7 +1647,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1665,7 +1725,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1741,7 +1803,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1835,7 +1899,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1930,7 +1996,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -2007,7 +2075,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -2084,7 +2154,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -2179,7 +2251,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -2273,7 +2347,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))

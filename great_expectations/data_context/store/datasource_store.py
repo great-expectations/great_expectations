@@ -94,12 +94,10 @@ class DatasourceStore(Store):
         return self._serializer.serialize(value)
 
     @overload
-    def deserialize(self, value: DatasourceConfig) -> DatasourceConfig:
-        ...
+    def deserialize(self, value: DatasourceConfig) -> DatasourceConfig: ...
 
     @overload
-    def deserialize(self, value: FluentDatasource) -> FluentDatasource:
-        ...
+    def deserialize(self, value: FluentDatasource) -> FluentDatasource: ...
 
     @override
     def deserialize(
@@ -184,9 +182,9 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: Union[
-            DataContextVariableKey, GXCloudIdentifier
-        ] = self.store_backend.build_key(name=datasource_name)
+        datasource_key: Union[DataContextVariableKey, GXCloudIdentifier] = (
+            self.store_backend.build_key(name=datasource_name)
+        )
         if not self.has_key(datasource_key):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
@@ -230,8 +228,7 @@ class DatasourceStore(Store):
         key: Union[DataContextKey, None],
         value: FluentDatasource,
         **kwargs,
-    ) -> FluentDatasource:
-        ...
+    ) -> FluentDatasource: ...
 
     @overload
     def set(
@@ -239,8 +236,7 @@ class DatasourceStore(Store):
         key: Union[DataContextKey, None],
         value: DatasourceConfig,
         **kwargs,
-    ) -> DatasourceConfig:
-        ...
+    ) -> DatasourceConfig: ...
 
     @override
     def set(

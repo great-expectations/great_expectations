@@ -221,8 +221,7 @@ class TableFactory(Protocol):
         table_names: set[str],
         schema: str | None = None,
         data: Sequence[Row] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @pytest.fixture(

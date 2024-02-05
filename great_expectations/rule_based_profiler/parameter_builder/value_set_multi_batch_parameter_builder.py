@@ -68,15 +68,16 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
-        "metric_name",
-        "single_batch_mode",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricMultiBatchParameterBuilder.exclude_field_names
+        | {
+            "metric_name",
+            "single_batch_mode",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -143,10 +144,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
-            attributed_metric_values=parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-            ]
+        metric_values: MetricValues = (
+            AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+                attributed_metric_values=parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
+            )
         )
         details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 

@@ -298,9 +298,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                             "params": {"value": value},
                             "styling": {
                                 "default": {
-                                    "classes": ["badge", "badge-info"]
-                                    if content_block_type == "value_list"
-                                    else [],
+                                    "classes": (
+                                        ["badge", "badge-info"]
+                                        if content_block_type == "value_list"
+                                        else []
+                                    ),
                                     "styles": {"word-break": "break-all"},
                                 },
                             },

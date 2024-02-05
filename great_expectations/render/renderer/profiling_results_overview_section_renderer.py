@@ -85,9 +85,13 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                         },
                     }
                 ),
-                "--"
-                if not expect_table_row_count_to_be_between_evr
-                else expect_table_row_count_to_be_between_evr.result["observed_value"],
+                (
+                    "--"
+                    if not expect_table_row_count_to_be_between_evr
+                    else expect_table_row_count_to_be_between_evr.result[
+                        "observed_value"
+                    ]
+                ),
             ]
         )
 
@@ -302,10 +306,12 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         # assume 100.0 missing for columns where ["result"]["unexpected_percent"] is not available
         return "{:.2f}%".format(
             sum(
-                evr.result["unexpected_percent"]
-                if "unexpected_percent" in evr.result
-                and evr.result["unexpected_percent"] is not None
-                else 100.0
+                (
+                    evr.result["unexpected_percent"]
+                    if "unexpected_percent" in evr.result
+                    and evr.result["unexpected_percent"] is not None
+                    else 100.0
+                )
                 for evr in expect_column_values_to_not_be_null_evrs
             )
             / len(columns)

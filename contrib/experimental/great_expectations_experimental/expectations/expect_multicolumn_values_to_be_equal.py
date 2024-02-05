@@ -361,10 +361,12 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                     },
                 }
             ),
-            result.result["unexpected_count"]
-            if "unexpected_count" in result.result
-            and result.result["unexpected_count"] is not None
-            else "--",
+            (
+                result.result["unexpected_count"]
+                if "unexpected_count" in result.result
+                and result.result["unexpected_count"] is not None
+                else "--"
+            ),
         ]
 
     @classmethod
@@ -389,10 +391,12 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                     },
                 }
             ),
-            f"{result.result['unexpected_percent']:.1f}%"
-            if "unexpected_percent" in result.result
-            and result.result["unexpected_percent"] is not None
-            else "--",
+            (
+                f"{result.result['unexpected_percent']:.1f}%"
+                if "unexpected_percent" in result.result
+                and result.result["unexpected_percent"] is not None
+                else "--"
+            ),
         ]
 
     def _validate(

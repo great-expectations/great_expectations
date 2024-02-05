@@ -143,8 +143,10 @@ def test_growth_numeric_data_assistant_result_get_expectation_suite(
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = bobby_growth_numeric_data_assistant_result_usage_stats_enabled.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
+    suite: ExpectationSuite = (
+        bobby_growth_numeric_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
     )
 
     assert suite is not None and len(suite.expectations) > 0
@@ -195,9 +197,9 @@ def test_growth_numeric_data_assistant_metrics_count(
 def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_growth_numeric_data_assistant_result: GrowthNumericDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_growth_numeric_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_growth_numeric_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -282,9 +284,11 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
 
     rule_config: dict
     assert all(
-        rule_config["variables"]["estimator"] == "exact"
-        if "estimator" in rule_config["variables"]
-        else True
+        (
+            rule_config["variables"]["estimator"] == "exact"
+            if "estimator" in rule_config["variables"]
+            else True
+        )
         for rule_config in data_assistant_result.profiler_config.rules.values()
     )
 

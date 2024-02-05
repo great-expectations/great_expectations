@@ -674,7 +674,9 @@ def load_data_into_test_database(  # noqa: PLR0912, PLR0915
             )
             return return_value
         except SQLAlchemyError:
-            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            error_message: str = (
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
             logger.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
@@ -706,7 +708,9 @@ def load_data_into_test_database(  # noqa: PLR0912, PLR0915
                 )
             return return_value
         except SQLAlchemyError:
-            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            error_message: str = (
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
             logger.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
@@ -878,7 +882,9 @@ def check_athena_table_count(
         result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
     except SQLAlchemyError:
-        error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+        error_message: str = (
+            """Docs integration tests encountered an error while loading test-data into test-database."""
+        )
         logger.error(error_message)
         raise gx_exceptions.DatabaseConnectionError(error_message)
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that

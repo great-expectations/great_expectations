@@ -2,6 +2,7 @@
 
 There are changes to paths that need to be made to prior versions of docs.
 """
+
 from __future__ import annotations
 from dataclasses import dataclass
 from functools import total_ordering

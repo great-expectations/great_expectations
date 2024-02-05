@@ -181,7 +181,9 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        test_connection_error_message_template: str = (
+            'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        )
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,

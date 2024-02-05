@@ -227,10 +227,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                     "tooltip": {"content": "expect_column_values_to_not_be_null"},
                 },
             ),
-            result.result["unexpected_count"]
-            if "unexpected_count" in result.result
-            and result.result["unexpected_count"] is not None
-            else "--",
+            (
+                result.result["unexpected_count"]
+                if "unexpected_count" in result.result
+                and result.result["unexpected_count"] is not None
+                else "--"
+            ),
         ]
 
     @classmethod
@@ -253,10 +255,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                     "tooltip": {"content": "expect_column_values_to_not_be_null"},
                 },
             ),
-            f"{result.result['unexpected_percent']:.1f}%"
-            if "unexpected_percent" in result.result
-            and result.result["unexpected_percent"] is not None
-            else "--",
+            (
+                f"{result.result['unexpected_percent']:.1f}%"
+                if "unexpected_percent" in result.result
+                and result.result["unexpected_percent"] is not None
+                else "--"
+            ),
         ]
 
     @override

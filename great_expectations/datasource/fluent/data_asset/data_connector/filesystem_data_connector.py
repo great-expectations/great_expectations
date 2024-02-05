@@ -68,9 +68,9 @@ class FilesystemDataConnector(FilePathDataConnector):
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
-        self._data_context_root_directory: Optional[
-            pathlib.Path
-        ] = data_context_root_directory
+        self._data_context_root_directory: Optional[pathlib.Path] = (
+            data_context_root_directory
+        )
 
         super().__init__(
             datasource_name=datasource_name,
@@ -168,7 +168,9 @@ class FilesystemDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
+        test_connection_error_message_template: str = (
+            'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
+        )
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,

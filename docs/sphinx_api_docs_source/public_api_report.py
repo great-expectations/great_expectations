@@ -49,6 +49,7 @@ Typical usage example:
   These utilities can also be used in tests to determine if there has been a
   change to our public API.
 """
+
 from __future__ import annotations
 
 import ast
@@ -253,10 +254,10 @@ class CodeParser:
         self, file_contents: FileContents
     ) -> Set[str]:
         """Get string names of all classes, methods and functions in a single FileContents."""
-        definitions: Set[
-            Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
-        ] = self._get_all_entity_definitions_from_file_contents(
-            file_contents=file_contents
+        definitions: Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]] = (
+            self._get_all_entity_definitions_from_file_contents(
+                file_contents=file_contents
+            )
         )
 
         return {definition.name for definition in definitions}
@@ -598,10 +599,10 @@ class CodeReferenceFilter:
         usages_in_docs_examples_and_docs_content: Set[str] = (
             self._docs_examples_usages() | self.references_from_docs_content
         )
-        gx_definitions_used_in_docs_examples: Set[
-            Definition
-        ] = self._filter_gx_definitions_from_docs_examples(
-            gx_usages_in_docs_examples=usages_in_docs_examples_and_docs_content
+        gx_definitions_used_in_docs_examples: Set[Definition] = (
+            self._filter_gx_definitions_from_docs_examples(
+                gx_usages_in_docs_examples=usages_in_docs_examples_and_docs_content
+            )
         )
         non_private_definitions: Set[Definition] = self._filter_private_entities(
             definitions=gx_definitions_used_in_docs_examples
@@ -609,10 +610,10 @@ class CodeReferenceFilter:
         included_definitions: Set[Definition] = self._filter_or_include(
             definitions=non_private_definitions
         )
-        definitions_not_marked_public_api: Set[
-            Definition
-        ] = self._filter_for_definitions_not_marked_public_api(
-            definitions=included_definitions
+        definitions_not_marked_public_api: Set[Definition] = (
+            self._filter_for_definitions_not_marked_public_api(
+                definitions=included_definitions
+            )
         )
 
         return definitions_not_marked_public_api
@@ -623,9 +624,9 @@ class CodeReferenceFilter:
 
             (e.g. filter out print() or other python or 3rd party classes/methods).
         """
-        doc_example_usages: Set[
-            str
-        ] = self.docs_example_parser.get_names_from_usage_in_docs_examples()
+        doc_example_usages: Set[str] = (
+            self.docs_example_parser.get_names_from_usage_in_docs_examples()
+        )
         gx_code_definitions = self.code_parser.get_all_class_method_and_function_names()
 
         doc_example_usages_of_gx_code = doc_example_usages.intersection(

@@ -169,14 +169,14 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-        query: Union[
-            sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList
-        ] = sa.and_(
-            *[
-                sa.extract(date_part.value, sa.column(column_name))
-                == date_parts_dict[date_part.value]
-                for date_part in date_parts
-            ]
+        query: Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList] = (
+            sa.and_(
+                *[
+                    sa.extract(date_part.value, sa.column(column_name))
+                    == date_parts_dict[date_part.value]
+                    for date_part in date_parts
+                ]
+            )
         )
 
         return query
@@ -348,9 +348,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
         )
         batch_identifiers_list: List[dict]
         if self._is_datetime_splitter(processed_splitter_method_name):
-            splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
-                processed_splitter_method_name
-            ]
+            splitter_fn_name: str = (
+                self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
+                    processed_splitter_method_name
+                ]
+            )
             batch_identifiers_list = getattr(self, splitter_fn_name)(
                 execution_engine, selectable, **splitter_kwargs
             )

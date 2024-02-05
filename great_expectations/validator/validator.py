@@ -496,9 +496,9 @@ class Validator:
                 {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            allowed_config_keys: Tuple[
-                str, ...
-            ] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[str, ...] = (
+                expectation_impl.get_allowed_config_keys()
+            )
 
             args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
@@ -636,11 +636,11 @@ class Validator:
         override_variables: Dict[str, Any] = override_profiler_config_dict.get(
             "variables", {}
         )
-        effective_variables: Optional[
-            ParameterContainer
-        ] = profiler.reconcile_profiler_variables(
-            variables=override_variables,
-            reconciliation_strategy=ReconciliationStrategy.UPDATE,
+        effective_variables: Optional[ParameterContainer] = (
+            profiler.reconcile_profiler_variables(
+                variables=override_variables,
+                reconciliation_strategy=ReconciliationStrategy.UPDATE,
+            )
         )
         profiler.variables = effective_variables
 
@@ -928,12 +928,14 @@ class Validator:
             )
 
             try:
-                expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
-                    configuration=evaluated_config,
-                    graph=self._metrics_calculator.build_metric_dependency_graph(
-                        metric_configurations=validation_dependencies.get_metric_configurations(),
-                        runtime_configuration=runtime_configuration,
-                    ),
+                expectation_validation_graph: ExpectationValidationGraph = (
+                    ExpectationValidationGraph(
+                        configuration=evaluated_config,
+                        graph=self._metrics_calculator.build_metric_dependency_graph(
+                            metric_configurations=validation_dependencies.get_metric_configurations(),
+                            runtime_configuration=runtime_configuration,
+                        ),
+                    )
                 )
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
@@ -1006,10 +1008,10 @@ class Validator:
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
-            metric_exception_info: Set[
-                ExceptionInfo
-            ] = expectation_validation_graph.get_exception_info(
-                metric_info=aborted_metrics_info
+            metric_exception_info: Set[ExceptionInfo] = (
+                expectation_validation_graph.get_exception_info(
+                    metric_info=aborted_metrics_info
+                )
             )
             # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
             if len(metric_exception_info) > 0:

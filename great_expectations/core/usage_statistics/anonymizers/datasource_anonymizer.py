@@ -43,11 +43,11 @@ class DatasourceAnonymizer(BaseAnonymizer):
                 object_config=config,
             )
             execution_engine_config = config.get("execution_engine")
-            anonymized_info_dict[
-                "anonymized_execution_engine"
-            ] = self._anonymize_execution_engine_info(
-                name=execution_engine_config.get("name", ""),
-                config=execution_engine_config,
+            anonymized_info_dict["anonymized_execution_engine"] = (
+                self._anonymize_execution_engine_info(
+                    name=execution_engine_config.get("name", ""),
+                    config=execution_engine_config,
+                )
             )
             data_connector_configs = config.get("data_connectors")
             if data_connector_configs:
@@ -89,13 +89,13 @@ class DatasourceAnonymizer(BaseAnonymizer):
                 data_connector_config,
             ) in introspection_data_connector_configs.items():
                 if data_connector_config.get("class_name") is None:
-                    data_connector_config[
-                        "class_name"
-                    ] = "InferredAssetSqlDataConnector"
+                    data_connector_config["class_name"] = (
+                        "InferredAssetSqlDataConnector"
+                    )
                 if data_connector_config.get("module_name") is None:
-                    data_connector_config[
-                        "module_name"
-                    ] = "great_expectations.datasource.data_connector"
+                    data_connector_config["module_name"] = (
+                        "great_expectations.datasource.data_connector"
+                    )
                 introspection_data_connector_anonymized_configs.append(
                     self._aggregate_anonymizer.anonymize(
                         name=data_connector_name, config=data_connector_config
@@ -109,13 +109,13 @@ class DatasourceAnonymizer(BaseAnonymizer):
                 data_connector_config,
             ) in tables_data_connector_configs.items():
                 if data_connector_config.get("class_name") is None:
-                    data_connector_config[
-                        "class_name"
-                    ] = "ConfiguredAssetSqlDataConnector"
+                    data_connector_config["class_name"] = (
+                        "ConfiguredAssetSqlDataConnector"
+                    )
                 if data_connector_config.get("module_name") is None:
-                    data_connector_config[
-                        "module_name"
-                    ] = "great_expectations.datasource.data_connector"
+                    data_connector_config["module_name"] = (
+                        "great_expectations.datasource.data_connector"
+                    )
                 tables_data_connector_anonymized_configs.append(
                     self._aggregate_anonymizer.anonymize(
                         name=data_connector_name, config=data_connector_config

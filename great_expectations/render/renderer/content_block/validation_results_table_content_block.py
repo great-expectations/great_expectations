@@ -187,13 +187,15 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
                 )
                 observed_value = [
-                    observed_value_renderer[1](result=result)
-                    if observed_value_renderer
-                    else (
-                        cls._get_legacy_v2_api_observed_value(
-                            expectation_string_fn, result
+                    (
+                        observed_value_renderer[1](result=result)
+                        if observed_value_renderer
+                        else (
+                            cls._get_legacy_v2_api_observed_value(
+                                expectation_string_fn, result
+                            )
+                            or "--"
                         )
-                        or "--"
                     )
                 ]
             except Exception as e:

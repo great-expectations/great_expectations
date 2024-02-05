@@ -208,9 +208,11 @@ class DatabaseStoreBackend(StoreBackend):
             try:
                 p_key = serialization.load_pem_private_key(
                     key.read(),
-                    password=private_key_passphrase.encode()
-                    if private_key_passphrase
-                    else None,
+                    password=(
+                        private_key_passphrase.encode()
+                        if private_key_passphrase
+                        else None
+                    ),
                     backend=default_backend(),
                 )
             except ValueError as e:

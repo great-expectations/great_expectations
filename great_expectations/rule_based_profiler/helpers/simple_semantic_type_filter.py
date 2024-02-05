@@ -206,13 +206,15 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         else:
             semantic_column_type = SemanticDomainTypes.UNKNOWN
 
-        inferred_semantic_column_type: InferredSemanticDomainType = InferredSemanticDomainType(
-            semantic_domain_type=semantic_column_type,
-            details={
-                "algorithm_type": "deterministic",
-                "mechanism": "lookup_table",
-                "source": "great_expectations.core.profiler_types_mapping.ProfilerTypeMapping",
-            },
+        inferred_semantic_column_type: InferredSemanticDomainType = (
+            InferredSemanticDomainType(
+                semantic_domain_type=semantic_column_type,
+                details={
+                    "algorithm_type": "deterministic",
+                    "mechanism": "lookup_table",
+                    "source": "great_expectations.core.profiler_types_mapping.ProfilerTypeMapping",
+                },
+            )
         )
 
         return inferred_semantic_column_type

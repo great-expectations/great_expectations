@@ -39,17 +39,18 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute histogram using specified metric for one Batch of data.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
-        "column_partition_metric_single_batch_parameter_builder_config",
-        "metric_name",
-        "metric_domain_kwargs",
-        "metric_value_kwargs",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricSingleBatchParameterBuilder.exclude_field_names
+        | {
+            "column_partition_metric_single_batch_parameter_builder_config",
+            "metric_name",
+            "metric_domain_kwargs",
+            "metric_value_kwargs",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -127,14 +128,18 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: (
+            str
+        ) = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=fully_qualified_column_partition_metric_single_batch_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        column_partition_parameter_node: ParameterNode = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=fully_qualified_column_partition_metric_single_batch_parameter_builder_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
         bins: MetricValue | None = column_partition_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
@@ -186,12 +191,14 @@ elements.
             runtime_configuration=runtime_configuration,
         )
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=column_values_nonnull_count_metric_single_batch_parameter_builder.raw_fully_qualified_parameter_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        column_values_nonnull_count_parameter_node: ParameterNode = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=column_values_nonnull_count_metric_single_batch_parameter_builder.raw_fully_qualified_parameter_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         self.metric_name = "column.histogram"

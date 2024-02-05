@@ -404,67 +404,69 @@ def test_checkpoint_config_deepcopy(
             clean_falsy=True,
         ),
     )
-    substituted_config_template_and_runtime_kwargs: dict = nested_checkpoint.get_substituted_config(
-        runtime_kwargs={
-            "batch_request": runtime_batch_request,
-            "expectation_suite_name": "runtime_suite_name",
-            "template_name": "my_nested_checkpoint_template_3",
-            "validations": [
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -4},
-                    }
-                },
-            ],
-            "run_name_template": "runtime_run_template",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
+    substituted_config_template_and_runtime_kwargs: dict = (
+        nested_checkpoint.get_substituted_config(
+            runtime_kwargs={
+                "batch_request": runtime_batch_request,
+                "expectation_suite_name": "runtime_suite_name",
+                "template_name": "my_nested_checkpoint_template_3",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_other_data_connector_2_runtime",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -3},
+                        }
                     },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                    {
+                        "batch_request": {
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_other_data_connector_3_runtime",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -4},
+                        }
                     },
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": None,
-                },
-                {
-                    "name": "update_data_docs_deluxe_runtime",
-                    "action": {
-                        "class_name": "UpdateDataDocsAction",
+                ],
+                "run_name_template": "runtime_run_template",
+                "action_list": [
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                        },
                     },
+                    {
+                        "name": "store_evaluation_params",
+                        "action": {
+                            "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                        },
+                    },
+                    {
+                        "name": "update_data_docs",
+                        "action": None,
+                    },
+                    {
+                        "name": "update_data_docs_deluxe_runtime",
+                        "action": {
+                            "class_name": "UpdateDataDocsAction",
+                        },
+                    },
+                ],
+                "evaluation_parameters": {
+                    "environment": "runtime-$GE_ENVIRONMENT",
+                    "tolerance": 1.0e-2,
+                    "aux_param_0": "runtime-$MY_PARAM",
+                    "aux_param_1": "1 + $MY_PARAM",
+                    "new_runtime_eval_param": "bloopy!",
                 },
-            ],
-            "evaluation_parameters": {
-                "environment": "runtime-$GE_ENVIRONMENT",
-                "tolerance": 1.0e-2,
-                "aux_param_0": "runtime-$MY_PARAM",
-                "aux_param_1": "1 + $MY_PARAM",
-                "new_runtime_eval_param": "bloopy!",
-            },
-            "runtime_configuration": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 999,
-                "new_runtime_config_key": "bleepy!",
-            },
-        }
+                "runtime_configuration": {
+                    "result_format": "BASIC",
+                    "partial_unexpected_count": 999,
+                    "new_runtime_config_key": "bleepy!",
+                },
+            }
+        )
     )
 
     checkpoint_config_copy: dict = copy.deepcopy(
@@ -538,67 +540,69 @@ def test_checkpoint_config_print(
             clean_falsy=True,
         ),
     )
-    substituted_config_template_and_runtime_kwargs: dict = nested_checkpoint.get_substituted_config(
-        runtime_kwargs={
-            "batch_request": runtime_batch_request,
-            "expectation_suite_name": "runtime_suite_name",
-            "template_name": "my_nested_checkpoint_template_3",
-            "validations": [
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -4},
-                    }
-                },
-            ],
-            "run_name_template": "runtime_run_template",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
+    substituted_config_template_and_runtime_kwargs: dict = (
+        nested_checkpoint.get_substituted_config(
+            runtime_kwargs={
+                "batch_request": runtime_batch_request,
+                "expectation_suite_name": "runtime_suite_name",
+                "template_name": "my_nested_checkpoint_template_3",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_other_data_connector_2_runtime",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -3},
+                        }
                     },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                    {
+                        "batch_request": {
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_other_data_connector_3_runtime",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -4},
+                        }
                     },
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": None,
-                },
-                {
-                    "name": "update_data_docs_deluxe_runtime",
-                    "action": {
-                        "class_name": "UpdateDataDocsAction",
+                ],
+                "run_name_template": "runtime_run_template",
+                "action_list": [
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                        },
                     },
+                    {
+                        "name": "store_evaluation_params",
+                        "action": {
+                            "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                        },
+                    },
+                    {
+                        "name": "update_data_docs",
+                        "action": None,
+                    },
+                    {
+                        "name": "update_data_docs_deluxe_runtime",
+                        "action": {
+                            "class_name": "UpdateDataDocsAction",
+                        },
+                    },
+                ],
+                "evaluation_parameters": {
+                    "environment": "runtime-$GE_ENVIRONMENT",
+                    "tolerance": 1.0e-2,
+                    "aux_param_0": "runtime-$MY_PARAM",
+                    "aux_param_1": "1 + $MY_PARAM",
+                    "new_runtime_eval_param": "bloopy!",
                 },
-            ],
-            "evaluation_parameters": {
-                "environment": "runtime-$GE_ENVIRONMENT",
-                "tolerance": 1.0e-2,
-                "aux_param_0": "runtime-$MY_PARAM",
-                "aux_param_1": "1 + $MY_PARAM",
-                "new_runtime_eval_param": "bloopy!",
-            },
-            "runtime_configuration": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 999,
-                "new_runtime_config_key": "bleepy!",
-            },
-        }
+                "runtime_configuration": {
+                    "result_format": "BASIC",
+                    "partial_unexpected_count": 999,
+                    "new_runtime_config_key": "bleepy!",
+                },
+            }
+        )
     )
 
     expected_nested_checkpoint_config_template_and_runtime_template_name = (

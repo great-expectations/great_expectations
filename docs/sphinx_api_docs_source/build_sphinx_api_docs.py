@@ -15,6 +15,7 @@ Typical usage example:
         doc_builder.build_docs()
         ...
 """
+
 from __future__ import annotations
 
 import ast
@@ -92,9 +93,9 @@ class SphinxInvokeDocsBuilder:
         )
         self.definitions: Dict[str, Definition] = {}
         self.sidebar_entries: Dict[str, SidebarEntry] = {}
-        self.written_class_md_stubs: dict[
-            pathlib.Path, list[str]
-        ] = {}  # Dict of {path_to_class_def: ["ClassName1", "ClassName2", ...]}
+        self.written_class_md_stubs: dict[pathlib.Path, list[str]] = (
+            {}
+        )  # Dict of {path_to_class_def: ["ClassName1", "ClassName2", ...]}
 
     def build_docs(self) -> None:
         """Main method to build Sphinx docs and convert to Docusaurus."""

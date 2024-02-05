@@ -289,10 +289,12 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
-        selectable=selectable,
-        column_name=column_name,
-        date_parts=date_parts,
+    result: sa.sql.elements.BooleanClauseList = (
+        data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+            selectable=selectable,
+            column_name=column_name,
+            date_parts=date_parts,
+        )
     )
 
     assert isinstance(result, sa.sql.Select)
@@ -347,10 +349,12 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
-        selectable=selectable,
-        column_name=column_name,
-        date_parts=date_parts,
+    result: sa.sql.elements.BooleanClauseList = (
+        data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+            selectable=selectable,
+            column_name=column_name,
+            date_parts=date_parts,
+        )
     )
 
     assert isinstance(result, sa.sql.Select)

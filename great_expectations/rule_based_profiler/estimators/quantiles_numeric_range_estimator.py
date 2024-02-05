@@ -64,12 +64,14 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
-        quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
-            quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,  # type: ignore[union-attr] # configuration could be None
-            round_decimals=self.configuration.round_decimals,  # type: ignore[union-attr] # configuration could be None
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
+        quantile_statistic_interpolation_method: str = (
+            get_quantile_statistic_interpolation_method_from_rule_state(
+                quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,  # type: ignore[union-attr] # configuration could be None
+                round_decimals=self.configuration.round_decimals,  # type: ignore[union-attr] # configuration could be None
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
         )
         if quantile_statistic_interpolation_method is None:
             quantile_statistic_interpolation_method = (

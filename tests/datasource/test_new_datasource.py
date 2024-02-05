@@ -343,36 +343,36 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
         ),
     )
 
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_datasource",
-            data_connector_name="my_filesystem_data_connector",
-            data_asset_name="B1",
-            data_connector_query={
-                "batch_filter_parameters": {
-                    "letter": "B",
-                    "number": "1",
-                }
-            },
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="B1",
+                data_connector_query={
+                    "batch_filter_parameters": {
+                        "letter": "B",
+                        "number": "1",
+                    }
+                },
+            )
         )
     )
     assert len(batch_list) == 0
 
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_datasource",
-            data_connector_name="my_filesystem_data_connector",
-            data_asset_name="Titanic",
-            data_connector_query={
-                "batch_filter_parameters": {
-                    "letter": "B",
-                    "number": "1",
-                }
-            },
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="Titanic",
+                data_connector_query={
+                    "batch_filter_parameters": {
+                        "letter": "B",
+                        "number": "1",
+                    }
+                },
+            )
         )
     )
     assert len(batch_list) == 1
@@ -423,10 +423,10 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         # }
     }
     batch_request = BatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert len(batch_list) == 1
@@ -461,10 +461,10 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert len(batch_list) == 1
@@ -504,10 +504,10 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         batch_request = RuntimeBatchRequest(**batch_request)
 
         # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-            batch_request=batch_request
+        batch_list: List[Batch] = (  # noqa: F841
+            basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
 
 
@@ -535,10 +535,10 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-            batch_request=batch_request
+        batch_list: List[Batch] = (  # noqa: F841
+            basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
 
 
@@ -566,10 +566,10 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = basic_spark_datasource.get_batch_list_from_batch_request(
-            batch_request=batch_request
+        batch_list: List[Batch] = (  # noqa: F841
+            basic_spark_datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
 
 
@@ -596,10 +596,10 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[  # noqa: F841
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (  # noqa: F841
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     expected_data_asset_names: dict = {
@@ -716,9 +716,9 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[  # noqa: F841
-        Batch
-    ] = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+    batch_list: List[Batch] = (  # noqa: F841
+        datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+    )
 
     expected_data_asset_names: dict = {
         "test_runtime_data_connector": [data_asset_name],
