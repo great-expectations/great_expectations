@@ -227,13 +227,7 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
-          lastVersion: 'current',
-          versions: {
-            current: {
-              label: '0.18.3',
-              path: ''
-            }
-          }
+          includeCurrentVersion: false,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss'),
