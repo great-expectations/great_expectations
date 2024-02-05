@@ -10,6 +10,44 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.8
+* [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](https://github.com/great-expectations/great_expectations/pull/9207))
+* [FEATURE] `TableAsset.test_connection()` should fail if table is not queryable. ([#9198](https://github.com/great-expectations/great_expectations/pull/9198))
+* [BUGFIX] Disable GCS Docs Integration Test to unblock Release ([#9226](https://github.com/great-expectations/great_expectations/pull/9226))
+* [DOCS] `0.18.x` Update `get_context()` overload to for `EphemeralDataContext` ([#9183](https://github.com/great-expectations/great_expectations/pull/9183))
+* [MAINTENANCE] Update Contrib Pipeline to release from `0.18` branch ([#9182](https://github.com/great-expectations/great_expectations/pull/9182))
+* [MAINTENANCE] `0.18.x` `mypy` & `ruff` updates ([#9191](https://github.com/great-expectations/great_expectations/pull/9191))
+* [MAINTENANCE] Apply the contract testing fixes to 0.18 ([#9225](https://github.com/great-expectations/great_expectations/pull/9225))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Interface Update ([#9165](https://github.com/great-expectations/great_expectations/pull/9165))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Parameter Rename ([#9180](https://github.com/great-expectations/great_expectations/pull/9180))
+* [CONTRIB] Referential Integrity Expectation- Atomic Renderers ([#9202](https://github.com/great-expectations/great_expectations/pull/9202))
+* [CONTRIB] Referential Integrity - Make building of `unexpected_value` table non-case sensitive ([#9224](https://github.com/great-expectations/great_expectations/pull/9224))
+
+### 0.18.7
+* [BUGFIX] 0.18.x - Apply `QueryAsset` splitting fix ([#9160](https://github.com/great-expectations/great_expectations/pull/9160))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Referential Integrity (0.18 branch) ([#9145](https://github.com/great-expectations/great_expectations/pull/9145))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Wording update ([#9151](https://github.com/great-expectations/great_expectations/pull/9151))
+
+### 0.18.6
+* [BUGFIX] 0.18.x: Microsoft Fabric Semantic Link API update ([#9102](https://github.com/great-expectations/great_expectations/pull/9102))
+* [BUGFIX] `0.18.x` cherrypick `create_temp_tables` fixes from `develop` ([#9124](https://github.com/great-expectations/great_expectations/pull/9124))
+* [BUGFIX] B/remove connection log v0.18 ([#9136](https://github.com/great-expectations/great_expectations/pull/9136))
+* [BUGFIX] Fix QueryAsset with `create_temp_table=False` ([#9148](https://github.com/great-expectations/great_expectations/pull/9148))
+* [DOCS] Fix doc test to use `create_temp_table=True` with QueryAsset ([#9137](https://github.com/great-expectations/great_expectations/pull/9137))
+* [DOCS] `how_to_connect_to_postgresql_data` uses `create_temp_table=True` ([#9140](https://github.com/great-expectations/great_expectations/pull/9140))
+* [MAINTENANCE] Delete `test_run_multibatch_data_assistant_and_checkpoint` ([#9128](https://github.com/great-expectations/great_expectations/pull/9128))
+
+### 0.18.5
+* [BUGFIX] validator head query limit ([#9071](https://github.com/great-expectations/great_expectations/pull/9071))
+* [BUGFIX] Databricks shared compute fix ([#9034](https://github.com/great-expectations/great_expectations/pull/9034))
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+* [MAINTENANCE] add_or_update_checkpoint with expectation_suite_ge_cloud_id ([#9070](https://github.com/great-expectations/great_expectations/pull/9070))
+
+### 0.18.4
+* [BUGFIX] 0.18.4 - Fix Snowflake error when using alternative connection details format. ([#9056](https://github.com/great-expectations/great_expectations/pull/9056))
+* [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068) via [#9061](https://github.com/great-expectations/great_expectations/pull/9061)) (thanks @matveykortsev)
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+
 ### 0.18.3
 * [FEATURE] Update SnowflakeDatasource connection details ([#8922](https://github.com/great-expectations/great_expectations/pull/8922))
 * [DOCS] Minor Updates to Create a Data Asset ([#8952](https://github.com/great-expectations/great_expectations/pull/8952))
@@ -696,7 +734,7 @@ title: Changelog
 * [DOCS] Cloud - Getting started uses Fluent Datasources ([#8035](https://github.com/great-expectations/great_expectations/pull/8035))
 * [DOCS] Update Links in How to use auto-initializing Expectations ([#8054](https://github.com/great-expectations/great_expectations/pull/8054))
 * [DOCS] Update How to create Expectations Interactively in Python ([#8052](https://github.com/great-expectations/great_expectations/pull/8052))
-* [DOCS] Add guidance for "DataFrameAsset.build_batch_request()" in "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas". ([#8069](https://github.com/great-expectations/great_expectations/pull/8069))
+* [DOCS] Add guidance for "DataFrameAsset.build_batch_request()" in "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas". ([#8069](https://github.com/great-expectations/great_expectations/pull/8069))
 * [DOCS] Update set_based_column_map_expectation_template.py ([#8068](https://github.com/great-expectations/great_expectations/pull/8068))
 * [DOCS] Remove mention of CLI in evaluation_parameters terminology page. ([#8075](https://github.com/great-expectations/great_expectations/pull/8075))
 * [MAINTENANCE] Ruff rule DTZ - prevent naive datetimes ([#8050](https://github.com/great-expectations/great_expectations/pull/8050))
@@ -750,20 +788,20 @@ title: Changelog
 
 ### 0.16.14
 * [FEATURE] Add "batch.columns()" convenience method to Fluent DataAsset implementation. ([#7926](https://github.com/great-expectations/great_expectations/pull/7926))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark" ([#7927](https://github.com/great-expectations/great_expectations/pull/7927))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas" ([#7938](https://github.com/great-expectations/great_expectations/pull/7938))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas" ([#7941](https://github.com/great-expectations/great_expectations/pull/7941))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark" ([#7943](https://github.com/great-expectations/great_expectations/pull/7943))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data" ([#7947](https://github.com/great-expectations/great_expectations/pull/7947))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas" ([#7959](https://github.com/great-expectations/great_expectations/pull/7959))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark" ([#7964](https://github.com/great-expectations/great_expectations/pull/7964))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark" ([#7927](https://github.com/great-expectations/great_expectations/pull/7927))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas" ([#7938](https://github.com/great-expectations/great_expectations/pull/7938))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas" ([#7941](https://github.com/great-expectations/great_expectations/pull/7941))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark" ([#7943](https://github.com/great-expectations/great_expectations/pull/7943))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data" ([#7947](https://github.com/great-expectations/great_expectations/pull/7947))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas" ([#7959](https://github.com/great-expectations/great_expectations/pull/7959))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark" ([#7964](https://github.com/great-expectations/great_expectations/pull/7964))
 * [FEATURE] add ssm parameter support for config secrets ([#7940](https://github.com/great-expectations/great_expectations/pull/7940)) (thanks @Isaacwhyuenac)
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas" ([#7965](https://github.com/great-expectations/great_expectations/pull/7965))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark" ([#7967](https://github.com/great-expectations/great_expectations/pull/7967))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context" ([#7984](https://github.com/great-expectations/great_expectations/pull/7984))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python" ([#7985](https://github.com/great-expectations/great_expectations/pull/7985))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas" ([#7965](https://github.com/great-expectations/great_expectations/pull/7965))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark" ([#7967](https://github.com/great-expectations/great_expectations/pull/7967))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context" ([#7984](https://github.com/great-expectations/great_expectations/pull/7984))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python" ([#7985](https://github.com/great-expectations/great_expectations/pull/7985))
 * [FEATURE] Put how_to_connect_to_sql_data fluent docs under test ([#7956](https://github.com/great-expectations/great_expectations/pull/7956))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python" and "https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context". ([#7986](https://github.com/great-expectations/great_expectations/pull/7986))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python" and "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context". ([#7986](https://github.com/great-expectations/great_expectations/pull/7986))
 * [FEATURE] putting fluent doc how_to_connect_to_a_sql_table under test ([#7966](https://github.com/great-expectations/great_expectations/pull/7966))
 * [FEATURE] put fluent doc "How to connect to sql data using a query" under test ([#7987](https://github.com/great-expectations/great_expectations/pull/7987))
 * [FEATURE] Checker for correct Python code snippets in documentation. ([#7996](https://github.com/great-expectations/great_expectations/pull/7996))
@@ -814,9 +852,9 @@ title: Changelog
 * [FEATURE] Spark directory asset types ([#7873](https://github.com/great-expectations/great_expectations/pull/7873))
 * [FEATURE] Add Spark DeltaAsset type ([#7872](https://github.com/great-expectations/great_expectations/pull/7872))
 * [FEATURE] Add DirectoryDeltaAsset ([#7877](https://github.com/great-expectations/great_expectations/pull/7877))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset" ([#7907](https://github.com/great-expectations/great_expectations/pull/7907))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset" ([#7909](https://github.com/great-expectations/great_expectations/pull/7909))
-* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas" ([#7922](https://github.com/great-expectations/great_expectations/pull/7922))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset" ([#7907](https://github.com/great-expectations/great_expectations/pull/7907))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset" ([#7909](https://github.com/great-expectations/great_expectations/pull/7909))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas" ([#7922](https://github.com/great-expectations/great_expectations/pull/7922))
 * [FEATURE] DataProfilerStructuredDataAssistant Float Rule ([#7842](https://github.com/great-expectations/great_expectations/pull/7842)) (thanks @micdavis)
 * [BUGFIX] Fix inability to extend SimpleCheckpoint -- and several additional enhancements and clean up ([#7879](https://github.com/great-expectations/great_expectations/pull/7879))
 * [BUGFIX] Delete ExpectationSuite by name in GX Cloud ([#7881](https://github.com/great-expectations/great_expectations/pull/7881))
