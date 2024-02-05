@@ -142,7 +142,7 @@ module.exports = {
           items: [
             {
               label: 'How to get support',
-              to: '/docs/how_to_get_support'
+              to: '/docs/resources/get_support'
             },
             {
               label: 'Expectations Gallery',
