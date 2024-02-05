@@ -79,8 +79,8 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function">
-    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -118,7 +118,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         }
         # </snippet>
 
-    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py examples">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py examples">
     examples = [
         {
             "data": [
@@ -202,7 +202,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         },
     ]
     # </snippet>
-    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py library_metadata">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py library_metadata">
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
@@ -212,7 +212,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()">
     ExpectQueriedColumnValueFrequencyToMeetThreshold().print_diagnostic_checklist()
     # </snippet>
 

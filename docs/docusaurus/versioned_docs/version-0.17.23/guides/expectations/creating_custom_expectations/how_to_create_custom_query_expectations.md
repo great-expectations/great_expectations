@@ -402,7 +402,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python name="expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -436,7 +436,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python name="expect_queried_column_value_frequency_to_meet_threshold.py examples"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -539,7 +539,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies,
@@ -548,7 +548,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `query.column` Metric against our success keys:
 
-```python name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -616,7 +616,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python name="expect_queried_column_value_frequency_to_meet_threshold.py library_metadata"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
