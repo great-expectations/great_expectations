@@ -161,7 +161,7 @@ You can create or modify an <TechnicalTag tag="expectation_suite" text="Expectat
 
 Run the following Python code to build and open your Data Docs:
 
-``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
+``` python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/data_docs.py data_docs_site"
 ```
 
 ### Limit Data Docs access (Optional)
@@ -181,7 +181,7 @@ Run the following Python code to build and open your Data Docs:
 
 Host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Google Cloud Storage (GCS). GX recommends using IP-based access, which is achieved by deploying a Google App Engine application.
 
-To view the code used in the examples, see [how_to_host_and_share_data_docs_on_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py).
+To view the code used in the examples, see [how_to_host_and_share_data_docs_on_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py).
 
 ### Prerequisites
 
@@ -198,14 +198,14 @@ To view the code used in the examples, see [how_to_host_and_share_data_docs_on_g
 
 Run the following command to create a GCS bucket: 
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket command"
+```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket command"
 ```
 
 Modify the project name, bucket name, and region.
 
 This is the output after you run the command:
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket output"
+```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket output"
 ```
 
 ### Create a directory for your Google App Engine app
@@ -214,31 +214,31 @@ GX recommends adding the directory to your project directory. For example, `grea
 
 1. Create and then open ``app.yaml`` and then add the following entry:
 
-    ```yaml name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py app yaml"
+    ```yaml name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py app yaml"
     ```
 
 2. Create and then open `requirements.txt` and then add the following entry:
 
-    ```yaml name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py requirements.txt"
+    ```yaml name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py requirements.txt"
     ```
 
 3. Create and then open `main.py` and then dd the following entry:
 
-    ```python name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports"
     ```
 
 ### Authenticate the gcloud CLI
 
 Run the following command to authenticate the gcloud CLI and set the project:
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud login and set project"
+```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud login and set project"
 ```
 
 ### Deploy your Google App Engine app
 
 Run the following CLI command from within the app directory you created previously:
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy"
+```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy"
 ```
 
 ### Set up the Google App Engine firewall
@@ -249,7 +249,7 @@ See [Creating firewall rules](https://cloud.google.com/appengine/docs/standard/p
 
 Open `great_expectations.yml` and add the following entry:
 
-```yaml name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml"
+```yaml name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml"
 ```
 
 Replace the default ``local_site`` to maintain a single GCS Data Docs site.
@@ -273,7 +273,7 @@ To host a Data Docs site with a private DNS, you can configure a ``base_public_p
 
 Run the following Python code to build and open your Data Docs:
 
-``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
+``` python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/data_docs.py data_docs_site"
 ```
 
 ### Test the configuration
@@ -319,7 +319,7 @@ data_docs_sites:
 
 Run the following Python code to build and open your Data Docs:
 
-``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs"
+``` python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/data_docs.py data_docs"
 ```
 
 To share the site, compress and distribute the directory in the ``base_directory`` key in your site configuration.

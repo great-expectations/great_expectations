@@ -25,7 +25,7 @@ An Ephemeral Data Context is a temporary, in-memory Data Context that will not p
 
 To confirm that you're working with an Ephemeral Data Context, run the following code:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral"
 ```
 
 In the example code, it is assumed that your Data Context is stored in the variable `context`.
@@ -40,7 +40,7 @@ You can determine if your current working directory already has a Filesystem Dat
 
 Converting an Ephemeral Data Context into a Filesystem Data Context can be done with one line of code:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context"
 ```
 
 :::info Replacing the Ephemeral Data Context

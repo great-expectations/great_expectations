@@ -53,7 +53,7 @@ action_list:
 
 Run the following command to retrieve and run a Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and then emit lineage events to the OpenLineage backend:
 
-```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/checkpoints.py retrieve_and_run"
 ```
 
 :::note Reminder

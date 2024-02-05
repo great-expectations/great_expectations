@@ -51,14 +51,14 @@ Identify failed rows using pandas.
 
 Use the `get_context()` method to create a new Data Context:
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py get context"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_pandas.py get context"
 ```
 
 ### Import the Checkpoint 
 
 Run the following code to import the example Checkpoint:
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py get checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_pandas.py get checkpoint"
 ```
 
 ### Set the `unexpected_index_column_names` parameter
@@ -67,14 +67,14 @@ The failed rows are defined as values in the `unexpected_index_column_names` par
 
 In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/expectations/result_format/#configure-result-format).
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py set unexpected_index_column_names"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_pandas.py set unexpected_index_column_names"
 ```
 
 ### Run Checkpoint using `result_format`
 
 Run the following code to apply the updated `result_format` to every Expectation in your Suite and pass it directly to the `run()` method: 
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py run checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_pandas.py run checkpoint"
 ```
 
 ### Review Validation Results
@@ -138,14 +138,14 @@ Identify failed rows using Spark.
 
 Use the `get_context()` method to create a new Data Context:
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py get context"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_spark.py get context"
 ```
 
 ### Import the Checkpoint 
 
 Run the following code to import the example Checkpoint:
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py get checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_spark.py get checkpoint"
 ```
 
 ### Set the `unexpected_index_column_names` parameter
@@ -154,14 +154,14 @@ The failed rows are defined as values in the `unexpected_index_column_names` par
 
 In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/expectations/result_format/#configure-result-format).
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py set unexpected_index_column_names"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_spark.py set unexpected_index_column_names"
 ```
 
 ### Run Checkpoint using `result_format`
 
 Run the following code to apply the updated `result_format` to every Expectation in your Suite and pass it directly to the `run()` method: 
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py run checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_spark.py run checkpoint"
 ```
 
 ### Review Validation Results
@@ -226,14 +226,14 @@ Identify failed rows using SQLAlchemy.
 
 Use the `get_context()` method to create a new Data Context:
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py get context"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_sql.py get context"
 ```
 
 ### Import the Checkpoint 
 
 Run the following code to import the example Checkpoint:
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py get checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_sql.py get checkpoint"
 ```
 
 ### Set the `unexpected_index_column_names` parameter
@@ -242,14 +242,14 @@ The failed rows are defined as values in the `unexpected_index_column_names` par
 
 In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/expectations/result_format/#configure-result-format).
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py set unexpected_index_column_names"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_sql.py set unexpected_index_column_names"
 ```
 
 ### Run Checkpoint using `result_format`
 
 Run the following code to apply the updated `result_format` to every Expectation in your Suite and pass it directly to the `run()` method: 
 
-```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py run checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/failed_rows_sql.py run checkpoint"
 ```
 
 ### Review Validation Results

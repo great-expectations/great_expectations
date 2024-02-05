@@ -107,14 +107,14 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py datasource"
 ```
 
 ### Add a query to the Data Source as a Data Asset
 
 Run the following Python code to define a Data Asset and the `name` and `query` variables:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py add_query_asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py add_query_asset"
 ```
 
 ### Add additional queries (Optional)
@@ -155,14 +155,14 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py my_datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py my_datasource"
 ```
 
 ### Add a Splitter to the Data Asset
 
 Run the following Python code to split the TableAsset into Batches:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month"
 ```
 
 ### Add Batch Sorters to the Data Asset (Optional) 
@@ -171,19 +171,19 @@ Adding Batch Sorters to your Data Asset lets you explicitly state the order in w
 
 Run the following Python code to split the `"pickup_datetime"` column on `"year"` and `"month"`, so your list of sorters can have up to two elements. The code also adds an ascending sorter based on the contents of the splitter group `"year"` and a descending sorter based on the contents of the splitter group `"month"`:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py add_sorters"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py add_sorters"
 ```
 
 ### Use a Batch Request to verify Data Asset functionality
 
 Run the following Python code to verify that your Data Asset returns the necessary files as Batches:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py my_batch_list"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py my_batch_list"
 ```
 
 A Batch List can contain a lot of metadata. To verify which files were included in the returned Batches, run the following Python code to review the `batch_spec` for each returned Batch:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py print_batch_spec"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec"
 ```
 
 ### Related documentation

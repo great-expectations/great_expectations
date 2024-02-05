@@ -71,14 +71,14 @@ The following are some of the connection strings that are available for differen
 
 Run one of the connection strings in your preferred SQL dialect to store the connection string in the `connection_string` variable with plain text credentials. The following code is an example of the PostgreSQL connection string format:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py sql_connection_string"
 ```
 
 :::tip Is there a more secure way to include my credentials?
 
 You can use environment variables or a key in `config_variables.yml` to store connection string passwords.  After you define your password, you reference it in your connection string similar to this example:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py connection_string"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py connection_string"
 ```
 
 In the previous example `MY_PASSWORD` is the name of the environment variable, or the key to the value in `config_variables.yml` that corresponds to your password.
@@ -91,7 +91,7 @@ If you include a password as plain text in your connection string when you defin
 
 Run the following Python code to create a SQL Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py add_sql"
 ```
 
 </TabItem>
@@ -133,12 +133,12 @@ The following code is an example of a PostgreSQL connection string format:
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py connection_string2"
     ```
 
 2. Run the following Python code to create a PostgreSQL Data Source:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_postgres"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_postgres"
     ```
 
 ### Connect to a specific set of data with a Data Asset
@@ -157,24 +157,24 @@ Although there isn't a maximum number of Data Assets you can define for a Data S
 
 1. Run the following Python code to identify the table to connect to with a Table Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_name"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py asset_name"
     ```
 
 2.  Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_table_asset"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_table_asset"
     ```
 
 ### Connect a Data Asset to the data returned by a query (Optional)
 
 1. Run the following Python code to define a Query Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py asset_query"
     ```
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_query_asset"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_query_asset"
     ```
 
 ### Connect to additional tables or queries (Optional)
@@ -207,19 +207,19 @@ The following code examples use a SQLite connection string. A SQLite connection 
 
 The following code is an example of a SQLite connection string format:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py connection_string"
 ```
 
 ### Create a SQLite Data Source
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py datasource_name"
     ```
 
 2. Run the following Python code to create a SQLite Data Source:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py datasource"
     ```
 
     :::caution Using `add_sql(...)` instead of `add_sqlite(...)`
@@ -235,23 +235,23 @@ The following code is an example of a SQLite connection string format:
 
 1. Run the following Python code to set the `asset_name` and `asset_table_name` variables:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py asset_name"
     ```
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py table_asset"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py table_asset"
     ```
 
 ### Connect to the data in a query (Optional)
 
 1. Run the following Python code to define a Query Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_query"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py asset_query"
     ```
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py query_table_asset"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py query_table_asset"
     ```
 
 ### Add additional tables or queries (Optional)
@@ -464,9 +464,9 @@ The following scripts and configuration files are used in the examples:
 
 - The local GX configuration is located in the [`great-expectations` GIT repository](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/fixtures/gcp_deployment/).
 
-- The script to test the BigQuery configuration is located in [gcp_deployment_patterns_file_bigquery.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py).
+- The script to test the BigQuery configuration is located in [gcp_deployment_patterns_file_bigquery.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py).
 
-- The script to test the GCS configuration is located in [gcp_deployment_patterns_file_gcs.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py).
+- The script to test the GCS configuration is located in [gcp_deployment_patterns_file_gcs.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py).
 
 ### Prerequisites
 
@@ -517,7 +517,7 @@ pip install great-expectations --upgrade
 
 Run the following code to create a new <TechnicalTag relative="../../../" tag="data_context" text="Data Context" />: 
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py get_context"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py get_context"
 ```
 
 The `full_path_to_project_directory` parameter can be an empty directory where you intend to build your GX configuration.
@@ -536,24 +536,24 @@ The code examples are located in the [`great-expectations` repository](https://g
 
 By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `gx/` folder. A new Expectations Store can be configured by adding the following lines to your `great_expectations.yml` file. Replace the `project`, `bucket` and `prefix` with your values.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
 ```
 
 To configure GX to use this new Expectations Store, `expectations_GCS_store`, set the `expectations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
 ### Add a Validations Store
 
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `gx/` folder. You can connfigure a new Validations Store by adding the following lines to your `great_expectations.yml` file. Replace the `project`, `bucket` and `prefix` with your values.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_validations_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py expected_validations_store"
 ```
 
 To configure GX to use the new `validations_GCS_store` Validations Store, set the `validations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
 ### Add a Data Docs Store
@@ -562,7 +562,7 @@ To host and share Data Docs on GCS, see [Host and share Data Docs](../../../setu
 
 After you have hosted and shared Data Docs, your `great-expectations.yml` contains the following configuration below `data_docs_sites`:
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_data_docs_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py new_data_docs_store"
 ```
 
 Run the following command in the gcloud CLI to view the deployed DataDocs site:
@@ -588,7 +588,7 @@ Connect to source data stored on GCS or BigQuery.
 
 Run the following code to add the name of your GCS bucket to the `add_pandas_gcs` function:
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py datasource"
 ```
 
 In the example, you've added a Data Source that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
@@ -604,7 +604,7 @@ Tables that are created by BigQuery queries are automatically set to expire afte
 
 Run the following code to create a Data Source that connects to data in BigQuery:
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
 ```
 
 In the example, you created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passed it in a connection string.
@@ -626,7 +626,7 @@ Use the `add_csv_asset` function to add a CSV `Asset` to your `Datasource`.
 
 Configure the `prefix` and `batching_regex`. The `prefix` is the path to the GCS bucket where the files are located. `batching_regex` is a regular expression that indicates which files should be treated as Batches in the Asset, and how to identify them. For example:
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex"
 ```
 
 In the example, the pattern `r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"` builds a Batch for the following files in the GCS bucket:
@@ -640,7 +640,7 @@ The `batching_regex` pattern matches the four digits of the year portion and ass
 
 Run the following code to use the `add_csv_asset` function to add an `Asset` named `csv_taxi_gcs_asset` to your Data Source: 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py asset"
 ```
 
 </TabItem>
@@ -650,12 +650,12 @@ You can add a BigQuery `Asset` into your `Datasource` as a table asset or query 
 
 In the following example, a table `Asset` named `my_table_asset` is built by naming the table in your BigQuery Database. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset"
 ```
 
 In the following example, a query `Asset` named `my_query_asset` is built by submitting a query to the `taxi_data` table.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset"
 ```
 
 </TabItem>
@@ -674,18 +674,18 @@ In the following example, a query `Asset` named `my_query_asset` is built by sub
 
 1. Use the `add_or_update_expectation_suite` method on your Data Context to create an Expectation Suite:
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py add_expectation_suite"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py add_expectation_suite"
     ```
 
 2. Use the `Validator` method to run Expectations on the Batch and automatically add them to the Expectation Suite. 
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py validator_calls"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py validator_calls"
     ```
     In this example, you're adding `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between`. You can replace the `passenger_count` and `congestion_surcharge` test data columns with your own data columns.
 
 3. Run the following code to save the Expectation Suite:
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
     ```
 
 </TabItem>
@@ -693,24 +693,24 @@ In the following example, a query `Asset` named `my_query_asset` is built by sub
 
 1. Use the `table_asset` you created previously to build a `BatchRequest`: 
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py batch_request"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py batch_request"
     ```
 
 2. Use the `add_or_update_expectation_suite` method on your Data Context to create an Expectation Suite and get a `Validator`: 
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite"
     ```
 
 3. Use the `Validator` to run expectations on the batch and automatically add them to the Expectation Suite: 
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py validator_calls"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py validator_calls"
     ```
     In this example, you're adding `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between`. You can replace the `passenger_count` and `congestion_surcharge` test data columns with your own data columns.
     
     
 4. Run the following code to save the Expectation Suite containing the two Expectations:
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
     ```
 
 </TabItem>
@@ -729,13 +729,13 @@ In the following example, a query `Asset` named `my_query_asset` is built by sub
 
 1. Run the following code to add the `gcs_checkpoint` Checkpoint to the Data Context:  
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py checkpoint"
     ```
     In this example, you're using the `BatchRequest` and `ExpectationSuite` names that you used when you created your Validator.
 
 2. Run the Checkpoint by calling `checkpoint.run()`:
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py run_checkpoint"
     ```
 
 </TabItem>
@@ -743,13 +743,13 @@ In the following example, a query `Asset` named `my_query_asset` is built by sub
 
 1. Run the following code to add the `bigquery_checkpoint` Checkpoint to the Data Context:
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py checkpoint"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py checkpoint"
     ```
     In this example, you're using the `BatchRequest` and `ExpectationSuite` names that you used when you created your Validator.
 
 2. Run the Checkpoint by calling `checkpoint.run()`:
 
-    ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py run_checkpoint"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py run_checkpoint"
     ```
 
 </TabItem>
@@ -823,9 +823,9 @@ To migrate your local configuration, you can move the local `gx/` folder to the 
 
 1. Run the following code to create a DAG with a single node (`t1`) that runs a `BashOperator`:
 
-    ```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py full"
     ```
-    The DAG is stored in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py)
+    The DAG is stored in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py)
 
     The `BashOperator` changes the directory to `/home/airflow/gcsfuse/great_expectations`, where you uploaded your local configuration.
 
@@ -848,9 +848,9 @@ To add the DAG to Cloud Composer, you move `ge_checkpoint_gcs.py` to the environ
 
 1. Run the following code to create a DAG with a single node (`t1`) that runs a `BashOperator`
 
-    ```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py full"
     ```
-    The DAG is stored in a file named: [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py)
+    The DAG is stored in a file named: [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py)
 
     The `BashOperator` changes the directory to `/home/airflow/gcsfuse/great_expectations`, where you uploaded your local configuration.
 

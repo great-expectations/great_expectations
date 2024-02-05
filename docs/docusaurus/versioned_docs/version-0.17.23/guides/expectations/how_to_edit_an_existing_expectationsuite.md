@@ -9,7 +9,7 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 Use the information provided here to learn how to edit an Expectation Suite. Editing Expectations does not edit or alter the Batch data.
 
-All the code used in the examples is available in GitHub at this location: [how_to_edit_an_expectation_suite.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py).
+All the code used in the examples is available in GitHub at this location: [how_to_edit_an_expectation_suite.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_edit_an_expectation_suite.py).
 
 
 ## Prerequisites
