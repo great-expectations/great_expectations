@@ -1605,9 +1605,14 @@ class SqlExpectation(BatchExpectation, ABC):
     )
 
     @pydantic.validator("query")
-    def _validate_unexpected_rows_query(cls, v):
-        # TODO: Need to validate proper SQL query structure and presence of {active_batch}
-        pass
+    def _validate_query(cls, query: str) -> str:
+        try:
+            # Using a dummy value to check syntactic correctness
+            query.format(active_batch="")
+        except KeyError:
+            raise ValueError("Query must contain {active_batch} parameter.")
+
+        return query
 
     def _validate(
         self,
