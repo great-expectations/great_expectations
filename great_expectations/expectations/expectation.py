@@ -1593,11 +1593,17 @@ representation."""
 
 
 class SqlExpectation(BatchExpectation, ABC):
-    unexpected_rows_query: str
+    query: str
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
+    success_keys: ClassVar[Tuple[str, ...]] = ("query",)
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
-    @pydantic.validator("unexpected_rows_query")
+    @pydantic.validator("query")
     def _validate_unexpected_rows_query(cls, v):
         pass
 
@@ -1607,11 +1613,13 @@ class SqlExpectation(BatchExpectation, ABC):
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        query_result = list(metrics.get("query.table")[0].values())[0]
+        metric_value = metrics["query.table"]
         return {
-            "success": query_result == 0,
-            "result": {"observed_value": query_result},
-            "details": {"value_counts": {"unexpected_rows": query_result}},
+            "success": len(metric_value) == 0,
+            "result": {
+                "observed_value": len(metric_value),
+                "details": {"value_counts": {"unexpected_rows": metric_value}},
+            },
         }
 
 
