@@ -36,7 +36,7 @@ def section_1_import_necessary_modules_and_initialize_your_data_context() -> (
     Returns:
         a Great Expectations DataContext object
     """
-    # <snippet name="import necessary modules and initialize your data context">
+    # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/datasource_configuration/filesystem_components/how_to_configure_a_datasource_universal_steps imports and data context">
     import great_expectations as gx
     from great_expectations.core.yaml_handler import YAMLHandler
 
