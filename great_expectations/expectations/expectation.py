@@ -1605,15 +1605,11 @@ class SqlExpectation(BatchExpectation, ABC):
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        configuration = self.configuration
         query_result = list(metrics.get("query.table")[0].values())[0]
-        value = configuration.kwargs.get("value")
-
-        success = query_result == value
-
         return {
-            "success": success,
+            "success": query_result == 0,
             "result": {"observed_value": query_result},
+            "details": {"value_counts": {"unexpected_rows": query_result}},
         }
 
 
