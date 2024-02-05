@@ -124,7 +124,7 @@ Make sure your one-line docstring begins with "Expect " and ends with a period. 
 ```
 
 with this one:
-```python name="expect_queried_table_row_count_to_be.py print_diagnostic_checklist"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py print_diagnostic_checklist"
 ```
 
 Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
@@ -159,7 +159,7 @@ You're going to search for `examples = []` in your file, and replace it with at 
 
 Your examples will look similar to this example:
 
-```python name="expect_queried_table_row_count_to_be.py examples"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -259,7 +259,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python name="expect_queried_table_row_count_to_be.py _validate function signature"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py function signature"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies,
@@ -268,7 +268,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `query.table` Metric against our success keys:
 
-```python name="expect_queried_table_row_count_to_be.py _validate function"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
