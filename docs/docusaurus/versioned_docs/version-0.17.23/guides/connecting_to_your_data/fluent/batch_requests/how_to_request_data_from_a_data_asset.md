@@ -6,14 +6,14 @@ keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration m
 ---
 
 <!-- ## Prerequisites -->
-import Prerequisites from '/docs/components/_prerequisites.jsx'
+import Prerequisites from '../../../../components/_prerequisites.jsx'
 
 <!-- ### Import GX and instantiate a Data Context -->
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import ImportGxAndInstantiateADataContext from '../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
 
 <!-- ### Retrieve existing DataAsset from existing Datsource -->
-import GetExistingDataAssetFromExistingDatasource from '/docs/components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
+import GetExistingDataAssetFromExistingDatasource from '../../../../components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
 
 Learn how you can request data from a Data Source that has been defined with the `context.sources.add_*` method.
 
@@ -21,7 +21,7 @@ Learn how you can request data from a Data Source that has been defined with the
 
 <Prerequisites> 
 
-- [An installation of GX](/docs/guides/setup/installation/install_gx)
+- [An installation of GX](/guides/setup/installation/install_gx.md)
 - A Data Source with a configured Data Asset
 
 </Prerequisites> 
@@ -91,7 +91,7 @@ Because Batch definitions are quite verbose, it is easiest to determine what dat
 ## Next steps
 
 Now that you have a retrieved data from a Data Asset, you may be interested in creating Expectations about your data:
-- [How to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [How to use the Onboarding Data Assistant to evaluate data](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [How to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [How to use the Onboarding Data Assistant to evaluate data](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 

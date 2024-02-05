@@ -7,11 +7,11 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import AfterCreateSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_sql_datasource.md'
-import PostgreSqlConfigureCredentialsInConfigVariablesYml from '/docs/components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import AfterCreateSqlDatasource from '../../../../components/connect_to_data/next_steps/_after_create_sql_datasource.md'
+import PostgreSqlConfigureCredentialsInConfigVariablesYml from '../../../../components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md'
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
 
 
 import TabItem from '@theme/TabItem';
@@ -40,7 +40,7 @@ Connect GX to a SQL database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md)
 - Source data stored in a SQL database
 
 </Prerequisites> 
@@ -105,7 +105,7 @@ Connect GX to a PostgreSQL database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with PostgreSQL](/guides/setup/installation/install_gx.md)
 - Source data stored in a PostgreSQL database
 
 </Prerequisites> 
@@ -192,7 +192,7 @@ Connect GX to a SQLite database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQLite](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQLite](/guides/setup/installation/install_gx.md)
 - Source data stored in a SQLite database
 
 </Prerequisites> 
@@ -270,7 +270,7 @@ Connect GX to a Snowflake database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md)
 - Source data stored in a Snowflake database
 
 </Prerequisites> 
@@ -384,7 +384,7 @@ Connect GX to Databricks to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md)
 - Source data stored in a Databricks cluster
 
 </Prerequisites> 
@@ -472,7 +472,7 @@ The following scripts and configuration files are used in the examples:
 
 <Prerequisites>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx).
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md).
 - Familiarity with Google Cloud Platform features and functionality.
 - A GCP project with a running Google Cloud Storage container that is accessible from your region.
 - Read/write access to a BigQuery database.
@@ -897,13 +897,13 @@ To trigger the DAG manually:
 
 ## Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
+- [How to organize Batches in a SQL based Data Asset](/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
 
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
+- [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
 
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 - [Configure Expectation Stores](../../../setup/configuring_metadata_stores/configure_expectation_stores.md)
 

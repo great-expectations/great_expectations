@@ -2,7 +2,7 @@
 title: Use Data Docs URLs in custom Validation Actions
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 To create a custom Validation Action that includes a link to the <TechnicalTag tag="data_docs" text="Data Docs"/>,
 you get the Data Docs URL for the <TechnicalTag tag="validation_result" text="Validation Results"/> page from your Validation Results after you run a <TechnicalTag tag="checkpoint" text="Checkpoint"/>. This method returns the URLs for any type of Data Docs site setup including S3 or a local setup.
@@ -13,7 +13,7 @@ The code used in this topic is available on GitHub here: [actions.py](https://gi
 
 <Prerequisites>
 
-  - [An Expectation Suite for Validation](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+  - [An Expectation Suite for Validation](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
   - [Familiarity with Validation Actions](../../../terms/action.md)
 
 </Prerequisites>

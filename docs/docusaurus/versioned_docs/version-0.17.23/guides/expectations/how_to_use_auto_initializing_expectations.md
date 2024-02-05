@@ -3,7 +3,7 @@ title: Use auto-initializing Expectations
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you create Expectations interactively using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
@@ -19,8 +19,8 @@ The following scripts are used in this topic and are available in GitHub:
 ## Prerequisites
 
 - Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
-- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
-- [A configured Data Source](/docs/guides/connecting_to_your_data/connect_to_data_lp)
+- [A configured Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md)
+- [A configured Data Source](/guides/connecting_to_your_data/connect_to_data_lp.md)
 - [An understanding of how to configure a BatchRequest](../../guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
 - [An understanding of how to create and edit Expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
