@@ -1,0 +1,46 @@
+---
+title: Batch
+sidebar_label: Batch
+---
+
+
+<section class="sphinx-api-doc" id="batch">
+
+<dl class="py class">
+<dt class="sig sig-object py" id="great_expectations.datasource.fluent.interfaces.Batch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.datasource.fluent.interfaces.</span></span><span class="sig-name descname"><span class="pre">Batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="http://localhost:3000/docs/reference/api/datasource/Datasource_class#great_expectations.datasource.Datasource" title="great_expectations.datasource.Datasource"><span class="pre">Datasource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataAsset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="http://localhost:3000/docs/reference/api/core/batch/BatchRequest_class#great_expectations.core.batch.BatchRequest" title="great_expectations.core.batch.BatchRequest"><span class="pre">BatchRequest</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BatchData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BatchMarkers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BatchSpec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="http://localhost:3000/docs/reference/api/core/batch/BatchDefinition_class#great_expectations.core.batch.BatchDefinition" title="great_expectations.core.batch.BatchDefinition"><span class="pre">BatchDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.datasource.fluent.interfaces.Batch" title="Permalink to this definition">#</a></dt>
+<dd><p>This represents a batch of data.</p>
+<p>This is usually not the data itself but a hook to the data on an external datastore such as
+a spark or a sql database. An exception exists for pandas or any in-memory datastore.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.datasource.fluent.interfaces.Batch.columns">
+<span class="sig-name descname"><span class="pre">columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#great_expectations.datasource.fluent.interfaces.Batch.columns" title="Permalink to this definition">#</a></dt>
+<dd><p>Return column names of this Batch.</p>
+<dl class="simple">
+<dt>Returns</dt><dd><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.datasource.fluent.interfaces.Batch.head">
+<span class="sig-name descname"><span class="pre">head</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.v1.types.StrictInt</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fetch_all</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.v1.types.StrictBool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">great_expectations.datasource.fluent.interfaces.HeadData</span></span></span><a class="headerlink" href="#great_expectations.datasource.fluent.interfaces.Batch.head" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the first n rows of this Batch.</p>
+<p>This method returns the first n rows for the Batch based on position.</p>
+<p>For negative values of n_rows, this method returns all rows except the last n rows.</p>
+<p>If n_rows is larger than the number of rows, this method returns all rows.</p>
+<dl class="simple">
+<dt>Parameters</dt><dd><p>n_rows: The number of rows to return from the Batch.
+fetch_all: If True, ignore n_rows and return the entire Batch.</p>
+</dd>
+<dt>Returns</dt><dd><p>HeadData</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.datasource.fluent.interfaces.Batch.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="http://localhost:3000/docs/reference/api/expectations/expectation/Expectation_class#great_expectations.expectations.expectation.Expectation" title="great_expectations.expectations.expectation.Expectation"><span class="pre">Expectation</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="http://localhost:3000/docs/reference/api/core/ExpectationValidationResult_class#great_expectations.core.ExpectationValidationResult" title="great_expectations.core.ExpectationValidationResult"><span class="pre">ExpectationValidationResult</span></a></span></span><a class="headerlink" href="#great_expectations.datasource.fluent.interfaces.Batch.validate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="http://localhost:3000/docs/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.ExpectationSuite"><span class="pre">ExpectationSuite</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="http://localhost:3000/docs/reference/api/core/ExpectationSuiteValidationResult_class#great_expectations.core.ExpectationSuiteValidationResult" title="great_expectations.core.ExpectationSuiteValidationResult"><span class="pre">ExpectationSuiteValidationResult</span></a></span></span></dt>
+<dd></dd></dl>
+</dd></dl>
+</section>

@@ -1,0 +1,1 @@
+- [How to set up GX to work with SQL databases](/oss/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
