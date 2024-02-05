@@ -10,23 +10,17 @@ const htmlparser2 = require('htmlparser2')
  */
 function constructSnippetMap(dirs) {
   const snippets = parseSourceDirectories(dirs)
-  const duplicateNames = []
 
   const snippetMap = {}
   for (const snippet of snippets) {
     const name = snippet.name
     if (name in snippetMap) {
-      duplicateNames.push(name)
+      throw new Error(
+        `A snippet named ${name} has already been defined elsewhere`
+      )
     }
     delete snippet.name // Remove duplicate filename to clean up stdout
     snippetMap[name] = snippet
-  }
-  if (duplicateNames.length > 0) {
-    console.error("Duplicate snippet names found:")
-    console.error(duplicateNames.map((name) => `  ${name}`).join('\n'))
-    throw new Error(
-      `${duplicateNames.length} duplicate snippet names found`
-    )
   }
 
   return snippetMap
