@@ -143,6 +143,4 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 
 
 if __name__ == "__main__":
-    ExpectQueriedTableRowCountToBe(value=5).print_diagnostic_checklist(
-        backends=["sqlite"]
-    )
+    ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
