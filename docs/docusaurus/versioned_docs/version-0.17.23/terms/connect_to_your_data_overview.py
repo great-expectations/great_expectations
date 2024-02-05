@@ -1,4 +1,4 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview add_datasource">
+# <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/terms/connect_to_your_data_overview add_datasource">
 import great_expectations as gx
 
 context = gx.get_context()
@@ -10,7 +10,7 @@ context.sources.add_pandas_filesystem(
 assert "my_pandas_datasource" in context.datasources
 
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config">
+# <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/terms/connect_to_your_data_overview config">
 datasource = context.datasources["my_pandas_datasource"]
 print(datasource)
 # </snippet>
