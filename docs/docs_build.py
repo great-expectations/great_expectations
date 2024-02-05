@@ -42,13 +42,7 @@ class DocsBuilder:
         )
 
     def build_docs(self) -> None:
-        """Build API docs + docusaurus docs.
-
-        NOTE: This will replace `build_docs` very shortly!
-        """
-        self.logger.print_header("Preparing to build docs...")
-        self._load_all_versioned_docs()
-
+        """Build API docs + docusaurus docs"""
         self._invoke_api_docs()
 
         self.logger.print_header("Building docusaurus docs...")
