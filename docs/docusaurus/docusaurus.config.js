@@ -25,42 +25,8 @@ module.exports = {
     ],
   ],
 
-  scripts: [
-    {
-      src: "/scripts/set-tab.js",
-      async: true,
-      defer: true,
-    },
-  ],
 
   themeConfig: {
-    announcementBar: {
-        id: 'cta_bar',
-        content:
-          '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
-        backgroundColor: '#141432',
-        textColor: '#fff',
-        isCloseable: true, 
-      },
-    gxCard: {
-      title: "What is GX Cloud?",
-      description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
-      buttons: {
-        primary: {
-          label: "Sign up for GX Cloud",
-          href: "https://greatexpectations.io/cloud"
-        },
-        secondary: {
-          label: "Why GX Cloud?",
-          href: "https://docs.greatexpectations.io/docs/cloud/why_gx_cloud"
-        }
-      }
-    },
-    docs: {
-      sidebar: {
-        autoCollapseCategories: true,
-      },
-    },
     algolia: {
       // See: https://docusaurus.io/docs/search#connecting-algolia
       appId: 'PFK639M3JK',
@@ -97,6 +63,10 @@ module.exports = {
       },
       items: [
         {
+          type: 'search',
+          position: 'right',
+        },
+        {
           type: 'docsVersionDropdown',
           position: 'left',
           dropdownItemsAfter: [
@@ -108,38 +78,85 @@ module.exports = {
           dropdownActiveClassDisabled: true,
         },
         {
-          type: 'search',
-          position: 'left',
+          label: 'Product',
+          position: 'right',
+          items: [
+            {
+              label: 'GX CLOUD',
+              to: 'https://greatexpectations.io/gx-cloud',
+            },
+            {
+              label: 'GX OSS',
+              to: 'https://greatexpectations.io/gx-oss',
+            },
+          ],
         },
         {
-          label: 'Home',
-          to: '/docs/home/',
-          position: 'right'
+          label: 'Community',
+          position: 'right',
+          items: [
+            {
+              label: 'COMMUNITY HOME',
+              to: 'https://greatexpectations.io/community',
+            },
+            {
+              label: 'COMMUNITY FORUM',
+              to: 'https://discourse.greatexpectations.io/',
+            },
+            {
+              label: 'GITHUB',
+              to: 'https://github.com/great-expectations/great_expectations',
+            },
+            {
+              label: 'JOIN THE EMAIL LIST',
+              to: 'https://greatexpectations.io/newsletter',
+            },
+          ],
         },
         {
+          label: 'RESOURCES',
+          position: 'right',
+          items: [
+            {
+              label: 'INTEGRATIONS',
+              to: 'https://greatexpectations.io/integrations',
+            },
+            {
+              label: 'DOCUMENTATION',
+              to: 'https://docs.greatexpectations.io/docs/',
+            },
+            {
+              label: 'EXPECTATION GALLERY',
+              to: 'https://greatexpectations.io/expectations',
+            },
+            {
+              label: 'GREAT EXPECTATIONS BLOG',
+              to: 'https://greatexpectations.io/blog',
+            },
+            {
+              label: 'GREAT EXPECTATIONS CASE STUDIES',
+              to: 'https://greatexpectations.io/case-studies',
+            },
+          ],
+        },
+        {
+          label: 'Company',
+          position: 'right',
+          items: [
+            {
+              label: 'ABOUT US',
+              to: 'https://greatexpectations.io/company',
+            },
+            {
+              label: 'CAREERS',
+              to: 'https://jobs.greatexpectations.io/',
+            },
+          ],
+        },
+        {
+          to: 'https://greatexpectations.io/gx-cloud',
           label: 'GX Cloud',
-          to: '/docs/cloud/',
-          position: 'right'
-        },
-        {
-          label: 'GX OSS',
-          to: '/docs/oss/',
-          position: 'right'
-        },
-        {
-          label: 'Learn',
-          to: '/docs/reference/learn/',
-          position: 'right'
-        },
-        {
-          label: 'API',
-          to: '/docs/reference/api',
-          position: 'right'
-        },
-        {
-          to: 'https://greatexpectations.io/cloud',
-          label: 'Sign up for GX Cloud',
-          position: 'left',
+          position: 'right',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
         },
@@ -166,10 +183,6 @@ module.exports = {
               label: 'GX OSS',
               to: 'https://greatexpectations.io/gx-oss',
             },
-            {
-              label: 'Integration support policy',
-              to: '/docs/application_integration_support'
-            }
           ],
         },
         {
@@ -230,7 +243,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '0.18.3',
+              label: '0.18.8',
               path: ''
             }
           }
