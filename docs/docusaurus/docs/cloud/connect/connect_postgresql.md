@@ -25,9 +25,16 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 ## Prepare your PostgreSQL environment
 
-You can use an existing PostgreSQL database, but GX recommends creating a separate warehouse for GX Cloud to simplify cost management and optimize performance.
+Run the following code to create and assign the `gx_ro` role and allow GX Cloud to access to all `public` schemas and tables on a specific database:
 
+```sql
+   CREATE ROLE gx_ro WITH LOGIN PASSWORD <your_password>;
+   GRANT CONNECT ON DATABASE <your_database> TO gx_ro;
+   GRANT USAGE ON SCHEMA public TO gx_ro;
+   GRANT SELECT ON ALL TABLES in SCHEMA public TO gx_ro;
+```
 
+Replace `your_password` and `your_database` with your own values.
 
 ## Get your GX Cloud access token and organization ID
 
