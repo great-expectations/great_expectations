@@ -36,14 +36,14 @@ the configuration is not persisted, and you'll receive a `UserWarning`. GX recom
 
 To apply `result_format` to an Expectation, you pass it into the Expectation configuration on your Validator:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
+```python name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_set"
 ```
 
 ### Checkpoint-level configuration
 
 Run the following code to apply `result_format` to every Expectation in a Suite:
 
-```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_checkpoint_example"
+```python name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example"
 ```
 Your Checkpoint configuration is defined below the `runtime_configuration` key. 
 

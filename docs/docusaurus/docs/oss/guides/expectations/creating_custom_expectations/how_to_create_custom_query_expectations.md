@@ -259,7 +259,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py function signature"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function signature"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies,

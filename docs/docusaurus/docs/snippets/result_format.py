@@ -214,3 +214,59 @@ test_suite.expectation_suite_name = "test_suite"
 context.add_or_update_expectation_suite(
     expectation_suite=test_suite,
 )
+
+# <snippet name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example">
+checkpoint: Checkpoint = Checkpoint(
+    name="my_checkpoint",
+    run_name_template="%Y%m%d-%H%M%S-my-run-name-template",
+    data_context=context,
+    batch_request=my_batch_request,
+    expectation_suite_name="test_suite",
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
+    ],
+    runtime_configuration={
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_column"],
+            "return_unexpected_index_query": True,
+        },
+    },
+)
+# </snippet>
+
+context.add_or_update_checkpoint(checkpoint=checkpoint)
+
+results: CheckpointResult = checkpoint.run()
+evrs: List[ExpectationSuiteValidationResult] = results.list_validation_results()
+
+result_index_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+    "unexpected_index_list"
+]
+assert result_index_list == [
+    {"my_var": "C", "pk_column": "three"},
+    {"my_var": "C", "pk_column": "four"},
+    {"my_var": "C", "pk_column": "five"},
+    {"my_var": "D", "pk_column": "six"},
+    {"my_var": "D", "pk_column": "seven"},
+]
+
+result_index_query: List[int] = evrs[0]["results"][0]["result"][
+    "unexpected_index_query"
+]
+assert result_index_query == "df.filter(items=[3, 4, 5, 6, 7], axis=0)"
+partial_unexpected_counts: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+    "partial_unexpected_counts"
+]
+assert partial_unexpected_counts == [
+    {"value": "C", "count": 3},
+    {"value": "D", "count": 2},
+]

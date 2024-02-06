@@ -58,7 +58,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/batch_requests/how_to_connect_to_a_sql_table.py datasource"
 ```
 
 ### Add a table to the Data Source as a Data Asset
@@ -67,7 +67,7 @@ You create a Data Asset to identify the table to connect to.
 
 Run the following Python code to define the `name` and `table_name` variables:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/batch_requests/how_to_connect_to_a_sql_table.py create_datasource"
 ```
 
 ### Add additional tables (Optional)

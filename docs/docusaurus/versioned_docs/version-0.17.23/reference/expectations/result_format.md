@@ -36,8 +36,8 @@ the configuration is not persisted, and you'll receive a `UserWarning`. GX recom
 
 To apply `result_format` to an Expectation, you pass it into the Expectation configuration on your Validator:
 
-    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/reference/expectations/result_format.py result_format_complete_example_set"
-    ```
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/reference/expectations/result_format.py result_format_complete_example_set"
+```
 
 ### Checkpoint-level configuration
 
