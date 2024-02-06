@@ -30,11 +30,13 @@ Run the following code to create and assign the `gx_ro` role and allow GX Cloud 
 ```sql
    CREATE ROLE gx_ro WITH LOGIN PASSWORD <your_password>;
    GRANT CONNECT ON DATABASE <your_database> TO gx_ro;
+   GRANT CREATE TEMPORARY ON DATABASE <your_database> TO gx_role;
    GRANT USAGE ON SCHEMA public TO gx_ro;
    GRANT SELECT ON ALL TABLES in SCHEMA public TO gx_ro;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_role;
 ```
 
-Replace `your_password` and `your_database` with your own values.
+Replace `your_password` and `your_database` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
 
 ## Get your GX Cloud access token and organization ID
 
