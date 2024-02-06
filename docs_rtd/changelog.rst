@@ -4,6 +4,49 @@
 Changelog
 #########
 
+0.18.8
+-----------------
+* [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](https://github.com/great-expectations/great_expectations/pull/9207))
+* [FEATURE] `TableAsset.test_connection()` should fail if table is not queryable. ([#9198](https://github.com/great-expectations/great_expectations/pull/9198))
+* [BUGFIX] Disable GCS Docs Integration Test to unblock Release ([#9226](https://github.com/great-expectations/great_expectations/pull/9226))
+* [DOCS] `0.18.x` Update `get_context()` overload to for `EphemeralDataContext` ([#9183](https://github.com/great-expectations/great_expectations/pull/9183))
+* [MAINTENANCE] Update Contrib Pipeline to release from `0.18` branch ([#9182](https://github.com/great-expectations/great_expectations/pull/9182))
+* [MAINTENANCE] `0.18.x` `mypy` & `ruff` updates ([#9191](https://github.com/great-expectations/great_expectations/pull/9191))
+* [MAINTENANCE] Apply the contract testing fixes to 0.18 ([#9225](https://github.com/great-expectations/great_expectations/pull/9225))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Interface Update ([#9165](https://github.com/great-expectations/great_expectations/pull/9165))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Parameter Rename ([#9180](https://github.com/great-expectations/great_expectations/pull/9180))
+* [CONTRIB] Referential Integrity Expectation- Atomic Renderers ([#9202](https://github.com/great-expectations/great_expectations/pull/9202))
+* [CONTRIB] Referential Integrity - Make building of `unexpected_value` table non-case sensitive ([#9224](https://github.com/great-expectations/great_expectations/pull/9224))
+
+0.18.7
+-----------------
+* [BUGFIX] 0.18.x - Apply `QueryAsset` splitting fix ([#9160](https://github.com/great-expectations/great_expectations/pull/9160))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Referential Integrity (0.18 branch) ([#9145](https://github.com/great-expectations/great_expectations/pull/9145))
+* [CONTRIB] ExpectColumnValuesToBePresentInOtherTable - Wording update ([#9151](https://github.com/great-expectations/great_expectations/pull/9151))
+
+0.18.6
+-----------------
+* [BUGFIX] 0.18.x: Microsoft Fabric Semantic Link API update ([#9102](https://github.com/great-expectations/great_expectations/pull/9102))
+* [BUGFIX] `0.18.x` cherrypick `create_temp_tables` fixes from `develop` ([#9124](https://github.com/great-expectations/great_expectations/pull/9124))
+* [BUGFIX] B/remove connection log v0.18 ([#9136](https://github.com/great-expectations/great_expectations/pull/9136))
+* [BUGFIX] Fix QueryAsset with `create_temp_table=False` ([#9148](https://github.com/great-expectations/great_expectations/pull/9148))
+* [DOCS] Fix doc test to use `create_temp_table=True` with QueryAsset ([#9137](https://github.com/great-expectations/great_expectations/pull/9137))
+* [DOCS] `how_to_connect_to_postgresql_data` uses `create_temp_table=True` ([#9140](https://github.com/great-expectations/great_expectations/pull/9140))
+* [MAINTENANCE] Delete `test_run_multibatch_data_assistant_and_checkpoint` ([#9128](https://github.com/great-expectations/great_expectations/pull/9128))
+
+0.18.5
+-----------------
+* [BUGFIX] validator head query limit ([#9071](https://github.com/great-expectations/great_expectations/pull/9071))
+* [BUGFIX] Databricks shared compute fix ([#9034](https://github.com/great-expectations/great_expectations/pull/9034))
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+* [MAINTENANCE] add_or_update_checkpoint with expectation_suite_ge_cloud_id ([#9070](https://github.com/great-expectations/great_expectations/pull/9070))
+
+0.18.4
+-----------------
+* [BUGFIX] 0.18.4 - Fix Snowflake error when using alternative connection details format. ([#9056](https://github.com/great-expectations/great_expectations/pull/9056))
+* [BUGFIX] Fix clickhouse like operators ([#9068](https://github.com/great-expectations/great_expectations/pull/9068) via [#9061](https://github.com/great-expectations/great_expectations/pull/9061)) (thanks @matveykortsev)
+* [MAINTENANCE] Add `0.18.3` release notes to `0.18.x` branch ([#9074](https://github.com/great-expectations/great_expectations/pull/9074))
+
 0.18.3
 -----------------
 * [FEATURE] Update SnowflakeDatasource connection details ([#8922](https://github.com/great-expectations/great_expectations/pull/8922))

@@ -38,9 +38,7 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
             "type": "pandas",
             "attributes": {
                 "datasource_config": {
-                    "assets": [
-                        {},
-                    ],
+                    "assets": [],
                 },
             },
         },
