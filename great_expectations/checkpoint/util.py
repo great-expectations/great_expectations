@@ -174,7 +174,9 @@ def send_email(  # noqa: PLR0913
         if sender_login is not None and sender_password is not None:
             mailserver.login(sender_login, sender_password)
         elif not (sender_login is None and sender_password is None):
-            logger.error("Please specify both sender_login and sender_password or specify both as None")
+            logger.error(
+                "Please specify both sender_login and sender_password or specify both as None"
+            )
         mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
         mailserver.quit()
     except smtplib.SMTPConnectError:

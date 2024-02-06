@@ -782,11 +782,15 @@ class EmailAction(ValidationAction):
             receiver_emails
         ), "No email addresses to send the email to in action config."
         if not sender_login:
-            logger.warning("No login found for sending the email in action config. "
-                           "This will only work for email server that does not require authentication.")
+            logger.warning(
+                "No login found for sending the email in action config. "
+                "This will only work for email server that does not require authentication."
+            )
         if not sender_password:
-            logger.warning("No password found for sending the email in action config."
-                           "This will only work for email server that does not require authentication.")
+            logger.warning(
+                "No password found for sending the email in action config."
+                "This will only work for email server that does not require authentication."
+            )
         self.notify_on = notify_on
         self.notify_with = notify_with
 
