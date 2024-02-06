@@ -7,6 +7,7 @@ adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.p
 ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/actions.py Name: _run",
     "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
+    "File: great_expectations/compatibility/typing_extensions.py Name: override",
     "File: great_expectations/core/batch.py Name: head",
     "File: great_expectations/core/batch_spec.py Name: to_json_dict",
     "File: great_expectations/core/expectation_diagnostics/expectation_doctor.py Name: print_diagnostic_checklist",
@@ -19,6 +20,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_expectation_suite",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_or_update_checkpoint",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_or_update_expectation_suite",
+    "File: great_expectations/data_context/data_context/abstract_data_context.py Name: get_docs_sites_urls",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: open_data_docs",
     "File: great_expectations/data_context/data_context/context_factory.py Name: get_context",
     "File: great_expectations/data_context/store/_store_backend.py Name: add",
@@ -36,6 +38,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/data_context/store/tuple_store_backend.py Name: TupleS3StoreBackend",
     "File: great_expectations/data_context/store/validations_store.py Name: ValidationsStore",
     "File: great_expectations/data_context/types/base.py Name: update",
+    "File: great_expectations/data_context/types/resource_identifiers.py Name: GXCloudIdentifier",
     "File: great_expectations/datasource/datasource_dict.py Name: add_dataframe_asset",
     "File: great_expectations/datasource/fluent/config.py Name: get_datasource",
     "File: great_expectations/datasource/fluent/config.py Name: pop",
