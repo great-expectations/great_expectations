@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 from typing import Any, Dict, List
 
@@ -9,6 +11,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
@@ -289,46 +292,75 @@ def sqlite_datasource(
     )
 
 
-@pytest.mark.sqlite
-def test_sql_expectation_validate(sqlite_datasource: SqliteDatasource):
+@pytest.fixture
+def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
     datasource = sqlite_datasource
     asset = datasource.add_table_asset("yellow_tripdata_sample_2022_01")
 
     batch_request = asset.build_batch_request()
-    batch = asset.get_batch_list_from_batch_request(batch_request)[0]
+    return asset.get_batch_list_from_batch_request(batch_request)[0]
 
-    expectation = SqlExpectation(
-        query="SELECT * FROM {active_batch} WHERE passenger_count > 6"
-    )
+
+@pytest.mark.sqlite
+@pytest.mark.parametrize(
+    "query, expected_success, expected_observed_value, expected_unexpected_rows",
+    [
+        pytest.param(
+            "SELECT * FROM {active_batch} WHERE passenger_count > 7",
+            True,
+            0,
+            [],
+            id="success",
+        ),
+        pytest.param(
+            # There is a single instance where passenger_count == 7
+            "SELECT * FROM {active_batch} WHERE passenger_count > 6",
+            False,
+            1,
+            [
+                {
+                    "?": 48422,
+                    "DOLocationID": 132,
+                    "PULocationID": 132,
+                    "RatecodeID": 5.0,
+                    "VendorID": 2,
+                    "airport_fee": 0.0,
+                    "congestion_surcharge": 0.0,
+                    "extra": 0.0,
+                    "fare_amount": 70.0,
+                    "improvement_surcharge": 0.3,
+                    "mta_tax": 0.0,
+                    "passenger_count": 7.0,
+                    "payment_type": 1,
+                    "store_and_fwd_flag": "N",
+                    "tip_amount": 21.09,
+                    "tolls_amount": 0.0,
+                    "total_amount": 91.39,
+                    "tpep_dropoff_datetime": "2022-01-01 19:20:46",
+                    "tpep_pickup_datetime": "2022-01-01 19:20:43",
+                    "trip_distance": 0.0,
+                }
+            ],
+            id="failure",
+        ),
+    ],
+)
+def test_sql_expectation_validate(
+    sqlite_batch: Batch,
+    query: str,
+    expected_success: bool,
+    expected_observed_value: int,
+    expected_unexpected_rows: list[dict],
+):
+    batch = sqlite_batch
+
+    expectation = SqlExpectation(query=query)
     result = batch.validate(expectation)
 
-    # DB contains a single deviation (passenger_count == 7)
-    assert result.success is False
+    assert result.success is expected_success
 
     res = result.result
-    assert res["observed_value"] == 1
+    assert res["observed_value"] == expected_observed_value
 
     unexpected_rows = res["details"]["value_counts"]["unexpected_rows"]
-    assert len(unexpected_rows) == 1
-    assert unexpected_rows[0] == {
-        "?": 48422,
-        "DOLocationID": 132,
-        "PULocationID": 132,
-        "RatecodeID": 5.0,
-        "VendorID": 2,
-        "airport_fee": 0.0,
-        "congestion_surcharge": 0.0,
-        "extra": 0.0,
-        "fare_amount": 70.0,
-        "improvement_surcharge": 0.3,
-        "mta_tax": 0.0,
-        "passenger_count": 7.0,
-        "payment_type": 1,
-        "store_and_fwd_flag": "N",
-        "tip_amount": 21.09,
-        "tolls_amount": 0.0,
-        "total_amount": 91.39,
-        "tpep_dropoff_datetime": "2022-01-01 19:20:46",
-        "tpep_pickup_datetime": "2022-01-01 19:20:43",
-        "trip_distance": 0.0,
-    }
+    assert unexpected_rows == expected_unexpected_rows
