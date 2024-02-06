@@ -5,6 +5,11 @@ import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
 from great_expectations.expectations.expectation import SqlExpectation
@@ -266,3 +271,44 @@ def test_unrecognized_expectation_arg_raises_error():
 def test_sql_expectation_invalid_query_raises_error(query: str):
     with pytest.raises(pydantic.ValidationError):
         SqlExpectation(query=query)
+
+
+@pytest.fixture
+def taxi_db_path() -> str:
+    return file_relative_path(__file__, "../test_sets/quickstart/yellow_tripdata.db")
+
+
+@pytest.fixture
+def sqlite_datasource(
+    in_memory_runtime_context: AbstractDataContext, taxi_db_path: str
+) -> SqliteDatasource:
+    context = in_memory_runtime_context
+    datasource_name = "my_sqlite_datasource"
+    return context.sources.add_sqlite(
+        datasource_name, connection_string=f"sqlite:///{taxi_db_path}"
+    )
+
+
+@pytest.mark.sqlite
+def test_sql_expectation_validate(sqlite_datasource: SqliteDatasource):
+    datasource = sqlite_datasource
+    asset = datasource.add_table_asset("yellow_tripdata_sample_2022_01")
+
+    batch_request = asset.build_batch_request()
+    batch = asset.get_batch_list_from_batch_request(batch_request)[0]
+
+    expectation = SqlExpectation(
+        query="SELECT * FROM {active_batch} WHERE passenger_count > 6"
+    )
+    result = batch.validate(expectation)
+
+    # DB contains a single deviation (passenger_count == 7)
+    assert result.success is False
+
+    res = result.result
+    assert res["observed_value"] == 1
+
+    details = res["details"]
+    value_counts = details["value_counts"]
+    unexpected_rows = value_counts["unexpected_rows"]
+    assert len(unexpected_rows) == 1

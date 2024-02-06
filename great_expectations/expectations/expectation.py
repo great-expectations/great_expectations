@@ -1610,6 +1610,7 @@ class SqlExpectation(BatchExpectation, ABC):
         try:
             # Using a dummy value to check syntactic correctness
             substituted_query = query.format(active_batch="dummy_value")
+            # If the query is not parameterized, it will be the same as the substituted query
             if query == substituted_query:
                 is_valid = False
         except KeyError:
