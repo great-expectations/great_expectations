@@ -36,11 +36,6 @@ module.exports = {
               label: 'Supported browsers',
               href: '/docs/cloud/about_gx#supported-browsers',
             },
-            {
-              type: 'link',
-              label: 'Get support',
-              href: '/docs/cloud/about_gx#get-support',
-            },
           ]
         },
         { type: 'doc', id: 'cloud/try_gx_cloud' },
@@ -431,7 +426,6 @@ module.exports = {
         },
         { type: 'doc', id: 'oss/troubleshooting' },
         'oss/contributing/contributing',
-        'oss/get_support',
       { type: 'doc', id: 'oss/changelog' },
       ],
   gx_apis: [
@@ -507,6 +501,9 @@ module.exports = {
         'reference/learn/terms/validation_result'
       ]
     },
+  ],
+  resources: [
+    'resources/get_support',
   ]
 }
 

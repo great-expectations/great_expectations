@@ -1,0 +1,28 @@
+div[role="tabpanel"]{
+  --ifm-code-background: var(--ifm-alert-background-color-highlight);
+}
+
+.tabs-container .tabs {
+  border-bottom: 2px solid var(--gray-200);
+  font-size: var(--p-font-size);
+  font-weight: var(--ifm-font-weight-normal);
+  line-height: var(--p-line-height);
+
+  & .tabs__item--active {
+    border-bottom: 0;
+    font-weight: var(--ifm-font-weight-bold);
+    position: relative;
+
+    &::after {
+      background-color: var(--ifm-color-primary);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      content: "";
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+  }
+}
