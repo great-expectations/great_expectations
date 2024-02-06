@@ -14,6 +14,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     Iterable,
     List,
     Optional,
@@ -92,6 +93,8 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
     "nearest",
     "linear",
 }
+
+NP_RANDOM_GENERATOR: Final = np.random.default_rng()
 
 
 def get_validator(  # noqa: PLR0913
@@ -815,7 +818,7 @@ def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
             metric_values, size=(n_resamples, metric_values.size)
         )
     else:
-        bootstraps = np.random.choice(
+        bootstraps = NP_RANDOM_GENERATOR.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
