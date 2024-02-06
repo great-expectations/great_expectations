@@ -1606,10 +1606,16 @@ class SqlExpectation(BatchExpectation, ABC):
 
     @pydantic.validator("query")
     def _validate_query(cls, query: str) -> str:
+        is_valid = "active_batch" in query
         try:
             # Using a dummy value to check syntactic correctness
-            query.format(active_batch="")
+            substituted_query = query.format(active_batch="dummy_value")
+            if query == substituted_query:
+                is_valid = False
         except KeyError:
+            is_valid = False
+
+        if not is_valid:
             raise ValueError("Query must contain {active_batch} parameter.")
 
         return query

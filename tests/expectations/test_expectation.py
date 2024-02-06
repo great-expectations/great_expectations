@@ -7,6 +7,7 @@ import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
+from great_expectations.expectations.expectation import SqlExpectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -251,3 +252,17 @@ def test_unrecognized_expectation_arg_raises_error():
         gxe.ExpectColumnMaxToBeBetween(
             column="foo", min_value=0, max_value=10, mostyl=0.95  # 'mostly' typo
         )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query",
+    [
+        pytest.param("SELECT * FROM table", id="no batch"),
+        pytest.param("SELECT * FROM {{ batch }}", id="invalid batch syntax 1"),
+        pytest.param("SELECT * FROM {batch}", id="invalid batch syntax 2"),
+    ],
+)
+def test_sql_expectation_invalid_query_raises_error(query: str):
+    with pytest.raises(pydantic.ValidationError):
+        SqlExpectation(query=query)
