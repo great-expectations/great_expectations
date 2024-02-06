@@ -308,7 +308,27 @@ def test_sql_expectation_validate(sqlite_datasource: SqliteDatasource):
     res = result.result
     assert res["observed_value"] == 1
 
-    details = res["details"]
-    value_counts = details["value_counts"]
-    unexpected_rows = value_counts["unexpected_rows"]
+    unexpected_rows = res["details"]["value_counts"]["unexpected_rows"]
     assert len(unexpected_rows) == 1
+    assert unexpected_rows[0] == {
+        "?": 48422,
+        "DOLocationID": 132,
+        "PULocationID": 132,
+        "RatecodeID": 5.0,
+        "VendorID": 2,
+        "airport_fee": 0.0,
+        "congestion_surcharge": 0.0,
+        "extra": 0.0,
+        "fare_amount": 70.0,
+        "improvement_surcharge": 0.3,
+        "mta_tax": 0.0,
+        "passenger_count": 7.0,
+        "payment_type": 1,
+        "store_and_fwd_flag": "N",
+        "tip_amount": 21.09,
+        "tolls_amount": 0.0,
+        "total_amount": 91.39,
+        "tpep_dropoff_datetime": "2022-01-01 19:20:46",
+        "tpep_pickup_datetime": "2022-01-01 19:20:43",
+        "trip_distance": 0.0,
+    }
