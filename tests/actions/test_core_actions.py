@@ -501,7 +501,7 @@ class MockSMTPServer:
 
 @pytest.mark.parametrize(
     (
-        "class_to_patch,use_tls,use_ssl,raise_on,exception,expected,"
+        "class_to_patch,use_tls,use_ssl,sender_login,sender_password,raise_on,exception,expected,"
         "data_context_parameterized_expectation_suite,"
         "validation_result_suite,validation_result_suite_id"
     ),
