@@ -58,7 +58,7 @@ You'll need your access token and organization ID to set your access credentials
 
 ## Deploy the GX Agent
 
-You deploy and run the GX Agent within your deployment environment. You can deploy the GX Agent container in any environment where you can run Docker container images or create Kubernetes clusters.
+You deploy and run the GX Agent within your deployment environment. You can deploy the GX Agent container in any environment where you can run Docker container images.
 
 To learn how to deploy a Docker container image in a specific environment, see the following documentation:
 
