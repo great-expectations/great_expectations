@@ -740,9 +740,9 @@ class EmailAction(ValidationAction):
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
-        sender_login: str,
-        sender_password: str,
         receiver_emails: str,
+        sender_login: Optional[str] = None,
+        sender_password: Optional[str] = None,
         sender_alias: Optional[str] = None,
         use_tls: Optional[bool] = None,
         use_ssl: Optional[bool] = None,
@@ -778,13 +778,15 @@ class EmailAction(ValidationAction):
         self.use_ssl = use_ssl
         assert smtp_address, "No SMTP server address found in action config."
         assert smtp_port, "No SMTP server port found in action config."
-        assert sender_login, "No login found for sending the email in action config."
-        assert (
-            sender_password
-        ), "No password found for sending the email in action config."
         assert (
             receiver_emails
         ), "No email addresses to send the email to in action config."
+        if not sender_login:
+            logger.warning("No login found for sending the email in action config. "
+                           "This will only work for email server that does not require authentication.")
+        if not sender_password:
+            logger.warning("No password found for sending the email in action config."
+                           "This will only work for email server that does not require authentication.")
         self.notify_on = notify_on
         self.notify_with = notify_with
 
