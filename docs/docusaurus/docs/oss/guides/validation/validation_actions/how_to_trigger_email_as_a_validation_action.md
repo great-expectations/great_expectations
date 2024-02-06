@@ -9,6 +9,7 @@ This guide will help you trigger emails as an <TechnicalTag tag="action" text="A
 ## Prerequisites 
 
 * An email account configured on the SMTP server you're going to use to send email
+  * If you are using an internal SMTP server with no authentication, no email account is required 
 * Identified the email addresses for sent messages
 * A <TechnicalTag tag="checkpoint" text="Checkpoint" /> configured to send email
 
@@ -19,8 +20,8 @@ Open `uncommitted/config_variables.yml` file and add the following variables by 
 ```yaml
 smtp_address: [address of the smtp server]
 smtp_port: [port used by the smtp server]
-sender_login: [login used to send the email]
-sender_password: [password used to send the email]
+sender_login: [optional login used to send the email, if SMTP server requires authentication (default = None)]
+sender_password: [optional password used to send the email, if SMTP server requires authentication  (default = None)]
 sender_alias: [optional alias used to send the email (default = sender_login)]
 receiver_emails: [addresses you want to send the email to]  # each address must be separated by commas
 ```
