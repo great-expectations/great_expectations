@@ -232,6 +232,10 @@ module.exports = {
             current: {
               label: '0.18.8',
               path: ''
+            },
+            ["0.17"]: {
+              label: '0.17.23',
+              path: '0.17.23'
             }
           }
         },
