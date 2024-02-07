@@ -1,4 +1,4 @@
-import SqlAlchemy2 from '/docs/components/warnings/_sql_alchemy2.md'
+import SqlAlchemy2 from '../../../../components/warnings/_sql_alchemy2.md'
 
 To connect Great Expectations to Athena, you need to provide a connection string. To determine your connection string, reference the following examples and the [PyAthena documentation](https://github.com/laughingman7743/PyAthena#sqlalchemy).
 
