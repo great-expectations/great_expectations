@@ -96,7 +96,9 @@ class ExpectationSuite(SerializableDictDot):
         self,
         name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
+        expectations: Optional[
+            Sequence[Union[dict, ExpectationConfiguration, Expectation]]
+        ] = None,
         evaluation_parameters: Optional[dict] = None,
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
@@ -107,10 +109,6 @@ class ExpectationSuite(SerializableDictDot):
             str
         ] = None,  # for backwards compatibility - remove
     ) -> None:
-        from great_expectations.expectations.expectation_configuration import (
-            ExpectationConfiguration,
-        )
-
         if name:
             assert isinstance(name, str), "Name is a required field."
             self.expectation_suite_name = name
@@ -120,17 +118,10 @@ class ExpectationSuite(SerializableDictDot):
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
 
-        if expectations is None:
-            expectations = []
-        expectation_configurations = [
-            ExpectationConfiguration(**expectation)
-            if isinstance(expectation, dict)
-            else expectation
-            for expectation in expectations
+        self.expectations = [
+            self._process_expectation(exp) for exp in expectations or []
         ]
-        self.expectations: list[Expectation] = [
-            self._build_expectation(config) for config in expectation_configurations
-        ]
+
         if evaluation_parameters is None:
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
@@ -207,6 +198,41 @@ class ExpectationSuite(SerializableDictDot):
                 custom_exp_type=custom_exp_type,
             )
         )
+
+    def _process_expectation(
+        self, expectation_like: Union[Expectation, ExpectationConfiguration, dict]
+    ) -> Expectation:
+        """Transform an Expectation from one of its various serialized forms to the Expectation type,
+        and bind it to this ExpectationSuite.
+
+        Raises:
+            ValueError: If expectation_like is of type Expectation and expectation_like.id is not None.
+        """
+        from great_expectations.expectations.expectation import Expectation
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
+        if isinstance(expectation_like, Expectation):
+            if expectation_like.id:
+                raise ValueError(
+                    "Expectations in parameter `expectations` must not belong to another ExpectationSuite. "
+                    "Instead, please use copies of Expectations, by calling `copy.copy(expectation)`."
+                )
+            expectation_like.register_save_callback(
+                save_callback=self._save_expectation
+            )
+            return expectation_like
+        elif isinstance(expectation_like, ExpectationConfiguration):
+            return self._build_expectation(expectation_configuration=expectation_like)
+        elif isinstance(expectation_like, dict):
+            return self._build_expectation(
+                expectation_configuration=ExpectationConfiguration(**expectation_like)
+            )
+        else:
+            raise TypeError(
+                f"Expected Expectation, ExpectationConfiguration, or dict, but received type {type(expectation_like)}."
+            )
 
     @public_api
     def delete_expectation(self, expectation: Expectation) -> Expectation:

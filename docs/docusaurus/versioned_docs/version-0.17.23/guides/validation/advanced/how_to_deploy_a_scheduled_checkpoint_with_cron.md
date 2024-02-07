@@ -2,7 +2,7 @@
 title: Deploy a scheduled Checkpoint with cron
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text="Checkpoint" /> with cron.
 
@@ -10,7 +10,7 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 <Prerequisites>
 
-- [A Great Expectations instance](/docs/guides/setup/setup_overview).
+- [A Great Expectations instance](/guides/setup/setup_overview.md).
 - A Checkpoint.
 
 </Prerequisites>
@@ -19,7 +19,7 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 Run the following command to verify that your Checkpoint runs:
 
-```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/checkpoints.py retrieve_and_run"
 ```
 
 ## Get `great_expectations` full path

@@ -5,11 +5,11 @@ description: Create Expectations with a Python interpreter or a script and then 
 keywords: [Expectations, Interactive Mode, Interactive]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrerequisiteQuickstartGuideComplete from '/docs/components/prerequisites/_quickstart_completed.mdx'
-import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
-import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
-import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
+import Prerequisites from '../../components/_prerequisites.jsx'
+import PrerequisiteQuickstartGuideComplete from '../../components/prerequisites/_quickstart_completed.mdx'
+import IfYouStillNeedToSetupGX from '../../components/prerequisites/_if_you_still_need_to_setup_gx.md'
+import DataContextInitializeQuickOrFilesystem from '../../components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
+import ConnectingToDataFluently from '../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 
 To Validate data we must first define a set of Expectations for that data to be Validated against.  In this guide, you'll learn how to create Expectations and interactively edit them with feedback from Validating each against a Batch of data. Validating your Expectations as you define them allows you to quickly determine if the Expectations are suitable for our data, and identify where changes might be necessary.
 
@@ -33,12 +33,12 @@ For this guide we will be working with Python code in a Jupyter Notebook. Jupyte
 
 Run the following code to import Great Expectations and instantiate a Data Context:
 
-```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context"
 ```
 
 :::info Data Contexts and persisting data
 
-If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
 :::
 
@@ -46,12 +46,12 @@ If you're using an Ephemeral Data Context, your configurations will not persist 
 
 Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data that you'll use to validate your Expectations:
 
-```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request"
 ```
 
 :::info Limit the Batches returned by a Batch Request
 
-You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset).
+You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md).
 
 :::
 
@@ -63,26 +63,26 @@ When you use a Validator to interactively create your Expectations, the Validato
 
 If you're using a Jupyter Notebook you'll automatically see the results of the code you run in a new cell when you run the code. If you're using a different interpreter, you might need to explicitly print these results to view them. For example:
 
-```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py inspect_data_no_jupyter"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py inspect_data_no_jupyter"
 ```
 
 :::
 
 1. Optional. Run the following command if you haven't created an Expectation Suite:
 
-    ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py create_expectation_suite"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py create_expectation_suite"
     ```
 
 2. Run the following command to create a Validator:
 
-    ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data"
+    ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data"
     ```
 
 ## Use the Validator to create and run an Expectation
 
 The Validator provides access to all the available Expectations as methods.  When an `expect_*()` method is run from the Validator, the Validator adds the specified Expectation to an Expectation Suite (or edits an existing Expectation in the Expectation Suite, if applicable) in its configuration, and then the specified Expectation is run against the data that was provided when the Validator was initialized with a Batch Request.
 
-```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation"
 ```
 
 Since we are working in a Jupyter Notebook, the results of the Validation are printed after we run an `expect_*()` method.  We can examine those results to determine if the Expectation needs to be edited.
@@ -90,7 +90,7 @@ Since we are working in a Jupyter Notebook, the results of the Validation are pr
 :::info Working outside a Jupyter Notebook
 If you are not working in a Jupyter Notebook you may need to explicitly print your results:
 
-```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation_no_jupyter"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation_no_jupyter"
 ```
 
 :::
@@ -111,7 +111,7 @@ The Expectations you create with the interactive method are saved in an Expectat
 
 To keep your Expectations for future use, you save them to your Data Context.  A Filesystem or Cloud Data Context persists outside the current Python session, so saving the Expectation Suite in your Data Context's Expectations Store ensures you can access it in the future:
 
-```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py save_expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py save_expectation_suite"
 ```
 
 :::caution Ephemeral Data Contexts and persistence
@@ -122,4 +122,4 @@ Ephemeral Data Contexts don't persist beyond the current Python session.  If you
 
 ## Next steps
 
-Now that you have created and saved an Expectation Suite, you can [Validate your data](/docs/guides/validation/validate_data_overview).
+Now that you have created and saved an Expectation Suite, you can [Validate your data](/guides/validation/validate_data_overview.md).

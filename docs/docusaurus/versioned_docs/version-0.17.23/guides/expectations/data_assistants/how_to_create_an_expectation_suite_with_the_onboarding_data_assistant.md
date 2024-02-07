@@ -2,20 +2,20 @@
 title: Create an Expectation Suite with the Onboarding Data Assistant
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import Prerequisites from '../../../components/_prerequisites.jsx'
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use the Onboarding Data Assistant to Profile your data and automate the generation of an Expectation Suite.
 
-All the code used in the examples is available in GitHub at this location: [how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py).
+All the code used in the examples is available in GitHub at this location: [how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py).
 
 ## Prerequisites
 
 <Prerequisites>
 
-- A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+- A [configured Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
-- An understanding of how to [configure a Batch Request](../../../connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md).
+- An understanding of how to [configure a Batch Request](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md).
 
 </Prerequisites>
 
@@ -25,12 +25,12 @@ In the following examples, you'll be using a Batch Request with multiple Batches
 
 This is the `Datasource` configuration:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config"
 ```
 
 This is the `BatchRequest` configuration:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py batch_request"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py batch_request"
 ```
 
 :::caution
@@ -41,7 +41,7 @@ The Onboarding Data Assistant runs multiple queries against your `Datasource`. D
 
 Run the following code to prepare a new Expectation Suite with the Data Context `add_expectation_suite(...)` method:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py expectation_suite"
 ```
 
 ## Run the Onboarding Data Assistant
@@ -50,12 +50,12 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
 
 1. Run the following code to define the columns to exclude:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py exclude_column_names"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py exclude_column_names"
   ```
 
 2. Run the following code to run the Onboarding Data Assistant:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py data_assistant_result"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py data_assistant_result"
   ```
 
   In this example, `context` is your Data Context instance.
@@ -72,19 +72,19 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
 
 1. After executing the Onboarding Data Assistant `run(...)` method and generating Expectations for your data, run the following code to load and save them into your Expectation Suite:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py get_expectation_suite"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py get_expectation_suite"
   ```
 
 2. Run the following code to save the Expectation Suite:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite"
   ```
 
 ## Test your Expectation Suite
 
 Run the following code to use a Checkpoint to operate with the Expectation Suite and Batch Request that you defined:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint"
 ```
 
 You can check the `"success"` key of the Checkpoint's results to verify that your Expectation Suite worked.
@@ -93,7 +93,7 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 1. Run the following code to view Batch-level visualizations of the Metrics computed by the Onboarding Data Assistant:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_metrics"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_metrics"
   ```
 
   ![Plot Metrics](../../../images/data_assistant_plot_metrics.png)
@@ -104,12 +104,12 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 2. Run the following code to view all Metrics computed by the Onboarding Data Assistant:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py metrics_by_domain"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py metrics_by_domain"
   ```
 
 3. Run the following code to plot the Expectations and the associated Metrics calculated by the Onboarding Data Assistant:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_expectations_and_metrics"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_expectations_and_metrics"
   ```
 
   ![Plot Expectations and Metrics](../../../images/data_assistant_plot_expectations_and_metrics.png)
@@ -120,17 +120,17 @@ You can check the `"success"` key of the Checkpoint's results to verify that you
 
 4. Run the following code to view the Expectations produced and grouped by Domain:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_domain_type"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_domain_type"
   ```
 
 5. Run the following code to view the Expectations produced and grouped by Expectation type:
 
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_expectation_type"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_expectation_type"
   ```
 
 ## Edit your Expectation Suite (Optional)
 
 The Onboarding Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary. It is also possible that you may possess some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
 
-To edit an existing Expectation Suite, see [Edit an Expectation Suite](/docs/guides/expectations/how_to_edit_an_existing_expectationsuite).
+To edit an existing Expectation Suite, see [Edit an Expectation Suite](/guides/expectations/how_to_edit_an_existing_expectationsuite.md).
 

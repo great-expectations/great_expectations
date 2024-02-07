@@ -12,7 +12,7 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 - You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
 
-- You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+- You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
 ## Create an Expectation
 
@@ -32,7 +32,7 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 7. Optional. Repeat steps 1 to 4 to add additional Expectations.
 
-8. Optional. Run a Validation. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+8. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Edit an Expectation
 

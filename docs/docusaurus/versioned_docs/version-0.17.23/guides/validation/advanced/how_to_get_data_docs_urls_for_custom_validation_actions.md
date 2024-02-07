@@ -2,7 +2,7 @@
 title: Use Data Docs URLs in custom Validation Actions
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 To create a custom Validation Action that includes a link to the <TechnicalTag tag="data_docs" text="Data Docs"/>,
 you get the Data Docs URL for the <TechnicalTag tag="validation_result" text="Validation Results"/> page from your Validation Results after you run a <TechnicalTag tag="checkpoint" text="Checkpoint"/>. This method returns the URLs for any type of Data Docs site setup including S3 or a local setup.
@@ -13,7 +13,7 @@ The code used in this topic is available on GitHub here: [actions.py](https://gi
 
 <Prerequisites>
 
-  - [An Expectation Suite for Validation](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+  - [An Expectation Suite for Validation](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
   - [Familiarity with Validation Actions](../../../terms/action.md)
 
 </Prerequisites>
@@ -22,14 +22,14 @@ The code used in this topic is available on GitHub here: [actions.py](https://gi
 
 First, within the `_run` method of your custom Validation Action, instantiate an empty `dict` to hold your sites:
 
-```python name="great_expectations/checkpoint/actions.py empty dict"
+```python name="version-0.17.23 great_expectations/checkpoint/actions.py empty dict"
 ```
 
 ## Acquire
 
 Next, call `get_docs_sites_urls` to get the urls for all the suites processed by this Checkpoint:
 
-```python name="great_expectations/checkpoint/actions.py get_docs_sites_urls"
+```python name="version-0.17.23 great_expectations/checkpoint/actions.py get_docs_sites_urls"
 ```
 
 
@@ -37,7 +37,7 @@ Next, call `get_docs_sites_urls` to get the urls for all the suites processed by
 
 The above step returns a list of dictionaries containing the relevant information. Now, we need to iterate through the entries to build the object we want:
 
-```python name="great_expectations/checkpoint/actions.py iterate"
+```python name="version-0.17.23 great_expectations/checkpoint/actions.py iterate"
 ```
 
 ## Utilize

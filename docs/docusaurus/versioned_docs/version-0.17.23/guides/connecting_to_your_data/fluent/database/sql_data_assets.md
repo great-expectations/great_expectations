@@ -8,13 +8,13 @@ toc_max_heading_level: 2
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, SQL]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
-import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
-import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
-import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
-import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import Prerequisites from '../../../../components/_prerequisites.jsx'
+import ImportGxAndInstantiateADataContext from '../../../../components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+import SetupAndInstallForSqlData from '../../../../components/setup/link_lists/_setup_and_install_for_sql_data.md'
+import ConnectingToSqlDatasourcesFluently from '../../../../components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
+import AfterRequestDataFromADataAsset from '../../../../components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
+import AfterCreateAndConfigureDataAsset from '../../../../components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -44,7 +44,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md)
 - Source data stored in a SQL database
 - A SQL-based Data Source
 
@@ -58,7 +58,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/batch_requests/how_to_connect_to_a_sql_table.py datasource"
 ```
 
 ### Add a table to the Data Source as a Data Asset
@@ -67,7 +67,7 @@ You create a Data Asset to identify the table to connect to.
 
 Run the following Python code to define the `name` and `table_name` variables:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/batch_requests/how_to_connect_to_a_sql_table.py create_datasource"
 ```
 
 ### Add additional tables (Optional)
@@ -76,10 +76,10 @@ To connect to additional tables in the same SQL Database, repeat the previous st
 
 ### Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [How to organize Batches in a SQL based Data Asset](/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 </TabItem>
 <TabItem value="query">
@@ -94,7 +94,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx).
+- [An installation of GX set up to work with SQL](/guides/setup/installation/install_gx.md).
 - Source data stored in a SQL database.
 
 </Prerequisites> 
@@ -107,14 +107,14 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py datasource"
 ```
 
 ### Add a query to the Data Source as a Data Asset
 
 Run the following Python code to define a Data Asset and the `name` and `query` variables:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py add_query_asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py add_query_asset"
 ```
 
 ### Add additional queries (Optional)
@@ -123,10 +123,10 @@ To connect to the contents of additional queries in the same SQL Database, repea
 
 ### Related documentation
 
-- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [How to organize Batches in a SQL based Data Asset](/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 </TabItem>
 <TabItem value="batches">
@@ -155,14 +155,14 @@ The following code examples use a previously defined Data Source named `"my_data
 
 Run the following Python code to retrieve the Data Source:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py my_datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py my_datasource"
 ```
 
 ### Add a Splitter to the Data Asset
 
 Run the following Python code to split the TableAsset into Batches:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month"
 ```
 
 ### Add Batch Sorters to the Data Asset (Optional) 
@@ -171,34 +171,34 @@ Adding Batch Sorters to your Data Asset lets you explicitly state the order in w
 
 Run the following Python code to split the `"pickup_datetime"` column on `"year"` and `"month"`, so your list of sorters can have up to two elements. The code also adds an ascending sorter based on the contents of the splitter group `"year"` and a descending sorter based on the contents of the splitter group `"month"`:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py add_sorters"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py add_sorters"
 ```
 
 ### Use a Batch Request to verify Data Asset functionality
 
 Run the following Python code to verify that your Data Asset returns the necessary files as Batches:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py my_batch_list"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py my_batch_list"
 ```
 
 A Batch List can contain a lot of metadata. To verify which files were included in the returned Batches, run the following Python code to review the `batch_spec` for each returned Batch:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py print_batch_spec"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec"
 ```
 
 ### Related documentation
 
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
+- [How to request data from a Data Asset](/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
 
 </TabItem>
 </Tabs>
 
 ## Related documentation
 
-- [How to set up GX to work with SQL databases](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
-- [How to connect to SQL data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
-- [How to connect to PostgreSQL data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
-- [How to connect to SQLite data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
+- [How to set up GX to work with SQL databases](/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
+- [How to connect to SQL data](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
+- [How to connect to PostgreSQL data](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
+- [How to connect to SQLite data](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md)
 

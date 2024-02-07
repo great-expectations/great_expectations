@@ -3,7 +3,7 @@ title: Collect OpenLineage metadata using an Action
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 [OpenLineage](https://openlineage.io) is an open framework for collection and analysis of data lineage. It tracks the movement of data over time, tracing relationships between datasets. Data engineers can use data lineage metadata to determine the root cause of failures, identify performance bottlenecks, and simulate the effects of planned changes.
 
@@ -53,7 +53,7 @@ action_list:
 
 Run the following command to retrieve and run a Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and then emit lineage events to the OpenLineage backend:
 
-```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/checkpoints.py retrieve_and_run"
 ```
 
 :::note Reminder

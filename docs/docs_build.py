@@ -13,8 +13,8 @@ from typing import TYPE_CHECKING, Generator, List, Optional
 
 from docs.docs_version_bucket_info import S3_URL
 from docs.prepare_prior_versions import (
-    prepare_prior_version,
     prepare_prior_versions,
+    prepend_version_info_to_name_for_snippet_by_name_references,
     Version,
 )
 from docs.logging import Logger
@@ -65,14 +65,6 @@ class DocsBuilder:
         MIN_PYTHON_VERSION = 3.8
         MAX_PYTHON_VERSION = 3.11
 
-        # load state of code for given version and process it
-        # we'll end up checking this branch out as well, but need the data in versioned_code for prepare_prior_version
-        versions = self._load_all_versioned_docs()
-        if version in versions:
-            raise Exception(f"Version {version} already exists")
-
-        # switch to the version branch for its docs and create versioned docs
-        self._context.run(f"git checkout {version}")
         old_version_file = self._read_prior_release_version_file()
         self._write_release_version(
             "\n".join(
@@ -87,33 +79,13 @@ class DocsBuilder:
             )
         )
 
-        # create versioned_docs and load versioned_code
+        self._invoke_api_docs()
         self._context.run(f"yarn docusaurus docs:version {version}")
-        self._load_versioned_code(version)
 
         # process the above
         os.chdir("..")  # TODO: none of this messing with current directory stuff
-        prepare_prior_version(version)
+        prepend_version_info_to_name_for_snippet_by_name_references(version)
         os.chdir("docusaurus")
-
-        output_file = "oss_docs_versions.zip"
-        self._context.run(
-            f"zip -r {output_file} versioned_code versioned_docs versioned_sidebars versions.json"
-        )
-        self.logger.print(f"Created {output_file}")
-
-        # restore version file and go back to intended branch
-        self._write_release_version(old_version_file)
-        self._context.run("git checkout -")
-
-        # finally, check that we can actually build the docs
-        self.logger.print_header("Testing that we can build the docs...")
-        # this is the steps from build_docs minus loading data from s3
-        self._invoke_api_docs()
-        self._context.run("yarn build")
-        self.logger.print_header(
-            f"Successfully created version {version}. Upload {output_file} to S3."
-        )
 
     def _prepare(self) -> None:
         """A whole bunch of common work we need"""

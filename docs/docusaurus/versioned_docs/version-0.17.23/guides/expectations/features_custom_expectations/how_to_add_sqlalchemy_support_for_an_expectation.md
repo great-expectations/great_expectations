@@ -4,7 +4,7 @@ title: Add SQLAlchemy support for Custom Expectations
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 This guide will help you implement native SQLAlchemy support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />.
 
@@ -31,7 +31,7 @@ To avoid surprises, it can be helpful to determine beforehand what backends and 
 
 Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to use for testing. If a backend is not specified, Great Expectations attempts testing on all supported backends. Run the following command to add entries corresponding to the functionality you want to add: 
     
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -69,7 +69,7 @@ The decorated method takes in an SQLAlchemy `Column` object and will either retu
   
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to leverage SQLAlchemy's `in_` ColumnOperator and the `@column_condition_partial` decorator.
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py sqlalchemy"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_values_to_equal_three.py sqlalchemy"
 ```
 
 <details>
@@ -110,7 +110,7 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to implement the `@metric_value` decorator, 
 specifying the type of value we're computing (`AGGREGATE_VALUE`) and the domain over which we're computing (`COLUMN`):
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_def"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py sql_def"
 ```
 
 The decorated method takes in a valid <TechnicalTag tag="execution_engine" text="Execution Engine"/> and relevant key word arguments,
@@ -118,12 +118,12 @@ and will return a computed value.
 
 To do this, we need to access our Compute Domain directly:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_selectable"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py sql_selectable"
 ```
 
 This allows us to build a query and use our Execution Engine to execute that query against our data to return the actual value we're looking for, instead of returning a query to find that value:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_query"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py sql_query"
 ```
 
 <details>
@@ -176,6 +176,6 @@ If you believe your Custom Expectation is otherwise ready for contribution at a 
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
-- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py)
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_values_to_equal_three.py)
 :::

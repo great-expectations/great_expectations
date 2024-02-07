@@ -1,6 +1,6 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
 
 Verify your new <TechnicalTag tag="datasource" text="Data Source" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a `BatchRequest`.
 
@@ -15,7 +15,7 @@ Verify your new <TechnicalTag tag="datasource" text="Data Source" /> by loading 
 
 Here is an example of loading data by specifying a SQL query.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py load data with query"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/redshift_yaml_example.py load data with query"
 ```
 
 </TabItem>
@@ -24,7 +24,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py load data with table name"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/redshift_python_example.py load data with table name"
 ```
 
 </TabItem>

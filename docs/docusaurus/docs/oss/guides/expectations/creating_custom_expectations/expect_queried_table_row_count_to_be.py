@@ -60,8 +60,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet name="expect_queried_table_row_count_to_be.py _validate function">
-    # <snippet name="expect_queried_table_row_count_to_be.py _validate function signature">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function signature">
     def _validate(
         self,
         metrics: dict,
@@ -81,7 +81,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         }
 
     # </snippet>
-    # <snippet name="expect_queried_table_row_count_to_be.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py examples">
     examples = [
         {
             "data": [
@@ -144,16 +144,14 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     ]
     # </snippet>
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="expect_queried_table_row_count_to_be.py library_metadata">
     library_metadata = {
         "tags": ["query-based"],
         "contributors": ["@joegargery"],
     }
-    # </snippet>
 
 
 if __name__ == "__main__":
-    # <snippet name="expect_queried_table_row_count_to_be.py print_diagnostic_checklist">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py print_diagnostic_checklist">
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
     # </snippet>
 

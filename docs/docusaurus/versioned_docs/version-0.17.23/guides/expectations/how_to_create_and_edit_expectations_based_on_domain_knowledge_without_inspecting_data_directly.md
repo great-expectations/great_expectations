@@ -5,12 +5,12 @@ description: Create ExpectationConfigurations based on domain knowledge.
 keywords: [Expectations, Domain Knowledge]
 ---
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrerequisiteQuickstartGuideComplete from '/docs/components/prerequisites/_quickstart_completed.mdx'
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
-import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
-import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
+import Prerequisites from '../../components/_prerequisites.jsx'
+import PrerequisiteQuickstartGuideComplete from '../../components/prerequisites/_quickstart_completed.mdx'
+import TechnicalTag from '../../term_tags/_tag.mdx';
+import IfYouStillNeedToSetupGX from '../../components/prerequisites/_if_you_still_need_to_setup_gx.md'
+import DataContextInitializeQuickOrFilesystem from '../../components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
+import ConnectingToDataFluently from '../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 
 This guide shows how to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> without a sample <TechnicalTag tag="batch" text="Batch" />.
 
@@ -45,12 +45,12 @@ For this guide we will be working with Python code in a Jupyter Notebook. Jupyte
 
 Run the following code to import Great Expectations and instantiate a Data Context:
 
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_context"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_context"
 ```
 
 :::info Data Contexts and persisting data
 
-If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
 :::
 
@@ -58,26 +58,26 @@ If you're using an Ephemeral Data Context, your configurations will not persist 
 
 We will use the `add_expectation_suite()` method to create an empty ExpectationSuite.
 
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite"
 ```
 
 ## Create Expectation Configurations
 
 You are adding Expectation configurations to the suite. Since there is no sample Batch of data, no <TechnicalTag tag="validation" text="Validation" /> happens during this process. To illustrate how to do this, consider a hypothetical example. Suppose that you have a table with the columns ``account_id``, ``user_id``, ``transaction_id``, ``transaction_type``, and ``transaction_amt_usd``. Then the following code snipped adds an Expectation that the columns of the actual table will appear in the order specified above:
 
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1"
 ```
 
 Here are a few more example expectations for this dataset:
 
 
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2"
 ```
 
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3"
 ```
 
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4"
 ```
 
 You can see all the available Expectations in the [Expectation Gallery](https://greatexpectations.io/expectations).
@@ -86,7 +86,7 @@ You can see all the available Expectations in the [Expectation Gallery](https://
 
 To keep your Expectations for future use, you save them to your Data Context.  A Filesystem or Cloud Data Context persists outside the current Python session, so saving the Expectation Suite in your Data Context's Expectations Store ensures you can access it in the future:
 
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite"
 ```
 
 :::caution Ephemeral Data Contexts and persistence
@@ -97,4 +97,4 @@ Ephemeral Data Contexts don't persist beyond the current Python session.  If you
 
 ## Next steps
 
-Now that you have created and saved an Expectation Suite, you can [Validate your data](/docs/guides/validation/validate_data_overview).
+Now that you have created and saved an Expectation Suite, you can [Validate your data](/guides/validation/validate_data_overview.md).

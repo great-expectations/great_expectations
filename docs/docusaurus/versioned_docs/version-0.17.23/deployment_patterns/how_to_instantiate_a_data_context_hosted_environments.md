@@ -10,7 +10,7 @@ The components in the ``great_expectations.yml`` file define the Validation Resu
 
 ## Configure your Data Context
  
-To use code to create a Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
+To use code to create a Data Context, see [Instantiate an Ephemeral Data Context](/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
 To configure a Data Context for a specific environment, see one of the following resources:
 
@@ -19,7 +19,7 @@ To configure a Data Context for a specific environment, see one of the following
 
 ## Create Expectation Suites and add Expectations
 
-To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/guides/connecting_to_your_data/database/connect_sql_source_data.md?sql-database-type=postgresql).
+To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md?sql-database-type=postgresql).
 
 To add Expectations to your Suite individually, use the following code:
 
