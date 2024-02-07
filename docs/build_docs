@@ -8,5 +8,4 @@ echo "Installing api docs dependencies."
 
 # TODO: change netlify settings so we don't need to do this
 cd ../..
-invoke docs --clean
 invoke docs --build
