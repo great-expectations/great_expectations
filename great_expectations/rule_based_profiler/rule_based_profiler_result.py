@@ -23,9 +23,6 @@ from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
-    from great_expectations.core.usage_statistics.usage_statistics import (
-        UsageStatisticsHandler,
-    )
 
 
 @public_api
@@ -62,8 +59,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
     rule_execution_time: Dict[str, float]
     rule_exception_tracebacks: Dict[str, Optional[str]]
     catch_exceptions: bool = field(default=False)
-    # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
-    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @override
     def to_dict(self) -> dict:

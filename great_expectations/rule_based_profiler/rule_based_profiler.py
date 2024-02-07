@@ -67,9 +67,6 @@ from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:
     from great_expectations.core.domain import Domain
-    from great_expectations.core.usage_statistics.usage_statistics import (
-        UsageStatisticsHandler,
-    )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.data_context.store.profiler_store import ProfilerStore
     from great_expectations.expectations.expectation_configuration import (
@@ -103,7 +100,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional[AbstractDataContext] = None,
-        usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
         catch_exceptions: bool = False,
     ) -> None:
         """
@@ -143,8 +139,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             variables_configs=variables
         )
         self.variables = _variables
-
-        self._usage_statistics_handler = usage_statistics_handler
 
         self._data_context = data_context
 
@@ -380,7 +374,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 for rule_state in self.rule_states
                 if rule_state.exception_traceback
             },
-            _usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
@@ -1625,14 +1618,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             rules=rules,
         )
 
-        usage_statistics_handler: Optional[UsageStatisticsHandler] = None
-        if data_context:
-            usage_statistics_handler = data_context.usage_statistics_handler
-
         super().__init__(
             profiler_config=profiler_config,
             data_context=data_context,
-            usage_statistics_handler=usage_statistics_handler,
             catch_exceptions=catch_exceptions,
         )
 
