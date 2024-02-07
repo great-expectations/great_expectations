@@ -1595,7 +1595,13 @@ representation."""
 
 class NoUnexpectedQueryRowsExpectation(BatchExpectation, ABC):
     """
-    TODO: Write docstring
+    NoUnexpectedQueryRowExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
+
+    QueryExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
+    A successful validation is one where the unexpected_rows_query returns no rows.
+
+    Args:
+        unexpected_rows_query (str): A SQL or Spark-SQL query to be executed for validation.
     """
 
     unexpected_rows_query: str
