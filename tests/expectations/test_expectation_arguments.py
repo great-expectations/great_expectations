@@ -1,6 +1,5 @@
 import logging
 from typing import List
-from unittest import mock
 
 import pandas as pd
 import pytest
@@ -35,13 +34,8 @@ def test_spark_df(test_pandas_df, spark_session):
     return df
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
-def test_catch_exceptions_no_exceptions(
-    mock_emit, in_memory_runtime_context, test_spark_df
-):
+def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
         "result_format": "SUMMARY",
@@ -148,16 +142,10 @@ def test_catch_exceptions_no_exceptions(
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
 
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
@@ -266,16 +254,10 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     )
     assert result.success
 
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = True  # expect exceptions to be caught
     result_format: dict = {
@@ -418,16 +400,10 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "exception_message" not in result.exception_info
     ) or not result.exception_info["exception_message"]
 
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -630,16 +606,10 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_result_format_configured_with_set_default_override(
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -795,6 +765,3 @@ def test_result_format_configured_with_set_default_override(
     }
     assert len(result.result.keys()) == 0
     assert result.result == {}
-
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
