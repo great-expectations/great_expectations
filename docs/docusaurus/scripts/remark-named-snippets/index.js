@@ -25,7 +25,7 @@ const constructSnippetMap = require('./snippet')
 
 function getDirs () {
   const currentDocs = 'docs'
-  const versionedDocs = glob.sync('versioned_docs/*/')
+  const versionedDocs = glob.sync('versioned_docs/*')
   return [currentDocs, ...versionedDocs]
 }
 
@@ -33,7 +33,7 @@ function codeImport () {
   // Instantiated within the import so it can be hot-reloaded
   const dirs = getDirs()
   const snippetMapsByNamespace = {}
-  for (const dir of dirs) {
+  for (let dir of dirs) {
     snippetMapsByNamespace[dir] = constructSnippetMap(dir)
   }
 
