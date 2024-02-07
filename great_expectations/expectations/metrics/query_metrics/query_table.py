@@ -27,16 +27,8 @@ class QueryTable(QueryMetricProvider):
         "unexpected_rows_query",
     )
 
-    # <snippet>
-    @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
-        cls,
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
-        runtime_configuration: dict,
-    ) -> List[dict]:
+    @classmethod
+    def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -50,6 +42,20 @@ class QueryTable(QueryMetricProvider):
             raise ValueError(
                 "Must provide either `query` or `unexpected_rows_query` to `query.table` metric."
             )
+
+        return query
+
+    # <snippet>
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(  # noqa: PLR0913
+        cls,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
+    ) -> List[dict]:
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
@@ -86,9 +92,7 @@ class QueryTable(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
         df, _, _ = execution_engine.get_compute_domain(
