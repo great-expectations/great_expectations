@@ -32,7 +32,7 @@ Run the following code to create and assign the `gx_ro` role and allow GX Cloud 
    GRANT CONNECT ON DATABASE <your_database> TO gx_ro;
    GRANT USAGE ON SCHEMA public TO gx_ro;
    GRANT SELECT ON ALL TABLES in SCHEMA public TO gx_ro;
-   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_role;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;
 ```
 
 Replace `your_password` and `your_database` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
