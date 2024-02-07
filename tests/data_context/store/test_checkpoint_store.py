@@ -570,7 +570,6 @@ def test_add_checkpoint(
     store, mock_backend = checkpoint_store_with_mock_backend
 
     context = mock.MagicMock(spec=FileDataContext)
-    context._usage_statistics_handler = mock.MagicMock()
     checkpoint_name = "my_checkpoint"
     checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
 

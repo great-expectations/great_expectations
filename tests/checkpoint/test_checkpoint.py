@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 def dummy_data_context() -> AbstractDataContext:
     class DummyDataContext:
         def __init__(self) -> None:
-            self._usage_statistics_handler = None
+            pass
 
     return cast(AbstractDataContext, DummyDataContext())
 

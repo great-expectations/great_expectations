@@ -732,13 +732,6 @@ class DataAsset:
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )
-                if getattr(data_context, "_usage_statistics_handler", None):
-                    handler = data_context._usage_statistics_handler
-                    handler.send_usage_message(
-                        event=UsageStatsEvents.DATA_ASSET_VALIDATE,
-                        event_payload=handler.anonymizer.anonymize(obj=self),
-                        success=False,
-                    )
                 return ExpectationValidationResult(success=False)
             # Evaluation parameter priority is
             # 1. from provided parameters
