@@ -101,8 +101,8 @@ module.exports = {
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: 'https://legacy.docs.greatexpectations.io/',
-              label: '0.13.x and earlier',
+              to: 'https://legacy.016.docs.greatexpectations.io',
+              label: '0.16.x and earlier',
             },
           ],
           dropdownActiveClassDisabled: true,
