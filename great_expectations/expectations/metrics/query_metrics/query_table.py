@@ -22,7 +22,10 @@ if TYPE_CHECKING:
 
 class QueryTable(QueryMetricProvider):
     metric_name = "query.table"
-    value_keys = ("query",)
+    value_keys = (
+        "query",
+        "unexpected_rows_query",
+    )
 
     # <snippet>
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -37,6 +40,16 @@ class QueryTable(QueryMetricProvider):
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
+
+        if not query:
+            query = metric_value_kwargs.get(
+                "unexpected_rows_query"
+            ) or cls.default_kwarg_values.get("unexpected_rows_query")
+
+        if not query:
+            raise ValueError(
+                "Must provide either `query` or `unexpected_rows_query` to `query.table` metric."
+            )
 
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(

@@ -1595,17 +1595,17 @@ representation."""
 
 class SqlExpectation(BatchExpectation, ABC):
     # TODO: Need to rename to unexpected_rows_query (and make corresponding metric change)
-    query: str
+    unexpected_rows_query: str
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
-    success_keys: ClassVar[Tuple[str, ...]] = ("query",)
+    success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "row_condition",
         "condition_parser",
     )
 
-    @pydantic.validator("query")
+    @pydantic.validator("unexpected_rows_query")
     def _validate_query(cls, query: str) -> str:
         parsed_fields = [f[1] for f in Formatter().parse(query)]
         if "active_batch" not in parsed_fields:
