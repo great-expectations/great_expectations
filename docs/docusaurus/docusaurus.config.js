@@ -224,7 +224,7 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          includeCurrentVersion: false,
+          includeCurrentVersion: true,
           sidebarPath: require.resolve('./sidebars.js'),
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
@@ -232,7 +232,7 @@ module.exports = {
           versions: {
             ['0.18']: {
               label: '0.18.8',
-              path: ''
+              path: '0.18.8',
             }
           }
         },
