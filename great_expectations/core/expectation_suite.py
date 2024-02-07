@@ -690,8 +690,6 @@ class ExpectationSuite(SerializableDictDot):
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
-        This is a private method for adding expectations that allows for usage_events to be suppressed when
-        Expectations are added through internal processing (ie. while building profilers, rendering or validation).
         If successful, upserts ExpectationConfiguration into this ExpectationSuite.
 
         Args:

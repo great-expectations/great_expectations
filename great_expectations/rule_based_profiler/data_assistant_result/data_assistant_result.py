@@ -239,10 +239,34 @@ class DataAssistantResult(SerializableDictDot):
             ExpectationSuite object.
 
         """
-        return self._get_expectation_suite_without_usage_statistics(
+        expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
+            data_context=None,
+            expectation_suite=None,
             expectation_suite_name=expectation_suite_name,
-            include_profiler_config=include_profiler_config,
+            component_name=self.__class__.__name__,
+            persist=False,
         )
+        expectation_suite.add_expectation_configurations(
+            expectation_configurations=self.expectation_configurations
+            if self.expectation_configurations
+            else [],
+            match_type="domain",
+            overwrite_existing=True,
+        )
+
+        citation: Dict[str, Any] = self.citation or {}
+        if not include_profiler_config:
+            key: str
+            value: Any
+            citation = {
+                key: value
+                for key, value in citation.items()
+                if key != "profiler_config"
+            }
+        if citation:
+            expectation_suite.add_citation(**citation)
+
+        return expectation_suite
 
     @override
     def to_dict(self) -> dict:
@@ -477,58 +501,6 @@ class DataAssistantResult(SerializableDictDot):
                 )
 
         return auxiliary_info
-
-    def _get_expectation_suite_with_usage_statistics(
-        self,
-        expectation_suite_name: Optional[str] = None,
-        include_profiler_config: bool = False,
-    ) -> ExpectationSuite:
-        """
-        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
-        Side Effects: One usage statistics event (specified in "usage_statistics_enabled_method" decorator) is emitted.
-        """
-        return self._get_expectation_suite_without_usage_statistics(
-            expectation_suite_name=expectation_suite_name,
-            include_profiler_config=include_profiler_config,
-        )
-
-    def _get_expectation_suite_without_usage_statistics(
-        self,
-        expectation_suite_name: Optional[str] = None,
-        include_profiler_config: bool = False,
-    ) -> ExpectationSuite:
-        """
-        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
-        Side Effects: None -- no usage statistics event is emitted.
-        """
-        expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-            data_context=None,
-            expectation_suite=None,
-            expectation_suite_name=expectation_suite_name,
-            component_name=self.__class__.__name__,
-            persist=False,
-        )
-        expectation_suite.add_expectation_configurations(
-            expectation_configurations=self.expectation_configurations
-            if self.expectation_configurations
-            else [],
-            match_type="domain",
-            overwrite_existing=True,
-        )
-
-        citation: Dict[str, Any] = self.citation or {}
-        if not include_profiler_config:
-            key: str
-            value: Any
-            citation = {
-                key: value
-                for key, value in citation.items()
-                if key != "profiler_config"
-            }
-        if citation:
-            expectation_suite.add_citation(**citation)
-
-        return expectation_suite
 
     @public_api
     def plot_metrics(

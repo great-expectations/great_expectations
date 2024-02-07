@@ -53,7 +53,6 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
-    DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
     CheckpointValidationConfig,
     DataContextConfig,
@@ -523,7 +522,6 @@ class CloudDataContext(SerializableDataContext):
             "plugins_directory": self._normalize_absolute_or_relative_path(
                 path=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
             ),
-            "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }
         missing_config_vars_and_subs: list[tuple[str, str]] = []
         for config_variable, value in cloud_config_variable_defaults.items():
