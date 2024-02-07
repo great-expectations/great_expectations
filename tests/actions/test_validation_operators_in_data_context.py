@@ -1,4 +1,5 @@
 import json
+from copy import copy
 
 import pytest
 
@@ -40,7 +41,7 @@ def validation_operators_data_context(
             }
         },
     )
-    data_context.add_expectation_suite("f1.foo")
+    data_context.suites.add(ExpectationSuite("f1.foo"))
 
     df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
@@ -54,11 +55,23 @@ def validation_operators_data_context(
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    failure_expectations.expectation_suite_name = "f1.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+    data_context.suites.add(
+        ExpectationSuite(
+            name="f1.failure",
+            expectations=[
+                copy(expectation) for expectation in failure_expectations.expectations
+            ],
+        )
+    )
 
-    warning_expectations.expectation_suite_name = "f1.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
+    data_context.suites.add(
+        ExpectationSuite(
+            name="f1.warning",
+            expectations=[
+                copy(expectation) for expectation in warning_expectations.expectations
+            ],
+        )
+    )
 
     return data_context
 
