@@ -145,11 +145,11 @@ module.exports = {
               to: '/docs/resources/get_support'
             },
             {
-              label: 'Expectations Gallery',
+              label: 'Expectations gallery',
               to: 'https://greatexpectations.io/expectations'
             },
             {
-              label: 'Integration Support Policy',
+              label: 'Integration support policy',
               to: '/docs/application_integration_support'
             },
             {
