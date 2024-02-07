@@ -185,47 +185,47 @@ class _YamlConfigValidator:
             print("Attempting to instantiate class from config...")
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
-                (
-                    instantiated_class,
-                ) = self._test_instantiation_of_store_from_yaml_config(
+                instantiated_class = self._test_instantiation_of_store_from_yaml_config(
                     name=name, class_name=class_name, config=config_with_substitutions
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
-                (
-                    instantiated_class,
-                ) = self._test_instantiation_of_datasource_from_yaml_config(
+                instantiated_class = self._test_instantiation_of_datasource_from_yaml_config(
                     name=name,
                     class_name=class_name,
                     config=config,  # Uses original config as substitutions are done downstream
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
-                (
-                    instantiated_class,
-                ) = self._test_instantiation_of_checkpoint_from_yaml_config(
-                    name=name, class_name=class_name, config=config_with_substitutions
+                instantiated_class = (
+                    self._test_instantiation_of_checkpoint_from_yaml_config(
+                        name=name,
+                        class_name=class_name,
+                        config=config_with_substitutions,
+                    )
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
-                (
-                    instantiated_class,
-                ) = self._test_instantiation_of_data_connector_from_yaml_config(
-                    name=name,
-                    class_name=class_name,
-                    config=config_with_substitutions,
-                    runtime_environment=runtime_environment,
+                instantiated_class = (
+                    self._test_instantiation_of_data_connector_from_yaml_config(
+                        name=name,
+                        class_name=class_name,
+                        config=config_with_substitutions,
+                        runtime_environment=runtime_environment,
+                    )
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
-                (
-                    instantiated_class,
-                ) = self._test_instantiation_of_profiler_from_yaml_config(
-                    name=name, class_name=class_name, config=config_with_substitutions
+                instantiated_class = (
+                    self._test_instantiation_of_profiler_from_yaml_config(
+                        name=name,
+                        class_name=class_name,
+                        config=config_with_substitutions,
+                    )
                 )
             else:
-                (
-                    instantiated_class,
-                ) = self._test_instantiation_of_misc_class_from_yaml_config(
-                    name=name,
-                    config=config_with_substitutions,
-                    runtime_environment=runtime_environment,
+                instantiated_class = (
+                    self._test_instantiation_of_misc_class_from_yaml_config(
+                        name=name,
+                        config=config_with_substitutions,
+                        runtime_environment=runtime_environment,
+                    )
                 )
 
             if pretty_print:
