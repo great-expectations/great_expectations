@@ -19,19 +19,11 @@ Named snippets are defined with the following syntax:
 ```
 */
 const visit = require('unist-util-visit')
-const glob = require('glob')
 const constructSnippetMap = require('./snippet')
 
 function getDirs () {
   // Get all directories that should be processed
-  const manualDirs = ['../../great_expectations', '../../tests', './docs', './versioned_docs']
-  const versionDirs = glob.sync('versioned_code/*/')
-  // remove v0.14.13 from processing since it does not use named snippets
-  const index = versionDirs.indexOf('versioned_code/version-0.14.13/')
-  if (index !== -1) {
-    versionDirs.splice(index, 1)
-  }
-  return manualDirs.concat(versionDirs)
+  return ['./docs', './versioned_docs']
 }
 
 function codeImport () {
