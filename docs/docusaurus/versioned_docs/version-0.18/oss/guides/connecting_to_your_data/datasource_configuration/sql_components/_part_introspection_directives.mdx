@@ -1,0 +1,6 @@
+Valid keys for the `introspection directives` dictionary include:
+- **`schema_name`:** A string describing schema to introspect (default is `None`). If this is provided, the introspection will be limited to the specified schema.
+- **`ignore_information_schemas_and_system_tables`:** A boolean value (`default=True`) which determines whether to ignore information schemas and system tables when introspecting the database.
+- **`system_tables`:** An optional list of strings that define `system_tables` for your database.
+- **`information_schemas`:** An optional list of strings that define `information_schemas` for your database.
+- **`include_views`:** A boolean value (`default=True`) which determines whether to include `views` when introspecting the database.
