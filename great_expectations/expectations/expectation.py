@@ -10,6 +10,7 @@ from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
 from numbers import Number
+from string import Formatter
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -1606,17 +1607,8 @@ class SqlExpectation(BatchExpectation, ABC):
 
     @pydantic.validator("query")
     def _validate_query(cls, query: str) -> str:
-        is_valid = "active_batch" in query
-        try:
-            # Using a dummy value to check syntactic correctness
-            substituted_query = query.format(active_batch="dummy_value")
-            # If the query is not parameterized, it will be the same as the substituted query
-            if query == substituted_query:
-                is_valid = False
-        except KeyError:
-            is_valid = False
-
-        if not is_valid:
+        parsed_fields = [f[1] for f in Formatter().parse(query)]
+        if "active_batch" not in parsed_fields:
             raise ValueError("Query must contain {active_batch} parameter.")
 
         return query
