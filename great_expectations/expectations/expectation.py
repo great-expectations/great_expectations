@@ -1593,8 +1593,11 @@ representation."""
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
-class SqlExpectation(BatchExpectation, ABC):
-    # TODO: Need to rename to unexpected_rows_query (and make corresponding metric change)
+class NoUnexpectedQueryRowsExpectation(BatchExpectation, ABC):
+    """
+    TODO: Write docstring
+    """
+
     unexpected_rows_query: str
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
