@@ -22,9 +22,6 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message_from_handler,
-)
 from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -108,10 +105,6 @@ class _YamlConfigValidator:
     ):
         """Init _YamlConfigValidator with a Data Context"""
         self._data_context = data_context
-
-    @property
-    def usage_statistics_handler(self):
-        return self._data_context.usage_statistics_handler
 
     @property
     def runtime_environment(self):
@@ -251,12 +244,6 @@ class _YamlConfigValidator:
                     usage_stats_event_payload=usage_stats_event_payload,
                 )
 
-            send_usage_message_from_handler(
-                event=usage_stats_event_name,
-                handler=self.usage_statistics_handler,
-                event_payload=usage_stats_event_payload,
-                success=True,
-            )
             if pretty_print:
                 print(
                     f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n"
@@ -286,12 +273,6 @@ class _YamlConfigValidator:
             ):
                 # add parent_class if it doesn't exist and class_name is one of our supported core GX types
                 usage_stats_event_payload["parent_class"] = class_name
-            send_usage_message_from_handler(
-                event=usage_stats_event_name,
-                handler=self.usage_statistics_handler,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
             if shorten_tracebacks:
                 traceback.print_exc(limit=1)
             else:
@@ -329,47 +310,22 @@ class _YamlConfigValidator:
     def _prepare_config_string_with_substituted_variables(
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> str:
-        try:
-            config_provider = self._data_context.config_provider
-            config_values = config_provider.get_values()
+        config_provider = self._data_context.config_provider
+        config_values = config_provider.get_values()
 
-            # While normally we'd just call `self.config_provider.substitute_config()`,
-            # we need to account for `runtime_environment` values that may have been passed.
-            config_values.update(runtime_environment)
+        # While normally we'd just call `self.config_provider.substitute_config()`,
+        # we need to account for `runtime_environment` values that may have been passed.
+        config_values.update(runtime_environment)
 
-            return config_provider.substitute_config(
-                config=yaml_config, config_values=config_values
-            )
-        except Exception as e:
-            usage_stats_event_payload: dict = {
-                "diagnostic_info": ["__substitution_error__"],
-            }
-            send_usage_message_from_handler(
-                event=usage_stats_event_name,
-                handler=self.usage_statistics_handler,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
+        return config_provider.substitute_config(
+            config=yaml_config, config_values=config_values
+        )
 
     def _load_config_string_as_commented_map(
         self, config_str: str, usage_stats_event_name: str
     ) -> CommentedMap:
-        try:
-            substituted_config: CommentedMap = yaml.load(config_str)
-            return substituted_config
-
-        except Exception as e:
-            usage_stats_event_payload = {
-                "diagnostic_info": ["__yaml_parse_error__"],
-            }
-            send_usage_message_from_handler(
-                event=usage_stats_event_name,
-                handler=self.usage_statistics_handler,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
+        substituted_config: CommentedMap = yaml.load(config_str)
+        return substituted_config
 
     def _test_instantiation_of_store_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap

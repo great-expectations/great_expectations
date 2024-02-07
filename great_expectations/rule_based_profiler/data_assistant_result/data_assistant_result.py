@@ -33,12 +33,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-    get_expectation_suite_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     in_jupyter_notebook,
@@ -79,6 +73,9 @@ from great_expectations.types import (
 if TYPE_CHECKING:
     from great_expectations.core import (
         ExpectationSuite,
+    )
+    from great_expectations.core.usage_statistics.usage_statistics import (
+        UsageStatisticsHandler,
     )
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
@@ -506,10 +503,6 @@ class DataAssistantResult(SerializableDictDot):
 
         return auxiliary_info
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE,
-        args_payload_fn=get_expectation_suite_usage_statistics,
-    )
     def _get_expectation_suite_with_usage_statistics(
         self,
         expectation_suite_name: Optional[str] = None,

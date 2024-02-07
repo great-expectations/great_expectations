@@ -15,12 +15,6 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-    get_profiler_run_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
@@ -73,6 +67,9 @@ from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:
     from great_expectations.core.domain import Domain
+    from great_expectations.core.usage_statistics.usage_statistics import (
+        UsageStatisticsHandler,
+    )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.data_context.store.profiler_store import ProfilerStore
     from great_expectations.expectations.expectation_configuration import (
@@ -243,10 +240,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
-        args_payload_fn=get_profiler_run_usage_statistics,
-    )
     def run(  # noqa: PLR0913
         self,
         variables: Optional[Dict[str, Any]] = None,

@@ -45,7 +45,6 @@ from great_expectations._docs_decorators import (
 from great_expectations.analytics.client import init as init_analytics
 from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import DataContextInitializedEvent
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
@@ -130,6 +129,7 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.run_identifier import RunIdentifier
@@ -266,6 +266,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         ):
             sys.path.append(self.plugins_directory)
 
+        # We want to have directories set up before initializing usage statistics so
+        # that we can obtain a context instance id
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
@@ -280,6 +282,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
+
+        # Override the project_config data_context_id if an expectations_store was already set up
+        self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -1530,6 +1535,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The Checkpoint object created.
         """
+        from great_expectations.checkpoint import Checkpoint
+
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
         expectation_suite_id = self._resolve_id_and_ge_cloud_id(
@@ -3448,7 +3455,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> DataContextConfig:
         """
         Applies global configuration overrides for
+            - usage_statistics being enabled
             - data_context_id for usage_statistics
+            - global_usage_statistics_url
 
         Args:
             config (DataContextConfig): Config that is passed into the DataContext constructor
@@ -3458,7 +3467,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         validation_errors: dict = {}
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
-        config_with_global_config_overrides.anonymous_usage_statistics.enabled = False
+        usage_stats_enabled: bool = self._is_usage_stats_enabled()
+        if not usage_stats_enabled:
+            logger.debug(
+                "Usage statistics is disabled globally. Applying override to project_config."
+            )
+            config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
+                False
+            )
         global_data_context_id: Optional[str] = self._get_data_context_id_override()
         # data_context_id
         if global_data_context_id:
@@ -3475,6 +3491,23 @@ class AbstractDataContext(ConfigPeer, ABC):
             else:
                 validation_errors.update(data_context_id_errors)
 
+        # usage statistics url
+        global_usage_statistics_url: Optional[
+            str
+        ] = self._get_usage_stats_url_override()
+        if global_usage_statistics_url:
+            usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
+                {"usage_statistics_url": global_usage_statistics_url}
+            )
+            if not usage_statistics_url_errors:
+                logger.debug(
+                    "usage_statistics_url is defined globally. Applying override to project_config."
+                )
+                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
+                    global_usage_statistics_url
+                )
+            else:
+                validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
             logger.warning(
                 "The following globally-defined config variables failed validation:\n{}\n\n"
@@ -3493,6 +3526,48 @@ class AbstractDataContext(ConfigPeer, ABC):
             return config_var_provider.get_values()
         return {}
 
+    @staticmethod
+    def _is_usage_stats_enabled() -> bool:
+        """
+        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
+            - GE_USAGE_STATS, which is an environment_variable
+            - GLOBAL_CONFIG_PATHS
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
+        Returns True otherwise
+
+        Returns:
+            bool that tells you whether usage_statistics is on or off
+        """
+        usage_statistics_enabled: bool = True
+        if os.environ.get("GE_USAGE_STATS", False):  # noqa: TID251
+            ge_usage_stats = os.environ.get("GE_USAGE_STATS")  # noqa: TID251
+            if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
+                usage_statistics_enabled = False
+            else:
+                logger.warning(
+                    "GE_USAGE_STATS environment variable must be one of: {}".format(
+                        AbstractDataContext.FALSEY_STRINGS
+                    )
+                )
+        for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
+            config = configparser.ConfigParser()
+            states = config.BOOLEAN_STATES
+            for falsey_string in AbstractDataContext.FALSEY_STRINGS:
+                states[falsey_string] = False  # type: ignore[index]
+
+            states["TRUE"] = True  # type: ignore[index]
+            states["True"] = True  # type: ignore[index]
+            config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
+            config.read(config_path)
+            try:
+                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                    usage_statistics_enabled = False
+
+            except (ValueError, configparser.Error):
+                pass
+        return usage_statistics_enabled
+
     def _get_data_context_id_override(self) -> Optional[str]:
         """
         Return data_context_id from environment variable.
@@ -3504,6 +3579,19 @@ class AbstractDataContext(ConfigPeer, ABC):
             environment_variable="GE_DATA_CONTEXT_ID",
             conf_file_section="anonymous_usage_statistics",
             conf_file_option="data_context_id",
+        )
+
+    def _get_usage_stats_url_override(self) -> Optional[str]:
+        """
+        Return GE_USAGE_STATISTICS_URL from environment variable if it exists
+
+        Returns:
+            Optional string that represents GE_USAGE_STATISTICS_URL
+        """
+        return self._get_global_config_value(
+            environment_variable="GE_USAGE_STATISTICS_URL",
+            conf_file_section="anonymous_usage_statistics",
+            conf_file_option="usage_statistics_url",
         )
 
     def _build_store_from_config(
