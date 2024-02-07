@@ -169,9 +169,6 @@ def test_instantiation_with_info_arg(
         "directory/B-2.csv",
     ],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
     mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
@@ -493,6 +490,78 @@ default_regex:
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
+    }
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
+        "2020/01/alpha-1001.csv",
+        "2020/01/beta-1002.csv",
+        "2020/02/alpha-1003.csv",
+        "2020/02/beta-1004.csv",
+        "2020/03/alpha-1005.csv",
+        "2020/03/beta-1006.csv",
+        "2020/04/beta-1007.csv",
+        "gamma-202001.csv",
+        "gamma-202002.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+)
+def test_yaml_config_excluding_non_regex_matching_files(
+    mock_gcs_client, mock_list_keys, empty_data_context_stats_enabled
+):
+    context = empty_data_context_stats_enabled
+
+    report_object = context.test_yaml_config(
+        """
+module_name: great_expectations.datasource.data_connector
+class_name: InferredAssetGCSDataConnector
+datasource_name: FAKE_DATASOURCE
+name: TEST_DATA_CONNECTOR
+
+bucket_or_name: test_bucket
+prefix: ""
+
+default_regex:
+    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
+    """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
+        return_mode="report_object",
+    )
+
+    assert report_object == {
+        "class_name": "InferredAssetGCSDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": ["alpha", "beta"],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "2020/01/alpha-*.csv",
+                    "2020/02/alpha-*.csv",
+                    "2020/03/alpha-*.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+            "beta": {
+                "example_data_references": [
+                    "2020/01/beta-*.csv",
+                    "2020/02/beta-*.csv",
+                    "2020/03/beta-*.csv",
+                ],
+                "batch_definition_count": 4,
+            },
+        },
+        "example_unmatched_data_references": ["gamma-202001.csv", "gamma-202002.csv"],
+        "unmatched_data_reference_count": 2,
     }
 
 
