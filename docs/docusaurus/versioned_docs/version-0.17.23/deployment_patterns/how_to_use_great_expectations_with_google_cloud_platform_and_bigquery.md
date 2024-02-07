@@ -75,7 +75,7 @@ One way to create a new <TechnicalTag relative="../../../" tag="data_context" te
 
 From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory`  can be an empty directory where you intend to build your Great Expectations configuration.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py get_context"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py get_context"
 ```
 
 ### 3. Connect to Metadata Stores on GCP
@@ -93,12 +93,12 @@ The full configuration used in this guide can be found in the [`great-expectatio
 #### Add Expectations Store
 By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `gx/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
 ```
 
 Great Expectations can then be configured to use this new Expectations Store, `expectations_GCS_store`, by setting the `expectations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
 For additional details and example configurations, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
@@ -106,12 +106,12 @@ For additional details and example configurations, see [Configure Expectation St
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `gx/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_validations_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py expected_validations_store"
 ```
 
 Great Expectations can then be configured to use this new Validations Store, `validations_GCS_store`, by setting the `validations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
 For additional details and example configurations, see [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md).
@@ -121,7 +121,7 @@ To host and share Datadocs on GCS, we recommend using the [following guide](../g
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_data_docs_store"
+```YAML name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py new_data_docs_store"
 ```
 
 
@@ -135,7 +135,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 4. Connect to your Data
 
-The remaining sections in Part 1 contain descriptions of [how to connect to your data in Google Cloud Storage (GCS) or BigQuery](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data) and build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that you'll migrate to Google Cloud Composer. 
+The remaining sections in Part 1 contain descriptions of [how to connect to your data in Google Cloud Storage (GCS) or BigQuery](/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md) and build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that you'll migrate to Google Cloud Composer. 
 
 More details can be found in the corresponding How to Guides, which have been linked.
 
@@ -150,7 +150,7 @@ More details can be found in the corresponding How to Guides, which have been li
 
 Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, add the name of your GCS bucket to the `add_pandas_gcs` function.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py datasource"
 ```
 
 In the example, we have added a Data Source that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
@@ -168,7 +168,7 @@ In order to support tables that are created as the result of queries in BigQuery
 
 Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, create a Data Source that will connect to data in BigQuery,
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
 ```
 
 In the example, we have created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
@@ -192,7 +192,7 @@ Add a CSV `Asset` to your `Datasource` by using the `add_csv_asset` function.
 
 First, configure the `prefix` and `batching_regex`. The `prefix` is for the path in the GCS bucket where we can find our files. The `batching_regex` is a regular expression that indicates which files to treat as Batches in the Asset, and how to identify them.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex"
 ```
 
 In our example, the pattern `r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"` is intended to build a Batch for each file in the GCS bucket, which are:
@@ -206,7 +206,7 @@ The `batching_regex` pattern will match the 4 digits of the year portion and ass
 
 Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Data Source by using the `add_csv_asset` function. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py asset"
 ```
 
 </TabItem>
@@ -216,12 +216,12 @@ Add a BigQuery `Asset` into your `Datasource` either as a table asset or query a
 
 In the first example, a table `Asset` named `my_table_asset` is built by naming the table in our BigQuery Database, which is `taxi_data` in our case. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset"
 ```
 
 In the second example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. Although we are showing a simple operation here, the query can be arbitrarily complicated, including any number of `JOIN`, `SELECT` operations and subqueries. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset"
 ```
 
 </TabItem>
@@ -242,17 +242,17 @@ In the following example, you'll create an Expectation Suite with [instant feedb
 
 First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py add_expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py add_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py validator_calls"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py validator_calls"
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
 ```
 
 </TabItem>
@@ -262,22 +262,22 @@ For our example, we will be creating our ExpectationSuite with [instant feedback
 
 Using the `table_asset` from the previous step, build a `BatchRequest`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py batch_request"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py batch_request"
 ```
 
 Next, create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py validator_calls"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py validator_calls"
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
 ```
 
 </TabItem>
@@ -298,12 +298,12 @@ In the following example, you'll create a basic Checkpoint configuration. For mo
 
 Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py checkpoint"
 ```
 
 Next, you can run the Checkpoint directly in-code by calling `checkpoint.run()`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py run_checkpoint"
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
@@ -319,12 +319,12 @@ Now you are ready to migrate the local configuration to Cloud Composer.
 
 Add the following Checkpoint `bigquery_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py checkpoint"
 ```
 
 Next, you can run the Checkpoint directly in-code by calling `checkpoint.run()`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py run_checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py run_checkpoint"
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
@@ -409,9 +409,9 @@ Once the `gx/` folder is uploaded to the Cloud Storage bucket, it will be mapped
   ]}>
 <TabItem value="gcs">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py).
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py).
 
-```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py full"
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/gx`, where we have uploaded our local configuration.
@@ -430,9 +430,9 @@ For more details, please consult the [official documentation for Cloud Composer]
 </TabItem>
 <TabItem value="bigquery">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py).
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py).
 
-```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py full"
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/gx`, where we have uploaded our local configuration.

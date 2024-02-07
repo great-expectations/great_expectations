@@ -14,7 +14,7 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
-# <snippet name="tests/integration/docusaurus/reference/glossary/batch_request batch_request">
+# <snippet name="docs/docusaurus/docs/snippets/batch_request batch_request">
 import great_expectations as gx
 
 context = gx.get_context()
@@ -38,7 +38,7 @@ assert batch_request.datasource_name == "my_pandas_datasource"
 assert batch_request.data_asset_name == "csv_asset"
 assert batch_request.options == {"year": "2019", "month": "02"}
 
-# <snippet name="tests/integration/docusaurus/reference/glossary/batch_request options">
+# <snippet name="docs/docusaurus/docs/snippets/batch_request options">
 options = asset.batch_request_options
 print(options)
 # </snippet>
