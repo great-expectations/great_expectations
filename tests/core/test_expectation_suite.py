@@ -598,6 +598,7 @@ class TestCRUDMethods:
             == updated_column_name
         )
 
+    @pytest.mark.unit
     def test_expectation_suite_name_can_be_updated(self, empty_cloud_context_fluent):
         """Expect that ExpectationSuite.name can be updated directly"""
         suite = ExpectationSuite(name=self.expectation_suite_name)
