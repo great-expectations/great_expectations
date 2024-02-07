@@ -79,13 +79,6 @@ def batch_request_as_dict() -> Dict[str, str]:
 
 
 @pytest.mark.unit
-def test_checkpoint_raises_typeerror_on_incorrect_data_context():
-    with pytest.raises(AttributeError):
-        # noinspection PyTypeChecker
-        Checkpoint(name="my_checkpoint", data_context="foo", config_version=1)
-
-
-@pytest.mark.unit
 def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
     checkpoint: Checkpoint = Checkpoint(
         name="foo", data_context=empty_data_context, config_version=None

@@ -10,9 +10,6 @@ from great_expectations.core.id_dict import deep_convert_properties_iterable_to_
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,  # noqa: TCH001
-)
 from great_expectations.datasource.fluent.interfaces import (
     Batch as FluentBatch,  # noqa: TCH001
 )
@@ -566,17 +563,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Returns:
             An instance of `DataAssistantResult`.
         """
-        usage_statistics_handler: Optional[UsageStatisticsHandler]
-        if self._data_context is None:
-            usage_statistics_handler = None
-        else:
-            usage_statistics_handler = self._data_context._usage_statistics_handler
-
         batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 
         data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
-            _usage_statistics_handler=usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,

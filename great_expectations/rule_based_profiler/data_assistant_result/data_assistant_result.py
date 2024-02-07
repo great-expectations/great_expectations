@@ -71,9 +71,6 @@ if TYPE_CHECKING:
     from great_expectations.core import (
         ExpectationSuite,
     )
-    from great_expectations.core.usage_statistics.usage_statistics import (
-        UsageStatisticsHandler,
-    )
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
@@ -179,8 +176,6 @@ class DataAssistantResult(SerializableDictDot):
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
-    # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
-    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @property
     def metric_expectation_map(self) -> Dict[Union[str, tuple[str, ...]], str]:
