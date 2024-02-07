@@ -358,8 +358,7 @@ class _YamlConfigValidator:
             )
         )
 
-        usage_stats_event_payload = {}
-        return instantiated_class, usage_stats_event_payload
+        return instantiated_class, {}
 
     def _test_instantiation_of_checkpoint_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
