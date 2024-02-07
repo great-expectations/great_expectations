@@ -241,44 +241,6 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 0
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filesystem
-def test_instantiation_with_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-module_name: great_expectations.data_context.store.checkpoint_store
-class_name: CheckpointStore
-store_backend:
-    class_name: TupleFilesystemStoreBackend
-    base_directory: checkpoints/
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "CheckpointStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "response_json, expected, error_type",

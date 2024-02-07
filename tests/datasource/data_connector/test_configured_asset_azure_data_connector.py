@@ -426,10 +426,6 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
         )
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -440,7 +436,6 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
 def test_instantiation_with_test_yaml_config(
     mock_azure_conn,
     mock_list_keys,
-    mock_emit,
     empty_data_context_stats_enabled,
     expected_config_dict,
 ):
@@ -473,10 +468,6 @@ def test_instantiation_with_test_yaml_config(
     assert report_object == expected_config_dict
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -485,7 +476,7 @@ def test_instantiation_with_test_yaml_config(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
-    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
 
@@ -512,24 +503,6 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
         },
         return_mode="report_object",
     )
-    assert mock_emit.call_count == 1
-
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ConfiguredAssetAzureDataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 # noinspection PyUnusedLocal

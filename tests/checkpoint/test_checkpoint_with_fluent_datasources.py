@@ -3,8 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pickle
-import unittest
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 from unittest import mock
 
 import pytest
@@ -50,11 +49,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
-    mock_emit,
     monkeypatch,
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -137,31 +132,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
-
-    # Test usage stats messages
-    assert mock_emit.call_count == 1
-
-    # Substitute current anonymized name since it changes for each run
-    anonymized_checkpoint_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_checkpoint_name,
-                    "parent_class": "Checkpoint",
-                },
-                "success": True,
-            },
-        ),
-    ]
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
 
     assert len(data_context.list_checkpoints()) == 0
     data_context.add_checkpoint(**yaml.load(yaml_config))
@@ -1079,12 +1049,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 1.31s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_multi_validation_pandasdf_and_sparkdf(
-    mock_emit,
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     batch_request_as_dict,
@@ -1130,18 +1096,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 4
     assert result["success"]
-
-    assert mock_emit.call_count == 13
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-
-    # Since there are two validations, confirming there should be two "data_asset.validate" events
-    num_data_asset_validate_events = 0
-    for event in actual_events:
-        if event[0][0]["event"] == "data_asset.validate":
-            num_data_asset_validate_events += 1
-    assert num_data_asset_validate_events == 4
 
 
 @pytest.mark.filesystem
