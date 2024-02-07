@@ -65,7 +65,7 @@ Then the config variable can be loaded into the `connection_string` parameter wh
 ## Additional Notes
 
 - The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments using  ``FileSystemDataContexts``.
-- To view the full script used in this page, see it on GitHub: [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py)
+- To view the full script used in this page, see it on GitHub: [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py)
 
 </TabItem>
 <TabItem value="secret-manager">

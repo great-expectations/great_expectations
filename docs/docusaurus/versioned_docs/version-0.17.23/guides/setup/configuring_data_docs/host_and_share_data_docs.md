@@ -181,7 +181,7 @@ Run the following Python code to build and open your Data Docs:
 
 Host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Google Cloud Storage (GCS). GX recommends using IP-based access, which is achieved by deploying a Google App Engine application.
 
-To view the code used in the examples, see [how_to_host_and_share_data_docs_on_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py).
+To view the code used in the examples, see [how_to_host_and_share_data_docs_on_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py).
 
 ### Prerequisites
 

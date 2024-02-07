@@ -7,7 +7,7 @@ import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 This guide will help you pass an in-memory DataFrame to a <TechnicalTag tag="checkpoint" text="Checkpoint" /> that is defined at runtime. This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
 
-The full script used in the following code examples, is available in GitHub here: [how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py](https://github.com/great-expectations/great_expectations/tree/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py).
+The full script used in the following code examples, is available in GitHub here: [how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py).
 
 <Prerequisites>
 

@@ -20,7 +20,7 @@ To use GX with PostgreSQL Database, you'll complete the following tasks:
 
 The full code used in the following examples is available on GitHub:
 
-- [postgres_deployment_patterns.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py)
+- [postgres_deployment_patterns.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py)
 
 ## Prerequisites
 

@@ -271,5 +271,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_values_to_be_in_solfege_scale_set.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py)
+- [expect_column_values_to_be_in_solfege_scale_set.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py)
 :::

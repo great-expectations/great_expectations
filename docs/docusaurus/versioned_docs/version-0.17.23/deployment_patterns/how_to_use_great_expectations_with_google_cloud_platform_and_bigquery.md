@@ -409,7 +409,7 @@ Once the `gx/` folder is uploaded to the Cloud Storage bucket, it will be mapped
   ]}>
 <TabItem value="gcs">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py).
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py).
 
 ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py full"
 ```
@@ -430,7 +430,7 @@ For more details, please consult the [official documentation for Cloud Composer]
 </TabItem>
 <TabItem value="bigquery">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py).
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py).
 
 ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py full"
 ```

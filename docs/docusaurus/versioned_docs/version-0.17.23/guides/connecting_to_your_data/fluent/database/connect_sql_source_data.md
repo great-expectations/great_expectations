@@ -464,9 +464,9 @@ The following scripts and configuration files are used in the examples:
 
 - The local GX configuration is located in the [`great-expectations` GIT repository](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/fixtures/gcp_deployment/).
 
-- The script to test the BigQuery configuration is located in [gcp_deployment_patterns_file_bigquery.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py).
+- The script to test the BigQuery configuration is located in [gcp_deployment_patterns_file_bigquery.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_bigquery.py).
 
-- The script to test the GCS configuration is located in [gcp_deployment_patterns_file_gcs.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py).
+- The script to test the GCS configuration is located in [gcp_deployment_patterns_file_gcs.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py).
 
 ### Prerequisites
 
@@ -825,7 +825,7 @@ To migrate your local configuration, you can move the local `gx/` folder to the 
 
     ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py full"
     ```
-    The DAG is stored in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py)
+    The DAG is stored in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_gcs.py)
 
     The `BashOperator` changes the directory to `/home/airflow/gcsfuse/great_expectations`, where you uploaded your local configuration.
 
@@ -850,7 +850,7 @@ To add the DAG to Cloud Composer, you move `ge_checkpoint_gcs.py` to the environ
 
     ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py full"
     ```
-    The DAG is stored in a file named: [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py)
+    The DAG is stored in a file named: [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/ge_checkpoint_bigquery.py)
 
     The `BashOperator` changes the directory to `/home/airflow/gcsfuse/great_expectations`, where you uploaded your local configuration.
 

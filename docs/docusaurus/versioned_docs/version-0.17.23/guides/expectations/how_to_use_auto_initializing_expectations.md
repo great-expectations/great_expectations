@@ -13,8 +13,8 @@ Additionally, this guide assumes that you are using a multi-batch <TechnicalTag 
 
 The following scripts are used in this topic and are available in GitHub:
 
-- [is_expectation_auto_initializing.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/is_expectation_auto_initializing.py)
-- [auto_initializing_expect_column_mean_to_be_between.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/auto_initializing_expect_column_mean_to_be_between.py)
+- [is_expectation_auto_initializing.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/is_expectation_auto_initializing.py)
+- [auto_initializing_expect_column_mean_to_be_between.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/auto_initializing_expect_column_mean_to_be_between.py)
 
 ## Prerequisites
 

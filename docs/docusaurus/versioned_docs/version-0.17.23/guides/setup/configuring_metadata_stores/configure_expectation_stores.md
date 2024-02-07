@@ -173,7 +173,7 @@ If your Expectations have not been copied to Azure Blob Storage, the message "No
 
 Use the information provided here to configure a new storage location for Expectations in GCS.
 
-To view all the code used in this topic, see [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py).
+To view all the code used in this topic, see [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py).
 
 ### Prerequisites
 

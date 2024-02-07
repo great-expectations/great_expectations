@@ -205,4 +205,4 @@ Below is an example of a `CheckpointResult` object which itself contains `Valida
 
 ## Example script
 
-To view the full script used in this page, see [checkpoints_and_actions.py](https://github.com/great-expectations/great_expectations/tree/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/terms/checkpoints_and_actions.py)
+To view the full script used in this page, see [checkpoints_and_actions.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/versioned_docs/version-0.17.23/terms/checkpoints_and_actions.py)

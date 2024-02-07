@@ -22,9 +22,9 @@ The information provided here is intended to get you up and running quickly. To 
 
 The full code used in the following examples is available on GitHub:
 
-- [databricks_deployment_patterns_file_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/databricks_deployment_patterns_file_python_configs.py)
+- [databricks_deployment_patterns_file_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/databricks_deployment_patterns_file_python_configs.py)
 
-- [databricks_deployment_patterns_dataframe_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/databricks_deployment_patterns_dataframe_python_configs.py)
+- [databricks_deployment_patterns_dataframe_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/databricks_deployment_patterns_dataframe_python_configs.py)
 
 ## Prerequisites
 

@@ -7,7 +7,7 @@ import TechnicalTag from '../../../term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use the Onboarding Data Assistant to Profile your data and automate the generation of an Expectation Suite.
 
-All the code used in the examples is available in GitHub at this location: [how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py).
+All the code used in the examples is available in GitHub at this location: [how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py).
 
 ## Prerequisites
 
