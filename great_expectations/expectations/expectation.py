@@ -1593,7 +1593,7 @@ representation."""
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
-class UnexpectedRowsQueryExpectation(BatchExpectation, ABC):
+class UnexpectedRowsExpectation(BatchExpectation, ABC):
     """
     NoUnexpectedQueryRowExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
 
