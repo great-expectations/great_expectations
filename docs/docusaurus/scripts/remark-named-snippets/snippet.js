@@ -9,7 +9,7 @@ const htmlparser2 = require('htmlparser2')
  * @returns {object} The "snippet map", which is an object with name, snippet key-value pairs.
  */
 function constructSnippetMap(dir) {
-  const snippets = parseSourceDirectories(dir)
+  const snippets = parseSourceDirectory(dir)
   const duplicateNames = []
 
   const snippetMap = {}
@@ -38,7 +38,7 @@ function constructSnippetMap(dir) {
  * @param {string} dir - The directory to parse for snippet definitions.
  * @returns {object[]} A list of snippet objects parsed from the input directory.
  */
-function parseSourceDirectories(dir) {
+function parseSourceDirectory(dir) {
   const files = []
   for (const file of glob.sync(dir + '/**/*.{py,yml,yaml}')) {
     files.push(file)
@@ -195,7 +195,7 @@ function main(verbose = false) {
 
   const dirs = getDirs()
   for (let dir of dirs) {
-    const snippets = parseSourceDirectories(dir)
+    const snippets = parseSourceDirectory(dir)
     const out = {}
     for (const snippet of snippets) {
       // If no explicit args are provided, default to all snippets
