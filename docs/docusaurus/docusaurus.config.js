@@ -230,6 +230,10 @@ module.exports = {
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
           // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
+            current: {
+              label: '1.0 Prerelease',
+              path: 'next',
+            },
             ['0.18']: {
               label: '0.18.8',
               path: '',
