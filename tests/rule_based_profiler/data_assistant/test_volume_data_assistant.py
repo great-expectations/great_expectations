@@ -1353,7 +1353,6 @@ def quentin_expected_expectation_suite(
         for expectation_configuration in expected_expectation_configurations:
             expected_expectation_suite._add_expectation(
                 expectation_configuration=expectation_configuration,
-                send_usage_event=False,
             )
 
         expected_expectation_suite_meta: Dict[str, Any] = {

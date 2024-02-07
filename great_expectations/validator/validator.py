@@ -556,7 +556,6 @@ class Validator:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite._add_expectation(
                         expectation_configuration=configuration.get_raw_configuration(),
-                        send_usage_event=False,
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.
@@ -1258,7 +1257,7 @@ class Validator:
 
         expectation_suite.expectations = []
         expectation_suite.add_expectation_configurations(
-            expectation_configurations=expectations, send_usage_event=False
+            expectation_configurations=expectations
         )
         if not suppress_logging:
             logger.info(message + settings_message)

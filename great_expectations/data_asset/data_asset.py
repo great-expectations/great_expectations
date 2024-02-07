@@ -267,7 +267,6 @@ class DataAsset:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite._add_expectation(
                         expectation_configuration=expectation_config,
-                        send_usage_event=False,
                     )
 
                 if include_config:
@@ -534,9 +533,7 @@ class DataAsset:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.add_expectation_configurations(
-            expectations, send_usage_event=False
-        )
+        expectation_suite.add_expectation_configurations(expectations)
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite

@@ -137,7 +137,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
         )
         expectation_suite.add_expectation_configurations(
             expectation_configurations=self.expectation_configurations,
-            send_usage_event=False,
             match_type="domain",
             overwrite_existing=True,
         )

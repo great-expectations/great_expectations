@@ -686,19 +686,16 @@ class ExpectationSuite(SerializableDictDot):
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
         This is a private method for adding expectations that allows for usage_events to be suppressed when
-        Expectations are added through internal processing (ie. while building profilers, rendering or validation). It
-        takes in send_usage_event boolean.  If successful, upserts ExpectationConfiguration into this ExpectationSuite.
+        Expectations are added through internal processing (ie. while building profilers, rendering or validation).
+        If successful, upserts ExpectationConfiguration into this ExpectationSuite.
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
-            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
-                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
@@ -717,8 +714,6 @@ class ExpectationSuite(SerializableDictDot):
         )
 
         if len(found_expectation_indexes) > 1:
-            if send_usage_event:
-                self.send_usage_event(success=False)
             raise ValueError(
                 "More than one matching expectation was found. Please be more specific with your search "
                 "criteria"
@@ -745,9 +740,6 @@ class ExpectationSuite(SerializableDictDot):
                     expectation_configuration=expectation_configuration
                 )
             else:
-                if send_usage_event:
-                    self.send_usage_event(success=False)
-
                 raise gx_exceptions.DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
@@ -764,7 +756,6 @@ class ExpectationSuite(SerializableDictDot):
     def add_expectation_configurations(
         self,
         expectation_configurations: List[ExpectationConfiguration],
-        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> List[ExpectationConfiguration]:
@@ -772,8 +763,6 @@ class ExpectationSuite(SerializableDictDot):
 
         Args:
             expectation_configurations: The List of candidate new/modifed "ExpectationConfiguration" objects for Suite.
-            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
-                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an "ExpectationConfiguration"
                 object, matching the specified criteria, and thus whether we should add or replace (i.e., "upsert").
             overwrite_existing: If "ExpectationConfiguration" already exists, this will cause it to be overwritten if
@@ -793,7 +782,6 @@ class ExpectationSuite(SerializableDictDot):
         ] = [
             self.add_expectation_configuration(
                 expectation_configuration=expectation_configuration,
-                send_usage_event=send_usage_event,
                 match_type=match_type,
                 overwrite_existing=overwrite_existing,
             )
@@ -805,7 +793,6 @@ class ExpectationSuite(SerializableDictDot):
     def add_expectation_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
@@ -813,8 +800,6 @@ class ExpectationSuite(SerializableDictDot):
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update.
-            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
-                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
@@ -832,7 +817,6 @@ class ExpectationSuite(SerializableDictDot):
         self._build_expectation(expectation_configuration)
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
-            send_usage_event=send_usage_event,
             match_type=match_type,
             overwrite_existing=overwrite_existing,
         )
