@@ -35,7 +35,7 @@ Run the following code to create and assign the `gx_ro` role and allow GX Cloud 
    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;
 ```
 
-Replace `your_password` and `your_database` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
+Replace `your_password` and `your_database` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;` is optional and gives the `gx_ro` user access to all future tables in the defined schema.
 
 ## Get your GX Cloud access token and organization ID
 
