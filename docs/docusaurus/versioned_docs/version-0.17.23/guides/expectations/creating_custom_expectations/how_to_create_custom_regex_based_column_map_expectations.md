@@ -77,28 +77,28 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py ExpectColumnValuesToMatchSomeRegex class_def"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/regex_based_column_map_expectation_template.py ExpectColumnValuesToMatchSomeRegex class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py ExpectColumnValuesToOnlyContainVowels class_def"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py ExpectColumnValuesToOnlyContainVowels class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py docstring"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/regex_based_column_map_expectation_template.py docstring"
 ```
 
 with something like:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring"
 ```
 
 Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py diagnostics"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/regex_based_column_map_expectation_template.py diagnostics"
 ```
 
 with this one:
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
@@ -126,7 +126,7 @@ You're going to search for `examples = []` in your file, and replace it with at 
 
 Your examples will look similar to this example:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -172,24 +172,24 @@ In the case of your Custom `RegexBasedColumnMapExpectation`, Great Expectations 
 
 To do this, we replace these:
 
-```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py definition"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/regex_based_column_map_expectation_template.py definition"
 ```
 
 with something like this:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition"
 ```
 
 For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating.
 
 For example:
 
-```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py plural"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/regex_based_column_map_expectation_template.py plural"
 ```
 
 becomes:
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py plural"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py plural"
 ```
 
 Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
@@ -256,12 +256,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py library_metadata"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/regex_based_column_map_expectation_template.py library_metadata"
 ```
 
 would become
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py library_metadata"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
@@ -270,5 +270,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_values_to_only_contain_vowels.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py)
+- [expect_column_values_to_only_contain_vowels.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py)
 :::

@@ -6,7 +6,7 @@ from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
 from unittest import mock
 from unittest.mock import MagicMock, Mock
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -214,6 +214,36 @@ class TestCRUDMethods:
             value_set=[1, 2, 3],
             result_format="BASIC",
         )
+
+    @pytest.mark.unit
+    def test_instantiate_suite_with_expectations(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        columns = ["a", "b", "c", "d", "e"]
+        expectations = [
+            expectation.copy(update={"column": column}) for column in columns
+        ]
+        suite = ExpectationSuite(
+            name=self.expectation_suite_name, expectations=expectations
+        )
+        assert suite.expectations == expectations
+
+    @pytest.mark.unit
+    def test_instantiate_suite_fails_with_expectations_with_ids(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        columns = ["a", "b", "c", "d", "e"]
+        expectations = [
+            expectation.copy(update={"column": column, "id": uuid4()})
+            for column in columns
+        ]
+        with pytest.raises(
+            ValueError,
+            match="Expectations in parameter `expectations` must not belong to another ExpectationSuite.",
+        ):
+            ExpectationSuite(
+                name=self.expectation_suite_name, expectations=expectations
+            )
 
     @pytest.mark.unit
     def test_add_success_with_saved_suite(self, expectation):

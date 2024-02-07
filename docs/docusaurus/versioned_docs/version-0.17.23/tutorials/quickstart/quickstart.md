@@ -42,19 +42,19 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 2. Run the following Python code to import the `great_expectations` module:
 
-    ```python name="tutorials/quickstart/quickstart.py import_gx"
+    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py import_gx"
     ```
 ## Create a DataContext
 
 - Run the following command to import the existing `DataContext` object:
 
-    ```python name="tutorials/quickstart/quickstart.py get_context"
+    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py get_context"
     ```
 ## Connect to Data
 
 - Run the following command to connect to existing `.csv` data stored in the `great_expectations` GitHub repository:
 
-    ```python name="tutorials/quickstart/quickstart.py connect_to_data"
+    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
     The example code uses the default Data Context Data Source for Pandas to access the `.csv` data in the file at the specified `path`.
@@ -63,7 +63,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 - Run the following command to create two Expectations:
 
-    ```python name="tutorials/quickstart/quickstart.py create_expectation"
+    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py create_expectation"
     ```
 
 The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column.
@@ -72,17 +72,17 @@ The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be 
 
 1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations:
 
-    ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
+    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
 2. Run the following command to return the Validation results:
 
-    ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
+    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
 3. Run the following command to view an HTML representation of the Validation results:
 
-    ```python name="tutorials/quickstart/quickstart.py view_results"
+    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py view_results"
     ```
 
 ## Related documentation

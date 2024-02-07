@@ -22,7 +22,7 @@ def generate_data():
     chi2_df, chi2_loc, chi2_scale = 30, 3, 5
     expon_loc, expon_scale = 4.2, 10
 
-    np.random.seed(12345)
+    np.random.seed(12345)  # noqa: NPY002
     fixed = pd.DataFrame(
         {
             "norm": stats.norm.rvs(loc=norm_mean, scale=norm_std, size=500),
@@ -51,7 +51,7 @@ def generate_data():
     )
 
     # different seed for chi2
-    np.random.seed(123456)
+    np.random.seed(123456)  # noqa: NPY002
     fixed["chi2"] = stats.chi2.rvs(df=chi2_df, loc=chi2_loc, scale=chi2_scale, size=500)
 
     return fixed

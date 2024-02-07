@@ -13,14 +13,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py add datasource config"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/inferred_and_runtime_yaml_example_spark_s3.py add datasource config"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py add datasource config"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/connecting_to_your_data/cloud/s3/components_spark/inferred_and_runtime_python_example.py add datasource config"
 ```
 
 </TabItem>

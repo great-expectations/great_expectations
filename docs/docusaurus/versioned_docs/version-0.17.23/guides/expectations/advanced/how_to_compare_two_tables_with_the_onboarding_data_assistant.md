@@ -25,7 +25,7 @@ In this workflow, we will be making use of the `OnboardingDataAssistant` to prof
 
 To begin, we'll need to import Great Expectations and instantiate our <TechnicalTag tag="data_context" text="Data Context" />:
 
-```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py imports"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/data_assistant_cross_table_comparison.py imports"
 ```
 
 :::note
@@ -43,24 +43,24 @@ In order to profile our first table and validate our second table, we need to se
 
 In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Data Source" /> as our source data -- the data we trust to be correct.
 
-```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py mysql_batch_request"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/data_assistant_cross_table_comparison.py mysql_batch_request"
 ```
 
 From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Data Source.
 
-```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request"
 ```
 
 ## Profile source data
 
 We can now use the `OnboardingDataAssistant` to profile our MySQL data defined in the `mysql_batch_request` above.
 
-```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py run_assistant"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/data_assistant_cross_table_comparison.py run_assistant"
 ```
 
 And use the results from the Data Assistant to build and save an Expectation Suite:
 
-```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py build_suite"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/data_assistant_cross_table_comparison.py build_suite"
 ```
 
 <details>
@@ -81,14 +81,14 @@ Before we can validate our second table, we need to define a <TechnicalTag tag="
 
 We will pass both the `pg_batch_request` and the Expectation Suite defined above to this checkpoint.
 
-```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py checkpoint_config"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/data_assistant_cross_table_comparison.py checkpoint_config"
 ```
 
 ## Validation
 
 Finally, we can use our Checkpoint to validate that our two tables are identical:
 
-```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py run_checkpoint"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/data_assistant_cross_table_comparison.py run_checkpoint"
 ```
 
 If we now inspect the results of this Checkpoint (`results["success"]`), we can see that our Validation was successful!
