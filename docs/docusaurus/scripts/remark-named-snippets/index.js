@@ -20,11 +20,7 @@ Named snippets are defined with the following syntax:
 */
 const visit = require('unist-util-visit')
 const constructSnippetMap = require('./snippet')
-
-function getDirs () {
-  // Get all directories that should be processed
-  return ['./docs', './versioned_docs']
-}
+const { getDirs } = require('./common')
 
 function codeImport () {
   // Instantiated within the import so it can be hot-reloaded
