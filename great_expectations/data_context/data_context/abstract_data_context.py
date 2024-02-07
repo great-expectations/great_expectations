@@ -1716,6 +1716,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
         expectation_suite_id = self._resolve_id_and_ge_cloud_id(
             id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
         )
