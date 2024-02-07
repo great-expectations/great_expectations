@@ -1621,11 +1621,12 @@ class SqlExpectation(BatchExpectation, ABC):
 
         return query
 
+    @override
     def _validate(
         self,
         metrics: dict,
         runtime_configuration: dict | None = None,
-        execution_engine: ExecutionEngine = None,
+        execution_engine: ExecutionEngine | None = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metric_value = metrics["query.table"]
         return {
