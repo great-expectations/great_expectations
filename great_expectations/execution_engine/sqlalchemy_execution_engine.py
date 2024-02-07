@@ -43,7 +43,6 @@ from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import (
     MetricComputationConfiguration,
@@ -447,20 +446,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 # sqlite3.Connection (distinct from a sqlalchemy Connection).
                 _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
-
-        # Send a connect event to provide dialect type
-        if data_context is not None and getattr(
-            data_context, "_usage_statistics_handler", None
-        ):
-            handler = data_context._usage_statistics_handler
-            handler.send_usage_message(
-                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT,
-                event_payload={
-                    "anonymized_name": handler.anonymizer.anonymize(self.name),
-                    "sqlalchemy_dialect": self.engine.name,
-                },
-                success=True,
-            )
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,
         # and set the instance "_config" variable equal to the resulting dictionary.

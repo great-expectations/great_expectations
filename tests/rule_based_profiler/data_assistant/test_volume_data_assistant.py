@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pathlib
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, cast
-from unittest import mock
 
 import altair as alt
 import nbconvert
@@ -20,7 +19,6 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -1353,7 +1351,6 @@ def quentin_expected_expectation_suite(
         for expectation_configuration in expected_expectation_configurations:
             expected_expectation_suite._add_expectation(
                 expectation_configuration=expectation_configuration,
-                send_usage_event=False,
             )
 
         expected_expectation_suite_meta: Dict[str, Any] = {
@@ -1678,12 +1675,8 @@ def test_volume_data_assistant_result_serialization(
     assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 1.06s
 def test_volume_data_assistant_result_get_expectation_suite(
-    mock_emit,
     bobby_volume_data_assistant_result_usage_stats_enabled: VolumeDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
@@ -1695,15 +1688,6 @@ def test_volume_data_assistant_result_get_expectation_suite(
     )
 
     assert suite is not None and len(suite.expectations) > 0
-
-    assert mock_emit.call_count == 1
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
-    )
 
 
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
