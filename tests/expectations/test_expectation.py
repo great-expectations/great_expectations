@@ -1,36 +1,43 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.fluent.interfaces import Batch
-from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations import expectation
-from great_expectations.expectations.expectation import NoUnexpectedQueryRowsExpectation
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    ColumnPairMapExpectation,
+    MulticolumnMapExpectation,
+    NoUnexpectedQueryRowsExpectation,
+    _validate_dependencies_against_available_metrics,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 
-class FakeMulticolumnExpectation(expectation.MulticolumnMapExpectation):
+
+class FakeMulticolumnExpectation(MulticolumnMapExpectation):
     map_metric = "fake_multicol_metric"
 
 
-class FakeColumnMapExpectation(expectation.ColumnMapExpectation):
+class FakeColumnMapExpectation(ColumnMapExpectation):
     map_metric = "fake_col_metric"
 
 
-class FakeColumnPairMapExpectation(expectation.ColumnPairMapExpectation):
+class FakeColumnPairMapExpectation(ColumnPairMapExpectation):
     map_metric = "fake_pair_metric"
 
 
@@ -194,7 +201,7 @@ def test_validate_dependencies_against_available_metrics_success(metrics_dict):
             "column": "i_exist",
         },
     )
-    expectation._validate_dependencies_against_available_metrics(
+    _validate_dependencies_against_available_metrics(
         validation_dependencies=metric_config_list,
         metrics=metrics_dict,
     )
@@ -210,7 +217,7 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
         },
     )
     with pytest.raises(InvalidExpectationConfigurationError):
-        expectation._validate_dependencies_against_available_metrics(
+        _validate_dependencies_against_available_metrics(
             validation_dependencies=metric_config_list,
             metrics=metrics_dict,
         )
