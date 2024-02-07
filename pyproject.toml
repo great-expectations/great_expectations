@@ -166,7 +166,6 @@ module = [
     "contrib.experimental.great_expectations_experimental.*",
     "great_expectations.checkpoint.checkpoint",
     "great_expectations.compatibility.docstring_parser",
-    "great_expectations.core.usage_statistics.*",
     "great_expectations.data_context.*",
     "great_expectations.dataset.*",
     "great_expectations.datasource.data_connector.*",

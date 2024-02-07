@@ -185,7 +185,7 @@ class ProjectManager:
             "ephemeral": EphemeralDataContext,
             "file": FileDataContext,
             "cloud": CloudDataContext,
-            None: AbstractDataContext,
+            None: AbstractDataContext,  # type: ignore[type-abstract]
         }
 
         context_fn_map: dict[ContextModes | None, Callable] = {
