@@ -15,12 +15,6 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-    get_profiler_run_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
@@ -106,7 +100,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional[AbstractDataContext] = None,
-        usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
         catch_exceptions: bool = False,
     ) -> None:
         """
@@ -146,8 +139,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             variables_configs=variables
         )
         self.variables = _variables
-
-        self._usage_statistics_handler = usage_statistics_handler
 
         self._data_context = data_context
 
@@ -243,10 +234,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
-        args_payload_fn=get_profiler_run_usage_statistics,
-    )
     def run(  # noqa: PLR0913
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -387,7 +374,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 for rule_state in self.rule_states
                 if rule_state.exception_traceback
             },
-            _usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
@@ -1632,14 +1618,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             rules=rules,
         )
 
-        usage_statistics_handler: Optional[UsageStatisticsHandler] = None
-        if data_context:
-            usage_statistics_handler = data_context.usage_statistics_handler
-
         super().__init__(
             profiler_config=profiler_config,
             data_context=data_context,
-            usage_statistics_handler=usage_statistics_handler,
             catch_exceptions=catch_exceptions,
         )
 

@@ -9,9 +9,6 @@ import pytest
 
 from great_expectations import get_context, project_manager
 from great_expectations.core.config_provider import _ConfigurationProvider
-from great_expectations.core.usage_statistics.usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -36,6 +33,9 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+)
+from tests.data_context.conftest import (
+    USAGE_STATISTICS_QA_URL,
 )
 
 yaml = YAMLHandler()

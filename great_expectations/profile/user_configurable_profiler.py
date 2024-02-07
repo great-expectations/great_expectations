@@ -11,8 +11,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
 from great_expectations.execution_engine import (
@@ -249,53 +247,7 @@ class UserConfigurableProfiler:
         else:
             expectation_suite = self._profile_and_build_expectation_suite()
 
-        self._send_usage_stats_message()
-
         return expectation_suite
-
-    def _send_usage_stats_message(self) -> None:
-        profile_dataset_type: str = str(type(self.profile_dataset))
-        if "Dataset" in profile_dataset_type:
-            profile_dataset_type = "Dataset"
-        elif "Batch" in profile_dataset_type:
-            profile_dataset_type = "Batch"
-        elif "Validator" in profile_dataset_type:
-            profile_dataset_type = "Validator"
-        else:
-            raise ValueError(
-                f"""The "profile_dataset_type" property must be one of "Dataset", "Batch", or "Validator" objects. The \
-type detected is "{type(self.profile_dataset)!s}", which is illegal.
-"""
-            )
-
-        event_payload: dict = {
-            "profile_dataset_type": profile_dataset_type,
-            "excluded_expectations_specified": self.excluded_expectations is not None
-            and isinstance(self.excluded_expectations, list)
-            and len(self.excluded_expectations) > 0,
-            "ignored_columns_specified": self.ignored_columns is not None
-            and isinstance(self.ignored_columns, list)
-            and len(self.ignored_columns) > 0,
-            "not_null_only": self.not_null_only,
-            "primary_or_compound_key_specified": self.primary_or_compound_key
-            is not None
-            and isinstance(self.primary_or_compound_key, list)
-            and len(self.primary_or_compound_key) > 0,
-            "semantic_types_dict_specified": self.semantic_types_dict is not None
-            and isinstance(self.semantic_types_dict, dict)
-            and len(self.semantic_types_dict.keys()) > 0,
-            "table_expectations_only": self.table_expectations_only,
-            "value_set_threshold_specified": self.value_set_threshold is not None
-            and isinstance(self.value_set_threshold, str)
-            and len(self.value_set_threshold) > 0,
-        }
-        send_usage_message(
-            data_context=self.profile_dataset._data_context,
-            event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE,
-            event_payload=event_payload,
-            api_version="v2",
-            success=True,
-        )
 
     def _build_expectation_suite_from_semantic_types_dict(self):
         """
