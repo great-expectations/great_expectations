@@ -14,8 +14,8 @@
   --ifm-color-danger-contrast-background: #FEF6F9;
   --ifm-color-danger-dark: #E54F54;
 
-  --ifm-color-secondary-contrast-background: transparent;
-  --ifm-color-secondary-dark: var(--ifm-color-primary);
+  --color-cta-contrast-background: transparent;
+  --color-cta-secondary-dark: var(--ifm-color-primary);
 }
 
 .alert {
@@ -48,7 +48,21 @@
   }
 
   &--secondary {
-    border-width: 3px;
     border-left-width: var(--ifm-alert-border-left-width);
+  }
+
+  &.theme-admonition-cta {
+    background-color: var(--color-cta-contrast-background);
+    border: 3px solid var(--color-cta-secondary-dark);
+    border-left-width: var(--ifm-alert-border-left-width);
+
+    a.cta {
+      background-color: var(--color-cta-secondary-dark);
+      border-radius: 35px;
+      color: white;
+      font-weight: var(--ifm-font-weight-semibold);
+      padding: 0.5em 3em;
+      text-decoration: none;
+    }
   }
 }

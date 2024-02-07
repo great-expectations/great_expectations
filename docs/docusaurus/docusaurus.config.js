@@ -242,7 +242,7 @@ module.exports = {
     },
     mermaid: {
       theme: {light: "neutral", dark: "neutral"},
-    }
+    },
   },
   themes: ['@docusaurus/theme-mermaid'],
 
@@ -265,7 +265,10 @@ module.exports = {
               label: '0.17.23',
               path: '0.17.23'
             }
-          }
+          },
+          admonitions: {
+            keywords: ['note', 'info', 'tip', 'warning', 'danger', 'cta'],
+          },
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss'),
