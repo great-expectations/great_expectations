@@ -232,7 +232,7 @@ module.exports = {
           versions: {
             ['0.18']: {
               label: '0.18.8',
-              path: '0.18.8'
+              path: ''
             }
           }
         },
