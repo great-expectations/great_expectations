@@ -86,6 +86,7 @@ class DocsBuilder:
         os.chdir("..")  # TODO: none of this messing with current directory stuff
         prepend_version_info_to_name_for_snippet_by_name_references(version)
         os.chdir("docusaurus")
+        self._write_release_version(old_version_file)
 
     def _prepare(self) -> None:
         """A whole bunch of common work we need"""
