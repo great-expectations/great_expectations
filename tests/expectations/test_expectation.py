@@ -13,7 +13,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ColumnPairMapExpectation,
     MulticolumnMapExpectation,
-    NoUnexpectedQueryRowsExpectation,
+    UnexpectedRowsQueryExpectation,
     _validate_dependencies_against_available_metrics,
 )
 from great_expectations.expectations.expectation_configuration import (
@@ -278,9 +278,9 @@ def test_unrecognized_expectation_arg_raises_error():
         pytest.param("SELECT * FROM {batch}", id="invalid batch syntax 2"),
     ],
 )
-def test_no_unexpected_query_rows_expectation_invalid_query_raises_error(query: str):
+def test_unexpected_rows_query_expectation_invalid_query_raises_error(query: str):
     with pytest.raises(pydantic.ValidationError):
-        NoUnexpectedQueryRowsExpectation(unexpected_rows_query=query)
+        UnexpectedRowsQueryExpectation(unexpected_rows_query=query)
 
 
 @pytest.fixture
@@ -352,7 +352,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
         ),
     ],
 )
-def test_no_unexpected_query_rows_expectation_validate(
+def test_unexpected_rows_query_expectation_validate(
     sqlite_batch: Batch,
     query: str,
     expected_success: bool,
@@ -361,7 +361,7 @@ def test_no_unexpected_query_rows_expectation_validate(
 ):
     batch = sqlite_batch
 
-    expectation = NoUnexpectedQueryRowsExpectation(unexpected_rows_query=query)
+    expectation = UnexpectedRowsQueryExpectation(unexpected_rows_query=query)
     result = batch.validate(expectation)
 
     assert result.success is expected_success
