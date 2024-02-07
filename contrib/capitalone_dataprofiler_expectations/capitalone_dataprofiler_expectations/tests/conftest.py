@@ -128,11 +128,6 @@ def pytest_addoption(parser):
         help="If set, execute tests against snowflake",
     )
     parser.addoption(
-        "--aws-integration",
-        action="store_true",
-        help="If set, run aws integration tests for usage_statistics",
-    )
-    parser.addoption(
         "--docs-tests",
         action="store_true",
         help="If set, run integration tests for docs",

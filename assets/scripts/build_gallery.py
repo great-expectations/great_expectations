@@ -737,7 +737,7 @@ def _disable_progress_bars() -> Tuple[str, FileDataContext]:
         os.path.sep, "tmp", f"gx-context-{os.getpid()}"
     )
     os.makedirs(context_dir)  # noqa: PTH103
-    context = FileDataContext.create(context_dir, usage_statistics_enabled=False)
+    context = FileDataContext.create(context_dir)
     context.variables.progress_bars = {
         "globally": False,
         "metric_calculations": False,
