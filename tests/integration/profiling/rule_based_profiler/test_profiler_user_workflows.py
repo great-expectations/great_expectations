@@ -49,10 +49,6 @@ from great_expectations.rule_based_profiler.parameter_container import Parameter
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 
 if TYPE_CHECKING:
@@ -406,10 +402,6 @@ def test_alice_profiler_user_workflow_single_batch(
     )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 # noinspection PyUnusedLocal
 @pytest.mark.slow  # 1.16s
@@ -756,10 +748,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 class HasStaticDefaultProfiler(Protocol):
     default_profiler_config: RuleBasedProfilerConfig
@@ -918,10 +906,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
@@ -1068,7 +1052,3 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         }
     )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)

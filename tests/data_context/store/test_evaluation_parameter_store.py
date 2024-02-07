@@ -24,10 +24,6 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from tests import test_utils
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 
 
 @pytest.fixture(
@@ -399,7 +395,3 @@ class_name: EvaluationParameterStore
             }
         ),
     ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)

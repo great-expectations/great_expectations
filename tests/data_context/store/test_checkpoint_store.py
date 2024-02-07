@@ -23,10 +23,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 from tests.test_utils import build_checkpoint_store_using_filesystem
 
 logger = logging.getLogger(__name__)
@@ -281,10 +277,6 @@ store_backend:
             }
         ),
     ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.cloud

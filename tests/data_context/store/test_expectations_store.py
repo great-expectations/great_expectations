@@ -14,10 +14,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 
 
 @pytest.mark.filesystem
@@ -237,10 +233,6 @@ store_backend:
             }
         ),
     ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.cloud

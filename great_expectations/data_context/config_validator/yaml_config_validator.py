@@ -18,10 +18,6 @@ from ruamel.yaml import YAML
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-    DatasourceAnonymizer,
-)
 from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -343,11 +339,7 @@ class _YamlConfigValidator:
         store_name = instantiated_class.store_name or store_name
         self._data_context.config["stores"][store_name] = config
 
-        anonymizer = Anonymizer(self._data_context.data_context_id)
-        usage_stats_event_payload = anonymizer.anonymize(
-            store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
-        )
-        return instantiated_class, usage_stats_event_payload
+        return instantiated_class, {}
 
     def _test_instantiation_of_datasource_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
@@ -366,22 +358,7 @@ class _YamlConfigValidator:
             )
         )
 
-        anonymizer = Anonymizer(self._data_context.data_context_id)
-
-        if class_name == "SimpleSqlalchemyDatasource":
-            # Use the raw config here, defaults will be added in the anonymizer
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=datasource_name, config=config  # type: ignore[arg-type]
-            )
-        else:
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            datasource_config = datasourceConfigSchema.load(instantiated_class.config)
-            full_datasource_config = datasourceConfigSchema.dump(datasource_config)
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class,
-                name=datasource_name,  # type: ignore[arg-type]
-                config=full_datasource_config,
-            )
+        usage_stats_event_payload = {}
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_checkpoint_from_yaml_config(
@@ -414,13 +391,7 @@ class _YamlConfigValidator:
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        anonymizer = Anonymizer(self._data_context.data_context_id)
-
-        usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config_dict  # type: ignore[arg-type]
-        )
-
-        return instantiated_class, usage_stats_event_payload
+        return instantiated_class, {}
 
     def _test_instantiation_of_data_connector_from_yaml_config(
         self,
@@ -434,9 +405,6 @@ class _YamlConfigValidator:
         See `test_yaml_config` for more details.
         """
         print(f"\tInstantiating as a DataConnector, since class_name is {class_name}")
-        data_connector_name: str = (
-            name or config.get("name") or "my_temp_data_connector"
-        )
         instantiated_class = instantiate_class_from_config(
             config=config,
             runtime_environment={
@@ -448,12 +416,7 @@ class _YamlConfigValidator:
             config_defaults={},
         )
 
-        anonymizer = Anonymizer(self._data_context.data_context_id)
-
-        usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=data_connector_name, config=config  # type: ignore[arg-type]
-        )
-        return instantiated_class, usage_stats_event_payload
+        return instantiated_class, {}
 
     def _test_instantiation_of_profiler_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
@@ -481,13 +444,7 @@ class _YamlConfigValidator:
             },
         )
 
-        anonymizer = Anonymizer(self._data_context.data_context_id)
-
-        usage_stats_event_payload: dict = anonymizer.anonymize(
-            obj=instantiated_class, name=profiler_name, config=profiler_config  # type: ignore[arg-type]
-        )
-
-        return instantiated_class, usage_stats_event_payload
+        return instantiated_class, {}
 
     def _test_instantiation_of_misc_class_from_yaml_config(
         self,
@@ -515,81 +472,4 @@ class _YamlConfigValidator:
             config_defaults={},
         )
 
-        # If a subclass of a supported type, find the parent class and anonymize
-        anonymizer = Anonymizer(self._data_context.data_context_id)
-
-        parent_class_from_object = anonymizer.get_parent_class(
-            object_=instantiated_class
-        )
-        parent_class_from_config = anonymizer.get_parent_class(object_config=config)
-
-        if parent_class_from_object is not None and parent_class_from_object.endswith(
-            "Store"
-        ):
-            store_name: str = name or config.get("name") or "my_temp_store"
-            store_name = instantiated_class.store_name or store_name
-            usage_stats_event_payload = anonymizer.anonymize(
-                store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
-            )
-        elif parent_class_from_config is not None and parent_class_from_config.endswith(
-            "Datasource"
-        ):
-            datasource_name: str = name or config.get("name") or "my_temp_datasource"
-            if DatasourceAnonymizer.get_parent_class_v3_api(config=config):
-                # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-                datasource_config = datasourceConfigSchema.load(
-                    instantiated_class.config
-                )
-                full_datasource_config = datasourceConfigSchema.dump(datasource_config)
-            else:
-                # for v2 api
-                full_datasource_config = config
-            if parent_class_from_config == "SimpleSqlalchemyDatasource":
-                # Use the raw config here, defaults will be added in the anonymizer
-                usage_stats_event_payload = anonymizer.anonymize(
-                    obj=instantiated_class, name=datasource_name, config=config  # type: ignore[arg-type]
-                )
-            else:
-                usage_stats_event_payload = anonymizer.anonymize(
-                    obj=instantiated_class,
-                    name=datasource_name,  # type: ignore[arg-type]
-                    config=full_datasource_config,
-                )
-
-        elif parent_class_from_config is not None and parent_class_from_config.endswith(
-            "Checkpoint"
-        ):
-            checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            checkpoint_config: Union[CheckpointConfig, dict]
-            checkpoint_config = CheckpointConfig.from_commented_map(
-                commented_map=config
-            )
-            checkpoint_config_dict: dict[
-                str, JSONValues
-            ] = checkpoint_config.to_json_dict()
-            checkpoint_config_dict.update({"name": checkpoint_name})
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=checkpoint_config_dict, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
-            )
-
-        elif parent_class_from_config is not None and parent_class_from_config.endswith(
-            "DataConnector"
-        ):
-            data_connector_name: str = (
-                name or config.get("name") or "my_temp_data_connector"
-            )
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=data_connector_name, config=config  # type: ignore[arg-type]
-            )
-
-        else:
-            # If class_name is not a supported type or subclass of a supported type,
-            # mark it as custom with no additional information since we can't anonymize
-            usage_stats_event_payload[
-                "diagnostic_info"
-            ] = usage_stats_event_payload.get("diagnostic_info", []) + [
-                "__custom_subclass_not_core_ge__"
-            ]
-
-        return instantiated_class, usage_stats_event_payload
+        return instantiated_class, {}
