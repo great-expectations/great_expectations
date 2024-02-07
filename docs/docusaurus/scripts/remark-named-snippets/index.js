@@ -19,15 +19,9 @@ Named snippets are defined with the following syntax:
 ```
 */
 const visit = require('unist-util-visit')
-const glob = require('glob')
 const path = require('path')
 const constructSnippetMap = require('./snippet')
-
-function getDirs () {
-  const currentDocs = 'docs'
-  const versionedDocs = glob.sync('versioned_docs/*')
-  return [currentDocs, ...versionedDocs]
-}
+const { getDirs } = require('./common')
 
 function codeImport () {
   // Instantiated within the import so it can be hot-reloaded

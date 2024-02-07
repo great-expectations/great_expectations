@@ -1,6 +1,7 @@
 const fs = require('fs')
 const glob = require('glob')
 const htmlparser2 = require('htmlparser2')
+const { getDirs } = require('./common')
 
 /**
  * Constructs a map associating names with snippets by parsing source code.
@@ -158,25 +159,6 @@ function sanitizeText(text) {
     .trim()
 }
 
-/**
- * Organize parsed snippets by source filename.
- * If provided, input filenames will filter this output.
- *
- * Note that this is what is run if this file is invoked by Node.
- * An alias `yarn snippet-check` is defined in `package.json` for convenience.
- */
-function getDirs() {
-  // Get all directories that should be processed
-  const manualDirs = ['../../great_expectations', '../../tests']
-  const versionDirs = glob.sync('versioned_code/*/')
-  // remove v0.14.13 from processing since it does not use named snippets
-  const index = versionDirs.indexOf('versioned_code/version-0.14.13/')
-  if (index !== -1) {
-    versionDirs.splice(index, 1)
-  }
-  return manualDirs.concat(versionDirs)
-}
-
 function processVerbose() {
   const args = process.argv.slice(2)
 
@@ -188,6 +170,13 @@ function processVerbose() {
   return verbose
 }
 
+/**
+ * Organize parsed snippets by source filename.
+ * If provided, input filenames will filter this output.
+ *
+ * Note that this is what is run if this file is invoked by Node.
+ * An alias `yarn snippet-check` is defined in `package.json` for convenience.
+ */
 function main(verbose = false) {
   let argNum = 2
   if (verbose) { argNum = 3 }
