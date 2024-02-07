@@ -12,7 +12,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -110,7 +110,7 @@ class _YamlConfigValidator:
     def config_variables(self):
         return self._data_context.config_variables
 
-    def test_yaml_config(  # noqa: C901, PLR0912, PLR0913
+    def test_yaml_config(  # noqa: PLR0912, PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,
@@ -169,22 +169,17 @@ class _YamlConfigValidator:
             **self.runtime_environment,
         }
 
-        usage_stats_event_name: str = "data_context.test_yaml_config"
-
         # Based on the particular object type we are attempting to instantiate,
         # we may need the original config, the substituted config, or both.
-        config = self._test_yaml_config_prepare_config(
-            yaml_config=yaml_config, usage_stats_event_name=usage_stats_event_name
-        )
+        config = self._test_yaml_config_prepare_config(yaml_config=yaml_config)
         config_with_substitutions = self._test_yaml_config_prepare_substituted_config(
-            yaml_config, runtime_environment, usage_stats_event_name
+            yaml_config, runtime_environment
         )
 
         if "class_name" in config:
             class_name = config["class_name"]
 
         instantiated_class: Any = None
-        usage_stats_event_payload: dict[str, Union[str, List[str]]] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")
@@ -192,14 +187,12 @@ class _YamlConfigValidator:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
                 (
                     instantiated_class,
-                    usage_stats_event_payload,
                 ) = self._test_instantiation_of_store_from_yaml_config(
                     name=name, class_name=class_name, config=config_with_substitutions
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
                 (
                     instantiated_class,
-                    usage_stats_event_payload,
                 ) = self._test_instantiation_of_datasource_from_yaml_config(
                     name=name,
                     class_name=class_name,
@@ -208,14 +201,12 @@ class _YamlConfigValidator:
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
                 (
                     instantiated_class,
-                    usage_stats_event_payload,
                 ) = self._test_instantiation_of_checkpoint_from_yaml_config(
                     name=name, class_name=class_name, config=config_with_substitutions
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
                 (
                     instantiated_class,
-                    usage_stats_event_payload,
                 ) = self._test_instantiation_of_data_connector_from_yaml_config(
                     name=name,
                     class_name=class_name,
@@ -225,19 +216,16 @@ class _YamlConfigValidator:
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
                 (
                     instantiated_class,
-                    usage_stats_event_payload,
                 ) = self._test_instantiation_of_profiler_from_yaml_config(
                     name=name, class_name=class_name, config=config_with_substitutions
                 )
             else:
                 (
                     instantiated_class,
-                    usage_stats_event_payload,
                 ) = self._test_instantiation_of_misc_class_from_yaml_config(
                     name=name,
                     config=config_with_substitutions,
                     runtime_environment=runtime_environment,
-                    usage_stats_event_payload=usage_stats_event_payload,
                 )
 
             if pretty_print:
@@ -255,36 +243,19 @@ class _YamlConfigValidator:
             return report_object
 
         except Exception as e:
-            if class_name is None:
-                usage_stats_event_payload[
-                    "diagnostic_info"
-                ] = usage_stats_event_payload.get(
-                    "diagnostic_info", []
-                ) + [  # type: ignore[operator]
-                    "__class_name_not_provided__"
-                ]
-            elif (
-                usage_stats_event_payload.get("parent_class") is None
-                and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
-            ):
-                # add parent_class if it doesn't exist and class_name is one of our supported core GX types
-                usage_stats_event_payload["parent_class"] = class_name
             if shorten_tracebacks:
                 traceback.print_exc(limit=1)
             else:
                 raise e
 
-    def _test_yaml_config_prepare_config(
-        self, yaml_config: str, usage_stats_event_name: str
-    ) -> CommentedMap:
+    def _test_yaml_config_prepare_config(self, yaml_config: str) -> CommentedMap:
         config = self._load_config_string_as_commented_map(
             config_str=yaml_config,
-            usage_stats_event_name=usage_stats_event_name,
         )
         return config
 
     def _test_yaml_config_prepare_substituted_config(
-        self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
+        self, yaml_config: str, runtime_environment: dict
     ) -> CommentedMap:
         """
         Performs variable substitution and conversion from YAML to CommentedMap.
@@ -294,17 +265,15 @@ class _YamlConfigValidator:
             self._prepare_config_string_with_substituted_variables(
                 yaml_config=yaml_config,
                 runtime_environment=runtime_environment,
-                usage_stats_event_name=usage_stats_event_name,
             )
         )
         config = self._load_config_string_as_commented_map(
             config_str=config_str_with_substituted_variables,
-            usage_stats_event_name=usage_stats_event_name,
         )
         return config
 
     def _prepare_config_string_with_substituted_variables(
-        self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
+        self, yaml_config: str, runtime_environment: dict
     ) -> str:
         config_provider = self._data_context.config_provider
         config_values = config_provider.get_values()
@@ -317,15 +286,13 @@ class _YamlConfigValidator:
             config=yaml_config, config_values=config_values
         )
 
-    def _load_config_string_as_commented_map(
-        self, config_str: str, usage_stats_event_name: str
-    ) -> CommentedMap:
+    def _load_config_string_as_commented_map(self, config_str: str) -> CommentedMap:
         substituted_config: CommentedMap = yaml.load(config_str)
         return substituted_config
 
     def _test_instantiation_of_store_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Tuple[Store, dict]:
+    ) -> Store:
         """
         Helper to create store instance and update usage stats payload.
         See `test_yaml_config` for more details.
@@ -339,11 +306,11 @@ class _YamlConfigValidator:
         store_name = instantiated_class.store_name or store_name
         self._data_context.config["stores"][store_name] = config
 
-        return instantiated_class, {}
+        return instantiated_class
 
     def _test_instantiation_of_datasource_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Tuple[Datasource, dict]:
+    ) -> Datasource:
         """
         Helper to create datasource instance and update usage stats payload.
         See `test_yaml_config` for more details.
@@ -358,11 +325,11 @@ class _YamlConfigValidator:
             )
         )
 
-        return instantiated_class, {}
+        return instantiated_class
 
     def _test_instantiation_of_checkpoint_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Tuple[Checkpoint, dict]:
+    ) -> Checkpoint:
         """
         Helper to create checkpoint instance and update usage stats payload.
         See `test_yaml_config` for more details.
@@ -390,7 +357,7 @@ class _YamlConfigValidator:
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        return instantiated_class, {}
+        return instantiated_class
 
     def _test_instantiation_of_data_connector_from_yaml_config(
         self,
@@ -398,7 +365,7 @@ class _YamlConfigValidator:
         class_name: str,
         config: CommentedMap,
         runtime_environment: dict,
-    ) -> Tuple[DataConnector, dict]:
+    ) -> DataConnector:
         """
         Helper to create data connector instance and update usage stats payload.
         See `test_yaml_config` for more details.
@@ -415,11 +382,11 @@ class _YamlConfigValidator:
             config_defaults={},
         )
 
-        return instantiated_class, {}
+        return instantiated_class
 
     def _test_instantiation_of_profiler_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Tuple[RuleBasedProfiler, dict]:
+    ) -> RuleBasedProfiler:
         """
         Helper to create profiler instance and update usage stats payload.
         See `test_yaml_config` for more details.
@@ -443,15 +410,14 @@ class _YamlConfigValidator:
             },
         )
 
-        return instantiated_class, {}
+        return instantiated_class
 
     def _test_instantiation_of_misc_class_from_yaml_config(
         self,
         name: Optional[str],
         config: CommentedMap,
         runtime_environment: dict,
-        usage_stats_event_payload: dict,
-    ) -> Tuple[Any, dict]:
+    ) -> Any:
         """
         Catch-all to cover all classes not covered in other `_test_instantiation` methods.
         Attempts to match config to the relevant class/parent and update usage stats payload.
@@ -471,4 +437,4 @@ class _YamlConfigValidator:
             config_defaults={},
         )
 
-        return instantiated_class, {}
+        return instantiated_class
