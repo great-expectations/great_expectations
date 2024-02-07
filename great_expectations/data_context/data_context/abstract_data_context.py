@@ -1590,6 +1590,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Checkpoint.
         """
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
         result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(
             checkpoint
         )

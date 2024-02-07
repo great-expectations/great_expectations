@@ -121,6 +121,7 @@ class BaseCheckpoint(ConfigPeer):
 
         self._validator: Validator | None = None
 
+    @public_api
     @new_argument(
         argument_name="expectation_suite_ge_cloud_id",
         version="0.13.33",
