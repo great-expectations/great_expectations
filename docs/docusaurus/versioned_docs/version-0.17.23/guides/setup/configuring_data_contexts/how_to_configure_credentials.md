@@ -20,12 +20,12 @@ The quickest way to get started is by setting up your credentials as environment
 
 First set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
+```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
 ```
 
 These can then be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
+```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
 ```
 
 
@@ -47,7 +47,7 @@ A more advanced option is to use the config variables YAML file. YAML files make
 
 If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml``:
 
-```yaml name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
+```yaml name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
 ```
 
 :::note
@@ -59,13 +59,13 @@ If using a YAML file, save desired credentials or config values to ``great_expec
 
 Then the config variable can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
+```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
 ```
 
 ## Additional Notes
 
 - The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments using  ``FileSystemDataContexts``.
-- To view the full script used in this page, see it on GitHub: [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py)
+- To view the full script used in this page, see it on GitHub: [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py)
 
 </TabItem>
 <TabItem value="secret-manager">

@@ -20,22 +20,22 @@
             {
               "type": "link",
               "label": "Request a GX Cloud Beta account",
-              "href": "/docs/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account"
+              "href": "/docs/0.17.23/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account"
             },
             {
               "type": "link",
               "label": "Prepare your environment",
-              "href": "/docs/cloud/set_up_gx_cloud#prepare-your-environment"
+              "href": "/docs/0.17.23/cloud/set_up_gx_cloud#prepare-your-environment"
             },
             {
               "type": "link",
               "label": "Get your user access token and organization ID",
-              "href": "/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id"
+              "href": "/docs/0.17.23/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id"
             },
             {
               "type": "link",
               "label": "Set the environment variables and start the GX Cloud agent",
-              "href": "/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent"
+              "href": "/docs/0.17.23/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent"
             }
           ]
         },
@@ -61,22 +61,22 @@
             {
               "type": "link",
               "label": "Create a Data Asset",
-              "href": "/docs/cloud/data_assets/manage_data_assets#create-a-data-asset"
+              "href": "/docs/0.17.23/cloud/data_assets/manage_data_assets#create-a-data-asset"
             },
             {
               "type": "link",
               "label": "View Data Asset metrics",
-              "href": "/docs/cloud/data_assets/manage_data_assets#view-data-asset-metrics"
+              "href": "/docs/0.17.23/cloud/data_assets/manage_data_assets#view-data-asset-metrics"
             },
             {
               "type": "link",
               "label": "Edit a Data Asset",
-              "href": "/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset"
+              "href": "/docs/0.17.23/cloud/data_assets/manage_data_assets#edit-a-data-asset"
             },
             {
               "type": "link",
               "label": "Delete a Data Asset",
-              "href": "/docs/cloud/data_assets/manage_data_assets#delete-a-data-asset"
+              "href": "/docs/0.17.23/cloud/data_assets/manage_data_assets#delete-a-data-asset"
             }
           ]
         },
@@ -91,17 +91,17 @@
             {
               "type": "link",
               "label": "Add an Expectation",
-              "href": "/docs/cloud/expectations/manage_expectations#create-an-expectation"
+              "href": "/docs/0.17.23/cloud/expectations/manage_expectations#create-an-expectation"
             },
             {
               "type": "link",
               "label": "Edit an Expectation",
-              "href": "/docs/cloud/expectations/manage_expectations#edit-an-expectation"
+              "href": "/docs/0.17.23/cloud/expectations/manage_expectations#edit-an-expectation"
             },
             {
               "type": "link",
               "label": "Delete an Expectation",
-              "href": "/docs/cloud/expectations/manage_expectations#delete-an-expectation"
+              "href": "/docs/0.17.23/cloud/expectations/manage_expectations#delete-an-expectation"
             }
           ]
         },
@@ -116,17 +116,17 @@
             {
               "type": "link",
               "label": "Automatically create an Expectation Suite that tests for missing data",
-              "href": "/docs/cloud/expectation_suites/manage_expectation_suites#automatically-create-an-expectation-suite-that-tests-for-missing-data"
+              "href": "/docs/0.17.23/cloud/expectation_suites/manage_expectation_suites#automatically-create-an-expectation-suite-that-tests-for-missing-data"
             },
             {
               "type": "link",
               "label": "Manually create an empty Expectation Suite ",
-              "href": "/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite"
+              "href": "/docs/0.17.23/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite"
             },
             {
               "type": "link",
               "label": "Delete an Expectation Suite",
-              "href": "/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite"
+              "href": "/docs/0.17.23/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite"
             }
           ]
         },
@@ -141,12 +141,12 @@
             {
               "type": "link",
               "label": "Run a Validation",
-              "href": "/docs/cloud/validations/manage_validations#run-a-validation"
+              "href": "/docs/0.17.23/cloud/validations/manage_validations#run-a-validation"
             },
             {
               "type": "link",
               "label": "View Validation run history",
-              "href": "/docs/cloud/validations/manage_validations#view-validation-run-history"
+              "href": "/docs/0.17.23/cloud/validations/manage_validations#view-validation-run-history"
             }
           ]
         },
@@ -161,22 +161,22 @@
             {
               "type": "link",
               "label": "Add a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint"
+              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#add-a-checkpoint"
             },
             {
               "type": "link",
               "label": "Run a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint"
+              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#run-a-checkpoint"
             },
             {
               "type": "link",
               "label": "Edit a Checkpoint configuration",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration"
+              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration"
             },
             {
               "type": "link",
               "label": "Delete a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint"
+              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint"
             }
           ]
         },
@@ -191,32 +191,32 @@
             {
               "type": "link",
               "label": "Invite a user",
-              "href": "/docs/cloud/users/manage_users#invite-a-user"
+              "href": "/docs/0.17.23/cloud/users/manage_users#invite-a-user"
             },
             {
               "type": "link",
               "label": "Edit a user role",
-              "href": "/docs/cloud/users/manage_users#edit-a-user-role"
+              "href": "/docs/0.17.23/cloud/users/manage_users#edit-a-user-role"
             },
             {
               "type": "link",
               "label": "Delete a user",
-              "href": "/docs/cloud/users/manage_users#delete-a-user"
+              "href": "/docs/0.17.23/cloud/users/manage_users#delete-a-user"
             },
             {
               "type": "link",
               "label": "Create a user access token",
-              "href": "/docs/cloud/users/manage_users#create-a-user-access-token"
+              "href": "/docs/0.17.23/cloud/users/manage_users#create-a-user-access-token"
             },
             {
               "type": "link",
               "label": "Create an organization access token",
-              "href": "/docs/cloud/users/manage_users#create-an-organization-access-token"
+              "href": "/docs/0.17.23/cloud/users/manage_users#create-an-organization-access-token"
             },
             {
               "type": "link",
               "label": "Delete a user or organization access token",
-              "href": "/docs/cloud/users/manage_users#delete-a-user-or-organization-access-token"
+              "href": "/docs/0.17.23/cloud/users/manage_users#delete-a-user-or-organization-access-token"
             }
           ]
         }
