@@ -14,7 +14,7 @@ You may provide the following key/value pairs in your Data Asset configuration t
 
 For example, imagine that you have a copy of the 2020 NYC taxi data in a table called `yellow_tripdata_sample_2020`, along with a public schema.  You could access this data by defining an entry in the `assets` dictionary like:
 
-```python name="configured sql data asset single batch"
+```python name="version-0.17.23 configured sql data asset single batch"
 ```
 
 
@@ -28,7 +28,7 @@ The configuration we provided above does not include a `splitter_method`, and th
 
 Alternatively, you could define a Data Asset that is split into Batches based on the year and month by defining the `splitter_method` to be `split_on_year_and_month` and providing a Datetime column. (In the case of the NYC taxi data, this would be the `pickup_datetime` column.)  Creating a Data Asset like this would result in the following key/value pair in your `assets` dictionary:
 
-```python name="configured sql data asset multi batch"
+```python name="version-0.17.23 configured sql data asset multi batch"
 ```
 
 If you included both of these Data Assets, your complete configuration would look like:

@@ -20,7 +20,7 @@ To use GX with PostgreSQL Database, you'll complete the following tasks:
 
 The full code used in the following examples is available on GitHub:
 
-- [postgres_deployment_patterns.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py)
+- [postgres_deployment_patterns.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py)
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ The full code used in the following examples is available on GitHub:
 
 2. Run the following command to import configuration information that you'll use in the following steps:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py imports"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py imports"
   ```
 
 ## Set up GX
@@ -50,7 +50,7 @@ To avoid configuring external resources, you'll use your local filesystem for yo
 
 Run the following code to create a <TechnicalTag tag="data_context" text="Data Context"/> with the default settings:
 
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py set up context"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py set up context"
 ```
 
 ## Connect to your data
@@ -65,19 +65,19 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
 
 2. Run the following command to create a <TechnicalTag tag='datasource' text='Data Source' /> to represent the data available in your PostgreSQL database:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_datasource"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py add_datasource"
   ```
 
 3. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> to represent a discrete set of data: 
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_asset"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py add_asset"
   ```
 
   In this example, the name of a specific table within your database is used.
 
 4. Run the following command to build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> you configured previously:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py pg_batch_request"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py pg_batch_request"
   ```
 
 ## Create Expectations
@@ -88,17 +88,17 @@ Every time you evaluate an Expectation with `validator.expect_*`, it is immediat
 
 1. Run the following command to create the suite and get a `Validator`:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py get validator"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py get validator"
   ```
 
 2. Run the following command to use the `Validator` to add a few Expectations:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add expectations"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py add expectations"
   ```
 
 3. Run the following command to save your Expectation Suite (all the unique Expectation Configurations from each run of `validator.expect_*`) to your Expectation Store:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py save suite"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py save suite"
   ```
 ## Validate your data
 
@@ -106,17 +106,17 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
 1. Run the following command to create the Checkpoint configuration that uses your Data Context:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py checkpoint config"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py checkpoint config"
   ```
 
 2. Run the following command to save the Checkpoint:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add checkpoint config"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py add checkpoint config"
   ```
 
 3. Run the following command to run the Checkpoint and pass in your Batch Request (your data) and your Expectation Suite (your tests):
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py run checkpoint"
+  ```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py run checkpoint"
   ```
 
   Your Checkpoint configuration includes the `store_validation_result` and `update_data_docs` actions. The `store_validation_result` action saves your validation results from the Checkpoint run and allows the results to be persisted for future use. The  `update_data_docs` action builds Data Docs files for the validations run in the Checkpoint.

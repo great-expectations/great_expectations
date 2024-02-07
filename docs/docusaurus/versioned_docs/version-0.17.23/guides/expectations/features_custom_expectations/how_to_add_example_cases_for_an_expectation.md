@@ -137,7 +137,7 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publicly displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -189,5 +189,5 @@ If you believe your Custom Expectation is otherwise ready for contribution at a 
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py)
 :::

@@ -7,8 +7,9 @@ description: Install Great Expectations and initialize your deployment.
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import VersionedLink from '@site/src/components/VersionedLink'
 
-<p class="DocItem__header-description">Start here if you're unfamiliar with Great Expectations (GX), or you want to use GX with Databricks or a SQL Data Source in a production environment. To install and configure GX in your specific production environment, see <a href='/docs/guides/setup/setup_overview_lp'>Set up your Great Expectations environment</a>. </p>
+<p class="DocItem__header-description">Start here if you're unfamiliar with Great Expectations (GX), or you want to use GX with Databricks or a SQL Data Source in a production environment. To install and configure GX in your specific production environment, see <VersionedLink to='/guides/setup/setup_overview_lp'>Set up your Great Expectations environment</VersionedLink>. </p>
 
 
 

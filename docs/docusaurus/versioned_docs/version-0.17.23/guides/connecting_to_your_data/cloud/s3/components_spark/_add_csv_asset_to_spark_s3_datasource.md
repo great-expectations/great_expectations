@@ -1,6 +1,6 @@
 Add a CSV `Asset` into your `Datasource` by using the `add_csv_asset` function.
 
-```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py get_spark_s3_asset"
+```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/aws_cloud_storage_spark.py get_spark_s3_asset"
 ```
 
 Here we have added a `Asset` named `csv_taxi_s3_asset` using the `add_csv_asset` function. The `batching_regex` is a regular expression that 
