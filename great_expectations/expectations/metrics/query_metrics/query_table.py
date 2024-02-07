@@ -29,15 +29,12 @@ class QueryTable(QueryMetricProvider):
 
     @classmethod
     def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
-
-        if not query:
-            query = metric_value_kwargs.get(
-                "unexpected_rows_query"
-            ) or cls.default_kwarg_values.get("unexpected_rows_query")
-
+        query: Optional[str] = (
+            metric_value_kwargs.get("query")
+            or cls.default_kwarg_values.get("query")
+            or metric_value_kwargs.get("unexpected_rows_query")
+            or cls.default_kwarg_values.get("unexpected_rows_query")
+        )
         if not query:
             raise ValueError(
                 "Must provide either `query` or `unexpected_rows_query` to `query.table` metric."
