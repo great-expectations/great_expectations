@@ -1595,7 +1595,7 @@ representation."""
 
 class UnexpectedRowsExpectation(BatchExpectation, ABC):
     """
-    NoUnexpectedQueryRowExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
+    UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
 
     QueryExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
     A successful validation is one where the unexpected_rows_query returns no rows.
