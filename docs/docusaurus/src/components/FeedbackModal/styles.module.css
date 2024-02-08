@@ -64,6 +64,7 @@
     max-width: 700px;
     max-height: 80vh;
     z-index: calc(var(--ifm-z-index-fixed) + 2);
+    overflow: scroll;
 }
 
 .modalHeader {
@@ -134,11 +135,17 @@
     border: 1px solid var(--ifm-color-primary);
 }
 
-.box__dragndrop,
-.box__uploading,
-.box__success,
-.box__error {
-    display: none;
+.drop_area {
+    color: #555555 !important;
+    border: 2px #c3c3c3 dashed !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+}
+
+.dragAndDropComponent {
+    color: #555555 !important;
+    border: 2px #c3c3c3 dashed !important;
+    width: 100% !important;
 }
 
 .submitButton {

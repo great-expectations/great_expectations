@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import styles from './styles.module.css';
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import { FileUploader } from "react-drag-drop-files";
 
 export default function FeedbackModal(){
 
@@ -12,18 +13,27 @@ export default function FeedbackModal(){
         description: '',
         attachment: null
     });
+    const [file, setFile] = useState(null);
+    const fileTypes = ["JPG", "PNG", "GIF"];
 
     const handleChange = (e) => {
-        const { name, value, files } = e.target;
+        const { name, value } = e.target;
         setFormData((prevData) => ({
             ...prevData,
-            [name]: name === 'attachment' ? files[0] : value,
+            [name]: value,
         }));
+    };
+    const handleChangeFile = (file) => {
+        setFile(file);
     };
 
     const thumbsUpImg = useBaseUrl(`img/thumbs_up_icon.svg`);
     const thumbsDownImg = useBaseUrl(`img/thumbs_down_icon.svg`);
     const closeImg = useBaseUrl(`img/close_icon.svg`);
+
+    const dragAndDrop = <div className={styles.dragAndDropComponent}>
+        <span>Drop files to attach or <a>browse</a></span>
+    </div>
 
     return <>
         <div className={styles.feedbackCard}>
@@ -89,11 +99,9 @@ export default function FeedbackModal(){
                             us better identify the problem and determine a solution."
                         />
                     </div>
-                    <input
-                        type="file"
-                        name="attachment"
-                        onChange={handleChange}
-                    />
+                    <FileUploader handleChange={handleChangeFile} classes={styles.drop_area}
+                                  name="file" types={fileTypes} children={dragAndDrop}/>
+                    <p>{file ? `File name: ${file[0].name}` : "no files uploaded yet"}</p>
                     <button className={styles.submitButton} onClick={() => setIsOpen(false)}> Submit</button>
                 </div>
             </div>

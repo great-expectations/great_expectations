@@ -36,6 +36,7 @@
     "posthog-docusaurus": "^2.0.0",
     "react": "16.14.0",
     "react-dom": "16.14.0",
+    "react-drag-drop-files": "2.3.10",
     "react-loadable": "5.5.0",
     "react-router-dom": "5.3.4",
     "react-select": "4.3.1",
