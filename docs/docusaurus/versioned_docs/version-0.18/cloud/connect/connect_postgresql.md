@@ -39,7 +39,7 @@ New to GX Cloud and not sure that it's the right solution for your organization?
    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;
    ```
 
-   Replace `your_password` and `your_database` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;` is optional and gives the `gx_ro` user access to all future tables in the defined schema.
+   Replace `<your_password>` and `<your_database>` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;` is optional and gives the `gx_ro` user access to all future tables in the defined schema.
 
 4. Click **Execute/Refresh**.
 
