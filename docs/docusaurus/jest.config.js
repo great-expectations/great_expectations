@@ -12,16 +12,6 @@ module.exports = {
     "@site/(.*)": "website/$1",
   },
   transform: {
-    "^.+\\.[jt]sx?$": [
-      "@swc/jest",
-      {
-        jsc: {
-          parser: {
-            syntax: "ecmascript",
-            jsx: true,
-          },
-        },
-      },
-    ],
+    "^.+\\.[jt]sx?$": "babel-jest",
   },
 };
