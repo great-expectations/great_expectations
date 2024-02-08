@@ -74,7 +74,7 @@ class PartitionerMethod(enum.Enum):
 
 
 class DataPartitioner(abc.ABC):
-    """Abstract base class containing methods for partitionting data accessible via Execution Engines.
+    """Abstract base class containing methods for partitioning data accessible via Execution Engines.
 
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. DataPartitioner.date_part.MONTH

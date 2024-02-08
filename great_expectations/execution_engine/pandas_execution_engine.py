@@ -365,7 +365,7 @@ Bucket: {error}"""
 not {batch_spec.__class__.__name__}"""
             )
 
-        df = self._apply_partitionting_and_sampling_methods(batch_spec, df)  # type: ignore[arg-type]
+        df = self._apply_partitioning_and_sampling_methods(batch_spec, df)  # type: ignore[arg-type]
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
@@ -373,12 +373,12 @@ not {batch_spec.__class__.__name__}"""
 
         return typed_batch_data, batch_markers
 
-    def _apply_partitionting_and_sampling_methods(
+    def _apply_partitioning_and_sampling_methods(
         self,
         batch_spec: BatchSpec | PandasBatchSpecProtocol,
         batch_data: PandasBatchData,
     ):
-        # partitionting and sampling not supported for FabricBatchSpec
+        # partitioning and sampling not supported for FabricBatchSpec
         if isinstance(batch_spec, BatchSpec):
             partitioner_method_name: Optional[str] = batch_spec.get(
                 "partitioner_method"

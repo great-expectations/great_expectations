@@ -397,7 +397,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 ):
                     raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-keys used for partitionting.
+keys used for partitioning.
                         """
                     )
                 if len(partitioner_group_names) < len(sorters):

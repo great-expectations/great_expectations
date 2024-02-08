@@ -266,7 +266,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         temp_column = df.select(column).where(F.col(column).isNotNull())
         bucketizer = pyspark.Bucketizer(
-            partitions=bins, inputCol=column, outputCol="buckets"
+            splits=bins, inputCol=column, outputCol="buckets"
         )
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
 

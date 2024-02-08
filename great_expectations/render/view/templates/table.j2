@@ -20,7 +20,7 @@
       {% set header_row = content_block.get("header_row") %}
     {% else %}
       {% set header_row_cell_count = content_block["table"][0] | length %}
-      {% set header_row = ((header_row_cell_count - 1) * ",").partition(',') %}
+      {% set header_row = ((header_row_cell_count - 1) * ",").split(',') %}
       {% set hidden_table_header = True %}
     {% endif %}
       <thead {{ "hidden" if  hidden_table_header }}>

@@ -503,7 +503,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         """Associates a divided integer partitioner with this asset.
         Args:
             column_name: A column name of the column to partition on.
-            divisor: The divisor to use when partitionting.
+            divisor: The divisor to use when partitioning.
         Returns:
             This asset so we can use this method fluently.
         """
@@ -520,7 +520,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         """Associates a mod integer partitioner with this asset.
         Args:
             column_name: A column name of the column to partition on.
-            mod: The mod to use when partitionting.
+            mod: The mod to use when partitioning.
         Returns:
             This asset so we can use this method fluently.
         """

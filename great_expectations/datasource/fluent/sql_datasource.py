@@ -570,7 +570,7 @@ class _SQLAsset(DataAsset):
         """Associates a divided integer partitioner with this sql asset.
         Args:
             column_name: A column name of the column to partition on.
-            divisor: The divisor to use when partitionting.
+            divisor: The divisor to use when partitioning.
         Returns:
             This sql asset so we can use this method fluently.
         """
@@ -587,7 +587,7 @@ class _SQLAsset(DataAsset):
         """Associates a mod integer partitioner with this sql asset.
         Args:
             column_name: A column name of the column to partition on.
-            mod: The mod to use when partitionting.
+            mod: The mod to use when partitioning.
         Returns:
             This sql asset so we can use this method fluently.
         """

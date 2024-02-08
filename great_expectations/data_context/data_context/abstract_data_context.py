@@ -2128,10 +2128,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Partitionting and Sampling)
+            sampling_method: The method used to sample Batch data (see: partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
             partitioner_method: The method used to partition the Data Asset into Batches
-            partitioner_kwargs: Arguments for the partitionting method
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             expectation_suite_ge_cloud_id: The identifier of the ExpectationSuite to retrieve from the DataContext
                 (can be used in place of `expectation_suite_name`)
@@ -2372,10 +2372,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Partitionting and Sampling)
+            sampling_method: The method used to sample Batch data (see: partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
             partitioner_method: The method used to partition the Data Asset into Batches
-            partitioner_kwargs: Arguments for the partitionting method
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`

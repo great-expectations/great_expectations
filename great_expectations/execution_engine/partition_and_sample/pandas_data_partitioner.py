@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class PandasDataPartitioner(DataPartitioner):
-    """Methods for partitionting data accessible via PandasExecutionEngine.
+    """Methods for partitioning data accessible via PandasExecutionEngine.
 
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. SparkDataPartitioner.date_part.MONTH
@@ -32,7 +32,7 @@ class PandasDataPartitioner(DataPartitioner):
             df: dataframe from batch data.
             column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for partitionting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
@@ -58,7 +58,7 @@ class PandasDataPartitioner(DataPartitioner):
             df: dataframe from batch data.
             column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for partitionting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
@@ -84,7 +84,7 @@ class PandasDataPartitioner(DataPartitioner):
             df: dataframe from batch data.
             column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for partitionting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
@@ -117,12 +117,12 @@ class PandasDataPartitioner(DataPartitioner):
             df: dataframe from batch data.
             column_name: column in data used to determine partition.
             batch_identifiers: should contain a dateutil parseable datetime whose date parts
-                will be used for partitionting or key values of {date_part: date_part_value}
-            date_parts: part of the date to be used for partitionting e.g.
+                will be used for partitioning or key values of {date_part: date_part_value}
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
-            Dataframe with partitionting applied.
+            Dataframe with partitioning applied.
         """
         self._validate_date_parts(date_parts)
 
@@ -241,7 +241,7 @@ class PandasDataPartitioner(DataPartitioner):
         except (TypeError, AttributeError):
             raise (
                 gx_exceptions.ExecutionEngineError(
-                    f"""The partitionting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    f"""The partitioning method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                         Reference to {hash_function_name} cannot be found."""
                 )
             )

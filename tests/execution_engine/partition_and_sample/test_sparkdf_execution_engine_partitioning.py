@@ -84,7 +84,7 @@ def test_get_batch_with_partition_on_year(
     basic_spark_df_execution_engine,
     simple_multi_year_spark_df: pyspark.DataFrame,
 ):
-    partition_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,
             partitioner_method="partition_on_year",
@@ -94,8 +94,8 @@ def test_get_batch_with_partition_on_year(
             },
         )
     ).dataframe
-    assert partition_df.count() == num_values_in_df
-    assert len(partition_df.columns) == 2
+    assert partitioned_df.count() == num_values_in_df
+    assert len(partitioned_df.columns) == 2
 
 
 @pytest.mark.parametrize(
@@ -117,7 +117,7 @@ def test_get_batch_with_partition_on_date_parts_day(
     basic_spark_df_execution_engine,
     simple_multi_year_spark_df: pyspark.DataFrame,
 ):
-    partition_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,
             partitioner_method="partition_on_date_parts",
@@ -129,8 +129,8 @@ def test_get_batch_with_partition_on_date_parts_day(
         )
     ).dataframe
 
-    assert partition_df.count() == num_values_in_df
-    assert len(partition_df.columns) == 2
+    assert partitioned_df.count() == num_values_in_df
+    assert len(partitioned_df.columns) == 2
 
 
 @pytest.mark.parametrize(
@@ -470,7 +470,7 @@ def test_get_batch_with_partition_on_whole_table_gcs(
 def test_get_batch_with_partition_on_column_value(
     test_sparkdf, basic_spark_df_execution_engine
 ):
-    partition_df = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             partitioner_method="_partition_on_column_value",
@@ -482,11 +482,11 @@ def test_get_batch_with_partition_on_column_value(
     ).dataframe
     assert test_sparkdf.count() == 120
     assert len(test_sparkdf.columns) == 10
-    collected = partition_df.collect()
+    collected = partitioned_df.collect()
     for val in collected:
         assert val.batch_id == 2
 
-    partition_df = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             partitioner_method="_partition_on_column_value",
@@ -496,14 +496,14 @@ def test_get_batch_with_partition_on_column_value(
             },
         )
     ).dataframe
-    assert partition_df.count() == 3
-    assert len(partition_df.columns) == 10
+    assert partitioned_df.count() == 3
+    assert len(partitioned_df.columns) == 10
 
 
 def test_get_batch_with_partition_on_converted_datetime(
     test_sparkdf, basic_spark_df_execution_engine
 ):
-    partition_df = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             partitioner_method="_partition_on_converted_datetime",
@@ -513,14 +513,14 @@ def test_get_batch_with_partition_on_converted_datetime(
             },
         )
     ).dataframe
-    assert partition_df.count() == 2
-    assert len(partition_df.columns) == 10
+    assert partitioned_df.count() == 2
+    assert len(partitioned_df.columns) == 10
 
 
 def test_get_batch_with_partition_on_divided_integer(
     test_sparkdf, basic_spark_df_execution_engine
 ):
-    partition_df = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             partitioner_method="_partition_on_divided_integer",
@@ -531,18 +531,18 @@ def test_get_batch_with_partition_on_divided_integer(
             },
         )
     ).dataframe
-    assert partition_df.count() == 10
-    assert len(partition_df.columns) == 10
-    max_result = partition_df.select([F.max("id")])
+    assert partitioned_df.count() == 10
+    assert len(partitioned_df.columns) == 10
+    max_result = partitioned_df.select([F.max("id")])
     assert max_result.collect()[0]["max(id)"] == 59
-    min_result = partition_df.select([F.min("id")])
+    min_result = partitioned_df.select([F.min("id")])
     assert min_result.collect()[0]["min(id)"] == 50
 
 
 def test_get_batch_with_partition_on_mod_integer(
     test_sparkdf, basic_spark_df_execution_engine
 ):
-    partition_df = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             partitioner_method="_partition_on_mod_integer",
@@ -554,18 +554,18 @@ def test_get_batch_with_partition_on_mod_integer(
         )
     ).dataframe
 
-    assert partition_df.count() == 12
-    assert len(partition_df.columns) == 10
-    max_result = partition_df.select([F.max("id")])
+    assert partitioned_df.count() == 12
+    assert len(partitioned_df.columns) == 10
+    max_result = partitioned_df.select([F.max("id")])
     assert max_result.collect()[0]["max(id)"] == 115
-    min_result = partition_df.select([F.min("id")])
+    min_result = partitioned_df.select([F.min("id")])
     assert min_result.collect()[0]["min(id)"] == 5
 
 
 def test_get_batch_with_partition_on_multi_column_values(
     test_sparkdf, basic_spark_df_execution_engine
 ):
-    partition_df = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             partitioner_method="_partition_on_multi_column_values",
@@ -579,15 +579,15 @@ def test_get_batch_with_partition_on_multi_column_values(
             },
         )
     ).dataframe
-    assert partition_df.count() == 4
-    assert len(partition_df.columns) == 10
-    collected = partition_df.collect()
+    assert partitioned_df.count() == 4
+    assert len(partitioned_df.columns) == 10
+    collected = partitioned_df.collect()
     for val in collected:
         assert val.date == datetime.date(2020, 1, 5)
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        partition_df = basic_spark_df_execution_engine.get_batch_data(
+        partitioned_df = basic_spark_df_execution_engine.get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,
                 partitioner_method="_partition_on_multi_column_values",
@@ -628,7 +628,7 @@ def test_get_batch_with_partition_on_hashed_column_incorrect_hash_function_name(
 def test_get_batch_with_partition_on_hashed_column(
     test_sparkdf, basic_spark_df_execution_engine
 ):
-    partition_df = basic_spark_df_execution_engine.get_batch_data(
+    partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
             partitioner_method="_partition_on_hashed_column",
@@ -642,5 +642,5 @@ def test_get_batch_with_partition_on_hashed_column(
             },
         )
     ).dataframe
-    assert partition_df.count() == 8
-    assert len(partition_df.columns) == 10
+    assert partitioned_df.count() == 8
+    assert len(partitioned_df.columns) == 10

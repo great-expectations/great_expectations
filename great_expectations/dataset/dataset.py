@@ -3696,7 +3696,7 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             tail_weight_holdout (float between 0 and 1 or None): \
-                The amount of weight to partition uniformly between values observed in the data but not present in the \
+                The amount of weight to split uniformly between values observed in the data but not present in the \
                 provided partition. tail_weight_holdout provides a mechanism to make the test less strict by \
                 assigning positive weights to unknown values observed in the data that are not present in the \
                 partition.
@@ -3922,13 +3922,13 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             internal_weight_holdout (float between 0 and 1 or None): \
-                The amount of weight to partition uniformly among zero-weighted partition bins. internal_weight_holdout \
+                The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
                 provides a mechanisms to make the test less strict by assigning positive weights to values observed in \
                 the data for which the partition explicitly expected zero weight. With no internal_weight_holdout, \
                 any value observed in such a region will cause KL divergence to rise to +Infinity.\
                 Defaults to 0.
             tail_weight_holdout (float between 0 and 1 or None): \
-                The amount of weight to add to the tails of the histogram. Tail weight holdout is partition evenly between\
+                The amount of weight to add to the tails of the histogram. Tail weight holdout is split evenly between\
                 (-Infinity, min(partition_object['bins'])) and (max(partition_object['bins']), +Infinity). \
                 tail_weight_holdout provides a mechanism to make the test less strict by assigning positive weights to \
                 values observed in the data that are not present in the partition. With no tail_weight_holdout, \
@@ -3977,7 +3977,7 @@ class Dataset(MetaDataset):
             categorical.
 
                 * If the column includes values that are not present in the partition, the tail_weight_holdout will be \
-                equally partition among those values, providing a mechanism to weaken the strictness of the expectation \
+                equally split among those values, providing a mechanism to weaken the strictness of the expectation \
                 (otherwise, relative entropy would immediately go to infinity).
                 * If the partition includes values that are not present in the column, the test will simply include \
                 zero weight for that value.

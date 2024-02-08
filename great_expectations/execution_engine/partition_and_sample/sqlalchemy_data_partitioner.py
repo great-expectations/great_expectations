@@ -1,4 +1,4 @@
-"""Create queries for use in sql data partitionting.
+"""Create queries for use in sql data partitioning.
 
 This module contains utilities for generating queries used by execution engines
 and data connectors to partition data into batches based on the data itself. It
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 
 class SqlAlchemyDataPartitioner(DataPartitioner):
-    """Methods for partitionting data accessible via SqlAlchemyExecutionEngine.
+    """Methods for partitioning data accessible via SqlAlchemyExecutionEngine.
 
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. SqlAlchemyDataPartitioner.date_part.MONTH
@@ -73,7 +73,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         Args:
             column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for partitionting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
@@ -96,7 +96,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         Args:
             column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for partitionting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
@@ -119,7 +119,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         Args:
             column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for partitionting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
@@ -149,8 +149,8 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         Args:
             column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose date parts
-                will be used for partitionting or key values of {date_part: date_part_value}
-            date_parts: part of the date to be used for partitionting e.g.
+                will be used for partitioning or key values of {date_part: date_part_value}
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
@@ -471,7 +471,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         Args:
             selectable: selectable to partition.
             column_name: column in table to use in determining partition.
-            date_parts: part of the date to be used for partitionting e.g.
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
@@ -541,7 +541,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                     "concat_distinct_values"
                 )
 
-        partition_query: sqlalchemy.Selectable = sa.select(
+        partitioned_query: sqlalchemy.Selectable = sa.select(
             concat_clause,
             *[
                 sa.cast(
@@ -551,7 +551,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             ],
         ).select_from(selectable)
 
-        return partition_query
+        return partitioned_query
 
     def get_data_for_batch_identifiers_for_partition_on_date_parts(
         self,
@@ -569,40 +569,40 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             execution_engine: used to query the data to find batch identifiers.
             selectable: selectable to partition.
             column_name: column in table to use in determining partition.
-            date_parts: part of the date to be used for partitionting e.g.
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
 
-        partition_query: sqlalchemy.Selectable = self.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
+        partitioned_query: sqlalchemy.Selectable = self.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
             selectable, column_name, date_parts
         )
 
         result: List[
             sqlalchemy.Row | sqlalchemy.LegacyRow
-        ] = self._execute_partition_query(execution_engine, partition_query)
+        ] = self._execute_partitioned_query(execution_engine, partitioned_query)
 
         return self._get_params_for_batch_identifiers_from_date_part_partitioner(
             column_name, result, date_parts
         )
 
     @staticmethod
-    def _execute_partition_query(
+    def _execute_partitioned_query(
         execution_engine: SqlAlchemyExecutionEngine,
-        partition_query: sqlalchemy.Selectable,
+        partitioned_query: sqlalchemy.Selectable,
     ) -> List[sqlalchemy.Row | sqlalchemy.LegacyRow]:
         """Use the provided execution engine to run the partition query and fetch all of the results.
 
         Args:
             execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
-            partition_query: Query to be executed as a sqlalchemy Selectable.
+            partitioned_query: Query to be executed as a sqlalchemy Selectable.
 
         Returns:
             List of row results.
         """
-        return execution_engine.execute_partition_query(partition_query)
+        return execution_engine.execute_partitioned_query(partitioned_query)
 
     def _get_params_for_batch_identifiers_from_date_part_partitioner(
         self,
@@ -671,11 +671,11 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             )
         )
 
-        partition_query: sqlalchemy.Selectable = getattr(
+        partitioned_query: sqlalchemy.Selectable = getattr(
             self, get_partition_query_method_name
         )(selectable=selectable, **partitioner_kwargs)
-        rows: List[sqlalchemy.LegacyRow] = self._execute_partition_query(
-            execution_engine, partition_query
+        rows: List[sqlalchemy.LegacyRow] = self._execute_partitioned_query(
+            execution_engine, partitioned_query
         )
         column_names: List[str] = self._get_column_names_from_partitioner_kwargs(
             partitioner_kwargs

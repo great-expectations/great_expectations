@@ -455,12 +455,12 @@ def test_dataframe_property_given_loaded_batch():
 
 @pytest.mark.unit
 def test_get_batch_data(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
         )
     )
-    assert partition_df.dataframe.shape == (120, 10)
+    assert partitioned_df.dataframe.shape == (120, 10)
 
     # No dataset passed to RuntimeDataBatchSpec
     with pytest.raises(gx_exceptions.InvalidBatchSpecError):
@@ -521,7 +521,7 @@ def test_get_batch_with_no_s3_configured():
 
 @pytest.mark.big
 def test_get_batch_with_partition_on_divided_integer_and_sample_on_list(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_divided_integer",
@@ -538,9 +538,9 @@ def test_get_batch_with_partition_on_divided_integer_and_sample_on_list(test_df)
             },
         )
     )
-    assert partition_df.dataframe.shape == (2, 10)
-    assert partition_df.dataframe.id.min() == 54
-    assert partition_df.dataframe.id.max() == 59
+    assert partitioned_df.dataframe.shape == (2, 10)
+    assert partitioned_df.dataframe.id.min() == 54
+    assert partitioned_df.dataframe.id.max() == 59
 
 
 # noinspection PyUnusedLocal

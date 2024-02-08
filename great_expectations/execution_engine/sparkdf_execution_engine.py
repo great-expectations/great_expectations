@@ -370,14 +370,14 @@ illegal.  Please check your config."""
                 """
             )
 
-        batch_data = self._apply_partitionting_and_sampling_methods(
+        batch_data = self._apply_partitioning_and_sampling_methods(
             batch_spec, batch_data
         )
         typed_batch_data = SparkDFBatchData(execution_engine=self, dataframe=batch_data)
 
         return typed_batch_data, batch_markers
 
-    def _apply_partitionting_and_sampling_methods(self, batch_spec, batch_data):
+    def _apply_partitioning_and_sampling_methods(self, batch_spec, batch_data):
         # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
         partitions: Optional[List[str]] = batch_spec.get("partitions")
         if partitions:
@@ -664,11 +664,15 @@ illegal.  Please check your config."""
 
         data: pyspark.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-        partition_domain_kwargs: PartitionDomainKwargs = self._partition_domain_kwargs(
-            domain_kwargs, domain_type, accessor_keys
+        partitioned_domain_kwargs: PartitionDomainKwargs = (
+            self._partition_domain_kwargs(domain_kwargs, domain_type, accessor_keys)
         )
 
-        return data, partition_domain_kwargs.compute, partition_domain_kwargs.accessor
+        return (
+            data,
+            partitioned_domain_kwargs.compute,
+            partitioned_domain_kwargs.accessor,
+        )
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False

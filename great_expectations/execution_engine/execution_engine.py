@@ -97,7 +97,7 @@ class MetricComputationConfiguration(DictDot):
 
 @dataclass
 class PartitionDomainKwargs:
-    """compute_domain_kwargs, accessor_domain_kwargs when partition from domain_kwargs
+    """compute_domain_kwargs, accessor_domain_kwargs when partitioned from domain_kwargs
 
     The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
     """
@@ -126,7 +126,7 @@ class ExecutionEngine(ABC):
     to provide specific functionality (bundling of computation is available only for "deferred execution" computational
     systems, such as SQLAlchemy and Spark; it is not available for Pandas, because Pandas computations are immediate).
 
-    Finally, ExecutionEngine defines interfaces for Batch data sampling and partitionting Batch of data along defined axes.
+    Finally, ExecutionEngine defines interfaces for Batch data sampling and partitioning Batch of data along defined axes.
 
     Constructor builds an ExecutionEngine, using provided configuration options (instatiation is done by child classes).
 

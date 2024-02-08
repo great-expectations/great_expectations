@@ -873,8 +873,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             SqlAlchemy column
         """
-        partition_domain_kwargs: PartitionDomainKwargs = self._partition_domain_kwargs(
-            domain_kwargs, domain_type, accessor_keys
+        partitioned_domain_kwargs: PartitionDomainKwargs = (
+            self._partition_domain_kwargs(domain_kwargs, domain_type, accessor_keys)
         )
 
         selectable: sqlalchemy.Selectable = self.get_domain_records(
@@ -883,8 +883,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return (
             selectable,
-            partition_domain_kwargs.compute,
-            partition_domain_kwargs.accessor,
+            partitioned_domain_kwargs.compute,
+            partitioned_domain_kwargs.accessor,
         )
 
     @override
@@ -1186,13 +1186,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_partitioner.get_partitioner_method(partitioner_method_name)
 
-    def execute_partition_query(
-        self, partition_query: sqlalchemy.Selectable
+    def execute_partitioned_query(
+        self, partitioned_query: sqlalchemy.Selectable
     ) -> List[sqlalchemy.Row]:
-        """Use the execution engine to run the partition query and fetch all of the results.
+        """Use the execution engine to run the partitioned query and fetch all of the results.
 
         Args:
-            partition_query: Query to be executed as a sqlalchemy Selectable.
+            partitioned_query: Query to be executed as a sqlalchemy Selectable.
 
         Returns:
             List of row results.
@@ -1201,16 +1201,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Note: Athena does not support casting to string, only to varchar
             # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
             # of `CAST(colname AS VARCHAR)` with other dialects.
-            partition_query = str(
-                partition_query.compile(
+            partitioned_query = str(
+                partitioned_query.compile(
                     self.engine, compile_kwargs={"literal_binds": True}
                 )
             )
 
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
-            partition_query = re.sub(pattern, r"\1 AS VARCHAR)", partition_query)
+            partitioned_query = re.sub(pattern, r"\1 AS VARCHAR)", partitioned_query)
 
-        return self.execute_query(partition_query).fetchall()
+        return self.execute_query(partitioned_query).fetchall()
 
     def get_data_for_batch_identifiers(
         self,

@@ -735,9 +735,9 @@ class S3Url:
         Attempts to get a file suffix from the S3 key.
         If can't find one returns `None`.
         """
-        partitions = self._parsed.path.rsplit(".", 1)
-        _suffix = partitions[-1]
-        if len(_suffix) > 0 and len(partitions) > 1:
+        splits = self._parsed.path.rsplit(".", 1)
+        _suffix = splits[-1]
+        if len(_suffix) > 0 and len(splits) > 1:
             return str(_suffix)
         return None
 

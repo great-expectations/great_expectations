@@ -114,7 +114,7 @@ def test_get_batch_with_partition_on_year(
 ):
     engine = PandasExecutionEngine()
 
-    partition_df: pd.DataFrame = engine.get_batch_data(
+    partitioned_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_pandas_df,
             partitioner_method="partition_on_year",
@@ -124,8 +124,8 @@ def test_get_batch_with_partition_on_year(
             },
         )
     ).dataframe
-    assert len(partition_df) == num_values_in_df
-    assert len(partition_df.columns) == 2
+    assert len(partitioned_df) == num_values_in_df
+    assert len(partitioned_df.columns) == 2
 
 
 @pytest.mark.big
@@ -148,7 +148,7 @@ def test_get_batch_with_partition_on_date_parts_day(
 ):
     engine = PandasExecutionEngine()
 
-    partition_df: pd.DataFrame = engine.get_batch_data(
+    partitioned_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_pandas_df,
             partitioner_method="partition_on_date_parts",
@@ -160,8 +160,8 @@ def test_get_batch_with_partition_on_date_parts_day(
         )
     ).dataframe
 
-    assert len(partition_df) == num_values_in_df
-    assert len(partition_df.columns) == 2
+    assert len(partitioned_df) == num_values_in_df
+    assert len(partitioned_df.columns) == 2
 
 
 @pytest.mark.big
@@ -307,12 +307,12 @@ def test_get_partitioner_method(underscore_prefix: str, partitioner_method_name:
 
 @pytest.mark.unit
 def test_get_batch_with_partition_on_whole_table_runtime(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df, partitioner_method="_partition_on_whole_table"
         )
     )
-    assert partition_df.dataframe.shape == (120, 10)
+    assert partitioned_df.dataframe.shape == (120, 10)
 
 
 @pytest.mark.filesystem
@@ -398,7 +398,7 @@ def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_dat
 
 @pytest.mark.big
 def test_get_batch_with_partition_on_column_value(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_column_value",
@@ -408,10 +408,10 @@ def test_get_batch_with_partition_on_column_value(test_df):
             },
         )
     )
-    assert partition_df.dataframe.shape == (12, 10)
-    assert (partition_df.dataframe.batch_id == 2).all()
+    assert partitioned_df.dataframe.shape == (12, 10)
+    assert (partitioned_df.dataframe.batch_id == 2).all()
 
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_column_value",
@@ -421,12 +421,12 @@ def test_get_batch_with_partition_on_column_value(test_df):
             },
         )
     )
-    assert partition_df.dataframe.shape == (3, 10)
+    assert partitioned_df.dataframe.shape == (3, 10)
 
 
 @pytest.mark.big
 def test_get_batch_with_partition_on_converted_datetime(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_converted_datetime",
@@ -436,12 +436,12 @@ def test_get_batch_with_partition_on_converted_datetime(test_df):
             },
         )
     )
-    assert partition_df.dataframe.shape == (3, 10)
+    assert partitioned_df.dataframe.shape == (3, 10)
 
 
 @pytest.mark.big
 def test_get_batch_with_partition_on_divided_integer(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_divided_integer",
@@ -452,14 +452,14 @@ def test_get_batch_with_partition_on_divided_integer(test_df):
             },
         )
     )
-    assert partition_df.dataframe.shape == (10, 10)
-    assert partition_df.dataframe.id.min() == 50
-    assert partition_df.dataframe.id.max() == 59
+    assert partitioned_df.dataframe.shape == (10, 10)
+    assert partitioned_df.dataframe.id.min() == 50
+    assert partitioned_df.dataframe.id.max() == 59
 
 
 @pytest.mark.big
 def test_get_batch_with_partition_on_mod_integer(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_mod_integer",
@@ -470,14 +470,14 @@ def test_get_batch_with_partition_on_mod_integer(test_df):
             },
         )
     )
-    assert partition_df.dataframe.shape == (12, 10)
-    assert partition_df.dataframe.id.min() == 5
-    assert partition_df.dataframe.id.max() == 115
+    assert partitioned_df.dataframe.shape == (12, 10)
+    assert partitioned_df.dataframe.id.min() == 5
+    assert partitioned_df.dataframe.id.max() == 115
 
 
 @pytest.mark.big
 def test_get_batch_with_partition_on_multi_column_values(test_df):
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_multi_column_values",
@@ -491,12 +491,12 @@ def test_get_batch_with_partition_on_multi_column_values(test_df):
             },
         )
     )
-    assert partition_df.dataframe.shape == (4, 10)
-    assert (partition_df.dataframe.date == datetime.date(2020, 1, 5)).all()
+    assert partitioned_df.dataframe.shape == (4, 10)
+    assert (partitioned_df.dataframe.date == datetime.date(2020, 1, 5)).all()
 
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        partition_df = PandasExecutionEngine().get_batch_data(
+        partitioned_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
                 partitioner_method="_partition_on_multi_column_values",
@@ -516,7 +516,7 @@ def test_get_batch_with_partition_on_multi_column_values(test_df):
 def test_get_batch_with_partition_on_hashed_column(test_df):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        partition_df = PandasExecutionEngine().get_batch_data(
+        partitioned_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
                 partitioner_method="_partition_on_hashed_column",
@@ -531,7 +531,7 @@ def test_get_batch_with_partition_on_hashed_column(test_df):
             )
         )
 
-    partition_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
             partitioner_method="_partition_on_hashed_column",
@@ -545,4 +545,4 @@ def test_get_batch_with_partition_on_hashed_column(test_df):
             },
         )
     )
-    assert partition_df.dataframe.shape == (8, 10)
+    assert partitioned_df.dataframe.shape == (8, 10)
