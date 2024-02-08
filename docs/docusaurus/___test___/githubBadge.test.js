@@ -11,9 +11,6 @@ global.fetch = jest.fn(() =>
   })
 );
 
-afterEach(() => {
-  jest.restoreAllMocks();
-});
 describe("github badge in the header", () => {
   test("should show stargazers count", async () => {
     render(
