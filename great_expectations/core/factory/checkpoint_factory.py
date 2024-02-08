@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.core.factory import Factory
+from great_expectations.core.factory.factory import Factory
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.data_context.store import CheckpointStore
 
 
@@ -75,6 +75,7 @@ class CheckpointFactory(Factory):
         Raises:
             DataContextError when Checkpoint is not found.
         """
+        from great_expectations.checkpoint.checkpoint import Checkpoint
 
         key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
