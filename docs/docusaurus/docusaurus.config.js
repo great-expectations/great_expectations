@@ -82,7 +82,7 @@ module.exports = {
       contextualSearch: true,
     },
     prism: {
-      theme: require('prism-react-renderer/themes/vsDark'),
+      theme: require('./src/theme/CodeBlock/theme'),
     },
     colorMode: {
       disableSwitch: true,

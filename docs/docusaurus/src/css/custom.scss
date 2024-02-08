@@ -48,6 +48,8 @@
 
     --ifm-navbar-height: 6rem;
 
+    --ifm-pre-background: #373F58 !important;
+
      /* Colors */
       --white: #fff;
       --black: #000;
@@ -98,6 +100,43 @@
       --gray-900: #1a1c1f;
 
       --link-hover-color: #A03E0A;
+}
+
+.theme-code-block {
+  position: relative;
+
+  &:hover {
+    .codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module + div button {
+      opacity: 1;
+    }
+  }
+}
+
+div.codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module {
+  border-bottom: none;
+
+  & + div pre code {
+    background-color: #373F58;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  & + div {
+    position: static;
+  }
+
+  & + div > div {
+    top: calc(var(--ifm-pre-padding) / 2);
+
+    &:hover {
+      opacity: 1;
+    }
+
+    button {
+      border: none;
+      opacity: 1;
+    }
+  }
 }
 
 .markdown a,
