@@ -33,14 +33,14 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         data_asset_name_prefix: A prefix to prepend to all names of Data Assets inferred by this Data Connector.
         data_asset_name_suffix: A suffix to append to all names of Data Asset inferred by this Data Connector.
         include_schema_name: If True the Data Asset name  will include the schema as a prefix.
-        splitter_method: A method to use to split the target table into multiple Batches.
-        splitter_kwargs: Keyword arguments to pass to the splitter method.
+        partitioner_method: A method to use to partition the target table into multiple Batches.
+        partitioner_kwargs: Keyword arguments to pass to the partitioner method.
         sampling_method: A method to use to downsample within a target Batch.
         sampling_kwargs: Keyword arguments to pass to sampling method.
         excluded_tables: A list of tables to ignore when inferring Data Asset names.
         included_tables: A list of tables to include when inferring Data Asset names. When provided, only Data Assets
             matching this list will be inferred.
-        skip_inapplicable_tables: If True, tables that can't be successfully queried using sampling and splitter methods
+        skip_inapplicable_tables: If True, tables that can't be successfully queried using sampling and partitioner methods
             are excluded from inferred data_asset_names. If False, the class will throw an error during initialization
             if any such tables are encountered.
         introspection_directives: Arguments passed to the introspection method to guide introspection. These may be,
@@ -61,8 +61,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         data_asset_name_prefix: str = "",
         data_asset_name_suffix: str = "",
         include_schema_name: bool = False,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         excluded_tables: Optional[list] = None,
@@ -77,8 +77,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             include_schema_name=include_schema_name,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
             assets=None,
@@ -147,8 +147,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     "data_asset_name_suffix": self.data_asset_name_suffix,
                     "include_schema_name": self.include_schema_name,
                     "schema_name": schema_name,
-                    "splitter_method": self.splitter_method,
-                    "splitter_kwargs": self.splitter_kwargs,
+                    "partitioner_method": self.partitioner_method,
+                    "partitioner_kwargs": self.partitioner_kwargs,
                     "sampling_method": self.sampling_method,
                     "sampling_kwargs": self.sampling_kwargs,
                 },

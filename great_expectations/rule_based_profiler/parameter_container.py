@@ -394,7 +394,7 @@ def build_parameter_container(
         )
         fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[
             1:
-        ].split(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER)
+        ].partition(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER)
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
         parameter_node = parameter_container.get_parameter_node(
             parameter_name_root=parameter_name_root
@@ -507,7 +507,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
 
     fully_qualified_parameter_name_as_list: List[
         str
-    ] = fully_qualified_parameter_name.split(
+    ] = fully_qualified_parameter_name.partition(
         FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
     )
 

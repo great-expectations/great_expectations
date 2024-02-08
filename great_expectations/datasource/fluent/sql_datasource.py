@@ -53,9 +53,11 @@ from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
-from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
-    SqlAlchemyDataSplitter,
+from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+    DatePart,
+)
+from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
+    SqlAlchemyDataPartitioner,
 )
 
 if TYPE_CHECKING:
@@ -76,36 +78,36 @@ class SQLDatasourceError(Exception):
     pass
 
 
-class _Splitter(Protocol):
+class _Partitioner(Protocol):
     @property
     def columns(self) -> list[str]:
-        """The names of the column used to split the data"""
+        """The names of the column used to partition the data"""
 
     @property
     def method_name(self) -> str:
-        """Returns a splitter method name.
+        """Returns a partitioner method name.
 
-        The possible values of splitter method names are defined in the enum,
-        great_expectations.execution_engine.split_and_sample.data_splitter.SplitterMethod
+        The possible values of partitioner method names are defined in the enum,
+        great_expectations.execution_engine.partition_and_sample.data_partitioner.PartitionerMethod
         """
 
     @property
     def param_names(self) -> List[str]:
-        """Returns the parameter names that specify a batch derived from this splitter
+        """Returns the parameter names that specify a batch derived from this partitioner
 
-        For example, for SplitterYearMonth this returns ["year", "month"]. For more
-        examples, please see Splitter* classes below.
+        For example, for PartitionerYearMonth this returns ["year", "month"]. For more
+        examples, please see Partitioner* classes below.
         """
 
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
-        """A shim to our sqlalchemy execution engine splitter methods
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
+        """A shim to our sqlalchemy execution engine partitioner methods
 
-        We translate any internal _Splitter state and what is passed in from
-        a batch_request to the splitter_kwargs required by our execution engine
-        data splitters defined in:
-        great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter
+        We translate any internal _Partitioner state and what is passed in from
+        a batch_request to the partitioner_kwargs required by our execution engine
+        data partitioners defined in:
+        great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner
 
-        Look at Splitter* classes for concrete examples.
+        Look at Partitioner* classes for concrete examples.
         """
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
@@ -115,24 +117,24 @@ class _Splitter(Protocol):
 
         Arguments:
             options: A BatchRequest.options dictionary that specifies ALL the fields necessary
-                     to specify a batch with respect to this splitter.
+                     to specify a batch with respect to this partitioner.
 
         Returns:
             A dictionary that can be added to batch_spec_kwargs["batch_identifiers"].
             This has one of 2 forms:
               1. This category has many parameters are derived from 1 column.
-                 These only are datetime splitters and the batch_spec_kwargs["batch_identifiers"]
+                 These only are datetime partitioners and the batch_spec_kwargs["batch_identifiers"]
                  look like:
                    {column_name: {datepart_1: value, datepart_2: value, ...}
                  where datepart_* are strings like "year", "month", "day". The exact
-                 fields depend on the splitter.
+                 fields depend on the partitioner.
 
               2. This category has only 1 parameter for each column.
-                 This is used for all other splitters and the batch_spec_kwargs["batch_identifiers"]
+                 This is used for all other partitioners and the batch_spec_kwargs["batch_identifiers"]
                  look like:
                    {column_name_1: value, column_name_2: value, ...}
-                 where value is the value of the column after being processed by the splitter.
-                 For example, for the SplitterModInteger where mod = 3,
+                 where value is the value of the column after being processed by the partitioner.
+                 For example, for the PartitionerModInteger where mod = 3,
                  {"passenger_count": 2}, means the raw passenger count value is in the set:
                  {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
                  This category was only 1 parameter per column.
@@ -143,27 +145,29 @@ class _Splitter(Protocol):
 
         This can be implemented by querying the data defined in the sql_asset to generate
         all the possible parameter values for the BatchRequest.options that will return data.
-        For example for a YearMonth splitter, we can query the underlying data to return the
+        For example for a YearMonth partitioner, we can query the underlying data to return the
         set of distinct (year, month) pairs. We would then return a list of BatchRequest.options,
         ie dictionaries, of the form {"year": year, "month": month} that contain all these distinct
         pairs.
         """
 
 
-def _splitter_and_sql_asset_to_batch_identifier_data(
-    splitter: _Splitter, asset: _SQLAsset
+def _partitioner_and_sql_asset_to_batch_identifier_data(
+    partitioner: _Partitioner, asset: _SQLAsset
 ) -> list[dict]:
     execution_engine = asset.datasource.get_execution_engine()
-    sqlalchemy_data_splitter = SqlAlchemyDataSplitter(execution_engine.dialect_name)
-    return sqlalchemy_data_splitter.get_data_for_batch_identifiers(
+    sqlalchemy_data_partitioner = SqlAlchemyDataPartitioner(
+        execution_engine.dialect_name
+    )
+    return sqlalchemy_data_partitioner.get_data_for_batch_identifiers(
         execution_engine=execution_engine,
         selectable=asset.as_selectable(),
-        splitter_method_name=splitter.method_name,
-        splitter_kwargs=splitter.splitter_method_kwargs(),
+        partitioner_method_name=partitioner.method_name,
+        partitioner_kwargs=partitioner.partitioner_method_kwargs(),
     )
 
 
-class _SplitterDatetime(FluentBaseModel):
+class _PartitionerDatetime(FluentBaseModel):
     column_name: str
     method_name: str
 
@@ -172,8 +176,8 @@ class _SplitterDatetime(FluentBaseModel):
         return [self.column_name]
 
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
-        batch_identifier_data = _splitter_and_sql_asset_to_batch_identifier_data(
-            splitter=self, asset=sql_asset
+        batch_identifier_data = _partitioner_and_sql_asset_to_batch_identifier_data(
+            partitioner=self, asset=sql_asset
         )
         params: list[dict] = []
         for identifer_data in batch_identifier_data:
@@ -183,7 +187,7 @@ class _SplitterDatetime(FluentBaseModel):
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
-        """Validates all the datetime parameters for this splitter exist in `options`."""
+        """Validates all the datetime parameters for this partitioner exist in `options`."""
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
@@ -197,13 +201,13 @@ class _SplitterDatetime(FluentBaseModel):
     def param_names(self) -> list[str]:
         raise NotImplementedError
 
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
 
 
-class SplitterYear(_SplitterDatetime):
+class PartitionerYear(_PartitionerDatetime):
     column_name: str
-    method_name: Literal["split_on_year"] = "split_on_year"
+    method_name: Literal["partition_on_year"] = "partition_on_year"
 
     @property
     @override
@@ -211,13 +215,13 @@ class SplitterYear(_SplitterDatetime):
         return ["year"]
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
 
-class SplitterYearAndMonth(_SplitterDatetime):
+class PartitionerYearAndMonth(_PartitionerDatetime):
     column_name: str
-    method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
+    method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
     @property
     @override
@@ -225,15 +229,15 @@ class SplitterYearAndMonth(_SplitterDatetime):
         return ["year", "month"]
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
 
-class SplitterYearAndMonthAndDay(_SplitterDatetime):
+class PartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
     method_name: Literal[
-        "split_on_year_and_month_and_day"
-    ] = "split_on_year_and_month_and_day"
+        "partition_on_year_and_month_and_day"
+    ] = "partition_on_year_and_month_and_day"
 
     @property
     @override
@@ -241,14 +245,14 @@ class SplitterYearAndMonthAndDay(_SplitterDatetime):
         return ["year", "month", "day"]
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
 
-class SplitterDatetimePart(_SplitterDatetime):
+class PartitionerDatetimePart(_PartitionerDatetime):
     datetime_parts: List[str]
     column_name: str
-    method_name: Literal["split_on_date_parts"] = "split_on_date_parts"
+    method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
 
     @property
     @override
@@ -256,7 +260,7 @@ class SplitterDatetimePart(_SplitterDatetime):
         return self.datetime_parts
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "date_parts": self.param_names}
 
     @pydantic.validator("datetime_parts", each_item=True)
@@ -268,7 +272,7 @@ class SplitterDatetimePart(_SplitterDatetime):
         return v
 
 
-class _SplitterOneColumnOneParam(FluentBaseModel):
+class _PartitionerOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
 
@@ -277,8 +281,8 @@ class _SplitterOneColumnOneParam(FluentBaseModel):
         return [self.column_name]
 
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
-        batch_identifier_data = _splitter_and_sql_asset_to_batch_identifier_data(
-            splitter=self, asset=sql_asset
+        batch_identifier_data = _partitioner_and_sql_asset_to_batch_identifier_data(
+            partitioner=self, asset=sql_asset
         )
         params: list[dict] = []
         for identifer_data in batch_identifier_data:
@@ -289,7 +293,7 @@ class _SplitterOneColumnOneParam(FluentBaseModel):
     def param_names(self) -> list[str]:
         raise NotImplementedError
 
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
@@ -298,10 +302,12 @@ class _SplitterOneColumnOneParam(FluentBaseModel):
         raise NotImplementedError
 
 
-class SplitterDividedInteger(_SplitterOneColumnOneParam):
+class PartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
-    method_name: Literal["split_on_divided_integer"] = "split_on_divided_integer"
+    method_name: Literal[
+        "partition_on_divided_integer"
+    ] = "partition_on_divided_integer"
 
     @property
     @override
@@ -309,7 +315,7 @@ class SplitterDividedInteger(_SplitterOneColumnOneParam):
         return ["quotient"]
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "divisor": self.divisor}
 
     @override
@@ -323,10 +329,10 @@ class SplitterDividedInteger(_SplitterOneColumnOneParam):
         return {self.column_name: options["quotient"]}
 
 
-class SplitterModInteger(_SplitterOneColumnOneParam):
+class PartitionerModInteger(_PartitionerOneColumnOneParam):
     mod: int
     column_name: str
-    method_name: Literal["split_on_mod_integer"] = "split_on_mod_integer"
+    method_name: Literal["partition_on_mod_integer"] = "partition_on_mod_integer"
 
     @property
     @override
@@ -334,7 +340,7 @@ class SplitterModInteger(_SplitterOneColumnOneParam):
         return ["remainder"]
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "mod": self.mod}
 
     @override
@@ -348,9 +354,9 @@ class SplitterModInteger(_SplitterOneColumnOneParam):
         return {self.column_name: options["remainder"]}
 
 
-class SplitterColumnValue(_SplitterOneColumnOneParam):
+class PartitionerColumnValue(_PartitionerOneColumnOneParam):
     column_name: str
-    method_name: Literal["split_on_column_value"] = "split_on_column_value"
+    method_name: Literal["partition_on_column_value"] = "partition_on_column_value"
 
     @property
     @override
@@ -358,7 +364,7 @@ class SplitterColumnValue(_SplitterOneColumnOneParam):
         return [self.column_name]
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
     @override
@@ -375,16 +381,16 @@ class SplitterColumnValue(_SplitterOneColumnOneParam):
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
         # The superclass version of param_defaults is correct, but here we leverage that
         # the parameter name is the same as the column name to make this much faster.
-        return _splitter_and_sql_asset_to_batch_identifier_data(
-            splitter=self, asset=sql_asset
+        return _partitioner_and_sql_asset_to_batch_identifier_data(
+            partitioner=self, asset=sql_asset
         )
 
 
-class SplitterMultiColumnValue(FluentBaseModel):
+class PartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
     method_name: Literal[
-        "split_on_multi_column_values"
-    ] = "split_on_multi_column_values"
+        "partition_on_multi_column_values"
+    ] = "partition_on_multi_column_values"
 
     @property
     def columns(self):
@@ -394,7 +400,7 @@ class SplitterMultiColumnValue(FluentBaseModel):
     def param_names(self) -> List[str]:
         return self.column_names
 
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_names": self.column_names}
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
@@ -408,22 +414,22 @@ class SplitterMultiColumnValue(FluentBaseModel):
         return {col: options[col] for col in self.column_names}
 
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
-        return _splitter_and_sql_asset_to_batch_identifier_data(
-            splitter=self, asset=sql_asset
+        return _partitioner_and_sql_asset_to_batch_identifier_data(
+            partitioner=self, asset=sql_asset
         )
 
 
-# We create this type instead of using _Splitter so pydantic can use to this to
-# coerce the splitter to the right type during deserialization from config.
-Splitter = Union[
-    SplitterColumnValue,
-    SplitterMultiColumnValue,
-    SplitterDividedInteger,
-    SplitterModInteger,
-    SplitterYear,
-    SplitterYearAndMonth,
-    SplitterYearAndMonthAndDay,
-    SplitterDatetimePart,
+# We create this type instead of using _Partitioner so pydantic can use to this to
+# coerce the partitioner to the right type during deserialization from config.
+Partitioner = Union[
+    PartitionerColumnValue,
+    PartitionerMultiColumnValue,
+    PartitionerDividedInteger,
+    PartitionerModInteger,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
+    PartitionerDatetimePart,
 ]
 
 
@@ -439,7 +445,7 @@ class _SQLAsset(DataAsset):
 
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
-    splitter: Optional[Splitter] = None
+    partitioner: Optional[Partitioner] = None
     name: str
 
     @property
@@ -459,13 +465,13 @@ class _SQLAsset(DataAsset):
             A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
         options: tuple[str, ...] = tuple()
-        if self.splitter:
-            options = tuple(self.splitter.param_names)
+        if self.partitioner:
+            options = tuple(self.partitioner.param_names)
         return options
 
-    def _add_splitter(self: Self, splitter: Splitter) -> Self:
-        self.splitter = splitter
-        self.test_splitter_connection()
+    def _add_partitioner(self: Self, partitioner: Partitioner) -> Self:
+        self.partitioner = partitioner
+        self.test_partitioner_connection()
         # persist the config changes
         context: AbstractDataContext | None
         if context := self._datasource._data_context:
@@ -474,135 +480,139 @@ class _SQLAsset(DataAsset):
         return self
 
     @public_api
-    def add_splitter_year(
+    def add_partitioner_year(
         self: Self,
         column_name: str,
     ) -> Self:
-        """Associates a year splitter with this sql data asset.
+        """Associates a year partitioner with this sql data asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterYear(method_name="split_on_year", column_name=column_name)
+        return self._add_partitioner(
+            PartitionerYear(method_name="partition_on_year", column_name=column_name)
         )
 
     @public_api
-    def add_splitter_year_and_month(
+    def add_partitioner_year_and_month(
         self: Self,
         column_name: str,
     ) -> Self:
-        """Associates a year, month splitter with this sql asset.
+        """Associates a year, month partitioner with this sql asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterYearAndMonth(
-                method_name="split_on_year_and_month", column_name=column_name
+        return self._add_partitioner(
+            PartitionerYearAndMonth(
+                method_name="partition_on_year_and_month", column_name=column_name
             )
         )
 
     @public_api
-    def add_splitter_year_and_month_and_day(
+    def add_partitioner_year_and_month_and_day(
         self: Self,
         column_name: str,
     ) -> Self:
-        """Associates a year, month, day splitter with this sql asset.
+        """Associates a year, month, day partitioner with this sql asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterYearAndMonthAndDay(
-                method_name="split_on_year_and_month_and_day", column_name=column_name
+        return self._add_partitioner(
+            PartitionerYearAndMonthAndDay(
+                method_name="partition_on_year_and_month_and_day",
+                column_name=column_name,
             )
         )
 
     @public_api
-    def add_splitter_datetime_part(
+    def add_partitioner_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
-        """Associates a datetime part splitter with this sql asset.
+        """Associates a datetime part partitioner with this sql asset.
         Args:
             column_name: Name of the date column where parts will be parsed out.
-            datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
+            datetime_parts: A list of datetime parts to partition on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterDatetimePart(
-                method_name="split_on_date_parts",
+        return self._add_partitioner(
+            PartitionerDatetimePart(
+                method_name="partition_on_date_parts",
                 column_name=column_name,
                 datetime_parts=datetime_parts,
             )
         )
 
     @public_api
-    def add_splitter_column_value(self: Self, column_name: str) -> Self:
-        """Associates a column value splitter with this sql asset.
+    def add_partitioner_column_value(self: Self, column_name: str) -> Self:
+        """Associates a column value partitioner with this sql asset.
         Args:
-            column_name: A column name of the column to split on.
+            column_name: A column name of the column to partition on.
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterColumnValue(
-                method_name="split_on_column_value",
+        return self._add_partitioner(
+            PartitionerColumnValue(
+                method_name="partition_on_column_value",
                 column_name=column_name,
             )
         )
 
     @public_api
-    def add_splitter_divided_integer(
+    def add_partitioner_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
-        """Associates a divided integer splitter with this sql asset.
+        """Associates a divided integer partitioner with this sql asset.
         Args:
-            column_name: A column name of the column to split on.
-            divisor: The divisor to use when splitting.
+            column_name: A column name of the column to partition on.
+            divisor: The divisor to use when partitionting.
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterDividedInteger(
-                method_name="split_on_divided_integer",
+        return self._add_partitioner(
+            PartitionerDividedInteger(
+                method_name="partition_on_divided_integer",
                 column_name=column_name,
                 divisor=divisor,
             )
         )
 
     @public_api
-    def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
-        """Associates a mod integer splitter with this sql asset.
+    def add_partitioner_mod_integer(self: Self, column_name: str, mod: int) -> Self:
+        """Associates a mod integer partitioner with this sql asset.
         Args:
-            column_name: A column name of the column to split on.
-            mod: The mod to use when splitting.
+            column_name: A column name of the column to partition on.
+            mod: The mod to use when partitionting.
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterModInteger(
-                method_name="split_on_mod_integer",
+        return self._add_partitioner(
+            PartitionerModInteger(
+                method_name="partition_on_mod_integer",
                 column_name=column_name,
                 mod=mod,
             )
         )
 
     @public_api
-    def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
-        """Associates a multi column value splitter with this sql asset.
+    def add_partitioner_multi_column_values(
+        self: Self, column_names: list[str]
+    ) -> Self:
+        """Associates a multi column value partitioner with this sql asset.
         Args:
-            column_names: A list of column names to split on.
+            column_names: A list of column names to partition on.
         Returns:
             This sql asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterMultiColumnValue(
-                column_names=column_names, method_name="split_on_multi_column_values"
+        return self._add_partitioner(
+            PartitionerMultiColumnValue(
+                column_names=column_names,
+                method_name="partition_on_multi_column_values",
             )
         )
 
@@ -610,7 +620,7 @@ class _SQLAsset(DataAsset):
     def test_connection(self) -> None:
         pass
 
-    def test_splitter_connection(self) -> None:
+    def test_partitioner_connection(self) -> None:
         pass
 
     @staticmethod
@@ -629,19 +639,19 @@ class _SQLAsset(DataAsset):
         self, batch_request: BatchRequest
     ) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
-        if self.splitter is None:
+        if self.partitioner is None:
             # Currently batch_request.options is complete determined by the presence of a
-            # splitter. If splitter is None, then there are no specifiable options
+            # partitioner. If partitioner is None, then there are no specifiable options
             # so we return early. Since the passed in batch_request is verified, it must be the
             # empty, ie {}.
-            # In the future, if there are options that are not determined by the splitter
+            # In the future, if there are options that are not determined by the partitioner
             # this check will have to be generalized.
             return [batch_request]
 
         batch_requests: List[BatchRequest] = []
-        # We iterate through all possible batches as determined by the splitter
-        for params in self.splitter.param_defaults(self):
-            # If the params from the splitter don't match the batch request options
+        # We iterate through all possible batches as determined by the partitioner
+        for params in self.partitioner.param_defaults(self):
+            # If the params from the partitioner don't match the batch request options
             # we don't create this batch.
             if not _SQLAsset._matches_request_options(params, batch_request.options):
                 continue
@@ -672,20 +682,22 @@ class _SQLAsset(DataAsset):
         self._validate_batch_request(batch_request)
 
         batch_list: List[Batch] = []
-        splitter = self.splitter
+        partitioner = self.partitioner
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
             batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
                 batch_request=request
             )
             batch_spec_kwargs = self._create_batch_spec_kwargs()
-            if splitter:
-                batch_spec_kwargs["splitter_method"] = splitter.method_name
-                batch_spec_kwargs["splitter_kwargs"] = splitter.splitter_method_kwargs()
+            if partitioner:
+                batch_spec_kwargs["partitioner_method"] = partitioner.method_name
+                batch_spec_kwargs[
+                    "partitioner_kwargs"
+                ] = partitioner.partitioner_method_kwargs()
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
                         request.options
                     )
                 )
@@ -927,8 +939,8 @@ class TableAsset(_SQLAsset):
             )
 
     @override
-    def test_splitter_connection(self) -> None:
-        if self.splitter:
+    def test_partitioner_connection(self) -> None:
+        if self.partitioner:
             datasource: SQLDatasource = self.datasource
             engine: sqlalchemy.Engine = datasource.get_engine()
             inspector: sqlalchemy.Inspector = sa.inspect(engine)
@@ -937,10 +949,10 @@ class TableAsset(_SQLAsset):
                 table_name=self.table_name, schema=self.schema_name
             )
             column_names: list[str] = [column["name"] for column in columns]
-            for splitter_column_name in self.splitter.columns:
-                if splitter_column_name not in column_names:
+            for partitioner_column_name in self.partitioner.columns:
+                if partitioner_column_name not in column_names:
                     raise TestConnectionError(
-                        f'The column "{splitter_column_name}" was not found in table "{self.qualified_name}"'
+                        f'The column "{partitioner_column_name}" was not found in table "{self.qualified_name}"'
                     )
 
     @override

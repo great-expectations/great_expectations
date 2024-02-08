@@ -320,8 +320,8 @@ class AssetConfig(SerializableDictDot):
         schema_name: Optional[str] = None,
         batch_spec_passthrough: Optional[Dict[str, Any]] = None,
         batch_identifiers: Optional[List[str]] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[Dict[str, str]] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[Dict[str, str]] = None,
         sorters: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
@@ -346,10 +346,10 @@ class AssetConfig(SerializableDictDot):
             self.batch_spec_passthrough = batch_spec_passthrough
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
-        if splitter_method is not None:
-            self.splitter_method = splitter_method
-        if splitter_kwargs is not None:
-            self.splitter_kwargs = splitter_kwargs
+        if partitioner_method is not None:
+            self.partitioner_method = partitioner_method
+        if partitioner_kwargs is not None:
+            self.partitioner_kwargs = partitioner_kwargs
         if sorters is not None:
             self.sorters = sorters
         if sampling_method is not None:
@@ -440,8 +440,8 @@ class AssetConfigSchema(Schema):
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
-    splitter_method = fields.String(required=False, allow_none=True)
-    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    partitioner_method = fields.String(required=False, allow_none=True)
+    partitioner_kwargs = fields.Dict(required=False, allow_none=True)
     sorters = fields.List(
         cls_or_instance=fields.Nested(
             SorterConfigSchema, required=False, allow_none=True
@@ -520,8 +520,8 @@ class DataConnectorConfig(AbstractConfig):
         data_asset_name_prefix=None,
         data_asset_name_suffix=None,
         include_schema_name=None,
-        splitter_method=None,
-        splitter_kwargs=None,
+        partitioner_method=None,
+        partitioner_kwargs=None,
         sorters=None,
         sampling_method=None,
         sampling_kwargs=None,
@@ -552,10 +552,10 @@ class DataConnectorConfig(AbstractConfig):
             self.data_asset_name_suffix = data_asset_name_suffix
         if include_schema_name is not None:
             self.include_schema_name = include_schema_name
-        if splitter_method is not None:
-            self.splitter_method = splitter_method
-        if splitter_kwargs is not None:
-            self.splitter_kwargs = splitter_kwargs
+        if partitioner_method is not None:
+            self.partitioner_method = partitioner_method
+        if partitioner_kwargs is not None:
+            self.partitioner_kwargs = partitioner_kwargs
         if sorters is not None:
             self.sorters = sorters
         if sampling_method is not None:
@@ -605,7 +605,7 @@ class DataConnectorConfig(AbstractConfig):
 
         super().__init__(id=id, name=name)
 
-        # Note: optional samplers and splitters are handled by setattr
+        # Note: optional samplers and partitioners are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -704,8 +704,8 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
-    splitter_method = fields.String(required=False, allow_none=True)
-    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    partitioner_method = fields.String(required=False, allow_none=True)
+    partitioner_kwargs = fields.Dict(required=False, allow_none=True)
     sorters = fields.List(
         cls_or_instance=fields.Nested(
             SorterConfigSchema, required=False, allow_none=True
@@ -876,8 +876,8 @@ data connector. You must only select one between `filename` (from_service_accoun
                 )
         if (
             "include_schema_name" in data
-            or "splitter_method" in data
-            or "splitter_kwargs" in data
+            or "partitioner_method" in data
+            or "partitioner_kwargs" in data
             or "sampling_method" in data
             or "sampling_kwargs" in data
             or "skip_inapplicable_tables" in data

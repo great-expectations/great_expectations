@@ -633,7 +633,7 @@ class FileDataAsset(MetaFileDataAsset):
             lines = lines[skip:]
 
         header_line = lines[0].strip()
-        header_names = comp_regex.split(header_line)
+        header_names = comp_regex.partition(header_line)
         if len(set(header_names)) == len(header_names):
             success = True
 

@@ -204,11 +204,11 @@ def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
         func with modified docstring.
     """
     existing_docstring = func.__doc__ if func.__doc__ else ""
-    split_docstring = existing_docstring.split("\n", 1)
+    partition_docstring = existing_docstring.split("\n", 1)
 
     docstring = ""
-    if len(split_docstring) == 2:  # noqa: PLR2004
-        short_description, docstring = split_docstring
+    if len(partition_docstring) == 2:  # noqa: PLR2004
+        short_description, docstring = partition_docstring
         docstring = (
             f"{short_description.strip()}\n"
             "\n"
@@ -216,10 +216,10 @@ def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
             "\n"
             f"{dedent(docstring)}"
         )
-    elif len(split_docstring) == 1:
-        short_description = split_docstring[0]
+    elif len(partition_docstring) == 1:
+        short_description = partition_docstring[0]
         docstring = f"{short_description.strip()}\n" "\n" f"{text}\n"
-    elif len(split_docstring) == 0:
+    elif len(partition_docstring) == 0:
         docstring = f"{text}\n"
 
     func.__doc__ = docstring

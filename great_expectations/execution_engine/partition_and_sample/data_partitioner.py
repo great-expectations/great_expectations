@@ -47,68 +47,70 @@ class DatePart(enum.Enum):
         return representer.represent_str(data=node.value)
 
 
-class SplitterMethod(enum.Enum):
-    """The names of available splitter_methods."""
+class PartitionerMethod(enum.Enum):
+    """The names of available partitioner_methods."""
 
-    SPLIT_ON_YEAR = "split_on_year"
-    SPLIT_ON_YEAR_AND_MONTH = "split_on_year_and_month"
-    SPLIT_ON_YEAR_AND_MONTH_AND_DAY = "split_on_year_and_month_and_day"
-    SPLIT_ON_DATE_PARTS = "split_on_date_parts"
-    SPLIT_ON_WHOLE_TABLE = "split_on_whole_table"
-    SPLIT_ON_COLUMN_VALUE = "split_on_column_value"
-    SPLIT_ON_CONVERTED_DATETIME = "split_on_converted_datetime"
-    SPLIT_ON_DIVIDED_INTEGER = "split_on_divided_integer"
-    SPLIT_ON_MOD_INTEGER = "split_on_mod_integer"
-    SPLIT_ON_MULTI_COLUMN_VALUES = "split_on_multi_column_values"
-    SPLIT_ON_HASHED_COLUMN = "split_on_hashed_column"
+    PARTITION_ON_YEAR = "partition_on_year"
+    PARTITION_ON_YEAR_AND_MONTH = "partition_on_year_and_month"
+    PARTITION_ON_YEAR_AND_MONTH_AND_DAY = "partition_on_year_and_month_and_day"
+    PARTITION_ON_DATE_PARTS = "partition_on_date_parts"
+    PARTITION_ON_WHOLE_TABLE = "partition_on_whole_table"
+    PARTITION_ON_COLUMN_VALUE = "partition_on_column_value"
+    PARTITION_ON_CONVERTED_DATETIME = "partition_on_converted_datetime"
+    PARTITION_ON_DIVIDED_INTEGER = "partition_on_divided_integer"
+    PARTITION_ON_MOD_INTEGER = "partition_on_mod_integer"
+    PARTITION_ON_MULTI_COLUMN_VALUES = "partition_on_multi_column_values"
+    PARTITION_ON_HASHED_COLUMN = "partition_on_hashed_column"
 
     @override
-    def __eq__(self, other: str | SplitterMethod):  # type: ignore[override] # expects `object`
+    def __eq__(self, other: str | PartitionerMethod):  # type: ignore[override] # expects `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
     @override
-    def __hash__(self: SplitterMethod):
+    def __hash__(self: PartitionerMethod):
         return hash(self.value)
 
 
-class DataSplitter(abc.ABC):
-    """Abstract base class containing methods for splitting data accessible via Execution Engines.
+class DataPartitioner(abc.ABC):
+    """Abstract base class containing methods for partitionting data accessible via Execution Engines.
 
     Note, for convenience, you can also access DatePart via the instance variable
-    date_part e.g. DataSplitter.date_part.MONTH
+    date_part e.g. DataPartitioner.date_part.MONTH
     """
 
     date_part: ClassVar[Type[DatePart]] = DatePart
 
-    def get_splitter_method(self, splitter_method_name: str) -> Callable:
-        """Get the appropriate splitter method from the method name.
+    def get_partitioner_method(self, partitioner_method_name: str) -> Callable:
+        """Get the appropriate partitioner method from the method name.
 
         Args:
-            splitter_method_name: name of the splitter to retrieve.
+            partitioner_method_name: name of the partitioner to retrieve.
 
         Returns:
-            splitter method.
+            partitioner method.
         """
-        splitter_method_name = self._get_splitter_method_name(splitter_method_name)
+        partitioner_method_name = self._get_partitioner_method_name(
+            partitioner_method_name
+        )
 
-        return getattr(self, splitter_method_name)
+        return getattr(self, partitioner_method_name)
 
     @staticmethod
-    def _get_splitter_method_name(splitter_method_name: str) -> str:
-        """Accept splitter methods with or without starting with `_`.
+    def _get_partitioner_method_name(partitioner_method_name: str) -> str:
+        """Accept partitioner methods with or without starting with `_`.
 
         Args:
-            splitter_method_name: splitter name starting with or without preceding `_`.
+            partitioner_method_name: partitioner name starting with or without preceding `_`.
 
         Returns:
-            splitter method name stripped of preceding underscore.
+            partitioner method name stripped of preceding underscore.
         """
-        if splitter_method_name.startswith("_"):
-            return splitter_method_name[1:]
+        if partitioner_method_name.startswith("_"):
+            return partitioner_method_name[1:]
         else:
-            return splitter_method_name
+            return partitioner_method_name
 
     @staticmethod
     def _convert_date_parts(date_parts: List[DatePart] | List[str]) -> List[DatePart]:
@@ -137,7 +139,7 @@ class DataSplitter(abc.ABC):
         """
         if len(date_parts) == 0:
             raise gx_exceptions.InvalidConfigError(
-                "date_parts are required when using split_on_date_parts."
+                "date_parts are required when using partition_on_date_parts."
             )
         if not all(
             (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701

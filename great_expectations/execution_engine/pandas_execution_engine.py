@@ -46,14 +46,14 @@ from great_expectations.core.metric_domain_types import (
 from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
-    SplitDomainKwargs,  # noqa: TCH001
+    PartitionDomainKwargs,  # noqa: TCH001
 )
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-from great_expectations.execution_engine.split_and_sample.pandas_data_sampler import (
-    PandasDataSampler,
+from great_expectations.execution_engine.partition_and_sample.pandas_data_partitioner import (
+    PandasDataPartitioner,
 )
-from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
-    PandasDataSplitter,
+from great_expectations.execution_engine.partition_and_sample.pandas_data_sampler import (
+    PandasDataSampler,
 )
 
 if TYPE_CHECKING:
@@ -133,7 +133,7 @@ class PandasExecutionEngine(ExecutionEngine):
             }
         )
 
-        self._data_splitter = PandasDataSplitter()
+        self._data_partitioner = PandasDataPartitioner()
         self._data_sampler = PandasDataSampler()
 
     def _instantiate_azure_client(self) -> None:
@@ -365,7 +365,7 @@ Bucket: {error}"""
 not {batch_spec.__class__.__name__}"""
             )
 
-        df = self._apply_splitting_and_sampling_methods(batch_spec, df)  # type: ignore[arg-type]
+        df = self._apply_partitionting_and_sampling_methods(batch_spec, df)  # type: ignore[arg-type]
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
@@ -373,20 +373,24 @@ not {batch_spec.__class__.__name__}"""
 
         return typed_batch_data, batch_markers
 
-    def _apply_splitting_and_sampling_methods(
+    def _apply_partitionting_and_sampling_methods(
         self,
         batch_spec: BatchSpec | PandasBatchSpecProtocol,
         batch_data: PandasBatchData,
     ):
-        # splitting and sampling not supported for FabricBatchSpec
+        # partitionting and sampling not supported for FabricBatchSpec
         if isinstance(batch_spec, BatchSpec):
-            splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
-            if splitter_method_name:
-                splitter_fn: Callable = self._data_splitter.get_splitter_method(
-                    splitter_method_name
+            partitioner_method_name: Optional[str] = batch_spec.get(
+                "partitioner_method"
+            )
+            if partitioner_method_name:
+                partitioner_fn: Callable = (
+                    self._data_partitioner.get_partitioner_method(
+                        partitioner_method_name
+                    )
                 )
-                splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
-                batch_data = splitter_fn(batch_data, **splitter_kwargs)
+                partitioner_kwargs: dict = batch_spec.get("partitioner_kwargs") or {}
+                batch_data = partitioner_fn(batch_data, **partitioner_kwargs)
 
             sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
             if sampler_method_name:
@@ -661,11 +665,11 @@ not {batch_spec.__class__.__name__}"""
 
         data: pd.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
+        partition_domain_kwargs: PartitionDomainKwargs = self._partition_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
 
-        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
+        return data, partition_domain_kwargs.compute, partition_domain_kwargs.accessor
 
 
 def hash_pandas_dataframe(df):

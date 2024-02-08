@@ -43,7 +43,7 @@ connecting_to_your_data = [
     # ),
 ]
 
-split_data = []
+partition_data = []
 
 sample_data = []
 
@@ -57,6 +57,6 @@ fluent_datasources = [
 ]
 
 abs_integration_tests += connecting_to_your_data
-abs_integration_tests += split_data
+abs_integration_tests += partition_data
 abs_integration_tests += sample_data
 abs_integration_tests += fluent_datasources

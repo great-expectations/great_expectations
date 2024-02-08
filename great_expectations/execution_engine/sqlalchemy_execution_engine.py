@@ -46,13 +46,13 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import (
     MetricComputationConfiguration,
-    SplitDomainKwargs,
+    PartitionDomainKwargs,
 )
-from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
+from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
+    SqlAlchemyDataPartitioner,
+)
+from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
-)
-from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
-    SqlAlchemyDataSplitter,
 )
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
@@ -463,7 +463,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-        self._data_splitter = SqlAlchemyDataSplitter(dialect=self.dialect_name)
+        self._data_partitioner = SqlAlchemyDataPartitioner(dialect=self.dialect_name)
         self._data_sampler = SqlAlchemyDataSampler()
 
     def _setup_engine(
@@ -873,7 +873,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             SqlAlchemy column
         """
-        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
+        partition_domain_kwargs: PartitionDomainKwargs = self._partition_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
 
@@ -881,15 +881,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_kwargs=domain_kwargs
         )
 
-        return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
+        return (
+            selectable,
+            partition_domain_kwargs.compute,
+            partition_domain_kwargs.accessor,
+        )
 
     @override
-    def _split_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
+    def _partition_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for column Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -897,7 +901,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             like to be using.
 
         Returns:
-            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
+            compute_domain_kwargs, accessor_domain_kwargs partition from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
         assert (
@@ -922,15 +926,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
-        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+        return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @override
-    def _split_column_pair_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
+    def _partition_column_pair_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -938,7 +942,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             like to be using.
 
         Returns:
-            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
+            compute_domain_kwargs, accessor_domain_kwargs partition from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
         assert (
@@ -969,15 +973,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
             accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+        return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @override
-    def _split_multi_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
+    def _partition_multi_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -985,7 +989,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             like to be using.
 
         Returns:
-            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
+            compute_domain_kwargs, accessor_domain_kwargs partition from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
         assert (
@@ -1014,7 +1018,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             accessor_domain_kwargs["column_list"] = column_list
 
-        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+        return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @override
     def resolve_metric_bundle(
@@ -1171,24 +1175,24 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.engine.dispose()
 
-    def _get_splitter_method(self, splitter_method_name: str) -> Callable:
-        """Get the appropriate splitter method from the method name.
+    def _get_partitioner_method(self, partitioner_method_name: str) -> Callable:
+        """Get the appropriate partitioner method from the method name.
 
         Args:
-            splitter_method_name: name of the splitter to retrieve.
+            partitioner_method_name: name of the partitioner to retrieve.
 
         Returns:
-            splitter method.
+            partitioner method.
         """
-        return self._data_splitter.get_splitter_method(splitter_method_name)
+        return self._data_partitioner.get_partitioner_method(partitioner_method_name)
 
-    def execute_split_query(
-        self, split_query: sqlalchemy.Selectable
+    def execute_partition_query(
+        self, partition_query: sqlalchemy.Selectable
     ) -> List[sqlalchemy.Row]:
-        """Use the execution engine to run the split query and fetch all of the results.
+        """Use the execution engine to run the partition query and fetch all of the results.
 
         Args:
-            split_query: Query to be executed as a sqlalchemy Selectable.
+            partition_query: Query to be executed as a sqlalchemy Selectable.
 
         Returns:
             List of row results.
@@ -1197,38 +1201,40 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Note: Athena does not support casting to string, only to varchar
             # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
             # of `CAST(colname AS VARCHAR)` with other dialects.
-            split_query = str(
-                split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
+            partition_query = str(
+                partition_query.compile(
+                    self.engine, compile_kwargs={"literal_binds": True}
+                )
             )
 
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
-            split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
+            partition_query = re.sub(pattern, r"\1 AS VARCHAR)", partition_query)
 
-        return self.execute_query(split_query).fetchall()
+        return self.execute_query(partition_query).fetchall()
 
     def get_data_for_batch_identifiers(
         self,
         selectable: sqlalchemy.Selectable,
-        splitter_method_name: str,
-        splitter_kwargs: dict,
+        partitioner_method_name: str,
+        partitioner_kwargs: dict,
     ) -> List[dict]:
-        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+        """Build data used to construct batch identifiers for the input table using the provided partitioner config.
 
-        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+        Sql partitioner configurations yield the unique values that comprise a batch by introspecting your data.
 
         Args:
-            selectable: Selectable to split.
-            splitter_method_name: Desired splitter method to use.
-            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
+            selectable: Selectable to partition.
+            partitioner_method_name: Desired partitioner method to use.
+            partitioner_kwargs: Dict of directives used by the partitioner method as keyword arguments of key=value.
 
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
         """
-        return self._data_splitter.get_data_for_batch_identifiers(
+        return self._data_partitioner.get_data_for_batch_identifiers(
             execution_engine=self,
             selectable=selectable,
-            splitter_method_name=splitter_method_name,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method_name=partitioner_method_name,
+            partitioner_kwargs=partitioner_kwargs,
         )
 
     def _build_selectable_from_batch_spec(
@@ -1243,20 +1249,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 "It is currently only supported on table data."
             )
 
-        if "splitter_method" in batch_spec:
-            splitter_fn: Callable = self._get_splitter_method(
-                splitter_method_name=batch_spec["splitter_method"]
+        if "partitioner_method" in batch_spec:
+            partitioner_fn: Callable = self._get_partitioner_method(
+                partitioner_method_name=batch_spec["partitioner_method"]
             )
-            split_clause = splitter_fn(
+            partition_clause = partitioner_fn(
                 batch_identifiers=batch_spec["batch_identifiers"],
-                **batch_spec["splitter_kwargs"],
+                **batch_spec["partitioner_kwargs"],
             )
 
         else:  # noqa: PLR5501
             if self.dialect_name == GXSqlDialect.SQLITE:
-                split_clause = sa.text("1 = 1")
+                partition_clause = sa.text("1 = 1")
             else:
-                split_clause = sa.true()
+                partition_clause = sa.true()
 
         selectable: sqlalchemy.Selectable = self._subselectable(batch_spec)
         sampling_method: Optional[str] = batch_spec.get("sampling_method")
@@ -1271,7 +1277,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 return sampler_fn(
                     execution_engine=self,
                     batch_spec=batch_spec,
-                    where_clause=split_clause,
+                    where_clause=partition_clause,
                 )
             else:
                 sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
@@ -1280,13 +1286,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .select_from(selectable)
                     .where(
                         sa.and_(
-                            split_clause,
+                            partition_clause,
                             sampler_fn(batch_spec),
                         )
                     )
                 )
 
-        return sa.select("*").select_from(selectable).where(split_clause)
+        return sa.select("*").select_from(selectable).where(partition_clause)
 
     def _subselectable(self, batch_spec: BatchSpec) -> sqlalchemy.Selectable:
         table_name = batch_spec.get("table_name")
@@ -1347,7 +1353,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-        # this is where splitter components are added to the selectable
+        # this is where partitioner components are added to the selectable
         selectable: sqlalchemy.Selectable = self._build_selectable_from_batch_spec(
             batch_spec=batch_spec
         )

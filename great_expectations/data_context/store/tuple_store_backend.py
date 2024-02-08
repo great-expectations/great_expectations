@@ -163,7 +163,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         if self.filepath_template:
             # filepath_template is always specified with forward slashes, but it is then
-            # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
+            # used to (1) dynamically construct and evaluate a regex, and (2) partition the provided (observed) filepath
             if self.platform_specific_separator:
                 filepath_template = os.path.join(  # noqa: PTH118
                     *self.filepath_template.split("/")

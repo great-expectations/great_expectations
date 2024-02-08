@@ -330,11 +330,11 @@ class SlackNotificationAction(ValidationAction):
     def _send_notifications_in_batches(self, blocks, query, result):
         text = blocks[0]["text"]["text"]
         chunks, chunk_size = len(text), len(text) // 4
-        split_text = [
+        partition_text = [
             text[position : position + chunk_size]
             for position in range(0, chunks, chunk_size)
         ]
-        for batch in split_text:
+        for batch in partition_text:
             query["text"] = batch
             result = self._get_slack_result(query)
         return result

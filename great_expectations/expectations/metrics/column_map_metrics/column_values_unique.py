@@ -25,7 +25,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     def _pandas(cls, column, **kwargs):
         return ~column.duplicated(keep=False)
 
-    # NOTE: 20201119 - JPC - We cannot split per-dialect into window and non-window functions
+    # NOTE: 20201119 - JPC - We cannot partition per-dialect into window and non-window functions
     # @column_condition_partial(
     #     engine=SqlAlchemyExecutionEngine,
     # )

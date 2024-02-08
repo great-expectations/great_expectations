@@ -15,7 +15,7 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
+from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -64,13 +64,13 @@ def test_get_sampler_method(underscore_prefix: str, sampler_method_name: str):
     This test is to ensure that the sampler methods are accessible with and without underscores.
     When new sampling methods are added, the parameter list should be updated.
     """
-    data_splitter: SqlAlchemyDataSampler = SqlAlchemyDataSampler()
+    data_partitioner: SqlAlchemyDataSampler = SqlAlchemyDataSampler()
 
     sampler_method_name_with_prefix = f"{underscore_prefix}{sampler_method_name}"
 
-    assert data_splitter.get_sampler_method(sampler_method_name_with_prefix) == getattr(
-        data_splitter, sampler_method_name
-    )
+    assert data_partitioner.get_sampler_method(
+        sampler_method_name_with_prefix
+    ) == getattr(data_partitioner, sampler_method_name)
 
 
 def clean_query_for_comparison(query_string: str) -> str:
@@ -135,7 +135,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 ):
     """What does this test and why?
 
-    split_on_limit should build the appropriate query based on input parameters.
+    partition_on_limit should build the appropriate query based on input parameters.
     This tests dialects that differ from the standard dialect, not each dialect exhaustively.
     """
     if hasattr(pytest_parsed_arguments, str(dialect_name.value)):

@@ -1,12 +1,12 @@
 import pandas as pd
 
 from tests.integration.db.taxi_data_utils import (
-    _execute_taxi_splitting_test_cases,
+    _execute_taxi_partitioning_test_cases,
     loaded_table,
 )
-from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
-    TaxiSplittingTestCasesBase,
-    TaxiSplittingTestCasesWholeTable,
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+    TaxiPartitioningTestCasesBase,
+    TaxiPartitioningTestCasesHashedColumn,
     TaxiTestData,
 )
 from tests.test_utils import get_connection_string_and_dialect
@@ -23,16 +23,18 @@ if __name__ == "test_script_module":
         table_name: str = table.table_name
         test_df: pd.DataFrame = table.inserted_dataframe
 
+        test_column_name: str = "pickup_location_id"
+
         taxi_test_data: TaxiTestData = TaxiTestData(
             test_df=test_df,
-            test_column_name=None,
+            test_column_name=test_column_name,
             test_column_names=None,
         )
-        taxi_splitting_test_cases: TaxiSplittingTestCasesBase = (
-            TaxiSplittingTestCasesWholeTable(taxi_test_data=taxi_test_data)
+        taxi_partitioning_test_cases: TaxiPartitioningTestCasesBase = (
+            TaxiPartitioningTestCasesHashedColumn(taxi_test_data=taxi_test_data)
         )
-        _execute_taxi_splitting_test_cases(
-            taxi_splitting_test_cases=taxi_splitting_test_cases,
+        _execute_taxi_partitioning_test_cases(
+            taxi_partitioning_test_cases=taxi_partitioning_test_cases,
             connection_string=connection_string,
             table_name=table_name,
         )

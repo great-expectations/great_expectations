@@ -440,7 +440,7 @@ def _generate_pandas_data_asset_models(
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
                 extra=pydantic.Extra.forbid,
-                model_docstring=signature_tuple.docstring.partition("\n\nParameters")[0]
+                model_docstring=signature_tuple.docstring.split("\n\nParameters")[0]
                 if use_docstring_from_method
                 else "",
             )

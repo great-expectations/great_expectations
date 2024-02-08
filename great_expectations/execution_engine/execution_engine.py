@@ -96,8 +96,8 @@ class MetricComputationConfiguration(DictDot):
 
 
 @dataclass
-class SplitDomainKwargs:
-    """compute_domain_kwargs, accessor_domain_kwargs when split from domain_kwargs
+class PartitionDomainKwargs:
+    """compute_domain_kwargs, accessor_domain_kwargs when partition from domain_kwargs
 
     The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
     """
@@ -126,7 +126,7 @@ class ExecutionEngine(ABC):
     to provide specific functionality (bundling of computation is available only for "deferred execution" computational
     systems, such as SQLAlchemy and Spark; it is not available for Pandas, because Pandas computations are immediate).
 
-    Finally, ExecutionEngine defines interfaces for Batch data sampling and splitting Batch of data along defined axes.
+    Finally, ExecutionEngine defines interfaces for Batch data sampling and partitionting Batch of data along defined axes.
 
     Constructor builds an ExecutionEngine, using provided configuration options (instatiation is done by child classes).
 
@@ -578,13 +578,13 @@ class ExecutionEngine(ABC):
 
         return resolved_metrics
 
-    def _split_domain_kwargs(
+    def _partition_domain_kwargs(
         self,
         domain_kwargs: Dict[str, Any],
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for all Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for all Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -612,45 +612,45 @@ class ExecutionEngine(ABC):
                 'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
-        split_domain_kwargs: SplitDomainKwargs
+        partition_domain_kwargs: PartitionDomainKwargs
         if domain_type == MetricDomainTypes.TABLE:
-            split_domain_kwargs = self._split_table_metric_domain_kwargs(
+            partition_domain_kwargs = self._partition_table_metric_domain_kwargs(
                 domain_kwargs, domain_type, accessor_keys
             )
 
         elif domain_type == MetricDomainTypes.COLUMN:
-            split_domain_kwargs = self._split_column_metric_domain_kwargs(
+            partition_domain_kwargs = self._partition_column_metric_domain_kwargs(
                 domain_kwargs,
                 domain_type,
             )
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            split_domain_kwargs = self._split_column_pair_metric_domain_kwargs(
+            partition_domain_kwargs = self._partition_column_pair_metric_domain_kwargs(
                 domain_kwargs,
                 domain_type,
             )
 
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            split_domain_kwargs = self._split_multi_column_metric_domain_kwargs(
+            partition_domain_kwargs = self._partition_multi_column_metric_domain_kwargs(
                 domain_kwargs,
                 domain_type,
             )
         else:
             compute_domain_kwargs = copy.deepcopy(domain_kwargs)
             accessor_domain_kwargs: Dict[str, Any] = {}
-            split_domain_kwargs = SplitDomainKwargs(
+            partition_domain_kwargs = PartitionDomainKwargs(
                 compute_domain_kwargs, accessor_domain_kwargs
             )
 
-        return split_domain_kwargs
+        return partition_domain_kwargs
 
     @staticmethod
-    def _split_table_metric_domain_kwargs(
+    def _partition_table_metric_domain_kwargs(
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for table Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for table Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -691,14 +691,14 @@ class ExecutionEngine(ABC):
                     f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for Domain type "{domain_type.value}"."""
                 )
 
-        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+        return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
-    def _split_column_metric_domain_kwargs(
+    def _partition_column_metric_domain_kwargs(
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for column Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -723,14 +723,14 @@ class ExecutionEngine(ABC):
 
         accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
-        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+        return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
-    def _split_column_pair_metric_domain_kwargs(
+    def _partition_column_pair_metric_domain_kwargs(
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -756,14 +756,14 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
         accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+        return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
-    def _split_multi_column_metric_domain_kwargs(
+    def _partition_multi_column_metric_domain_kwargs(
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
-    ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
+    ) -> PartitionDomainKwargs:
+        """Partition domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
@@ -795,4 +795,4 @@ class ExecutionEngine(ABC):
 
         accessor_domain_kwargs["column_list"] = column_list
 
-        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+        return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)

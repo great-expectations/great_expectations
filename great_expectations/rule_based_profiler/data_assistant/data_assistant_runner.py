@@ -151,7 +151,7 @@ class DataAssistantRunner:
             """
             To supply user-configurable override arguments/directives:
             1) obtain "Domain"-level attributes;
-            2) split passed-in arguments/directives into "Domain"-level and "variables"-level.
+            2) partition passed-in arguments/directives into "Domain"-level and "variables"-level.
             """
             rule_based_profiler_domain_type_attributes: List[
                 str

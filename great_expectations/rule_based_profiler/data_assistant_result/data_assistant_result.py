@@ -912,7 +912,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
             if "value_ranges" in list_column_names:
-                # split value ranges into two columns
+                # partition value ranges into two columns
                 df_transformed["min_value"] = 0
                 df_transformed["max_value"] = 0
                 df_transformed[["min_value", "max_value"]] = df_transformed[
