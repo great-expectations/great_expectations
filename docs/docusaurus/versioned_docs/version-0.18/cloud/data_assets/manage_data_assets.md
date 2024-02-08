@@ -13,19 +13,12 @@ A Data Asset is a collection of records that you create when you connect to your
 
 To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_asset.md).
 
-## Prerequisites
-
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
-
-- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
-
-
 ## Create a Data Asset
 
 Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
 
 <Tabs
-  groupId="try-gx-cloud"
+  groupId="manage-data-assets"
   defaultValue='Snowflake'
   values={[
   {label: 'Snowflake', value:'Snowflake'},
@@ -36,6 +29,10 @@ Create a Data Asset to define the data you want GX Cloud to access. To connect t
 Define the data you want GX Cloud to access within Snowflake. 
 
 ### Prerequisites
+
+- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
 
 - You have a Snowflake database, schema, and table.
 
@@ -99,6 +96,10 @@ Define the data you want GX Cloud to access within Snowflake.
 Define the data you want GX Cloud to access within PostgreSQL.
 
 ### Prerequisites
+
+- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
 
 - You have a PostgreSQL database, schema, and table.
 
@@ -231,7 +232,7 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
 ## Edit Data Source settings
 
-Edit Data Source settings to update Data Source connection settings or access credentials.
+Edit Data Source settings to update Data Source connection information or access credentials.
 
 <Tabs
   groupId="manage-data-assets"
