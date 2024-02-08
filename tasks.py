@@ -20,7 +20,6 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
-from packaging.version import parse as parse_version
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
@@ -615,6 +614,8 @@ def docs(  # noqa: PLR0913
     version: str | None = None,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    from packaging.version import parse as parse_version
+
     from docs.docs_build import DocsBuilder
 
     repo_root = pathlib.Path(__file__).parent
