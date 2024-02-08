@@ -1618,8 +1618,8 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
     @pydantic.validator("unexpected_rows_query")
     def _validate_query(cls, query: str) -> str:
         parsed_fields = [f[1] for f in Formatter().parse(query)]
-        if "active_batch" not in parsed_fields:
-            raise ValueError("Query must contain {active_batch} parameter.")
+        if "batch" not in parsed_fields:
+            raise ValueError("Query must contain {batch} parameter.")
 
         return query
 
@@ -1718,14 +1718,14 @@ class QueryExpectation(BatchExpectation, ABC):
                 for x in re.split(", |\\(|\n|\\)| |/", query)
                 if x.upper() and x.upper() not in valid_sql_tokens_and_types
             }
-            assert "{active_batch}" in parsed_query, (
+            assert "{batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "
-                "By not parameterizing your query with `{active_batch}`, "
+                "By not parameterizing your query with `{batch}`, "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
             assert all(re.match("{.*?}", x) for x in parsed_query), (
                 "Your query appears to have hard-coded references to your data. "
-                "By not parameterizing your query with `{active_batch}`, {col}, etc., "
+                "By not parameterizing your query with `{batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
         except (TypeError, AssertionError) as e:

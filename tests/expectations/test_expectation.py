@@ -313,7 +313,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
     "query, expected_success, expected_observed_value, expected_unexpected_rows",
     [
         pytest.param(
-            "SELECT * FROM {active_batch} WHERE passenger_count > 7",
+            "SELECT * FROM {batch} WHERE passenger_count > 7",
             True,
             0,
             [],
@@ -321,7 +321,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
         ),
         pytest.param(
             # There is a single instance where passenger_count == 7
-            "SELECT * FROM {active_batch} WHERE passenger_count > 6",
+            "SELECT * FROM {batch} WHERE passenger_count > 6",
             False,
             1,
             [

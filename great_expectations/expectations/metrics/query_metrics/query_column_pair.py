@@ -50,13 +50,13 @@ class QueryColumnPair(QueryMetricProvider):
         column_B: Optional[str] = metric_value_kwargs.get("column_B")
         if isinstance(selectable, sa.Table):
             query = query.format(  # type: ignore[union-attr] # could be none
-                column_A=column_A, column_B=column_B, active_batch=selectable
+                column_A=column_A, column_B=column_B, batch=selectable
             )
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
             query = query.format(  # type: ignore[union-attr] # could be none
-                column_A=column_A, column_B=column_B, active_batch=f"({selectable})"
+                column_A=column_A, column_B=column_B, batch=f"({selectable})"
             )
         elif isinstance(
             selectable, sa.sql.Select
@@ -64,11 +64,11 @@ class QueryColumnPair(QueryMetricProvider):
             query = query.format(  # type: ignore[union-attr] # could be none
                 column_A=column_A,
                 column_B=column_B,
-                active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+                batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
             query = query.format(  # type: ignore[union-attr] # could be none
-                column_A=column_A, column_B=column_B, active_batch=f"({selectable})"
+                column_A=column_A, column_B=column_B, batch=f"({selectable})"
             )
 
         result: List[sqlalchemy.Row] = execution_engine.execute_query(
@@ -99,7 +99,7 @@ class QueryColumnPair(QueryMetricProvider):
         column_A: Optional[str] = metric_value_kwargs.get("column_A")
         column_B: Optional[str] = metric_value_kwargs.get("column_B")
         query = query.format(  # type: ignore[union-attr] # could be none
-            column_A=column_A, column_B=column_B, active_batch="tmp_view"
+            column_A=column_A, column_B=column_B, batch="tmp_view"
         )
 
         engine: pyspark.SparkSession = execution_engine.spark
