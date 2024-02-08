@@ -369,5 +369,5 @@ def test_unexpected_rows_expectation_validate(
     res = result.result
     assert res["observed_value"] == expected_observed_value
 
-    unexpected_rows = res["details"]["value_counts"]["unexpected_rows"]
+    unexpected_rows = res["details"]["unexpected_rows"]
     assert unexpected_rows == expected_unexpected_rows

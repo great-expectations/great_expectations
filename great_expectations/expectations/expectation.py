@@ -1635,7 +1635,7 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
             "success": len(metric_value) == 0,
             "result": {
                 "observed_value": len(metric_value),
-                "details": {"value_counts": {"unexpected_rows": metric_value}},
+                "details": {"unexpected_rows": metric_value},
             },
         }
 
