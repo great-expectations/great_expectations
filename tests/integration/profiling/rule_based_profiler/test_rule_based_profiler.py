@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import pathlib
 from typing import TYPE_CHECKING
-from unittest import mock
 
 import pytest
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -135,13 +133,9 @@ def test_batches_are_accessible(
         assert metric_value_set == {"category0", "category1", "category2"}
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 2.04s
 @pytest.mark.filesystem
 def test_profile_includes_citations(
-    mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
@@ -175,24 +169,10 @@ def test_profile_includes_citations(
 
     assert result.citation is not None and len(result.citation.keys()) > 0
 
-    assert mock_emit.call_count == 43
-    assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
-        for payload in mock_emit.call_args_list[:-1]
-    )
 
-    # noinspection PyUnresolvedReferences
-    actual_events: list[mock._Call] = mock_emit.call_args_list
-    assert actual_events[-1][0][0]["event"] == UsageStatsEvents.RULE_BASED_PROFILER_RUN
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 2.16s
 @pytest.mark.filesystem
 def test_profile_get_expectation_suite(
-    mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
@@ -231,12 +211,3 @@ def test_profile_get_expectation_suite(
     )
 
     assert suite is not None and len(suite.expectations) > 0
-
-    assert mock_emit.call_count == 44
-
-    # noinspection PyUnresolvedReferences
-    actual_events: list[mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE
-    )

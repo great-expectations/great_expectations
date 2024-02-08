@@ -1,7 +1,6 @@
 # noinspection PyPep8Naming
 from contextlib import ExitStack as does_not_raise
 from typing import List
-from unittest import mock
 
 import boto3
 import pandas as pd
@@ -317,11 +316,8 @@ def test_self_check():
     }
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock_s3
-def test_test_yaml_config(mock_emit, empty_data_context_stats_enabled):
+def test_test_yaml_config(empty_data_context_stats_enabled):
     context = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
@@ -394,31 +390,11 @@ default_regex:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
-    assert mock_emit.call_count == 1
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "InferredAssetS3DataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock_s3
 def test_yaml_config_excluding_non_regex_matching_files(
-    mock_emit, empty_data_context_stats_enabled
+    empty_data_context_stats_enabled,
 ):
     context = empty_data_context_stats_enabled
 
@@ -496,23 +472,6 @@ default_regex:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
-    assert mock_emit.call_count == 1
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "InferredAssetS3DataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @mock_s3

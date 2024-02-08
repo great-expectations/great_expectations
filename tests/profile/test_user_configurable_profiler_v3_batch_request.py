@@ -416,13 +416,9 @@ def test_profiler_works_with_batch_object(cardinality_validator):
     ]
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 1.18s
 @pytest.mark.filesystem
 def test_build_suite_with_semantic_types_dict(
-    mock_emit,
     cardinality_validator,
     possible_expectations_set,
 ):
@@ -467,12 +463,8 @@ def test_build_suite_with_semantic_types_dict(
     assert value_set_columns == {"col_two", "col_very_few"}
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.filesystem
 def test_build_suite_when_suite_already_exists(
-    mock_emit,
     cardinality_validator,
 ):
     """
