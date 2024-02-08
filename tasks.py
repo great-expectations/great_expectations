@@ -605,10 +605,9 @@ def api_docs(ctx: Context):
         "lint": "Run the linter",
     },
 )
-def docs(  # noqa: PLR0913
+def docs(
     ctx: Context,
     build: bool = False,
-    clean: bool = False,
     start: bool = False,
     lint: bool = False,
     version: str | None = None,
@@ -633,18 +632,7 @@ def docs(  # noqa: PLR0913
     is_pull_request = pull_request == "true"
     is_local = not pull_request
 
-    if clean:
-        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
-        ctx.run(" ".join(rm_cmds), echo=True)
-        rm_rf_cmds = [
-            "rm",
-            "-rf",
-            "versioned_code",
-            "versioned_docs",
-            "versioned_sidebars",
-        ]
-        ctx.run(" ".join(rm_rf_cmds), echo=True)
-    elif lint:
+    if lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(
