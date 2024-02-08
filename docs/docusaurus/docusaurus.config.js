@@ -92,7 +92,7 @@ module.exports = {
     navbar: {
       logo: {
         alt: 'Great Expectations',
-        src: 'img/gx-logo.svg',
+        src: 'img/GXDocs.svg',
         href: 'https://greatexpectations.io',
       },
       items: [
@@ -101,8 +101,8 @@ module.exports = {
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: 'https://legacy.docs.greatexpectations.io/',
-              label: '0.13.x and earlier',
+              to: 'https://legacy.016.docs.greatexpectations.io',
+              label: '0.16.x and earlier',
             },
           ],
           dropdownActiveClassDisabled: true,
@@ -110,6 +110,13 @@ module.exports = {
         {
           type: 'search',
           position: 'left',
+          className: 'custom-search-bar'
+        },
+        {
+          type: 'custom-githubNavbarItem',
+          position: 'left',
+          owner: 'great-expectations',
+          repository: 'great_expectations'
         },
         {
           label: 'Home',
@@ -247,14 +254,19 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
+          includeCurrentVersion: false,
           sidebarPath: require.resolve('./sidebars.js'),
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
-          lastVersion: 'current',
+          // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
-            current: {
+            ['0.18']: {
               label: '0.18.8',
               path: ''
+            },
+            ["0.17"]: {
+              label: '0.17.23',
+              path: '0.17.23'
             }
           }
         },

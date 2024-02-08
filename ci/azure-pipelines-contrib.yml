@@ -10,7 +10,17 @@ variables:
 name: $(Date:yyyyMMdd)$(Rev:rrr)
 
 stages:
+  - stage: block_pipeline
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: BlockPipeline
+        steps:
+          - bash: echo "Block pipeline"
+
   - stage: contrib
+    dependsOn: block_pipeline
+    condition: failed('block_pipline')
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:

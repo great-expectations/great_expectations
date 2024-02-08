@@ -20,9 +20,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -44,6 +41,11 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
 
 yaml = YAMLHandler()
+
+# No longer used but keeping around for tests
+USAGE_STATISTICS_QA_URL = (
+    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+)
 
 
 @pytest.fixture()

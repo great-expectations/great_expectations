@@ -352,16 +352,12 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.data_context.data_context.AbstractDataContext.get_expectation_suite"
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
     mock_expectation_store_update,
-    mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
     unset_gx_env_variables,
@@ -572,28 +568,6 @@ def test_custom_filter_function(
         v.batch_identifiers["month"] for v in jan_feb_batch_definition_list
     }
     assert batch_definitions_months_set == {"01", "02"}
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.big
-def test_adding_expectation_to_validator_not_send_usage_message(
-    mock_emit, multi_batch_taxi_validator
-):
-    """
-    What does this test and why?
-
-    When an Expectation is called using a Validator, it validates the dataset using the implementation of
-    the Expectation. As part of the process, it also adds the Expectation to the active
-    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
-    (ie not calling add_expectations() directly) does not emit a usage_stats event.
-    """
-    multi_batch_taxi_validator.expect_column_values_to_be_between(
-        column="trip_distance", min_value=11, max_value=22
-    )
-    assert mock_emit.call_count == 0
-    assert mock_emit.call_args_list == []
 
 
 @pytest.mark.big

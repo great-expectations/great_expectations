@@ -313,16 +313,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
         description = expectation.description
         if not description:
             raise ValueError("Cannot render an expectation with no description.")
+        # If we wish to support $VAR substitution, we should use RenderedStringTemplateContent with params
         return [
-            RenderedStringTemplateContent(
-                content_block_type="string_template",
-                string_template={
-                    "template": description,
-                    # If we want to support $VAR substitution, params should be `expectation.configuration`
-                    # Keeping this simple to limit scope of this feature for the time being
-                    "params": {},
-                    "styling": runtime_configuration.get("styling", {}),
-                },
+            RenderedMarkdownContent(
+                markdown=description, styling=runtime_configuration.get("styling", {})
             )
         ]
 

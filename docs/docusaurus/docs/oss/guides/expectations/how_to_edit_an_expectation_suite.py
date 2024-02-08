@@ -1,6 +1,6 @@
 # ruff: noqa: I001, E401, B018
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite import_expectation_configuration">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py import_expectation_configuration">
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -14,14 +14,14 @@ import sys, io
 stdout = sys.stdout
 sys.stdout = io.StringIO()
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_context">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py get_context">
 import great_expectations as gx
 import great_expectations.expectations as gxe
 
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite create_validator">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py create_validator">
 validator = context.sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
@@ -35,11 +35,11 @@ validator.expect_column_values_to_be_between(
 
 my_suite = validator.get_expectation_suite()
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite show_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py show_suite">
 my_suite.show_expectations_by_expectation_type()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_dict_1">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py example_dict_1">
 
 {
     "expect_column_values_to_be_between": {
@@ -53,7 +53,7 @@ my_suite.show_expectations_by_expectation_type()
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_configuration_1">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py example_configuration_1">
 config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
@@ -68,7 +68,7 @@ config = ExpectationConfiguration(
 # </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite updated_configuration">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py updated_configuration">
 updated_config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
@@ -83,7 +83,7 @@ updated_config = ExpectationConfiguration(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_configuration">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py add_configuration">
 my_suite.add_expectation_configuration(updated_config)
 # </snippet>
 
@@ -93,7 +93,7 @@ assert isinstance(my_suite.expectations[1], gxe.ExpectColumnValuesToBeBetween)
 assert my_suite.expectations[1] == updated_config.to_domain_obj()
 
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py find_configuration">
 config_to_search = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={"column": "passenger_count"},
@@ -105,7 +105,7 @@ assert len(found_expectation) == 1
 # </snippet>
 assert found_expectation[0].to_domain_obj() == updated_config.to_domain_obj()
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite remove_configuration">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py remove_configuration">
 config_to_remove = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={"column": "passenger_count"},
@@ -127,6 +127,6 @@ assert my_suite.expectation_configurations[0] == ExpectationConfiguration(
     kwargs={"column": "pickup_datetime"},
 )
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite save_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py save_suite">
 context.save_expectation_suite(my_suite)
 # </snippet>

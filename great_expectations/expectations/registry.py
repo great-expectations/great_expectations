@@ -369,10 +369,10 @@ def get_metric_kwargs(
             "metric_value_keys": metric_definition["metric_value_keys"],
         }
         if configuration:
-            expectation_impl = get_expectation_impl(configuration.expectation_type)
-            configuration_kwargs = expectation_impl(
-                **configuration.kwargs
-            )._get_runtime_kwargs(runtime_configuration=runtime_configuration)
+            expectation = configuration.to_domain_obj()
+            configuration_kwargs = expectation._get_runtime_kwargs(
+                runtime_configuration=runtime_configuration
+            )
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {

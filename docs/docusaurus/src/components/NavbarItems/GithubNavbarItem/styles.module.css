@@ -1,0 +1,46 @@
+.githubBadge {
+    display: flex;
+    gap: 0.25rem;
+    align-items: flex-start;
+    font-size: var(--p-tiny-font-size);
+    padding-right: 2rem;
+}
+
+.githubBadgeNoErrors {
+    min-width: 8.5rem;
+}
+
+a {
+    color: var(--ifm-menu-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--ifm-menu-color);
+    text-decoration:none;
+}
+
+.githubBadgeInfo {
+    line-height: 0;
+}
+
+.githubStats {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-family: 'Source Sans Pro', sans-serif;
+
+}
+
+.githubStats img {
+    height: 10px;
+    margin-right: 2px;
+}
+
+.githubMark {
+    height: 26px;
+}
+
+.githubLogo {
+    height: 18px;
+}
