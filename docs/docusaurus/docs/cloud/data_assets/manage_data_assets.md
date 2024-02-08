@@ -25,7 +25,7 @@ To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_as
 Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
 
 <Tabs
-  groupId="try-gx-cloud"
+  groupId="manage-data-assets"
   defaultValue='Snowflake'
   values={[
   {label: 'Snowflake', value:'Snowflake'},
@@ -204,30 +204,43 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
 ## Add a Data Asset to an Existing Data Source
 
-Additional Data Assets can only be added to an existing Snowflake Data Source.
-
 1. In GX Cloud, click **Data Assets** and then select **New Data Asset**.
 
-2. Click the **Existing Data Source** tab and then select a Snowflake Data Source.
+2. Click the **Existing Data Source** tab and then select a Data Source.
 
-3. Click **Add another Data Asset**.
+3. Click **Add Data Asset**.
 
 4. Select **Table Asset** or **Query Asset** and complete the following fields:
-
-    - **Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-5. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat step 4.
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
-6. Click **Finish**.
+5. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+
+    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
+
+    - **Column of datetime type** - Enter the name of the column containing the date and time data.
+
+6. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
+
+7. Click **Finish**.
 
 
 ## Edit Data Source settings
 
-Currently, you can only edit Snowflake Data Source settings.
+Edit Data Source settings to update Data Source connection settings or access credentials.
+
+<Tabs
+  groupId="manage-data-assets"
+  defaultValue='Snowflake'
+  values={[
+  {label: 'Snowflake', value:'Snowflake'},
+  {label: 'PostgreSQL', value:'PostgreSQL'},
+  ]}>
+<TabItem value="Snowflake">
 
 1. In GX Cloud, click **Data Assets**.
 
@@ -235,10 +248,12 @@ Currently, you can only edit Snowflake Data Source settings.
 
 3. Click **Edit Data Source** for the Snowflake Data Source you want to edit.
 
-4. If you used a connection string to connect to the Data Source, edit the Data Source connection string, or click the **Use connection string** selector and edit the following fields:
+4. Optional. Edit the Data Source name.
 
-     - **Data Source name**: Enter a new name for the Data Asset.
-     
+5. Optional. If you used a connection string to connect to the Data Source, click the **Use connection string** slider and edit the Data Source connection string.
+
+6. Optional. If you're not using a connection string, edit the following fields:
+    
      - **Username**: Enter a new Snowflake username.
 
     - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
@@ -253,11 +268,28 @@ Currently, you can only edit Snowflake Data Source settings.
 
     - **Role**: Enter a new Snowflake role.
 
-5. Click **Save**.
+7. Click **Save**.
+
+</TabItem>
+<TabItem value="PostgreSQL">
+
+1. In GX Cloud, click **Data Assets**.
+
+2. Click **Manage Data Sources**.
+
+3. Click **Edit Data Source** for the PostgreSQL Data Source you want to edit.
+
+4. Optional. Edit the Data Source name.
+
+5. Optional. Click **Show** in the **Connection string** field and then edit the Data Source connection string.
+
+6. Click **Save**.
+
+
+</TabItem>
+</Tabs>
 
 ## Edit a Data Asset
-
-Currently, you can only edit Snowflake Data Assets.
 
 1. In GX Cloud, click **Data Assets** and in the Data Assets list click **Edit Data Asset** for the Data Asset you want to edit.
 
