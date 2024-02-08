@@ -20,6 +20,7 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
+from packaging.version import parse as parse_version
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
@@ -614,7 +615,7 @@ def docs(  # noqa: PLR0913
     version: str | None = None,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
-    from docs.docs_build import DocsBuilder, Version
+    from docs.docs_build import DocsBuilder
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -626,12 +627,6 @@ def docs(  # noqa: PLR0913
     old_cwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
-    # set by netlify: https://docs.netlify.com/configure-builds/environment-variables/#git-metadata
-    pull_request = os.environ.get(  # noqa: TID251 # os.environ allowed in config files
-        "PULL_REQUEST"
-    )
-    is_pull_request = pull_request == "true"
-    is_local = not pull_request
 
     if clean:
         rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
@@ -647,23 +642,13 @@ def docs(  # noqa: PLR0913
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
-        docs_builder = DocsBuilder(
-            ctx,
-            docusaurus_dir,
-            is_pull_request=is_pull_request,
-            is_local=is_local,
-        )
-        docs_builder.create_version(version=Version.from_string(version))
+        docs_builder = DocsBuilder(ctx, docusaurus_dir)
+        docs_builder.create_version(version=parse_version(version))
     else:  # noqa: PLR5501
         if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
-            docs_builder = DocsBuilder(
-                ctx,
-                docusaurus_dir,
-                is_pull_request=is_pull_request,
-                is_local=is_local,
-            )
+            docs_builder = DocsBuilder(ctx, docusaurus_dir)
             print("Making sure docusaurus dependencies are installed.")
             ctx.run(" ".join(["yarn install"]), echo=True)
 
