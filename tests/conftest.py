@@ -290,11 +290,6 @@ def pytest_addoption(parser):
         help="If set, execute tests against clickhouse",
     )
     parser.addoption(
-        "--aws-integration",
-        action="store_true",
-        help="If set, run aws integration tests for usage_statistics",
-    )
-    parser.addoption(
         "--docs-tests",
         action="store_true",
         help="If set, run integration tests for docs",
@@ -465,11 +460,6 @@ def pytest_collection_modifyitems(config, items):
         reason: str
 
     categories = (
-        Category(
-            mark="aws_integration",
-            flag="--aws-integration",
-            reason="need --aws-integration option to run",
-        ),
         Category(
             mark="docs",
             flag="--docs-tests",
