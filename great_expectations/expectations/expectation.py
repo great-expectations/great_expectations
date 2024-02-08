@@ -10,6 +10,7 @@ from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
 from numbers import Number
+from string import Formatter
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -1590,6 +1591,53 @@ representation."""
         success = bool(above_min and below_max)
 
         return {"success": success, "result": {"observed_value": metric_value}}
+
+
+class UnexpectedRowsExpectation(BatchExpectation, ABC):
+    """
+    UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
+
+    UnexpectedRowsExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
+    One is written by default, but can be overridden.
+    A successful validation is one where the unexpected_rows_query returns no rows.
+
+    Args:
+        unexpected_rows_query (str): A SQL or Spark-SQL query to be executed for validation.
+    """
+
+    unexpected_rows_query: str
+
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
+    success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
+
+    @pydantic.validator("unexpected_rows_query")
+    def _validate_query(cls, query: str) -> str:
+        parsed_fields = [f[1] for f in Formatter().parse(query)]
+        if "active_batch" not in parsed_fields:
+            raise ValueError("Query must contain {active_batch} parameter.")
+
+        return query
+
+    @override
+    def _validate(
+        self,
+        metrics: dict,
+        runtime_configuration: dict | None = None,
+        execution_engine: ExecutionEngine | None = None,
+    ) -> Union[ExpectationValidationResult, dict]:
+        metric_value = metrics["query.table"]
+        return {
+            "success": len(metric_value) == 0,
+            "result": {
+                "observed_value": len(metric_value),
+                "details": {"unexpected_rows": metric_value},
+            },
+        }
 
 
 @public_api

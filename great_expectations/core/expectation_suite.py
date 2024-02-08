@@ -110,10 +110,10 @@ class ExpectationSuite(SerializableDictDot):
     ) -> None:
         if name:
             assert isinstance(name, str), "Name is a required field."
-            self.expectation_suite_name = name
+            self.name = name
         else:
             assert isinstance(expectation_suite_name, str), "Name is a required field."
-            self.expectation_suite_name = expectation_suite_name
+            self.name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
 
@@ -143,8 +143,12 @@ class ExpectationSuite(SerializableDictDot):
         self._store = project_manager.get_expectations_store()
 
     @property
-    def name(self) -> str:
-        return self.expectation_suite_name
+    def expectation_suite_name(self) -> str:
+        return self.name
+
+    @expectation_suite_name.setter
+    def expectation_suite_name(self, value) -> None:
+        self.name = value
 
     @public_api
     def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
