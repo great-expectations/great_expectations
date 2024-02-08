@@ -1597,7 +1597,8 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
     """
     UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
 
-    QueryExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
+    UnexpectedRowsExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
+    One is written by default, but can be overridden.
     A successful validation is one where the unexpected_rows_query returns no rows.
 
     Args:
