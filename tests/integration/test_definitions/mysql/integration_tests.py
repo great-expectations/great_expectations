@@ -17,7 +17,7 @@ connecting_to_your_data = [
 partition_data = [
     IntegrationTestFixture(
         name="partition_data_on_whole_table_mysql",
-        user_flow_script="tests/integration/db/test_sql_data_partition_on_whole_table.py",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_whole_table.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -31,7 +31,7 @@ partition_data = [
     ),
     IntegrationTestFixture(
         name="partition_data_on_column_value_mysql",
-        user_flow_script="tests/integration/db/test_sql_data_partition_on_column_value.py",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_column_value.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -45,7 +45,7 @@ partition_data = [
     ),
     IntegrationTestFixture(
         name="partition_data_on_divided_integer_mysql",
-        user_flow_script="tests/integration/db/test_sql_data_partition_on_divided_integer.py",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_column_value.py.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -59,7 +59,7 @@ partition_data = [
     ),
     IntegrationTestFixture(
         name="partition_data_on_mod_integer_mysql",
-        user_flow_script="tests/integration/db/test_sql_data_partition_on_mod_integer.py",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_mod_integer.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -88,7 +88,7 @@ partition_data = [
     # ),
     IntegrationTestFixture(
         name="partition_data_on_multi_column_values_mysql",
-        user_flow_script="tests/integration/db/test_sql_data_partition_on_multi_column_values.py",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_multi_column_values.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -102,7 +102,7 @@ partition_data = [
     ),
     IntegrationTestFixture(
         name="partition_data_on_datetime_mysql",
-        user_flow_script="tests/integration/db/test_sql_data_partition_on_datetime_and_day_part.py",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_datetime_and_day_part.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
