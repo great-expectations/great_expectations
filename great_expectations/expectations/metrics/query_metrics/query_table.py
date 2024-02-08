@@ -22,7 +22,25 @@ if TYPE_CHECKING:
 
 class QueryTable(QueryMetricProvider):
     metric_name = "query.table"
-    value_keys = ("query",)
+    value_keys = (
+        "query",
+        "unexpected_rows_query",
+    )
+
+    @classmethod
+    def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
+        query: Optional[str] = (
+            metric_value_kwargs.get("query")
+            or cls.default_kwarg_values.get("query")
+            or metric_value_kwargs.get("unexpected_rows_query")
+            or cls.default_kwarg_values.get("unexpected_rows_query")
+        )
+        if not query:
+            raise ValueError(
+                "Must provide either `query` or `unexpected_rows_query` to `query.table` metric."
+            )
+
+        return query
 
     # <snippet>
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -34,9 +52,7 @@ class QueryTable(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
@@ -44,19 +60,19 @@ class QueryTable(QueryMetricProvider):
         )
 
         if isinstance(selectable, sa.Table):
-            query = query.format(active_batch=selectable)  # type: ignore[union-attr] # could be none
+            query = query.format(active_batch=selectable)
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery or Alias; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(active_batch=f"({selectable})")  # type: ignore[union-attr] # could be none
+            query = query.format(active_batch=f"({selectable})")
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
-            query = query.format(  # type: ignore[union-attr] # could be none
+            query = query.format(
                 active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(active_batch=f"({selectable})")  # type: ignore[union-attr] # could be none
+            query = query.format(active_batch=f"({selectable})")
 
         result: List[sqlalchemy.Row] = execution_engine.execute_query(
             sa.text(query)
@@ -73,9 +89,7 @@ class QueryTable(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
         df, _, _ = execution_engine.get_compute_domain(
@@ -83,7 +97,7 @@ class QueryTable(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        query = query.format(active_batch="tmp_view")  # type: ignore[union-attr] # could be none
+        query = query.format(active_batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).collect()
