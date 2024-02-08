@@ -54,6 +54,7 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
+from great_expectations.core.checkpoint_factory import CheckpointFactory
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
@@ -291,16 +292,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
-        self._sources: _SourceFactories = _SourceFactories(self)
-
-        self._suites: Union[SuiteFactory, None]
-        if self.stores.get(self.expectations_store_name):
-            self._suites = SuiteFactory(
-                store=self.expectations_store,
-                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
-            )
-        else:
-            self._suites = None
+        self._init_factories()
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
@@ -322,6 +314,22 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
+
+    def _init_factories(self):
+        self._sources: _SourceFactories = _SourceFactories(self)
+
+        self._suites: Union[SuiteFactory, None] = None
+        if self.stores.get(self.expectations_store_name):
+            self._suites = SuiteFactory(
+                store=self.expectations_store,
+                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
+            )
+
+        self._checkpoints: Union[CheckpointFactory, None] = None
+        if self.stores.get(self.checkpoint_store_name):
+            self._checkpoints = CheckpointFactory(
+                store=self.checkpoint_store,
+            )
 
     def _init_analytics(self) -> None:
         init_analytics(
@@ -538,6 +546,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not self._suites:
             raise gx_exceptions.DataContextError(
                 "DataContext requires a configured ExpectationsStore to persist ExpectationSuites."
+            )
+        return self._suites
+
+    @property
+    def checkpoints(self) -> CheckpointFactory:
+        if not self._checkpoints:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured CheckpointStore to persist Checkpoints."
             )
         return self._suites
 
