@@ -132,7 +132,7 @@ To connect to the contents of additional queries in the same SQL Database, repea
 
 ## Organize Batches
 
-Organize Batches in a SQL-based Data Asset. This includes using Splitters to divide the data in a table or query based on the contents of a provided field and adding Batch Sorters to a Data Asset to specify the order in which Batches are returned.
+Organize Batches in a SQL-based Data Asset. This includes using Partitioners to divide the data in a table or query based on the contents of a provided field and adding Batch Sorters to a Data Asset to specify the order in which Batches are returned.
 
 The following code examples use a previously defined Data Source named `"my_datasource"` to connect to a SQL database.
 
@@ -157,7 +157,7 @@ Run the following Python code to retrieve the Data Source:
 ```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource"
 ```
 
-### Add a Splitter to the Data Asset
+### Add a Partitioners to the Data Asset
 
 Run the following Python code to split the TableAsset into Batches:
 
@@ -168,7 +168,7 @@ Run the following Python code to split the TableAsset into Batches:
 
 Adding Batch Sorters to your Data Asset lets you explicitly state the order in which your Batches are returned when you request data from the Data Asset. To add Batch Sorters, pass a list of sorters to the `add_sorters(...)` method of your Data Asset.
 
-Run the following Python code to split the `"pickup_datetime"` column on `"year"` and `"month"`, so your list of sorters can have up to two elements. The code also adds an ascending sorter based on the contents of the splitter group `"year"` and a descending sorter based on the contents of the splitter group `"month"`:
+Run the following Python code to split the `"pickup_datetime"` column on `"year"` and `"month"`, so your list of sorters can have up to two elements. The code also adds an ascending sorter based on the contents of the Partitioner group `"year"` and a descending sorter based on the contents of the Partitioner group `"month"`:
 
 ```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_sorters"
 ```

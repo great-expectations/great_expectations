@@ -22,17 +22,17 @@
             <strong><code>included_tables</code>:</strong> A list that, if defined, will limit the inferred Data Assets to those tables that are included in the list.
         </li>
         <li>
-            <strong><code>skip_inapplicable_tables</code>:</strong>  A boolean value.  If <code>True</code>, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred Data Assets. If <code>False</code>, the class will throw an error during initialization if any such tables are encountered.
+            <strong><code>skip_inapplicable_tables</code>:</strong>  A boolean value.  If <code>True</code>, tables that can't be successfully queried using sampling and partitioner methods are excluded from inferred Data Assets. If <code>False</code>, the class will throw an error during initialization if any such tables are encountered.
         </li>
     </span>
 }
 { props.splitting &&
     <span>
         <li>
-            <strong><code>splitter_method</code>:</strong> A string that names the method that will be used to split the target table into multiple Batches.
+            <strong><code>partitioner_method</code>:</strong> A string that names the method that will be used to partition the target table into multiple Batches.
         </li>
         <li>
-            <strong><code>splitter_kwargs</code>:</strong> A dictionary containing keyword arguments to pass to <code>splitter_method</code> if <code>splitter_method</code> has been defined.
+            <strong><code>partitioner_kwargs</code>:</strong> A dictionary containing keyword arguments to pass to <code>partitioner_method</code> if <code>partitioner_method</code> has been defined.
         </li>
     </span>
 }

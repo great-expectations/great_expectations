@@ -22,7 +22,7 @@ import ImportGxAndInstantiateADataContext from '../../../../../components/setup/
 <!-- ## Next steps -->
 import AfterCreateAndConfigureDataAsset from '../../../../../components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
 
-In this guide we will demonstrate the ways in which Batches can be organized in a SQL-based Data Asset.  We will discuss how to use Splitters to divide the data in a table or query based on the contents of a provided field.  We will also show how to add Batch Sorters to a Data Asset in order to specify the order in which Batches are returned.
+In this guide we will demonstrate the ways in which Batches can be organized in a SQL-based Data Asset.  We will discuss how to use Partitioners to divide the data in a table or query based on the contents of a provided field.  We will also show how to add Batch Sorters to a Data Asset in order to specify the order in which Batches are returned.
 
 ## Prerequisites
 
@@ -76,7 +76,7 @@ To retrieve this Data Source, we will supply the `get_datasource(...)` method of
 ```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource"
 ```
 
-### 3. Add a Splitter to the Data Asset
+### 3. Add a Partitioners to the Data Asset
 
 Our table has a datetime column called "`pickup_datetime`" which we will use to split our TableAsset into Batches.
 
@@ -87,7 +87,7 @@ Our table has a datetime column called "`pickup_datetime`" which we will use to 
 
 We will now add Batch Sorters to our Data Asset.  This will allow us to explicitly state the order in which our Batches are returned when we request data from the Data Asset.  To do this, we will pass a list of sorters to the `add_sorters(...)` method of our Data Asset.
 
-In this example we split `"pickup_datetime"` column on `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the splitter group `"year"` and a descending sorter based on the contents of the splitter group `"month"`:
+In this example we split `"pickup_datetime"` column on `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the Partitioner group `"year"` and a descending sorter based on the contents of the Partitioner group `"month"`:
 
 ```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_sorters"
 ```
