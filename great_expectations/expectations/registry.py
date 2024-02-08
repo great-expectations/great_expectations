@@ -359,6 +359,7 @@ def get_metric_kwargs(
 ) -> dict:
     try:
         metric_definition = _registered_metrics.get(metric_name)
+        print("METRICS", _registered_metrics)
         if metric_definition is None:
             raise gx_exceptions.MetricProviderError(
                 f"No definition found for {metric_name}"
