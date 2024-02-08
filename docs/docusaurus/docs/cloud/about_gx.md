@@ -108,7 +108,8 @@ The following table lists the sequence of tasks that you complete in a typical G
 | Task                                     | Description                                                        |
 |------------------------------------------|--------------------------------------------------------------------|
 |[Connect GX Cloud](./connect/connect_lp.md) | Set up your deployment environment to get the most out of GX Cloud. Do it once, and you don't need to do it again. If you're not ready to use GX Cloud in your deployment environment, see [Try GX Cloud](./try_gx_cloud.md).                                   | 
-| [Connect to a Data Asset on a Data Source](./data_assets/manage_data_assets.md#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
+| [Create a Data Asset](./data_assets/manage_data_assets.md#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
+| [Invite users](./users/manage_users.md#invite-a-user)    | Invite users to your GX Cloud organization.                       |
 | [Create an Expectation](./expectations/manage_expectations.md)    | Define verifiable assertions about your data.                       |  
 | [Run Validations](./validations/manage_validations.md)                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       |
 | (Optional) [Add and run Checkpoints](./checkpoints/manage_checkpoints.md)       | Add and run Checkpoints to refine and confirm your Data Validations. |
