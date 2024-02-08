@@ -19,21 +19,29 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 - To improve data security, GX recommends creating a separate PostgreSQL user for your GX Cloud connection.
 
+- [pgAdmin (optional)](https://www.pgadmin.org/download/)
+
 - You have stopped all local running instances of the GX Agent.
 
 ## Prepare your PostgreSQL environment
 
-Run the following code to create and assign the `gx_ro` role and allow GX Cloud to access to all `public` schemas and tables on a specific database:
+1. In pgAdmin, select a database.
 
-```sql
-   CREATE ROLE gx_ro WITH LOGIN PASSWORD <your_password>;
+2. Click **Tools** > **Query Tool**.
+
+3. Copy and paste the following code into the **Query** pane to create and assign the `gx_ro` role and allow GX Cloud to access to all `public` schemas and tables on a specific database:
+
+   ```sql
+   CREATE ROLE gx_ro WITH LOGIN PASSWORD '<your_password>';
    GRANT CONNECT ON DATABASE <your_database> TO gx_ro;
    GRANT USAGE ON SCHEMA public TO gx_ro;
    GRANT SELECT ON ALL TABLES in SCHEMA public TO gx_ro;
    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;
-```
+   ```
 
-Replace `your_password` and `your_database` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;` is optional and gives the `gx_ro` user access to all future tables in the defined schema.
+   Replace `your_password` and `your_database` with your own values. `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gx_ro;` is optional and gives the `gx_ro` user access to all future tables in the defined schema.
+
+4. Click **Execute/Refresh**.
 
 ## Get your GX Cloud access token and organization ID
 
