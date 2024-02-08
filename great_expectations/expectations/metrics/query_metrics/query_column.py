@@ -36,9 +36,7 @@ class QueryColumn(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
@@ -77,9 +75,7 @@ class QueryColumn(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
         df, _, _ = execution_engine.get_compute_domain(

@@ -30,3 +30,20 @@ class QueryMetricProvider(MetricProvider):
     """
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
+
+    @classmethod
+    def _get_query_param_name(cls) -> str:
+        return "query"
+
+    @classmethod
+    def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
+        query_param = cls._get_query_param_name()
+        query: str | None = metric_value_kwargs.get(
+            query_param
+        ) or cls.default_kwarg_values.get(query_param)
+        if not query:
+            raise ValueError(
+                f"Must provide `{query_param}` to `{cls.metric_name}` metric."
+            )
+
+        return query

@@ -36,9 +36,7 @@ class QueryMultipleColumns(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
-            "query"
-        )
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         if not isinstance(query, str):
             raise TypeError("Query must be supplied as a string")
@@ -93,9 +91,7 @@ class QueryMultipleColumns(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
-            "query"
-        )
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         if not isinstance(query, str):
             raise TypeError("Query must be supplied as a string")
