@@ -68,9 +68,6 @@ module.exports = {
       indexName: 'greatexpectations',
       searchPagePath: 'search',
       contextualSearch: true,
-      searchParameters: {
-        facetFilters: ['version:0.18'],
-      },
     },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark'),
