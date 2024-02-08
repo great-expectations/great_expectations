@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import ClassVar
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.metrics.metric_provider import MetricProvider
@@ -31,13 +32,11 @@ class QueryMetricProvider(MetricProvider):
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
-    @classmethod
-    def _get_query_param_name(cls) -> str:
-        return "query"
+    _query_param_name: ClassVar[str] = "query"
 
     @classmethod
     def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
-        query_param = cls._get_query_param_name()
+        query_param = cls._query_param_name
         query: str | None = metric_value_kwargs.get(
             query_param
         ) or cls.default_kwarg_values.get(query_param)
