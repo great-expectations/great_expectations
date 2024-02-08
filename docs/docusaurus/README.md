@@ -75,7 +75,7 @@ To add a new version, follow these steps:
 1. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"` and `pip install pyspark`
 1. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
 1. Run `invoke docs version=<MAJOR.MINOR>` (substituting your new version numbers)
-1. This will create a new entry in `v
+1. Commit the new files in `versioned_docs/`, `versioned_sidebars/` and the change in `versions.json` to version control
 
 
 ## Versioning and docs build flow
