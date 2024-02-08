@@ -534,20 +534,15 @@ def prepare_prior_version(version: Version) -> None:
     if version >= Version(0, 16):
         prepend_version_info_to_name_for_md_images(version)
 
-    # TODO: delete this after we cut 0.18.9
-    if version >= Version(0, 18) and version < Version(0, 18, 9):
-        remove_extension_from_absolute_md_links(version)
-
 
 @total_ordering
 @dataclass(frozen=True)
 class Version:
     major: int = 0
     minor: int = 0
-    patch: int = 0
 
-    def as_tuple(self) -> tuple[int, int, int]:
-        return self.major, self.minor, self.patch
+    def as_tuple(self) -> tuple[int, int]:
+        return self.major, self.minor
 
     def __lt__(self, other: Version) -> bool:
         return self.as_tuple() < other.as_tuple()
@@ -558,5 +553,5 @@ class Version:
 
     @staticmethod
     def from_string(string: str) -> Version:
-        major, minor, patch = [int(x) for x in string.split(".")]
-        return Version(major, minor, patch)
+        major, minor = [int(x) for x in string.split(".")]
+        return Version(major, minor)
