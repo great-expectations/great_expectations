@@ -41,9 +41,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
@@ -4071,7 +4068,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
         # _add_expectation().
         expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {
@@ -4427,15 +4424,6 @@ def alice_columnar_table_single_batch_context(
     alice_columnar_table_single_batch,
 ):
     context = empty_data_context_stats_enabled
-    # We need our salt to be consistent between runs to ensure idempotent anonymized values
-    # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
-    # (ie. adjusted to be context._usage_statistics_handler)
-    context._usage_statistics_handler = UsageStatisticsHandler(
-        data_context=context,
-        data_context_id="00000000-0000-0000-0000-00000000a004",
-        usage_statistics_url="N/A",
-        oss_id=None,
-    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(  # noqa: PTH118
@@ -5422,7 +5410,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
         expected_expectation_suite_quantiles_estimator._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {

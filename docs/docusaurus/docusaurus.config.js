@@ -101,8 +101,8 @@ module.exports = {
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: 'https://legacy.docs.greatexpectations.io/',
-              label: '0.13.x and earlier',
+              to: 'https://legacy.016.docs.greatexpectations.io',
+              label: '0.16.x and earlier',
             },
           ],
           dropdownActiveClassDisabled: true,
@@ -224,14 +224,19 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
+          includeCurrentVersion: false,
           sidebarPath: require.resolve('./sidebars.js'),
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
-          lastVersion: 'current',
+          // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
-            current: {
+            ['0.18']: {
               label: '0.18.8',
               path: ''
+            },
+            ["0.17"]: {
+              label: '0.17.23',
+              path: '0.17.23'
             }
           }
         },

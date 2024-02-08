@@ -7,32 +7,9 @@ from docs.prepare_prior_versions import (
     _prepend_version_info_for_md_absolute_links,
     _prepend_version_info_to_name_for_md_relative_links,
     _prepend_version_info_to_name_for_md_relative_links_to_index_files,
-    _update_tag_references_for_correct_version_substitution,
     _use_relative_path_for_imports_substitution,
     _use_relative_path_for_imports_substitution_path_starting_with_forwardslash,
 )
-
-
-@pytest.mark.unit
-def test__update_tag_references_for_correct_version_substitution():
-    contents = """import data from '../term_tags/terms.json'
-
-<span class="tooltip">
-    <a href={'/docs/' + data[props.tag].url}>{props.text}</a>
-    <span class="tooltiptext">{data[props.tag].definition}</span>
-</span>"""
-
-    version = "0.15.50"
-    updated_contents = _update_tag_references_for_correct_version_substitution(
-        contents=contents, version=version
-    )
-    expected_contents = """import data from '../term_tags/terms.json'
-
-<span class="tooltip">
-    <a href={'/docs/0.15.50/' + data[props.tag].url}>{props.text}</a>
-    <span class="tooltiptext">{data[props.tag].definition}</span>
-</span>"""
-    assert updated_contents == expected_contents
 
 
 @pytest.mark.unit
@@ -238,9 +215,9 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
 @pytest.mark.parametrize(
     "a, b, expected",
     [
-        (Version(0, 0, 0), Version(0, 0, 1), True),
-        (Version(0, 0, 0), Version(0, 1, 0), True),
-        (Version(1, 0, 0), Version(0, 1, 0), False),
+        (Version(0, 0), Version(0, 1), True),
+        (Version(0, 1), Version(1, 0), True),
+        (Version(1, 0), Version(0, 1), False),
     ],
 )
 @pytest.mark.unit
@@ -252,9 +229,10 @@ def test_version__lt(a: Version, b: Version, expected: bool):
 @pytest.mark.parametrize(
     "a, b, expected",
     [
-        (Version(0, 0, 0), Version(0, 0, 0), True),
-        (Version(1, 1, 1), Version(1, 1, 1), True),
-        (Version(0, 1, 1), Version(1, 1, 0), False),
+        (Version(0, 0), Version(0, 0), True),
+        (Version(1, 1), Version(1, 1), True),
+        (Version(0, 1), Version(0, 1), True),
+        (Version(1, 0), Version(0, 1), False),
     ],
 )
 @pytest.mark.unit
