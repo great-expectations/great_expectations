@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Final
 
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 import numpy as np
 from scipy import stats
+
+NP_RANDOM_GENERATOR: Final = np.random.default_rng()
 
 
 class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
@@ -69,7 +72,8 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
 
         results = [
             stats.kstest(
-                np.random.choice(column, size=bootstrap_sample_size), estimated_cdf
+                NP_RANDOM_GENERATOR.choice(column, size=bootstrap_sample_size),
+                estimated_cdf,
             )[1]
             for _ in range(bootstrap_samples)
         ]

@@ -53,7 +53,6 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
-    DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
     CheckpointValidationConfig,
     DataContextConfig,
@@ -73,9 +72,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.data_context.types.base import (
-        AnonymizedUsageStatisticsConfig,
-    )
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
@@ -184,13 +180,6 @@ class CloudDataContext(SerializableDataContext):
         )
 
         return self._apply_global_config_overrides(config=project_data_context_config)
-
-    @override
-    def _initialize_usage_statistics(
-        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ) -> None:
-        # Usage statistics are always disabled within Cloud-backed environments.
-        self._usage_statistics_handler = None
 
     @override
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
@@ -533,7 +522,6 @@ class CloudDataContext(SerializableDataContext):
             "plugins_directory": self._normalize_absolute_or_relative_path(
                 path=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
             ),
-            "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }
         missing_config_vars_and_subs: list[tuple[str, str]] = []
         for config_variable, value in cloud_config_variable_defaults.items():

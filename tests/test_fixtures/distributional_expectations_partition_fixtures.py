@@ -19,7 +19,7 @@ The partitions should be built from distributional_expectations_data_base.csv. T
 
 
 def generate_new_data(seed):
-    np.random.seed(seed=seed)
+    np.random.seed(seed=seed)  # noqa: NPY002
 
     norm_0_1 = stats.norm.rvs(0, 1, 1000)
     norm_1_1 = stats.norm.rvs(1, 1, 1000)

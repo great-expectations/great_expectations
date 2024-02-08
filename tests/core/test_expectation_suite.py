@@ -6,7 +6,7 @@ from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
 from unittest import mock
 from unittest.mock import MagicMock, Mock
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -23,7 +23,6 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -214,6 +213,36 @@ class TestCRUDMethods:
             value_set=[1, 2, 3],
             result_format="BASIC",
         )
+
+    @pytest.mark.unit
+    def test_instantiate_suite_with_expectations(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        columns = ["a", "b", "c", "d", "e"]
+        expectations = [
+            expectation.copy(update={"column": column}) for column in columns
+        ]
+        suite = ExpectationSuite(
+            name=self.expectation_suite_name, expectations=expectations
+        )
+        assert suite.expectations == expectations
+
+    @pytest.mark.unit
+    def test_instantiate_suite_fails_with_expectations_with_ids(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        columns = ["a", "b", "c", "d", "e"]
+        expectations = [
+            expectation.copy(update={"column": column, "id": uuid4()})
+            for column in columns
+        ]
+        with pytest.raises(
+            ValueError,
+            match="Expectations in parameter `expectations` must not belong to another ExpectationSuite.",
+        ):
+            ExpectationSuite(
+                name=self.expectation_suite_name, expectations=expectations
+            )
 
     @pytest.mark.unit
     def test_add_success_with_saved_suite(self, expectation):
@@ -1357,35 +1386,6 @@ class DataContextSendUsageMessageSpy:
                 "success": success,
             }
         )
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "success",
-    [
-        pytest.param(True, id="success=True"),
-        pytest.param(False, id="success=False"),
-    ],
-)
-def test_expectation_suite_send_usage_message(success: bool):
-    """Ensure usage stats event is sent on expectation suite."""
-
-    dc_message_spy = DataContextSendUsageMessageSpy()
-
-    suite = ExpectationSuite(
-        expectation_suite_name="suite_name",
-        data_context=dc_message_spy,  # type: ignore[arg-type]
-    )
-
-    suite.send_usage_event(success=success)
-
-    assert dc_message_spy.messages
-    assert len(dc_message_spy.messages) == 1
-    assert dc_message_spy.messages[0] == {
-        "event": UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
-        "event_payload": {},
-        "success": success,
-    }
 
 
 @pytest.mark.unit

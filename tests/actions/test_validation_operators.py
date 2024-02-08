@@ -1,10 +1,13 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
+from copy import copy
+
 import dateutil.parser
 import pandas as pd
 import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
@@ -75,7 +78,7 @@ def warning_failure_validation_operator_data_context(
         },
     )
 
-    data_context.add_expectation_suite(expectation_suite_name="f1.failure")
+    f1_failure_suite = data_context.suites.add(ExpectationSuite(name="f1.failure"))
     df = data_context._get_batch_v2(
         expectation_suite_name="f1.failure",
         batch_kwargs=data_context.build_batch_kwargs(
@@ -85,10 +88,10 @@ def warning_failure_validation_operator_data_context(
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    failure_expectations.expectation_suite_name = "f1.failure"
-    data_context.update_expectation_suite(expectation_suite=failure_expectations)
+    for expectation in failure_expectations.expectations:
+        f1_failure_suite.add_expectation(copy(expectation))
 
-    data_context.add_expectation_suite(expectation_suite_name="f1.warning")
+    f1_warning_suite = data_context.suites.add(ExpectationSuite(name="f1.warning"))
     df = data_context._get_batch_v2(
         expectation_suite_name="f1.warning",
         batch_kwargs=data_context.build_batch_kwargs(
@@ -101,20 +104,43 @@ def warning_failure_validation_operator_data_context(
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    warning_expectations.expectation_suite_name = "f1.warning"
-    data_context.update_expectation_suite(expectation_suite=warning_expectations)
+    for expectation in warning_expectations.expectations:
+        f1_warning_suite.add_expectation(copy(expectation))
 
-    failure_expectations.expectation_suite_name = "f2.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+    data_context.suites.add(
+        ExpectationSuite(
+            name="f2.failure",
+            expectations=[
+                copy(expectation) for expectation in failure_expectations.expectations
+            ],
+        )
+    )
 
-    failure_expectations.expectation_suite_name = "f3.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+    data_context.suites.add(
+        ExpectationSuite(
+            name="f3.failure",
+            expectations=[
+                copy(expectation) for expectation in failure_expectations.expectations
+            ],
+        )
+    )
 
-    warning_expectations.expectation_suite_name = "f2.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
-
-    warning_expectations.expectation_suite_name = "f3.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
+    data_context.suites.add(
+        ExpectationSuite(
+            name="f2.warning",
+            expectations=[
+                copy(expectation) for expectation in warning_expectations.expectations
+            ],
+        )
+    )
+    data_context.suites.add(
+        ExpectationSuite(
+            name="f3.warning",
+            expectations=[
+                copy(expectation) for expectation in warning_expectations.expectations
+            ],
+        )
+    )
 
     return data_context
 

@@ -170,7 +170,7 @@ The following code examples use a PostgreSQL connection string. A PostgreSQL con
 
 The following code is an example of a PostgreSQL connection string format:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgreql_data.py connection_string"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py connection_string"
 ```
 
 :::tip Is there a more secure way to store my credentials than plain text in a connection string?

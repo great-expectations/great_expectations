@@ -24,10 +24,6 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from tests import test_utils
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 
 
 @pytest.fixture(
@@ -364,42 +360,3 @@ def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     evaluation_parameter_store.get_bind_params(run_id=run_id)
     assert mock_gcs_list_keys.called
     assert not mock_parent_list_keys.called
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filesystem
-def test_instantiation_with_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-module_name: great_expectations.data_context.store
-class_name: EvaluationParameterStore
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "EvaluationParameterStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "InMemoryStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)

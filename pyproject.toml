@@ -166,7 +166,6 @@ module = [
     "contrib.experimental.great_expectations_experimental.*",
     "great_expectations.checkpoint.checkpoint",
     "great_expectations.compatibility.docstring_parser",
-    "great_expectations.core.usage_statistics.*",
     "great_expectations.data_context.*",
     "great_expectations.dataset.*",
     "great_expectations.datasource.data_connector.*",
@@ -259,7 +258,7 @@ select = [
     # https://beta.ruff.rs/docs/rules/#ruff-specific-rules-ruf
     "RUF", # custom ruff rules
     #  https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
-    # "NPY", # NumPy-specific rules TODO: Enable after fixing or ignoring errors
+    "NPY", # NumPy-specific rules TODO: Enable after fixing or ignoring errors
     "NPY201", # numpy 2.0 compatibility (see https://numpy.org/devdocs/numpy_2_0_migration_guide.html#ruff-plugin) -- Explicitly listed to view preview rule errors
 ]
 ignore = [
