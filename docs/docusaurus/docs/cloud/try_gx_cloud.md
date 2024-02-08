@@ -191,17 +191,19 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit.
 
-1. In the **Data Assets** list, click the Snowflake Data Asset name.
+1. In the **Data Assets** list, click the Data Asset name.
 
-2. Click **New Expectation**.
+2. Click the **Expectations** tab.
 
-3. Select an Expectation type, enter the column name, and then complete the optional fields.
+3. Click **New Expectation**.
+
+4. Select an Expectation type, enter the column name, and then complete the optional fields. To view descriptions of the available Expectation types, see [Available Expectations](/cloud/expectations/manage_expectations#available-expectations)
 
     If you prefer to work in a code editor, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
 
-4. Click **Save**.
+5. Click **Save**.
 
-5. Optional. Repeat steps 1 to 4 to add additional Expectations.
+6. Optional. Repeat steps 3 to 5 to add additional Expectations.
 
 ## Validate Expectations
 

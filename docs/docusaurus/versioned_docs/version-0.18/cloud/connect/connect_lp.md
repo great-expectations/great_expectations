@@ -9,7 +9,7 @@ import LinkCard from '@site/src/components/LinkCard';
 
 <p class="DocItem__header-description">When you're finished testing GX Cloud features and functionality and you've determined it's the right solution for your organization, it's time to connect GX Cloud to your deployment environment. Great Expectations (GX) is rapidly adding new GX Cloud integrations, so check back often for our latest solution.
 <br /> 
-New to GX Cloud and not sure that it's the right solution for your organization? See <a href='../try_gx_cloud.md'>Try GX Cloud</a>.</p>
+New to GX Cloud and not sure that it's the right solution for your organization? See <a to='/cloud/try_gx_cloud.md'>Try GX Cloud</a>.</p>
 
 
 <LinkCardGrid>
