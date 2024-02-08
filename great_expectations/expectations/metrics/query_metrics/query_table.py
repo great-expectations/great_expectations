@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -22,25 +22,7 @@ if TYPE_CHECKING:
 
 class QueryTable(QueryMetricProvider):
     metric_name = "query.table"
-    value_keys = (
-        "query",
-        "unexpected_rows_query",
-    )
-
-    @classmethod
-    def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
-        query: Optional[str] = (
-            metric_value_kwargs.get("query")
-            or cls.default_kwarg_values.get("query")
-            or metric_value_kwargs.get("unexpected_rows_query")
-            or cls.default_kwarg_values.get("unexpected_rows_query")
-        )
-        if not query:
-            raise ValueError(
-                "Must provide either `query` or `unexpected_rows_query` to `query.table` metric."
-            )
-
-        return query
+    value_keys = ("query",)
 
     # <snippet>
     @metric_value(engine=SqlAlchemyExecutionEngine)
