@@ -32,9 +32,6 @@ resources:
     ports:
       - 1433:1433
 
-variables:
-  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-
 
 stages:
   - stage: scope_check
