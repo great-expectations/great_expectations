@@ -554,7 +554,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise gx_exceptions.DataContextError(
                 "DataContext requires a configured CheckpointStore to persist Checkpoints."
             )
-        return self._suites
+        return self._checkpoints
 
     @property
     def expectations_store_name(self) -> Optional[str]:

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store import CheckpointStore
 
 
+# TODO: Add analytics as needed
 class CheckpointFactory(Factory):
     def __init__(self, store: CheckpointStore):
         self._store = store
