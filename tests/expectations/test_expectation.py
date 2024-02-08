@@ -275,7 +275,7 @@ def test_unrecognized_expectation_arg_raises_error():
     [
         pytest.param("SELECT * FROM table", id="no batch"),
         pytest.param("SELECT * FROM {{ batch }}", id="invalid format"),
-        pytest.param("SELECT * FROM {active_batch}", id="legacy syntax"),
+        pytest.param("SELECT * FROM {batch}", id="legacy syntax"),
     ],
 )
 def test_unexpected_rows_expectation_invalid_query_raises_error(query: str):

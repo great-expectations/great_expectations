@@ -30,8 +30,8 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
     query = """
             SELECT {col},
-            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
-            FROM {active_batch}
+            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch})
+            FROM {batch}
             GROUP BY {col}
             """
 
