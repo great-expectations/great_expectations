@@ -9,13 +9,14 @@ from great_expectations.analytics.events import (
     ExpectationSuiteDeletedEvent,
 )
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.factory import Factory
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store import ExpectationsStore
 
 
-class SuiteFactory:
+class SuiteFactory(Factory):
     def __init__(self, store: ExpectationsStore, include_rendered_content: bool):
         self._store = store
         self._include_rendered_content = include_rendered_content

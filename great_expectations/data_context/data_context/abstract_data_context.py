@@ -54,7 +54,6 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
-from great_expectations.core.checkpoint_factory import CheckpointFactory
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
@@ -63,12 +62,12 @@ from great_expectations.core.config_provider import (
     _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
+from great_expectations.core.factory import CheckpointFactory, SuiteFactory
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
-from great_expectations.core.suite_factory import SuiteFactory
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset

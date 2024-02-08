@@ -4,13 +4,14 @@ from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.core.factory import Factory
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store import CheckpointStore
 
 
-class CheckpointFactory:
+class CheckpointFactory(Factory):
     def __init__(self, store: CheckpointStore):
         self._store = store
 
