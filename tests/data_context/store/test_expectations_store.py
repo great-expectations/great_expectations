@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from unittest import mock
 from uuid import UUID
 
 import pytest
@@ -14,10 +13,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 
 
 @pytest.mark.filesystem
@@ -199,48 +194,6 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
         gen_directory_tree_str(project_path)
         == initialized_directory_tree_with_store_backend_id
     )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filesystem
-def test_instantiation_with_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-module_name: great_expectations.data_context.store.expectations_store
-class_name: ExpectationsStore
-store_backend:
-    module_name: great_expectations.data_context.store.store_backend
-    class_name: InMemoryStoreBackend
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ExpectationsStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "InMemoryStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.cloud

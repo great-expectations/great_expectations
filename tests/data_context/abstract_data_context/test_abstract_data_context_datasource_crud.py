@@ -52,7 +52,6 @@ class FakeAbstractDataContext(AbstractDataContext):
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._datasources: dict = {}
-        self._usage_statistics_handler = None
         self._config_provider = config_provider
 
     def _init_variables(self):
