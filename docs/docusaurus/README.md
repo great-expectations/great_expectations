@@ -79,7 +79,6 @@ To add a new version, follow these steps:
 
 
 ## Versioning and docs build flow
-### Versioning
 ```mermaid
 sequenceDiagram
     Participant Code
