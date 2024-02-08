@@ -45,7 +45,7 @@ partition_data = [
     ),
     IntegrationTestFixture(
         name="partition_data_on_divided_integer_mysql",
-        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_column_value.py.py",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_column_value.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
