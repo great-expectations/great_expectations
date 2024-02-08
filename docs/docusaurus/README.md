@@ -85,8 +85,6 @@ sequenceDiagram
     Participant SphinxBuild as temp_sphinx_api_docs_build_dir/
     Participant Docusaurus as docs/docusaurus
     Participant DocsBuild as docs/docusaurus/build
-    Participant Github
-    Participant S3
     Participant Netlify
 
     loop versioning
