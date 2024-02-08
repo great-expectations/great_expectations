@@ -42,7 +42,7 @@ class QueryMetricProvider(MetricProvider):
         ) or cls.default_kwarg_values.get(query_param)
         if not query:
             raise ValueError(
-                f"Must provide `{query_param}` to `{cls.metric_name}` metric."
+                f"Must provide `{query_param}` to `{cls.__name__}` metric."
             )
 
         return query
