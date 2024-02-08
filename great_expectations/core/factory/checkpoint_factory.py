@@ -26,12 +26,7 @@ class CheckpointFactory(Factory):
         Raises:
             DataContextError if Checkpoint already exists
         """
-        key = self._store.get_key(name=checkpoint.name, id=None)
-        if self._store.has_key(key=key):
-            raise DataContextError(
-                f"Cannot add Checkpoint with name {checkpoint.name} because it already exists."
-            )
-        self._store.add(key=key, value=checkpoint)
+        checkpoint = self._store.add_checkpoint(checkpoint=checkpoint)
 
         # submit_event(
         #     event=ExpectationSuiteCreatedEvent(
@@ -51,7 +46,9 @@ class CheckpointFactory(Factory):
         Raises:
             DataContextError if Checkpoint doesn't exist
         """
-        key = self._store.get_key(name=checkpoint.name, id=checkpoint.ge_cloud_id)
+        key = self._store._determine_key(
+            name=checkpoint.name, id=checkpoint.ge_cloud_id
+        )
         if not self._store.has_key(key=key):
             raise DataContextError(
                 f"Cannot delete Checkpoint with name {checkpoint.name} because it cannot be found."
@@ -78,7 +75,7 @@ class CheckpointFactory(Factory):
         """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
-        key = self._store.get_key(name=name, id=None)
+        key = self._store._determine_key(name=name, id=None)
         if not self._store.has_key(key=key):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
         checkpoint_dict = self._store.get(key=key)
