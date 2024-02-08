@@ -69,7 +69,7 @@ module.exports = {
       searchPagePath: 'search',
       contextualSearch: true,
       searchParameters: {
-        facetFilters: ['version:current'],
+        facetFilters: ['version:0.18'],
       },
     },
     prism: {
