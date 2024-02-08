@@ -197,7 +197,7 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 3. Click **New Expectation**.
 
-4. Select an Expectation type, enter the column name, and then complete the optional fields. To view descriptions of the available Expectation types, see [Available Expectations](/cloud/expectations/manage_expectations#available-expectations)
+4. Select an Expectation type, enter the column name, and then complete the optional fields. To view descriptions of the available Expectation types, see [Available Expectations](expectations/manage_expectations.md#available-expectations).
 
     If you prefer to work in a code editor, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
 
