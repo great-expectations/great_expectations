@@ -98,7 +98,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_runtime_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {batch} GROUP BY {col}",
             False,
             0.04112718964204113,
             None,
@@ -106,7 +106,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT(y) FROM wrong) FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT(y) FROM wrong) FROM {batch} GROUP BY {col}",
             True,
             7.091666666666667,
             None,
@@ -114,7 +114,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {batch} GROUP BY {col}",
             False,
             0.2338156892612338,
             'col("Age")<35',
@@ -122,7 +122,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch}) / 2 FROM {batch} GROUP BY {col}",
             False,
             0.3240670220868241,
             None,
@@ -233,14 +233,14 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     "query,success,observed,row_condition,warns",
     [
         (
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch}) / 2 FROM {batch} GROUP BY {col}",
             False,
             0.3240670220868241,
             None,
             False,
         ),
         (
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch}) / 2 FROM {batch} GROUP BY {col}",
             False,
             0.3107287449392713,
             'col("Age")<35',

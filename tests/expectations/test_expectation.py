@@ -274,8 +274,8 @@ def test_unrecognized_expectation_arg_raises_error():
     "query",
     [
         pytest.param("SELECT * FROM table", id="no batch"),
-        pytest.param("SELECT * FROM {{ batch }}", id="invalid batch syntax 1"),
-        pytest.param("SELECT * FROM {batch}", id="invalid batch syntax 2"),
+        pytest.param("SELECT * FROM {{ batch }}", id="invalid format"),
+        pytest.param("SELECT * FROM {active_batch}", id="legacy syntax"),
     ],
 )
 def test_unexpected_rows_expectation_invalid_query_raises_error(query: str):
@@ -313,7 +313,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
     "query, expected_success, expected_observed_value, expected_unexpected_rows",
     [
         pytest.param(
-            "SELECT * FROM {active_batch} WHERE passenger_count > 7",
+            "SELECT * FROM {batch} WHERE passenger_count > 7",
             True,
             0,
             [],
@@ -321,7 +321,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
         ),
         pytest.param(
             # There is a single instance where passenger_count == 7
-            "SELECT * FROM {active_batch} WHERE passenger_count > 6",
+            "SELECT * FROM {batch} WHERE passenger_count > 6",
             False,
             1,
             [

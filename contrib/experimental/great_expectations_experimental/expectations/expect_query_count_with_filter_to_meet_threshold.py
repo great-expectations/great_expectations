@@ -27,7 +27,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     query = """
                 SELECT COUNT(*) n
-                FROM {active_batch}
+                FROM {batch}
                 WHERE {col} = {filter}
             """
 

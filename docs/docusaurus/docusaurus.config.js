@@ -40,7 +40,7 @@ module.exports = {
           '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
         backgroundColor: '#141432',
         textColor: '#fff',
-        isCloseable: true, 
+        isCloseable: true,
       },
     gxCard: {
       title: "What is GX Cloud?",
@@ -141,6 +141,29 @@ module.exports = {
         {
           label: 'API',
           to: '/docs/reference/api',
+          position: 'right'
+        },
+        {
+          type: 'dropdown',
+          label: 'Resources',
+          items: [
+            {
+              label: 'How to get support',
+              to: '/docs/resources/get_support'
+            },
+            {
+              label: 'Expectations gallery',
+              to: 'https://greatexpectations.io/expectations'
+            },
+            {
+              label: 'Integration support policy',
+              to: '/docs/application_integration_support'
+            },
+            {
+              label: 'Community',
+              to: 'https://greatexpectations.io/community'
+            }
+          ],
           position: 'right'
         },
         {

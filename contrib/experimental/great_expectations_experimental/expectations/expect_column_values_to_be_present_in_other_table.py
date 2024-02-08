@@ -71,7 +71,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
 
     query: str = """
             SELECT a.{foreign_key_column}
-            FROM {active_batch} a
+            FROM {batch} a
             LEFT JOIN {foreign_table} b
                 ON a.{foreign_key_column} = b.{foreign_table_key_column}
             WHERE b.{foreign_table_key_column} IS NULL

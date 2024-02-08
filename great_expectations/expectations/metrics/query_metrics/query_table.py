@@ -42,19 +42,19 @@ class QueryTable(QueryMetricProvider):
         )
 
         if isinstance(selectable, sa.Table):
-            query = query.format(active_batch=selectable)
+            query = query.format(batch=selectable)
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery or Alias; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(active_batch=f"({selectable})")
+            query = query.format(batch=f"({selectable})")
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
             query = query.format(
-                active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+                batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(active_batch=f"({selectable})")
+            query = query.format(batch=f"({selectable})")
 
         result: List[sqlalchemy.Row] = execution_engine.execute_query(
             sa.text(query)
@@ -79,7 +79,7 @@ class QueryTable(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        query = query.format(active_batch="tmp_view")
+        query = query.format(batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).collect()

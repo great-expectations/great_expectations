@@ -20,7 +20,7 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
 
     query = """
             SELECT {column_to_check}, COUNT(1)
-            FROM {active_batch}
+            FROM {batch}
             WHERE {condition}
             GROUP BY {column_to_check}
             HAVING count(1) > 1

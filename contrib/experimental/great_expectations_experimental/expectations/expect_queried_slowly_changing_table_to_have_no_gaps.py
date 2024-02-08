@@ -34,7 +34,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
     COUNT(1)
     FROM(SELECT {primary_key}, {close_date_column}, LEAD({open_date_column}) OVER(PARTITION BY {primary_key} ORDER BY
     {open_date_column}) AS next_start_date
-    FROM {active_batch})
+    FROM {batch})
     """
 
     success_keys = (
