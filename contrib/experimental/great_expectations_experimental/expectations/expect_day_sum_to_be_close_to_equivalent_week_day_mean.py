@@ -47,7 +47,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
 
     query = """
     SELECT {date_column} as date_column, SUM({summed_column}) as column_sum_over_date
-    FROM {active_batch}
+    FROM {batch}
     GROUP BY {date_column}
     """
 

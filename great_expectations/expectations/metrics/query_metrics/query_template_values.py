@@ -31,14 +31,12 @@ class QueryTemplateValues(QueryMetricProvider):
     @classmethod
     def get_query(cls, query, template_dict, selectable) -> str:
         template_dict_reformatted = {
-            k: str(v).format(active_batch=selectable)
+            k: str(v).format(batch=selectable)
             if isinstance(v, numbers.Number)
-            else v.format(active_batch=selectable)
+            else v.format(batch=selectable)
             for k, v in template_dict.items()
         }
-        query_reformatted = query.format(
-            **template_dict_reformatted, active_batch=selectable
-        )
+        query_reformatted = query.format(**template_dict_reformatted, batch=selectable)
         return query_reformatted
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -126,7 +124,7 @@ class QueryTemplateValues(QueryMetricProvider):
         if not isinstance(template_dict, dict):
             raise TypeError("template_dict supplied by the expectation must be a dict")
 
-        query = query.format(**template_dict, active_batch="tmp_view")
+        query = query.format(**template_dict, batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).collect()

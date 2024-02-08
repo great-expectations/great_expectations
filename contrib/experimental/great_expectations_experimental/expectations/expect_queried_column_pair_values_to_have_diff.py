@@ -26,7 +26,7 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
 
     query = """
             SELECT {column_A} - {column_B} as diff
-            FROM {active_batch}
+            FROM {batch}
             """
 
     success_keys = ("column_A", "column_B", "diff", "mostly", "query", "strict")

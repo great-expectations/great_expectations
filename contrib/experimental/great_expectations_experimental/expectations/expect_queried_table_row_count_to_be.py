@@ -43,7 +43,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     value: int
     query: str = """
             SELECT COUNT(*)
-            FROM {active_batch}
+            FROM {batch}
             """
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
