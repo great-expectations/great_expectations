@@ -39,7 +39,8 @@
     --ifm-alert-background-color-highlight: rgba(182, 198, 71, 0.2);
   }
 
-  &--warning {
+  &--warning,
+  &--caution {
     --ifm-alert-background-color-highlight: rgba(245, 206, 74, 0.2);
   }
 
@@ -56,13 +57,27 @@
     border: 3px solid var(--color-cta-secondary-dark);
     border-left-width: var(--ifm-alert-border-left-width);
 
+    div:first-child {
+      font-size: var(--ifm-h3-font-size);
+      text-transform: capitalize;
+
+      & span {
+        font-size: var(--p-font-size);
+      }
+    }
+
     a.cta {
       background-color: var(--color-cta-secondary-dark);
       border-radius: 35px;
-      color: white;
+      color: var(--white);
+      font-size: var(--p-font-size);
       font-weight: var(--ifm-font-weight-semibold);
       padding: 0.5em 3em;
       text-decoration: none;
+
+      &:hover {
+        background-color: #DE550A;
+      }
     }
   }
 }

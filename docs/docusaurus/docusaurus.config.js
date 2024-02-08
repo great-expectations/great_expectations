@@ -267,7 +267,7 @@ module.exports = {
             }
           },
           admonitions: {
-            keywords: ['note', 'info', 'tip', 'warning', 'danger', 'cta'],
+            keywords: ['note', 'info', 'tip', 'warning', 'caution', 'danger', 'cta'],
           },
         },
         theme: {

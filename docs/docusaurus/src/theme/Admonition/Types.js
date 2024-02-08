@@ -3,8 +3,8 @@ import DefaultAdmonitionTypes from '@theme-original/Admonition/Types';
 
 function CtaAdmonition(props) {
     return (
-        <div className="alert--cta">
-            <h5>{props.title}</h5>
+        <div>
+            <h3>{props.title}</h3>
             <div>{props.children}</div>
         </div>
     );
@@ -13,8 +13,7 @@ function CtaAdmonition(props) {
 const AdmonitionTypes = {
     ...DefaultAdmonitionTypes,
 
-    // Add all your custom admonition types here...
-    // You can also override the default ones if you want
+    // Custom admonitions
     'cta': CtaAdmonition,
 };
 
