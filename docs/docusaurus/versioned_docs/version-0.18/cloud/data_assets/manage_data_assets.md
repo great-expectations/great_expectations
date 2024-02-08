@@ -6,6 +6,9 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
+import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs';
+
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
 
 To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_asset.md).
@@ -16,14 +19,33 @@ To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_as
 
 - The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
-
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
 
-1. In GX Cloud, click **Data Assets** > **New Asset**.
+<Tabs
+  groupId="try-gx-cloud"
+  defaultValue='Snowflake'
+  values={[
+  {label: 'Snowflake', value:'Snowflake'},
+  {label: 'PostgreSQL', value:'PostgreSQL'},
+  ]}>
+<TabItem value="Snowflake">
+
+Define the data you want GX Cloud to access within Snowflake. 
+
+### Prerequisites
+
+- You have a Snowflake database, schema, and table.
+
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you have SELECT privileges on the table you are validating. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
+
+- You know your Snowflake password.
+
+### Connect to a Snowflake Data Asset
+
+1. In GX Cloud, click **Data Assets** > **New Data Asset**.
 
 2. Click the **New Data Source** tab and then select **Snowflake**.
 
@@ -37,7 +59,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Account identifier**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-    - **Password**: Enter the password for the Snowflake user you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
+    - **Password**: Enter a Snowflake password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored. In Snowsight, click **Data** > **Databases**. In the Snowflake Classic Console, click **Databases**.
  
@@ -47,7 +69,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Role**: Enter your Snowflake role.
 
-6. Optional. Select **Test connection** if you want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+6. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
 7. Click **Continue**.
 
@@ -55,7 +77,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
-    - **Data Asset name**: Enter a name for the Data Asset. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
@@ -70,6 +92,57 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 11. Click **Finish**.
 
 12. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+
+</TabItem>
+<TabItem value="PostgreSQL">
+
+Define the data you want GX Cloud to access within PostgreSQL.
+
+### Prerequisites
+
+- You have a PostgreSQL database, schema, and table.
+
+- You have a [PostgreSQL instance](https://www.postgresql.org/download/). To improve data security, GX recommends using a separate user service account to connect to GX Cloud.
+
+- You know your PostgreSQL access credentials.
+
+### Connect to a PostgreSQL Data Asset 
+
+1. In GX Cloud, click **Data Assets** > **New Daata Asset**.
+
+2. Click the **New Data Source** tab and then select **PostgreSQL**.
+
+3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
+
+4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
+
+5. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+
+6. Click **Continue**.
+
+7. Select **Table Asset** or **Query Asset** and complete the following fields:
+
+    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique within a Data Source.
+
+    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
+
+8. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+
+    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
+
+    - **Column of datetime type** - Enter the name of the column containing the date and time data.
+
+9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+
+10. Click **Finish**.
+
+11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+
+</TabItem>
+</Tabs>
+
 
 ## View Data Asset metrics
 
