@@ -19,8 +19,6 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 - To improve data security, GX recommends creating a separate PostgreSQL user for your GX Cloud connection.
 
-- You know your PostgreSQL access credentials.
-
 - You have stopped all local running instances of the GX Agent.
 
 ## Prepare your PostgreSQL environment

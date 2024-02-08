@@ -151,8 +151,6 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 - You have a [PostgreSQL instance](https://www.postgresql.org/download/). To improve data security, GX recommends using a separate user service account to connect to GX Cloud.
 
-- You know your PostgreSQL access credentials.
-
 ### Create a PostgreSQL Data Asset 
 
 1. In GX Cloud, click **Data Assets** > **New Daata Asset**.
