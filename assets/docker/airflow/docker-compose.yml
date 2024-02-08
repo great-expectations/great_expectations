@@ -1,0 +1,12 @@
+version: '3'
+services:
+  webserver:
+    image: apache/airflow:latest
+    restart: always
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+    ports:
+      - "8082:8080"
+    volumes:
+      - /users/jungh/airflow/dags 

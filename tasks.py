@@ -830,6 +830,7 @@ class TestDependencies(NamedTuple):
 
 
 MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
+    "airflow": TestDependencies(("reqs/requirements-dev-airflow.txt",)),
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
     "aws_deps": TestDependencies(("reqs/requirements-dev-lite.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
