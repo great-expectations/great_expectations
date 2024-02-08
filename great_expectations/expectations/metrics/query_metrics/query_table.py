@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Union
 
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -24,7 +24,8 @@ class QueryTable(QueryMetricProvider):
     metric_name = "query.table"
     value_keys = ("query",)
 
-    _query_param: str = "query"
+    # The name of the parameter that will be used to pass the unexpected_rows_query to the query metric provider
+    _query_param: ClassVar[str] = "query"
 
     @classmethod
     def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
