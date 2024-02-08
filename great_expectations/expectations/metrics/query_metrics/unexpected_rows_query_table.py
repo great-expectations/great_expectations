@@ -7,4 +7,4 @@ class UnexpectedRowsQueryTable(QueryTable):
     metric_name = "unexpected_rows_query.table"
     value_keys = ("unexpected_rows_query",)
 
-    _query_param_name: ClassVar[str] = "unexpected_rows_query"
+    query_param_name: ClassVar[str] = "unexpected_rows_query"
