@@ -4780,7 +4780,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             result.expectation_config for result in validation_results.results
         ]
 
-        dependencies = {}
+        dependencies: dict = {}
         for expectation_configuration in expectation_configurations:
             expectation_eval_param_dependencies = (
                 expectation_configuration.get_evaluation_parameter_dependencies()
