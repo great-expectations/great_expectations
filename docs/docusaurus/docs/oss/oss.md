@@ -14,9 +14,9 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Use GX OSS to connect, test, and validate your Data Assets. If you're ready to get started see <a href='/docs/oss/guides/setup/get_started_lp'>Get started with GX OSS</a>.
+  Use GX OSS to connect, test, and validate your Data Assets.
   <br/>
-  GX Cloud might be the solution if you don't want to manage your own configurations and infrastructure. <a href='https://greatexpectations.io/cloud'>Sign up here</a> to learn more and get early access to GX Cloud.
+  If you don't want to manage your configurations and infrastructure, see the GX cloud documentation.
 </OverviewCard>
 
 ### Prepare

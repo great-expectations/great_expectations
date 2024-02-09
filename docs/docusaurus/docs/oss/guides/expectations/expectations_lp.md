@@ -2,13 +2,17 @@
 sidebar_label: 'Create Expectations'
 title: 'Create Expectations'
 id: expectations_lp
+hide_title: true
 description: Create and manage Expectations and Expectation Suites.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">Create and manage Expectations and Expectation Suites. An Expectation is a verifiable assertion about your data, and an  Expectation Suite is a collection of Expectations.</p>
+<OverviewCard title={frontMatter.title}>
+  Create and manage Expectations and Expectation Suites. An Expectation is a verifiable assertion about your data, and an  Expectation Suite is a collection of Expectations.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Expectation creation workflow" description="Learn more about the process for creating and managing Expectations and Expectation Suites" to="/oss/guides/expectations/create_expectations_overview" icon="/img/workflow_icon.svg" />
