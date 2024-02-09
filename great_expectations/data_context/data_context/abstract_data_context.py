@@ -61,9 +61,6 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.evaluation_parameters import (
-    _deduplicate_evaluation_parameter_dependencies,
-)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
@@ -135,9 +132,6 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.expectation_validation_result import (
-        ExpectationSuiteValidationResult,
-    )
     from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -292,6 +286,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
 
+        self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
@@ -462,6 +457,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     expectation_suite_name
                 )
             )
+        self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
             self._determine_if_expectation_suite_include_rendered_content(
                 include_rendered_content=include_rendered_content
@@ -2027,16 +2023,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         return result
 
     def store_evaluation_parameters(
-        self,
-        validation_results: ExpectationSuiteValidationResult,
-        target_store_name: str | None = None,
+        self, validation_results, target_store_name=None
     ) -> None:
         """
         Stores ValidationResult EvaluationParameters to defined store
         """
-        self._compile_evaluation_parameter_dependencies(
-            validation_results=validation_results
-        )
+        if not self._evaluation_parameter_dependencies_compiled:
+            self._compile_evaluation_parameter_dependencies()
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -4031,31 +4024,26 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _compile_evaluation_parameter_dependencies(
-        self, validation_results: ExpectationSuiteValidationResult
-    ) -> None:
+    def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
-        dependencies = self._get_evaluation_parameter_dependencies(
-            validation_results=validation_results
-        )
-        if len(dependencies) > 0:
-            nested_update(self._evaluation_parameter_dependencies, dependencies)
-
-    @staticmethod
-    def _get_evaluation_parameter_dependencies(
-        validation_results: ExpectationSuiteValidationResult,
-    ) -> dict:
-        expectation_configurations: list[ExpectationConfiguration] = [
-            result.expectation_config for result in validation_results.results
-        ]
-        dependencies: dict = {}
-        for expectation_configuration in expectation_configurations:
-            expectation_eval_param_dependencies = (
-                expectation_configuration.get_evaluation_parameter_dependencies()
+        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
+        # https://github.com/great-expectations/great_expectations/pull/3377
+        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        for key in self.expectations_store.list_keys():
+            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
+            if not expectation_suite_dict:
+                continue
+            expectation_suite = ExpectationSuite(
+                **expectation_suite_dict, data_context=self
             )
-            nested_update(dependencies, expectation_eval_param_dependencies)
 
-        return _deduplicate_evaluation_parameter_dependencies(dependencies=dependencies)
+            dependencies: dict = (
+                expectation_suite.get_evaluation_parameter_dependencies()
+            )
+            if len(dependencies) > 0:
+                nested_update(self._evaluation_parameter_dependencies, dependencies)
+
+        self._evaluation_parameter_dependencies_compiled = True
 
     def get_validation_result(  # noqa: PLR0913
         self,
