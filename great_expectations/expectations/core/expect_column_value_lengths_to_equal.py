@@ -31,6 +31,10 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     """Expect the column entries to be strings with length equal to the provided value.
 
