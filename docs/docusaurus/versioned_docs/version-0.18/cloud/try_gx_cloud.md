@@ -59,7 +59,7 @@ Environment variables securely store your GX Cloud and Snowflake access credenti
     ```
    Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
-3. Confirm the GX Agent status icon in GX cloud is green. This indicates the GX Agent is running. 
+3. Confirm the GX Agent status icon in GX Cloud is green. This indicates the GX Agent is running. 
 
     ![GX Agent status](/img/gx_agent_status.png)
 
