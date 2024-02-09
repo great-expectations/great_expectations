@@ -45,7 +45,7 @@ This guide assumes you have:
   The rest of this section assumes the variable `batch` is your Batch of data.
   :::
 
-2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/docs/core/expectation_suites/manage_expectation_suites#get-an-expectation), or a pre-existing Expectation from your code.
+2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/core/expectation_suites/manage_expectation_suites.md#get-an-expectation), or a pre-existing Expectation from your code.
   
   :::note
   The rest of this section assumes the variable `expectation` is the Expectation you wish to test.
@@ -59,7 +59,7 @@ validation_result = batch.validate(expectation)
 
 4. (Optional) [Modify the Expectation](#modify-an-expectation) and test it again.
  
-5. (Optional) [Add the Expectation to an Expectation Suite](/docs/core/expectation_suites/manage_expectation_suites#add-expectations-to-an-expectation-suite).
+5. (Optional) [Add the Expectation to an Expectation Suite](/core/expectation_suites/manage_expectation_suites.md#add-expectations-to-an-expectation-suite).
    
   :::caution 
   Expectations do not persist between Python sessions unless they are saved as part of an Expectation Suite.
@@ -67,7 +67,7 @@ validation_result = batch.validate(expectation)
 
 ## Modify an Expectation
 
-1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/docs/core/expectation_suites/manage_expectation_suites#get-an-expectation), or a pre-existing Expectation from your code.  This example uses an Expectation that was newly created in an Expectation Suite.
+1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/expectation_suites/manage_expectation_suites.md#get-an-expectation), or a pre-existing Expectation from your code.  This example uses an Expectation that was newly created in an Expectation Suite.
   ```python name="core/expectations/_examples/edit_an_expectation.py get expectation"
   ```
 
