@@ -1,6 +1,5 @@
 """
-This example script demonstrates how to edit a single Expectation in an
- Expectation Suite.
+This example script demonstrates how to edit an Expectation.
 
 The <snippet> tags are used to insert the corresponding code into the
  Great Expectations documentation.  They can be disregarded by anyone

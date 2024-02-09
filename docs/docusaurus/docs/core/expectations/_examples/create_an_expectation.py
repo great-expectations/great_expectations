@@ -1,6 +1,6 @@
 """
-This example script demonstrates how to add Expectations to an
- Expectation Suite.
+This example script demonstrates how to create an Expectation outside
+  of an Expectation Suite.
 
 The <snippet> tags are used to insert the corresponding code into the
  Great Expectations documentation.  They can be disregarded by anyone
