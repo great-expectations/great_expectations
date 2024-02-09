@@ -297,12 +297,15 @@ def test_get_expectation_suite_include_rendered_content(
 @pytest.mark.filesystem
 def test_compile_evaluation_parameter_dependencies(
     data_context_parameterized_expectation_suite,
+    expectation_suite_validation_result_with_evaluation_parameters,
 ):
     assert (
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {}
     )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies(
+        validation_results=expectation_suite_validation_result_with_evaluation_parameters
+    )
     assert (
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {

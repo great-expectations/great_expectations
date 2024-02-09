@@ -18,6 +18,7 @@ import great_expectations as gx
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -39,6 +40,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 yaml = YAMLHandler()
 
@@ -774,3 +778,86 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
         fds = PandasDatasource(name="my_datasource")
         context.add_datasource(datasource=fds)
     return context
+
+
+@pytest.fixture
+def expectation_suite_validation_result_with_evaluation_parameters():
+    return ExpectationSuiteValidationResult(
+        success=True,
+        statistics={
+            "evaluated_expectations": 2,
+            "successful_expectations": 2,
+            "unsuccessful_expectations": 0,
+            "success_percent": 100.0,
+        },
+        results=[
+            ExpectationValidationResult(
+                **{
+                    "meta": {},
+                    "success": True,
+                    "exception_info": {
+                        "raised_exception": False,
+                        "exception_traceback": None,
+                        "exception_message": None,
+                    },
+                    "result": {
+                        "element_count": 100000,
+                        "unexpected_count": 1,
+                        "unexpected_percent": 0.001,
+                        "partial_unexpected_list": [7.0],
+                        "missing_count": 0,
+                        "missing_percent": 0.0,
+                        "unexpected_percent_total": 0.001,
+                        "unexpected_percent_nonmissing": 0.001,
+                        "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+                        "partial_unexpected_index_list": [48422],
+                    },
+                    "expectation_config": ExpectationConfiguration(
+                        **{
+                            "meta": {},
+                            "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+                            "ge_cloud_id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
+                            "kwargs": {
+                                "column": "default",
+                                "min_value": {
+                                    "$PARAMETER": "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result.observed_value"
+                                },
+                            },
+                            "expectation_type": "expect_column_unique_value_count_to_be_between",
+                        }
+                    ),
+                }
+            ),
+            ExpectationValidationResult(
+                **{
+                    "meta": {},
+                    "success": True,
+                    "exception_info": {
+                        "raised_exception": False,
+                        "exception_traceback": None,
+                        "exception_message": None,
+                    },
+                    "result": {
+                        "element_count": 100000,
+                        "unexpected_count": 0,
+                        "unexpected_percent": 0.0,
+                        "partial_unexpected_list": [],
+                        "partial_unexpected_counts": [],
+                        "partial_unexpected_index_list": [],
+                    },
+                    "expectation_config": ExpectationConfiguration(
+                        **{
+                            "meta": {},
+                            "ge_cloud_id": "19c0e80c-d676-4b01-a4a3-2a568552d368",
+                            "kwargs": {
+                                "value": {
+                                    "$PARAMETER": "urn:great_expectations:validations:source_diabetes_data.default:expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr"
+                                },
+                            },
+                            "expectation_type": "expect_table_row_count_to_equal",
+                        }
+                    ),
+                }
+            ),
+        ],
+    )
