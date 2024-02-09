@@ -16,7 +16,7 @@ To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_as
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets on another Data Source, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
 
 <Tabs
   groupId="manage-data-assets"
@@ -206,6 +206,8 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
 ## Add a Data Asset to an Existing Data Source
 
+Additional Data Assets can only be added to Data Sources created in GX Cloud.
+
 1. In GX Cloud, click **Data Assets** and then select **New Data Asset**.
 
 2. Click the **Existing Data Source** tab and then select a Data Source.
@@ -233,7 +235,7 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
 ## Edit Data Source settings
 
-Edit Data Source settings to update Data Source connection information or access credentials.
+Edit Data Source settings to update Data Source connection information or access credentials. You can only edit the settings of Data Sources created in GX Cloud.
 
 <Tabs
   groupId="manage-data-assets"
@@ -292,6 +294,8 @@ Edit Data Source settings to update Data Source connection information or access
 </Tabs>
 
 ## Edit a Data Asset
+
+You can only edit the settings of Data Assets created in GX Cloud.
 
 1. In GX Cloud, click **Data Assets** and in the Data Assets list click **Edit Data Asset** for the Data Asset you want to edit.
 
