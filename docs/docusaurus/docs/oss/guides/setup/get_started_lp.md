@@ -11,7 +11,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Start here if you're unfamiliar with GX or want to use GX with Databricks or a SQL Data Source in a production environment. To install and configure GX in a production environment, see <a href="/docs/oss/guides/setup/setup_overview_lp">Set up your Great Expectations environment</a>.
+  Start here if you're unfamiliar with GX or want to use GX with Databricks or a SQL Data Source in a deployment environment.
 </OverviewCard>
 
 

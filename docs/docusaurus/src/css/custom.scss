@@ -272,4 +272,15 @@ li p + ol {
   margin-top: calc( -1 * var(--ifm-paragraph-margin-bottom) + 0.5em);
 }
 
+.theme-doc-version-badge {
+  display: none;
+}
+
+.linkCard_src-components-LinkCard-styles-module {
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  box-shadow: 0 3px 6px -1px var(--gray-300);
+}
+
 @import "api_docs/api_docs.scss";

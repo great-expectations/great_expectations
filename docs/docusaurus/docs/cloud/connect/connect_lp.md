@@ -10,9 +10,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  When you've determined that GX Cloud is the right solution for your organization, it's time to connect GX Cloud to your production environment.
-  <br/>
-  Haven’t determined whether GX Cloud is the right solution for your organization? See <a href="/docs/try_gx_cloud">Try GX Cloud</a>.
+  When you've finished evaluating GX Cloud, it's time to connect GX Cloud to your deployment environment.
 </OverviewCard>
 
 <LinkCardGrid>
