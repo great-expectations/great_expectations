@@ -600,15 +600,13 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "clean": "Remove directories and files from versioned docs and code. Default False.",
         "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
         "lint": "Run the linter",
     },
 )
-def docs(  # noqa: PLR0913
+def docs(
     ctx: Context,
     build: bool = False,
-    clean: bool = False,
     start: bool = False,
     lint: bool = False,
     version: str | None = None,
@@ -629,18 +627,7 @@ def docs(  # noqa: PLR0913
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
 
-    if clean:
-        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
-        ctx.run(" ".join(rm_cmds), echo=True)
-        rm_rf_cmds = [
-            "rm",
-            "-rf",
-            "versioned_code",
-            "versioned_docs",
-            "versioned_sidebars",
-        ]
-        ctx.run(" ".join(rm_rf_cmds), echo=True)
-    elif lint:
+    if lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
