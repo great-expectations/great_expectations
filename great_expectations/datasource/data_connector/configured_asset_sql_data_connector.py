@@ -657,7 +657,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
         data_asset_name in those cases are [schema].[table_name].
 
-        function will partition data_asset_name on [schema]. and return the resulting table_name.
+        function will split data_asset_name on [schema]. and return the resulting table_name.
         """
         data_asset_name: str = batch_definition.data_asset_name
         data_asset_dict: dict = self.assets[data_asset_name]

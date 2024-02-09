@@ -157,7 +157,7 @@ Run the following Python code to retrieve the Data Source:
 ```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource"
 ```
 
-### Add a Partitioners to the Data Asset
+### Add a Partitioner to the Data Asset
 
 Run the following Python code to split the TableAsset into Batches:
 
