@@ -214,6 +214,15 @@ a.pagination-nav__link:hover {
     display: none;
 }
 
+table a {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+
+  &:hover {
+    color: #A03E0A;
+  }
+}
+
 table.borderless {
     border-collapse: collapse;
     border: none;
