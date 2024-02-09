@@ -15,16 +15,12 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
-from great_expectations.core.evaluation_parameters import (
-    _deduplicate_evaluation_parameter_dependencies,
-)
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
     in_jupyter_notebook,
-    nested_update,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
@@ -679,25 +675,6 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     def describe(self) -> str:
         """JSON string description of this ExpectationSuiteValidationResult"""
         return json.dumps(self.describe_dict(), indent=4)
-
-    def _compile_evaluation_parameter_dependencies(self) -> None:
-        self._evaluation_parameter_dependencies = {}
-        dependencies = self._get_evaluation_parameter_dependencies()
-        if len(dependencies) > 0:
-            nested_update(self._evaluation_parameter_dependencies, dependencies)
-
-    def _get_evaluation_parameter_dependencies(self) -> dict:
-        expectation_configurations: list[ExpectationConfiguration] = [
-            result.expectation_config for result in self.results
-        ]
-        dependencies: dict = {}
-        for expectation_configuration in expectation_configurations:
-            expectation_eval_param_dependencies = (
-                expectation_configuration.get_evaluation_parameter_dependencies()
-            )
-            nested_update(dependencies, expectation_eval_param_dependencies)
-
-        return _deduplicate_evaluation_parameter_dependencies(dependencies=dependencies)
 
 
 class ExpectationSuiteValidationResultSchema(Schema):

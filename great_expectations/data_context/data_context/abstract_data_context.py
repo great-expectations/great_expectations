@@ -61,6 +61,9 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
+from great_expectations.core.evaluation_parameters import (
+    _deduplicate_evaluation_parameter_dependencies,
+)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
@@ -68,6 +71,7 @@ from great_expectations.core.serializer import (
     DictConfigSerializer,
 )
 from great_expectations.core.suite_factory import SuiteFactory
+from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
@@ -2028,7 +2032,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         Stores ValidationResult EvaluationParameters to defined store
         """
-        validation_results._compile_evaluation_parameter_dependencies()
+        self._compile_evaluation_parameter_dependencies(
+            validation_results=validation_results
+        )
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -4022,6 +4028,32 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Otherwise choose the id stored in the project_config
         else:
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
+
+    def _compile_evaluation_parameter_dependencies(
+        self, validation_results: ExpectationSuiteValidationResult
+    ) -> None:
+        self._evaluation_parameter_dependencies = {}
+        dependencies = self._get_evaluation_parameter_dependencies(
+            validation_results=validation_results
+        )
+        if len(dependencies) > 0:
+            nested_update(self._evaluation_parameter_dependencies, dependencies)
+
+    @staticmethod
+    def _get_evaluation_parameter_dependencies(
+        validation_results: ExpectationSuiteValidationResult,
+    ) -> dict:
+        expectation_configurations: list[ExpectationConfiguration] = [
+            result.expectation_config for result in validation_results.results
+        ]
+        dependencies: dict = {}
+        for expectation_configuration in expectation_configurations:
+            expectation_eval_param_dependencies = (
+                expectation_configuration.get_evaluation_parameter_dependencies()
+            )
+            nested_update(dependencies, expectation_eval_param_dependencies)
+
+        return _deduplicate_evaluation_parameter_dependencies(dependencies=dependencies)
 
     def get_validation_result(  # noqa: PLR0913
         self,
