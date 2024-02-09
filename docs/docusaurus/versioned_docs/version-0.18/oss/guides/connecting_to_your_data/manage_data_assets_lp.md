@@ -1,14 +1,17 @@
 ---
 sidebar_label: 'Manage Data Assets'
 title: 'Manage Data Assets'
+hide_title: true
 id: manage_data_assets_lp
 description: Request data from a Data Source and organize Batches in file-based and SQL Data Assets.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
-import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">This is where you'll find information for managing your Data Assets. A Data Asset is a collection of records within a Data Source that define how Great Expectations (GX) organizes data into Batches </p>
+<OverviewCard title={frontMatter.title}>
+  This is where you'll find information for managing your Data Assets. A Data Asset is a collection of records within a Data Source that define how Great Expectations (GX) organizes data into Batches.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Request data from a Data Asset" description="Request data from a Data Source" to="/oss/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset" icon="/img/request_icon.svg" />

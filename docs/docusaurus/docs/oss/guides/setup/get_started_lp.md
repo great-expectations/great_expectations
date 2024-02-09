@@ -14,7 +14,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
   Start here if you're unfamiliar with GX or want to use GX with Databricks or a SQL Data Source in a deployment environment.
 </OverviewCard>
 
-
 <LinkCardGrid>
   <LinkCard topIcon label="Quickstart" description="Install GX, connect to sample data, build your first Expectation, validate data, and review the validation results" to="/oss/tutorials/quickstart/" icon="/img/test_icon.svg" />
   <LinkCard topIcon label="GX overview" description="An overview of GX for new users and those looking for an understanding of its components and its primary workflows" to="/reference/learn/conceptual_guides/gx_overview" icon="/img/overview_icon.svg" />
