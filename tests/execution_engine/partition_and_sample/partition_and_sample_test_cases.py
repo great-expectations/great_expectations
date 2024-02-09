@@ -4,7 +4,9 @@ from typing import List
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
+from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+    DatePart,
+)
 
 SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
     pytest.param({"month": 10}, id="month_dict"),

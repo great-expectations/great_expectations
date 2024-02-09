@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 
 from tests.integration.db.taxi_data_utils import (
-    _execute_taxi_splitting_test_cases,
+    _execute_taxi_partitioning_test_cases,
     _is_dialect_athena,
     loaded_table,
 )
-from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
-    TaxiSplittingTestCasesBase,
-    TaxiSplittingTestCasesMultiColumnValues,
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+    TaxiPartitioningTestCasesBase,
+    TaxiPartitioningTestCasesMultiColumnValues,
     TaxiTestData,
 )
 from tests.test_utils import get_connection_string_and_dialect
@@ -50,11 +50,11 @@ if __name__ == "test_script_module":
             test_column_name=None,
             test_column_names=test_column_names,
         )
-        taxi_splitting_test_cases: TaxiSplittingTestCasesBase = (
-            TaxiSplittingTestCasesMultiColumnValues(taxi_test_data=taxi_test_data)
+        taxi_partitioning_test_cases: TaxiPartitioningTestCasesBase = (
+            TaxiPartitioningTestCasesMultiColumnValues(taxi_test_data=taxi_test_data)
         )
-        _execute_taxi_splitting_test_cases(
-            taxi_splitting_test_cases=taxi_splitting_test_cases,
+        _execute_taxi_partitioning_test_cases(
+            taxi_partitioning_test_cases=taxi_partitioning_test_cases,
             connection_string=connection_string,
             table_name=table_name,
         )

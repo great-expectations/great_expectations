@@ -41,7 +41,7 @@ deployment_patterns = [
     ),
 ]
 
-split_data = []
+partition_data = []
 
 sample_data = []
 
@@ -56,6 +56,6 @@ fluent_datasources = [
 
 s3_integration_tests += connecting_to_your_data
 s3_integration_tests += deployment_patterns
-s3_integration_tests += split_data
+s3_integration_tests += partition_data
 s3_integration_tests += sample_data
 s3_integration_tests += fluent_datasources

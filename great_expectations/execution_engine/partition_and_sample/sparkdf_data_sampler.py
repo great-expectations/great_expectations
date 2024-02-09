@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.execution_engine.split_and_sample.data_sampler import (
+from great_expectations.execution_engine.partition_and_sample.data_sampler import (
     DataSampler,
 )
 

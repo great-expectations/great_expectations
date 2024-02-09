@@ -33,7 +33,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[BatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a splitter config if present.
+        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
 
         Args:
             batch_request: Batch request used to generate batch definitions.
@@ -41,8 +41,8 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
         Returns:
             List of batch definitions, in the case of a _DirectoryDataAssetMixin the list contains a single item.
         """
-        if self.splitter:
-            # Currently non-sql asset splitters do not introspect the datasource for available
+        if self.partitioner:
+            # Currently non-sql asset partitioners do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
             batch_identifiers = batch_request.options
             if not batch_identifiers.get("path"):

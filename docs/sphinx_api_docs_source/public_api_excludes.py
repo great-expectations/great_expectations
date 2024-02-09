@@ -696,7 +696,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason='The "columns()" property in this module is not included in the public API',
         name="columns",
         filepath=pathlib.Path(
-            "great_expectations/datasource/fluent/spark_generic_splitters.py"
+            "great_expectations/datasource/fluent/spark_generic_partitioners.py"
         ),
     ),
     IncludeExcludeDefinition(

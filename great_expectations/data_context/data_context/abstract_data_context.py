@@ -2083,8 +2083,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2128,10 +2128,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_method: The method used to sample Batch data (see: Partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
-            splitter_method: The method used to split the Data Asset into Batches
-            splitter_kwargs: Arguments for the splitting method
+            partitioner_method: The method used to partition the Data Asset into Batches
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             expectation_suite_ge_cloud_id: The identifier of the ExpectationSuite to retrieve from the DataContext
                 (can be used in place of `expectation_suite_name`)
@@ -2239,8 +2239,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                         custom_filter_function=custom_filter_function,
                         sampling_method=sampling_method,
                         sampling_kwargs=sampling_kwargs,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
+                        partitioner_method=partitioner_method,
+                        partitioner_kwargs=partitioner_kwargs,
                         runtime_parameters=runtime_parameters,
                         query=query,
                         path=path,
@@ -2332,8 +2332,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2372,10 +2372,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_method: The method used to sample Batch data (see: Partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
-            splitter_method: The method used to split the Data Asset into Batches
-            splitter_kwargs: Arguments for the splitting method
+            partitioner_method: The method used to partition the Data Asset into Batches
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
@@ -2404,8 +2404,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,
@@ -2429,8 +2429,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2452,8 +2452,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,

@@ -12,47 +12,50 @@ from dateutil.parser import parse
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
+from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
     DatePart,
-    SqlAlchemyDataSplitter,
+    SqlAlchemyDataPartitioner,
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.self_check.util import build_sa_execution_engine
-from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
+from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
     SINGLE_DATE_PART_DATE_PARTS,
 )
 
-# Here we add SqlAlchemyDataSplitter specific test cases to the generic test cases:
-from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
-    TaxiSplittingTestCase,
-    TaxiSplittingTestCasesBase,
-    TaxiSplittingTestCasesColumnValue,
-    TaxiSplittingTestCasesConvertedDateTime,
-    TaxiSplittingTestCasesDateTime,
-    TaxiSplittingTestCasesDividedInteger,
-    TaxiSplittingTestCasesHashedColumn,
-    TaxiSplittingTestCasesModInteger,
-    TaxiSplittingTestCasesMultiColumnValues,
-    TaxiSplittingTestCasesWholeTable,
+# Here we add SqlAlchemyDataPartitioner specific test cases to the generic test cases:
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+    TaxiPartitioningTestCase,
+    TaxiPartitioningTestCasesBase,
+    TaxiPartitioningTestCasesColumnValue,
+    TaxiPartitioningTestCasesConvertedDateTime,
+    TaxiPartitioningTestCasesDateTime,
+    TaxiPartitioningTestCasesDividedInteger,
+    TaxiPartitioningTestCasesHashedColumn,
+    TaxiPartitioningTestCasesModInteger,
+    TaxiPartitioningTestCasesMultiColumnValues,
+    TaxiPartitioningTestCasesWholeTable,
     TaxiTestData,
 )
 from tests.test_utils import convert_string_columns_to_datetime
 
 SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(
-        [SqlAlchemyDataSplitter.date_part.MONTH],
-        id="month getting date parts from SqlAlchemyDataSplitter.date_part",
+        [SqlAlchemyDataPartitioner.date_part.MONTH],
+        id="month getting date parts from SqlAlchemyDataPartitioner.date_part",
     )
 ]
 MULTIPLE_DATE_PART_DATE_PARTS += [
     pytest.param(
-        [SqlAlchemyDataSplitter.date_part.YEAR, SqlAlchemyDataSplitter.date_part.MONTH],
-        id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
+        [
+            SqlAlchemyDataPartitioner.date_part.YEAR,
+            SqlAlchemyDataPartitioner.date_part.MONTH,
+        ],
+        id="year_month getting date parts from SqlAlchemyDataPartitioner.date_part",
     )
 ]
 
@@ -63,38 +66,40 @@ pytestmark = [
 
 
 @mock.patch(
-    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
+    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.partition_on_date_parts"
 )
 @pytest.mark.parametrize(
-    "splitter_method_name,called_with_date_parts",
+    "partitioner_method_name,called_with_date_parts",
     [
-        ("split_on_year", [DatePart.YEAR]),
-        ("split_on_year_and_month", [DatePart.YEAR, DatePart.MONTH]),
+        ("partition_on_year", [DatePart.YEAR]),
+        ("partition_on_year_and_month", [DatePart.YEAR, DatePart.MONTH]),
         (
-            "split_on_year_and_month_and_day",
+            "partition_on_year_and_month_and_day",
             [DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
         ),
     ],
 )
 @pytest.mark.sqlite
 def test_named_date_part_methods(
-    mock_split_on_date_parts: mock.MagicMock,
-    splitter_method_name: str,
+    mock_partition_on_date_parts: mock.MagicMock,
+    partitioner_method_name: str,
     called_with_date_parts: List[DatePart],
 ):
-    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params.
-    For example, split_on_year.
+    """Test that a partially pre-filled version of partition_on_date_parts() was called with the appropriate params.
+    For example, partition_on_year.
     """
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
     column_name: str = "column_name"
     batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
 
-    getattr(data_splitter, splitter_method_name)(
+    getattr(data_partitioner, partitioner_method_name)(
         column_name=column_name,
         batch_identifiers=batch_identifiers,
     )
 
-    mock_split_on_date_parts.assert_called_with(
+    mock_partition_on_date_parts.assert_called_with(
         column_name=column_name,
         batch_identifiers=batch_identifiers,
         date_parts=called_with_date_parts,
@@ -110,24 +115,28 @@ def test_named_date_part_methods(
     SINGLE_DATE_PART_DATE_PARTS,
 )
 @pytest.mark.sqlite
-def test_split_on_date_parts_single_date_parts(
+def test_partition_on_date_parts_single_date_parts(
     batch_identifiers_for_column, date_parts, sa
 ):
     """What does this test and why?
 
-    split_on_date_parts should still build the correct query when passed a single element list
+    partition_on_date_parts should still build the correct query when passed a single element list
      date_parts that is a string, DatePart enum objects, mixed case string.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
     """
 
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_splitter.split_on_date_parts(
-        column_name=column_name,
-        batch_identifiers={column_name: batch_identifiers_for_column},
-        date_parts=date_parts,
+    result: sa.sql.elements.BooleanClauseList = (
+        data_partitioner.partition_on_date_parts(
+            column_name=column_name,
+            batch_identifiers={column_name: batch_identifiers_for_column},
+            date_parts=date_parts,
+        )
     )
 
     # using values
@@ -148,24 +157,28 @@ def test_split_on_date_parts_single_date_parts(
     MULTIPLE_DATE_PART_DATE_PARTS,
 )
 @pytest.mark.sqlite
-def test_split_on_date_parts_multiple_date_parts(
+def test_partition_on_date_parts_multiple_date_parts(
     batch_identifiers_for_column, date_parts, sa
 ):
     """What does this test and why?
 
-    split_on_date_parts should still build the correct query when passed
+    partition_on_date_parts should still build the correct query when passed
      date parts that are strings, DatePart enum objects, a mixture and mixed case.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
     """
 
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_splitter.split_on_date_parts(
-        column_name=column_name,
-        batch_identifiers={column_name: batch_identifiers_for_column},
-        date_parts=date_parts,
+    result: sa.sql.elements.BooleanClauseList = (
+        data_partitioner.partition_on_date_parts(
+            column_name=column_name,
+            batch_identifiers={column_name: batch_identifiers_for_column},
+            date_parts=date_parts,
+        )
     )
 
     # using values
@@ -185,29 +198,31 @@ def test_split_on_date_parts_multiple_date_parts(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year(
     mock_execution_engine: mock.MagicMock,
-    mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,
 ):
-    """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
     # selectable should be a sa.Selectable object but since we are mocking out
-    # get_data_for_batch_identifiers_for_split_on_date_parts
+    # get_data_for_batch_identifiers_for_partition_on_date_parts
     # and just verifying its getting passed through, we ignore the type here.
     selectable: str = "mock_selectable"
     column_name: str = "column_name"
 
-    data_splitter.get_data_for_batch_identifiers_year(
+    data_partitioner.get_data_for_batch_identifiers_year(
         execution_engine=mock_execution_engine,
         selectable=selectable,
         column_name=column_name,
     )
 
-    mock_get_data_for_batch_identifiers_for_split_on_date_parts.assert_called_with(
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts.assert_called_with(
         execution_engine=mock_execution_engine,
         selectable=selectable,
         column_name=column_name,
@@ -216,26 +231,28 @@ def test_get_data_for_batch_identifiers_year(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month(
     mock_execution_engine: mock.MagicMock,
-    mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,
 ):
-    """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
     selectable: str = "mock_selectable"
     column_name: str = "column_name"
 
-    data_splitter.get_data_for_batch_identifiers_year_and_month(
+    data_partitioner.get_data_for_batch_identifiers_year_and_month(
         execution_engine=mock_execution_engine,
         selectable=selectable,
         column_name=column_name,
     )
 
-    mock_get_data_for_batch_identifiers_for_split_on_date_parts.assert_called_with(
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts.assert_called_with(
         execution_engine=mock_execution_engine,
         selectable=selectable,
         column_name=column_name,
@@ -244,26 +261,28 @@ def test_get_data_for_batch_identifiers_year_and_month(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month_and_day(
     mock_execution_engine: mock.MagicMock,
-    mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,
 ):
-    """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
     selectable: str = "mock_selectable"
     column_name: str = "column_name"
 
-    data_splitter.get_data_for_batch_identifiers_year_and_month_and_day(
+    data_partitioner.get_data_for_batch_identifiers_year_and_month_and_day(
         execution_engine=mock_execution_engine,
         selectable=selectable,
         column_name=column_name,
     )
 
-    mock_get_data_for_batch_identifiers_for_split_on_date_parts.assert_called_with(
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts.assert_called_with(
         execution_engine=mock_execution_engine,
         selectable=selectable,
         column_name=column_name,
@@ -276,20 +295,22 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
     SINGLE_DATE_PART_DATE_PARTS,
 )
 @pytest.mark.sqlite
-def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_single_date_parts(
+def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts_single_date_parts(
     date_parts, sa
 ):
     """What does this test and why?
 
-    get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts should still build the correct
+    get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts should still build the correct
     query when passed a single element list of date_parts that is a string, DatePart enum object, or mixed case string.
     """
 
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
     selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+    result: sa.sql.elements.BooleanClauseList = data_partitioner.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
         selectable=selectable,
         column_name=column_name,
         date_parts=date_parts,
@@ -336,18 +357,20 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
         ),
     ],
 )
-def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_multiple_date_parts(
+def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts_multiple_date_parts(
     date_parts, dialect, expected_query_str, sa
 ):
     """What does this test and why?
-    get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts should
+    get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts should
     return the correct query when passed any valid set of parameters including multiple date parts.
     """
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect=dialect)
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect=dialect
+    )
     selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+    result: sa.sql.elements.BooleanClauseList = data_partitioner.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
         selectable=selectable,
         column_name=column_name,
         date_parts=date_parts,
@@ -375,33 +398,37 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     ],
 )
 @pytest.mark.parametrize(
-    "splitter_method_name",
+    "partitioner_method_name",
     [
-        pytest.param(splitter_method_name, id=splitter_method_name)
-        for splitter_method_name in [
-            "split_on_year",
-            "split_on_year_and_month",
-            "split_on_year_and_month_and_day",
-            "split_on_date_parts",
-            "split_on_whole_table",
-            "split_on_column_value",
-            "split_on_converted_datetime",
-            "split_on_divided_integer",
-            "split_on_mod_integer",
-            "split_on_multi_column_values",
-            "split_on_hashed_column",
+        pytest.param(partitioner_method_name, id=partitioner_method_name)
+        for partitioner_method_name in [
+            "partition_on_year",
+            "partition_on_year_and_month",
+            "partition_on_year_and_month_and_day",
+            "partition_on_date_parts",
+            "partition_on_whole_table",
+            "partition_on_column_value",
+            "partition_on_converted_datetime",
+            "partition_on_divided_integer",
+            "partition_on_mod_integer",
+            "partition_on_multi_column_values",
+            "partition_on_hashed_column",
         ]
     ],
 )
 @pytest.mark.sqlite
-def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+def test_get_partitioner_method(underscore_prefix: str, partitioner_method_name: str):
+    data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
+        dialect="sqlite"
+    )
 
-    splitter_method_name_with_prefix = f"{underscore_prefix}{splitter_method_name}"
+    partitioner_method_name_with_prefix = (
+        f"{underscore_prefix}{partitioner_method_name}"
+    )
 
-    assert data_splitter.get_splitter_method(
-        splitter_method_name_with_prefix
-    ) == getattr(data_splitter, splitter_method_name)
+    assert data_partitioner.get_partitioner_method(
+        partitioner_method_name_with_prefix
+    ) == getattr(data_partitioner, partitioner_method_name)
 
 
 def ten_trips_per_month_df() -> pd.DataFrame:
@@ -431,7 +458,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
 @pytest.mark.parametrize(
     "taxi_test_cases",
     [
-        TaxiSplittingTestCasesWholeTable(
+        TaxiPartitioningTestCasesWholeTable(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name=None,
@@ -439,7 +466,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiSplittingTestCasesColumnValue(
+        TaxiPartitioningTestCasesColumnValue(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="passenger_count",
@@ -447,7 +474,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiSplittingTestCasesDividedInteger(
+        TaxiPartitioningTestCasesDividedInteger(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_location_id",
@@ -455,7 +482,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiSplittingTestCasesModInteger(
+        TaxiPartitioningTestCasesModInteger(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_location_id",
@@ -463,7 +490,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiSplittingTestCasesHashedColumn(
+        TaxiPartitioningTestCasesHashedColumn(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_location_id",
@@ -471,7 +498,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiSplittingTestCasesMultiColumnValues(
+        TaxiPartitioningTestCasesMultiColumnValues(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name=None,
@@ -482,7 +509,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiSplittingTestCasesDateTime(
+        TaxiPartitioningTestCasesDateTime(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_datetime",
@@ -490,7 +517,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiSplittingTestCasesConvertedDateTime(
+        TaxiPartitioningTestCasesConvertedDateTime(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_datetime",
@@ -501,27 +528,27 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
     ],
 )
 @pytest.mark.sqlite
-def test_sqlite_split(
-    taxi_test_cases: TaxiSplittingTestCasesBase,
+def test_sqlite_partition(
+    taxi_test_cases: TaxiPartitioningTestCasesBase,
     sa,
 ):
     """What does this test and why?
-    splitters should work with sqlite.
+    partitioners should work with sqlite.
     """
     engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
         taxi_test_cases.test_df, sa
     )
 
-    test_cases: List[TaxiSplittingTestCase] = taxi_test_cases.test_cases()
-    test_case: TaxiSplittingTestCase
+    test_cases: List[TaxiPartitioningTestCase] = taxi_test_cases.test_cases()
+    test_case: TaxiPartitioningTestCase
     batch_spec: SqlAlchemyDatasourceBatchSpec
     for test_case in test_cases:
         if test_case.table_domain_test_case:
             batch_spec = SqlAlchemyDatasourceBatchSpec(
                 table_name="test",
                 schema_name="main",
-                splitter_method=test_case.splitter_method_name,
-                splitter_kwargs=test_case.splitter_kwargs,
+                partitioner_method=test_case.partitioner_method_name,
+                partitioner_kwargs=test_case.partitioner_kwargs,
                 batch_identifiers={},
             )
         else:  # noqa: PLR5501
@@ -530,8 +557,8 @@ def test_sqlite_split(
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
                     schema_name="main",
-                    splitter_method=test_case.splitter_method_name,
-                    splitter_kwargs=test_case.splitter_kwargs,
+                    partitioner_method=test_case.partitioner_method_name,
+                    partitioner_kwargs=test_case.partitioner_kwargs,
                     batch_identifiers={
                         taxi_test_cases.test_column_name: test_case.expected_column_values[
                             0
@@ -544,8 +571,8 @@ def test_sqlite_split(
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
                     schema_name="main",
-                    splitter_method=test_case.splitter_method_name,
-                    splitter_kwargs=test_case.splitter_kwargs,
+                    partitioner_method=test_case.partitioner_method_name,
+                    partitioner_kwargs=test_case.partitioner_kwargs,
                     batch_identifiers={
                         column_name: test_case.expected_column_values[0][column_name]
                         for column_name in taxi_test_cases.test_column_names
@@ -567,11 +594,11 @@ def test_sqlite_split(
 
 
 @pytest.mark.sqlite
-def test_sqlite_split_on_year(
+def test_sqlite_partition_on_year(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
     """What does this test and why?
-    splitters should work with sqlite and return the correct rows.
+    partitioners should work with sqlite and return the correct rows.
     """
 
     engine: SqlAlchemyExecutionEngine = (
@@ -582,8 +609,8 @@ def test_sqlite_split_on_year(
     batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
         table_name="test",
         schema_name="main",
-        splitter_method="split_on_year",
-        splitter_kwargs={"column_name": "pickup_datetime"},
+        partitioner_method="partition_on_year",
+        partitioner_kwargs={"column_name": "pickup_datetime"},
         batch_identifiers={"pickup_datetime": "2018"},
     )
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
@@ -611,11 +638,11 @@ def test_sqlite_split_on_year(
 
 
 @pytest.mark.sqlite
-def test_sqlite_split_and_sample_using_limit(
+def test_sqlite_partition_and_sample_using_limit(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
     """What does this test and why?
-    splitters and samplers should work together in sqlite.
+    partitioners and samplers should work together in sqlite.
     """
 
     engine: SqlAlchemyExecutionEngine = (
@@ -628,8 +655,8 @@ def test_sqlite_split_and_sample_using_limit(
         schema_name="main",
         sampling_method="sample_using_limit",
         sampling_kwargs={"n": n},
-        splitter_method="split_on_year",
-        splitter_kwargs={"column_name": "pickup_datetime"},
+        partitioner_method="partition_on_year",
+        partitioner_kwargs={"column_name": "pickup_datetime"},
         batch_identifiers={"pickup_datetime": "2018"},
     )
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)

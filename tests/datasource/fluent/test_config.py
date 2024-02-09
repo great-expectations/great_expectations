@@ -43,7 +43,7 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    SplitterYearAndMonth,
+    PartitionerYearAndMonth,
     TableAsset,
 )
 from tests.datasource.fluent.conftest import FLUENT_DATASOURCE_TEST_DIR
@@ -76,17 +76,17 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
             "type": "postgres",
             "assets": [
                 {
-                    "name": "my_table_asset_wo_splitters",
+                    "name": "my_table_asset_wo_partitioners",
                     "table_name": "my_table",
                     "type": "table",
                 },
                 {
-                    "splitter": {
+                    "partitioner": {
                         "column_name": "my_column",
-                        "method_name": "split_on_year_and_month",
+                        "method_name": "partition_on_year_and_month",
                     },
                     "table_name": "another_table",
-                    "name": "with_splitter",
+                    "name": "with_partitioner",
                     "type": "table",
                 },
                 {
@@ -508,10 +508,10 @@ def test_catch_bad_top_level_config(
     [
         p(
             {
-                "name": "unknown splitter",
+                "name": "unknown partitioner",
                 "type": "table",
                 "table_name": "pool",
-                "splitter": {
+                "partitioner": {
                     "method_name": "not_a_valid_method_name",
                     "column_name": "foo",
                 },
@@ -521,11 +521,11 @@ def test_catch_bad_top_level_config(
                 "assets",
                 0,
                 "TableAsset",
-                "splitter",
+                "partitioner",
                 "method_name",
             ),
             "unexpected value; permitted:",
-            id="unknown splitter method",
+            id="unknown partitioner method",
         ),
         p(
             {
@@ -612,14 +612,14 @@ def test_catch_bad_asset_configs(
         )
     ],
 )
-def test_general_splitter_errors(
+def test_general_partitioner_errors(
     inject_engine_lookup_double,
     bad_column_kwargs: dict,
     expected_error_type: str,
     expected_msg: str,
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        SplitterYearAndMonth(**bad_column_kwargs)
+        PartitionerYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -755,14 +755,14 @@ def test_assets_key_presence(
 
 
 # Marked via from_all_config fixture
-def test_splitters_deserialization(
+def test_partitioners_deserialization(
     inject_engine_lookup_double, from_all_config: GxConfig
 ):
     table_asset: TableAsset = from_all_config.get_datasource(
         datasource_name="my_pg_ds"
-    ).get_asset(asset_name="with_splitter")
-    assert isinstance(table_asset.splitter, SplitterYearAndMonth)
-    assert table_asset.splitter.method_name == "split_on_year_and_month"
+    ).get_asset(asset_name="with_partitioner")
+    assert isinstance(table_asset.partitioner, PartitionerYearAndMonth)
+    assert table_asset.partitioner.method_name == "partition_on_year_and_month"
 
 
 # TDD Tests for future work

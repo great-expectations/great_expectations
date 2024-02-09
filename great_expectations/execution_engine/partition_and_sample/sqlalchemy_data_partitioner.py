@@ -1,17 +1,17 @@
-"""Create queries for use in sql data splitting.
+"""Create queries for use in sql data partitioning.
 
 This module contains utilities for generating queries used by execution engines
-and data connectors to split data into batches based on the data itself. It
+and data connectors to partition data into batches based on the data itself. It
 is typically used from within either an execution engine or a data connector,
 not by itself.
 
     Typical usage example:
         __init__():
-            self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
+            self._sqlalchemy_data_partitioner = SqlAlchemyDataPartitioner()
 
         elsewhere():
-            splitter = self._sqlalchemy_data_splitter._get_splitter_method()
-            split_query_or_clause = splitter()
+            partitioner = self._sqlalchemy_data_partitioner._get_partitioner_method()
+            partition_query_or_clause = partitioner()
 """
 
 from __future__ import annotations
@@ -22,10 +22,10 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.execution_engine.split_and_sample.data_splitter import (
-    DataSplitter,
+from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+    DataPartitioner,
     DatePart,
-    SplitterMethod,
+    PartitionerMethod,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
@@ -36,109 +36,109 @@ if TYPE_CHECKING:
     )
 
 
-class SqlAlchemyDataSplitter(DataSplitter):
-    """Methods for splitting data accessible via SqlAlchemyExecutionEngine.
+class SqlAlchemyDataPartitioner(DataPartitioner):
+    """Methods for partitioning data accessible via SqlAlchemyExecutionEngine.
 
     Note, for convenience, you can also access DatePart via the instance variable
-    date_part e.g. SqlAlchemyDataSplitter.date_part.MONTH
+    date_part e.g. SqlAlchemyDataPartitioner.date_part.MONTH
     """
 
     def __init__(self, dialect: str):
         self._dialect = dialect
 
-    DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
-        SplitterMethod.SPLIT_ON_YEAR: "get_data_for_batch_identifiers_year",
-        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH: "get_data_for_batch_identifiers_year_and_month",
-        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY: "get_data_for_batch_identifiers_year_and_month_and_day",
-        SplitterMethod.SPLIT_ON_DATE_PARTS: "get_data_for_batch_identifiers_for_split_on_date_parts",
+    DATETIME_PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
+        PartitionerMethod.PARTITION_ON_YEAR: "get_data_for_batch_identifiers_year",
+        PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH: "get_data_for_batch_identifiers_year_and_month",
+        PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH_AND_DAY: "get_data_for_batch_identifiers_year_and_month_and_day",
+        PartitionerMethod.PARTITION_ON_DATE_PARTS: "get_data_for_batch_identifiers_for_partition_on_date_parts",
     }
 
-    SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
-        SplitterMethod.SPLIT_ON_WHOLE_TABLE: "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
-        SplitterMethod.SPLIT_ON_COLUMN_VALUE: "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
-        SplitterMethod.SPLIT_ON_CONVERTED_DATETIME: "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
-        SplitterMethod.SPLIT_ON_DIVIDED_INTEGER: "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
-        SplitterMethod.SPLIT_ON_MOD_INTEGER: "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
-        SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES: "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
-        SplitterMethod.SPLIT_ON_HASHED_COLUMN: "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
+    PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
+        PartitionerMethod.PARTITION_ON_WHOLE_TABLE: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_whole_table",
+        PartitionerMethod.PARTITION_ON_COLUMN_VALUE: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_column_value",
+        PartitionerMethod.PARTITION_ON_CONVERTED_DATETIME: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_converted_datetime",
+        PartitionerMethod.PARTITION_ON_DIVIDED_INTEGER: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_divided_integer",
+        PartitionerMethod.PARTITION_ON_MOD_INTEGER: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_mod_integer",
+        PartitionerMethod.PARTITION_ON_MULTI_COLUMN_VALUES: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_multi_column_values",
+        PartitionerMethod.PARTITION_ON_HASHED_COLUMN: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_hashed_column",
     }
 
-    def split_on_year(
+    def partition_on_year(
         self,
         column_name: str,
         batch_identifiers: dict,
     ) -> Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList]:
-        """Split on year values in column_name.
+        """Partition on year values in column_name.
 
         Args:
-            column_name: column in table to use in determining split.
+            column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
-        return self.split_on_date_parts(
+        return self.partition_on_date_parts(
             column_name=column_name,
             batch_identifiers=batch_identifiers,
             date_parts=[DatePart.YEAR],
         )
 
-    def split_on_year_and_month(
+    def partition_on_year_and_month(
         self,
         column_name: str,
         batch_identifiers: dict,
     ) -> Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList]:
-        """Split on year and month values in column_name.
+        """Partition on year and month values in column_name.
 
         Args:
-            column_name: column in table to use in determining split.
+            column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
-        return self.split_on_date_parts(
+        return self.partition_on_date_parts(
             column_name=column_name,
             batch_identifiers=batch_identifiers,
             date_parts=[DatePart.YEAR, DatePart.MONTH],
         )
 
-    def split_on_year_and_month_and_day(
+    def partition_on_year_and_month_and_day(
         self,
         column_name: str,
         batch_identifiers: dict,
     ) -> Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList]:
-        """Split on year and month and day values in column_name.
+        """Partition on year and month and day values in column_name.
 
         Args:
-            column_name: column in table to use in determining split.
+            column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
-        return self.split_on_date_parts(
+        return self.partition_on_date_parts(
             column_name=column_name,
             batch_identifiers=batch_identifiers,
             date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
         )
 
-    def split_on_date_parts(
+    def partition_on_date_parts(
         self,
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
     ) -> Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList]:
-        """Split on date_part values in column_name.
+        """Partition on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
         given month (if only month is chosen for date_parts) for ALL years.
@@ -147,10 +147,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
         year, month and day.
 
         Args:
-            column_name: column in table to use in determining split.
+            column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose date parts
-                will be used for splitting or key values of {date_part: date_part_value}
-            date_parts: part of the date to be used for splitting e.g.
+                will be used for partitioning or key values of {date_part: date_part_value}
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
@@ -182,24 +182,24 @@ class SqlAlchemyDataSplitter(DataSplitter):
         return query
 
     @staticmethod
-    def split_on_whole_table(batch_identifiers: dict) -> bool:
-        """'Split' by returning the whole table"""
+    def partition_on_whole_table(batch_identifiers: dict) -> bool:
+        """'Partition' by returning the whole table"""
 
         return True
 
     @staticmethod
-    def split_on_column_value(column_name: str, batch_identifiers: dict) -> bool:
-        """Split using the values in the named column"""
+    def partition_on_column_value(column_name: str, batch_identifiers: dict) -> bool:
+        """Partition using the values in the named column"""
 
         return sa.column(column_name) == batch_identifiers[column_name]
 
-    def split_on_converted_datetime(
+    def partition_on_converted_datetime(
         self,
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
     ) -> bool:
-        """Convert the values in the named column to the given date_format, and split on that"""
+        """Convert the values in the named column to the given date_format, and partition on that"""
         if self._dialect == GXSqlDialect.SQLITE:
             return (
                 sa.func.strftime(
@@ -210,16 +210,16 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
 
         raise NotImplementedError(
-            f'Splitter method "split_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
         )
 
-    def split_on_divided_integer(
+    def partition_on_divided_integer(
         self,
         column_name: str,
         divisor: int,
         batch_identifiers: dict,
     ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
+        """Divide the values in the named column by `divisor`, and partition on that"""
         if self._dialect == GXSqlDialect.SQLITE:
             return (
                 sa.cast(
@@ -271,13 +271,13 @@ class SqlAlchemyDataSplitter(DataSplitter):
             == batch_identifiers[column_name]
         )
 
-    def split_on_mod_integer(
+    def partition_on_mod_integer(
         self,
         column_name: str,
         mod: int,
         batch_identifiers: dict,
     ) -> bool:
-        """Divide the values in the named column by `mod`, and split on that"""
+        """Divide the values in the named column by `mod`, and partition on that"""
         if self._dialect in [
             GXSqlDialect.SQLITE,
             GXSqlDialect.MSSQL,
@@ -293,11 +293,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
         )
 
     @staticmethod
-    def split_on_multi_column_values(
+    def partition_on_multi_column_values(
         column_names: List[str],
         batch_identifiers: dict,
     ) -> bool:
-        """Split on the joint values in the named columns"""
+        """Partition on the joint values in the named columns"""
 
         return sa.and_(
             *(
@@ -306,13 +306,13 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-    def split_on_hashed_column(
+    def partition_on_hashed_column(
         self,
         column_name: str,
         hash_digits: int,
         batch_identifiers: dict,
     ) -> bool:
-        """Split on the hashed value of the named column"""
+        """Partition on the hashed value of the named column"""
         if self._dialect == GXSqlDialect.SQLITE:
             return (
                 sa.func.md5(sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits)
@@ -320,63 +320,63 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
 
         raise NotImplementedError(
-            f'Splitter method "split_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
         )
 
     def get_data_for_batch_identifiers(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
         selectable: sqlalchemy.Selectable,
-        splitter_method_name: str,
-        splitter_kwargs: dict,
+        partitioner_method_name: str,
+        partitioner_kwargs: dict,
     ) -> List[dict]:
-        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+        """Build data used to construct batch identifiers for the input table using the provided partitioner config.
 
-        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+        Sql partitioner configurations yield the unique values that comprise a batch by introspecting your data.
 
         Args:
             execution_engine: Used to introspect the data.
-            selectable: Selectable to split.
-            splitter_method_name: Desired splitter method to use.
-            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
+            selectable: Selectable to partition.
+            partitioner_method_name: Desired partitioner method to use.
+            partitioner_kwargs: Dict of directives used by the partitioner method as keyword arguments of key=value.
 
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
         """
-        processed_splitter_method_name: str = self._get_splitter_method_name(
-            splitter_method_name
+        processed_partitioner_method_name: str = self._get_partitioner_method_name(
+            partitioner_method_name
         )
         batch_identifiers_list: List[dict]
-        if self._is_datetime_splitter(processed_splitter_method_name):
-            splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
-                processed_splitter_method_name
+        if self._is_datetime_partitioner(processed_partitioner_method_name):
+            partitioner_fn_name: str = self.DATETIME_PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
+                processed_partitioner_method_name
             ]
-            batch_identifiers_list = getattr(self, splitter_fn_name)(
-                execution_engine, selectable, **splitter_kwargs
+            batch_identifiers_list = getattr(self, partitioner_fn_name)(
+                execution_engine, selectable, **partitioner_kwargs
             )
         else:
             batch_identifiers_list = (
-                self.get_data_for_batch_identifiers_for_non_date_part_splitters(
+                self.get_data_for_batch_identifiers_for_non_date_part_partitioners(
                     execution_engine,
                     selectable,
-                    processed_splitter_method_name,
-                    splitter_kwargs,
+                    processed_partitioner_method_name,
+                    partitioner_kwargs,
                 )
             )
 
         return batch_identifiers_list
 
-    def _is_datetime_splitter(self, splitter_method_name: str) -> bool:
-        """Whether the splitter method is a datetime splitter.
+    def _is_datetime_partitioner(self, partitioner_method_name: str) -> bool:
+        """Whether the partitioner method is a datetime partitioner.
 
         Args:
-            splitter_method_name: Name of the splitter method
+            partitioner_method_name: Name of the partitioner method
 
         Returns:
             Boolean
         """
-        return splitter_method_name in list(
-            self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING.keys()
+        return partitioner_method_name in list(
+            self.DATETIME_PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING.keys()
         )
 
     def get_data_for_batch_identifiers_year(
@@ -385,20 +385,20 @@ class SqlAlchemyDataSplitter(DataSplitter):
         selectable: sqlalchemy.Selectable,
         column_name: str,
     ) -> List[dict]:
-        """Build batch_identifiers from a column split on year.
+        """Build batch_identifiers from a column partition on year.
 
         This method builds a query to select the unique date_parts from the
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
             execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
-            selectable: selectable to split.
-            column_name: column in table to use in determining split.
+            selectable: selectable to partition.
+            column_name: column in table to use in determining partition.
 
         Returns:
             List of dicts of the form [{column_name: {"year": 2022}}]
         """
-        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+        return self.get_data_for_batch_identifiers_for_partition_on_date_parts(
             execution_engine=execution_engine,
             selectable=selectable,
             column_name=column_name,
@@ -411,20 +411,20 @@ class SqlAlchemyDataSplitter(DataSplitter):
         selectable: sqlalchemy.Selectable,
         column_name: str,
     ) -> List[dict]:
-        """Build batch_identifiers from a column split on year and month.
+        """Build batch_identifiers from a column partition on year and month.
 
         This method builds a query to select the unique date_parts from the
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
             execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
-            selectable: selectable to split.
-            column_name: column in table to use in determining split.
+            selectable: selectable to partition.
+            column_name: column in table to use in determining partition.
 
         Returns:
             List of dicts of the form [{column_name: {"year": 2022, "month": 4}}]
         """
-        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+        return self.get_data_for_batch_identifiers_for_partition_on_date_parts(
             execution_engine=execution_engine,
             selectable=selectable,
             column_name=column_name,
@@ -437,41 +437,41 @@ class SqlAlchemyDataSplitter(DataSplitter):
         selectable: sqlalchemy.Selectable,
         column_name: str,
     ) -> List[dict]:
-        """Build batch_identifiers from a column split on year and month and day.
+        """Build batch_identifiers from a column partition on year and month and day.
 
         This method builds a query to select the unique date_parts from the
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
             execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
-            selectable: selectable to split.
-            column_name: column in table to use in determining split.
+            selectable: selectable to partition.
+            column_name: column in table to use in determining partition.
 
         Returns:
             List of dicts of the form [{column_name: {"year": 2022, "month": 4, "day": 14}}]
         """
-        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+        return self.get_data_for_batch_identifiers_for_partition_on_date_parts(
             execution_engine=execution_engine,
             selectable=selectable,
             column_name=column_name,
             date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
         )
 
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
         self,
         selectable: sqlalchemy.Selectable,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
     ) -> sqlalchemy.Selectable:
-        """Build a split query to retrieve batch_identifiers info from a column split on a list of date parts.
+        """Build a partition query to retrieve batch_identifiers info from a column partition on a list of date parts.
 
         This method builds a query to select the unique date_parts from the
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
-            selectable: selectable to split.
-            column_name: column in table to use in determining split.
-            date_parts: part of the date to be used for splitting e.g.
+            selectable: selectable to partition.
+            column_name: column in table to use in determining partition.
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
@@ -541,7 +541,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                     "concat_distinct_values"
                 )
 
-        split_query: sqlalchemy.Selectable = sa.select(
+        partitioned_query: sqlalchemy.Selectable = sa.select(
             concat_clause,
             *[
                 sa.cast(
@@ -551,68 +551,66 @@ class SqlAlchemyDataSplitter(DataSplitter):
             ],
         ).select_from(selectable)
 
-        return split_query
+        return partitioned_query
 
-    def get_data_for_batch_identifiers_for_split_on_date_parts(
+    def get_data_for_batch_identifiers_for_partition_on_date_parts(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
         selectable: sqlalchemy.Selectable,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
     ) -> List[dict]:
-        """Build batch_identifiers from a column split on a list of date parts.
+        """Build batch_identifiers from a column partition on a list of date parts.
 
         This method builds a query to select the unique date_parts from the
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
             execution_engine: used to query the data to find batch identifiers.
-            selectable: selectable to split.
-            column_name: column in table to use in determining split.
-            date_parts: part of the date to be used for splitting e.g.
+            selectable: selectable to partition.
+            column_name: column in table to use in determining partition.
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
 
-        split_query: sqlalchemy.Selectable = (
-            self.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
-                selectable, column_name, date_parts
-            )
+        partitioned_query: sqlalchemy.Selectable = self.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
+            selectable, column_name, date_parts
         )
 
-        result: List[sqlalchemy.Row | sqlalchemy.LegacyRow] = self._execute_split_query(
-            execution_engine, split_query
-        )
+        result: List[
+            sqlalchemy.Row | sqlalchemy.LegacyRow
+        ] = self._execute_partitioned_query(execution_engine, partitioned_query)
 
-        return self._get_params_for_batch_identifiers_from_date_part_splitter(
+        return self._get_params_for_batch_identifiers_from_date_part_partitioner(
             column_name, result, date_parts
         )
 
     @staticmethod
-    def _execute_split_query(
+    def _execute_partitioned_query(
         execution_engine: SqlAlchemyExecutionEngine,
-        split_query: sqlalchemy.Selectable,
+        partitioned_query: sqlalchemy.Selectable,
     ) -> List[sqlalchemy.Row | sqlalchemy.LegacyRow]:
-        """Use the provided execution engine to run the split query and fetch all of the results.
+        """Use the provided execution engine to run the partition query and fetch all of the results.
 
         Args:
             execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
-            split_query: Query to be executed as a sqlalchemy Selectable.
+            partitioned_query: Query to be executed as a sqlalchemy Selectable.
 
         Returns:
             List of row results.
         """
-        return execution_engine.execute_split_query(split_query)
+        return execution_engine.execute_partitioned_query(partitioned_query)
 
-    def _get_params_for_batch_identifiers_from_date_part_splitter(
+    def _get_params_for_batch_identifiers_from_date_part_partitioner(
         self,
         column_name: str,
         result: List[sqlalchemy.LegacyRow],
         date_parts: List[DatePart] | List[str],
     ) -> List[dict]:
-        """Get parameters used to build BatchIdentifiers from the results of a get_data_for_batch_identifiers_for_split_on_date_parts
+        """Get parameters used to build BatchIdentifiers from the results of a get_data_for_batch_identifiers_for_partition_on_date_parts
 
         Args:
             column_name: Column name associated with the batch identifier.
@@ -637,88 +635,90 @@ class SqlAlchemyDataSplitter(DataSplitter):
         return data_for_batch_identifiers
 
     @staticmethod
-    def _get_column_names_from_splitter_kwargs(splitter_kwargs) -> List[str]:
+    def _get_column_names_from_partitioner_kwargs(partitioner_kwargs) -> List[str]:
         column_names: List[str] = []
 
-        if "column_names" in splitter_kwargs:
-            column_names = splitter_kwargs["column_names"]
-        elif "column_name" in splitter_kwargs:
-            column_names = [splitter_kwargs["column_name"]]
+        if "column_names" in partitioner_kwargs:
+            column_names = partitioner_kwargs["column_names"]
+        elif "column_name" in partitioner_kwargs:
+            column_names = [partitioner_kwargs["column_name"]]
 
         return column_names
 
-    def get_data_for_batch_identifiers_for_non_date_part_splitters(
+    def get_data_for_batch_identifiers_for_non_date_part_partitioners(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
         selectable: sqlalchemy.Selectable,
-        splitter_method_name: str,
-        splitter_kwargs: dict,
+        partitioner_method_name: str,
+        partitioner_kwargs: dict,
     ) -> List[dict]:
-        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+        """Build data used to construct batch identifiers for the input table using the provided partitioner config.
 
-        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+        Sql partitioner configurations yield the unique values that comprise a batch by introspecting your data.
 
         Args:
             execution_engine: Used to introspect the data.
-            selectable: selectable to split.
-            splitter_method_name: Desired splitter method to use.
-            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
+            selectable: selectable to partition.
+            partitioner_method_name: Desired partitioner method to use.
+            partitioner_kwargs: Dict of directives used by the partitioner method as keyword arguments of key=value.
 
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
         """
-        get_split_query_method_name: str = (
+        get_partition_query_method_name: str = (
             self._get_method_name_for_get_data_for_batch_identifiers_method(
-                splitter_method_name
+                partitioner_method_name
             )
         )
 
-        split_query: sqlalchemy.Selectable = getattr(self, get_split_query_method_name)(
-            selectable=selectable, **splitter_kwargs
+        partitioned_query: sqlalchemy.Selectable = getattr(
+            self, get_partition_query_method_name
+        )(selectable=selectable, **partitioner_kwargs)
+        rows: List[sqlalchemy.LegacyRow] = self._execute_partitioned_query(
+            execution_engine, partitioned_query
         )
-        rows: List[sqlalchemy.LegacyRow] = self._execute_split_query(
-            execution_engine, split_query
+        column_names: List[str] = self._get_column_names_from_partitioner_kwargs(
+            partitioner_kwargs
         )
-        column_names: List[str] = self._get_column_names_from_splitter_kwargs(
-            splitter_kwargs
-        )
-        return self._get_params_for_batch_identifiers_from_non_date_part_splitters(
+        return self._get_params_for_batch_identifiers_from_non_date_part_partitioners(
             column_names, rows
         )
 
     def _get_method_name_for_get_data_for_batch_identifiers_method(
-        self, splitter_method_name: str
+        self, partitioner_method_name: str
     ):
-        """Get the matching method name to get the data for batch identifiers from the input splitter method name.
+        """Get the matching method name to get the data for batch identifiers from the input partitioner method name.
 
         Args:
-            splitter_method_name: Configured splitter name.
+            partitioner_method_name: Configured partitioner name.
 
         Returns:
             Name of the corresponding method to get data for building batch identifiers.
         """
-        processed_splitter_method_name: str = self._get_splitter_method_name(
-            splitter_method_name
+        processed_partitioner_method_name: str = self._get_partitioner_method_name(
+            partitioner_method_name
         )
         try:
-            return self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
-                processed_splitter_method_name
-            ]
+            return (
+                self.PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
+                    processed_partitioner_method_name
+                ]
+            )
         except ValueError:
             raise gx_exceptions.InvalidConfigError(
-                f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
+                f"Please provide a supported partitioner method name, you provided: {partitioner_method_name}"
             )
 
     @staticmethod
-    def _get_params_for_batch_identifiers_from_non_date_part_splitters(
+    def _get_params_for_batch_identifiers_from_non_date_part_partitioners(
         column_names: List[str],
         rows: List[sqlalchemy.LegacyRow],
     ) -> List[dict]:
-        """Get params used in batch identifiers from output of executing query for non date part splitters.
+        """Get params used in batch identifiers from output of executing query for non date part partitioners.
 
         Args:
-            column_names: Column names referenced in splitter_kwargs.
-            rows: Rows from execution of split query.
+            column_names: Column names referenced in partitioner_kwargs.
+            rows: Rows from execution of partition query.
 
         Returns:
             Dict of {column_name: row, column_name: row, ...}
@@ -726,35 +726,35 @@ class SqlAlchemyDataSplitter(DataSplitter):
         return [dict(zip(column_names, row)) for row in rows]
 
     @staticmethod
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_whole_table(
         selectable: sqlalchemy.Selectable,
     ) -> sqlalchemy.Selectable:
         """
-        'Split' by returning the whole table
+        'Partition' by returning the whole table
 
         Note: the selectable parameter is a required to keep the signature of this method consistent with other methods.
         """
         return sa.select(sa.true())
 
     @staticmethod
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_column_value(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_column_value(
         selectable: sqlalchemy.Selectable,
         column_name: str,
     ) -> sqlalchemy.Selectable:
-        """Split using the values in the named column"""
+        """Partition using the values in the named column"""
         return (
             sa.select(sa.func.distinct(sa.column(column_name)))
             .select_from(selectable)
             .order_by(sa.column(column_name).asc())
         )
 
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_converted_datetime(
         self,
         selectable: sqlalchemy.Selectable,
         column_name: str,
         date_format_string: str = "%Y-%m-%d",
     ) -> sqlalchemy.Selectable:
-        """Convert the values in the named column to the given date_format, and split on that"""
+        """Convert the values in the named column to the given date_format, and partition on that"""
         if self._dialect == "sqlite":
             return sa.select(
                 sa.func.distinct(
@@ -766,16 +766,16 @@ class SqlAlchemyDataSplitter(DataSplitter):
             ).select_from(selectable)
 
         raise NotImplementedError(
-            f'Splitter method "split_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
         )
 
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_divided_integer(
         self,
         selectable: sqlalchemy.Selectable,
         column_name: str,
         divisor: int,
     ) -> sqlalchemy.Selectable:
-        """Divide the values in the named column by `divisor`, and split on that"""
+        """Divide the values in the named column by `divisor`, and partition on that"""
         if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
                 sa.func.distinct(
@@ -836,13 +836,13 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         ).select_from(selectable)
 
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_mod_integer(
         self,
         selectable: sqlalchemy.Selectable,
         column_name: str,
         mod: int,
     ) -> sqlalchemy.Selectable:
-        """Divide the values in the named column by `mod`, and split on that"""
+        """Divide the values in the named column by `mod`, and partition on that"""
         if self._dialect in [
             GXSqlDialect.SQLITE,
             GXSqlDialect.MSSQL,
@@ -858,18 +858,18 @@ class SqlAlchemyDataSplitter(DataSplitter):
         ).select_from(selectable)
 
     @staticmethod
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_multi_column_values(
         selectable: sqlalchemy.Selectable,
         column_names: List[str],
     ) -> sqlalchemy.Selectable:
-        """Split on the joint values in the named columns"""
+        """Partition on the joint values in the named columns"""
         return (
             sa.select(*[sa.column(column_name) for column_name in column_names])
             .distinct()
             .select_from(selectable)
         )
 
-    def get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column(
+    def get_partition_query_for_data_for_batch_identifiers_for_partition_on_hashed_column(
         self,
         selectable: sqlalchemy.Selectable,
         column_name: str,
@@ -886,5 +886,5 @@ class SqlAlchemyDataSplitter(DataSplitter):
             ).select_from(selectable)
 
         raise NotImplementedError(
-            f'Splitter method "split_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
         )
