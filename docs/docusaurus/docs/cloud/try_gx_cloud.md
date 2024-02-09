@@ -32,7 +32,7 @@ You'll need your user access token and organization ID to set your environment v
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
-2. In the **Access tokens** pane, click **Create user access token**.
+2. In the **User access tokens** pane, click **Create user access token**.
 
 3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
 
@@ -59,9 +59,13 @@ Environment variables securely store your GX Cloud and Snowflake access credenti
     ```
    Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
-3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+3. Confirm the GX Agent status icon in GX cloud is green. This indicates the GX Agent is running. 
 
-4. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
+    ![GX Agent status](/img/gx_agent_status.png)
+
+4. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+
+5. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
     If you stop the GX Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
 
