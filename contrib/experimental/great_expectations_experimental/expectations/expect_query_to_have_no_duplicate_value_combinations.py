@@ -21,7 +21,7 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
 
     query = """
                 SELECT {col_1}, {col_2}, COUNT(*) n
-                FROM {active_batch}
+                FROM {batch}
                 GROUP BY {col_1}, {col_2}
                 HAVING n > 1
             """

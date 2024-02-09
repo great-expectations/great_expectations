@@ -1696,7 +1696,8 @@ Notes:
 
         results = [
             stats.kstest(
-                np.random.choice(column, size=bootstrap_sample_size), estimated_cdf
+                np.random.choice(column, size=bootstrap_sample_size),  # noqa: NPY002
+                estimated_cdf,
             )[1]
             for _ in range(bootstrap_samples)
         ]

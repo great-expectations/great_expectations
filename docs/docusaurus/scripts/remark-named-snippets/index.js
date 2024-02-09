@@ -19,28 +19,23 @@ Named snippets are defined with the following syntax:
 ```
 */
 const visit = require('unist-util-visit')
-const glob = require('glob')
+const path = require('path')
 const constructSnippetMap = require('./snippet')
-
-function getDirs () {
-  // Get all directories that should be processed
-  const manualDirs = ['../../great_expectations', '../../tests', './docs']
-  const versionDirs = glob.sync('versioned_code/*/')
-  // remove v0.14.13 from processing since it does not use named snippets
-  const index = versionDirs.indexOf('versioned_code/version-0.14.13/')
-  if (index !== -1) {
-    versionDirs.splice(index, 1)
-  }
-  return manualDirs.concat(versionDirs)
-}
+const { getDirs } = require('./common')
 
 function codeImport () {
   // Instantiated within the import so it can be hot-reloaded
-  const snippetMap = constructSnippetMap(getDirs())
+  const dirs = getDirs()
+  const snippetMapsByNamespace = {}
+  for (let dir of dirs) {
+    snippetMapsByNamespace[dir] = constructSnippetMap(dir)
+  }
 
   return function transformer (tree, file) {
     const codes = []
     const promises = []
+    const namespace = getFileNamespace(file, dirs)
+    const snippetMap = snippetMapsByNamespace[namespace]
 
     // Walk the AST of the markdown file and filter for code snippets
     visit(tree, 'code', (node, index, parent) => {
@@ -78,6 +73,23 @@ function codeImport () {
       return Promise.all(promises)
     }
   }
+}
+
+/**
+ * Gets what we'll call the "namespace" of the file, e.g. docs, versioned_docs/<VERSION>, etc
+ * @param {VFile} file 
+ * @param {string[]} namespaces
+ * @returns 
+ */
+function getFileNamespace(file, namespaces) {
+  const relativePath = path.relative(file.cwd, file.path);
+
+  for (const namespace of namespaces) {
+    if (relativePath.startsWith(namespace)) {
+      return namespace
+    }
+  }
+  throw Error(`No namespace found for file ${file.path} with namespaces ${namespaces}`)
 }
 
 module.exports = codeImport

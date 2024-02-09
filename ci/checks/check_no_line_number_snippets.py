@@ -11,7 +11,6 @@ from typing import List
 
 ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER = {
     "docs/prepare_to_build_docs.sh",
-    "docs/prepare_prior_versions.py",
 }
 EXCLUDED_FILENAMES_PATTERN = re.compile(r"node_modules", re.IGNORECASE)
 

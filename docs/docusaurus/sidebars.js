@@ -506,8 +506,5 @@ module.exports = {
       ]
     },
   ],
-  resources: [
-    'resources/get_support',
-  ]
 }
 

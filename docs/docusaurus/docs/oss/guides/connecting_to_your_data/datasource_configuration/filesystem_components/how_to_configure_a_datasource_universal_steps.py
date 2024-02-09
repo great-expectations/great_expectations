@@ -16,16 +16,6 @@ the snippets that are specified for use in documentation are maintained.  These 
     https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource
 """
 
-# The following imports are used as part of verifying that all example snippets are consistent.
-# Users may disregard them.
-
-from datasource_configuration_test_utilities import is_subset
-from full_datasource_configurations import (
-    get_partial_config_universal_datasource_config_elements,
-)
-
-# The following methods correspond to the section headings in the how-to guide linked in the module docstring.
-
 
 def section_1_import_necessary_modules_and_initialize_your_data_context():
     """Provides and tests the snippets for section 1 of the Spark, Pandas, and SQL Datasource configuration guides.
@@ -33,7 +23,7 @@ def section_1_import_necessary_modules_and_initialize_your_data_context():
     Returns:
         a Great Expectations DataContext object
     """
-    # <snippet name="import necessary modules and initialize your data context">
+    # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/datasource_configuration/filesystem_components/how_to_configure_a_datasource_universal_steps imports and data context">
     import great_expectations as gx
     from great_expectations.core.yaml_handler import YAMLHandler
 
@@ -44,51 +34,4 @@ def section_1_import_necessary_modules_and_initialize_your_data_context():
     return data_context
 
 
-def section_2_create_new_datasource_configuration():
-    """Provides and tests the snippets for section 2 of the Spark, Pandas, and SQL Datasource configuration guides."""
-    # <snippet name="create empty datasource_config dictionary">
-    datasource_config: dict = {}
-    # </snippet>
-    is_subset(
-        datasource_config, get_partial_config_universal_datasource_config_elements()
-    )
-
-
-def section_3_name_your_datasource():
-    """Provides and tests the snippets for section 3 of the Spark, Pandas, and SQL Datasource configuration guides."""
-    # <snippet name="datasource_config up to name being populated as my_datasource_name">
-    datasource_config: dict = {"name": "my_datasource_name"}
-    # </snippet>
-
-    name_snippet: dict = {
-        # <snippet name="populate name as my_datasource_name">
-        "name": "my_datasource_name"
-        # </snippet>
-    }
-    assert name_snippet == datasource_config
-    is_subset(
-        datasource_config, get_partial_config_universal_datasource_config_elements()
-    )
-
-
-def section_4_specify_the_datasource_class_and_module():
-    """Provides and tests the snippets for section 4 of the Spark, Pandas, and SQL Datasource configuration guides."""
-    # <snippet name="datasource_config containing top level elements universal to spark pandas and sql Datasources">
-    datasource_config: dict = {
-        "name": "my_datasource_name",  # Preferably name it something relevant
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-    }
-    # </snippet>
-    assert (
-        datasource_config == get_partial_config_universal_datasource_config_elements()
-    )
-    is_subset(
-        datasource_config, get_partial_config_universal_datasource_config_elements()
-    )
-
-
 section_1_import_necessary_modules_and_initialize_your_data_context()
-section_2_create_new_datasource_configuration()
-section_3_name_your_datasource()
-section_4_specify_the_datasource_class_and_module()

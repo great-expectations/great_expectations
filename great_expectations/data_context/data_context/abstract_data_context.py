@@ -42,6 +42,8 @@ from great_expectations._docs_decorators import (
     new_method_or_class,
     public_api,
 )
+from great_expectations.analytics.client import init as init_analytics
+from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import DataContextInitializedEvent
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
@@ -66,7 +68,6 @@ from great_expectations.core.serializer import (
     DictConfigSerializer,
 )
 from great_expectations.core.suite_factory import SuiteFactory
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset
@@ -118,19 +119,6 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispat
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
-from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
-    UsageStatisticsHandler,
-    add_datasource_usage_statistics,
-    get_batch_list_usage_statistics,
-    run_validation_operator_usage_statistics,
-    save_expectation_suite_usage_statistics,
-    send_usage_message,
-    usage_statistics_enabled_method,
-)
-from great_expectations.analytics.client import init as init_analytics
-from great_expectations.analytics.client import submit as submit_event
-from great_expectations.checkpoint import Checkpoint
-
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
@@ -141,6 +129,7 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.run_identifier import RunIdentifier
@@ -251,9 +240,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     # instance attribute type annotations
     fluent_config: GxConfig
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
-    )
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
@@ -299,9 +285,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
-        self._initialize_usage_statistics(
-            self.project_config_with_variables_substituted.anonymous_usage_statistics
-        )
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -411,10 +394,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     @deprecated_method_or_class(
         version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
         self,
@@ -823,10 +802,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         argument_name="datasource",
         version="0.15.49",
         message="Pass in an existing Datasource instead of individual constructor arguments",
-    )
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
-        args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
         self,
@@ -1560,6 +1535,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The Checkpoint object created.
         """
+        from great_expectations.checkpoint import Checkpoint
+
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
         expectation_suite_id = self._resolve_id_and_ge_cloud_id(
@@ -1613,6 +1590,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Checkpoint.
         """
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
         result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(
             checkpoint
         )
@@ -1737,6 +1716,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
         expectation_suite_id = self._resolve_id_and_ge_cloud_id(
             id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
         )
@@ -1922,9 +1903,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="To be used in place of `expectation_suite_ge_cloud_id`",
     )
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
-    )
     def run_checkpoint(  # noqa: PLR0913
         self,
         checkpoint_name: str | None = None,
@@ -2105,8 +2083,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2150,10 +2128,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_method: The method used to sample Batch data (see: Partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
-            splitter_method: The method used to split the Data Asset into Batches
-            splitter_kwargs: Arguments for the splitting method
+            partitioner_method: The method used to partition the Data Asset into Batches
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             expectation_suite_ge_cloud_id: The identifier of the ExpectationSuite to retrieve from the DataContext
                 (can be used in place of `expectation_suite_name`)
@@ -2261,8 +2239,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                         custom_filter_function=custom_filter_function,
                         sampling_method=sampling_method,
                         sampling_kwargs=sampling_kwargs,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
+                        partitioner_method=partitioner_method,
+                        partitioner_kwargs=partitioner_kwargs,
                         runtime_parameters=runtime_parameters,
                         query=query,
                         path=path,
@@ -2340,10 +2318,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return validator
 
     @public_api
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
-        args_payload_fn=get_batch_list_usage_statistics,
-    )
     def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -2358,8 +2332,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2398,10 +2372,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_method: The method used to sample Batch data (see: Partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
-            splitter_method: The method used to split the Data Asset into Batches
-            splitter_kwargs: Arguments for the splitting method
+            partitioner_method: The method used to partition the Data Asset into Batches
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
@@ -2430,8 +2404,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,
@@ -2455,8 +2429,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2478,8 +2452,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,
@@ -2665,12 +2639,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
-    # A future effort will add more granular event names
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
     def update_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -2743,12 +2711,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
-    # A future effort will add more granular event names
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
     def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
@@ -2931,10 +2893,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
-        args_payload_fn=run_validation_operator_usage_statistics,
-    )
     def run_validation_operator(  # noqa: PLR0913
         self,
         validation_operator_name: str,
@@ -3176,9 +3134,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return batch_kwargs
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
-    )
     def open_data_docs(
         self,
         resource_identifier: Optional[str] = None,
@@ -3686,10 +3641,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._variables
 
     @property
-    def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
-        return self._usage_statistics_handler
-
-    @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
         return self.variables.anonymous_usage_statistics  # type: ignore[return-value]
 
@@ -3747,22 +3698,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         (example is add_datasource())
         """
         self._config_variables = self._load_config_variables()
-
-    def _initialize_usage_statistics(
-        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ) -> None:
-        """Initialize the usage statistics system."""
-        if not usage_statistics_config.enabled:
-            logger.info("Usage statistics is disabled; skipping initialization.")
-            self._usage_statistics_handler = None
-            return
-
-        self._usage_statistics_handler = UsageStatisticsHandler(
-            data_context=self,
-            data_context_id=self._data_context_id,
-            usage_statistics_url=usage_statistics_config.usage_statistics_url,
-            oss_id=self._get_oss_id(),
-        )
 
     @classmethod
     def _get_oss_id(cls) -> uuid.UUID | None:
@@ -4266,21 +4201,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                             "this validation result.".format(metric_name)
                         )
 
-    def send_usage_message(
-        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ) -> None:
-        """helper method to send a usage method using DataContext. Used when sending usage events from
-            classes like ExpectationSuite.
-            event
-        Args:
-            event (str): str representation of event
-            event_payload (dict): optional event payload
-            success (bool): optional success param
-        Returns:
-            None
-        """
-        send_usage_message(self, event, event_payload, success)
-
     def _determine_if_expectation_suite_include_rendered_content(
         self, include_rendered_content: Optional[bool] = None
     ) -> bool:
@@ -4368,9 +4288,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             shorten_tracebacks=shorten_tracebacks,
         )
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
-    )
     @public_api
     def build_data_docs(
         self,
@@ -4498,7 +4415,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _view_validation_result(self, result: CheckpointResult) -> None:
         validation_result_identifier = result.list_validation_result_identifiers()[0]
-        self.open_data_docs(resource_identifier=validation_result_identifier)
+        self.open_data_docs(resource_identifier=validation_result_identifier)  # type: ignore[arg-type]
 
     def escape_all_config_variables(
         self,

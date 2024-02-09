@@ -13,9 +13,9 @@
 @import "left_navigation.scss";
 @import "navbar.scss";
 @import "tabs.scss";
+@import "searchBar.scss";
 
 /* You can override the default Infima variables here. */
-
 :root {
     --ifm-font-color-base: #404041;
     --ifm-navbar-link-color: #404041;
@@ -43,7 +43,7 @@
     --doc-sidebar-width: 350px !important;
 
     --ifm-navbar-height: 6rem;
-    
+
      /* Colors */
       --white: #fff;
       --black: #000;

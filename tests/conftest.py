@@ -41,9 +41,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
@@ -293,11 +290,6 @@ def pytest_addoption(parser):
         help="If set, execute tests against clickhouse",
     )
     parser.addoption(
-        "--aws-integration",
-        action="store_true",
-        help="If set, run aws integration tests for usage_statistics",
-    )
-    parser.addoption(
         "--docs-tests",
         action="store_true",
         help="If set, run integration tests for docs",
@@ -468,11 +460,6 @@ def pytest_collection_modifyitems(config, items):
         reason: str
 
     categories = (
-        Category(
-            mark="aws_integration",
-            flag="--aws-integration",
-            reason="need --aws-integration option to run",
-        ),
         Category(
             mark="docs",
             flag="--docs-tests",
@@ -3182,9 +3169,9 @@ def fds_data_context(
         query="SELECT * FROM table_partitioned_by_date_column__A",
     )
     datasource.add_query_asset(
-        name="trip_asset_split_by_event_type",
+        name="trip_asset_partition_by_event_type",
         query="SELECT * FROM table_partitioned_by_date_column__A",
-    ).add_splitter_column_value("event_type")
+    ).add_partitioner_column_value("event_type")
 
     return context
 
@@ -3202,20 +3189,20 @@ introspection:
     whole_table: {{}}
 
     daily:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%m-%d"
 
     weekly:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%W"
 
     by_id_dozens:
-        splitter_method: _split_on_divided_integer
-        splitter_kwargs:
+        partitioner_method: _partition_on_divided_integer
+        partitioner_kwargs:
             column_name: id
             divisor: 12
 """
@@ -4071,7 +4058,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
         # _add_expectation().
         expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {
@@ -4427,15 +4414,6 @@ def alice_columnar_table_single_batch_context(
     alice_columnar_table_single_batch,
 ):
     context = empty_data_context_stats_enabled
-    # We need our salt to be consistent between runs to ensure idempotent anonymized values
-    # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
-    # (ie. adjusted to be context._usage_statistics_handler)
-    context._usage_statistics_handler = UsageStatisticsHandler(
-        data_context=context,
-        data_context_id="00000000-0000-0000-0000-00000000a004",
-        usage_statistics_url="N/A",
-        oss_id=None,
-    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(  # noqa: PTH118
@@ -5422,7 +5400,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
         expected_expectation_suite_quantiles_estimator._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {
