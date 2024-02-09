@@ -444,3 +444,20 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/reference/expectations/standard_arguments/* /docs/reference/learn/expectations/standard_arguments/:splat
 /docs/reference/expectations/* /docs/reference/learn/expectations/:splat
 /docs/reference/terms/* /docs/reference/learn/terms/:splat
+
+
+# Redirects for GX Core prerelease
+/docs/oss/guides/expectations/creating_custom_expectations/*    /docs/core/expectations/manage_expectations#customize-an-expectation-class
+/docs/oss/guides/expectations/how_to_edit_an_existing_expectationsuite  /docs/core/expectation_suites/manage_expectation_suites
+/docs/oss/guides/expectations/* /docs/core/expectations/manage_expectations
+
+/docs/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly
+/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
+
+
+# TODO: Revise/replace/redirect these files:
+  # /docs/oss/contributing/contributing_maturity
+  # /docs/oss/guides/expectations/creating_custom_expectations/how_to_use_custom_expectations
+  # /docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters
+  # /docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database
+  # /docs/oss/guides/expectations/advanced/identify_failed_rows_expectations
