@@ -4757,11 +4757,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
-        # https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        # we have to iterate through all expectation suites because evaluation parameters
+        # can reference metric values from other suites
         for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
+            try:
+                expectation_suite_dict: dict = cast(
+                    dict, self.expectations_store.get(key)
+                )
+            except ValidationError:
+                # if a suite that isn't associated with the checkpoint in question is misconfigured
+                # we should ignore that instead of breaking all checkpoints in the entire context
+                continue
             if not expectation_suite_dict:
                 continue
             expectation_suite = ExpectationSuite(
