@@ -1,6 +1,6 @@
 const codeBlockTheme = {
     plain: {
-        color: "#FAFAFA",
+        color: "#9CDCFE",
         backgroundColor: "#292F43"
     },
     styles: [{

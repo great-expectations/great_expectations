@@ -112,14 +112,19 @@
   }
 }
 
+.theme-code-block pre code {
+  background-color: #373F58;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  font-size: var(--p-md-font-size);
+}
+
 div.codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module {
   border-bottom: none;
-
-  & + div pre code {
-    background-color: #373F58;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
+  color: #FAFAFA;
+  font-size: var(--p-md-font-size);
+  opacity: 0.75;
+  text-transform: capitalize;
 
   & + div {
     position: static;
@@ -129,12 +134,16 @@ div.codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-C
     top: calc(var(--ifm-pre-padding) / 2);
 
     &:hover {
-      opacity: 1;
+      opacity: 0.75;
     }
 
     button {
       border: none;
-      opacity: 1;
+      opacity: 0.75;
+
+      svg path {
+        fill: #FAFAFA;
+      }
     }
   }
 }
