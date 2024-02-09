@@ -18,16 +18,10 @@ Then run the following command from the repository root to install the rest of t
 invoke docs
 ```
 
-Once you've run `invoke docs` once, you can run `invoke docs --start` to start the development server without copying and building prior versions. Note that if prior versions change your build won't include those changes until you run `invoke docs --clean` and `invoke docs` again.
+Once you've run `invoke docs` once, you can run `invoke docs --start` to start the development server without copying and building prior versions.
 
 ```console
 invoke docs --start
-```
-
-To remove versioned code, docs and sidebars run:
-
-```console
-invoke docs --clean
 ```
 
 
@@ -51,17 +45,20 @@ invoke docs --build
 
 Deployment is handled via [Netlify](https://app.netlify.com/sites/niobium-lead-7998/overview).
 
-## Other relevant files
+## Other relevant files & directories
 
 The following are a few details about other files Docusaurus uses that you may wish to be familiar with.
 
 - `sidebars.js`: JavaScript that specifies the sidebar/navigation used in docs pages
-- `src`: non-docs pages live here
 - `static`: static assets used in docs pages (such as CSS) live here
 - `docusaurus.config.js`: the configuration file for Docusaurus
 - `babel.config.js`: Babel config file used when building
 - `package.json`: dependencies and scripts
 - `yarn.lock`: dependency lock file that ensures reproducibility
+- `src/`: global components live here
+- `docs/`: Current version of docs
+- `versioned_docs/`: Older versions of docs live here. These are copies of `docs/` from the moment when `docs invoke --version=<VERSION>` was run.
+- `versioned_sidebars/`: Older versions of sidebars live here. Similar to `versioned_docs/`
 
 sitemap.xml is not in the repo since it is built and uploaded by a netlify plugin during the documentation build process. 
 
@@ -77,20 +74,17 @@ To add a new version, follow these steps:
 1. It may help to start with a fresh virtualenv and clone of gx.
 1. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"` and `pip install pyspark`
 1. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
-1. Run `invoke docs version=<MAJOR.MINOR.PATCH>` (substituting your new version numbers)
-1. This will create a new zip file (`oss_docs_versions.zip`). Upload to S3 (run `docs/docs_version_bucket_info.py` to generate the url). This will be used later by `invoke docs --build`
+1. Run `invoke docs version=<MAJOR.MINOR>` (substituting your new version numbers)
+1. Commit the new files in `versioned_docs/`, `versioned_sidebars/` and the change in `versions.json` to version control
 
 
-## Versioning and docs build flow (pre v1.0)
-### Versioning
+## Versioning and docs build flow
 ```mermaid
 sequenceDiagram
     Participant Code
     Participant SphinxBuild as temp_sphinx_api_docs_build_dir/
     Participant Docusaurus as docs/docusaurus
     Participant DocsBuild as docs/docusaurus/build
-    Participant Github
-    Participant S3
     Participant Netlify
 
     loop versioning
@@ -100,18 +94,10 @@ sequenceDiagram
         SphinxBuild ->> Docusaurus: html converted to .md and store in docs/docusaurus/docs/reference/api
         deactivate SphinxBuild
 
-        activate Docusaurus
         Code ->> Docusaurus: yarn docusaurus docs:version
-        Docusaurus ->> Docusaurus: process new version with prepare_prior_versions.py
-        DocsBuild ->> S3: Manually update S3 with the new version
-        deactivate Docusaurus
     end
 
     loop invoke docs --build
-        % invoke docs --build
-        activate Docusaurus
-        S3 ->> Docusaurus: Load versions.json, versoned_code/, versioned_docs/ and versioned_sidebars/
-
         % invoke api-docs
         Code ->> SphinxBuild: sphinx generated html
         activate SphinxBuild
@@ -121,7 +107,6 @@ sequenceDiagram
         % yarn docusaurus build
         activate DocsBuild
         Docusaurus ->> DocsBuild: build docs and versioned_*
-        deactivate Docusaurus
         DocsBuild ->> Netlify: Deploy
         deactivate DocsBuild
     end
