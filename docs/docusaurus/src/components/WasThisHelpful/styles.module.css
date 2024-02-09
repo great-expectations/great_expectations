@@ -1,9 +1,3 @@
-.feedbackDivider {
-    border-top: 1px solid var(--gray-400);
-    margin-top: 3rem;
-    margin-bottom: 3em;
-}
-
 .feedbackCard {
     background-color: var(--gray-100);
     border: 1px solid var(--gray-200);
@@ -11,54 +5,32 @@
     box-shadow: 0 3px 6px -1px var(--gray-300);
 
     display: flex;
-    flex-direction: row;
-    gap: 1.5rem;
+    flex-direction: column;
+    gap: 1.25rem;
     margin: auto;
-    padding: 0.75rem;
-    width: 100%;
-    max-width: 30rem;
-    justify-content: center;
-    align-items: center;
+    padding: 1rem;
+    width: 40%;
 }
 
 .feedbackCardTitle {
-    font-size: var(--p-font-size);
-    font-weight: var(--ifm-font-weight-semibold);
-    margin: 0;
+    margin: auto;
 }
 
-.feedbackCardActions{
+.feedbackCardBody {
     display: flex;
-    gap: 0.5rem;
+    flex-direction: row;
+    gap: 1rem;
+    margin: auto;
 }
 
-.feedbackButton {
-    border-color: var(--ifm-color-primary);
-    background: none;
+.feedbackIcon {
     border: 1px solid var(--ifm-color-primary);
-    border-radius: 50rem;
-    color: var(--ifm-color-primary);
+    border-radius: 50%;
+    height: 50px;
+    padding: 5px;
+}
+
+.feedbackIcon:hover {
+    background-color: var(--orange-200);
     cursor: pointer;
-    font-size: var(--p-md-font-size);
-    font-weight: var(--ifm-font-weight-semibold);
-    padding: 0.25rem;
-    text-align: center;
-    min-width: 4.5rem;
-}
-
-.feedbackButton:hover {
-    background: var(--orange-100);
-    color: var(--ifm-color-primary);
-}
-
-.inactiveFeedbackButton {
-    background: var(--gray-200);
-    border: 1px solid transparent;
-    border-radius: 50rem;
-    color: var(--gray-500);
-    font-size: var(--p-font-size);
-    font-weight: var(--ifm-font-weight-semibold);
-    padding: 0.25rem;
-    text-align: center;
-    min-width: 4.5rem;
 }
