@@ -4765,7 +4765,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     dict, self.expectations_store.get(key)
                 )
             except ValidationError:
-                # if a suite that isn't associated with the checkpoint in question is misconfigured
+                # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
                 # we should ignore that instead of breaking all checkpoints in the entire context
                 continue
             if not expectation_suite_dict:
