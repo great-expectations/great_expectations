@@ -288,8 +288,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
 
-        self._evaluation_parameter_dependencies: dict = {}
-
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._sources: _SourceFactories = _SourceFactories(self)
@@ -2036,7 +2034,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             target_store_name = self.evaluation_parameter_store_name
 
         self._store_metrics(
-            self._evaluation_parameter_dependencies,
+            validation_results._evaluation_parameter_dependencies,
             validation_results,
             target_store_name,
         )

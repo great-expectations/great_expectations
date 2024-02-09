@@ -556,6 +556,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         )  # We require meta information to be serializable.
         self.meta = meta
         self._metrics: dict = {}
+        self._evaluation_parameter_dependencies: dict = {}
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""
