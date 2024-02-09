@@ -59,6 +59,9 @@ from great_expectations.core.config_provider import (
     _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.datasource_dict import CacheableDatasourceDict
+from great_expectations.core.evaluation_parameters import (
+    _deduplicate_evaluation_parameter_dependencies,
+)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -2174,7 +2177,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Stores ValidationResult EvaluationParameters to defined store
         """
         if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
+            self._compile_evaluation_parameter_dependencies(validation_results)
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -4755,26 +4758,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         else:
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _compile_evaluation_parameter_dependencies(self) -> None:
+    def _compile_evaluation_parameter_dependencies(self, validation_results) -> None:
         self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
-        # https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
-        for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
-            if not expectation_suite_dict:
-                continue
-            expectation_suite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
-
-            dependencies: dict = (
-                expectation_suite.get_evaluation_parameter_dependencies()
-            )
-            if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
+        dependencies = self._get_evaluation_parameter_dependencies(validation_results)
+        if len(dependencies) > 0:
+            nested_update(self._evaluation_parameter_dependencies, dependencies)
 
         self._evaluation_parameter_dependencies_compiled = True
+
+    def _get_evaluation_parameter_dependencies(self, validation_results) -> dict:
+        expectation_configurations: list[ExpectationConfiguration] = [
+            result.expectation_config for result in validation_results.results
+        ]
+
+        dependencies: dict = {}
+        for expectation_configuration in expectation_configurations:
+            t = expectation_configuration.get_evaluation_parameter_dependencies()
+            nested_update(dependencies, t)
+
+        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
+        return dependencies
 
     def get_validation_result(  # noqa: PLR0913
         self,
