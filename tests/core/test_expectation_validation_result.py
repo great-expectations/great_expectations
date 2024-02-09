@@ -12,6 +12,89 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 
+@pytest.fixture()
+def expectation_suite_validation_result():
+    return ExpectationSuiteValidationResult(
+        success=True,
+        statistics={
+            "evaluated_expectations": 2,
+            "successful_expectations": 2,
+            "unsuccessful_expectations": 0,
+            "success_percent": 100.0,
+        },
+        results=[
+            ExpectationValidationResult(
+                **{
+                    "meta": {},
+                    "success": True,
+                    "exception_info": {
+                        "raised_exception": False,
+                        "exception_traceback": None,
+                        "exception_message": None,
+                    },
+                    "result": {
+                        "element_count": 100000,
+                        "unexpected_count": 1,
+                        "unexpected_percent": 0.001,
+                        "partial_unexpected_list": [7.0],
+                        "missing_count": 0,
+                        "missing_percent": 0.0,
+                        "unexpected_percent_total": 0.001,
+                        "unexpected_percent_nonmissing": 0.001,
+                        "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+                        "partial_unexpected_index_list": [48422],
+                    },
+                    "expectation_config": ExpectationConfiguration(
+                        **{
+                            "meta": {},
+                            "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+                            "ge_cloud_id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
+                            "kwargs": {
+                                "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+                                "mostly": 0.95,
+                                "column": "passenger_count",
+                                "min_value": 0.0,
+                                "max_value": 6.0,
+                            },
+                            "expectation_type": "expect_column_values_to_be_between",
+                        }
+                    ),
+                }
+            ),
+            ExpectationValidationResult(
+                **{
+                    "meta": {},
+                    "success": True,
+                    "exception_info": {
+                        "raised_exception": False,
+                        "exception_traceback": None,
+                        "exception_message": None,
+                    },
+                    "result": {
+                        "element_count": 100000,
+                        "unexpected_count": 0,
+                        "unexpected_percent": 0.0,
+                        "partial_unexpected_list": [],
+                        "partial_unexpected_counts": [],
+                        "partial_unexpected_index_list": [],
+                    },
+                    "expectation_config": ExpectationConfiguration(
+                        **{
+                            "meta": {},
+                            "ge_cloud_id": "19c0e80c-d676-4b01-a4a3-2a568552d368",
+                            "kwargs": {
+                                "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+                                "column": "trip_distance",
+                            },
+                            "expectation_type": "expect_column_values_to_not_be_null",
+                        }
+                    ),
+                }
+            ),
+        ],
+    )
+
+
 @pytest.mark.unit
 def test_expectation_validation_result_describe_returns_expected_description():
     # arrange
@@ -153,89 +236,11 @@ def test_expectation_validation_result_describe_returns_expected_description_wit
 
 
 @pytest.mark.unit
-def test_expectation_suite_validation_result_returns_expected_shape():
-    # arrange
-    svr = ExpectationSuiteValidationResult(
-        success=True,
-        statistics={
-            "evaluated_expectations": 2,
-            "successful_expectations": 2,
-            "unsuccessful_expectations": 0,
-            "success_percent": 100.0,
-        },
-        results=[
-            ExpectationValidationResult(
-                **{
-                    "meta": {},
-                    "success": True,
-                    "exception_info": {
-                        "raised_exception": False,
-                        "exception_traceback": None,
-                        "exception_message": None,
-                    },
-                    "result": {
-                        "element_count": 100000,
-                        "unexpected_count": 1,
-                        "unexpected_percent": 0.001,
-                        "partial_unexpected_list": [7.0],
-                        "missing_count": 0,
-                        "missing_percent": 0.0,
-                        "unexpected_percent_total": 0.001,
-                        "unexpected_percent_nonmissing": 0.001,
-                        "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
-                        "partial_unexpected_index_list": [48422],
-                    },
-                    "expectation_config": ExpectationConfiguration(
-                        **{
-                            "meta": {},
-                            "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
-                            "ge_cloud_id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
-                            "kwargs": {
-                                "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
-                                "mostly": 0.95,
-                                "column": "passenger_count",
-                                "min_value": 0.0,
-                                "max_value": 6.0,
-                            },
-                            "expectation_type": "expect_column_values_to_be_between",
-                        }
-                    ),
-                }
-            ),
-            ExpectationValidationResult(
-                **{
-                    "meta": {},
-                    "success": True,
-                    "exception_info": {
-                        "raised_exception": False,
-                        "exception_traceback": None,
-                        "exception_message": None,
-                    },
-                    "result": {
-                        "element_count": 100000,
-                        "unexpected_count": 0,
-                        "unexpected_percent": 0.0,
-                        "partial_unexpected_list": [],
-                        "partial_unexpected_counts": [],
-                        "partial_unexpected_index_list": [],
-                    },
-                    "expectation_config": ExpectationConfiguration(
-                        **{
-                            "meta": {},
-                            "ge_cloud_id": "19c0e80c-d676-4b01-a4a3-2a568552d368",
-                            "kwargs": {
-                                "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
-                                "column": "trip_distance",
-                            },
-                            "expectation_type": "expect_column_values_to_not_be_null",
-                        }
-                    ),
-                }
-            ),
-        ],
-    )
+def test_expectation_suite_validation_result_returns_expected_shape(
+    expectation_suite_validation_result: ExpectationSuiteValidationResult,
+):
     # act
-    description = svr.describe()
+    description = expectation_suite_validation_result.describe()
     # assert
     assert description == json.dumps(
         {
@@ -290,3 +295,25 @@ def test_expectation_suite_validation_result_returns_expected_shape():
         },
         indent=4,
     )
+
+
+@pytest.mark.filesystem
+def test_compile_evaluation_parameter_dependencies(
+    expectation_suite_validation_result: ExpectationSuiteValidationResult,
+):
+    assert expectation_suite_validation_result._evaluation_parameter_dependencies == {}
+    expectation_suite_validation_result._compile_evaluation_parameter_dependencies()
+    assert expectation_suite_validation_result._evaluation_parameter_dependencies == {
+        "source_diabetes_data.default": [
+            {
+                "metric_kwargs_id": {
+                    "column=patient_nbr": [
+                        "expect_column_unique_value_count_to_be_between.result.observed_value"
+                    ]
+                }
+            }
+        ],
+        "source_patient_data.default": [
+            "expect_table_row_count_to_equal.result.observed_value"
+        ],
+    }

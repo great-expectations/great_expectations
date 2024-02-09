@@ -295,34 +295,6 @@ def test_get_expectation_suite_include_rendered_content(
 
 
 @pytest.mark.filesystem
-def test_compile_evaluation_parameter_dependencies(
-    data_context_parameterized_expectation_suite,
-):
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
-        == {}
-    )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
-        == {
-            "source_diabetes_data.default": [
-                {
-                    "metric_kwargs_id": {
-                        "column=patient_nbr": [
-                            "expect_column_unique_value_count_to_be_between.result.observed_value"
-                        ]
-                    }
-                }
-            ],
-            "source_patient_data.default": [
-                "expect_table_row_count_to_equal.result.observed_value"
-            ],
-        }
-    )
-
-
-@pytest.mark.filesystem
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
     mock_update_by_name: mock.MagicMock,
