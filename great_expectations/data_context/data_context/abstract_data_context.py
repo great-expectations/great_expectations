@@ -155,6 +155,9 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -317,7 +320,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
 
-        self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
@@ -475,7 +477,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                     expectation_suite_name
                 )
             )
-        self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
             self._determine_if_expectation_suite_include_rendered_content(
                 include_rendered_content=include_rendered_content
@@ -2171,13 +2172,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         return result
 
     def store_evaluation_parameters(
-        self, validation_results, target_store_name=None
+        self,
+        validation_results: ExpectationSuiteValidationResult,
+        target_store_name: str | None = None,
     ) -> None:
         """
         Stores ValidationResult EvaluationParameters to defined store
         """
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies(validation_results)
+        self._compile_evaluation_parameter_dependencies(
+            validation_results=validation_results
+        )
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -4758,26 +4762,32 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         else:
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _compile_evaluation_parameter_dependencies(self, validation_results) -> None:
+    def _compile_evaluation_parameter_dependencies(
+        self, validation_results: ExpectationSuiteValidationResult
+    ) -> None:
         self._evaluation_parameter_dependencies = {}
-        dependencies = self._get_evaluation_parameter_dependencies(validation_results)
+        dependencies = self._get_evaluation_parameter_dependencies(
+            validation_results=validation_results
+        )
         if len(dependencies) > 0:
             nested_update(self._evaluation_parameter_dependencies, dependencies)
 
-        self._evaluation_parameter_dependencies_compiled = True
-
-    def _get_evaluation_parameter_dependencies(self, validation_results) -> dict:
+    @staticmethod
+    def _get_evaluation_parameter_dependencies(
+        validation_results: ExpectationSuiteValidationResult,
+    ) -> dict:
         expectation_configurations: list[ExpectationConfiguration] = [
             result.expectation_config for result in validation_results.results
         ]
 
-        dependencies: dict = {}
+        dependencies = {}
         for expectation_configuration in expectation_configurations:
-            t = expectation_configuration.get_evaluation_parameter_dependencies()
-            nested_update(dependencies, t)
+            expectation_eval_param_dependencies = (
+                expectation_configuration.get_evaluation_parameter_dependencies()
+            )
+            nested_update(dependencies, expectation_eval_param_dependencies)
 
-        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
-        return dependencies
+        return _deduplicate_evaluation_parameter_dependencies(dependencies=dependencies)
 
     def get_validation_result(  # noqa: PLR0913
         self,

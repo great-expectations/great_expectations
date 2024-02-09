@@ -22,7 +22,6 @@ from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
-from great_expectations.exceptions.exceptions import InvalidKeyError
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -1091,6 +1090,6 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
         # Happens when an ExpectationIdentifier is being evaluated as ValidationResultIdentifier
         context.build_data_docs()
 
-    with pytest.raises(InvalidKeyError):
+    with pytest.raises(IndexError):
         # Happens when an ValidationResultIdentifier is being evaluated as ExpectationIdentifier
         checkpoint.run()
