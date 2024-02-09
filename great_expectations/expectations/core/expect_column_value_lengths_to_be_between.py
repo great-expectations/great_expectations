@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
@@ -101,7 +101,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     strict_max: bool = False
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

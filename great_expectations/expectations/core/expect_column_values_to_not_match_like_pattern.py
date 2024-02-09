@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
 
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
@@ -71,7 +71,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
 
     like_pattern: Union[str, EvaluationParameterDict]
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [

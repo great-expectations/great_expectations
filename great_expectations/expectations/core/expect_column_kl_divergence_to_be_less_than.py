@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
 import altair as alt
 import numpy as np
@@ -174,7 +174,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": [
             "core expectation",

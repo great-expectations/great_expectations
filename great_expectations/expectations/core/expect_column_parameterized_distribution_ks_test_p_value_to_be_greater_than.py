@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import ClassVar
+
 from great_expectations.expectations.expectation import (
     BatchExpectation,
 )
@@ -13,7 +15,7 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     def __init__(self, *args, **kwargs):
         raise NotImplementedError
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": [
             "core expectation",

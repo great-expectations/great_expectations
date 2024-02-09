@@ -79,7 +79,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     min_value: Union[int, EvaluationParameterDict, datetime, None] = None
     max_value: Union[int, EvaluationParameterDict, datetime, None] = None
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
         "contributors": [

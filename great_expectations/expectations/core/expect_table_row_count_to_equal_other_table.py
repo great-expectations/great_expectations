@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
@@ -71,7 +71,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
     other_table_name: str
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation", "multi-table expectation"],
         "contributors": [

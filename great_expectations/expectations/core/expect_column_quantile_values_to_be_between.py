@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from numbers import Number
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
 
 import numpy as np
 from typing_extensions import TypedDict
@@ -139,7 +139,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     allow_relative_error: Union[bool, str] = False
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],

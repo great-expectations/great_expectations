@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Literal, Optional
+from typing import TYPE_CHECKING, ClassVar, List, Literal, Optional
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -65,7 +65,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     ] = "all_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": [
             "core expectation",
