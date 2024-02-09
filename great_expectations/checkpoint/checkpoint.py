@@ -531,7 +531,10 @@ class BaseCheckpoint(ConfigPeer):
             gx_exceptions.MetricError,
         ) as e:
             raise gx_exceptions.CheckpointError(
-                f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
+                message=f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}.",
+                name=self.name,
+                validation_index=idx,
+                error=e,
             ) from e
 
     def self_check(self, pretty_print: bool = True) -> dict:
