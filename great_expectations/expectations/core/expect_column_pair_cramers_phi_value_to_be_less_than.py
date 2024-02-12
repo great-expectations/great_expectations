@@ -31,10 +31,8 @@ if TYPE_CHECKING:
 
 # NOTE: This Expectation is incomplete and not ready for use.
 #       It should remain unexported until it meets the requirements set by our V1 API.
-from great_expectations._docs_decorators import public_api
 
 
-@public_api
 class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError
