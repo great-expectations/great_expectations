@@ -166,7 +166,6 @@ my_checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
 class_name: Checkpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 """
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config">
@@ -224,7 +223,6 @@ assert os.listdir(os.path.join(data_docs_local_site_path, "validations")) == [
     expectation_suite_name
 ], "Validation was not written successfully to Data Docs"
 
-run_name = first_run_result["validation_result"]["meta"]["run_id"].run_name
 assert (
     len(
         os.listdir(
@@ -232,7 +230,6 @@ assert (
                 data_docs_local_site_path,
                 "validations",
                 expectation_suite_name,
-                run_name,
             )
         )
     )

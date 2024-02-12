@@ -19,8 +19,6 @@ def checkpoint(
         **{
             "name": "my_checkpoint",
             "config_version": 1.0,
-            "template_name": None,
-            "run_name_template": None,
             "expectation_suite_name": None,
             "batch_request": None,
             "action_list": [

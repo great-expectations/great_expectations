@@ -58,7 +58,6 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 0
 
     checkpoint_name_0: str = "my_checkpoint_0"
-    run_name_template_0: str = "%Y-%M-my-run-template-$VAR"
     validations_0: Union[List, Dict] = [
         {
             "batch_request": {
@@ -103,7 +102,6 @@ def test_checkpoint_store(empty_data_context):
     }
     my_checkpoint_config_0 = CheckpointConfig(
         name=checkpoint_name_0,
-        run_name_template=run_name_template_0,
         expectation_suite_name=expectation_suite_name_0,
         evaluation_parameters=evaluation_parameters_0,
         runtime_configuration=runtime_configuration_0,
@@ -135,7 +133,6 @@ def test_checkpoint_store(empty_data_context):
     )
 
     checkpoint_name_1: str = "my_checkpoint_1"
-    run_name_template_1: str = "%Y-%M-my-run-template-$VAR"
     validations_1: Union[List, Dict] = [
         {
             "action_list": [
@@ -180,7 +177,6 @@ def test_checkpoint_store(empty_data_context):
     }
     my_checkpoint_config_1 = CheckpointConfig(
         name=checkpoint_name_1,
-        run_name_template=run_name_template_1,
         expectation_suite_name=expectation_suite_name_1,
         batch_request=batch_request_1,
         evaluation_parameters=evaluation_parameters_1,

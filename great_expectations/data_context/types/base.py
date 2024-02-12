@@ -2554,10 +2554,8 @@ class CheckpointConfigSchema(Schema):
         fields = (
             "name",
             "config_version",
-            "template_name",
             "module_name",
             "class_name",
-            "run_name_template",
             "expectation_suite_name",
             "batch_request",
             "action_list",
@@ -2586,7 +2584,6 @@ class CheckpointConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-    template_name = fields.String(required=False, allow_none=True)
     class_name = fields.Str(
         required=False,
         allow_none=True,
@@ -2596,7 +2593,6 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
         missing="great_expectations.checkpoint",
     )
-    run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
     expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
@@ -2665,10 +2661,8 @@ class CheckpointConfig(BaseYamlConfig):
     Args:
         name: The name of the checkpoint.
         config_version: Your config version
-        template_name: The template name of your checkpoint
         module_name: The module name used for your checkpoint
         class_name: The class name of your checkpoint
-        run_name_template: The run template name
         expectation_suite_name: The expectation suite name of your checkpoint
         batch_request: The batch request
         action_list: The action list
@@ -2688,10 +2682,8 @@ class CheckpointConfig(BaseYamlConfig):
         self,
         name: Optional[str] = None,
         config_version: Union[int, float] = 1.0,  # noqa: PYI041
-        template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
-        run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
         action_list: Optional[Sequence[ActionDict]] = None,
@@ -2706,8 +2698,6 @@ class CheckpointConfig(BaseYamlConfig):
     ) -> None:
         self._name = name
         self._config_version = config_version
-        self._template_name = template_name
-        self._run_name_template = run_name_template
         self._expectation_suite_name = expectation_suite_name
         self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
         self._batch_request = batch_request or {}
@@ -2758,14 +2748,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._name = value
 
     @property
-    def template_name(self) -> str:
-        return self._template_name  # type: ignore[return-value]
-
-    @template_name.setter
-    def template_name(self, value: str) -> None:
-        self._template_name = value
-
-    @property
     def config_version(self) -> Union[int, float]:
         return self._config_version
 
@@ -2812,14 +2794,6 @@ class CheckpointConfig(BaseYamlConfig):
     @class_name.setter
     def class_name(self, value: str) -> None:
         self._class_name = value
-
-    @property
-    def run_name_template(self) -> str:
-        return self._run_name_template  # type: ignore[return-value]
-
-    @run_name_template.setter
-    def run_name_template(self, value: str) -> None:
-        self._run_name_template = value
 
     @property
     def batch_request(self) -> dict:
@@ -2932,8 +2906,6 @@ class CheckpointConfig(BaseYamlConfig):
     @staticmethod
     def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
         checkpoint: Checkpoint,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         validator: Optional[Validator] = None,
@@ -2980,8 +2952,6 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         runtime_kwargs: dict = {
-            "template_name": template_name,
-            "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
             "validator": validator,
@@ -2995,17 +2965,12 @@ class CheckpointConfig(BaseYamlConfig):
         substituted_runtime_config: dict = checkpoint.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
-        run_name_template = substituted_runtime_config.get("run_name_template")
         validations = substituted_runtime_config.get("validations") or []
         batch_request = substituted_runtime_config.get("batch_request")
         if len(validations) == 0 and not batch_request:
             raise gx_exceptions.CheckpointError(
                 f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
             )
-
-        if run_name is None and run_name_template is not None:
-            if isinstance(run_time, datetime.datetime):
-                run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 

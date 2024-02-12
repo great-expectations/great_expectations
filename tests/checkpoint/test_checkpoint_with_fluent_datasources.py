@@ -66,7 +66,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
     validations:
       - batch_request:
           datasource_name: my_pandas_filesystem_datasource
@@ -113,8 +112,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
                 "partial_unexpected_count": 20,
             },
         },
-        "template_name": None,
-        "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
         "action_list": [],
@@ -169,7 +166,6 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
     validations:
       - batch_request:
           datasource_name: my_pandas_filesystem_datasource
@@ -222,8 +218,6 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         "runtime_configuration": {
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20},
         },
-        "template_name": None,
-        "run_name_template": "%Y-%M-foo-bar-template-test",
         "batch_request": None,
         "profilers": [],
     }
@@ -350,8 +344,6 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         "runtime_configuration": {
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20},
         },
-        "template_name": None,
-        "run_name_template": None,
         "expectation_suite_name": None,
         "profilers": [],
     }
@@ -407,7 +399,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     name: my_base_checkpoint
     config_version: 1
     class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
     action_list:
     - name: store_validation_result
       action:
@@ -432,8 +423,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "config_version": 1.0,
         "class_name": "Checkpoint",
         "module_name": "great_expectations.checkpoint",
-        "template_name": None,
-        "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
         "action_list": common_action_list,
@@ -490,7 +479,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
-    template_name: my_base_checkpoint
     validations:
     - batch_request:
         datasource_name: my_pandas_filesystem_datasource
@@ -506,7 +494,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "config_version": 1.0,
         "class_name": "Checkpoint",
         "module_name": "great_expectations.checkpoint",
-        "template_name": "my_base_checkpoint",
         "validations": [
             {
                 "batch_request": {
@@ -522,7 +509,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
             },
         ],
         "expectation_suite_name": "users.delivery",
-        "run_name_template": None,
         "batch_request": None,
         "action_list": [],
         "evaluation_parameters": {},
@@ -569,7 +555,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         validations=[
@@ -607,7 +592,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     checkpoint_config = CheckpointConfig(
         name=checkpoint_name,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[
             store_validation_result_action,
@@ -666,7 +650,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=data_context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         validator=validator,
         action_list=common_action_list,
     )
@@ -695,7 +678,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=data_context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -726,7 +708,6 @@ def test_newstyle_checkpoint_result_can_be_pickled(
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request,
@@ -759,7 +740,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [
@@ -805,7 +785,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [
@@ -838,7 +817,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
             CheckpointConfig(
                 name="my_checkpoint",
                 config_version=1,
-                run_name_template="%Y-%M-foo-bar-template",
                 expectation_suite_name="my_expectation_suite",
                 action_list=[
                     {
@@ -865,7 +843,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                 name="my_checkpoint",
                 config_version=1,
                 default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
-                run_name_template="%Y-%M-foo-bar-template",
                 expectation_suite_name="my_expectation_suite",
                 batch_request={
                     "datasource_name": "my_pandas_filesystem_datasource",
@@ -888,7 +865,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
             CheckpointConfig(
                 name="my_checkpoint",
                 config_version=1,
-                run_name_template="%Y-%M-foo-bar-template",
                 expectation_suite_name="my_expectation_suite",
                 action_list=[
                     {
@@ -916,7 +892,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                 name="my_checkpoint",
                 config_version=1,
                 default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
-                run_name_template="%Y-%M-foo-bar-template",
                 expectation_suite_name="my_expectation_suite",
                 action_list=[
                     {
@@ -978,7 +953,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1005,7 +979,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1037,7 +1010,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1078,7 +1050,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1123,7 +1094,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         validations=[
@@ -1157,7 +1127,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1187,7 +1156,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1218,7 +1186,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         batch_request=batch_request,
@@ -1250,7 +1217,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1281,7 +1247,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -1316,7 +1281,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -1352,7 +1316,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -1387,7 +1350,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -1423,7 +1385,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -1460,7 +1421,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -1496,7 +1456,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1526,7 +1485,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1561,7 +1519,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request_0,
@@ -1637,7 +1594,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request_0,
@@ -1713,7 +1669,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [{"batch_request": batch_request_0}],
@@ -1807,7 +1762,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [{"batch_request": batch_request_0}],
@@ -1902,7 +1856,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request_0,
@@ -1979,7 +1932,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request_0,
@@ -2056,7 +2008,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [{"batch_request": batch_request_0}],
@@ -2151,7 +2102,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [{"batch_request": batch_request_0}],
@@ -2241,7 +2191,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         name="my_checkpoint",
         data_context=context,
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         validations=[{"batch_request": batch_request}],
