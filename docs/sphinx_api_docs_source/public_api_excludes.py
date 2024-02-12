@@ -792,4 +792,9 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
             "great_expectations/expectations/core/expect_column_values_to_be_in_set.py"
         ),
     ),
+    IncludeExcludeDefinition(
+        reason="This validate is a name collision with batch.validate().",
+        name="validate",
+        filepath=pathlib.Path("great_expectations/profile/base.py"),
+    ),
 ]
