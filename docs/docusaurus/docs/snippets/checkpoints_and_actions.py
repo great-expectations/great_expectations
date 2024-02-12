@@ -365,7 +365,6 @@ context.add_or_update_expectation_suite("my_other_expectation_suite")
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py using_template just the yaml">
 context.add_or_update_checkpoint(
     name="my_checkpoint",
-    template_name="my_base_checkpoint",
     validations=[
         {
             "batch_request": {
