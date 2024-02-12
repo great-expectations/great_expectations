@@ -92,10 +92,9 @@ if __name__ == "__main__":
             }
         ],
     }
-    context_gx.add_or_update_checkpoint(**python_config)
+    checkpoint = context_gx.add_or_update_checkpoint(**python_config)
 
-    results = context_gx.run_checkpoint(
-        checkpoint_name=my_checkpoint_name,
+    results = checkpoint.run(
         run_name="run_name",
         batch_request={
             "runtime_parameters": {"batch_data": df_spark},

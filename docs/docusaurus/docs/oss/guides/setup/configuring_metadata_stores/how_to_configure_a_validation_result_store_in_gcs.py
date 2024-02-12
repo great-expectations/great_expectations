@@ -44,7 +44,7 @@ expectation_suite_name = "my_expectation_suite"
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 checkpoint_name = "my_checkpoint"
-context.add_or_update_checkpoint(
+checkpoint = context.add_or_update_checkpoint(
     name=checkpoint_name,
     validations=[
         {
@@ -59,8 +59,8 @@ context.add_or_update_checkpoint(
 )
 
 # run the checkpoint twice to create two validations
-context.run_checkpoint(checkpoint_name=checkpoint_name)
-context.run_checkpoint(checkpoint_name=checkpoint_name)
+checkpoint.run()
+checkpoint.run()
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = pathlib.Path(
@@ -285,7 +285,8 @@ assert (
 
 # get the updated context and run a checkpoint to ensure validation store is updated
 context = gx.get_context()
-validation_result = context.run_checkpoint(checkpoint_name=checkpoint_name)
+checkpoint = context.get_checkpoint(checkpoint_name)
+validation_result = checkpoint.run()
 assert validation_result["success"] is True
 list_validation_store_files = (
     f"gsutil ls gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
