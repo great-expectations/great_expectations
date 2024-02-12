@@ -425,10 +425,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                 ) from e
 
 
-# Now that BatchAsset is defined, we need to update BatchConfig
-BatchConfig.update_forward_refs(DataAsset=DataAsset)
-
-
 def _sort_batches_with_none_metadata_values(
     key: str,
 ) -> Callable[[Batch, Batch], int]:

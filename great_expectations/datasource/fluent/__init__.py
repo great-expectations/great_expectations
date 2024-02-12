@@ -10,6 +10,10 @@ from great_expectations.datasource.fluent.interfaces import (
     GxDatasourceWarning,
     TestConnectionError,
 )
+from great_expectations.datasource.fluent.partitioners import Partitioner
+from great_expectations.core.batch_config import BatchConfig
+
+BatchConfig.update_forward_refs(Partitioner=Partitioner, DataAsset=DataAsset)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
