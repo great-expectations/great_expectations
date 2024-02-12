@@ -2003,7 +2003,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             name=checkpoint_name,
             id=id,
         )
-        result: CheckpointResult = checkpoint.run_with_runtime_args(
+        result: CheckpointResult = checkpoint.run(
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,

@@ -12,7 +12,6 @@ from typing import (
     Sequence,
     Type,
     Union,
-    cast,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -819,83 +818,6 @@ constructor arguments.
         )
 
         self._validator = validator
-
-    def run_with_runtime_args(  # noqa: PLR0913
-        self,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
-        validator: Validator | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,  # noqa: PYI041
-        run_name: str | None = None,
-        run_time: datetime.datetime | None = None,
-        result_format: str | dict | None = None,  # TODO: type-dict?
-        expectation_suite_ge_cloud_id: str | None = None,
-        **kwargs,
-    ) -> CheckpointResult:
-        checkpoint_config_from_store: CheckpointConfig = cast(
-            CheckpointConfig, self.get_config()
-        )
-
-        if (
-            "runtime_configuration" in checkpoint_config_from_store
-            and checkpoint_config_from_store.runtime_configuration
-            and "result_format" in checkpoint_config_from_store.runtime_configuration
-        ):
-            result_format = (
-                result_format
-                or checkpoint_config_from_store.runtime_configuration.get(
-                    "result_format"
-                )
-            )
-
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
-
-        batch_request = get_batch_request_as_dict(batch_request=batch_request)
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
-
-        checkpoint_config_from_call_args: dict = {
-            "template_name": template_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "validator": validator,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "profilers": profilers,
-            "run_id": run_id,
-            "run_name": run_name,
-            "run_time": run_time,
-            "result_format": result_format,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-        }
-
-        checkpoint_config: dict = {
-            key: value
-            for key, value in checkpoint_config_from_store.items()
-            if key in checkpoint_config_from_call_args
-        }
-        checkpoint_config.update(checkpoint_config_from_call_args)
-
-        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
-        filter_properties_dict(
-            properties=checkpoint_run_arguments,
-            clean_falsy=True,
-            inplace=True,
-        )
-
-        return self.run(**checkpoint_run_arguments)
 
     @classmethod
     def construct_from_config_args(  # noqa: PLR0913
