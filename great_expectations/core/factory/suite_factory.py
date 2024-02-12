@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import submit as submit_event
@@ -22,7 +22,8 @@ class SuiteFactory(Factory[ExpectationSuite]):
         self._include_rendered_content = include_rendered_content
 
     @public_api
-    def add(self, obj: ExpectationSuite) -> ExpectationSuite:
+    @override
+    def add(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Add an ExpectationSuite to the collection.
 
         Parameters:
@@ -31,23 +32,24 @@ class SuiteFactory(Factory[ExpectationSuite]):
         Raises:
             DataContextError if ExpectationSuite already exists
         """
-        key = self._store.get_key(name=obj.name, id=None)
+        key = self._store.get_key(name=suite.name, id=None)
         if self._store.has_key(key=key):
             raise DataContextError(
-                f"Cannot add ExpectationSuite with name {obj.name} because it already exists."
+                f"Cannot add ExpectationSuite with name {suite.name} because it already exists."
             )
-        self._store.add(key=key, value=obj)
+        self._store.add(key=key, value=suite)
 
         submit_event(
             event=ExpectationSuiteCreatedEvent(
-                expectation_suite_id=obj.ge_cloud_id,
+                expectation_suite_id=suite.ge_cloud_id,
             )
         )
 
-        return obj
+        return suite
 
     @public_api
-    def delete(self, obj: ExpectationSuite) -> ExpectationSuite:
+    @override
+    def delete(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Delete an ExpectationSuite from the collection.
 
         Parameters:
@@ -56,22 +58,23 @@ class SuiteFactory(Factory[ExpectationSuite]):
         Raises:
             DataContextError if ExpectationSuite doesn't exist
         """
-        key = self._store.get_key(name=obj.name, id=obj.ge_cloud_id)
+        key = self._store.get_key(name=suite.name, id=suite.ge_cloud_id)
         if not self._store.has_key(key=key):
             raise DataContextError(
-                f"Cannot delete ExpectationSuite with name {obj.name} because it cannot be found."
+                f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
             )
         self._store.remove_key(key=key)
 
         submit_event(
             event=ExpectationSuiteDeletedEvent(
-                expectation_suite_id=obj.ge_cloud_id,
+                expectation_suite_id=suite.ge_cloud_id,
             )
         )
 
-        return obj
+        return suite
 
     @public_api
+    @override
     def get(self, name: str) -> ExpectationSuite:
         """Get an ExpectationSuite from the collection by name.
 

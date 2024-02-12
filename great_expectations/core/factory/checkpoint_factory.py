@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -17,6 +17,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         self._store = store
 
     @public_api
+    @override
     def add(self, checkpoint: Checkpoint) -> Checkpoint:
         """Add a Checkpoint to the collection.
 
@@ -28,15 +29,10 @@ class CheckpointFactory(Factory[Checkpoint]):
         """
         checkpoint = self._store.add_checkpoint(checkpoint=checkpoint)
 
-        # submit_event(
-        #     event=ExpectationSuiteCreatedEvent(
-        #         expectation_suite_id=suite.ge_cloud_id,
-        #     )
-        # )
-
         return checkpoint
 
     @public_api
+    @override
     def delete(self, checkpoint: Checkpoint) -> Checkpoint:
         """Delete a Checkpoint from the collection.
 
@@ -55,15 +51,10 @@ class CheckpointFactory(Factory[Checkpoint]):
             )
         self._store.remove_key(key=key)
 
-        # submit_event(
-        #     event=ExpectationSuiteDeletedEvent(
-        #         expectation_suite_id=suite.ge_cloud_id,
-        #     )
-        # )
-
         return checkpoint
 
     @public_api
+    @override
     def get(self, name: str) -> Checkpoint:
         """Get a Checkpoint from the collection by name.
 
