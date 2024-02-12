@@ -14,7 +14,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from tests.integration.db.taxi_data_utils import (
     loaded_table,
 )
-from tests.integration.fixtures.split_and_sample_data.sampler_test_cases_and_fixtures import (
+from tests.integration.fixtures.partition_and_sample_data.sampler_test_cases_and_fixtures import (
     SamplerTaxiTestData,
     TaxiSamplingTestCase,
     TaxiSamplingTestCases,

@@ -29,8 +29,8 @@ def data_source_config_with_aws_glue_catalog_data_connectors():
                 db_test.tb_titanic:
                     table_name: tb_titanic_with_partitions
                     database_name: db_test
-                    splitter_method: split_on_column_value
-                    splitter_kwargs:
+                    partitioner_method: partition_on_column_value
+                    partitioner_kwargs:
                         column_name: PClass
                     partitions:
                         - SexCode
@@ -149,7 +149,7 @@ def test_instantiation_from_datasource(
     data_source_config_with_aws_glue_catalog_data_connectors,
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
     context = empty_data_context
 

@@ -13,7 +13,8 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "lint": "standard --fix",
-    "snippet-check": "node scripts/remark-named-snippets/snippet.js"
+    "snippet-check": "node scripts/remark-named-snippets/snippet.js",
+    "test": "jest"
   },
   "dependencies": {
     "@algolia/client-search": "4.19.1",
@@ -44,7 +45,15 @@
     "webpack": "5.88.2"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.4.1"
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "@docusaurus/module-type-aliases": "2.4.1",
+    "@testing-library/react": "12.1.5",
+    "babel-jest": "^29.7.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
   },
   "browserslist": {
     "production": [

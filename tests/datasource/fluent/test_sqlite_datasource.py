@@ -80,17 +80,17 @@ def test_non_select_query_asset(sqlite_datasource):
         sqlite_datasource.add_query_asset(name="query_asset", query="* from table")
 
 
-# Test double used to return canned responses for splitter queries.
+# Test double used to return canned responses for partitioner queries.
 @contextmanager
 def _create_sqlite_source(
     data_context: Optional[AbstractDataContext] = None,
-    splitter_query_response: Optional[list[tuple[str]]] = None,
+    partitioner_query_response: Optional[list[tuple[str]]] = None,
     create_temp_table: bool = True,
 ) -> Generator[Any, Any, Any]:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=lambda _: None,
         dialect="sqlite",
-        splitter_query_response=splitter_query_response,
+        partitioner_query_response=partitioner_query_response,
     )
     # These type ignores when dealing with the execution_engine_override are because
     # it is a generic. We don't care about the exact type since we swap it out with our
@@ -122,9 +122,9 @@ def create_sqlite_source() -> (
 @pytest.mark.unit
 @pytest.mark.parametrize(
     [
-        "add_splitter_method_name",
-        "splitter_kwargs",
-        "splitter_query_responses",
+        "add_partitioner_method_name",
+        "partitioner_kwargs",
+        "partitioner_query_responses",
         "sorter_args",
         "all_batches_cnt",
         "specified_batch_request",
@@ -133,7 +133,7 @@ def create_sqlite_source() -> (
     ],
     [
         pytest.param(
-            "add_splitter_hashed_column",
+            "add_partitioner_hashed_column",
             {"column_name": "passenger_count", "hash_digits": 3},
             [("abc",), ("bcd",), ("xyz",)],
             ["hash"],
@@ -144,7 +144,7 @@ def create_sqlite_source() -> (
             id="hash",
         ),
         pytest.param(
-            "add_splitter_converted_datetime",
+            "add_partitioner_converted_datetime",
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             [("2019-02-01",), ("2019-02-23",)],
             ["datetime"],
@@ -156,12 +156,12 @@ def create_sqlite_source() -> (
         ),
     ],
 )
-def test_sqlite_specific_splitter(
+def test_sqlite_specific_partitioner(
     empty_data_context,
     create_sqlite_source,
-    add_splitter_method_name,
-    splitter_kwargs,
-    splitter_query_responses,
+    add_partitioner_method_name,
+    partitioner_kwargs,
+    partitioner_query_responses,
     sorter_args,
     all_batches_cnt,
     specified_batch_request,
@@ -170,10 +170,12 @@ def test_sqlite_specific_splitter(
 ):
     with create_sqlite_source(
         data_context=empty_data_context,
-        splitter_query_response=[response for response in splitter_query_responses],
+        partitioner_query_response=[
+            response for response in partitioner_query_responses
+        ],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
-        getattr(asset, add_splitter_method_name)(**splitter_kwargs)
+        getattr(asset, add_partitioner_method_name)(**partitioner_kwargs)
         asset.add_sorters(sorter_args)
         # Test getting all batches
         all_batches = asset.get_batch_list_from_batch_request(

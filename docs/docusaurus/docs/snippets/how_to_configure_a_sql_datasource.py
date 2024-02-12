@@ -262,10 +262,10 @@ def section_8_configure_your_data_connectors_data_assets__inferred():
             },
             # </snippet>
             # <snippet name="inferred sql data asset multi batch">
-            "inferred_data_connector_multi_batch_asset_split_on_date_time": {
+            "inferred_data_connector_multi_batch_asset_partition_on_date_time": {
                 "class_name": "InferredAssetSqlDataConnector",
-                "splitter_method": "split_on_year_and_month",
-                "splitter_kwargs": {
+                "partitioner_method": "partition_on_year_and_month",
+                "partitioner_kwargs": {
                     "column_name": "pickup_datetime",
                 },
             },
@@ -304,8 +304,8 @@ def section_8_configure_your_data_connectors_data_assets__configured():
                     "yellow_tripdata_sample_2020_by_year_and_month": {
                         "table_name": "yellow_tripdata_sample_2020",
                         "schema_name": "main",
-                        "splitter_method": "split_on_year_and_month",
-                        "splitter_kwargs": {
+                        "partitioner_method": "partition_on_year_and_month",
+                        "partitioner_kwargs": {
                             "column_name": "pickup_datetime",
                         },
                     },
@@ -385,7 +385,7 @@ def section_9_test_your_configuration__inferred_and_configured():
         ),
         (
             get_full_config_sql_inferred_datasource__single_and_multi_batch(),
-            "inferred_data_connector_multi_batch_asset_split_on_date_time",
+            "inferred_data_connector_multi_batch_asset_partition_on_date_time",
             1,
             "yellow_tripdata_sample_2020",
             12,

@@ -600,21 +600,21 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "clean": "Remove directories and files from versioned docs and code. Default False.",
         "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
         "lint": "Run the linter",
     },
 )
-def docs(  # noqa: PLR0913
+def docs(
     ctx: Context,
     build: bool = False,
-    clean: bool = False,
     start: bool = False,
     lint: bool = False,
     version: str | None = None,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
-    from docs.docs_build import DocsBuilder, Version
+    from packaging.version import parse as parse_version
+
+    from docs.docs_build import DocsBuilder
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -626,44 +626,17 @@ def docs(  # noqa: PLR0913
     old_cwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
-    # set by netlify: https://docs.netlify.com/configure-builds/environment-variables/#git-metadata
-    pull_request = os.environ.get(  # noqa: TID251 # os.environ allowed in config files
-        "PULL_REQUEST"
-    )
-    is_pull_request = pull_request == "true"
-    is_local = not pull_request
 
-    if clean:
-        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
-        ctx.run(" ".join(rm_cmds), echo=True)
-        rm_rf_cmds = [
-            "rm",
-            "-rf",
-            "versioned_code",
-            "versioned_docs",
-            "versioned_sidebars",
-        ]
-        ctx.run(" ".join(rm_rf_cmds), echo=True)
-    elif lint:
+    if lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
-        docs_builder = DocsBuilder(
-            ctx,
-            docusaurus_dir,
-            is_pull_request=is_pull_request,
-            is_local=is_local,
-        )
-        docs_builder.create_version(version=Version.from_string(version))
+        docs_builder = DocsBuilder(ctx, docusaurus_dir)
+        docs_builder.create_version(version=parse_version(version))
     else:  # noqa: PLR5501
         if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
-            docs_builder = DocsBuilder(
-                ctx,
-                docusaurus_dir,
-                is_pull_request=is_pull_request,
-                is_local=is_local,
-            )
+            docs_builder = DocsBuilder(ctx, docusaurus_dir)
             print("Making sure docusaurus dependencies are installed.")
             ctx.run(" ".join(["yarn install"]), echo=True)
 

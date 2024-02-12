@@ -290,11 +290,6 @@ def pytest_addoption(parser):
         help="If set, execute tests against clickhouse",
     )
     parser.addoption(
-        "--aws-integration",
-        action="store_true",
-        help="If set, run aws integration tests for usage_statistics",
-    )
-    parser.addoption(
         "--docs-tests",
         action="store_true",
         help="If set, run integration tests for docs",
@@ -465,11 +460,6 @@ def pytest_collection_modifyitems(config, items):
         reason: str
 
     categories = (
-        Category(
-            mark="aws_integration",
-            flag="--aws-integration",
-            reason="need --aws-integration option to run",
-        ),
         Category(
             mark="docs",
             flag="--docs-tests",
@@ -3179,9 +3169,9 @@ def fds_data_context(
         query="SELECT * FROM table_partitioned_by_date_column__A",
     )
     datasource.add_query_asset(
-        name="trip_asset_split_by_event_type",
+        name="trip_asset_partition_by_event_type",
         query="SELECT * FROM table_partitioned_by_date_column__A",
-    ).add_splitter_column_value("event_type")
+    ).add_partitioner_column_value("event_type")
 
     return context
 
@@ -3199,20 +3189,20 @@ introspection:
     whole_table: {{}}
 
     daily:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%m-%d"
 
     weekly:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%W"
 
     by_id_dozens:
-        splitter_method: _split_on_divided_integer
-        splitter_kwargs:
+        partitioner_method: _partition_on_divided_integer
+        partitioner_kwargs:
             column_name: id
             divisor: 12
 """

@@ -253,12 +253,12 @@ def test_config_variables(empty_data_context):
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
-def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine(
+def test_conveying_partitioning_and_sampling_directives_from_data_context_to_pandas_execution_engine(
     empty_data_context, test_df, tmp_path_factory
 ):
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine"
+            "test_conveying_partitioning_and_sampling_directives_from_data_context_to_pandas_execution_engine"
         )
     )
 
@@ -335,8 +335,8 @@ data_connectors:
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         batch_spec_passthrough={
-            "splitter_method": "_split_on_multi_column_values",
-            "splitter_kwargs": {
+            "partitioner_method": "_partition_on_multi_column_values",
+            "partitioner_kwargs": {
                 "column_names": ["y", "m", "d"],
                 "batch_identifiers": {"y": 2020, "m": 1, "d": 5},
             },
@@ -349,11 +349,11 @@ data_connectors:
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
     )
-    df_data["belongs_in_split"] = df_data.apply(
+    df_data["belongs_in_partition"] = df_data.apply(
         lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1
     )
-    df_data = df_data[df_data["belongs_in_split"]]
-    assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
+    df_data = df_data[df_data["belongs_in_partition"]]
+    assert df_data.drop("belongs_in_partition", axis=1).shape == (4, 10)
 
 
 @pytest.mark.filesystem

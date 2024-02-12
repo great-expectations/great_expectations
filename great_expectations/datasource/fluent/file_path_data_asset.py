@@ -42,16 +42,16 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.spark_generic_splitters import (
-    Splitter,
-    SplitterColumnValue,
-    SplitterDatetimePart,
-    SplitterDividedInteger,
-    SplitterModInteger,
-    SplitterMultiColumnValue,
-    SplitterYear,
-    SplitterYearAndMonth,
-    SplitterYearAndMonthAndDay,
+from great_expectations.datasource.fluent.spark_generic_partitioners import (
+    Partitioner,
+    PartitionerColumnValue,
+    PartitionerDatetimePart,
+    PartitionerDividedInteger,
+    PartitionerModInteger,
+    PartitionerMultiColumnValue,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
 )
 
 if TYPE_CHECKING:
@@ -95,7 +95,7 @@ class _FilePathDataAsset(DataAsset):
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )
-    splitter: Optional[Splitter] = None
+    partitioner: Optional[Partitioner] = None
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -157,13 +157,13 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        splitter_options: tuple[str, ...] = tuple()
-        if self.splitter:
-            splitter_options = tuple(self.splitter.param_names)
+        partitioner_options: tuple[str, ...] = tuple()
+        if self.partitioner:
+            partitioner_options = tuple(self.partitioner.param_names)
         return (
             tuple(self._all_group_names)
             + (FILE_PATH_BATCH_SPEC_KEY,)
-            + splitter_options
+            + partitioner_options
         )
 
     @public_api
@@ -305,7 +305,7 @@ class _FilePathDataAsset(DataAsset):
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[BatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a splitter config if present.
+        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
 
         Args:
             batch_request: Batch request used to generate batch definitions.
@@ -313,20 +313,22 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             List of batch definitions.
         """
-        if self.splitter:
-            # Remove the splitter kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
+        if self.partitioner:
+            # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
             batch_request_options_counts = Counter(self.batch_request_options)
-            batch_request_copy_without_splitter_kwargs = copy.deepcopy(batch_request)
-            for param_name in self.splitter.param_names:
-                # If the option appears twice (e.g. from asset regex and from splitter) then don't remove.
+            batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)
+            for param_name in self.partitioner.param_names:
+                # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.
                 if batch_request_options_counts[param_name] == 1:
-                    batch_request_copy_without_splitter_kwargs.options.pop(param_name)
+                    batch_request_copy_without_partitioner_kwargs.options.pop(
+                        param_name
+                    )
                 else:
                     warnings.warn(
-                        f"The same option name is applied for your batch regex and splitter config: {param_name}"
+                        f"The same option name is applied for your batch regex and partitioner config: {param_name}"
                     )
             batch_definition_list = self._data_connector.get_batch_definition_list(
-                batch_request=batch_request_copy_without_splitter_kwargs
+                batch_request=batch_request_copy_without_partitioner_kwargs
             )
         else:
             batch_definition_list = self._data_connector.get_batch_definition_list(
@@ -360,15 +362,15 @@ class _FilePathDataAsset(DataAsset):
             ),
         }
 
-        if self.splitter:
-            batch_spec_options["splitter_method"] = self.splitter.method_name
-            splitter_kwargs = self.splitter.splitter_method_kwargs()
-            splitter_kwargs[
+        if self.partitioner:
+            batch_spec_options["partitioner_method"] = self.partitioner.method_name
+            partitioner_kwargs = self.partitioner.partitioner_method_kwargs()
+            partitioner_kwargs[
                 "batch_identifiers"
-            ] = self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
+            ] = self.partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
                 batch_request.options
             )
-            batch_spec_options["splitter_kwargs"] = splitter_kwargs
+            batch_spec_options["partitioner_kwargs"] = partitioner_kwargs
 
         return batch_spec_options
 
@@ -406,139 +408,143 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 to use as its "include" directive for File-Path style DataAsset processing."""
         )
 
-    def _add_splitter(self: Self, splitter: Splitter) -> Self:
-        self.splitter = splitter
+    def _add_partitioner(self: Self, partitioner: Partitioner) -> Self:
+        self.partitioner = partitioner
         return self
 
     @public_api
-    def add_splitter_year(
+    def add_partitioner_year(
         self: Self,
         column_name: str,
     ) -> Self:
-        """Associates a year splitter with this data asset.
+        """Associates a year partitioner with this data asset.
         Args:
             column_name: A column name of the date column where year will be parsed out.
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterYear(method_name="split_on_year", column_name=column_name)
+        return self._add_partitioner(
+            PartitionerYear(method_name="partition_on_year", column_name=column_name)
         )
 
     @public_api
-    def add_splitter_year_and_month(
+    def add_partitioner_year_and_month(
         self: Self,
         column_name: str,
     ) -> Self:
-        """Associates a year, month splitter with this asset.
+        """Associates a year, month partitioner with this asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterYearAndMonth(
-                method_name="split_on_year_and_month", column_name=column_name
+        return self._add_partitioner(
+            PartitionerYearAndMonth(
+                method_name="partition_on_year_and_month", column_name=column_name
             )
         )
 
     @public_api
-    def add_splitter_year_and_month_and_day(
+    def add_partitioner_year_and_month_and_day(
         self: Self,
         column_name: str,
     ) -> Self:
-        """Associates a year, month, day splitter with this asset.
+        """Associates a year, month, day partitioner with this asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterYearAndMonthAndDay(
-                method_name="split_on_year_and_month_and_day", column_name=column_name
+        return self._add_partitioner(
+            PartitionerYearAndMonthAndDay(
+                method_name="partition_on_year_and_month_and_day",
+                column_name=column_name,
             )
         )
 
     @public_api
-    def add_splitter_datetime_part(
+    def add_partitioner_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
-        """Associates a datetime part splitter with this asset.
+        """Associates a datetime part partitioner with this asset.
         Args:
             column_name: Name of the date column where parts will be parsed out.
-            datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
+            datetime_parts: A list of datetime parts to partition on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterDatetimePart(
-                method_name="split_on_date_parts",
+        return self._add_partitioner(
+            PartitionerDatetimePart(
+                method_name="partition_on_date_parts",
                 column_name=column_name,
                 datetime_parts=datetime_parts,
             )
         )
 
     @public_api
-    def add_splitter_column_value(self: Self, column_name: str) -> Self:
-        """Associates a column value splitter with this asset.
+    def add_partitioner_column_value(self: Self, column_name: str) -> Self:
+        """Associates a column value partitioner with this asset.
         Args:
-            column_name: A column name of the column to split on.
+            column_name: A column name of the column to partition on.
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterColumnValue(
-                method_name="split_on_column_value",
+        return self._add_partitioner(
+            PartitionerColumnValue(
+                method_name="partition_on_column_value",
                 column_name=column_name,
             )
         )
 
     @public_api
-    def add_splitter_divided_integer(
+    def add_partitioner_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
-        """Associates a divided integer splitter with this asset.
+        """Associates a divided integer partitioner with this asset.
         Args:
-            column_name: A column name of the column to split on.
-            divisor: The divisor to use when splitting.
+            column_name: A column name of the column to partition on.
+            divisor: The divisor to use when partitioning.
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterDividedInteger(
-                method_name="split_on_divided_integer",
+        return self._add_partitioner(
+            PartitionerDividedInteger(
+                method_name="partition_on_divided_integer",
                 column_name=column_name,
                 divisor=divisor,
             )
         )
 
     @public_api
-    def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
-        """Associates a mod integer splitter with this asset.
+    def add_partitioner_mod_integer(self: Self, column_name: str, mod: int) -> Self:
+        """Associates a mod integer partitioner with this asset.
         Args:
-            column_name: A column name of the column to split on.
-            mod: The mod to use when splitting.
+            column_name: A column name of the column to partition on.
+            mod: The mod to use when partitioning.
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterModInteger(
-                method_name="split_on_mod_integer",
+        return self._add_partitioner(
+            PartitionerModInteger(
+                method_name="partition_on_mod_integer",
                 column_name=column_name,
                 mod=mod,
             )
         )
 
     @public_api
-    def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
-        """Associates a multi-column value splitter with this asset.
+    def add_partitioner_multi_column_values(
+        self: Self, column_names: list[str]
+    ) -> Self:
+        """Associates a multi-column value partitioner with this asset.
         Args:
-            column_names: A list of column names to split on.
+            column_names: A list of column names to partition on.
         Returns:
             This asset so we can use this method fluently.
         """
-        return self._add_splitter(
-            SplitterMultiColumnValue(
-                column_names=column_names, method_name="split_on_multi_column_values"
+        return self._add_partitioner(
+            PartitionerMultiColumnValue(
+                column_names=column_names,
+                method_name="partition_on_multi_column_values",
             )
         )

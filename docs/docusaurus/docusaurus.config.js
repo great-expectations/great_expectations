@@ -9,7 +9,7 @@ module.exports = {
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenMarkdownLinks: 'throw',
   favicon: '/img/gx-mark.png',
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
@@ -40,7 +40,7 @@ module.exports = {
           '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
         backgroundColor: '#141432',
         textColor: '#fff',
-        isCloseable: true, 
+        isCloseable: true,
       },
     gxCard: {
       title: "What is GX Cloud?",
@@ -68,9 +68,6 @@ module.exports = {
       indexName: 'greatexpectations',
       searchPagePath: 'search',
       contextualSearch: true,
-      searchParameters: {
-        facetFilters: ['version:current'],
-      },
     },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark'),
@@ -92,7 +89,7 @@ module.exports = {
     navbar: {
       logo: {
         alt: 'Great Expectations',
-        src: 'img/gx-logo.svg',
+        src: 'img/GXDocs.svg',
         href: 'https://greatexpectations.io',
       },
       items: [
@@ -110,6 +107,13 @@ module.exports = {
         {
           type: 'search',
           position: 'left',
+          className: 'custom-search-bar'
+        },
+        {
+          type: 'custom-githubNavbarItem',
+          position: 'left',
+          owner: 'great-expectations',
+          repository: 'great_expectations'
         },
         {
           label: 'Home',
@@ -134,6 +138,29 @@ module.exports = {
         {
           label: 'API',
           to: '/docs/reference/api',
+          position: 'right'
+        },
+        {
+          type: 'dropdown',
+          label: 'Resources',
+          items: [
+            {
+              label: 'How to get support',
+              to: '/docs/resources/get_support'
+            },
+            {
+              label: 'Expectations gallery',
+              to: 'https://greatexpectations.io/expectations'
+            },
+            {
+              label: 'Integration support policy',
+              to: '/docs/application_integration_support'
+            },
+            {
+              label: 'Community',
+              to: 'https://greatexpectations.io/community'
+            }
+          ],
           position: 'right'
         },
         {

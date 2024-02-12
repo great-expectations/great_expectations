@@ -34,7 +34,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query">
     query: str = """
             SELECT COUNT(*)
-            FROM {active_batch}
+            FROM {batch}
             """
     # </snippet>
     # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py success_keys">

@@ -38,7 +38,7 @@ my_table_asset = my_datasource.get_asset(asset_name="my_table_asset")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month">
-my_table_asset.add_splitter_year_and_month(column_name="pickup_datetime")
+my_table_asset.add_partitioner_year_and_month(column_name="pickup_datetime")
 # </snippet>
 
 my_batch_request = my_table_asset.build_batch_request()
