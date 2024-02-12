@@ -319,17 +319,13 @@ def _add_expectations_and_checkpoint(
         animals_suite.add_expectation(expectation=expectation)
 
     checkpoint_config = CheckpointConfig(**checkpoint_config)
-
-    checkpoint = Checkpoint(
+    context.add_checkpoint(
         **filter_properties_dict(
             properties=checkpoint_config.to_json_dict(),
-            delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         ),
-        data_context=context,
     )
-    context.checkpoints.add(checkpoint=checkpoint)
-
+    # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
@@ -3545,12 +3541,9 @@ runtime_configuration:
     result_format: COMPLETE
 """
 
-    checkpoint_config = yaml.load(checkpoint_config_yml)
-    checkpoint_config.pop("class_name")
+    checkpoint_config = CheckpointConfig(**yaml.load(checkpoint_config_yml))
 
-    checkpoint = Checkpoint(**checkpoint_config, data_context=context)
-
-    context.checkpoints.add(checkpoint)
+    context.add_checkpoint(**checkpoint_config.to_json_dict())
 
     result: CheckpointResult
 
