@@ -52,6 +52,7 @@ def build_in_code_data_context_project_config(
                 },
             },
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "checkpoint_store": {"class_name": "CheckpointStore"},
         }
     project_config = DataContextConfig(
         config_version=2,
