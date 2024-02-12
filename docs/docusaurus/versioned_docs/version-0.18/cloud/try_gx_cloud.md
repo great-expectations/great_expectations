@@ -48,7 +48,7 @@ You'll need your user access token and organization ID to set your environment v
 
 ## Set the environment variables and start the GX Agent
 
-Environment variables securely store your GX Cloud and Snowflake access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
+Environment variables securely store your GX Cloud access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
 1. Start the Docker Engine.
 
