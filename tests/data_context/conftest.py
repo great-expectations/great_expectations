@@ -175,6 +175,13 @@ def basic_data_context_config():
                         "base_directory": "expectations/",
                     },
                 },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
+                    },
+                },
                 "evaluation_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
                     "class_name": "EvaluationParameterStore",
