@@ -867,15 +867,4 @@ constructor arguments.
             clean_falsy=True,
         )
 
-        checkpoint: Checkpoint = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": data_context,
-            },
-            config_defaults={
-                "class_name": "Checkpoint",
-                "module_name": "great_expectations.checkpoint",
-            },
-        )
-
-        return checkpoint
+        return Checkpoint(**config, data_context=data_context)

@@ -21,7 +21,6 @@ def checkpoint(
         data_context=context,
         **{
             "name": "my_checkpoint",
-            "config_version": 1.0,
             "expectation_suite_name": None,
             "batch_request": None,
             "action_list": [
@@ -63,10 +62,7 @@ def test_checkpoint_config_repr(checkpoint):
     for key in (
         "action_list",
         "batch_request",
-        "class_name",
-        "config_version",
         "evaluation_parameters",
-        "module_name",
         "name",
         "profilers",
         "runtime_configuration",
@@ -114,10 +110,7 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
     for key in (
         "action_list",
         "batch_request",
-        "class_name",
-        "config_version",
         "evaluation_parameters",
-        "module_name",
         "name",
         "profilers",
         "runtime_configuration",

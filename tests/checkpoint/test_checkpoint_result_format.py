@@ -46,9 +46,6 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
     """
     checkpoint_dict: dict = {
         "name": "my_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
         "expectation_suite_name": None,
         "batch_request": None,
         "profilers": [],

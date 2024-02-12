@@ -18,7 +18,6 @@ def checkpoint(
         data_context=context,
         **{
             "name": "my_checkpoint",
-            "config_version": 1.0,
             "expectation_suite_name": None,
             "batch_request": None,
             "action_list": [
