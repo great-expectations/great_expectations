@@ -1170,7 +1170,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
         "module_name",
         "name",
         "profilers",
-        "run_name_template",
         "runtime_configuration",
         "validations",
     ]
@@ -1185,7 +1184,6 @@ def test_run_checkpoint_new_style(
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[
             {
@@ -1474,7 +1472,6 @@ def test_add_checkpoint_from_yaml(empty_data_context_stats_enabled):
 name: {checkpoint_name}
 config_version: 1.0
 class_name: Checkpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: data_dir
@@ -1509,10 +1506,8 @@ action_list:
 
     expected_checkpoint_yaml: str = """name: my_new_checkpoint
 config_version: 1.0
-template_name:
 module_name: great_expectations.checkpoint
 class_name: Checkpoint
-run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request: {}
 action_list:
@@ -1610,7 +1605,6 @@ expectation_suite_ge_cloud_id:
         "config_version": 1.0,
         "class_name": "Checkpoint",
         "module_name": "great_expectations.checkpoint",
-        "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
             {
                 "name": "store_validation_result",
@@ -1666,7 +1660,6 @@ def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(
 name: {checkpoint_name}
 config_version: 1.0
 class_name: NotAValidCheckpointClassName
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: data_dir

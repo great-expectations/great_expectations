@@ -58,7 +58,6 @@ def checkpoint_config_spark(
     return CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
-        template_name="my_nested_checkpoint_template",
         expectation_suite_name="users.delivery",
         validations=[
             CheckpointValidationConfig(
@@ -82,7 +81,6 @@ def checkpoint_config_with_schema_spark(
     return CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
-        template_name="my_nested_checkpoint_template",
         expectation_suite_name="users.delivery",
         validations=[
             CheckpointValidationConfig(
@@ -375,7 +373,6 @@ def test_checkpoint_config_deepcopy(
     nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
-        template_name="my_nested_checkpoint_template_2",
         expectation_suite_name="users.delivery",
         validations=[
             {
@@ -408,7 +405,6 @@ def test_checkpoint_config_deepcopy(
         runtime_kwargs={
             "batch_request": runtime_batch_request,
             "expectation_suite_name": "runtime_suite_name",
-            "template_name": "my_nested_checkpoint_template_3",
             "validations": [
                 {
                     "batch_request": {
@@ -427,7 +423,6 @@ def test_checkpoint_config_deepcopy(
                     }
                 },
             ],
-            "run_name_template": "runtime_run_template",
             "action_list": [
                 {
                     "name": "store_validation_result",
@@ -509,7 +504,6 @@ def test_checkpoint_config_print(
     nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
-        template_name="my_nested_checkpoint_template_2",
         expectation_suite_name="users.delivery",
         validations=[
             {
@@ -542,7 +536,6 @@ def test_checkpoint_config_print(
         runtime_kwargs={
             "batch_request": runtime_batch_request,
             "expectation_suite_name": "runtime_suite_name",
-            "template_name": "my_nested_checkpoint_template_3",
             "validations": [
                 {
                     "batch_request": {
@@ -561,7 +554,6 @@ def test_checkpoint_config_print(
                     }
                 },
             ],
-            "run_name_template": "runtime_run_template",
             "action_list": [
                 {
                     "name": "store_validation_result",
@@ -607,8 +599,6 @@ def test_checkpoint_config_print(
             config_version=1.0,
             class_name="Checkpoint",
             module_name="great_expectations.checkpoint",
-            template_name="my_nested_checkpoint_template_3",
-            run_name_template="runtime_run_template",
             batch_request=runtime_batch_request.to_dict(),
             expectation_suite_name="runtime_suite_name",
             action_list=[
@@ -729,7 +719,6 @@ def test_checkpoint_config_print(
             CheckpointConfig(
                 name="my_nested_checkpoint",
                 config_version=1,
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
                     CheckpointValidationConfig(
@@ -754,9 +743,7 @@ def test_checkpoint_config_print(
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -777,7 +764,6 @@ def test_checkpoint_config_print(
                 name="my_nested_checkpoint",
                 config_version=1,
                 default_validation_id="93e015ee-6405-4d5e-894c-741dc763f509",
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
                     CheckpointValidationConfig(
@@ -803,9 +789,7 @@ def test_checkpoint_config_print(
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -826,7 +810,6 @@ def test_checkpoint_config_print(
                 name="my_nested_checkpoint",
                 config_version=1,
                 default_validation_id="e3ff7a3a-3529-4c2a-be22-598493269680",
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
                     CheckpointValidationConfig(
@@ -853,9 +836,7 @@ def test_checkpoint_config_print(
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -876,7 +857,6 @@ def test_checkpoint_config_print(
             CheckpointConfig(
                 name="my_nested_checkpoint",
                 config_version=1,
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
                     CheckpointValidationConfig(
@@ -902,9 +882,7 @@ def test_checkpoint_config_print(
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -955,9 +933,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -991,9 +967,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {

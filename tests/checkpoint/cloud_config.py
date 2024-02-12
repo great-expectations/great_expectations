@@ -273,9 +273,7 @@ def _checkpoint_config(data_file_name, with_slack):
                     "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
                     "profilers": [],
-                    "run_name_template": None,
                     "runtime_configuration": {},
-                    "template_name": None,
                     "validations": [
                         {
                             "batch_request": {

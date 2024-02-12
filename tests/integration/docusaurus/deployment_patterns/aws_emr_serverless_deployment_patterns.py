@@ -73,7 +73,6 @@ if __name__ == "__main__":
         "name": my_checkpoint_name,
         "class_name": "Checkpoint",
         "config_version": 1,
-        "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
             {
                 "name": "store_validation_result",

@@ -1294,7 +1294,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1342,7 +1341,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
@@ -1400,8 +1398,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
         config_version=1,
-        template_name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1450,8 +1446,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         config_version=1,
-        template_name="my_nested_checkpoint_template_2",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1904,7 +1898,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1952,7 +1945,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
         config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
@@ -2010,8 +2002,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
         config_version=1,
-        template_name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -2060,8 +2050,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         config_version=1,
-        template_name="my_nested_checkpoint_template_2",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[
             {
                 "name": "store_validation_result",

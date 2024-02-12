@@ -220,9 +220,7 @@ def serialized_configuration_bundle() -> dict:
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": None,
                 "ge_cloud_id": None,
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": None,
                 "validations": [],
             }
         ],

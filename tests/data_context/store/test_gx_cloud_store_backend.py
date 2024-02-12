@@ -255,10 +255,8 @@ def test_set(
                             [
                                 ("name", "my_minimal_simple_checkpoint"),
                                 ("config_version", 1.0),
-                                ("template_name", None),
                                 ("module_name", "great_expectations.checkpoint"),
                                 ("class_name", "Checkpoint"),
-                                ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
                                 (
