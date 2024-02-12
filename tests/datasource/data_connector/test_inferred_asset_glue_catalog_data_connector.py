@@ -151,9 +151,9 @@ def test_instantiation_with_invalid_database_name(glue_titanic_catalog):
         )
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_metadata_without_partitions(
-    splitter_method_name_prefix,
+    partitioner_method_name_prefix,
     glue_titanic_catalog,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
 ):
@@ -175,8 +175,8 @@ def test_get_batch_data_and_metadata_without_partitions(
             data_asset_name="prefix__db_test.tb_titanic_without_partitions__suffix",
             batch_identifiers=IDDict(),
             batch_spec_passthrough={
-                "splitter_method": f"{splitter_method_name_prefix}split_on_hashed_column",
-                "splitter_kwargs": {
+                "partitioner_method": f"{partitioner_method_name_prefix}partition_on_hashed_column",
+                "partitioner_kwargs": {
                     "column_name": "Name",
                     "hash_digits": 1,
                     "hash_function_name": "md5",

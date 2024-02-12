@@ -58,7 +58,6 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 0
 
     checkpoint_name_0: str = "my_checkpoint_0"
-    run_name_template_0: str = "%Y-%M-my-run-template-$VAR"
     validations_0: Union[List, Dict] = [
         {
             "batch_request": {
@@ -103,7 +102,6 @@ def test_checkpoint_store(empty_data_context):
     }
     my_checkpoint_config_0 = CheckpointConfig(
         name=checkpoint_name_0,
-        run_name_template=run_name_template_0,
         expectation_suite_name=expectation_suite_name_0,
         evaluation_parameters=evaluation_parameters_0,
         runtime_configuration=runtime_configuration_0,
@@ -135,7 +133,6 @@ def test_checkpoint_store(empty_data_context):
     )
 
     checkpoint_name_1: str = "my_checkpoint_1"
-    run_name_template_1: str = "%Y-%M-my-run-template-$VAR"
     validations_1: Union[List, Dict] = [
         {
             "action_list": [
@@ -180,7 +177,6 @@ def test_checkpoint_store(empty_data_context):
     }
     my_checkpoint_config_1 = CheckpointConfig(
         name=checkpoint_name_1,
-        run_name_template=run_name_template_1,
         expectation_suite_name=expectation_suite_name_1,
         batch_request=batch_request_1,
         evaluation_parameters=evaluation_parameters_1,
@@ -252,8 +248,6 @@ def test_checkpoint_store(empty_data_context):
                     "attributes": {
                         "checkpoint_config": {
                             "name": "oss_test_checkpoint",
-                            "config_version": 1.0,
-                            "class_name": "Checkpoint",
                             "expectation_suite_name": "oss_test_expectation_suite",
                             "validations": [
                                 {
@@ -272,8 +266,6 @@ def test_checkpoint_store(empty_data_context):
                 }
             },
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "expectation_suite_name": "oss_test_expectation_suite",
                 "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",
@@ -300,8 +292,6 @@ def test_checkpoint_store(empty_data_context):
                         "attributes": {
                             "checkpoint_config": {
                                 "name": "oss_test_checkpoint",
-                                "config_version": 1.0,
-                                "class_name": "Checkpoint",
                                 "expectation_suite_name": "oss_test_expectation_suite",
                                 "validations": [
                                     {
@@ -321,8 +311,6 @@ def test_checkpoint_store(empty_data_context):
                 ]
             },
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "expectation_suite_name": "oss_test_expectation_suite",
                 "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",

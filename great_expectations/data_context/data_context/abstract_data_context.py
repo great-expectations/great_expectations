@@ -1419,18 +1419,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: str = ...,
-        config_version: float = ...,
-        template_name: str | None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
-        profilers: list[dict] | None = ...,
         ge_cloud_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1450,18 +1444,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: None = ...,
-        config_version: float = ...,
-        template_name: None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
-        profilers: None = ...,
         ge_cloud_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1500,18 +1488,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: float = 1.0,
-        template_name: str | None = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1527,18 +1509,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             name: The name to give the checkpoint.
-            config_version: The config version of this checkpoint.
-            template_name: The template to use in generating this checkpoint.
-            module_name: The module name to use in generating this checkpoint.
-            class_name: The class name to use in generating this checkpoint.
-            run_name_template: The run name template to use in generating this checkpoint.
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            profilers: The profilers to use in generating this checkpoint.
             ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1563,18 +1539,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            template_name=template_name,
-            module_name=module_name,
-            class_name=class_name,
-            run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1623,18 +1593,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str = ...,
         id: str | None = ...,
-        config_version: float = ...,
-        template_name: str | None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
-        profilers: list[dict] | None = ...,
         expectation_suite_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1652,18 +1616,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         id: None = ...,
-        config_version: float = ...,
-        template_name: None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
-        profilers: None = ...,
         expectation_suite_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1687,18 +1645,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: float = 1.0,
-        template_name: str | None = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         expectation_suite_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1710,18 +1662,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name to give the checkpoint.
             id: The ID to associate with this checkpoint.
-            config_version: The config version of this checkpoint.
-            template_name: The template to use in generating this checkpoint.
-            module_name: The module name to use in generating this checkpoint.
-            class_name: The class name to use in generating this checkpoint.
-            run_name_template: The run name template to use in generating this checkpoint.
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            profilers: The profilers to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1740,18 +1686,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            template_name=template_name,
-            module_name=module_name,
-            class_name=class_name,
-            run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1773,18 +1713,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: float = 1.0,
-        template_name: str | None = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
@@ -1808,18 +1742,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 data_context=self,
                 checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
                 name=name,
-                config_version=config_version,
-                template_name=template_name,
-                module_name=module_name,
-                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
-                run_name_template=run_name_template,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
                 action_list=action_list,
                 evaluation_parameters=evaluation_parameters,
                 runtime_configuration=runtime_configuration,
                 validations=validations,
-                profilers=profilers,
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
@@ -1922,16 +1850,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         checkpoint_name: str | None = None,
         ge_cloud_id: str | None = None,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
-        profilers: list[dict] | None = None,
-        run_id: str | float | None = None,
+        run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | None = None,
@@ -1944,15 +1869,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             checkpoint_name: The name of a Checkpoint
-            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
-            run_name_template: The template to use for run_name
             expectation_suite_name: Expectation suite to be used by Checkpoint run
             batch_request: Batch request to be used by Checkpoint run
             action_list: List of actions to be performed by the Checkpoint
             evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
             runtime_configuration: Runtime configuration override parameters
             validations: Validations to be performed by the Checkpoint run
-            profilers: Profilers to be used by the Checkpoint run
             run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
             run_time: The date/time of the run
@@ -1977,15 +1899,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._run_checkpoint(
             checkpoint_name=checkpoint_name,
             id=id,
-            template_name=template_name,
-            run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             run_id=run_id,
             run_name=run_name,
             run_time=run_time,
@@ -1998,16 +1917,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         checkpoint_name: str | None = None,
         id: str | None = None,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
-        run_id: str | float | None = None,
+        run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | None = None,
@@ -2018,16 +1934,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             name=checkpoint_name,
             id=id,
         )
-        result: CheckpointResult = checkpoint.run_with_runtime_args(
-            template_name=template_name,
-            run_name_template=run_name_template,
+        result: CheckpointResult = checkpoint.run(
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             run_id=run_id,
             run_name=run_name,
             run_time=run_time,
@@ -2098,8 +2011,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2143,10 +2056,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_method: The method used to sample Batch data (see: Partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
-            splitter_method: The method used to split the Data Asset into Batches
-            splitter_kwargs: Arguments for the splitting method
+            partitioner_method: The method used to partition the Data Asset into Batches
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             expectation_suite_ge_cloud_id: The identifier of the ExpectationSuite to retrieve from the DataContext
                 (can be used in place of `expectation_suite_name`)
@@ -2254,8 +2167,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                         custom_filter_function=custom_filter_function,
                         sampling_method=sampling_method,
                         sampling_kwargs=sampling_kwargs,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
+                        partitioner_method=partitioner_method,
+                        partitioner_kwargs=partitioner_kwargs,
                         runtime_parameters=runtime_parameters,
                         query=query,
                         path=path,
@@ -2347,8 +2260,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2387,10 +2300,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_method: The method used to sample Batch data (see: Partitioning and Sampling)
             sampling_kwargs: Arguments for the sampling method
-            splitter_method: The method used to split the Data Asset into Batches
-            splitter_kwargs: Arguments for the splitting method
+            partitioner_method: The method used to partition the Data Asset into Batches
+            partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
             batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
@@ -2419,8 +2332,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,
@@ -2444,8 +2357,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         custom_filter_function: Optional[Callable] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
@@ -2467,8 +2380,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,

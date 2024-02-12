@@ -218,7 +218,6 @@ context.add_or_update_expectation_suite(
 # <snippet name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example">
 checkpoint: Checkpoint = Checkpoint(
     name="my_checkpoint",
-    run_name_template="%Y%m%d-%H%M%S-my-run-name-template",
     data_context=context,
     batch_request=my_batch_request,
     expectation_suite_name="test_suite",

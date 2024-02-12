@@ -37,9 +37,7 @@ class QueryColumnPair(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
@@ -49,25 +47,23 @@ class QueryColumnPair(QueryMetricProvider):
         column_A: Optional[str] = metric_value_kwargs.get("column_A")
         column_B: Optional[str] = metric_value_kwargs.get("column_B")
         if isinstance(selectable, sa.Table):
-            query = query.format(  # type: ignore[union-attr] # could be none
-                column_A=column_A, column_B=column_B, batch=selectable
-            )
+            query = query.format(column_A=column_A, column_B=column_B, batch=selectable)
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(  # type: ignore[union-attr] # could be none
+            query = query.format(
                 column_A=column_A, column_B=column_B, batch=f"({selectable})"
             )
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
-            query = query.format(  # type: ignore[union-attr] # could be none
+            query = query.format(
                 column_A=column_A,
                 column_B=column_B,
                 batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(  # type: ignore[union-attr] # could be none
+            query = query.format(
                 column_A=column_A, column_B=column_B, batch=f"({selectable})"
             )
 
@@ -86,9 +82,7 @@ class QueryColumnPair(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or cls.default_kwarg_values.get("query")
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
         df, _, _ = execution_engine.get_compute_domain(
@@ -98,9 +92,7 @@ class QueryColumnPair(QueryMetricProvider):
         df.createOrReplaceTempView("tmp_view")
         column_A: Optional[str] = metric_value_kwargs.get("column_A")
         column_B: Optional[str] = metric_value_kwargs.get("column_B")
-        query = query.format(  # type: ignore[union-attr] # could be none
-            column_A=column_A, column_B=column_B, batch="tmp_view"
-        )
+        query = query.format(column_A=column_A, column_B=column_B, batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).collect()

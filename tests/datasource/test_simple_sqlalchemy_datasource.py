@@ -70,8 +70,8 @@ if sa:
         def get_data_for_batch_identifiers(
             self,
             selectable: sa.sql.Selectable,
-            splitter_method_name: str,
-            splitter_kwargs: dict,
+            partitioner_method_name: str,
+            partitioner_kwargs: dict,
         ) -> List[dict]:
             return [{}]
 
@@ -198,11 +198,11 @@ def _datasource_asserts(
             "whole_table": {"excluded_tables": ["table1"]},
             "hourly": {
                 "included_tables": ["table2"],
-                "splitter_kwargs": {
+                "partitioner_kwargs": {
                     "column_name": "timestamp",
                     "date_format_string": "%Y-%m-%d:%H",
                 },
-                "splitter_method": "_split_on_converted_datetime",
+                "partitioner_method": "_partition_on_converted_datetime",
             },
         },
     ],
@@ -215,11 +215,11 @@ def _datasource_asserts(
             "my_table": {
                 "partitioners": {
                     "daily": {
-                        "splitter_kwargs": {
+                        "partitioner_kwargs": {
                             "column_name": "date",
                             "date_format_string": "%Y-%m-%d",
                         },
-                        "splitter_method": "_split_on_converted_datetime",
+                        "partitioner_method": "_partition_on_converted_datetime",
                     }
                 }
             }

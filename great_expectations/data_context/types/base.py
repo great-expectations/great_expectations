@@ -72,7 +72,6 @@ logger.setLevel(logging.INFO)
 
 CURRENT_GX_CONFIG_VERSION = 3
 FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
-CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -320,8 +319,8 @@ class AssetConfig(SerializableDictDot):
         schema_name: Optional[str] = None,
         batch_spec_passthrough: Optional[Dict[str, Any]] = None,
         batch_identifiers: Optional[List[str]] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[Dict[str, str]] = None,
+        partitioner_method: Optional[str] = None,
+        partitioner_kwargs: Optional[Dict[str, str]] = None,
         sorters: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
@@ -346,10 +345,10 @@ class AssetConfig(SerializableDictDot):
             self.batch_spec_passthrough = batch_spec_passthrough
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
-        if splitter_method is not None:
-            self.splitter_method = splitter_method
-        if splitter_kwargs is not None:
-            self.splitter_kwargs = splitter_kwargs
+        if partitioner_method is not None:
+            self.partitioner_method = partitioner_method
+        if partitioner_kwargs is not None:
+            self.partitioner_kwargs = partitioner_kwargs
         if sorters is not None:
             self.sorters = sorters
         if sampling_method is not None:
@@ -440,8 +439,8 @@ class AssetConfigSchema(Schema):
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
-    splitter_method = fields.String(required=False, allow_none=True)
-    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    partitioner_method = fields.String(required=False, allow_none=True)
+    partitioner_kwargs = fields.Dict(required=False, allow_none=True)
     sorters = fields.List(
         cls_or_instance=fields.Nested(
             SorterConfigSchema, required=False, allow_none=True
@@ -520,8 +519,8 @@ class DataConnectorConfig(AbstractConfig):
         data_asset_name_prefix=None,
         data_asset_name_suffix=None,
         include_schema_name=None,
-        splitter_method=None,
-        splitter_kwargs=None,
+        partitioner_method=None,
+        partitioner_kwargs=None,
         sorters=None,
         sampling_method=None,
         sampling_kwargs=None,
@@ -552,10 +551,10 @@ class DataConnectorConfig(AbstractConfig):
             self.data_asset_name_suffix = data_asset_name_suffix
         if include_schema_name is not None:
             self.include_schema_name = include_schema_name
-        if splitter_method is not None:
-            self.splitter_method = splitter_method
-        if splitter_kwargs is not None:
-            self.splitter_kwargs = splitter_kwargs
+        if partitioner_method is not None:
+            self.partitioner_method = partitioner_method
+        if partitioner_kwargs is not None:
+            self.partitioner_kwargs = partitioner_kwargs
         if sorters is not None:
             self.sorters = sorters
         if sampling_method is not None:
@@ -605,7 +604,7 @@ class DataConnectorConfig(AbstractConfig):
 
         super().__init__(id=id, name=name)
 
-        # Note: optional samplers and splitters are handled by setattr
+        # Note: optional samplers and partitioners are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -704,8 +703,8 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
-    splitter_method = fields.String(required=False, allow_none=True)
-    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    partitioner_method = fields.String(required=False, allow_none=True)
+    partitioner_kwargs = fields.Dict(required=False, allow_none=True)
     sorters = fields.List(
         cls_or_instance=fields.Nested(
             SorterConfigSchema, required=False, allow_none=True
@@ -876,8 +875,8 @@ data connector. You must only select one between `filename` (from_service_accoun
                 )
         if (
             "include_schema_name" in data
-            or "splitter_method" in data
-            or "splitter_kwargs" in data
+            or "partitioner_method" in data
+            or "partitioner_kwargs" in data
             or "sampling_method" in data
             or "sampling_kwargs" in data
             or "skip_inapplicable_tables" in data
@@ -1792,10 +1791,6 @@ class DataContextConfigDefaults(enum.Enum):
     }
 
 
-class CheckpointConfigDefaults(enum.Enum):
-    DEFAULT_CONFIG_VERSION = CURRENT_CHECKPOINT_CONFIG_VERSION
-
-
 class BaseStoreBackendDefaults(DictDot):
     """
     Define base defaults for platform specific StoreBackendDefaults.
@@ -2553,11 +2548,6 @@ class CheckpointConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
-            "config_version",
-            "template_name",
-            "module_name",
-            "class_name",
-            "run_name_template",
             "expectation_suite_name",
             "batch_request",
             "action_list",
@@ -2580,23 +2570,6 @@ class CheckpointConfigSchema(Schema):
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
-    config_version = fields.Number(
-        validate=lambda x: (0 < x < 100) or x is None,  # noqa: PLR2004
-        error_messages={"invalid": "config version must " "be a number or None."},
-        required=False,
-        allow_none=True,
-    )
-    template_name = fields.String(required=False, allow_none=True)
-    class_name = fields.Str(
-        required=False,
-        allow_none=True,
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.checkpoint",
-    )
-    run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
     expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
@@ -2664,11 +2637,6 @@ class CheckpointConfig(BaseYamlConfig):
 
     Args:
         name: The name of the checkpoint.
-        config_version: Your config version
-        template_name: The template name of your checkpoint
-        module_name: The module name used for your checkpoint
-        class_name: The class name of your checkpoint
-        run_name_template: The run template name
         expectation_suite_name: The expectation suite name of your checkpoint
         batch_request: The batch request
         action_list: The action list
@@ -2676,7 +2644,6 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: The runtime configuration for your checkpoint
         validations: An optional list of validations in your checkpoint
         default_validation_id: The default validation id of your checkpoint
-        profilers: An optional list of profilers in your checkpoint
         validation_operator_name: The validation operator name
         batches: An optional list of batches
         commented_map: The commented map
@@ -2687,11 +2654,6 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        config_version: Union[int, float] = 1.0,  # noqa: PYI041
-        template_name: Optional[str] = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
         action_list: Optional[Sequence[ActionDict]] = None,
@@ -2699,15 +2661,11 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationConfig]] = None,
         default_validation_id: Optional[str] = None,
-        profilers: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> None:
         self._name = name
-        self._config_version = config_version
-        self._template_name = template_name
-        self._run_name_template = run_name_template
         self._expectation_suite_name = expectation_suite_name
         self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
         self._batch_request = batch_request or {}
@@ -2716,11 +2674,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = runtime_configuration or {}
         self._validations = validations or []
         self._default_validation_id = default_validation_id
-        self._profilers = profilers or []
         self._ge_cloud_id = ge_cloud_id
-
-        self._module_name = module_name or "great_expectations.checkpoint"
-        self._class_name = class_name or "Checkpoint"
 
         super().__init__(commented_map=commented_map)
 
@@ -2758,22 +2712,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._name = value
 
     @property
-    def template_name(self) -> str:
-        return self._template_name  # type: ignore[return-value]
-
-    @template_name.setter
-    def template_name(self, value: str) -> None:
-        self._template_name = value
-
-    @property
-    def config_version(self) -> Union[int, float]:
-        return self._config_version
-
-    @config_version.setter
-    def config_version(self, value: float) -> None:
-        self._config_version = value
-
-    @property
     def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
@@ -2788,38 +2726,6 @@ class CheckpointConfig(BaseYamlConfig):
     @default_validation_id.setter
     def default_validation_id(self, validation_id: str) -> None:
         self._default_validation_id = validation_id
-
-    @property
-    def profilers(self) -> List[dict]:
-        return self._profilers
-
-    @profilers.setter
-    def profilers(self, value: List[dict]) -> None:
-        self._profilers = value
-
-    @property
-    def module_name(self) -> str:
-        return self._module_name
-
-    @module_name.setter
-    def module_name(self, value: str) -> None:
-        self._module_name = value
-
-    @property
-    def class_name(self) -> str:
-        return self._class_name
-
-    @class_name.setter
-    def class_name(self, value: str) -> None:
-        self._class_name = value
-
-    @property
-    def run_name_template(self) -> str:
-        return self._run_name_template  # type: ignore[return-value]
-
-    @run_name_template.setter
-    def run_name_template(self, value: str) -> None:
-        self._run_name_template = value
 
     @property
     def batch_request(self) -> dict:
@@ -2932,8 +2838,6 @@ class CheckpointConfig(BaseYamlConfig):
     @staticmethod
     def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
         checkpoint: Checkpoint,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         validator: Optional[Validator] = None,
@@ -2943,7 +2847,6 @@ class CheckpointConfig(BaseYamlConfig):
         validations: Optional[
             Union[List[dict], List[CheckpointValidationConfig]]
         ] = None,
-        profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
@@ -2980,8 +2883,6 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         runtime_kwargs: dict = {
-            "template_name": template_name,
-            "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
             "validator": validator,
@@ -2989,23 +2890,17 @@ class CheckpointConfig(BaseYamlConfig):
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "profilers": profilers,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
         substituted_runtime_config: dict = checkpoint.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
-        run_name_template = substituted_runtime_config.get("run_name_template")
         validations = substituted_runtime_config.get("validations") or []
         batch_request = substituted_runtime_config.get("batch_request")
         if len(validations) == 0 and not batch_request:
             raise gx_exceptions.CheckpointError(
                 f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
             )
-
-        if run_name is None and run_name_template is not None:
-            if isinstance(run_time, datetime.datetime):
-                run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 

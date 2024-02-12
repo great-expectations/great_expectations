@@ -6,7 +6,9 @@ from typing import Any, List, Optional
 
 import pandas as pd
 
-from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
+from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+    DatePart,
+)
 from tests.test_utils import convert_string_columns_to_datetime
 
 
@@ -238,16 +240,16 @@ class TaxiTestData:
 
 
 @dataclass
-class TaxiSplittingTestCase:
+class TaxiPartitioningTestCase:
     table_domain_test_case: bool  # Use "MetricDomainTypes" when column-pair and multicolumn test cases are developed.
-    splitter_method_name: str
-    splitter_kwargs: dict
+    partitioner_method_name: str
+    partitioner_kwargs: dict
     num_expected_batch_definitions: int
     num_expected_rows_in_first_batch_definition: int
     expected_column_values: Optional[List[Any]]
 
 
-class TaxiSplittingTestCasesBase(ABC):
+class TaxiPartitioningTestCasesBase(ABC):
     def __init__(self, taxi_test_data: TaxiTestData):
         self._taxi_test_data = taxi_test_data
 
@@ -268,17 +270,17 @@ class TaxiSplittingTestCasesBase(ABC):
         return self._taxi_test_data.test_column_names
 
     @abstractmethod
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         pass
 
 
-class TaxiSplittingTestCasesWholeTable(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesWholeTable(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=True,
-                splitter_method_name="split_on_whole_table",
-                splitter_kwargs={},
+                partitioner_method_name="partition_on_whole_table",
+                partitioner_kwargs={},
                 num_expected_batch_definitions=1,
                 num_expected_rows_in_first_batch_definition=360,
                 expected_column_values=None,
@@ -286,13 +288,13 @@ class TaxiSplittingTestCasesWholeTable(TaxiSplittingTestCasesBase):
         ]
 
 
-class TaxiSplittingTestCasesColumnValue(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesColumnValue(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_column_value",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_column_value",
+                partitioner_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
                 },
                 num_expected_batch_definitions=8,
@@ -304,13 +306,13 @@ class TaxiSplittingTestCasesColumnValue(TaxiSplittingTestCasesBase):
         ]
 
 
-class TaxiSplittingTestCasesDividedInteger(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesDividedInteger(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_divided_integer",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_divided_integer",
+                partitioner_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
                     "divisor": 5,
                 },
@@ -323,13 +325,13 @@ class TaxiSplittingTestCasesDividedInteger(TaxiSplittingTestCasesBase):
         ]
 
 
-class TaxiSplittingTestCasesModInteger(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesModInteger(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_mod_integer",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_mod_integer",
+                partitioner_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
                     "mod": 5,
                 },
@@ -342,13 +344,13 @@ class TaxiSplittingTestCasesModInteger(TaxiSplittingTestCasesBase):
         ]
 
 
-class TaxiSplittingTestCasesHashedColumn(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesHashedColumn(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_hashed_column",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_hashed_column",
+                partitioner_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
                     "hash_digits": 2,
                 },
@@ -361,13 +363,13 @@ class TaxiSplittingTestCasesHashedColumn(TaxiSplittingTestCasesBase):
         ]
 
 
-class TaxiSplittingTestCasesMultiColumnValues(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesMultiColumnValues(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_multi_column_values",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_multi_column_values",
+                partitioner_kwargs={
                     "column_names": self.taxi_test_data.test_column_names,
                 },
                 num_expected_batch_definitions=9,
@@ -379,37 +381,43 @@ class TaxiSplittingTestCasesMultiColumnValues(TaxiSplittingTestCasesBase):
         ]
 
 
-class TaxiSplittingTestCasesDateTime(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesDateTime(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_year",
-                splitter_kwargs={"column_name": self.taxi_test_data.test_column_name},
+                partitioner_method_name="partition_on_year",
+                partitioner_kwargs={
+                    "column_name": self.taxi_test_data.test_column_name
+                },
                 num_expected_batch_definitions=3,
                 num_expected_rows_in_first_batch_definition=120,
                 expected_column_values=self.taxi_test_data.year_batch_identifier_data(),
             ),
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_year_and_month",
-                splitter_kwargs={"column_name": self.taxi_test_data.test_column_name},
+                partitioner_method_name="partition_on_year_and_month",
+                partitioner_kwargs={
+                    "column_name": self.taxi_test_data.test_column_name
+                },
                 num_expected_batch_definitions=36,
                 num_expected_rows_in_first_batch_definition=10,
                 expected_column_values=self.taxi_test_data.year_month_batch_identifier_data(),
             ),
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_year_and_month_and_day",
-                splitter_kwargs={"column_name": self.taxi_test_data.test_column_name},
+                partitioner_method_name="partition_on_year_and_month_and_day",
+                partitioner_kwargs={
+                    "column_name": self.taxi_test_data.test_column_name
+                },
                 num_expected_batch_definitions=299,
                 num_expected_rows_in_first_batch_definition=2,
                 expected_column_values=self.taxi_test_data.year_month_day_batch_identifier_data(),
             ),
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_date_parts",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_date_parts",
+                partitioner_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
                     "date_parts": [DatePart.MONTH],
                 },
@@ -418,10 +426,10 @@ class TaxiSplittingTestCasesDateTime(TaxiSplittingTestCasesBase):
                 expected_column_values=self.taxi_test_data.month_batch_identifier_data(),
             ),
             # Mix of types of date_parts, mixed case for string date part:
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_date_parts",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_date_parts",
+                partitioner_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
                     "date_parts": [DatePart.YEAR, "mOnTh"],
                 },
@@ -432,13 +440,13 @@ class TaxiSplittingTestCasesDateTime(TaxiSplittingTestCasesBase):
         ]
 
 
-class TaxiSplittingTestCasesConvertedDateTime(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
+class TaxiPartitioningTestCasesConvertedDateTime(TaxiPartitioningTestCasesBase):
+    def test_cases(self) -> List[TaxiPartitioningTestCase]:
         return [
-            TaxiSplittingTestCase(
+            TaxiPartitioningTestCase(
                 table_domain_test_case=False,
-                splitter_method_name="split_on_converted_datetime",
-                splitter_kwargs={
+                partitioner_method_name="partition_on_converted_datetime",
+                partitioner_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
                     "date_format_string": "%Y-%m-%d",
                 },

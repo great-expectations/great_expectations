@@ -46,14 +46,8 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
     """
     checkpoint_dict: dict = {
         "name": "my_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "template_name": None,
-        "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
-        "profilers": [],
         "action_list": [
             {
                 "name": "store_validation_result",
@@ -3533,9 +3527,6 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
 
     checkpoint_config_yml = """
 name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%m-foo-bar-template-test"
 batch_request:
   datasource_name: pandas_datasource
   data_asset_name: IN_MEMORY_DATA_ASSET

@@ -9,7 +9,7 @@ module.exports = {
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenMarkdownLinks: 'throw',
   favicon: '/img/gx-mark.png',
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
@@ -68,9 +68,6 @@ module.exports = {
       indexName: 'greatexpectations',
       searchPagePath: 'search',
       contextualSearch: true,
-      searchParameters: {
-        facetFilters: ['version:current'],
-      },
     },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark'),

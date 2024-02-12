@@ -501,19 +501,33 @@ class MockSMTPServer:
 
 @pytest.mark.parametrize(
     (
-        "class_to_patch,use_tls,use_ssl,raise_on,exception,expected,"
+        "class_to_patch,use_tls,use_ssl,sender_login,sender_password,raise_on,exception,expected,"
         "data_context_parameterized_expectation_suite,"
         "validation_result_suite,validation_result_suite_id"
     ),
     [
-        ("SMTP", False, False, None, None, "success", None, None, None),
-        ("SMTP", True, False, None, None, "success", None, None, None),
-        ("SMTP", False, False, None, None, "success", None, None, None),
-        ("SMTP_SSL", False, True, None, None, "success", None, None, None),
+        ("SMTP", False, False, "test", "test", None, None, "success", None, None, None),
+        ("SMTP", True, False, "test", "test", None, None, "success", None, None, None),
+        ("SMTP", False, False, "test", "test", None, None, "success", None, None, None),
         (
             "SMTP_SSL",
             False,
             True,
+            "test",
+            "test",
+            None,
+            None,
+            "success",
+            None,
+            None,
+            None,
+        ),
+        (
+            "SMTP_SSL",
+            False,
+            True,
+            "test",
+            "test",
             "__init__",
             smtplib.SMTPConnectError(421, "Can't connect"),
             None,
@@ -525,6 +539,8 @@ class MockSMTPServer:
             "SMTP",
             True,
             False,
+            "test",
+            "test",
             "starttls",
             smtplib.SMTPConnectError(421, "Can't connect"),
             None,
@@ -536,9 +552,24 @@ class MockSMTPServer:
             "SMTP",
             True,
             False,
+            "test",
+            "test",
             "login",
             smtplib.SMTPAuthenticationError(534, "Can't authenticate"),
             None,
+            None,
+            None,
+            None,
+        ),
+        (
+            "SMTP",
+            False,
+            False,
+            None,
+            None,
+            "login",
+            smtplib.SMTPAuthenticationError(534, "Can't authenticate"),
+            "success",
             None,
             None,
             None,
@@ -556,6 +587,8 @@ def test_EmailAction(
     class_to_patch,
     use_tls,
     use_ssl,
+    sender_login,
+    sender_password,
     raise_on,
     exception,
     expected,
@@ -574,8 +607,6 @@ def test_EmailAction(
         }
         smtp_address = "test"
         smtp_port = 999
-        sender_login = "test"
-        sender_password = "test"
         sender_alias = "other"
         receiver_emails = "test"
         notify_on = "all"

@@ -7,107 +7,107 @@ from typing import List, Union
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.exceptions import exceptions as gx_exceptions
-from great_expectations.execution_engine.split_and_sample.data_splitter import (
-    DataSplitter,
+from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+    DataPartitioner,
     DatePart,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class SparkDataSplitter(DataSplitter):
-    """Methods for splitting data accessible via SparkDFExecutionEngine.
+class SparkDataPartitioner(DataPartitioner):
+    """Methods for partitioning data accessible via SparkDFExecutionEngine.
 
     Note, for convenience, you can also access DatePart via the instance variable
-    date_part e.g. SparkDataSplitter.date_part.MONTH
+    date_part e.g. SparkDataPartitioner.date_part.MONTH
     """
 
-    def split_on_year(
+    def partition_on_year(
         self,
         df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
     ) -> pyspark.DataFrame:
-        """Split on year values in column_name.
+        """Partition on year values in column_name.
 
         Args:
             df: dataframe from batch data.
-            column_name: column in table to use in determining split.
+            column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
-        return self.split_on_date_parts(
+        return self.partition_on_date_parts(
             df=df,
             column_name=column_name,
             batch_identifiers=batch_identifiers,
             date_parts=[DatePart.YEAR],
         )
 
-    def split_on_year_and_month(
+    def partition_on_year_and_month(
         self,
         df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
     ) -> pyspark.DataFrame:
-        """Split on year and month values in column_name.
+        """Partition on year and month values in column_name.
 
         Args:
             df: dataframe from batch data.
-            column_name: column in table to use in determining split.
+            column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
-        return self.split_on_date_parts(
+        return self.partition_on_date_parts(
             df=df,
             column_name=column_name,
             batch_identifiers=batch_identifiers,
             date_parts=[DatePart.YEAR, DatePart.MONTH],
         )
 
-    def split_on_year_and_month_and_day(
+    def partition_on_year_and_month_and_day(
         self,
         df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
     ) -> pyspark.DataFrame:
-        """Split on year and month and day values in column_name.
+        """Partition on year and month and day values in column_name.
 
         Args:
             df: dataframe from batch data.
-            column_name: column in table to use in determining split.
+            column_name: column in table to use in determining partition.
             batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
+                relevant date parts will be used for partitioning or key values
                 of {date_part: date_part_value}.
 
         Returns:
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
-        return self.split_on_date_parts(
+        return self.partition_on_date_parts(
             df=df,
             column_name=column_name,
             batch_identifiers=batch_identifiers,
             date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
         )
 
-    def split_on_date_parts(
+    def partition_on_date_parts(
         self,
         df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
     ) -> pyspark.DataFrame:
-        """Split on date_part values in column_name.
+        """Partition on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
         given month (if only month is chosen for date_parts) for ALL years.
@@ -117,14 +117,14 @@ class SparkDataSplitter(DataSplitter):
 
         Args:
             df: dataframe from batch data.
-            column_name: column in data used to determine split.
+            column_name: column in data used to determine partition.
             batch_identifiers: should contain a dateutil parseable datetime whose date parts
-                will be used for splitting or key values of {date_part: date_part_value}
-            date_parts: part of the date to be used for splitting e.g.
+                will be used for partitioning or key values of {date_part: date_part_value}
+            date_parts: part of the date to be used for partitioning e.g.
                 DatePart.DAY or the case-insensitive string representation "day"
 
         Returns:
-            Dataframe with splitting applied.
+            Dataframe with partitioning applied.
         """
         self._validate_date_parts(date_parts)
 
@@ -173,7 +173,7 @@ class SparkDataSplitter(DataSplitter):
         return spark_date_part_decoder[date_part]
 
     @staticmethod
-    def split_on_whole_table(
+    def partition_on_whole_table(
         df: pyspark.DataFrame,
     ) -> pyspark.DataFrame:
         """No op. Return the same data that is passed in.
@@ -187,7 +187,7 @@ class SparkDataSplitter(DataSplitter):
         return df
 
     @staticmethod
-    def split_on_column_value(
+    def partition_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pyspark.DataFrame:
         """Return a dataframe where rows are filtered based on the specified column value.
@@ -203,7 +203,7 @@ class SparkDataSplitter(DataSplitter):
         return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
-    def split_on_converted_datetime(
+    def partition_on_converted_datetime(
         df,
         column_name: str,
         batch_identifiers: dict,
@@ -234,10 +234,10 @@ class SparkDataSplitter(DataSplitter):
         return res
 
     @staticmethod
-    def split_on_divided_integer(
+    def partition_on_divided_integer(
         df, column_name: str, divisor: int, batch_identifiers: dict
     ):
-        """Divide the values in the named column by `divisor`, and split on that"""
+        """Divide the values in the named column by `divisor`, and partition on that"""
         matching_divisor = batch_identifiers[column_name]
         res = (
             df.withColumn(
@@ -250,8 +250,10 @@ class SparkDataSplitter(DataSplitter):
         return res
 
     @staticmethod
-    def split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
-        """Divide the values in the named column by `divisor`, and split on that"""
+    def partition_on_mod_integer(
+        df, column_name: str, mod: int, batch_identifiers: dict
+    ):
+        """Divide the values in the named column by `divisor`, and partition on that"""
         matching_mod_value = batch_identifiers[column_name]
         res = (
             df.withColumn(
@@ -263,13 +265,15 @@ class SparkDataSplitter(DataSplitter):
         return res
 
     @staticmethod
-    def split_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
-        """Split on the joint values in the named columns"""
+    def partition_on_multi_column_values(
+        df, column_names: list, batch_identifiers: dict
+    ):
+        """Partition on the joint values in the named columns"""
         for column_name in column_names:
             value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
-                    f"In order for SparkDFExecutionEngine to `_split_on_multi_column_values`, "
+                    f"In order for SparkDFExecutionEngine to `_partition_on_multi_column_values`, "
                     f"all values in  column_names must also exist in batch_identifiers. "
                     f"{column_name} was not found in batch_identifiers."
                 )
@@ -277,20 +281,20 @@ class SparkDataSplitter(DataSplitter):
         return df
 
     @staticmethod
-    def split_on_hashed_column(
+    def partition_on_hashed_column(
         df,
         column_name: str,
         hash_digits: int,
         batch_identifiers: dict,
         hash_function_name: str = "sha256",
     ):
-        """Split on the hashed value of the named column"""
+        """Partition on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
             raise (
                 gx_exceptions.ExecutionEngineError(
-                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    f"""The partitioning method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                     Reference to {hash_function_name} cannot be found."""
                 )
             )

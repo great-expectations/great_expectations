@@ -103,7 +103,7 @@ def azure_batch_spec() -> AzureBatchSpec:
     batch_spec = AzureBatchSpec(
         path=full_path,
         reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
+        partitioner_method="_partition_on_whole_table",
     )
     return batch_spec
 
@@ -125,7 +125,7 @@ def gcs_batch_spec() -> GCSBatchSpec:
     batch_spec = GCSBatchSpec(
         path=full_path,
         reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
+        partitioner_method="_partition_on_whole_table",
     )
     return batch_spec
 

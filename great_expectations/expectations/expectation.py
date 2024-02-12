@@ -1607,7 +1607,7 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
 
     unexpected_rows_query: str
 
-    metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query.table",)
     success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1630,7 +1630,7 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
         runtime_configuration: dict | None = None,
         execution_engine: ExecutionEngine | None = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        metric_value = metrics["query.table"]
+        metric_value = metrics["unexpected_rows_query.table"]
         return {
             "success": len(metric_value) == 0,
             "result": {
