@@ -278,7 +278,6 @@ class SphinxInvokeDocsBuilder:
             )
             without_extension = str(relative_link).replace(".mdx", "")
             if not without_extension.endswith("_class"):
-                breakpoint()
                 raise Exception(
                     f"Expected class mdx file path to end with _class; this could indicate a method link that will break: {without_extension}"
                 )
