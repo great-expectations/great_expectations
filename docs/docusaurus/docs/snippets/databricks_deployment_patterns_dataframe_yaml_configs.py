@@ -166,7 +166,6 @@ my_checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
 class_name: Checkpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 """
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config">

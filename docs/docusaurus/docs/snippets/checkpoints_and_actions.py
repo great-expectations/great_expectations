@@ -33,7 +33,6 @@ context.add_or_update_expectation_suite("my_other_expectation_suite")
 # Add a Checkpoint
 context.add_or_update_checkpoint(
     name="test_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template",
     validations=[
         {
             "batch_request": {
@@ -140,7 +139,6 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py no_nesting just the yaml">
 context.add_or_update_checkpoint(
     name="my_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template-$VAR",
     validations=[
         {
             "batch_request": {
@@ -194,7 +192,6 @@ assert (
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py nesting_with_defaults just the yaml">
 context.add_or_update_checkpoint(
     name="my_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template-$VAR",
     validations=[
         {
             "batch_request": {
@@ -279,7 +276,6 @@ assert second_batch_identifiers == {
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py keys_passed_at_runtime just the yaml">
 context.add_or_update_checkpoint(
     name="my_base_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template-$VAR",
     action_list=[
         {
             "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
