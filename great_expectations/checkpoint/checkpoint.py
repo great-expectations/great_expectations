@@ -620,7 +620,7 @@ class Checkpoint(BaseCheckpoint):
     being performed if they are configured to do so.
 
     Args:
-        name: User-selected cCheckpoint name (e.g. "staging_tables").
+        name: User-selected checkpoint name (e.g. "staging_tables").
         data_context: Data context that is associated with the current checkpoint.
         expectation_suite_name: Expectation suite associated with checkpoint.
         batch_request: Batch request describing the batch of data to validate.

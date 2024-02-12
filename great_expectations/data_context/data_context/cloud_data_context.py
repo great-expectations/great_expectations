@@ -768,9 +768,6 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: float = 1.0,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
@@ -800,9 +797,6 @@ class CloudDataContext(SerializableDataContext):
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            module_name=module_name,
-            class_name=class_name,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
