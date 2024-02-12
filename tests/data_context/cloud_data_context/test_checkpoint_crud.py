@@ -715,10 +715,7 @@ def mock_get_all_checkpoints_json(
                     "checkpoint_config": {
                         "action_list": [],
                         "batch_request": {},
-                        "class_name": "Checkpoint",
-                        "config_version": 1.0,
                         "evaluation_parameters": {},
-                        "module_name": "great_expectations.checkpoint",
                         "name": checkpoint_name_1,
                         "profilers": [],
                         "runtime_configuration": {},
@@ -749,8 +746,6 @@ def mock_get_all_checkpoints_json(
                     "checkpoint_config": {
                         "action_list": [],
                         "batch_request": {},
-                        "class_name": "Checkpoint",
-                        "config_version": 1.0,
                         "evaluation_parameters": {},
                         "module_name": "great_expectations.checkpoint",
                         "name": checkpoint_name_2,
@@ -768,7 +763,6 @@ def mock_get_all_checkpoints_json(
                             }
                         ],
                     },
-                    "class_name": "Checkpoint",
                     "created_by_id": "329eb0a6-6559-4221-8b27-131a9185118d",
                     "default_validation_id": None,
                     "id": checkpoint_id_2,

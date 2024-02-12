@@ -253,9 +253,6 @@ def test_set(
                         "checkpoint_config": OrderedDict(
                             [
                                 ("name", "my_minimal_simple_checkpoint"),
-                                ("config_version", 1.0),
-                                ("module_name", "great_expectations.checkpoint"),
-                                ("class_name", "Checkpoint"),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
                                 (
