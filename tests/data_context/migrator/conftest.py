@@ -29,7 +29,7 @@ class StubUsageStats:
 
 class StubCheckpointStore:
     def get_checkpoint(self, name: str, id: Optional[str]) -> CheckpointConfig:
-        return CheckpointConfig(name=name, class_name="Checkpoint")
+        return CheckpointConfig(name=name)
 
 
 class StubValidationsStore:
@@ -209,11 +209,7 @@ def serialized_configuration_bundle() -> dict:
         "data_context_id": "877166bd-08f2-4d7b-b473-a2b97ab5e36f",
         "checkpoints": [
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_checkpoint",
-                "profilers": [],
                 "action_list": [],
                 "batch_request": {},
                 "evaluation_parameters": {},

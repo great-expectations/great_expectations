@@ -77,24 +77,6 @@ def batch_request_as_dict() -> Dict[str, str]:
     }
 
 
-@pytest.mark.unit
-def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
-    checkpoint: Checkpoint = Checkpoint(
-        name="foo", data_context=empty_data_context, config_version=None
-    )
-    assert checkpoint.action_list == []
-
-
-@pytest.mark.unit
-def test_checkpoint_with_config_version_has_action_list(empty_data_context):
-    checkpoint: Checkpoint = Checkpoint(
-        "foo", empty_data_context, config_version=1, action_list=[{"foo": "bar"}]
-    )
-    obs = checkpoint.action_list
-    assert isinstance(obs, list)
-    assert obs == [{"foo": "bar"}]
-
-
 @pytest.mark.filesystem
 def test_basic_checkpoint_config_validation(
     empty_data_context_stats_enabled,
@@ -124,33 +106,7 @@ def test_basic_checkpoint_config_validation(
         )
 
     yaml_config_erroneous = """
-    config_version: 1
-    """
-    config_erroneous = yaml.load(yaml_config_erroneous)
-    with pytest.raises(gx_exceptions.InvalidConfigError):
-        # noinspection PyUnusedLocal
-        checkpoint_config = CheckpointConfig.from_commented_map(
-            commented_map=config_erroneous
-        )
-    with pytest.raises(KeyError):
-        # noinspection PyUnusedLocal
-        checkpoint: Checkpoint = context.test_yaml_config(
-            yaml_config=yaml_config_erroneous,
-            name="my_erroneous_checkpoint",
-        )
-
-    with pytest.raises(gx_exceptions.InvalidConfigError):
-        # noinspection PyUnusedLocal
-        checkpoint: Checkpoint = context.test_yaml_config(
-            yaml_config=yaml_config_erroneous,
-            name="my_erroneous_checkpoint",
-            class_name="Checkpoint",
-        )
-
-    yaml_config_erroneous = """
-    config_version: 1
     name: my_erroneous_checkpoint
-    class_name: Checkpoint
     """
     # noinspection PyUnusedLocal
     checkpoint: Checkpoint = context.test_yaml_config(
@@ -171,8 +127,6 @@ def test_basic_checkpoint_config_validation(
 
     yaml_config: str = """
     name: my_checkpoint
-    config_version: 1
-    class_name: Checkpoint
     validations: []
     action_list:
       - name: store_validation_result
@@ -188,9 +142,6 @@ def test_basic_checkpoint_config_validation(
 
     expected_checkpoint_config: dict = {
         "name": "my_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
         "action_list": common_action_list,
     }
 
@@ -229,6 +180,7 @@ def test_basic_checkpoint_config_validation(
     checkpoint: Checkpoint = context.test_yaml_config(
         yaml_config=yaml_config,
         name="my_checkpoint",
+        class_name="Checkpoint",
     )
     assert (
         deep_filter_properties_iterable(
@@ -266,649 +218,6 @@ def test_basic_checkpoint_config_validation(
 
 
 @pytest.mark.filesystem
-def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-    monkeypatch,
-):
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    checkpoint: Checkpoint
-
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    yaml_config: str = """
-    name: my_fancy_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    validations:
-      - batch_request:
-          datasource_name: my_datasource
-          data_connector_name: my_special_data_connector
-          data_asset_name: users
-          data_connector_query:
-            index: -1
-        expectation_suite_name: users.delivery
-        action_list:
-            - name: store_validation_result
-              action:
-                class_name: StoreValidationResultAction
-            - name: store_evaluation_params
-              action:
-                class_name: StoreEvaluationParametersAction
-            - name: update_data_docs
-              action:
-                class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20
-    """
-
-    expected_checkpoint_config: dict = {
-        "name": "my_fancy_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "validations": [
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {
-                        "index": -1,
-                    },
-                },
-                "expectation_suite_name": "users.delivery",
-                "action_list": common_action_list,
-            },
-        ],
-        "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
-        "runtime_configuration": {
-            "result_format": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 20,
-            }
-        },
-        "expectation_suite_name": None,
-        "batch_request": None,
-        "action_list": [],
-        "profilers": [],
-    }
-
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_fancy_checkpoint",
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_checkpoint_config,
-        clean_falsy=True,
-    )
-
-    assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(data_context.list_checkpoints()) == 1
-
-    data_context.suites.add(ExpectationSuite(name="users.delivery"))
-    result: CheckpointResult = data_context.run_checkpoint(
-        checkpoint_name=checkpoint.name,
-    )
-    assert len(result.list_validation_results()) == 1
-    assert len(data_context.validations_store.list_keys()) == 1
-    assert result.success
-
-    data_context.delete_checkpoint(name="my_fancy_checkpoint")
-    assert len(data_context.list_checkpoints()) == 0
-
-
-@pytest.mark.filesystem
-@pytest.mark.slow  # 1.74s
-def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-    monkeypatch,
-):
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    checkpoint: Checkpoint
-
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    yaml_config: str = """
-    name: my_fancy_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    validations:
-      - batch_request:
-          datasource_name: my_datasource
-          data_connector_name: my_special_data_connector
-          data_asset_name: users
-          data_connector_query:
-            index: -1
-      - batch_request:
-          datasource_name: my_datasource
-          data_connector_name: my_other_data_connector
-          data_asset_name: users
-          data_connector_query:
-            index: -2
-    expectation_suite_name: users.delivery
-    action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20
-    """
-
-    expected_checkpoint_config: dict = {
-        "name": "my_fancy_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "validations": [
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {
-                        "index": -1,
-                    },
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {
-                        "index": -2,
-                    },
-                }
-            },
-        ],
-        "expectation_suite_name": "users.delivery",
-        "action_list": common_action_list,
-        "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
-        "runtime_configuration": {
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
-        },
-        "batch_request": None,
-        "profilers": [],
-    }
-
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_fancy_checkpoint",
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_checkpoint_config,
-        clean_falsy=True,
-    )
-
-    assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(data_context.list_checkpoints()) == 1
-
-    data_context.suites.add(ExpectationSuite(name="users.delivery"))
-    result: CheckpointResult = data_context.run_checkpoint(
-        checkpoint_name=checkpoint.name,
-    )
-    assert len(result.list_validation_results()) == 2
-    assert len(data_context.validations_store.list_keys()) == 2
-    assert result.success
-
-    data_context.delete_checkpoint(name="my_fancy_checkpoint")
-    assert len(data_context.list_checkpoints()) == 0
-
-
-@pytest.mark.filesystem
-def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    checkpoint: Checkpoint
-
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    yaml_config: str = """
-    name: airflow_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    validations:
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_runtime_data_connector
-        data_asset_name: IN_MEMORY_DATA_ASSET
-    expectation_suite_name: users.delivery
-    action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-    """
-
-    expected_checkpoint_config: dict = {
-        "name": "airflow_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "validations": [
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_runtime_data_connector",
-                    "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                }
-            }
-        ],
-        "expectation_suite_name": "users.delivery",
-        "action_list": common_action_list,
-        "batch_request": None,
-        "evaluation_parameters": {},
-        "runtime_configuration": {},
-        "profilers": [],
-    }
-
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="airflow_checkpoint",
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_checkpoint_config,
-        clean_falsy=True,
-    )
-
-    assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(data_context.list_checkpoints()) == 1
-
-    data_context.suites.add(ExpectationSuite(name="users.delivery"))
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    result: CheckpointResult = data_context.run_checkpoint(
-        checkpoint_name=checkpoint.name,
-        batch_request={
-            "runtime_parameters": {
-                "batch_data": test_df,
-            },
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            },
-        },
-        run_name="airflow_run_1234567890",
-    )
-    assert len(result.list_validation_results()) == 1
-    assert len(data_context.validations_store.list_keys()) == 1
-    assert result.success
-
-    data_context.delete_checkpoint(name="airflow_checkpoint")
-    assert len(data_context.list_checkpoints()) == 0
-
-
-@pytest.mark.filesystem
-@pytest.mark.slow  # 1.75s
-def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-    monkeypatch,
-):
-    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
-
-    checkpoint: Checkpoint
-
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    yaml_config: str = """
-    name: airflow_users_node_3
-    config_version: 1
-    class_name: Checkpoint
-    batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_special_data_connector
-        data_asset_name: users
-        data_connector_query:
-            index: -1
-    validations:
-      - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
-      - expectation_suite_name: users.error  # runs the locally-specified action_list union the top level action-list against the top-level batch_request
-        action_list:
-        - name: quarantine_failed_data
-          action:
-              class_name: CreateQuarantineData
-        - name: advance_passed_data
-          action:
-              class_name: CreatePassedData
-    action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-    evaluation_parameters:
-        environment: $GE_ENVIRONMENT
-        tolerance: 0.01
-    runtime_configuration:
-        result_format:
-          result_format: BASIC
-          partial_unexpected_count: 20
-    """
-
-    mock_create_quarantine_data = mock.MagicMock()
-    mock_create_quarantine_data.run.return_value = True
-    # noinspection PyUnresolvedReferences
-    gx.validation_operators.CreateQuarantineData = mock_create_quarantine_data
-
-    mock_create_passed_data = mock.MagicMock()
-    mock_create_passed_data.run.return_value = True
-    # noinspection PyUnresolvedReferences
-    gx.validation_operators.CreatePassedData = mock_create_passed_data
-
-    expected_checkpoint_config: dict = {
-        "name": "airflow_users_node_3",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "batch_request": {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_special_data_connector",
-            "data_asset_name": "users",
-            "data_connector_query": {
-                "index": -1,
-            },
-        },
-        "validations": [
-            {"expectation_suite_name": "users.warning"},
-            {
-                "expectation_suite_name": "users.error",
-                "action_list": [
-                    {
-                        "name": "quarantine_failed_data",
-                        "action": {"class_name": "CreateQuarantineData"},
-                    },
-                    {
-                        "name": "advance_passed_data",
-                        "action": {"class_name": "CreatePassedData"},
-                    },
-                ],
-            },
-        ],
-        "action_list": common_action_list,
-        "evaluation_parameters": {
-            "environment": "my_ge_environment",
-            "tolerance": 0.01,
-        },
-        "runtime_configuration": {
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
-        },
-        "expectation_suite_name": None,
-        "profilers": [],
-    }
-
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="airflow_users_node_3",
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_checkpoint_config,
-        clean_falsy=True,
-    )
-
-    assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(data_context.list_checkpoints()) == 1
-
-    data_context.suites.add(ExpectationSuite(name="users.warning"))
-    data_context.suites.add(ExpectationSuite(name="users.error"))
-    result: CheckpointResult = data_context.run_checkpoint(
-        checkpoint_name=checkpoint.name,
-    )
-    assert len(result.list_validation_results()) == 2
-    assert len(data_context.validations_store.list_keys()) == 2
-    assert result.success
-
-    data_context.delete_checkpoint(name="airflow_users_node_3")
-    assert len(data_context.list_checkpoints()) == 0
-
-
-@pytest.mark.filesystem
-@pytest.mark.slow  # 3.10s
-def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-    monkeypatch,
-):
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    checkpoint: Checkpoint
-    yaml_config: str
-    expected_checkpoint_config: dict
-    result: CheckpointResult
-
-    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    yaml_config = """
-    name: my_base_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    action_list:
-    - name: store_validation_result
-      action:
-        class_name: StoreValidationResultAction
-    - name: store_evaluation_params
-      action:
-        class_name: StoreEvaluationParametersAction
-    - name: update_data_docs
-      action:
-        class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-        result_format:
-          result_format: BASIC
-          partial_unexpected_count: 20
-    """
-
-    expected_checkpoint_config = {
-        "name": "my_base_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "expectation_suite_name": None,
-        "batch_request": None,
-        "action_list": common_action_list,
-        "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
-        "runtime_configuration": {
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
-        },
-        "validations": [],
-        "profilers": [],
-    }
-
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_base_checkpoint",
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_checkpoint_config,
-        clean_falsy=True,
-    )
-
-    assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(data_context.list_checkpoints()) == 1
-
-    with pytest.raises(
-        gx_exceptions.DataContextError,
-        match=r'Checkpoint "my_base_checkpoint" must be called with a validator or contain either a batch_request or validations.',
-    ):
-        # noinspection PyUnusedLocal
-        result: CheckpointResult = data_context.run_checkpoint(
-            checkpoint_name=checkpoint.name,
-        )
-
-    data_context.suites.add(ExpectationSuite(name="users.delivery"))
-
-    result = data_context.run_checkpoint(
-        checkpoint_name="my_base_checkpoint",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {
-                        "index": -1,
-                    },
-                },
-                "expectation_suite_name": "users.delivery",
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {
-                        "index": -2,
-                    },
-                },
-                "expectation_suite_name": "users.delivery",
-            },
-        ],
-    )
-    assert len(result.list_validation_results()) == 2
-    assert len(data_context.validations_store.list_keys()) == 2
-    assert result.success
-
-    yaml_config = """
-    name: my_fancy_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    validations:
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_special_data_connector
-        data_asset_name: users
-        data_connector_query:
-          index: -1
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_other_data_connector
-        data_asset_name: users
-        data_connector_query:
-          index: -2
-    expectation_suite_name: users.delivery
-    """
-
-    expected_checkpoint_config = {
-        "name": "my_fancy_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "validations": [
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {
-                        "index": -1,
-                    },
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {
-                        "index": -2,
-                    },
-                }
-            },
-        ],
-        "expectation_suite_name": "users.delivery",
-        "batch_request": None,
-        "action_list": [],
-        "evaluation_parameters": {},
-        "runtime_configuration": {},
-        "profilers": [],
-    }
-
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_fancy_checkpoint",
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_checkpoint_config,
-        clean_falsy=True,
-    )
-
-    assert len(data_context.list_checkpoints()) == 1
-    data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(data_context.list_checkpoints()) == 2
-
-    result: CheckpointResult = data_context.run_checkpoint(
-        checkpoint_name=checkpoint.name,
-    )
-    assert len(result.list_validation_results()) == 2
-    assert len(data_context.validations_store.list_keys()) == 4
-    assert result.success
-
-    data_context.delete_checkpoint(name="my_base_checkpoint")
-    data_context.delete_checkpoint(name="my_fancy_checkpoint")
-    assert len(data_context.list_checkpoints()) == 0
-
-
-@pytest.mark.filesystem
 @pytest.mark.slow  # 1.25s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -918,7 +227,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         validations=[
@@ -961,7 +269,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name=checkpoint_name,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=[
             store_validation_result_action,
@@ -1019,7 +326,6 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             expectation_suite_name="my_expectation_suite",
             batch_request=batch_request,
             validator=validator,
@@ -1045,7 +351,6 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_va
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             expectation_suite_name="my_expectation_suite",
             validator=validator,
             action_list=common_action_list,
@@ -1070,7 +375,6 @@ def test_newstyle_checkpoint_raises_error_if_expectation_suite_name_and_validato
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             expectation_suite_name="my_expectation_suite",
             validator=validator,
             action_list=common_action_list,
@@ -1093,7 +397,6 @@ def test_newstyle_checkpoint_raises_error_if_expectation_suite_name_in_validatio
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             validator=validator,
             action_list=common_action_list,
             validations=[{"expectation_suite_name": "my_expectation_suite"}],
@@ -1118,7 +421,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         validator=validator,
         action_list=common_action_list,
     )
@@ -1142,7 +444,6 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             validator=validator,
             action_list=common_action_list,
         ).run(
@@ -1168,7 +469,6 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             validator=validator,
             action_list=common_action_list,
         ).run(
@@ -1196,7 +496,6 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_valid
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             expectation_suite_name="my_expectation_suite",
             action_list=common_action_list,
             validations=[{"batch_request": batch_request}],
@@ -1224,7 +523,6 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             validator=validator,
             action_list=common_action_list,
         ).run(
@@ -1252,7 +550,6 @@ def test_newstyle_checkpoint_raises_error_if_expectation_suite_name_is_specified
         _ = Checkpoint(
             name="my_checkpoint",
             data_context=context,
-            config_version=1,
             expectation_suite_name="my_expectation_suite",
             action_list=common_action_list,
             validations=[{"batch_request": batch_request}],
@@ -1284,7 +581,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1314,7 +610,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         validations=[{"batch_request": batch_request}],
@@ -1354,7 +649,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1395,7 +689,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1446,7 +739,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1513,7 +805,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1571,7 +862,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         validations=[{"batch_request": runtime_batch_request}],
@@ -1594,65 +884,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
 
-    # RuntimeBatchRequest with a query 1
-    batch_request_1 = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
-        }
-    )
-
-    # RuntimeBatchRequest with a query 2
-    batch_request_2 = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
-            },
-        }
-    )
-
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
-        expectation_suite_name="my_expectation_suite",
-        action_list=common_action_list,
-        validations=[
-            {"batch_request": batch_request_1},
-            {"batch_request": batch_request_2},
-        ],
-    )
-
-    result = checkpoint.run()
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
-@pytest.mark.filesystem
-def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
-    data_context_with_datasource_sqlalchemy_engine,
-    common_action_list,
-    sa,
-):
-    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    checkpoint: Checkpoint = Checkpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1691,7 +925,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         batch_request=runtime_batch_request,
@@ -1728,7 +961,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1766,7 +998,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1811,7 +1042,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         batch_request=runtime_batch_request,
@@ -1857,7 +1087,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
         batch_request=runtime_batch_request,
@@ -1896,7 +1125,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1934,7 +1162,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -1979,7 +1206,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -2024,7 +1250,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -2068,7 +1293,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -2113,7 +1337,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -2150,9 +1373,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2191,9 +1412,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2233,9 +1452,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2276,9 +1493,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2318,9 +1533,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2361,9 +1574,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2412,9 +1623,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2462,9 +1671,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2511,9 +1718,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2562,9 +1767,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -2606,7 +1809,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
@@ -2649,9 +1851,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request,
@@ -2714,9 +1914,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request,
@@ -2787,9 +1985,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [{"batch_request": batch_request}],
@@ -2874,9 +2070,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request,
@@ -2948,9 +2142,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [{"batch_request": batch_request}],
@@ -3030,9 +2222,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_batch_request_into_che
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request,
@@ -3069,9 +2259,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [{"batch_request": runtime_batch_request}],
@@ -3100,9 +2288,7 @@ def test_newstyle_checkpoint_result_can_be_pickled(
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "batch_request": batch_request,
@@ -3133,9 +2319,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [
@@ -3179,9 +2363,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
 
     # add checkpoint config
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [
@@ -3213,7 +2395,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
         pytest.param(
             CheckpointConfig(
                 name="my_checkpoint",
-                config_version=1,
                 expectation_suite_name="my_expectation_suite",
                 action_list=[
                     {
@@ -3239,7 +2420,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
         pytest.param(
             CheckpointConfig(
                 name="my_checkpoint",
-                config_version=1,
                 default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
                 expectation_suite_name="my_expectation_suite",
                 batch_request={
@@ -3263,7 +2443,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
         pytest.param(
             CheckpointConfig(
                 name="my_checkpoint",
-                config_version=1,
                 expectation_suite_name="my_expectation_suite",
                 action_list=[
                     {
@@ -3290,7 +2469,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
         pytest.param(
             CheckpointConfig(
                 name="my_checkpoint",
-                config_version=1,
                 default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
                 expectation_suite_name="my_expectation_suite",
                 action_list=[
@@ -3455,9 +2633,7 @@ def test_running_spark_checkpoint(
         },
     )
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [
@@ -3490,9 +2666,7 @@ def test_run_spark_checkpoint_with_schema(
         },
     )
     checkpoint_config: dict = {
-        "class_name": "Checkpoint",
         "name": "my_checkpoint",
-        "config_version": 1,
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
         "validations": [
