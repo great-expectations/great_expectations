@@ -10,7 +10,6 @@ from typing import (
     Literal,
     Optional,
     Sequence,
-    Type,
     Union,
 )
 
@@ -75,13 +74,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-def _get_validator_class() -> Type[Validator]:
-    """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.validator.validator"
-    class_name = "Validator"
-    return load_class(class_name=class_name, module_name=module_name)
 
 
 def _does_validation_contain_batch_request(
