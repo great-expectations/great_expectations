@@ -64,5 +64,8 @@ class CheckpointFactory(Factory[Checkpoint]):
         key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
+
         checkpoint_dict = self._store.get(key=key)
+        assert isinstance(checkpoint_dict, dict)
+
         return Checkpoint(**checkpoint_dict)

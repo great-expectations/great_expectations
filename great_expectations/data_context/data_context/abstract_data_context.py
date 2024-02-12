@@ -483,6 +483,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
             self._in_memory_instance_id = instance_id
+        assert isinstance(instance_id, str)
         return instance_id
 
     @property
