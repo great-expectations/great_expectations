@@ -302,7 +302,7 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_3">
-checkpoint = context.get_checkpoint("my_checkpoint")
+checkpoint = context.get_checkpoint("my_base_checkpoint")
 results = checkpoint.run(
     validations=[
         {
