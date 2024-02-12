@@ -1165,7 +1165,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
         "batch_request",
         "evaluation_parameters",
         "name",
-        "profilers",
         "runtime_configuration",
         "validations",
     ]

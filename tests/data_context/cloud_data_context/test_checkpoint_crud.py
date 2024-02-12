@@ -717,7 +717,6 @@ def mock_get_all_checkpoints_json(
                         "batch_request": {},
                         "evaluation_parameters": {},
                         "name": checkpoint_name_1,
-                        "profilers": [],
                         "runtime_configuration": {},
                         "validations": [
                             {
@@ -749,7 +748,6 @@ def mock_get_all_checkpoints_json(
                         "evaluation_parameters": {},
                         "module_name": "great_expectations.checkpoint",
                         "name": checkpoint_name_2,
-                        "profilers": [],
                         "runtime_configuration": {},
                         "validations": [
                             {

@@ -2644,7 +2644,6 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: The runtime configuration for your checkpoint
         validations: An optional list of validations in your checkpoint
         default_validation_id: The default validation id of your checkpoint
-        profilers: An optional list of profilers in your checkpoint
         validation_operator_name: The validation operator name
         batches: An optional list of batches
         commented_map: The commented map
@@ -2662,7 +2661,6 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationConfig]] = None,
         default_validation_id: Optional[str] = None,
-        profilers: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
@@ -2676,7 +2674,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = runtime_configuration or {}
         self._validations = validations or []
         self._default_validation_id = default_validation_id
-        self._profilers = profilers or []
         self._ge_cloud_id = ge_cloud_id
 
         super().__init__(commented_map=commented_map)
@@ -2729,14 +2726,6 @@ class CheckpointConfig(BaseYamlConfig):
     @default_validation_id.setter
     def default_validation_id(self, validation_id: str) -> None:
         self._default_validation_id = validation_id
-
-    @property
-    def profilers(self) -> List[dict]:
-        return self._profilers
-
-    @profilers.setter
-    def profilers(self, value: List[dict]) -> None:
-        self._profilers = value
 
     @property
     def batch_request(self) -> dict:
@@ -2858,7 +2847,6 @@ class CheckpointConfig(BaseYamlConfig):
         validations: Optional[
             Union[List[dict], List[CheckpointValidationConfig]]
         ] = None,
-        profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
@@ -2902,7 +2890,6 @@ class CheckpointConfig(BaseYamlConfig):
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "profilers": profilers,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
         substituted_runtime_config: dict = checkpoint.get_substituted_config(

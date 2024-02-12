@@ -125,7 +125,6 @@ class BaseCheckpoint(ConfigPeer):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] | None = None,
         run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
@@ -145,7 +144,6 @@ class BaseCheckpoint(ConfigPeer):
             runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
                 (e.g. `result_format`).
             validations: Validations to be executed as part of checkpoint.
-            profilers: Profilers to use in generating this checkpoint.
             run_id: The run_id for the validation; if None, a default value will be used.
             run_name: The run_name for the validation; if None, a default value will be used.
             run_time: The date/time of the run.
@@ -224,7 +222,6 @@ class BaseCheckpoint(ConfigPeer):
             "evaluation_parameters": evaluation_parameters or {},
             "runtime_configuration": runtime_configuration or {},
             "validations": validations or [],
-            "profilers": profilers or [],
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
@@ -629,7 +626,6 @@ class Checkpoint(BaseCheckpoint):
         runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
             (e.g. `result_format`).
         validations: Validations to be executed as part of checkpoint.
-        profilers: Profilers to use in generating this checkpoint.
         validation_operator_name: List of validation Operators configured by the Checkpoint.
         batches: List of Batches for validation by Checkpoint.
         ge_cloud_id: Great Expectations Cloud id for this Checkpoint.
@@ -672,7 +668,6 @@ class Checkpoint(BaseCheckpoint):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -727,7 +722,6 @@ constructor arguments.
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             default_validation_id=default_validation_id,
@@ -755,7 +749,6 @@ constructor arguments.
         validations: Optional[
             Union[list[dict], list[CheckpointValidationConfig]]
         ] = None,
-        profilers: Optional[list[dict]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -796,7 +789,6 @@ constructor arguments.
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "profilers": profilers,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "default_validation_id": default_validation_id,

@@ -46,7 +46,6 @@ def checkpoint(
                     "expectation_suite_name": "test_suite",
                 }
             ],
-            "profilers": [],
             "ge_cloud_id": None,
             "expectation_suite_ge_cloud_id": None,
         },

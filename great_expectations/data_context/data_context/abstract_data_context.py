@@ -1410,7 +1410,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
-        profilers: list[dict] | None = ...,
         ge_cloud_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1436,7 +1435,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
-        profilers: None = ...,
         ge_cloud_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1481,7 +1479,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1503,7 +1500,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            profilers: The profilers to use in generating this checkpoint.
             ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1534,7 +1530,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1589,7 +1584,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
-        profilers: list[dict] | None = ...,
         expectation_suite_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1613,7 +1607,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
-        profilers: None = ...,
         expectation_suite_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1643,7 +1636,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         expectation_suite_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1661,7 +1653,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            profilers: The profilers to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1686,7 +1677,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1714,7 +1704,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
@@ -1744,7 +1733,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 evaluation_parameters=evaluation_parameters,
                 runtime_configuration=runtime_configuration,
                 validations=validations,
-                profilers=profilers,
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
@@ -1853,7 +1841,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
-        profilers: list[dict] | None = None,
         run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
@@ -1873,7 +1860,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
             runtime_configuration: Runtime configuration override parameters
             validations: Validations to be performed by the Checkpoint run
-            profilers: Profilers to be used by the Checkpoint run
             run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
             run_time: The date/time of the run
@@ -1904,7 +1890,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             run_id=run_id,
             run_name=run_name,
             run_time=run_time,
@@ -1923,7 +1908,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
@@ -1942,7 +1926,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             run_id=run_id,
             run_name=run_name,
             run_time=run_time,

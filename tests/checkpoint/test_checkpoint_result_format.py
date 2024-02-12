@@ -48,7 +48,6 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
         "name": "my_checkpoint",
         "expectation_suite_name": None,
         "batch_request": None,
-        "profilers": [],
         "action_list": [
             {
                 "name": "store_validation_result",

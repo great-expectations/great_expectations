@@ -64,7 +64,6 @@ def test_checkpoint_config_repr(checkpoint):
         "batch_request",
         "evaluation_parameters",
         "name",
-        "profilers",
         "runtime_configuration",
         "validations",
     ):
@@ -112,7 +111,6 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         "batch_request",
         "evaluation_parameters",
         "name",
-        "profilers",
         "runtime_configuration",
         "validations",
     ):

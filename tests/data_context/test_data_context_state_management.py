@@ -876,7 +876,6 @@ def test_add_or_update_checkpoint_adds_successfully(
                 "batch_request": {},
                 "evaluation_parameters": {},
                 "expectation_suite_name": "oss_test_expectation_suite",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
@@ -906,7 +905,6 @@ def test_add_or_update_checkpoint_adds_successfully(
                     "evaluation_parameters": {},
                     "expectation_suite_name": "oss_test_expectation_suite",
                     "name": "my_checkpoint",
-                    "profilers": [],
                     "runtime_configuration": {},
                     "validations": [
                         {
@@ -954,7 +952,6 @@ def test_add_or_update_checkpoint_adds_successfully(
                     },
                     "expectation_suite_name": None,
                     "name": "my_checkpoint",
-                    "profilers": [],
                     "runtime_configuration": {},
                     "validations": [],
                 }

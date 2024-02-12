@@ -210,7 +210,6 @@ def serialized_configuration_bundle() -> dict:
         "checkpoints": [
             {
                 "name": "my_checkpoint",
-                "profilers": [],
                 "action_list": [],
                 "batch_request": {},
                 "evaluation_parameters": {},

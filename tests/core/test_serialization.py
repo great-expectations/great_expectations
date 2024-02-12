@@ -497,7 +497,6 @@ def test_checkpoint_config_deepcopy(
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
@@ -539,7 +538,6 @@ def test_checkpoint_config_deepcopy(
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
@@ -582,7 +580,6 @@ def test_checkpoint_config_deepcopy(
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
@@ -624,7 +621,6 @@ def test_checkpoint_config_deepcopy(
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
@@ -672,7 +668,6 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
@@ -703,7 +698,6 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {

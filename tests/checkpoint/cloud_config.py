@@ -269,7 +269,6 @@ def _checkpoint_config(data_file_name, with_slack):
                     "ge_cloud_id": None,
                     "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",
                     "name": "my_checkpoint",
-                    "profilers": [],
                     "runtime_configuration": {},
                     "validations": [
                         {
