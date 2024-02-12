@@ -28,6 +28,10 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     """Expect the values for each record to be unique across the columns listed.
 

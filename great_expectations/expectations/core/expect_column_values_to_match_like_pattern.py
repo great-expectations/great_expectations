@@ -26,6 +26,10 @@ except ImportError:
     pass
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
     """Expect the column entries to be strings that match a given like pattern expression.
 

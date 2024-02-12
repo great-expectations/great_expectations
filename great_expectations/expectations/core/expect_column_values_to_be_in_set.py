@@ -45,6 +45,10 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     """Expect each column value to be in a given set.
 
