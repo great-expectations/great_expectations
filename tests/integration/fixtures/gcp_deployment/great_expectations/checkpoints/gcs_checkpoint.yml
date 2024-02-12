@@ -1,7 +1,4 @@
 name: gcs_checkpoint
-config_version: 1.0
-module_name: great_expectations.checkpoint
-class_name: Checkpoint
 expectation_suite_name:
 batch_request:
 action_list:

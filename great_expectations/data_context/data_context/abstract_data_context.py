@@ -1404,9 +1404,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: str = ...,
-        config_version: float = ...,
-        module_name: str = ...,
-        class_name: str = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
@@ -1433,9 +1430,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: None = ...,
-        config_version: float = ...,
-        module_name: str = ...,
-        class_name: str = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
@@ -1481,9 +1475,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: float = 1.0,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
@@ -1506,9 +1497,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             name: The name to give the checkpoint.
-            config_version: The config version of this checkpoint.
-            module_name: The module name to use in generating this checkpoint.
-            class_name: The class name to use in generating this checkpoint.
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
@@ -1540,9 +1528,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            module_name=module_name,
-            class_name=class_name,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
@@ -1598,9 +1583,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str = ...,
         id: str | None = ...,
-        config_version: float = ...,
-        module_name: str = ...,
-        class_name: str = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
@@ -1625,9 +1607,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         id: None = ...,
-        config_version: float = ...,
-        module_name: str = ...,
-        class_name: str = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
@@ -1658,9 +1637,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: float = 1.0,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
@@ -1679,9 +1655,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name to give the checkpoint.
             id: The ID to associate with this checkpoint.
-            config_version: The config version of this checkpoint.
-            module_name: The module name to use in generating this checkpoint.
-            class_name: The class name to use in generating this checkpoint.
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
@@ -1707,9 +1680,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            module_name=module_name,
-            class_name=class_name,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
@@ -1738,9 +1708,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: float = 1.0,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
@@ -1771,9 +1738,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 data_context=self,
                 checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
                 name=name,
-                config_version=config_version,
-                module_name=module_name,
-                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
                 action_list=action_list,

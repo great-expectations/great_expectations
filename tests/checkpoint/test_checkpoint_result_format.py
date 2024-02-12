@@ -3527,8 +3527,6 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
 
     checkpoint_config_yml = """
 name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
 batch_request:
   datasource_name: pandas_datasource
   data_asset_name: IN_MEMORY_DATA_ASSET
