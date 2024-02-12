@@ -57,7 +57,6 @@ def checkpoint_config_spark(
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
-        config_version=1,
         expectation_suite_name="users.delivery",
         validations=[
             CheckpointValidationConfig(
@@ -80,7 +79,6 @@ def checkpoint_config_with_schema_spark(
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
-        config_version=1,
         expectation_suite_name="users.delivery",
         validations=[
             CheckpointValidationConfig(
@@ -372,7 +370,6 @@ def test_checkpoint_config_deepcopy(
 
     nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
-        config_version=1,
         expectation_suite_name="users.delivery",
         validations=[
             {
@@ -480,7 +477,6 @@ def test_checkpoint_config_deepcopy(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
                 expectation_suite_name="users.delivery",
                 validations=[
                     CheckpointValidationConfig(
@@ -496,13 +492,10 @@ def test_checkpoint_config_deepcopy(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
                 "runtime_configuration": {},
@@ -524,7 +517,6 @@ def test_checkpoint_config_deepcopy(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
                 default_validation_id="93e015ee-6405-4d5e-894c-741dc763f509",
                 expectation_suite_name="users.delivery",
                 validations=[
@@ -541,14 +533,11 @@ def test_checkpoint_config_deepcopy(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "default_validation_id": "93e015ee-6405-4d5e-894c-741dc763f509",
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
                 "runtime_configuration": {},
@@ -570,7 +559,6 @@ def test_checkpoint_config_deepcopy(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
                 default_validation_id="e3ff7a3a-3529-4c2a-be22-598493269680",
                 expectation_suite_name="users.delivery",
                 validations=[
@@ -588,14 +576,11 @@ def test_checkpoint_config_deepcopy(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "default_validation_id": "e3ff7a3a-3529-4c2a-be22-598493269680",
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
                 "runtime_configuration": {},
@@ -618,7 +603,6 @@ def test_checkpoint_config_deepcopy(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
                 expectation_suite_name="users.delivery",
                 validations=[
                     CheckpointValidationConfig(
@@ -635,13 +619,10 @@ def test_checkpoint_config_deepcopy(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
                 "runtime_configuration": {},
@@ -686,13 +667,10 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
                 "runtime_configuration": {},
@@ -720,13 +698,10 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
                 "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_nested_checkpoint",
                 "profilers": [],
                 "runtime_configuration": {},

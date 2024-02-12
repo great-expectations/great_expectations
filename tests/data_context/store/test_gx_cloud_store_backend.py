@@ -217,7 +217,6 @@ def test_set(
 
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDict(
                 name="store_validation_result",
