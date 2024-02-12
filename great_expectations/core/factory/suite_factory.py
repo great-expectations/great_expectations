@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import submit as submit_event
@@ -8,6 +8,7 @@ from great_expectations.analytics.events import (
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.factory.factory import Factory
 from great_expectations.exceptions import DataContextError
