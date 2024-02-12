@@ -79,6 +79,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         BatchRequestOptions,
+        Partitioner,
     )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
@@ -266,7 +267,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # End Abstract Methods
 
     @public_api
-    def add_batch_config(self, name: str) -> BatchConfig:
+    def add_batch_config(
+        self, name: str, partitioner: Optional[Partitioner] = None
+    ) -> BatchConfig:
         """Add a BatchConfig to this DataAsset.
         BatchConfig names must be unique within a DataAsset.
 
@@ -274,6 +277,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         Args:
             name (str): Name of the new batch config.
+            partitioner: Optional Partitioner to partition this BatchConfig
 
         Returns:
             BatchConfig: The new batch config.
@@ -287,7 +291,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)
         assert isinstance(self.datasource, Datasource)
 
-        batch_config = BatchConfig(name=name)
+        batch_config = BatchConfig(name=name, partitioner=partitioner)
         batch_config.set_data_asset(self)
         self.batch_configs.append(batch_config)
         if self.datasource.data_context:

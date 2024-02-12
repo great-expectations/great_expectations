@@ -11,6 +11,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
+from great_expectations.datasource.fluent.sql_datasource import PartitionerYear
 
 DATASOURCE_NAME = "my datasource for batch configs"
 EMPTY_DATA_ASSET_NAME = "my data asset for batch configs"
@@ -89,17 +90,43 @@ def test_add_batch_config__success(empty_data_asset: DataAsset):
 
 
 @pytest.mark.unit
+def test_add_batch_config_with_partitioner__success(empty_data_asset: DataAsset):
+    name = "my batch config"
+    partitioner = PartitionerYear(column_name="test-column")
+    batch_config = empty_data_asset.add_batch_config(name, partitioner=partitioner)
+
+    assert batch_config.partitioner == partitioner
+
+
+@pytest.mark.unit
 def test_add_batch_config__persists(
     file_context: AbstractDataContext, empty_data_asset: DataAsset
 ):
     name = "my batch config"
-    batch_config = empty_data_asset.add_batch_config(name)
+    partitioner = PartitionerYear(column_name="test-column")
+    batch_config = empty_data_asset.add_batch_config(name, partitioner=partitioner)
 
     loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
     assert loaded_asset.batch_configs == [batch_config]
+
+
+@pytest.mark.unit
+def test_add_batch_config_with_partitioner__persists(
+    file_context: AbstractDataContext, empty_data_asset: DataAsset
+):
+    name = "my batch config"
+    partitioner = PartitionerYear(column_name="test-column")
+    empty_data_asset.add_batch_config(name, partitioner=partitioner)
+
+    loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
+    assert isinstance(loaded_datasource, Datasource)
+    loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
+
+    loaded_batch_config = loaded_asset.batch_configs[0]
+    assert loaded_batch_config.partitioner == partitioner
 
 
 @pytest.mark.unit
