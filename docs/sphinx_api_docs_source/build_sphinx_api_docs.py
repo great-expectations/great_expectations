@@ -253,36 +253,36 @@ class SphinxInvokeDocsBuilder:
             external_ref.string = formatted_text
 
         # Process internal links
-        # Note: Currently the docusaurus link checker does not work well with
-        # anchor links, so we need to make these links absolute.
-        # We also need to use the shortened path version to match
-        # what is used for the page url.
+        # There are a couple things we need to do here:
+        #  - Use relative links. This solves two problems
+        #     - Ensure links continue to work even after cutting new docs versions
+        #     - Ensure links continue to work regardless of host url
+        #  - Remove fragments from links; docusaurus currently errors on these.
         internal_refs = doc.find_all(class_="reference internal")
         for internal_ref in internal_refs:
             href = internal_ref["href"]
 
             split_href = href.split("#")
-
             href_path = pathlib.Path(split_href[0])
 
             if str(href_path) == ".":
                 # For self referential links, use the file path
-                shortened_path_version = self._get_mdx_file_path(
-                    sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
-                ).with_suffix("")
+                link_sidebar_entry = self._get_sidebar_entry(
+                    html_file_path=html_file_path
+                )
             else:
-                shortened_path_version = self._get_mdx_file_path(
-                    sidebar_entry=self._get_sidebar_entry(html_file_path=href_path)
-                ).with_suffix("")
+                link_sidebar_entry = self._get_sidebar_entry(html_file_path=href_path)
 
-            fragment = ""
-            if len(split_href) > 1:
-                fragment = split_href[1]
-
-            absolute_href = (
-                self._get_base_url() + str(shortened_path_version) + "#" + fragment
+            relative_link = self._relative_path_between_documents(
+                sidebar_entry.mdx_relpath, link_sidebar_entry.mdx_relpath
             )
-            internal_ref["href"] = absolute_href
+            without_extension = str(relative_link).replace(".mdx", "")
+            if not without_extension.endswith("_class"):
+                breakpoint()
+                raise Exception(
+                    f"Expected class mdx file path to end with _class; this could indicate a method link that will break: {without_extension}"
+                )
+            internal_ref["href"] = str(without_extension)
 
         doc_str = str(doc)
 
@@ -295,6 +295,19 @@ class SphinxInvokeDocsBuilder:
             doc_str = self._clean_up_code_blocks(doc_str)
 
         return doc_str
+
+    def _relative_path_between_documents(
+        self, from_path: pathlib.Path, to_path: pathlib.Path
+    ) -> pathlib.Path:
+        """Get the relative path between two documents.
+
+        This assumes the paths are relative to the same root."""
+        # NOTE: this can be simplified to just use pathlib.Path::relative_to with walk_up=True in python 3.12
+        directories_up = len(from_path.parts) - 1
+        path_up = "../" * directories_up if directories_up > 0 else "./"
+
+        output = path_up / to_path
+        return output
 
     def _get_sidebar_entry(self, html_file_path: pathlib.Path) -> SidebarEntry:
         """Get the sidebar entry from html file path.
@@ -355,16 +368,6 @@ class SphinxInvokeDocsBuilder:
 
         # We don't want the .py suffix in the URL so we only add the .mdx suffix.
         return definition_path.with_suffix(".mdx")
-
-    def _get_base_url(self) -> str:
-        """The base url for use in generating absolute links.
-
-        Note, this will need to be modified if we begin to nest
-        directories inside of /docs/reference/api/
-        """
-        # URL is an environment variable provided by Netlify
-        base_url = os.getenv("URL", "http://localhost:3000")
-        return f"{base_url}/docs/reference/api/"
 
     def _remove_temp_html(self) -> None:
         """Remove the Sphinx-generated temporary html files + related files."""
