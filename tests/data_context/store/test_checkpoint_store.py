@@ -248,8 +248,6 @@ def test_checkpoint_store(empty_data_context):
                     "attributes": {
                         "checkpoint_config": {
                             "name": "oss_test_checkpoint",
-                            "config_version": 1.0,
-                            "class_name": "Checkpoint",
                             "expectation_suite_name": "oss_test_expectation_suite",
                             "validations": [
                                 {
@@ -268,8 +266,6 @@ def test_checkpoint_store(empty_data_context):
                 }
             },
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "expectation_suite_name": "oss_test_expectation_suite",
                 "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",
@@ -296,8 +292,6 @@ def test_checkpoint_store(empty_data_context):
                         "attributes": {
                             "checkpoint_config": {
                                 "name": "oss_test_checkpoint",
-                                "config_version": 1.0,
-                                "class_name": "Checkpoint",
                                 "expectation_suite_name": "oss_test_expectation_suite",
                                 "validations": [
                                     {
@@ -317,8 +311,6 @@ def test_checkpoint_store(empty_data_context):
                 ]
             },
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "expectation_suite_name": "oss_test_expectation_suite",
                 "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",

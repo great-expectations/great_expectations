@@ -18,7 +18,6 @@ def checkpoint(
         data_context=context,
         **{
             "name": "my_checkpoint",
-            "config_version": 1.0,
             "expectation_suite_name": None,
             "batch_request": None,
             "action_list": [
@@ -47,7 +46,6 @@ def checkpoint(
                     "expectation_suite_name": "test_suite",
                 }
             ],
-            "profilers": [],
             "ge_cloud_id": None,
             "expectation_suite_ge_cloud_id": None,
         },

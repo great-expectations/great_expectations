@@ -1,7 +1,4 @@
 name: bigquery_checkpoint
-config_version: 1.0
-module_name: great_expectations.checkpoint
-class_name: Checkpoint
 expectation_suite_name:
 batch_request:
 action_list:
@@ -29,6 +26,5 @@ validations:
       batch_spec_passthrough:
         bigquery_temp_table: ge_temp
     expectation_suite_name: test_bigquery_suite
-profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:

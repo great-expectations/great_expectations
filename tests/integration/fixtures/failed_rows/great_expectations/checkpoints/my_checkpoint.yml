@@ -1,7 +1,4 @@
 name: my_checkpoint
-config_version: 1.0
-module_name: great_expectations.checkpoint
-class_name: Checkpoint
 expectation_suite_name: visitors_exp
 batch_request:
   datasource_name: visits_datasource
@@ -17,6 +14,5 @@ action_list:
 evaluation_parameters: {}
 runtime_configuration: {}
 validations: []
-profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:

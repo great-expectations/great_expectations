@@ -125,7 +125,6 @@ class BaseCheckpoint(ConfigPeer):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] | None = None,
         run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
@@ -145,7 +144,6 @@ class BaseCheckpoint(ConfigPeer):
             runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
                 (e.g. `result_format`).
             validations: Validations to be executed as part of checkpoint.
-            profilers: Profilers to use in generating this checkpoint.
             run_id: The run_id for the validation; if None, a default value will be used.
             run_name: The run_name for the validation; if None, a default value will be used.
             run_time: The date/time of the run.
@@ -224,7 +222,6 @@ class BaseCheckpoint(ConfigPeer):
             "evaluation_parameters": evaluation_parameters or {},
             "runtime_configuration": runtime_configuration or {},
             "validations": validations or [],
-            "profilers": profilers or [],
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
@@ -557,13 +554,6 @@ is run), with each validation having its own defined "action_list" attribute.
         return self.config.name
 
     @property
-    def config_version(self) -> float | None:
-        try:
-            return self.config.config_version
-        except AttributeError:
-            return None
-
-    @property
     def action_list(self) -> Sequence[ActionDict]:
         try:
             return self.config.action_list
@@ -627,9 +617,8 @@ class Checkpoint(BaseCheckpoint):
     being performed if they are configured to do so.
 
     Args:
-        name: User-selected cCheckpoint name (e.g. "staging_tables").
+        name: User-selected checkpoint name (e.g. "staging_tables").
         data_context: Data context that is associated with the current checkpoint.
-        config_version: Version number of the checkpoint configuration.
         expectation_suite_name: Expectation suite associated with checkpoint.
         batch_request: Batch request describing the batch of data to validate.
         action_list: A list of actions to perform after each batch is validated.
@@ -637,7 +626,6 @@ class Checkpoint(BaseCheckpoint):
         runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
             (e.g. `result_format`).
         validations: Validations to be executed as part of checkpoint.
-        profilers: Profilers to use in generating this checkpoint.
         validation_operator_name: List of validation Operators configured by the Checkpoint.
         batches: List of Batches for validation by Checkpoint.
         ge_cloud_id: Great Expectations Cloud id for this Checkpoint.
@@ -673,7 +661,6 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: int | float = 1.0,  # noqa: PYI041
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         validator: Validator | None = None,
@@ -681,7 +668,6 @@ class Checkpoint(BaseCheckpoint):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -729,8 +715,6 @@ constructor arguments.
 
         checkpoint_config = CheckpointConfig(
             name=name,
-            config_version=config_version,
-            class_name=self.__class__.__name__,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,  # type: ignore[arg-type] # FluentBatchRequest is not a dict
             # TODO: check if `pydantic.BaseModel` and call `batch_request.dict()`??
@@ -738,7 +722,6 @@ constructor arguments.
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             default_validation_id=default_validation_id,
@@ -756,7 +739,6 @@ constructor arguments.
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
-        config_version: Optional[Union[int, float]] = 1.0,
         module_name: str = "great_expectations.checkpoint",
         class_name: Literal["Checkpoint"] = "Checkpoint",
         expectation_suite_name: Optional[str] = None,
@@ -767,7 +749,6 @@ constructor arguments.
         validations: Optional[
             Union[list[dict], list[CheckpointValidationConfig]]
         ] = None,
-        profilers: Optional[list[dict]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -800,7 +781,6 @@ constructor arguments.
 
         checkpoint_config = {
             "name": name,
-            "config_version": config_version,
             "module_name": module_name,
             "class_name": class_name,
             "expectation_suite_name": expectation_suite_name,
@@ -809,7 +789,6 @@ constructor arguments.
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "profilers": profilers,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "default_validation_id": default_validation_id,
@@ -880,14 +859,4 @@ constructor arguments.
             clean_falsy=True,
         )
 
-        checkpoint: Checkpoint = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": data_context,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint",
-            },
-        )
-
-        return checkpoint
+        return Checkpoint(**config, data_context=data_context)

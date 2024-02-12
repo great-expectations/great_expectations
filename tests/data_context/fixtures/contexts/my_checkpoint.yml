@@ -1,6 +1,4 @@
 name: my_v1_checkpoint
-config_version: 1
-class_name: Checkpoint
 validations:
   - batch_request:
       datasource_name: my_datasource

@@ -430,8 +430,6 @@ assert second_batch_identifiers == {
 equivalent_using_checkpoint = """
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py checkpoint_example">
 name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
 validations:
   - batch_request:
       datasource_name: taxi_datasource

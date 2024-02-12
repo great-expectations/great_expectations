@@ -164,12 +164,10 @@ assert len(suite.expectations) == 2
 my_checkpoint_name = "insert_your_checkpoint_name_here"
 my_checkpoint_config = f"""
 name: {my_checkpoint_name}
-config_version: 1.0
-class_name: Checkpoint
 """
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config">
-my_checkpoint = context.test_yaml_config(my_checkpoint_config)
+my_checkpoint = context.test_yaml_config(my_checkpoint_config, class_name="Checkpoint")
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py add checkpoint config">

@@ -71,8 +71,6 @@ if __name__ == "__main__":
     my_checkpoint_name = "in_memory_checkpoint"
     python_config = {
         "name": my_checkpoint_name,
-        "class_name": "Checkpoint",
-        "config_version": 1,
         "action_list": [
             {
                 "name": "store_validation_result",
