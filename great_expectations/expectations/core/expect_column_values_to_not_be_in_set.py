@@ -41,26 +41,6 @@ from great_expectations._docs_decorators import public_api
 class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     """Expect column entries to not be in the set.
 
-    For example:
-    ::
-
-        # my_df.my_col = [1,2,2,3,3,3]
-        >>> my_df.expect_column_values_to_not_be_in_set(
-                "my_col",
-                [1,2]
-            )
-        {
-            "success": false
-            "result": {
-                "unexpected_count": 3
-                "unexpected_percent": 50.0,
-                "unexpected_percent_nonmissing": 50.0,
-                "partial_unexpected_list": [
-                    1, 2, 2
-                ],
-            },
-        }
-
     expect_column_values_to_not_be_in_set is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 

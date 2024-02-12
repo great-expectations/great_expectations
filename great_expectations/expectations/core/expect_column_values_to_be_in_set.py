@@ -45,12 +45,8 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
-    """Expect each column value to be in a given set.
+    r"""Expect each column value to be in a given set.
 
     For example:
     ::
@@ -60,17 +56,17 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 "my_col",
                 [2,3]
             )
-        {
+        \{
             "success": false
-            "result": {
+            "result": \{
                 "unexpected_count": 1
                 "unexpected_percent": 16.66666666666666666,
                 "unexpected_percent_nonmissing": 16.66666666666666666,
                 "partial_unexpected_list": [
                     1
                 ],
-            },
-        }
+            \},
+        \}
 
     expect_column_values_to_be_in_set is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
@@ -118,9 +114,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "manually_reviewed_code": True,
     }
 
-    map_metric = "column_values.in_set"
+    map_metric: ClassVar[str] = "column_values.in_set"
 
-    args_keys = (
+    args_keys: ClassVar[Tuple[str, ...]] = (
         "column",
         "value_set",
     )
@@ -130,7 +126,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "row_condition",
         "condition_parser",
     )
-    success_keys = (
+    success_keys: ClassVar[Tuple[str, ...]] = (
         "value_set",
         "mostly",
     )

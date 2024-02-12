@@ -52,37 +52,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     The success value for this expectation will match that of \
     [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set).
 
-    For example:
-    ::
-
-        # my_df.my_col = [1,2,2,3,3,3]
-        >>> my_df.expect_column_distinct_values_to_be_in_set(
-                "my_col",
-                [2, 3, 4]
-            )
-        {
-            "success": false
-            "result": {
-                "observed_value": [1,2,3],
-                "details": {
-                    "value_counts": [
-                        {
-                            "value": 1,
-                            "count": 1
-                        },
-                        {
-                            "value": 2,
-                            "count": 1
-                        },
-                        {
-                            "value": 3,
-                            "count": 1
-                        }
-                    ]
-                }
-            }
-        }
-
     Args:
         column (str): \
             The column name.

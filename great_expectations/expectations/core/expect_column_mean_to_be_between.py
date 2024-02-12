@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
@@ -104,15 +104,15 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.mean",)
-    success_keys = (
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ("column.mean",)
+    success_keys: ClassVar[Tuple[str, ...]] = (
         "min_value",
         "strict_min",
         "max_value",
         "strict_max",
     )
 
-    args_keys = (
+    args_keys: ClassVar[Tuple[str, ...]] = (
         "column",
         "min_value",
         "max_value",
@@ -120,7 +120,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         "strict_max",
     )
 
-    kwargs_json_schema_base_properties = {
+    kwargs_json_schema_base_properties: ClassVar[dict] = {
         "result_format": {
             "oneOf": [
                 {"type": "null"},
@@ -148,7 +148,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         "meta": {"type": "object"},
     }
 
-    kwargs_json_schema = {
+    kwargs_json_schema: ClassVar[dict] = {
         "type": "object",
         "properties": {
             **kwargs_json_schema_base_properties,

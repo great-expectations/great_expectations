@@ -66,34 +66,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     expect_column_quantile_values_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-    For example:
-    ::
-
-        # my_df.my_col = [1,2,2,3,3,3,4]
-        >>> my_df.expect_column_quantile_values_to_be_between(
-            "my_col",
-            {
-                "quantiles": [0., 0.333, 0.6667, 1.],
-                "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
-            }
-        )
-        {
-          "success": True,
-            "result": {
-              "observed_value": {
-                "quantiles: [0., 0.333, 0.6667, 1.],
-                "values": [1, 2, 3, 4],
-              }
-              "element_count": 7,
-              "missing_count": 0,
-              "missing_percent": 0.0,
-              "details": {
-                "success_details": [true, true, true, true]
-              }
-            }
-          }
-        }
-
     expect_column_quantile_values_to_be_between can be computationally intensive for large datasets.
 
     Args:
