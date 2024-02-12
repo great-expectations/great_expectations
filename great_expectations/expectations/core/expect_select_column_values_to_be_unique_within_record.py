@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -76,7 +76,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     column_list: Union[tuple, list]
     ignore_row_if: str = "all_values_are_missing"
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": [
             "core expectation",

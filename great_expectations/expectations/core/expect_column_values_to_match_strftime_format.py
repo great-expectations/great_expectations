@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.evaluation_parameters import (
@@ -90,7 +90,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
         return strftime_format
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [

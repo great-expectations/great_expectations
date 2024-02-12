@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -37,7 +37,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": [
             "core expectation",

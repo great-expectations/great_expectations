@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -97,7 +97,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
     value_set: Union[list, set, EvaluationParameterDict, None]
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [

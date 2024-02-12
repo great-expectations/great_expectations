@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Literal, Optional, Union
 
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
@@ -88,7 +88,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     regex_list: Union[List[str], EvaluationParameterDict]
     match_on: Literal["any", "all"] = "any"
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [

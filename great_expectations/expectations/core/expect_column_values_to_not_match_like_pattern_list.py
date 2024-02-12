@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.evaluation_parameters import (
@@ -86,7 +86,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
 
         return like_pattern_list
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
