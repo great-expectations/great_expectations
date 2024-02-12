@@ -22,18 +22,19 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py create_validator">
-validator = context.sources.pandas_default.read_csv(
+context.sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
 
 
-validator.expect_column_values_to_not_be_null("pickup_datetime")
-validator.expect_column_values_to_be_between(
-    "passenger_count", min_value=1, max_value=6
+my_suite = context.add_expectation_suite("my_suite")
+my_suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+my_suite.add_expectation(
+    gxe.ExpectColumnValuesToBeBetween(
+        column="passenger_count", min_value=1, max_value=6
+    )
 )
-
-my_suite = validator.get_expectation_suite()
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py show_suite">
 my_suite.show_expectations_by_expectation_type()
