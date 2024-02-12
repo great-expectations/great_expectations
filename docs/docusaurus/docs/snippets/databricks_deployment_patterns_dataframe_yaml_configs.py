@@ -175,8 +175,8 @@ context.add_or_update_checkpoint(**yaml.load(my_checkpoint_config))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py run checkpoint">
-checkpoint_result = context.run_checkpoint(
-    checkpoint_name=my_checkpoint_name,
+checkpoint = context.get_checkpoint(my_checkpoint_name)
+checkpoint_result = checkpoint.run(
     validations=[
         {
             "batch_request": batch_request,
