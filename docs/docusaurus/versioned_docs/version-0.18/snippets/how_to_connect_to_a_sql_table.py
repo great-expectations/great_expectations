@@ -24,7 +24,7 @@ sqlite_database_path = str(
 )
 
 
-my_table_name = "version-0.18 yellow_tripdata_sample_2019_01"
+my_table_name = "yellow_tripdata_sample_2019_01"
 
 context = gx.get_context()
 
@@ -33,19 +33,17 @@ connection_string = f"sqlite:///{sqlite_database_path}"
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=GxDatasourceWarning)
     datasource = context.sources.add_sql(
-        name="version-0.18 my_datasource", connection_string=connection_string
+        name="my_datasource", connection_string=connection_string
     )
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py datasource">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py datasource">
 datasource = context.get_datasource("my_datasource")
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py create_datasource">
-table_asset = datasource.add_table_asset(
-    name="version-0.18 my_asset", table_name=my_table_name
-)
+# <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py create_datasource">
+table_asset = datasource.add_table_asset(name="my_asset", table_name=my_table_name)
 # </snippet>
 
 assert datasource.get_asset_names() == {"my_asset"}
@@ -77,11 +75,11 @@ assert set(batches[0].columns()) == {
     "congestion_surcharge",
 }
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py add_vendor_id_splitter">
-table_asset.add_splitter_column_value("vendor_id")
+# <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py add_vendor_id_splitter">
+table_asset.add_partitioner_column_value("vendor_id")
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request">
 my_batch_request = my_asset.build_batch_request({"vendor_id": 1})
 # </snippet>
 

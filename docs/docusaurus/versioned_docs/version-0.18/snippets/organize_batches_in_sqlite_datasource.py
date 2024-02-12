@@ -22,25 +22,23 @@ context = gx.get_context()
 
 sql_connection_string = f"sqlite:///{yellow_tripdata_db_file}"
 my_datasource = context.sources.add_sqlite(
-    name="version-0.18 my_datasource", connection_string=sql_connection_string
+    name="my_datasource", connection_string=sql_connection_string
 )
 
 my_datasource.add_table_asset(
-    name="my_table_asset",
-    table_name="version-0.18 yellow_tripdata_sample_2020",
-    schema_name=None,
+    name="my_table_asset", table_name="yellow_tripdata_sample_2020", schema_name=None
 )
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource">
+# <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource">
 my_datasource = context.get_datasource("my_datasource")
-my_table_asset = my_datasource.get_asset(asset_name="version-0.18 my_table_asset")
+my_table_asset = my_datasource.get_asset(asset_name="my_table_asset")
 # </snippet>
 
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month">
-my_table_asset.add_splitter_year_and_month(column_name="version-0.18 pickup_datetime")
+# <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month">
+my_table_asset.add_partitioner_year_and_month(column_name="pickup_datetime")
 # </snippet>
 
 my_batch_request = my_table_asset.build_batch_request()
@@ -49,14 +47,14 @@ batches = my_table_asset.get_batch_list_from_batch_request(my_batch_request)
 assert len(batches) == 12
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_sorters">
+# <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_sorters">
 my_asset = my_table_asset.add_sorters(["+year", "-month"])
 # </snippet>
 
 assert my_asset.batch_request_options == ("year", "month")
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_batch_list">
+# <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_batch_list">
 my_batch_request = my_table_asset.build_batch_request()
 batches = my_table_asset.get_batch_list_from_batch_request(my_batch_request)
 # </snippet>
@@ -68,7 +66,7 @@ assert my_batch_request.options == {}
 assert len(batches) == 12
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec">
+# <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec">
 for batch in batches:
     print(batch.batch_spec)
 # </snippet>

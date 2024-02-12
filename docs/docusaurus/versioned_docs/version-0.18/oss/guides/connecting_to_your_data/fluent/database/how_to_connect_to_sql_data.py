@@ -23,15 +23,15 @@ sqlite_database_path = str(
     ).resolve(strict=True)
 )
 
-my_table_name = "version-0.18 yellow_tripdata_sample_2019_01"
+my_table_name = "yellow_tripdata_sample_2019_01"
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py sql_connection_string">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py sql_connection_string">
 connection_string = "postgresql+psycopg2://username:my_password@localhost/test"
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py connection_string">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py connection_string">
 connection_string = (
     "postgresql+psycopg2://<USERNAME>:${MY_PASSWORD}@<HOST>:<PORT>/<DATABASE>"
 )
@@ -40,16 +40,16 @@ connection_string = (
 connection_string = f"sqlite:///{sqlite_database_path}"
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py add_sql">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py add_sql">
 datasource = context.sources.add_sql(
-    name="version-0.18 my_datasource", connection_string=connection_string
+    name="my_datasource", connection_string=connection_string
 )
 # </snippet>
 
 assert datasource
 assert datasource.name == "my_datasource"
 
-asset_name = "version-0.18 my_asset"
+asset_name = "my_asset"
 datasource.add_table_asset(name=asset_name, table_name=my_table_name)
 
 assert datasource.get_asset_names() == {asset_name}

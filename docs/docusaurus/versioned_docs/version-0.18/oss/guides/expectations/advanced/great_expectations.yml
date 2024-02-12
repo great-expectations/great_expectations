@@ -53,7 +53,7 @@ stores:
       suppress_store_backend_id: true
       base_directory: checkpoints/
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/great_expectations.yml my_query_store">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/great_expectations.yml my_query_store">
   my_query_store:
     class_name: SqlAlchemyQueryStore
     credentials: ${my_query_store_creds}

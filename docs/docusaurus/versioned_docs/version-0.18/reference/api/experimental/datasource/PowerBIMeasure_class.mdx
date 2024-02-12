@@ -12,13 +12,16 @@ sidebar_label: PowerBIMeasure
 <dd><p>Microsoft PowerBI Measure.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="great_expectations.experimental.datasource.PowerBIMeasure.add_batch_config">
-<span class="sig-name descname"><span class="pre">add_batch_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">great_expectations.core.batch_config.BatchConfig</span></span></span><a class="headerlink" href="#great_expectations.experimental.datasource.PowerBIMeasure.add_batch_config" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_batch_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Partitioner</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">BatchConfig</span></span></span><a class="headerlink" href="#great_expectations.experimental.datasource.PowerBIMeasure.add_batch_config" title="Permalink to this definition">#</a></dt>
 <dd><p>Add a BatchConfig to this DataAsset.
 BatchConfig names must be unique within a DataAsset.</p>
 <p>If the DataAsset is tied to a DataContext, the BatchConfig will be persisted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the new batch config.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the new batch config.</p></li>
+<li><p><strong>partitioner</strong> – Optional Partitioner to partition this BatchConfig</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The new batch config.</p>

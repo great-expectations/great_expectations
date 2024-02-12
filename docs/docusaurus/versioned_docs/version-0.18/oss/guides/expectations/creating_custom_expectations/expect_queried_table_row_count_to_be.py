@@ -21,23 +21,23 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py ExpectQueriedTableRowCountToBe class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py ExpectQueriedTableRowCountToBe class_def">
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring">
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
 
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies">
     metric_dependencies = ("query.table",)
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query">
     query: str = """
             SELECT COUNT(*)
-            FROM {active_batch}
+            FROM {batch}
             """
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py success_keys">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py success_keys">
     success_keys = (
         "value",
         "query",
@@ -60,8 +60,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function">
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function signature">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py _validate function signature">
     def _validate(
         self,
         metrics: dict,
@@ -81,7 +81,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         }
 
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py examples">
     examples = [
         {
             "data": [
@@ -151,7 +151,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py print_diagnostic_checklist">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py print_diagnostic_checklist">
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
     # </snippet>
 

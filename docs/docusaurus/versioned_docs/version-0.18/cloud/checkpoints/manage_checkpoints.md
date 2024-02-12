@@ -102,7 +102,7 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
 2. Run the following Python code to retrieve the Checkpoint:
 
     ```python title="Jupyter Notebook"
-    retrieved_checkpoint = context.get_checkpoint(name="version-0.18 <checkpoint_name>") 
+    retrieved_checkpoint = context.get_checkpoint(name="<checkpoint_name>") 
     ```
 3. Edit the Checkpoint configuration. 
 

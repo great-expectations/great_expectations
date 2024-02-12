@@ -32,8 +32,7 @@ context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # Add a Checkpoint
 context.add_or_update_checkpoint(
-    name="version-0.18 test_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template",
+    name="test_checkpoint",
     validations=[
         {
             "batch_request": {
@@ -61,7 +60,7 @@ context.add_or_update_checkpoint(
 )
 assert context.list_checkpoints() == ["test_checkpoint"]
 
-results = context.run_checkpoint(checkpoint_name="version-0.18 test_checkpoint")
+results = context.run_checkpoint(checkpoint_name="test_checkpoint")
 assert results.success is True
 run_id_type = type(results.run_id)
 assert run_id_type == RunIdentifier
@@ -91,7 +90,7 @@ typed_results = {
     "success": True,
 }
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py results">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py results">
 results = {
     "run_id": RunIdentifier,
     "run_results": {
@@ -115,13 +114,12 @@ assert typed_results == results
 os.environ["VAR"] = "ge"
 
 batch_request = FluentBatchRequest(
-    datasource_name="version-0.18 taxi_datasource",
-    data_asset_name="version-0.18 taxi_asset",
+    datasource_name="taxi_datasource",
+    data_asset_name="taxi_asset",
     options={"year": "2019", "month": "01"},
 )
 validator = context.get_validator(
-    batch_request=batch_request,
-    expectation_suite_name="version-0.18 my_expectation_suite",
+    batch_request=batch_request, expectation_suite_name="my_expectation_suite"
 )
 validator.expect_table_row_count_to_be_between(
     min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0},
@@ -129,8 +127,7 @@ validator.expect_table_row_count_to_be_between(
 )
 validator.save_expectation_suite(discard_failed_expectations=False)
 validator = context.get_validator(
-    batch_request=batch_request,
-    expectation_suite_name="version-0.18 my_other_expectation_suite",
+    batch_request=batch_request, expectation_suite_name="my_other_expectation_suite"
 )
 validator.expect_table_row_count_to_be_between(
     min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0},
@@ -138,11 +135,10 @@ validator.expect_table_row_count_to_be_between(
 )
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py no_nesting">
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py no_nesting just the yaml">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py no_nesting">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py no_nesting just the yaml">
 context.add_or_update_checkpoint(
-    name="version-0.18 my_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template-$VAR",
+    name="my_checkpoint",
     validations=[
         {
             "batch_request": {
@@ -175,8 +171,8 @@ context.add_or_update_checkpoint(
 # </snippet>
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint">
-results = context.run_checkpoint(checkpoint_name="version-0.18 my_checkpoint")
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint">
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
 assert (
@@ -192,11 +188,10 @@ assert (
     == 1000
 )
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py nesting_with_defaults">
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py nesting_with_defaults just the yaml">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py nesting_with_defaults">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py nesting_with_defaults just the yaml">
 context.add_or_update_checkpoint(
-    name="version-0.18 my_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template-$VAR",
+    name="my_checkpoint",
     validations=[
         {
             "batch_request": {
@@ -213,7 +208,7 @@ context.add_or_update_checkpoint(
             },
         },
     ],
-    expectation_suite_name="version-0.18 my_expectation_suite",
+    expectation_suite_name="my_expectation_suite",
     action_list=[
         {
             "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
@@ -236,12 +231,12 @@ context.add_or_update_checkpoint(
 # </snippet>
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_2">
-results = context.run_checkpoint(checkpoint_name="version-0.18 my_checkpoint")
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_2">
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets">
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -277,11 +272,10 @@ assert second_batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py keys_passed_at_runtime">
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py keys_passed_at_runtime just the yaml">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py keys_passed_at_runtime">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py keys_passed_at_runtime just the yaml">
 context.add_or_update_checkpoint(
-    name="version-0.18 my_base_checkpoint",
-    run_name_template="%Y-%M-foo-bar-template-$VAR",
+    name="my_base_checkpoint",
     action_list=[
         {
             "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
@@ -304,9 +298,9 @@ context.add_or_update_checkpoint(
 # </snippet>
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_3">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_3">
 results = context.run_checkpoint(
-    checkpoint_name="version-0.18 my_base_checkpoint",
+    checkpoint_name="my_base_checkpoint",
     validations=[
         {
             "batch_request": {
@@ -328,7 +322,7 @@ results = context.run_checkpoint(
 )
 # </snippet>
 assert results.success is True
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets_2">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets_2">
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -367,11 +361,10 @@ assert second_batch_identifiers == {
 context.add_or_update_expectation_suite("my_expectation_suite")
 context.add_or_update_expectation_suite("my_other_expectation_suite")
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py using_template">
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py using_template just the yaml">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py using_template">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py using_template just the yaml">
 context.add_or_update_checkpoint(
-    name="version-0.18 my_checkpoint",
-    template_name="version-0.18 my_base_checkpoint",
+    name="my_checkpoint",
     validations=[
         {
             "batch_request": {
@@ -394,11 +387,11 @@ context.add_or_update_checkpoint(
 # </snippet>
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_4">
-results = context.run_checkpoint(checkpoint_name="version-0.18 my_checkpoint")
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_4">
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets_3">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets_3">
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -435,10 +428,8 @@ assert second_batch_identifiers == {
 # </snippet>
 
 equivalent_using_checkpoint = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints_and_actions.py checkpoint_example">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py checkpoint_example">
 name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
 validations:
   - batch_request:
       datasource_name: taxi_datasource
@@ -473,7 +464,7 @@ checkpoint_example = equivalent_using_checkpoint.replace(
 context.add_or_update_checkpoint(**yaml.load(equivalent_using_checkpoint))
 context.add_or_update_checkpoint(**yaml.load(checkpoint_example))
 
-results = context.run_checkpoint(checkpoint_name="version-0.18 my_checkpoint")
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 
 assert results.success is True
 validation_result = list(results.run_results.items())[0][1]["validation_result"]

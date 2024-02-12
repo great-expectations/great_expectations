@@ -19,7 +19,7 @@ CONNECTION_STRING = f"postgresql+psycopg2://{redshift_username}:{redshift_passwo
 from tests.test_utils import load_data_into_test_database
 
 load_data_into_test_database(
-    table_name="version-0.18 taxi_data",
+    table_name="taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=CONNECTION_STRING,
 )
@@ -27,7 +27,7 @@ load_data_into_test_database(
 context = gx.get_context()
 
 datasource_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/redshift_yaml_example.py datasource config">
+# <snippet name="docs/docusaurus/docs/snippets/redshift_yaml_example.py datasource config">
 name: my_redshift_datasource
 class_name: Datasource
 execution_engine:
@@ -51,27 +51,25 @@ datasource_yaml = datasource_yaml.replace(
     CONNECTION_STRING,
 )
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/redshift_yaml_example.py test datasource config">
+# <snippet name="docs/docusaurus/docs/snippets/redshift_yaml_example.py test datasource config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
 # First test for RuntimeBatchRequest using a query
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/redshift_yaml_example.py load data with query">
+# <snippet name="docs/docusaurus/docs/snippets/redshift_yaml_example.py load data with query">
 batch_request = RuntimeBatchRequest(
-    datasource_name="version-0.18 my_redshift_datasource",
-    data_connector_name="version-0.18 default_runtime_data_connector_name",
-    data_asset_name="version-0.18 default_name",  # this can be anything that identifies this data
+    datasource_name="my_redshift_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_suite"
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="version-0.18 test_suite"
+    batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 # </snippet>
@@ -81,15 +79,13 @@ assert isinstance(validator, gx.validator.validator.Validator)
 
 # Second test for BatchRequest naming a table
 batch_request = BatchRequest(
-    datasource_name="version-0.18 my_redshift_datasource",
-    data_connector_name="version-0.18 default_inferred_data_connector_name",
-    data_asset_name="version-0.18 taxi_data",  # this is the name of the table you want to retrieve
+    datasource_name="my_redshift_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
 )
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_suite"
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="version-0.18 test_suite"
+    batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 

@@ -1,4 +1,4 @@
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/config_variables.yml my_query_store_creds">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/config_variables.yml my_query_store_creds">
 my_query_store_creds:
   drivername: postgresql
   host: localhost

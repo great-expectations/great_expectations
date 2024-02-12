@@ -3,20 +3,20 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 )
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py ExpectColumnValuesToOnlyContainVowels class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py ExpectColumnValuesToOnlyContainVowels class_def">
 class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring">
     """Expect values in this column to only contain vowels."""
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition">
-    regex_camel_name = "version-0.18 Vowel"
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition">
+    regex_camel_name = "Vowel"
     regex = "^[aeiouyAEIOUY]*$"
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py plural">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py plural">
     semantic_type_name_plural = "vowels"
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples">
     examples = [
         {
             "data": {
@@ -99,7 +99,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
         regex_camel_name=regex_camel_name,
         regex_=regex,
     )
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py library_metadata">
     library_metadata = {
         "tags": ["regex"],
         "contributors": ["@joegargery"],
@@ -108,7 +108,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics">
     ExpectColumnValuesToOnlyContainVowels(
         column="only_vowels"
     ).print_diagnostic_checklist()

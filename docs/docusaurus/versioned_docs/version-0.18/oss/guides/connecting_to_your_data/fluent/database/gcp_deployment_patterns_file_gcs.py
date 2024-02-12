@@ -12,7 +12,7 @@ full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 
 yaml = YAMLHandler()
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py get_context">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py get_context">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -51,7 +51,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
     "expectations_store_name"
 ]
 expected_existing_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py expected_expectation_store">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py expected_expectation_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -69,7 +69,7 @@ assert actual_existing_expectations_store == yaml.load(
 
 # adding expectations store
 configured_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_expectation_store">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_expectation_store">
 stores:
   expectations_GCS_store:
     class_name: ExpectationsStore
@@ -137,7 +137,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 ]
 
 expected_existing_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py expected_validations_store">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py expected_validations_store">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -154,7 +154,7 @@ assert actual_existing_validations_store == yaml.load(
 
 # adding validations store
 configured_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_validations_store">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_validations_store">
 stores:
   validations_GCS_store:
     class_name: ValidationsStore
@@ -196,7 +196,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding data docs store
 data_docs_site_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_data_docs_store">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_data_docs_store">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -234,27 +234,25 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding datasource
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py datasource">
 datasource = context.sources.add_pandas_gcs(
-    name="gcs_datasource", bucket_or_name="version-0.18 test_docs_data"
+    name="gcs_datasource", bucket_or_name="test_docs_data"
 )
 # </snippet>
 
 ### Add GCS data to the Datasource as a Data Asset
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex">
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 prefix = "data/taxi_yellow_tripdata_samples/"
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py asset">
 data_asset = datasource.add_csv_asset(
-    name="version-0.18 csv_taxi_gcs_asset",
-    batching_regex=batching_regex,
-    gcs_prefix=prefix,
+    name="csv_taxi_gcs_asset", batching_regex=batching_regex, gcs_prefix=prefix
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py batch_request">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py batch_request">
 batch_request = data_asset.build_batch_request(
     options={
         "month": "03",
@@ -262,20 +260,18 @@ batch_request = data_asset.build_batch_request(
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py add_expectation_suite">
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_gcs_suite"
-)
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py add_expectation_suite">
+context.add_or_update_expectation_suite(expectation_suite_name="test_gcs_suite")
 
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="version-0.18 test_gcs_suite"
+    batch_request=batch_request, expectation_suite_name="test_gcs_suite"
 )
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py validator_calls">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
@@ -283,13 +279,13 @@ validator.expect_column_values_to_be_between(
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py save_expectation_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py save_expectation_suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py checkpoint">
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 gcs_checkpoint",
+    name="gcs_checkpoint",
     validations=[
         {"batch_request": batch_request, "expectation_suite_name": "test_gcs_suite"}
     ],
@@ -297,7 +293,7 @@ checkpoint = context.add_or_update_checkpoint(
 # </snippet>
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py run_checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py run_checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 

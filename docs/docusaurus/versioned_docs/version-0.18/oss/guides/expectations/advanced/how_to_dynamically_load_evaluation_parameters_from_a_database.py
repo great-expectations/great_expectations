@@ -11,7 +11,7 @@ PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 csv_path = "./data/yellow_tripdata_sample_2019-01.csv"
 
 load_data_into_test_database(
-    table_name="version-0.18 postgres_taxi_data",
+    table_name="postgres_taxi_data",
     csv_path=csv_path,
     connection_string=PG_CONNECTION_STRING,
     load_full_dataset=True,
@@ -24,27 +24,26 @@ assert len(df) == 10000
 
 # Tutorial content resumes here.
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py get_validator">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py get_validator">
 import great_expectations as gx
 
 context = gx.get_context()
 
 pg_datasource = context.sources.add_postgres(
-    name="version-0.18 pg_datasource", connection_string=PG_CONNECTION_STRING
+    name="pg_datasource", connection_string=PG_CONNECTION_STRING
 )
 table_asset = pg_datasource.add_table_asset(
-    name="postgres_taxi_data", table_name="version-0.18 postgres_taxi_data"
+    name="postgres_taxi_data", table_name="postgres_taxi_data"
 )
 batch_request = table_asset.build_batch_request()
 
 validator = context.get_validator(
-    batch_request=batch_request,
-    create_expectation_suite_with_name="version-0.18 my_suite_name",
+    batch_request=batch_request, create_expectation_suite_with_name="my_suite_name"
 )
 # </snippet>
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py define expectation">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py define expectation">
 validator_results = validator.expect_column_values_to_be_in_set(
     column="passenger_count",
     value_set={
@@ -54,7 +53,7 @@ validator_results = validator.expect_column_values_to_be_in_set(
 # </snippet>
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py expected_validator_results">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py expected_validator_results">
 expected_validator_results = """
 {
   "expectation_config": {
