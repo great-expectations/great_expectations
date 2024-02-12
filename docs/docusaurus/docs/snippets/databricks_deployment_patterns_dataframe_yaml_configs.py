@@ -223,7 +223,6 @@ assert os.listdir(os.path.join(data_docs_local_site_path, "validations")) == [
     expectation_suite_name
 ], "Validation was not written successfully to Data Docs"
 
-run_name = first_run_result["validation_result"]["meta"]["run_id"].run_name
 assert (
     len(
         os.listdir(
@@ -231,7 +230,6 @@ assert (
                 data_docs_local_site_path,
                 "validations",
                 expectation_suite_name,
-                run_name,
             )
         )
     )
