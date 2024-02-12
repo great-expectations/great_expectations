@@ -157,7 +157,7 @@ class ConfigurationStore(Store):
     def serialization_self_check(self, pretty_print: bool) -> None:
         raise NotImplementedError
 
-    def _determine_key(
+    def get_key(
         self, name: Optional[str] = None, id: Optional[str] = None
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(id), "Must provide either name or id."

@@ -131,7 +131,7 @@ class CheckpointStore(ConfigurationStore):
         name: str | None = None,
         id: str | None = None,
     ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.get_key(
             name=name, id=id
         )
         try:
@@ -146,7 +146,7 @@ class CheckpointStore(ConfigurationStore):
     ) -> CheckpointConfig:
         key: GXCloudIdentifier | ConfigurationIdentifier
         if not isinstance(name, ConfigurationIdentifier):
-            key = self._determine_key(name=name, id=id)
+            key = self.get_key(name=name, id=id)
         else:
             key = name
 
@@ -234,8 +234,8 @@ class CheckpointStore(ConfigurationStore):
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
         if id:
-            return self._determine_key(id=id)
-        return self._determine_key(name=name)
+            return self.get_key(id=id)
+        return self.get_key(name=name)
 
     def _persist_checkpoint(
         self,
