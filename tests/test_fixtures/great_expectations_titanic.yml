@@ -1,6 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
-config_version: 2
+config_version: 3
 datasources:
   # For example, this one.
   mydatasource:
@@ -27,6 +27,12 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
+
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
 
   validations_store:
     class_name: ValidationsStore
