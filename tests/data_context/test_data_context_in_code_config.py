@@ -16,6 +16,7 @@ from tests.data_context.conftest import (
 def build_in_code_data_context_project_config(
     bucket: str = "leakybucket",
     expectations_store_prefix: str = "expectations_store_prefix",
+    checkpoint_store_prefix: str = "checkpoint_store_prefix",
     validations_store_prefix: str = "validations_store_prefix",
     data_docs_store_prefix: str = "data_docs_store_prefix",
     stores: Optional[Dict] = None,
@@ -25,6 +26,7 @@ def build_in_code_data_context_project_config(
     Not a fixture because we want to control when this is built (after the expectation store).
     Args:
         expectations_store_prefix: prefix for expectations store
+        checkpoint_store_prefix: prefix for checkpoint store
         validations_store_prefix: prefix for validations store
         data_docs_store_prefix: prefix for data docs
         bucket: name of the s3 bucket
@@ -70,6 +72,7 @@ def build_in_code_data_context_project_config(
             }
         },
         stores=stores,
+        checkpoint_store_name="checkpoint_store",
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
         evaluation_parameter_store_name="evaluation_parameter_store",

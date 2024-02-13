@@ -54,6 +54,7 @@ def test_base_context(clear_env_vars):
         plugins_directory=None,
         evaluation_parameter_store_name="evaluation_parameter_store",
         expectations_store_name="expectations_store",
+        checkpoint_store_name="checkpoint_store",
         datasources={},
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
@@ -83,9 +84,11 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
         plugins_directory=None,
         evaluation_parameter_store_name="new_evaluation_parameter_store",
         expectations_store_name="new_expectations_store",
+        checkpoint_store_name="new_checkpoint_store",
         datasources={},
         stores={
             "new_expectations_store": {"class_name": "ExpectationsStore"},
+            "new_checkpoint_store": {"class_name": "CheckpointStore"},
             "new_evaluation_parameter_store": {
                 "class_name": "EvaluationParameterStore"
             },
@@ -130,9 +133,11 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
         plugins_directory=None,
         evaluation_parameter_store_name="evaluation_parameter_store",
         expectations_store_name="expectations_store",
+        checkpoint_store_name="checkpoint_store",
         datasources={},
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
+            "checkpoint_store": {"class_name": "CheckpointStore"},
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
         },
