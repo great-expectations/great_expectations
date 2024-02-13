@@ -22,14 +22,14 @@ The code used in this topic is available on GitHub here: [actions.py](https://gi
 
 First, within the `_run` method of your custom Validation Action, instantiate an empty `dict` to hold your sites:
 
-```python name="version-0.18 great_expectations/checkpoint/actions.py empty dict"
+```python title="Python" name="version-0.18 great_expectations/checkpoint/actions.py empty dict"
 ```
 
 ## Acquire
 
 Next, call `get_docs_sites_urls` to get the urls for all the suites processed by this Checkpoint:
 
-```python name="version-0.18 great_expectations/checkpoint/actions.py get_docs_sites_urls"
+```python title="Python" name="version-0.18 great_expectations/checkpoint/actions.py get_docs_sites_urls"
 ```
 
 
@@ -37,7 +37,7 @@ Next, call `get_docs_sites_urls` to get the urls for all the suites processed by
 
 The above step returns a list of dictionaries containing the relevant information. Now, we need to iterate through the entries to build the object we want:
 
-```python name="version-0.18 great_expectations/checkpoint/actions.py iterate"
+```python title="Python" name="version-0.18 great_expectations/checkpoint/actions.py iterate"
 ```
 
 ## Utilize

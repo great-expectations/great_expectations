@@ -11,7 +11,7 @@ Using custom parameters in your Custom Expectations can help you create powerful
 
 All Custom Expectations include a `success_keys` attribute that is a tuple of strings. The tuple items are the names of the parameters which are available during the evaluation of your Custom Expectation. For example, the `success_keys` attribute for the ColumnPairMapExpectation appears similar to the following example:
 
-```python
+```python title="Python"
 success_keys = (
    "column_A",
    "column_B",
@@ -28,7 +28,7 @@ All parameters being passed to a Metric for use in value or domain keys must als
 
 This is how the tuples appear in the MulticolumnMapMetrics Metric:
 
-```python
+```python title="Python"
 condition_domain_keys = (
    "batch_id",       
    "table",       
@@ -42,14 +42,14 @@ condition_value_keys = ("sum_total",)
 
 ColumnAggregateMetrics, TableMetrics, and QueryMetrics can similarly define a value_keys tuple or a domain_keys tuple:
 
-```python
+```python title="Python"
 value_keys = ("column",)
 domain_keys = ("query",)
 ```
 
 After the attributes are added to the Expectation and the Metric, the custom parameters can be passed into and used within the individual Metric functions. For example, this is how it appears in the ColumnValuesBetween Metric:
 
-```python
+```python title="Python"
 classColumnValuesBetween(ColumnMapMetricProvider):   
 condition_metric_name = "version-0.18 column_values.between"   
 condition_value_keys = (       

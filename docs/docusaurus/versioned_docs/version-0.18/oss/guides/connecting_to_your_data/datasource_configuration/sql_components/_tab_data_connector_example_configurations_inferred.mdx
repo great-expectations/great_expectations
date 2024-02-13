@@ -10,7 +10,7 @@ import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.
 
 At this point, your configuration should look like:
 
-```python name="version-0.18 sql datasource configuration with empty inferred sql data_connector"
+```python title="Python" name="version-0.18 sql datasource configuration with empty inferred sql data_connector"
 ```
 
 #### Required Data Connector configuration keys
@@ -19,14 +19,14 @@ At this point, your configuration should look like:
 
 For this example, you will be using the `InferredAssetSqlDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support SQL Execution Engines, such as the `SqlAlchemyExecutionEngine`.  This key/value entry will therefore look like:
 
-```python name="version-0.18 define data_connector class_name for inferred sql datasource"
+```python title="Python" name="version-0.18 define data_connector class_name for inferred sql datasource"
 ```
 
 <TipCustomDataConnectorModuleName />
 
 With this value added your full configuration should now look like:
 
-```python name="version-0.18 inferred sql datasource configuration with data_connector class_name defined"
+```python title="Python" name="version-0.18 inferred sql datasource configuration with data_connector class_name defined"
 ```
 
 #### Optional Data Connector configuration key for defining introspection behaviour

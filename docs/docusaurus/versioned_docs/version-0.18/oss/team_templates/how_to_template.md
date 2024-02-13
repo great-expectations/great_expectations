@@ -40,12 +40,12 @@ To complete this how-to, you'll complete the following tasks:
 
 2. Open Jupyter Notebook, a command line, or a terminal and then run the following command to import the `great_expectations` module:
 
-    ```python name="version-0.18 tutorials/quickstart/quickstart.py import_gx"
+    ```python title="Python" name="version-0.18 tutorials/quickstart/quickstart.py import_gx"
     ```
 
 3. Run the following command to import the `DataContext` object:
 
-    ```python name="version-0.18 tutorials/quickstart/quickstart.py get_context"
+    ```python title="Python" name="version-0.18 tutorials/quickstart/quickstart.py get_context"
     ```
 
 4. Add a comment when the prompt appears:
@@ -60,7 +60,7 @@ To complete this how-to, you'll complete the following tasks:
 
 1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses explicit kwargs with the `passenger_count` column. 
 
-    ```python name="version-0.18 tutorials/quickstart/quickstart.py create_expectation"
+    ```python title="Python" name="version-0.18 tutorials/quickstart/quickstart.py create_expectation"
     ```
     The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
 
@@ -72,12 +72,12 @@ To complete this how-to, you'll complete the following tasks:
 
 1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
 
-    ```python name="version-0.18 tutorials/quickstart/quickstart.py create_checkpoint"
+    ```python title="Python" name="version-0.18 tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
 2. Run the following command to return the Validation results:
 
-    ```python name="version-0.18 tutorials/quickstart/quickstart.py run_checkpoint"
+    ```python title="Python" name="version-0.18 tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
 ## Additional tasks

@@ -32,7 +32,7 @@ By convention, each Expectation is kept in its own python file, named with the s
 You can find the template file for a custom [ColumnAggregateExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
-```bash 
+```bash title="Terminal input"
 cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to_be_between_custom.py
 ```
 
@@ -50,7 +50,7 @@ For more information about Custom Expectations, see [Use a Custom Expectation](.
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
-```bash 
+```bash title="Terminal input"
 python expect_column_max_to_be_between_custom.py
 ```
 
@@ -76,27 +76,27 @@ By convention, your Metric class is defined first in a Custom Expectation. For n
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py ExpectColumnAggregateToMatchSomeCriteria class_def"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py ExpectColumnAggregateToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py ExpectColumnMaxToBeBetween class_def"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py ExpectColumnMaxToBeBetween class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py docstring"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py docstring"
 ```
 
 with something like:
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py docstring"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py docstring"
 ```
 
 Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py diagnostics"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py diagnostics"
 ```
 
 with this one:
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py diagnostics"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
@@ -126,7 +126,7 @@ You're going to search for `examples = []` in your file, and replace it with at 
 
 Your examples will look similar to this example:
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -178,7 +178,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@column_aggregate_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate the max of a column using the PandasExecutionEngine.
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py _pandas"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py _pandas"
 ```
 
 This is all that you need to define for now. In the next step, we will implement the method to validate the results of this Metric.
@@ -198,22 +198,22 @@ The remainder of the Metric Identifier simply describes what the Metric computes
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py metric_name"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py metric_name"
 ```
 
 with
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py metric_name"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py metric_name"
 ```
 
 Second, in the Expectation class, replace
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py metric_dependencies"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py metric_dependencies"
 ```
 
 with
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py metric_dependencies"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py metric_dependencies"
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -222,12 +222,12 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py ColumnAggregateMatchesSomeCriteria class_def"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py ColumnAggregateMatchesSomeCriteria class_def"
 ```
 
 with 
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py ColumnCustomMax class_def"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py ColumnCustomMax class_def"
 ```
 
 ## Validate
@@ -236,7 +236,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py validate"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py validate"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -245,7 +245,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `column.custom_max` Metric against our success keys:
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py _validate"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py _validate"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -267,7 +267,7 @@ Finally, we need to lint our now-functioning Custom Expectation. Our CI system w
 
 If you've [set up your dev environment](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
-```console
+```console title="Terminal input"
 black <PATH/TO/YOUR/EXPECTATION.py>
 ruff <PATH/TO/YOUR/EXPECTATION.py> --fix
 ```
@@ -296,12 +296,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py library_metadata"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py library_metadata"
 ```
 
 would become
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py library_metadata"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

@@ -42,10 +42,10 @@ You will rarely need to access an existing Batch Request.  Instead, you will oft
 
 You can create a Batch Request from a Data Asset by calling `build_batch_request`.  Here is an example of configuring a Pandas Filesystem Asset and creating a Batch Request:
 
- ```python name="version-0.18 docs/docusaurus/docs/snippets/batch_request batch_request"
+ ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/batch_request batch_request"
 ```
 
 The `options` one passes in to specify a batch will vary depending on how the specific Data Asset was configured.  To look at the keys for the options dictionary, you can do the following:
 
-```python name="version-0.18 docs/docusaurus/docs/snippets/batch_request options"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/batch_request options"
 ```

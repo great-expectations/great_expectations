@@ -51,14 +51,14 @@ Identify failed rows using pandas.
 
 Use the `get_context()` method to create a new Data Context:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py get context"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py get context"
 ```
 
 ### Import the Checkpoint 
 
 Run the following code to import the example Checkpoint:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py get checkpoint"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py get checkpoint"
 ```
 
 ### Set the `unexpected_index_column_names` parameter
@@ -67,14 +67,14 @@ The failed rows are defined as values in the `unexpected_index_column_names` par
 
 In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/learn/expectations/result_format/#configure-result-format).
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py set unexpected_index_column_names"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py set unexpected_index_column_names"
 ```
 
 ### Run Checkpoint using `result_format`
 
 Run the following code to apply the updated `result_format` to every Expectation in your Suite and pass it directly to the `run()` method: 
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py run checkpoint"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py run checkpoint"
 ```
 
 ### Review Validation Results
@@ -83,7 +83,7 @@ After you run the Checkpoint, a dictionary for each failed row is returned. Each
 
 The following is an example of the information returned after running the Checkpoint. For pandas, a filter condition on the DataFrame is included.
 
-```python
+```python title="Python"
 {
     "element_count": 6,
     "unexpected_count": 3,
@@ -118,7 +118,7 @@ The following is an example of the information returned after running the Checkp
 
 Run the following code to open the Data Docs:
 
-```python
+```python title="Python"
 context.open_data_docs()
 ```
 
@@ -138,14 +138,14 @@ Identify failed rows using Spark.
 
 Use the `get_context()` method to create a new Data Context:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get context"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get context"
 ```
 
 ### Import the Checkpoint 
 
 Run the following code to import the example Checkpoint:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get checkpoint"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get checkpoint"
 ```
 
 ### Set the `unexpected_index_column_names` parameter
@@ -154,14 +154,14 @@ The failed rows are defined as values in the `unexpected_index_column_names` par
 
 In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/learn/expectations/result_format/#configure-result-format).
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py set unexpected_index_column_names"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py set unexpected_index_column_names"
 ```
 
 ### Run Checkpoint using `result_format`
 
 Run the following code to apply the updated `result_format` to every Expectation in your Suite and pass it directly to the `run()` method: 
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py run checkpoint"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py run checkpoint"
 ```
 
 ### Review Validation Results
@@ -171,7 +171,7 @@ After you run the Checkpoint, a dictionary for each failed row is returned. Each
 The following is an example of the information returned after running the Checkpoint. For Spark, a filter condition on the DataFrame is included.
 
 
-```python 
+```python title="Python" 
 {
     "element_count": 6,
     "unexpected_count": 3,
@@ -207,7 +207,7 @@ The following is an example of the information returned after running the Checkp
 
 Run the following code to open the Data Docs:
 
-```python
+```python title="Python"
 context.open_data_docs()
 ```
 
@@ -226,14 +226,14 @@ Identify failed rows using SQLAlchemy.
 
 Use the `get_context()` method to create a new Data Context:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get context"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get context"
 ```
 
 ### Import the Checkpoint 
 
 Run the following code to import the example Checkpoint:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get checkpoint"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get checkpoint"
 ```
 
 ### Set the `unexpected_index_column_names` parameter
@@ -242,14 +242,14 @@ The failed rows are defined as values in the `unexpected_index_column_names` par
 
 In the following example, you're setting the `result_format` to `COMPLETE` to return the full set of results. For more information about `result_format`, see [Result format](https://docs.greatexpectations.io/docs/reference/learn/expectations/result_format/#configure-result-format).
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py set unexpected_index_column_names"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py set unexpected_index_column_names"
 ```
 
 ### Run Checkpoint using `result_format`
 
 Run the following code to apply the updated `result_format` to every Expectation in your Suite and pass it directly to the `run()` method: 
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py run checkpoint"
+```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py run checkpoint"
 ```
 
 ### Review Validation Results
@@ -258,7 +258,7 @@ After you run the Checkpoint, a dictionary for each failed row is returned. Each
 
 The following is an example of the information returned after running the Checkpoint. For SQLAlchemy, the output includes a query that can be used directly against the database backend.
 
-```python 
+```python title="Python" 
  {
     "element_count": 6,
     "unexpected_count": 3,
@@ -294,7 +294,7 @@ The following is an example of the information returned after running the Checkp
 
 Run the following code to open the Data Docs:
 
-```python
+```python title="Python"
 context.open_data_docs()
 ```
 

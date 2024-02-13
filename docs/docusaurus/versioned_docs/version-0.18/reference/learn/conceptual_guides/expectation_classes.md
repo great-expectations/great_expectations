@@ -8,7 +8,7 @@ In our daily lives and our data, we expect different things from different types
 
 The following is the Expectation class hierarchy:
 
-```text
+```text title="Expectation class hierarchy"
 Expectation
     BatchExpectation
         ColumnAggregateExpectation

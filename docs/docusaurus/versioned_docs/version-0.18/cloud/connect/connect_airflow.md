@@ -55,7 +55,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 2. Open the `gx_dag.py` DAG file and add the following code:
 
-    ```python
+    ```python title="Python"
     import os
     import great_expectations as gx
     from airflow import DAG
