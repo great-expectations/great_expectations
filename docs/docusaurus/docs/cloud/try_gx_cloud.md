@@ -59,7 +59,7 @@ Environment variables securely store your GX Cloud access credentials. The GX Ag
     ```
    Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
-3. Confirm the GX Agent status icon in GX Cloud is green. This indicates the GX Agent is running. 
+3. In GX Cloud, confirm the GX Agent status icon is green. This indicates the GX Agent is running. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
 
     ![GX Agent status](/img/gx_agent_status.png)
 
@@ -142,7 +142,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
 10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-11. Click **Finish**.
+11. Click **Finish**. The Data Aset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created.
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -185,7 +185,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-10. Click **Finish**.
+10. Click **Finish**. The Data Aset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created. 
 
 </TabItem>
 </Tabs>
@@ -205,7 +205,7 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
     If you prefer to work in a code editor, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
 
-5. Click **Save**.
+5. Click **Save**. The Expectation is added to the default Expectation Suite.
 
 6. Optional. Repeat steps 3 to 5 to add additional Expectations.
 
