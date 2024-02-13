@@ -57,7 +57,6 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
-    deep_filter_properties_iterable,
     gen_directory_tree_str,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
@@ -1164,12 +1163,8 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert sorted(config.keys()) == [
         "action_list",
         "batch_request",
-        "class_name",
-        "config_version",
         "evaluation_parameters",
-        "module_name",
         "name",
-        "profilers",
         "runtime_configuration",
         "validations",
     ]
@@ -1183,7 +1178,6 @@ def test_run_checkpoint_new_style(
     # add Checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
-        config_version=1,
         expectation_suite_name="my_expectation_suite",
         action_list=[
             {
@@ -1220,24 +1214,21 @@ def test_run_checkpoint_new_style(
     )
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
 
+    checkpoint = context.get_checkpoint(checkpoint_config.name)
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
-        context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+        checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 0
 
     context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name=checkpoint_config.name
-    )
+    result: CheckpointResult = checkpoint.run()
     assert len(result.list_validation_results()) == 1
     assert result.success
 
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name=checkpoint_config.name
-    )
+    result: CheckpointResult = checkpoint.run()
     assert len(result.list_validation_results()) == 1
     assert len(context.validations_store.list_keys()) == 2
     assert result.success
@@ -1450,236 +1441,6 @@ def test_add_expectation_to_expectation_suite(empty_data_context_stats_enabled):
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-
-
-@pytest.mark.filesystem
-def test_add_checkpoint_from_yaml(empty_data_context_stats_enabled):
-    """
-    What does this test and why?
-    We should be able to add a checkpoint directly from a valid yaml configuration.
-    test_yaml_config() should not automatically save a checkpoint if valid.
-    checkpoint yaml in a store should match the configuration
-    Note: This tests multiple items and could stand to be broken up.
-    """
-
-    context = empty_data_context_stats_enabled
-    checkpoint_name: str = "my_new_checkpoint"
-
-    assert checkpoint_name not in context.list_checkpoints()
-    assert len(context.list_checkpoints()) == 0
-
-    checkpoint_yaml_config = f"""
-name: {checkpoint_name}
-config_version: 1.0
-class_name: Checkpoint
-validations:
-  - batch_request:
-      datasource_name: data_dir
-      data_connector_name: data_dir_example_data_connector
-      data_asset_name: DEFAULT_ASSET_NAME
-      partition_request:
-        index: -1
-    expectation_suite_name: newsuite
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-    """
-
-    checkpoint_from_test_yaml_config = context.test_yaml_config(
-        checkpoint_yaml_config, name=checkpoint_name
-    )
-
-    # test_yaml_config() no longer stores checkpoints automatically
-    assert checkpoint_name not in context.list_checkpoints()
-    assert len(context.list_checkpoints()) == 0
-
-    checkpoint_from_yaml = context.add_checkpoint(
-        **yaml.load(checkpoint_yaml_config),
-    )
-
-    expected_checkpoint_yaml: str = """name: my_new_checkpoint
-config_version: 1.0
-module_name: great_expectations.checkpoint
-class_name: Checkpoint
-expectation_suite_name:
-batch_request: {}
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-evaluation_parameters: {}
-runtime_configuration: {}
-validations:
-  - batch_request:
-      datasource_name: data_dir
-      data_connector_name: data_dir_example_data_connector
-      data_asset_name: DEFAULT_ASSET_NAME
-      partition_request:
-        index: -1
-    expectation_suite_name: newsuite
-profilers: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
-"""
-
-    checkpoint_dir = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        context.checkpoint_store.config["store_backend"]["base_directory"],
-    )
-    checkpoint_file = os.path.join(  # noqa: PTH118
-        checkpoint_dir, f"{checkpoint_name}.yml"
-    )
-
-    with open(checkpoint_file) as cf:
-        checkpoint_from_disk = cf.read()
-
-    assert checkpoint_from_disk == expected_checkpoint_yaml
-    assert (
-        checkpoint_from_yaml.get_config(mode=ConfigOutputModes.YAML)
-        == expected_checkpoint_yaml
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint_from_yaml.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=dict(yaml.load(expected_checkpoint_yaml)),
-        clean_falsy=True,
-    )
-
-    checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
-    assert (
-        checkpoint_from_store.get_config(mode=ConfigOutputModes.YAML)
-        == expected_checkpoint_yaml
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT),
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=dict(yaml.load(expected_checkpoint_yaml)),
-        clean_falsy=True,
-    )
-
-    expected_action_list = [
-        {
-            "name": "store_validation_result",
-            "action": {"class_name": "StoreValidationResultAction"},
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {"class_name": "StoreEvaluationParametersAction"},
-        },
-        {
-            "name": "update_data_docs",
-            "action": {"class_name": "UpdateDataDocsAction"},
-        },
-    ]
-
-    assert checkpoint_from_yaml.action_list == expected_action_list
-    assert checkpoint_from_store.action_list == expected_action_list
-    assert checkpoint_from_test_yaml_config.action_list == expected_action_list
-    assert checkpoint_from_store.action_list == expected_action_list
-
-    assert checkpoint_from_test_yaml_config.name == checkpoint_from_yaml.name
-    assert (
-        checkpoint_from_test_yaml_config.action_list == checkpoint_from_yaml.action_list
-    )
-
-    assert checkpoint_from_yaml.name == checkpoint_name
-    assert checkpoint_from_yaml.get_config(
-        mode=ConfigOutputModes.JSON_DICT, clean_falsy=True
-    ) == {
-        "name": "my_new_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "module_name": "great_expectations.checkpoint",
-        "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-            },
-            {
-                "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction"},
-            },
-        ],
-        "validations": [
-            {
-                "name": None,
-                "id": None,
-                "expectation_suite_name": "newsuite",
-                "expectation_suite_ge_cloud_id": None,
-                "batch_request": {
-                    "datasource_name": "data_dir",
-                    "data_connector_name": "data_dir_example_data_connector",
-                    "data_asset_name": "DEFAULT_ASSET_NAME",
-                    "partition_request": {"index": -1},
-                },
-            }
-        ],
-    }
-
-    assert isinstance(checkpoint_from_yaml, Checkpoint)
-
-    assert checkpoint_name in context.list_checkpoints()
-    assert len(context.list_checkpoints()) == 1
-
-
-@pytest.mark.filesystem
-def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(
-    empty_data_context_stats_enabled,
-):
-    """
-    What does this test and why?
-    Checkpoint yaml should have a valid class_name
-    """
-
-    context = empty_data_context_stats_enabled
-    checkpoint_name: str = "my_new_checkpoint"
-
-    assert checkpoint_name not in context.list_checkpoints()
-    assert len(context.list_checkpoints()) == 0
-
-    checkpoint_yaml_config = f"""
-name: {checkpoint_name}
-config_version: 1.0
-class_name: NotAValidCheckpointClassName
-validations:
-  - batch_request:
-      datasource_name: data_dir
-      data_connector_name: data_dir_example_data_connector
-      data_asset_name: DEFAULT_ASSET_NAME
-      partition_request:
-        index: -1
-    expectation_suite_name: newsuite
-    """
-
-    with pytest.raises(KeyError):
-        context.test_yaml_config(checkpoint_yaml_config, name=checkpoint_name)
-
-    with pytest.raises(AttributeError):
-        context.add_checkpoint(
-            **yaml.load(checkpoint_yaml_config),
-        )
-
-    assert checkpoint_name not in context.list_checkpoints()
-    assert len(context.list_checkpoints()) == 0
 
 
 @pytest.mark.filesystem

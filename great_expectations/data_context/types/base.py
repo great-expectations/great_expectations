@@ -72,7 +72,6 @@ logger.setLevel(logging.INFO)
 
 CURRENT_GX_CONFIG_VERSION = 3
 FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
-CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -1792,10 +1791,6 @@ class DataContextConfigDefaults(enum.Enum):
     }
 
 
-class CheckpointConfigDefaults(enum.Enum):
-    DEFAULT_CONFIG_VERSION = CURRENT_CHECKPOINT_CONFIG_VERSION
-
-
 class BaseStoreBackendDefaults(DictDot):
     """
     Define base defaults for platform specific StoreBackendDefaults.
@@ -2553,9 +2548,6 @@ class CheckpointConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
-            "config_version",
-            "module_name",
-            "class_name",
             "expectation_suite_name",
             "batch_request",
             "action_list",
@@ -2578,21 +2570,6 @@ class CheckpointConfigSchema(Schema):
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
-    config_version = fields.Number(
-        validate=lambda x: (0 < x < 100) or x is None,  # noqa: PLR2004
-        error_messages={"invalid": "config version must " "be a number or None."},
-        required=False,
-        allow_none=True,
-    )
-    class_name = fields.Str(
-        required=False,
-        allow_none=True,
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.checkpoint",
-    )
     expectation_suite_name = fields.String(required=False, allow_none=True)
     expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
@@ -2660,9 +2637,6 @@ class CheckpointConfig(BaseYamlConfig):
 
     Args:
         name: The name of the checkpoint.
-        config_version: Your config version
-        module_name: The module name used for your checkpoint
-        class_name: The class name of your checkpoint
         expectation_suite_name: The expectation suite name of your checkpoint
         batch_request: The batch request
         action_list: The action list
@@ -2670,7 +2644,6 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: The runtime configuration for your checkpoint
         validations: An optional list of validations in your checkpoint
         default_validation_id: The default validation id of your checkpoint
-        profilers: An optional list of profilers in your checkpoint
         validation_operator_name: The validation operator name
         batches: An optional list of batches
         commented_map: The commented map
@@ -2681,9 +2654,6 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        config_version: Union[int, float] = 1.0,  # noqa: PYI041
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
         action_list: Optional[Sequence[ActionDict]] = None,
@@ -2691,13 +2661,11 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationConfig]] = None,
         default_validation_id: Optional[str] = None,
-        profilers: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> None:
         self._name = name
-        self._config_version = config_version
         self._expectation_suite_name = expectation_suite_name
         self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
         self._batch_request = batch_request or {}
@@ -2706,11 +2674,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = runtime_configuration or {}
         self._validations = validations or []
         self._default_validation_id = default_validation_id
-        self._profilers = profilers or []
         self._ge_cloud_id = ge_cloud_id
-
-        self._module_name = module_name or "great_expectations.checkpoint"
-        self._class_name = class_name or "Checkpoint"
 
         super().__init__(commented_map=commented_map)
 
@@ -2748,14 +2712,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._name = value
 
     @property
-    def config_version(self) -> Union[int, float]:
-        return self._config_version
-
-    @config_version.setter
-    def config_version(self, value: float) -> None:
-        self._config_version = value
-
-    @property
     def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
@@ -2770,30 +2726,6 @@ class CheckpointConfig(BaseYamlConfig):
     @default_validation_id.setter
     def default_validation_id(self, validation_id: str) -> None:
         self._default_validation_id = validation_id
-
-    @property
-    def profilers(self) -> List[dict]:
-        return self._profilers
-
-    @profilers.setter
-    def profilers(self, value: List[dict]) -> None:
-        self._profilers = value
-
-    @property
-    def module_name(self) -> str:
-        return self._module_name
-
-    @module_name.setter
-    def module_name(self, value: str) -> None:
-        self._module_name = value
-
-    @property
-    def class_name(self) -> str:
-        return self._class_name
-
-    @class_name.setter
-    def class_name(self, value: str) -> None:
-        self._class_name = value
 
     @property
     def batch_request(self) -> dict:
@@ -2915,7 +2847,6 @@ class CheckpointConfig(BaseYamlConfig):
         validations: Optional[
             Union[List[dict], List[CheckpointValidationConfig]]
         ] = None,
-        profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
@@ -2959,7 +2890,6 @@ class CheckpointConfig(BaseYamlConfig):
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "profilers": profilers,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
         substituted_runtime_config: dict = checkpoint.get_substituted_config(

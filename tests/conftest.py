@@ -1293,7 +1293,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
-        config_version=1,
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1340,7 +1339,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
-        config_version=1,
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
@@ -1397,7 +1395,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
-        config_version=1,
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1445,7 +1442,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
-        config_version=1,
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1496,7 +1492,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add minimal Checkpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1513,7 +1508,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1537,7 +1531,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1559,7 +1552,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1897,7 +1889,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
-        config_version=1,
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1944,7 +1935,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
-        config_version=1,
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
@@ -2001,7 +1991,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
-        config_version=1,
         action_list=[
             {
                 "name": "store_validation_result",
@@ -2049,7 +2038,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
-        config_version=1,
         action_list=[
             {
                 "name": "store_validation_result",
@@ -2099,7 +2087,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -2116,7 +2103,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -2140,7 +2126,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -2162,7 +2147,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
