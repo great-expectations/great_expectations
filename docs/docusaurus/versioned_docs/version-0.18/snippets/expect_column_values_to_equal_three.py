@@ -37,23 +37,23 @@ result_dict = {}
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py ColumnValuesEqualThree class_def">
+# <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py ColumnValuesEqualThree class_def">
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your metric.
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py metric_name">
-    condition_metric_name = "version-0.18 column_values.equal_three"
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py metric_name">
+    condition_metric_name = "column_values.equal_three"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py pandas">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py pandas">
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column == 3
         # </snippet>
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_definition">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_definition">
     @metric_partial(
         engine=SparkDFExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -68,7 +68,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         runtime_configuration,
     ):
         # </snippet>
-        # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_selectable">
+        # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_selectable">
         (
             selectable,
             compute_domain_kwargs,
@@ -80,13 +80,13 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = F.col(column_name)
         # </snippet>
-        # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_query">
+        # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_query">
         query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
 
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
         # </snippet>
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py sqlalchemy">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py sqlalchemy">
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
         return column.in_([3])
@@ -113,7 +113,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
         dependencies["table.column_types"] = MetricConfiguration(
-            metric_name="version-0.18 table.column_types",
+            metric_name="table.column_types",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs={
                 "include_nested": True,
@@ -124,16 +124,16 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py ExpectColumnValuesToEqualThree class_def">
+# <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py ExpectColumnValuesToEqualThree class_def">
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py docstring">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py docstring">
     """Expect values in this column to equal 3."""
 
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py examples">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py examples">
     examples = [
         {
             "data": {
@@ -166,7 +166,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py map_metric">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py map_metric">
     map_metric = "column_values.equal_three"
     # </snippet>
 
@@ -377,7 +377,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         return unexpected_table_content_block
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py library_metadata">
     library_metadata = {
         "tags": ["extremely basic math"],
         "contributors": ["@joegargery"],
@@ -386,7 +386,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py diagnostics">
+    # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py diagnostics">
     ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
 #     </snippet>
 

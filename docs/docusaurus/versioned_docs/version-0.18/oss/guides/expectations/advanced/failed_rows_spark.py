@@ -14,7 +14,7 @@ folder_path = str(
 )
 
 # get context
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get context">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get context">
 import great_expectations as gx
 
 context = gx.get_context(project_root_dir=".")
@@ -22,9 +22,9 @@ context = gx.get_context(project_root_dir=".")
 
 # add datasource and asset
 data_asset = context.sources.add_spark_filesystem(
-    name="version-0.18 visits_datasource", base_directory=folder_path
+    name="visits_datasource", base_directory=folder_path
 ).add_csv_asset(
-    name="version-0.18 visits",
+    name="visits",
     glob_directive="*.csv",
     header=True,
     sep="\t",
@@ -32,7 +32,7 @@ data_asset = context.sources.add_spark_filesystem(
 )
 
 # get checkpoint
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get checkpoint">
 my_checkpoint = context.get_checkpoint("my_checkpoint")
 # </snippet>
 
@@ -57,13 +57,13 @@ assert (evrs[0]["results"][0]["result"]) == {
 
 
 # Example 2 - 1 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py set unexpected_index_column_names">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py set unexpected_index_column_names">
 result_format: dict = {
     "result_format": "COMPLETE",
     "unexpected_index_column_names": ["event_id"],
 }
 # </snippet>
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py run checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py run checkpoint">
 results = my_checkpoint.run(result_format=result_format)
 # </snippet>
 evrs = results.list_validation_results()

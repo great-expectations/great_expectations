@@ -1,6 +1,6 @@
 import pathlib
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get_context">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get_context">
 import great_expectations as gx
 
 context = gx.get_context()
@@ -15,9 +15,9 @@ data_directory = pathlib.Path(
 ).resolve(strict=True)
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get validators">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get validators">
 datasource = context.sources.add_pandas_filesystem(
-    name="version-0.18 demo_pandas", base_directory=data_directory
+    name="demo_pandas", base_directory=data_directory
 )
 
 asset = datasource.add_csv_asset(
@@ -31,25 +31,25 @@ downstream_batch_request = asset.build_batch_request({"year": "2020", "month": "
 
 upstream_validator = context.get_validator(
     batch_request=upstream_batch_request,
-    create_expectation_suite_with_name="version-0.18 upstream_expectation_suite",
+    create_expectation_suite_with_name="upstream_expectation_suite",
 )
 downstream_validator = context.get_validator(
     batch_request=downstream_batch_request,
-    create_expectation_suite_with_name="version-0.18 downstream_expectation_suite",
+    create_expectation_suite_with_name="downstream_expectation_suite",
 )
 # </snippet>
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py create upstream_expectation_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py create upstream_expectation_suite">
 upstream_validator.expect_table_row_count_to_be_between(min_value=5000, max_value=20000)
 upstream_validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py disable interactive_evaluation">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py disable interactive_evaluation">
 downstream_validator.interactive_evaluation = False
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py add expectation with evaluation parameter">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py add expectation with evaluation parameter">
 eval_param_urn = "urn:great_expectations:validations:upstream_expectation_suite:expect_table_row_count_to_be_between.result.observed_value"
 downstream_validator_validation_result = downstream_validator.expect_table_row_count_to_equal(
     value={
@@ -58,7 +58,7 @@ downstream_validator_validation_result = downstream_validator.expect_table_row_c
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py expected_validation_result">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py expected_validation_result">
 expected_validation_result = {
     "success": None,
     "expectation_config": {
@@ -85,13 +85,13 @@ assert (
     actual_validation_result == expected_validation_result
 ), f"Validation result does not match expected result: {actual_validation_result}"
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py save downstream_expectation_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py save downstream_expectation_suite">
 downstream_validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py run checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py run checkpoint">
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 checkpoint",
+    name="checkpoint",
     validations=[
         {
             "batch_request": upstream_batch_request,
@@ -109,6 +109,6 @@ checkpoint_result = checkpoint.run()
 
 assert checkpoint_result.success
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py build data docs">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py build data docs">
 context.build_data_docs()
 # </snippet>

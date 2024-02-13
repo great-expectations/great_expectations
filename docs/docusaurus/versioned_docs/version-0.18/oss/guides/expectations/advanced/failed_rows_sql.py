@@ -15,7 +15,7 @@ folder_path = str(
 connection_string: str = f"sqlite:///{folder_path}/visits.db"
 
 # get context
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get context">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get context">
 import great_expectations as gx
 
 context = gx.get_context(project_root_dir=".")
@@ -23,16 +23,16 @@ context = gx.get_context(project_root_dir=".")
 
 # add datasource and asset
 datasource = context.sources.add_sqlite(
-    name="version-0.18 visits_datasource",
+    name="visits_datasource",
     connection_string=connection_string,
 )
 asset = datasource.add_table_asset(
-    name="version-0.18 visits",
-    table_name="version-0.18 event_names",
+    name="visits",
+    table_name="event_names",
 )
 
 # get checkpoint
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get checkpoint">
 my_checkpoint = context.get_checkpoint("my_checkpoint")
 # </snippet>
 
@@ -57,13 +57,13 @@ assert (evrs[0]["results"][0]["result"]) == {
 
 
 # Example 2 - 1 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py set unexpected_index_column_names">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py set unexpected_index_column_names">
 result_format: dict = {
     "result_format": "COMPLETE",
     "unexpected_index_column_names": ["event_id"],
 }
 # </snippet>
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py run checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py run checkpoint">
 results = my_checkpoint.run(result_format=result_format)
 # </snippet>
 evrs = results.list_validation_results()
