@@ -157,7 +157,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 ### Create a PostgreSQL Data Asset 
 
-1. In GX Cloud, click **Data Assets** > **New Daata Asset**.
+1. In GX Cloud, click **Data Assets** > **New Data Asset**.
 
 2. Click the **New Data Source** tab and then select **PostgreSQL**.
 
