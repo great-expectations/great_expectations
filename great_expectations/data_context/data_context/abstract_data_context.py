@@ -77,13 +77,11 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GX_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
     ConcurrencyConfig,
     DataContextConfig,
-    DataContextConfigDefaults,
     DatasourceConfig,
     IncludeRenderedContentConfig,
     ProgressBarsConfig,
@@ -328,6 +326,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if checkpoint_store := self.stores.get(self.checkpoint_store_name):
             self._checkpoints = CheckpointFactory(
                 store=checkpoint_store,
+                context=self,
             )
 
     def _init_analytics(self) -> None:
@@ -608,43 +607,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:
-        try:
-            return self.variables.checkpoint_store_name
-        except AttributeError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
-
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory  # type: ignore[arg-type]
-            ):
-                return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
-                    self.root_directory,
-                    DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-                )
-                error_message: str = (
-                    f"Attempted to access the 'checkpoint_store_name' field "
-                    f"with no `checkpoints` directory.\n "
-                    f"Please create the following directory: {checkpoint_store_directory}.\n "
-                    f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
-                    f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
-                    f"to learn more about the upgrade process."
-                )
-            else:
-                error_message = (
-                    f"Attempted to access the 'checkpoint_store_name' field "
-                    f"with no `checkpoints` directory.\n  "
-                    f"Please create a `checkpoints` directory in your Great Expectations directory."
-                    f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
-                    f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
-                    f"to learn more about the upgrade process."
-                )
-
-            raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
+        return self.variables.checkpoint_store_name
 
     @checkpoint_store_name.setter
     @public_api
@@ -660,33 +623,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def checkpoint_store(self) -> CheckpointStore:
-        checkpoint_store_name: str = self.checkpoint_store_name  # type: ignore[assignment]
-        try:
-            return self.stores[checkpoint_store_name]
-        except KeyError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
-
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory  # type: ignore[arg-type]
-            ):
-                logger.warning(
-                    f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
-                    f"so will try to use default Checkpoint store.\n  Please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)} in order to use the new "
-                    f"'Checkpoint Store' feature.\n  Visit {AbstractDataContext.MIGRATION_WEBSITE} "
-                    f"to learn more about the upgrade process."
-                )
-                return self._build_store_from_config(  # type: ignore[return-value]
-                    checkpoint_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[  # type: ignore[arg-type]
-                        checkpoint_store_name
-                    ],
-                )
-            raise gx_exceptions.StoreConfigurationError(
-                f'Attempted to access the Checkpoint store: "{checkpoint_store_name}". It is not a configured store.'
-            )
+        return self.stores[self.checkpoint_store_name]
 
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:
