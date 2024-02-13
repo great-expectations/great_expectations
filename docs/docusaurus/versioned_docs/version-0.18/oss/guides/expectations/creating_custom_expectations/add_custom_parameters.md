@@ -51,7 +51,7 @@ After the attributes are added to the Expectation and the Metric, the custom par
 
 ```python
 classColumnValuesBetween(ColumnMapMetricProvider):   
-condition_metric_name = "version-0.18 column_values.between"   
+condition_metric_name = "column_values.between"   
 condition_value_keys = (       
    "min_value",       
    "max_value",       

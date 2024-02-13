@@ -10,16 +10,16 @@ import great_expectations as gx
 context = gx.get_context()
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py define_add_pandas_s3_args">
-datasource_name = "version-0.18 my_s3_datasource"
-bucket_name = "version-0.18 my_bucket"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py define_add_pandas_s3_args">
+datasource_name = "my_s3_datasource"
+bucket_name = "my_bucket"
 boto3_options = {}
 # </snippet>
 
-bucket_name = "version-0.18 superconductive-docs-test"
+bucket_name = "superconductive-docs-test"
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py create_datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py create_datasource">
 datasource = context.sources.add_pandas_s3(
     name=datasource_name, bucket=bucket_name, boto3_options=boto3_options
 )
@@ -28,8 +28,8 @@ datasource = context.sources.add_pandas_s3(
 assert datasource_name in context.datasources
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py add_asset">
-asset_name = "version-0.18 my_taxi_data_asset"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py add_asset">
+asset_name = "my_taxi_data_asset"
 s3_prefix = "data/taxi_yellow_tripdata_samples/"
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 data_asset = datasource.add_csv_asset(

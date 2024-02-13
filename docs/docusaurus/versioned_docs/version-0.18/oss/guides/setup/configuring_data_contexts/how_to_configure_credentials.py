@@ -9,14 +9,14 @@ from tests.test_utils import load_data_into_test_database
 yaml = YAMLHandler()
 
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
 export MY_DB_PW=password
 export POSTGRES_CONNECTION_STRING=postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
 # </snippet>
 """
 
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml">
 my_postgres_db_yaml_creds: postgresql://localhost:${MY_DB_PW}@$localhost:5432/postgres
 # </snippet>
 """
@@ -32,7 +32,7 @@ config_variables_file_path: uncommitted/config_variables.yml
 
 # add test_data to database for testing
 load_data_into_test_database(
-    table_name="version-0.18 postgres_taxi_data",
+    table_name="postgres_taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
 )
@@ -57,22 +57,22 @@ context_config_variables_file_path = pathlib.Path(
 with open(context_config_variables_file_path, "w+") as f:
     f.write(config_variables_yaml)
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string">
 # The password can be added as an environment variable
 pg_datasource = context.sources.add_or_update_postgres(
-    name="version-0.18 my_postgres_db",
+    name="my_postgres_db",
     connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
 )
 
 # Alternately, the full connection string can be added as an environment Variable
 pg_datasource = context.sources.add_or_update_postgres(
-    name="version-0.18 my_postgres_db",
+    name="my_postgres_db",
     connection_string="${POSTGRES_CONNECTION_STRING}",
 )
 # </snippet>
 
 pg_datasource.add_table_asset(
-    name="postgres_taxi_data", table_name="version-0.18 postgres_taxi_data"
+    name="postgres_taxi_data", table_name="postgres_taxi_data"
 )
 
 assert context.list_datasources() == [
@@ -94,14 +94,14 @@ assert context.list_datasources() == [
 ]
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml">
 # Variables in config_variables.yml can be referenced in the connection string
 pg_datasource = context.sources.add_or_update_postgres(
-    name="version-0.18 my_postgres_db", connection_string="${my_postgres_db_yaml_creds}"
+    name="my_postgres_db", connection_string="${my_postgres_db_yaml_creds}"
 )
 # </snippet>
 pg_datasource.add_table_asset(
-    name="postgres_taxi_data", table_name="version-0.18 postgres_taxi_data"
+    name="postgres_taxi_data", table_name="postgres_taxi_data"
 )
 assert context.list_datasources() == [
     {

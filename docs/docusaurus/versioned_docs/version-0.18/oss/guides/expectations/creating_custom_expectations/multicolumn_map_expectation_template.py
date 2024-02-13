@@ -21,12 +21,12 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most MulticolumnMapExpectations, the main business logic for calculation will live in this class.
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py MulticolumnValuesMatchSomeCriteria class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py MulticolumnValuesMatchSomeCriteria class_def">
 class MulticolumnValuesMatchSomeCriteria(MulticolumnMapMetricProvider):
     # </snippet>
     # This is the id string that will be used to reference your metric.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py metric_name">
-    condition_metric_name = "version-0.18 METRIC NAME GOES HERE"
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py metric_name">
+    condition_metric_name = "METRIC NAME GOES HERE"
     # </snippet>
     # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
@@ -40,7 +40,7 @@ class MulticolumnValuesMatchSomeCriteria(MulticolumnMapMetricProvider):
     condition_value_keys = ()
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py pandas">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py pandas">
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
         raise NotImplementedError
@@ -59,10 +59,10 @@ class MulticolumnValuesMatchSomeCriteria(MulticolumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py ExpectMulticolumnValuesToMatchSomeCriteria class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py ExpectMulticolumnValuesToMatchSomeCriteria class_def">
 class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py docstring">
     """TODO: Add a docstring here"""
     # </snippet>
 
@@ -72,7 +72,7 @@ class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py map_metric">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py map_metric">
     map_metric = "METRIC NAME GOES HERE"
     # </snippet>
 
@@ -111,7 +111,7 @@ class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -122,6 +122,6 @@ class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py diagnostics">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py diagnostics">
     ExpectMulticolumnValuesToMatchSomeCriteria().print_diagnostic_checklist()
 # </snippet>

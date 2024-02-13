@@ -27,13 +27,13 @@ As can be seen in the implementation below, we have chosen to keep our default m
 
 Notice that we do not need to set `default_kwarg_values` for all kwargs: it is sufficient to set them only for ones for which we would like to set a default value. To keep our implementation simple, we do not override the `metric_dependencies` or `success_keys`.
 
-````python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def"
+````python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def"
 ````
 
 :::info
 We could also explicitly override our parent methods to modify the behavior of our new Expectation, for example by updating the configuration validation to require the values we set as defaults not be altered.
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py validate_config"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py validate_config"
 ```
 :::
 
@@ -41,14 +41,14 @@ For another example, let's take a look at `expect_column_values_to_be_in_set`.
 
 In this case, we will only be changing our `value_set`:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def"
 ```
 
 ## Contribute (Optional)
 
 If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py library_metadata"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

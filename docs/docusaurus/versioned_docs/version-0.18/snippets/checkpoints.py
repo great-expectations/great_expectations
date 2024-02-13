@@ -1,4 +1,4 @@
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints.py setup">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints.py setup">
 import great_expectations as gx
 from great_expectations.datasource.fluent import DataAsset, Datasource
 
@@ -17,24 +17,24 @@ validator.expect_column_values_to_be_between(
 )
 
 taxi_suite = validator.get_expectation_suite()
-taxi_suite.expectation_suite_name = "version-0.18 taxi_suite"
+taxi_suite.expectation_suite_name = "taxi_suite"
 
 context.add_expectation_suite(expectation_suite=taxi_suite)
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints.py create_and_run">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints.py create_and_run">
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 taxi_checkpoint",
+    name="taxi_checkpoint",
     batch_request=batch_request,
-    expectation_suite_name="version-0.18 taxi_suite",
+    expectation_suite_name="taxi_suite",
 )
 checkpoint.run()
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints.py save">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints.py save">
 context.add_or_update_checkpoint(checkpoint=checkpoint)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/checkpoints.py retrieve_and_run">
+# <snippet name="docs/docusaurus/docs/snippets/checkpoints.py retrieve_and_run">
 checkpoint = context.get_checkpoint("taxi_checkpoint")
 checkpoint.run()
 # </snippet>

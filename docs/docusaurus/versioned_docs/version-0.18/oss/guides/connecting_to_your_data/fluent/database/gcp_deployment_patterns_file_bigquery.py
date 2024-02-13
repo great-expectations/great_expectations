@@ -11,7 +11,7 @@ temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml: YAMLHandler = YAMLHandler()
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py get_context">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py get_context">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -51,7 +51,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
 ]
 
 expected_existing_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py existing_expectations_store">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py existing_expectations_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -225,66 +225,62 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 CONNECTION_STRING = f"bigquery://{GCP_PROJECT_NAME}/{BIGQUERY_DATASET}"
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource">
 datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_bigquery_datasource",
+    name="my_bigquery_datasource",
     connection_string="bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
 )
 # </snippet>
 
 # For tests, we are replacing the `connection_string`
 datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_bigquery_datasource", connection_string=CONNECTION_STRING
+    name="my_bigquery_datasource", connection_string=CONNECTION_STRING
 )
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset">
-table_asset = datasource.add_table_asset(
-    name="my_table_asset", table_name="version-0.18 taxi_data"
-)
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset">
+table_asset = datasource.add_table_asset(name="my_table_asset", table_name="taxi_data")
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset">
 query_asset = datasource.add_query_asset(
-    name="version-0.18 my_query_asset", query="SELECT * from taxi_data"
+    name="my_query_asset", query="SELECT * from taxi_data"
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py batch_request">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py batch_request">
 request = table_asset.build_batch_request()
 # </snippet>
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite">
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_bigquery_suite"
-)
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite">
+context.add_or_update_expectation_suite(expectation_suite_name="test_bigquery_suite")
 
 validator = context.get_validator(
-    batch_request=request, expectation_suite_name="version-0.18 test_bigquery_suite"
+    batch_request=request, expectation_suite_name="test_bigquery_suite"
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py validator_calls">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py save_expectation_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py save_expectation_suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py checkpoint">
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 bigquery_checkpoint",
+    name="bigquery_checkpoint",
     validations=[
         {"batch_request": request, "expectation_suite_name": "test_bigquery_suite"}
     ],
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py run_checkpoint">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py run_checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 assert checkpoint_result.success is True

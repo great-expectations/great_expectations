@@ -30,7 +30,7 @@ csv_path = str(
 )
 
 load_data_into_test_database(
-    table_name="version-0.18 postgres_taxi_data",
+    table_name="postgres_taxi_data",
     csv_path=csv_path,
     connection_string=PG_CONNECTION_STRING,
     load_full_dataset=True,
@@ -44,15 +44,15 @@ assert len(df) == 10000
 context = gx.get_context()
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py connection_string">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py connection_string">
 my_connection_string = (
     "postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>"
 )
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py connection_string2">
-datasource_name = "version-0.18 my_datasource"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py connection_string2">
+datasource_name = "my_datasource"
 my_connection_string = (
     "postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>"
 )
@@ -61,31 +61,31 @@ my_connection_string = (
 my_connection_string = PG_CONNECTION_STRING
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_postgres">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_postgres">
 datasource = context.sources.add_postgres(
     name=datasource_name, connection_string=my_connection_string
 )
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py asset_name">
-asset_name = "version-0.18 my_table_asset"
-asset_table_name = "version-0.18 postgres_taxi_data"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py asset_name">
+asset_name = "my_table_asset"
+asset_table_name = "postgres_taxi_data"
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_table_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_table_asset">
 table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py asset_query">
-asset_name = "version-0.18 my_query_asset"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py asset_query">
+asset_name = "my_query_asset"
 asset_query = "SELECT * from postgres_taxi_data"
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_query_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_query_asset">
 query_asset = datasource.add_query_asset(name=asset_name, query=asset_query)
 # </snippet>
 
