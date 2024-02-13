@@ -13,7 +13,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend">
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
@@ -22,20 +22,20 @@ from great_expectations.data_context.types.base import (
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context">
 from great_expectations.data_context import EphemeralDataContext
 
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend">
 project_config = DataContextConfig(
     store_backend_defaults=InMemoryStoreBackendDefaults()
 )
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context">
 context = EphemeralDataContext(project_config=project_config)
 # </snippet>
 
@@ -44,7 +44,7 @@ assert context
 assert not context.root_directory
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral">
 from great_expectations.data_context import EphemeralDataContext
 
 # ...
@@ -54,7 +54,7 @@ if isinstance(context, EphemeralDataContext):
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context">
+# <snippet name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context">
 context = context.convert_to_file_context()
 # </snippet>
 

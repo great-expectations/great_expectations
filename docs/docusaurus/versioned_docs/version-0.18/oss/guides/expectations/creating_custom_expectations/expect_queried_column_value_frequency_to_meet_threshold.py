@@ -21,17 +21,17 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def">
 class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring">
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
 
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies">
     metric_dependencies = ("query.column",)
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query">
     query: str = """
             SELECT {col},
             CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
@@ -39,7 +39,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
             GROUP BY {col}
             """
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py success_keys">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py success_keys">
     success_keys = (
         "column",
         "value",
@@ -72,8 +72,8 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function">
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
     def _validate(
         self,
         metrics: dict,
@@ -111,7 +111,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         }
         # </snippet>
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py examples">
     examples = [
         {
             "data": [
@@ -195,7 +195,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         },
     ]
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py _validate function library_metadata">
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
@@ -205,7 +205,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()">
     ExpectQueriedColumnValueFrequencyToMeetThreshold().print_diagnostic_checklist()
     # </snippet>
 

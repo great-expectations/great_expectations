@@ -22,17 +22,17 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 
 # This class defines a Metric to support your Expectation.
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py BatchColumnsUnique class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py BatchColumnsUnique class_def">
 class BatchColumnsUnique(TableMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your Metric.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_name">
-    metric_name = "version-0.18 table.columns.unique"
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_name">
+    metric_name = "table.columns.unique"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py pandas">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py pandas">
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
@@ -88,10 +88,10 @@ class BatchColumnsUnique(TableMetricProvider):
         }
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py ExpectBatchColumnsToBeUnique class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py ExpectBatchColumnsToBeUnique class_def">
 class ExpectBatchColumnsToBeUnique(BatchExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py docstring">
     """Expect batch to contain columns with unique contents."""
     # </snippet>
 
@@ -99,7 +99,7 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py examples">
     examples = [
         {
             "dataset_name": "expect_batch_columns_to_be_unique_1",
@@ -145,7 +145,7 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     ]
     # </snippet>
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_dependencies">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py metric_dependencies">
     metric_dependencies = ("table.columns.unique", "table.columns")
     # </snippet>
 
@@ -180,7 +180,7 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py validate">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py validate">
     def _validate(
         self,
         metrics: Dict,
@@ -205,7 +205,7 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
         # </snippet>
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py library_metadata">
     library_metadata = {
         "tags": ["uniqueness"],
         "contributors": ["@joegargery"],
@@ -214,7 +214,7 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py diagnostics">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py diagnostics">
     ExpectBatchColumnsToBeUnique().print_diagnostic_checklist()
 #     </snippet>
 

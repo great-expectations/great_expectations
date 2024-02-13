@@ -23,6 +23,7 @@ the metric.</p></li>
 </dl>
 <p>In some cases, subclasses of Expectation, such as TableMetricProvider will already
 have correct values that may simply be inherited.</p>
+<p>They <em>may</em> optionally override the <cite>default_kwarg_values</cite> attribute.</p>
 <dl class="simple">
 <dt>MetricProvider classes <em>must</em> implement the following:</dt><dd><p>1. <cite>_get_evaluation_dependencies</cite>. Note that often, _get_evaluation_dependencies should
 augment dependencies provided by a parent class; consider calling super()._get_evaluation_dependencies</p>

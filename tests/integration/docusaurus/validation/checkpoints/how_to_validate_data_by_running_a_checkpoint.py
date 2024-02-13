@@ -48,8 +48,7 @@ cp = context.get_checkpoint(name="my_checkpoint")
 assert cp.name == "my_checkpoint"
 
 # context = gx.get_context()
-result = context.run_checkpoint(
-    checkpoint_name="my_checkpoint",
+result = cp.run(
     batch_request={
         "datasource_name": "taxi_source",
         "data_asset_name": "yellow_tripdata",

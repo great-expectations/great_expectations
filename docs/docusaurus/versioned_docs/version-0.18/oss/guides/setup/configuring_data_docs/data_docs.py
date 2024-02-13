@@ -15,24 +15,24 @@ validator.expect_column_values_to_be_between(
 )
 
 taxi_suite = validator.get_expectation_suite()
-taxi_suite.expectation_suite_name = "version-0.18 taxi_suite"
+taxi_suite.expectation_suite_name = "taxi_suite"
 
 context.add_expectation_suite(expectation_suite=taxi_suite)
 
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 taxi_checkpoint",
+    name="taxi_checkpoint",
     batch_request=batch_request,
-    expectation_suite_name="version-0.18 taxi_suite",
+    expectation_suite_name="taxi_suite",
 )
 checkpoint.run()
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs">
 context.build_data_docs()
 context.open_data_docs()
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs_site">
-site_name = "version-0.18 new_site_name"
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs_site">
+site_name = "new_site_name"
 context.build_data_docs(site_names=site_name)
 context.open_data_docs(site_name=site_name)
 # </snippet>

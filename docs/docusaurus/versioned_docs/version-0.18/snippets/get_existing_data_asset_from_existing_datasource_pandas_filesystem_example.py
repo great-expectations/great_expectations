@@ -20,15 +20,15 @@ import great_expectations as gx
 context = gx.get_context()
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource">
+# <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource">
 # data_directory is the full path to a directory containing csv files
 my_datasource = context.sources.add_pandas_filesystem(
-    name="version-0.18 my_datasource", base_directory=data_directory
+    name="my_datasource", base_directory=data_directory
 )
 # </snippet>
 
 my_asset = my_datasource.add_csv_asset(
-    name="version-0.18 my_asset",
+    name="my_asset",
     batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     order_by=["year", "month"],
 )
@@ -36,32 +36,28 @@ my_asset = my_datasource.add_csv_asset(
 import pandas as pd
 
 dataframe = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
-my_ephemeral_datasource = context.sources.add_pandas(
-    name="version-0.18 my_pandas_datasource"
-)
-my_asset = my_ephemeral_datasource.add_dataframe_asset(
-    name="version-0.18 my_ephemeral_asset"
-)
+my_ephemeral_datasource = context.sources.add_pandas(name="my_pandas_datasource")
+my_asset = my_ephemeral_datasource.add_dataframe_asset(name="my_ephemeral_asset")
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe">
+# <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe">
 my_batch_request = my_asset.build_batch_request(dataframe=dataframe)
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_asset">
+# <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_asset">
 my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request_options">
+# <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request_options">
 print(my_asset.batch_request_options)
 # </snippet>
 
 assert my_asset.batch_request_options == ("year", "month", "path")
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">
+# <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">
 my_batch_request = my_asset.build_batch_request()
 # </snippet>
 
@@ -70,7 +66,7 @@ assert my_batch_request.data_asset_name == "my_asset"
 assert my_batch_request.options == {}
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_list">
+# <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_list">
 batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
 # </snippet>
 
@@ -83,7 +79,7 @@ for batch in batches:
     assert batch.data.dataframe.shape == (10000, 18)
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py print_batch_spec">
+# <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py print_batch_spec">
 for batch in batches:
     print(batch.batch_spec)
 # </snippet>

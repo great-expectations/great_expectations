@@ -60,7 +60,8 @@ context.add_or_update_checkpoint(
 )
 assert context.list_checkpoints() == ["test_checkpoint"]
 
-results = context.run_checkpoint(checkpoint_name="test_checkpoint")
+checkpoint = context.get_checkpoint("test_checkpoint")
+results = checkpoint.run()
 assert results.success is True
 run_id_type = type(results.run_id)
 assert run_id_type == RunIdentifier
@@ -172,7 +173,8 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint">
-results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+checkpoint = context.get_checkpoint("my_checkpoint")
+results = checkpoint.run()
 # </snippet>
 assert results.success is True
 assert (
@@ -232,7 +234,8 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_2">
-results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+checkpoint = context.get_checkpoint("my_checkpoint")
+results = checkpoint.run()
 # </snippet>
 assert results.success is True
 
@@ -299,8 +302,8 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_3">
-results = context.run_checkpoint(
-    checkpoint_name="my_base_checkpoint",
+checkpoint = context.get_checkpoint("my_base_checkpoint")
+results = checkpoint.run(
     validations=[
         {
             "batch_request": {
@@ -388,7 +391,8 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_4">
-results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+checkpoint = context.get_checkpoint("my_checkpoint")
+results = checkpoint.run()
 # </snippet>
 assert results.success is True
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py validation_results_suites_data_assets_3">
@@ -464,7 +468,8 @@ checkpoint_example = equivalent_using_checkpoint.replace(
 context.add_or_update_checkpoint(**yaml.load(equivalent_using_checkpoint))
 context.add_or_update_checkpoint(**yaml.load(checkpoint_example))
 
-results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+checkpoint = context.get_checkpoint("my_checkpoint")
+results = checkpoint.run()
 
 assert results.success is True
 validation_result = list(results.run_results.items())[0][1]["validation_result"]
