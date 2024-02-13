@@ -77,7 +77,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
 
-        config: dict | CheckpointConfig = self._store.get(key=key)
+        config: dict | CheckpointConfig = self._store.get(key=key)  # type: ignore[assignment]
         if isinstance(config, CheckpointConfig):
             config = config.to_json_dict()
 

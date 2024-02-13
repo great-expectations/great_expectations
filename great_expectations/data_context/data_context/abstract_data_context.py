@@ -481,8 +481,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id
-        assert isinstance(instance_id, str)
+            self._in_memory_instance_id = instance_id  # type: ignore[assignment]
         return instance_id
 
     @property
