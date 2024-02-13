@@ -14,7 +14,7 @@ from great_expectations.exceptions import DataContextError
 def checkpoint_dict():
     return {
         "name": "oss_test_checkpoint",
-        "expectation_checkpoint_name": "oss_test_expectation_checkpoint",
+        "expectation_suite_name": "oss_test_expectation_checkpoint",
         "validations": [
             {
                 "name": None,
@@ -100,7 +100,7 @@ def test_checkpoint_factory_add_uses_store_add():
     factory.add(checkpoint=checkpoint)
 
     # Assert
-    store.add.assert_called_once_with(key=key, value=checkpoint)
+    store.add.assert_called_once_with(key=key, value=checkpoint.get_config())
 
 
 @pytest.mark.unit
@@ -183,7 +183,7 @@ def test_checkpoint_factory_add_success_filesystem(empty_data_context):
     _test_checkpoint_factory_add_success(empty_data_context)
 
 
-@pytest.mark.filesystem
+@pytest.mark.cloud
 def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent):
     _test_checkpoint_factory_add_success(empty_cloud_context_fluent)
 

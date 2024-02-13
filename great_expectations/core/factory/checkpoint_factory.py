@@ -6,6 +6,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
@@ -38,7 +39,7 @@ class CheckpointFactory(Factory[Checkpoint]):
                 f"Cannot add Checkpoint with name {checkpoint.name} because it already exists."
             )
 
-        self._store.add(key=key, value=checkpoint)
+        self._store.add(key=key, value=checkpoint.get_config())
         return checkpoint
 
     @public_api
@@ -76,7 +77,8 @@ class CheckpointFactory(Factory[Checkpoint]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
 
-        checkpoint_dict = self._store.get(key=key)
-        assert isinstance(checkpoint_dict, dict)
+        config: dict | CheckpointConfig = self._store.get(key=key)
+        if isinstance(config, CheckpointConfig):
+            config = config.to_json_dict()
 
-        return Checkpoint(**checkpoint_dict, data_context=self._context)
+        return Checkpoint(**config, data_context=self._context)
