@@ -23,13 +23,13 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py ColumnPairValuesDiffThree class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py ColumnPairValuesDiffThree class_def">
 class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
     # </snippet>
     """MetricProvider Class for Pair Values Diff Three MetricProvider"""
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py condition_metric_name">
-    condition_metric_name = "version-0.18 column_pair_values.diff_three"
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py condition_metric_name">
+    condition_metric_name = "column_pair_values.diff_three"
     # </snippet>
     condition_domain_keys = (
         "column_A",
@@ -37,7 +37,7 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
     )
     condition_value_keys = ()
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py _pandas">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py _pandas">
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         return abs(column_A - column_B) == 3
@@ -57,19 +57,19 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         return row_wise_cond
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py ExpectColumnPairValuesToHaveADifferenceOfThree class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py ExpectColumnPairValuesToHaveADifferenceOfThree class_def">
 class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_docstring">
     """Expect two columns to have a row-wise difference of three."""
 
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py complete_map_metric">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py complete_map_metric">
     map_metric = "column_pair_values.diff_three"
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_examples">
     examples = [
         {
             "data": {
@@ -124,7 +124,7 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_library_metadata">
     library_metadata = {
         "tags": [
             "basic math",
@@ -136,7 +136,7 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_print_diagnostic_checklist">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_print_diagnostic_checklist">
     ExpectColumnPairValuesToHaveADifferenceOfThree().print_diagnostic_checklist()
     # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!
