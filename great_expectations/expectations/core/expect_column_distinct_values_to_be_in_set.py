@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import altair as alt
 import pandas as pd
@@ -39,10 +39,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-from great_expectations._docs_decorators import public_api
-
-
-@public_api
 class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     """Expect the set of distinct column values to be contained by a given set.
 
@@ -82,7 +78,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     value_set: Union[list, set, EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],

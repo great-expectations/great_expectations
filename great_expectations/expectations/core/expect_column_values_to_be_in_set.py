@@ -46,27 +46,7 @@ if TYPE_CHECKING:
 
 
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
-    r"""Expect each column value to be in a given set.
-
-    For example:
-    ::
-
-        # my_df.my_col = [1,2,2,3,3,3]
-        >>> my_df.expect_column_values_to_be_in_set(
-                "my_col",
-                [2,3]
-            )
-        \{
-            "success": false
-            "result": \{
-                "unexpected_count": 1
-                "unexpected_percent": 16.66666666666666666,
-                "unexpected_percent_nonmissing": 16.66666666666666666,
-                "partial_unexpected_list": [
-                    1
-                ],
-            \},
-        \}
+    """Expect each column value to be in a given set.
 
     expect_column_values_to_be_in_set is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
