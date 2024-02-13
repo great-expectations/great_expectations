@@ -19,7 +19,7 @@ Use the information provided here to instantiate a Data Context on an EMR Spark 
 
 - Copy this code snippet into a cell in your EMR Spark notebook and then run it:
 
-  ```python
+  ```python title="Python"
   sc.install_pypi_package("great_expectations")
   ```
 
@@ -37,7 +37,7 @@ Use the information provided here to instantiate a Data Context on an EMR Spark 
 
 3. Run the following command to verify that an error isn't returned:
 
-  ```python
+  ```python title="Python"
       context.list_datasources()
    ```
 
