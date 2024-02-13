@@ -21,17 +21,17 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py MulticolumnValuesMultipleThree class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py MulticolumnValuesMultipleThree class_def">
 class MulticolumnValuesMultipleThree(MulticolumnMapMetricProvider):
     # </snippet>
     """MetricProvider Class for Multicolumn Values Multiple Of Three MetricProvider"""
 
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py condition_metric_name">
-    condition_metric_name = "version-0.18 multicolumn_values.multiple_three"
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py condition_metric_name">
+    condition_metric_name = "multicolumn_values.multiple_three"
     # </snippet>
     condition_domain_keys = ("column_list",)
     condition_value_keys = ()
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py _pandas">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py _pandas">
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
@@ -47,19 +47,19 @@ class MulticolumnValuesMultipleThree(MulticolumnMapMetricProvider):
         raise NotImplementedError
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py ExpectMulticolumnValuesToBeMultiplesOfThree class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py ExpectMulticolumnValuesToBeMultiplesOfThree class_def">
 class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py docstring">
     """Expect a set of columns to contain multiples of three."""
 
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py map_metric">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py map_metric">
     map_metric = "multicolumn_values.multiple_three"
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py examples">
     examples = [
         {
             "data": {
@@ -111,7 +111,7 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py library_metadata">
     library_metadata = {
         "tags": [
             "basic math",
@@ -123,7 +123,7 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py print_diagnostic_checklist">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py print_diagnostic_checklist">
     ExpectMulticolumnValuesToBeMultiplesOfThree(
         column_list=["col_a", "col_b", "col_c"]
     ).print_diagnostic_checklist()

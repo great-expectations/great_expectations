@@ -1,10 +1,10 @@
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py imports">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py imports">
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py set up context">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py set up context">
 context = gx.get_context()
 # </snippet>
 
@@ -15,27 +15,27 @@ from tests.test_utils import load_data_into_test_database
 PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
 load_data_into_test_database(
-    table_name="version-0.18 postgres_taxi_data",
+    table_name="postgres_taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=PG_CONNECTION_STRING,
 )
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add_datasource">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add_datasource">
 pg_datasource = context.sources.add_postgres(
-    name="version-0.18 pg_datasource", connection_string=PG_CONNECTION_STRING
+    name="pg_datasource", connection_string=PG_CONNECTION_STRING
 )
 # </snippet>
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add_asset">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add_asset">
 pg_datasource.add_table_asset(
-    name="postgres_taxi_data", table_name="version-0.18 postgres_taxi_data"
+    name="postgres_taxi_data", table_name="postgres_taxi_data"
 )
 # </snippet>
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py pg_batch_request">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py pg_batch_request">
 batch_request = pg_datasource.get_asset("postgres_taxi_data").build_batch_request()
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py get validator">
-expectation_suite_name = "version-0.18 insert_your_expectation_suite_name_here"
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py get validator">
+expectation_suite_name = "insert_your_expectation_suite_name_here"
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 validator = context.get_validator(
     batch_request=batch_request,
@@ -45,7 +45,7 @@ validator = context.get_validator(
 print(validator.head())
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add expectations">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add expectations">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
@@ -53,12 +53,12 @@ validator.expect_column_values_to_be_between(
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py save suite">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py save suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py checkpoint config">
-my_checkpoint_name = "version-0.18 my_sql_checkpoint"
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py checkpoint config">
+my_checkpoint_name = "my_sql_checkpoint"
 
 checkpoint = Checkpoint(
     name=my_checkpoint_name,
@@ -76,11 +76,11 @@ checkpoint = Checkpoint(
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add checkpoint config">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py add checkpoint config">
 context.add_or_update_checkpoint(checkpoint=checkpoint)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/postgres_deployment_patterns.py run checkpoint">
+# <snippet name="docs/docusaurus/docs/snippets/postgres_deployment_patterns.py run checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 

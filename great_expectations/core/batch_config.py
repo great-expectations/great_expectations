@@ -10,6 +10,7 @@ if TYPE_CHECKING:
         BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.interfaces import DataAsset
+    from great_expectations.datasource.fluent.partitioners import Partitioner
 
 
 class BatchConfig(pydantic.BaseModel):
@@ -20,6 +21,7 @@ class BatchConfig(pydantic.BaseModel):
 
     id: Optional[str] = None
     name: str
+    partitioner: Optional[Partitioner] = None
 
     # private attributes that must be set immediately after instantiation
     _data_asset: DataAsset = pydantic.PrivateAttr()

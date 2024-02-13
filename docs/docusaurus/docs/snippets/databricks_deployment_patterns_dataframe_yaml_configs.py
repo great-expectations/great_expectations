@@ -164,13 +164,10 @@ assert len(suite.expectations) == 2
 my_checkpoint_name = "insert_your_checkpoint_name_here"
 my_checkpoint_config = f"""
 name: {my_checkpoint_name}
-config_version: 1.0
-class_name: Checkpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 """
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config">
-my_checkpoint = context.test_yaml_config(my_checkpoint_config)
+my_checkpoint = context.test_yaml_config(my_checkpoint_config, class_name="Checkpoint")
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py add checkpoint config">
@@ -178,8 +175,8 @@ context.add_or_update_checkpoint(**yaml.load(my_checkpoint_config))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py run checkpoint">
-checkpoint_result = context.run_checkpoint(
-    checkpoint_name=my_checkpoint_name,
+checkpoint = context.get_checkpoint(my_checkpoint_name)
+checkpoint_result = checkpoint.run(
     validations=[
         {
             "batch_request": batch_request,
@@ -224,7 +221,6 @@ assert os.listdir(os.path.join(data_docs_local_site_path, "validations")) == [
     expectation_suite_name
 ], "Validation was not written successfully to Data Docs"
 
-run_name = first_run_result["validation_result"]["meta"]["run_id"].run_name
 assert (
     len(
         os.listdir(
@@ -232,7 +228,6 @@ assert (
                 data_docs_local_site_path,
                 "validations",
                 expectation_suite_name,
-                run_name,
             )
         )
     )

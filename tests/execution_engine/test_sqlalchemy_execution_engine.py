@@ -226,8 +226,7 @@ def test_instantiation_via_fluent_data_source__trino_add_sql(sa, empty_data_cont
     cp = context.get_checkpoint(name="my_checkpoint")
     assert cp.name == "my_checkpoint"
 
-    result = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
+    result = cp.run(
         batch_request={
             "datasource_name": "test_datasource",
             "data_asset_name": "taxi_data",

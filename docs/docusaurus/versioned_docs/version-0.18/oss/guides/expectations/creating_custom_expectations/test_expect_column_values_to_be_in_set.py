@@ -9,7 +9,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import AbstractDataContext
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def">
 class ExpectColumnValuesToBeTwoLetterCountryCode(gxe.ExpectColumnValuesToBeInSet):
     value_set: List[str] = ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"]
 
@@ -36,15 +36,15 @@ def test_expect_column_values_to_be_in_set_fail(
     )
 
     batch_request = RuntimeBatchRequest(
-        datasource_name="version-0.18 my_datasource",
-        data_connector_name="version-0.18 default_runtime_data_connector_name",
-        data_asset_name="version-0.18 my_data_asset",
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="my_data_asset",
         runtime_parameters={"batch_data": df},
         batch_identifiers={"default_identifier_name": "my_identifier"},
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="version-0.18 test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_in_set(
@@ -74,15 +74,15 @@ def test_expect_column_values_in_set_pass(
     )
 
     batch_request = RuntimeBatchRequest(
-        datasource_name="version-0.18 my_datasource",
-        data_connector_name="version-0.18 default_runtime_data_connector_name",
-        data_asset_name="version-0.18 my_data_asset",
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="my_data_asset",
         runtime_parameters={"batch_data": df},
         batch_identifiers={"default_identifier_name": "my_identifier"},
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="version-0.18 test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_in_set(
@@ -121,15 +121,15 @@ def test_expect_column_values_country_fail(
     )
 
     batch_request = RuntimeBatchRequest(
-        datasource_name="version-0.18 my_datasource",
-        data_connector_name="version-0.18 default_runtime_data_connector_name",
-        data_asset_name="version-0.18 my_data_asset",
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="my_data_asset",
         runtime_parameters={"batch_data": df},
         batch_identifiers={"default_identifier_name": "my_identifier"},
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="version-0.18 test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_two_letter_country_code(column="a")
@@ -146,15 +146,15 @@ def test_expect_column_values_country_pass(
     df = pd.DataFrame({"a": ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"]})
 
     batch_request = RuntimeBatchRequest(
-        datasource_name="version-0.18 my_datasource",
-        data_connector_name="version-0.18 default_runtime_data_connector_name",
-        data_asset_name="version-0.18 my_data_asset",
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="my_data_asset",
         runtime_parameters={"batch_data": df},
         batch_identifiers={"default_identifier_name": "my_identifier"},
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="version-0.18 test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_two_letter_country_code(column="a")
@@ -183,15 +183,15 @@ def test_expect_column_values_to_be_in_set_invalid_set(
     )
 
     batch_request = RuntimeBatchRequest(
-        datasource_name="version-0.18 my_datasource",
-        data_connector_name="version-0.18 default_runtime_data_connector_name",
-        data_asset_name="version-0.18 my_data_asset",
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="my_data_asset",
         runtime_parameters={"batch_data": df},
         batch_identifiers={"default_identifier_name": "my_identifier"},
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="version-0.18 test",
+        create_expectation_suite_with_name="test",
     )
     with pytest.raises(pydantic.ValidationError):
         _ = validator.expect_column_values_to_be_in_set(column="a", value_set="foo")

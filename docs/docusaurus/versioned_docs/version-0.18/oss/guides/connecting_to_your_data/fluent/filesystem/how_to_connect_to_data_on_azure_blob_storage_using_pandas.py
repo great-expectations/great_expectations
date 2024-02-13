@@ -14,18 +14,18 @@ context = gx.get_context()
 os.environ["AZURE_STORAGE_ACCOUNT_URL"] = "superconductivetesting.blob.core.windows.net"
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args">
-datasource_name = "version-0.18 my_datasource"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args">
+datasource_name = "my_datasource"
 azure_options = {
     "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
     "credential": "${AZURE_CREDENTIAL}",
 }
 # </snippet>
 
-bucket_or_name = "version-0.18 test_docs_data"
+bucket_or_name = "test_docs_data"
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource">
 datasource = context.sources.add_pandas_abs(
     name=datasource_name, azure_options=azure_options
 )
@@ -33,13 +33,13 @@ datasource = context.sources.add_pandas_abs(
 
 assert datasource_name in context.datasources
 
-asset_name = "version-0.18 my_taxi_data_asset"
+asset_name = "my_taxi_data_asset"
 abs_container = "superconductive-public"
 abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset">
 data_asset = datasource.add_csv_asset(
     name=asset_name,
     batching_regex=batching_regex,

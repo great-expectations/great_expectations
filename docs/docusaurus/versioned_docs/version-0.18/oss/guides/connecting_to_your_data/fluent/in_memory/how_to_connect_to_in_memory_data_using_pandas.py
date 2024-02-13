@@ -10,13 +10,13 @@ import great_expectations as gx
 context = gx.get_context()
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py datasource">
-datasource = context.sources.add_pandas(name="version-0.18 my_pandas_datasource")
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py datasource">
+datasource = context.sources.add_pandas(name="my_pandas_datasource")
 # </snippet>
 
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py dataframe">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py dataframe">
 import pandas as pd
 
 dataframe = pd.read_parquet(
@@ -25,17 +25,17 @@ dataframe = pd.read_parquet(
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py name">
-name = "version-0.18 taxi_dataframe"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py name">
+name = "taxi_dataframe"
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py data_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py data_asset">
 data_asset = datasource.add_dataframe_asset(name=name)
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe">
 my_batch_request = data_asset.build_batch_request(dataframe=dataframe)
 # </snippet>
 
