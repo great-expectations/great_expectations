@@ -4764,9 +4764,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 expectation_suite_dict: dict = cast(
                     dict, self.expectations_store.get(key)
                 )
-            except ValidationError:
+            except ValidationError as e:
                 # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
                 # we should ignore that instead of breaking all checkpoints in the entire context
+                logger.info(
+                    f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
+                    f"because it failed to load with message: {e}"
+                )
                 continue
             if not expectation_suite_dict:
                 continue
