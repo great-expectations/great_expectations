@@ -58,9 +58,9 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         )
         for backend in backends:
             for filename in test_configuration_files:
-                with subprocess.Popen(filename, shell=True) as file:
+                with subprocess.Popen(filename, shell=True):
                     pk_column: bool = False
-                    test_configuration = json.load(file)
+                    test_configuration = json.load(filename)
                     expectation_type = filename.split(".json")[0].split("/")[-1]
                     for index, test_config in enumerate(
                         test_configuration["datasets"], 1
