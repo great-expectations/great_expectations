@@ -262,20 +262,14 @@ def _checkpoint_config(data_file_name, with_slack):
                 "checkpoint_config": {
                     "action_list": action_list,
                     "batch_request": {},
-                    "class_name": "Checkpoint",
-                    "config_version": 1.0,
                     "default_validation_id": "51c303bd-2396-4f04-b567-79f746b09173",
                     "evaluation_parameters": {},
                     "expectation_suite_ge_cloud_id": None,
                     "expectation_suite_name": None,
                     "ge_cloud_id": None,
                     "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",
-                    "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
-                    "profilers": [],
-                    "run_name_template": None,
                     "runtime_configuration": {},
-                    "template_name": None,
                     "validations": [
                         {
                             "batch_request": {
@@ -290,7 +284,6 @@ def _checkpoint_config(data_file_name, with_slack):
                         }
                     ],
                 },
-                "class_name": "Checkpoint",
                 "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
                 "default_validation_id": "51c303bd-2396-4f04-b567-79f746b09173",
                 "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",

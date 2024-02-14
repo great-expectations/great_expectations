@@ -1,4 +1,4 @@
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/ge_checkpoint_bigquery.py full">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/ge_checkpoint_bigquery.py full">
 from datetime import timedelta
 
 import airflow

@@ -87,7 +87,7 @@ A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost 
 
 Run the following command to initialize your Filesystem Data Context in an empty folder:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
 ```
 
 ### Create a context
@@ -96,7 +96,7 @@ You provide the path for your empty folder to the GX library's `FileDataContext.
 
 For convenience, the `FileDataContext.create(...)` method instantiates and returns the newly initialized Data Context, which you can keep in a Python variable.
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.py initialize_filesystem_data_context"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.py initialize_filesystem_data_context"
 ```
 
 :::info What if the folder is not empty?
@@ -132,14 +132,14 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 Each Filesystem Data Context has a root folder in which it was initialized.  This root folder identifies the specific Filesystem Data Context to instantiate.
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root"
 ```
 
 ### Run the `get_context(...)` method
 
 You provide the path for your empty folder to the GX library's `get_context(...)` method as the `project_root_dir` parameter. Because you are providing a path to an empty folder, the `get_context(...)` method instantiates and return the Data Context at that location.
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
+```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
 ```
 
 :::info Project root vs context root
@@ -147,7 +147,7 @@ Note that there is a subtle distinction between the `project_root_dir` and `cont
 
 Your context root is the directory that contains all your GX config while your project root refers to your actual working directory (and therefore contains the context root).
 
-```bash title="Folder tree"
+```bash
 # The overall directory is your project root
 data/
 gx/ # The GX folder with your config is your context root
@@ -192,26 +192,26 @@ To create your Data Context, you'll create a configuration that uses in-memory M
 
 1. Run the following command to import the `DataContextConfig` and the `InMemoryStoreBackendDefaults` classes:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend"
+    ```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend"
     ```
 
 2. Run the following command to import the `EphemeralDataContext` class:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context"
+    ```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context"
     ```
 
 ### Create the Data Context configuration
 
 Run the following command to create a Data Context configuration that specifies the use of in-memory Metadata Stores and pass in an instance of the `InMemoryStoreBackendDefaults` class as a parameter when initializing an instance of the `DataContextConfig` class:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend"
+```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend"
 ```
 
 ### Instantiate an Ephemeral Data Context
 
 Run the following command to initialize the `EphemeralDataContext` class while passing in the `DataContextConfig` instance you created as the value of the `project_config` parameter.
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context"
+```python name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context"
 ```
 
 :::info Saving the contents of an Ephemeral Data Context for future use

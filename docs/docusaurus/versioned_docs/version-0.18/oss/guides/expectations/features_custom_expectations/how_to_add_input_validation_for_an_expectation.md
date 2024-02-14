@@ -43,7 +43,7 @@ To do this, we're going to write a series of `assert` statements to catch invali
 
 To begin with, we want to create our `validate_configuration(...)` method and ensure that a configuration is set:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config"
 ```
 
 Next, we're going to implement the logic for validating the four parameters we identified above.
@@ -52,34 +52,34 @@ Next, we're going to implement the logic for validating the four parameters we i
 
 First we need to access the parameters to be evaluated:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_params"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_params"
 ```
 
 Now we can begin writing the assertions to validate these parameters. 
 
 We're going to ensure that at least one of `min_value` or `max_value` is set:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_values"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_values"
 ```
 
 Check that `min_value` and `max_value` are of the correct type:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_types"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_types"
 ```
 
 Verify that, if both `min_value` and `max_value` are set, `min_value` does not exceed `max_value`:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_comparison"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_comparison"
 ```
 
 And assert that `strict_min` and `strict_max`, if provided, are of the correct type:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_none"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_none"
 ```
 
 If any of these fail, we raise an exception:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_except"
+```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py validate_config_except"
 ```
 
 Putting this all together, our `validate_configuration(...)` method should verify that all necessary inputs have been provided, 
@@ -92,7 +92,7 @@ If you now run your file, `print_diagnostic_checklist()` will attempt to execute
 
 If your input is successfully validated, and the rest the logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
-```console title="Output"
+```console
  ✔ Has basic input validation and type checking
     ✔ Custom 'assert' statements in validate_configuration
 ```

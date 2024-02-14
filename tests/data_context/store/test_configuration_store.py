@@ -70,10 +70,6 @@ class SampleConfigSchema(Schema):
 class SampleConfigurationStore(ConfigurationStore):
     _configuration_class = SampleConfig
 
-    def serialization_self_check(self, pretty_print: bool) -> None:
-        # Required to fulfill contract set by parent
-        pass
-
     def list_keys(self) -> List[DataContextKey]:
         # Mock values to work with self.self_check
         return [
@@ -270,36 +266,6 @@ def test_config_property_and_defaults() -> None:
         "overwrite_existing": False,
         "store_name": "my_configuration_store",
     }
-
-
-@pytest.mark.unit
-def test_self_check(capsys) -> None:
-    store = SampleConfigurationStore(store_name="my_configuration_store")
-
-    report_obj = store.self_check(pretty_print=True)
-
-    keys = [f"key{char}" for char in string.ascii_uppercase]
-
-    assert report_obj == {
-        "config": {
-            "class_name": "SampleConfigurationStore",
-            "module_name": "tests.data_context.store.test_configuration_store",
-            "overwrite_existing": False,
-            "store_name": "my_configuration_store",
-        },
-        "keys": keys,
-        "len_keys": len(keys),
-    }
-
-    stdout = capsys.readouterr().out
-
-    messages = [
-        "Checking for existing keys...",
-        f"{len(keys)} keys found",
-    ]
-
-    for message in messages:
-        assert message in stdout
 
 
 @pytest.mark.parametrize(

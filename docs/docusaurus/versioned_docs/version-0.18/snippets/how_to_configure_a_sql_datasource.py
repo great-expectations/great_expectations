@@ -57,7 +57,7 @@ def validate_universal_config_elements():
 
 def section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configuration():
     datasource_config: dict = {
-        # <snippet name="version-0.18 sql datasource define execution_engine class_name and module_name">
+        # <snippet name="sql datasource define execution_engine class_name and module_name">
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
             "module_name": "great_expectations.execution_engine",
@@ -72,7 +72,7 @@ def section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configurati
     ):
         is_subset(datasource_config, full_config)
 
-    # <snippet name="version-0.18 sql datasource configuration post execution engine defined">
+    # <snippet name="sql datasource configuration post execution engine defined">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -80,7 +80,7 @@ def section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configurati
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
             "module_name": "great_expectations.execution_engine",
-            # <snippet name="version-0.18 sql datasource define CONNECTION_STRING">
+            # <snippet name="sql datasource define CONNECTION_STRING">
             "connection_string": CONNECTION_STRING,
             # </snippet>
         },
@@ -96,7 +96,7 @@ def section_5_add_the_sqlalchemy_execution_engine_to_your_datasource_configurati
 
 
 def section_6_add_a_dictionary_as_the_value_of_the_data_connectors_key():
-    # <snippet name="version-0.18 sql datasource configuration post execution engine defined with empty data_connectors">
+    # <snippet name="sql datasource configuration post execution engine defined with empty data_connectors">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -119,7 +119,7 @@ def section_6_add_a_dictionary_as_the_value_of_the_data_connectors_key():
 
 
 def section_7_configure_your_individual_data_connectors__inferred():
-    # <snippet name="version-0.18 sql datasource configuration with empty inferred sql data_connector">
+    # <snippet name="sql datasource configuration with empty inferred sql data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -138,7 +138,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
         datasource_config, get_full_config_sql_inferred_datasource__single_batch_only()
     )
 
-    # <snippet name="version-0.18 inferred sql datasource configuration with data_connector class_name defined">
+    # <snippet name="inferred sql datasource configuration with data_connector class_name defined">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -150,7 +150,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
         },
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
-                # <snippet name="version-0.18 define data_connector class_name for inferred sql datasource">
+                # <snippet name="define data_connector class_name for inferred sql datasource">
                 "class_name": "InferredAssetSqlDataConnector",
                 # </snippet>
             },
@@ -163,7 +163,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
 
 
 def section_7_configure_your_individual_data_connectors__configured():
-    # <snippet name="version-0.18 sql datasource configuration with empty configured sql data_connector">
+    # <snippet name="sql datasource configuration with empty configured sql data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -180,7 +180,7 @@ def section_7_configure_your_individual_data_connectors__configured():
     # </snippet>
     is_subset(datasource_config, get_full_config_sql_configured_datasource())
 
-    # <snippet name="version-0.18 configured sql datasource configuration with data_connector class_name defined">
+    # <snippet name="configured sql datasource configuration with data_connector class_name defined">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -192,7 +192,7 @@ def section_7_configure_your_individual_data_connectors__configured():
         },
         "data_connectors": {
             "name_of_my_configured_data_connector": {
-                # <snippet name="version-0.18 define data_connector class_name for configured sql datasource">
+                # <snippet name="define data_connector class_name for configured sql datasource">
                 "class_name": "ConfiguredAssetSqlDataConnector",
                 # </snippet>
                 "assets": {},
@@ -204,7 +204,7 @@ def section_7_configure_your_individual_data_connectors__configured():
 
 
 def section_7_configure_your_individual_data_connectors__runtime():
-    # <snippet name="version-0.18 sql datasource configuration with empty runtime sql data_connector">
+    # <snippet name="sql datasource configuration with empty runtime sql data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -221,7 +221,7 @@ def section_7_configure_your_individual_data_connectors__runtime():
     # </snippet>
     is_subset(datasource_config, get_full_config_sql_runtime_datasource())
 
-    # <snippet name="version-0.18 runtime sql datasource configuration with data_connector class_name defined">
+    # <snippet name="runtime sql datasource configuration with data_connector class_name defined">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -233,7 +233,7 @@ def section_7_configure_your_individual_data_connectors__runtime():
         },
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
-                # <snippet name="version-0.18 define data_connector class_name for runtime sql datasource">
+                # <snippet name="define data_connector class_name for runtime sql datasource">
                 "class_name": "RuntimeDataConnector",
                 # </snippet>
                 "batch_identifiers": {},
@@ -245,7 +245,7 @@ def section_7_configure_your_individual_data_connectors__runtime():
 
 
 def section_8_configure_your_data_connectors_data_assets__inferred():
-    # <snippet name="version-0.18 full configuration for sql inferred Datasource">
+    # <snippet name="full configuration for sql inferred Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -256,12 +256,12 @@ def section_8_configure_your_data_connectors_data_assets__inferred():
             "connection_string": CONNECTION_STRING,
         },
         "data_connectors": {
-            # <snippet name="version-0.18 inferred sql data asset single batch">
+            # <snippet name="inferred sql data asset single batch">
             "inferred_data_connector_single_batch_asset": {
                 "class_name": "InferredAssetSqlDataConnector",
             },
             # </snippet>
-            # <snippet name="version-0.18 inferred sql data asset multi batch">
+            # <snippet name="inferred sql data asset multi batch">
             "inferred_data_connector_multi_batch_asset_split_on_date_time": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "splitter_method": "split_on_year_and_month",
@@ -280,7 +280,7 @@ def section_8_configure_your_data_connectors_data_assets__inferred():
 
 
 def section_8_configure_your_data_connectors_data_assets__configured():
-    # <snippet name="version-0.18 full configuration for sql configured Datasource">
+    # <snippet name="full configuration for sql configured Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -294,13 +294,13 @@ def section_8_configure_your_data_connectors_data_assets__configured():
             "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetSqlDataConnector",
                 "assets": {
-                    # <snippet name="version-0.18 configured sql data asset single batch">
+                    # <snippet name="configured sql data asset single batch">
                     "yellow_tripdata_sample_2020_full": {
                         "table_name": "yellow_tripdata_sample_2020",
                         "schema_name": "main",
                     },
                     # </snippet>
-                    # <snippet name="version-0.18 configured sql data asset multi batch">
+                    # <snippet name="configured sql data asset multi batch">
                     "yellow_tripdata_sample_2020_by_year_and_month": {
                         "table_name": "yellow_tripdata_sample_2020",
                         "schema_name": "main",
@@ -322,7 +322,7 @@ def section_8_configure_your_data_connectors_data_assets__configured():
 
 
 def section_8_configure_your_data_connectors_data_assets__runtime():
-    # <snippet name="version-0.18 full configuration for sql runtime Datasource">
+    # <snippet name="full configuration for sql runtime Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -335,7 +335,7 @@ def section_8_configure_your_data_connectors_data_assets__runtime():
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
-                # <snippet name="version-0.18 runtime sql data asset define batch_identifiers">
+                # <snippet name="runtime sql data asset define batch_identifiers">
                 "batch_identifiers": ["batch_timestamp"],
                 # </snippet>
             },
@@ -349,7 +349,7 @@ def section_8_configure_your_data_connectors_data_assets__runtime():
 
 
 def configure_your_data_connectors_data_assets__runtime__yaml():
-    # <snippet name="version-0.18 full configuration for sql runtime Datasource YAML">
+    # <snippet name="full configuration for sql runtime Datasource YAML">
     datasource_config = f"""
     name: my_datasource_name
     class_name: Datasource
@@ -363,7 +363,7 @@ def configure_your_data_connectors_data_assets__runtime__yaml():
           - batch_timestamp
     """
     # </snippet>
-    connector_name = "version-0.18 name_of_my_runtime_data_connector"
+    connector_name = "name_of_my_runtime_data_connector"
     asset_count = 0
 
     test_result = data_context.test_yaml_config(datasource_config)
@@ -422,11 +422,11 @@ def section_9_test_your_configuration__inferred_and_configured():
 def section_9_test_your_configuration__runtime():
     # Testing the runtime data connector (there will be no data assets, those are passed in by the RuntimeBatchRequest.)
     datasource_config = get_full_config_sql_runtime_datasource()
-    connector_name = "version-0.18 name_of_my_runtime_data_connector"
+    connector_name = "name_of_my_runtime_data_connector"
     asset_count = 0
 
     test_result = (
-        # <snippet name="version-0.18 test your sql datasource_config with test_yaml_config">
+        # <snippet name="test your sql datasource_config with test_yaml_config">
         data_context.test_yaml_config(yaml.dump(datasource_config))
         # </snippet>
     )

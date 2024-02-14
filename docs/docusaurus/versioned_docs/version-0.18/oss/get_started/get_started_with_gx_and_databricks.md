@@ -40,7 +40,7 @@ The complete code used in the following examples is available on GitHub:
 
 1. Run the following command in your notebook to install GX as a notebook-scoped library:
 
-    ```bash title="Terminal input"
+    ```bash
     %pip install great-expectations
     ```
 
@@ -48,7 +48,7 @@ The complete code used in the following examples is available on GitHub:
 
 2. Run the following command to import the Python configurations you'll use in the following steps:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py imports"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py imports"
   ```
 
 ## Set up GX
@@ -59,11 +59,11 @@ DBFS is a distributed file system mounted in a Databricks workspace and availabl
 
 1. Run the following code to set up a <TechnicalTag tag="data_context" text="Data Context"/> with the default settings:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
   ```
 2. Run the following code to instantiate your Data Context:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py set up context"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py set up context"
   ```
 
 ## Prepare your data
@@ -79,7 +79,7 @@ DBFS is a distributed file system mounted in a Databricks workspace and availabl
 
 Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example `.csv` taxi data to your DBFS folder:
 
-```python title="Python"
+```python
 # Copy 3 months of data
 for month in range(1, 4):
     dbutils.fs.cp(
@@ -94,7 +94,7 @@ for month in range(1, 4):
 
 Run the following code in your notebook to load a month of existing example taxi data as a DataFrame:
 
-```python title="Python"
+```python
 df = spark.read.format("csv")\
     .option("header", "true")\
     .option("inferSchema", "true")\
@@ -117,27 +117,27 @@ df = spark.read.format("csv")\
 
 1. Run the following command to set the base directory that contains the data:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose base directory"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose base directory"
   ```
 
 2. Run the following command to create our <TechnicalTag tag="datasource" text="Data Source" />:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py add datasource"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py add datasource"
   ```
 
 3. Run the following command to set the [batching regex](https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset/#create-a-batching_regex):
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose batching regex"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose batching regex"
   ```
 
 4. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Data Source:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py add data asset"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py add data asset"
   ```
 
 5. Run the following command to build a <TechnicalTag tag="batch_request" text="Batch Request" /> with the <TechnicalTag tag="data_asset" text="Data Asset" /> you configured earlier:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py build batch request"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py build batch request"
   ```
 
 </TabItem>
@@ -145,17 +145,17 @@ df = spark.read.format("csv")\
 
 1. Run the following command to create the Data Source:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py add datasource"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py add datasource"
   ```
 
 2. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Data Source:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py add data asset"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py add data asset"
   ```
 
 3. Run the following command to build a <TechnicalTag tag="batch_request" text="Batch Request" /> with the <TechnicalTag tag="data_asset" text="Data Asset" /> you configured earlier:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py build batch request"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py build batch request"
   ```
 
 </TabItem>
@@ -169,17 +169,17 @@ Every time you evaluate an Expectation with `validator.expect_*`, it is immediat
 
 1. Run the following command to create the suite and get a `Validator`:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py get validator"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py get validator"
   ```
 
 2. Run the following command to use the `Validator` to add a few Expectations:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py add expectations"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py add expectations"
   ```
 
 3. Run the following command to save your Expectation Suite (all the unique Expectation Configurations from each run of `validator.expect_*`) to your Expectation Store:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py save suite"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py save suite"
   ```
 
 ## Validate your data
@@ -188,17 +188,17 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
 1. Run the following command to create the Checkpoint configuration that uses your Data Context, passes in your Batch Request (your data) and your Expectation Suite (your tests):
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py checkpoint config"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py checkpoint config"
   ```
 
 2. Run the following command to save the Checkpoint:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py add checkpoint config"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py add checkpoint config"
   ```
 
 3. Run the following command to run the Checkpoint:
 
-  ```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py run checkpoint"
+  ```python name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py run checkpoint"
   ```
 
   Your Checkpoint configuration includes the `store_validation_result` and `update_data_docs` actions. The `store_validation_result` action saves your validation results from the Checkpoint run and allows the results to be persisted for future use. The  `update_data_docs` action builds Data Docs files for the validations run in the Checkpoint.
@@ -215,7 +215,7 @@ Because you used the DBFS for your Data Docs store, you need to download your Da
 
 If you have the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) installed and configured locally, run the following commands from your local terminal to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
 
-```bash title="Terminal input"
+```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 
 cd great_expectations/uncommitted/data_docs/local_site
@@ -225,7 +225,7 @@ open -a "<YOUR_PREFERRED_BROWSER_NAME_HERE>" index.html
 
 The `displayHTML` command is another option you can use to display Data Docs in a Databricks notebook. However, when you use this option, an empty page is returned when you click a link in the displayed data documents. To view validation results, use the following method:
 
-```python title="Python" 
+```python 
 html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'
 with open(html, "r") as f:
     data = "".join([l for l in f])

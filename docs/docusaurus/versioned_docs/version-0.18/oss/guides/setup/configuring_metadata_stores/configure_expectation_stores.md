@@ -80,7 +80,7 @@ Use the information provided here to configure a new storage location for Expect
 
 GX recommends that you store Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following code adds Azure Storage credentials below the ``AZURE_STORAGE_CONNECTION_STRING`` key:
 
-```yaml title="YAML"
+```yaml
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
 To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md)
@@ -89,7 +89,7 @@ To learn more about the additional options for configuring the ``config_variable
 
 Your Expectations Store configuration is provided in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry:
 
-```yaml title="YAML"
+```yaml
 expectations_store_name: expectations_store
 
 stores:
@@ -106,7 +106,7 @@ This configuration tells Great Expectations to look for Expectations in a Store 
 
 In the following example, ``expectations_store_name`` is set to ``expectations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Expectations are stored, ``prefix`` is the folder in the container where Expectations are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}`` to reference the corresponding key in the ``config_variables.yml`` file.
 
-```yaml title="YAML"
+```yaml
 expectations_store_name: expectations_AZ_store
 
 stores:
@@ -129,7 +129,7 @@ Additional authentication and configuration options are available. See [Hosting 
 
 You can use the ``az storage blob upload`` command to copy Expectations into Azure Blob Storage. The following command copies the Expectation ``exp1`` from a local folder to Azure Blob Storage: 
 
-```bash title="Terminal"
+```bash
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 az storage blob upload -f <local/path/to/expectation.json> -c <GREAT-EXPECTATION-DEDICATED-AZURE-BLOB-CONTAINER-NAME> -n <PREFIX>/<expectation.json>
 example :
@@ -149,7 +149,7 @@ If you copied your existing Expectation Suites to Azure Blob Storage, run the fo
 
 <!--A snippet is required for this code block.-->
 
-```python title="Python"
+```python
 import great_expectations as gx
 
 context = gx.get_context()
@@ -161,7 +161,7 @@ A list of Expectations you copied to Azure Blob Storage is returned. Expectation
 
 Run the following command to confirm your Expectations have been copied to Azure Blob Storage: 
 
-```bash title="Terminal input"
+```bash
 great_expectations suite list
 ```
 If your Expectations have not been copied to Azure Blob Storage, the message "No Expectations were found" is returned.
@@ -200,7 +200,7 @@ For more information about validating your GCP authentication credentials, see [
 
 The configuration for your Expectations <TechnicalTag tag="store" text="Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry: 
 
-```yaml title="YAML" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py expected_existing_expectations_store_yaml"
+```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py expected_existing_expectations_store_yaml"
 ```
 
 This configuration tells Great Expectations to look for Expectations in the ``expectations_store`` Store. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
@@ -209,7 +209,7 @@ This configuration tells Great Expectations to look for Expectations in the ``ex
 
 In the following example, `expectations_store_name` is set to ``expectations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Expectations are stored.
 
-```yaml title="YAML" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py configured_expectations_store_yaml"
+```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py configured_expectations_store_yaml"
 ```
 
 :::warning
@@ -218,14 +218,14 @@ If you are also storing [Validations in GCS](./configure_result_stores.md) or [D
 
 ### Copy existing Expectation JSON files to the GCS bucket (Optional)
 
-Use the ``gsutil cp`` command to copy Expectations into GCS. For example, the following command copies the Expectation `my_expectation_suite` from a local folder into a GCS bucket:
+Use the ``gsutil cp`` command to copy Expectations into GCS. For example, the following command copies the Expectation ```my_expectation_suite`` from a local folder into a GCS bucket:
 
-```bash title="Terminal input" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_command"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_command"
 ```
 
 The following confirmation message is returned:
 
-```bash title="Terminal output" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_output"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_output"
 ```
 
 Additional methods for copying Expectations into GCS are available. See [Upload objects from a filesystem](https://cloud.google.com/storage/docs/uploading-objects).
@@ -236,7 +236,7 @@ If you copied your existing Expectation Suites to GCS, run the following Python 
 
 <!--A snippet is required for this code block.-->
 
-```python title="Python"
+```python
 import great_expectations as gx
 
 context = gx.get_context()
@@ -249,7 +249,7 @@ A list of Expectation Suites you copied to GCS is returned. Expectation Suites t
 
 Run the following command to confirm your Expectations were copied to GCS:
 
-```bash title="Terminal input" name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_command"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_command"
 ```
 
 If your Expectations were not copied to Azure Blob Storage, a message indicating no Expectations were found is returned.
@@ -275,7 +275,7 @@ Use the information provided here to configure a new storage location for Expect
 
 Run the following command to create a new folder for your Expectations and move your existing Expectations to the new folder:
 
-```bash title="Terminal input"
+```bash
 # in the gx/ folder
 mkdir shared_expectations
 mv expectations/npi_expectations.json shared_expectations/
@@ -286,7 +286,7 @@ In this example, the name of the Expectation is ``npi_expectations`` and the pat
 
 The configuration for your Expectations <TechnicalTag tag="store" text="Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  Open ``great_expectations.yml``and find the following entry:
 
-```yaml title="YAML"
+```yaml
 expectations_store_name: expectations_store
 
 stores:
@@ -302,7 +302,7 @@ This configuration tells Great Expectations to look for Expectations in the ``ex
 
 In the following example, `expectations_store_name` is set to ``shared_expectations_filesystem_store``, but it can be personalized.  Also, ``base_directory`` is set to ``shared_expectations/``, but you can set it to another path that is accessible by Great Expectations.
 
-```yaml title="YAML"
+```yaml
 expectations_store_name: shared_expectations_filesystem_store
 
 stores:
@@ -319,7 +319,7 @@ If you copied your existing Expectation Suites to your filesystem, run the follo
 
 <!--A snippet is required for this code block.-->
 
-```python title="Python"
+```python
 import great_expectations as gx
 
 context = gx.get_context()
@@ -330,9 +330,9 @@ A list of Expectation Suites you copied your filesystem is returned. Expectation
 
 ### Version control systems
 
-GX recommends that you store Expectations in a version control system such as Git. The JSON format of Expectations allows for informative diff-statements and modification tracking. In the following example, the `expect_table_column_count_to_equal` value changes from ``333`` to ``331``, and then to ``330``:
+GX recommends that you store Expectations in a version control system such as Git. The JSON format of Expectations allows for informative diff-statements and modification tracking. In the following example, the ```expect_table_column_count_to_equal`` value changes from ``333`` to ``331``, and then to ``330``:
 
-```bash title="Terminal"
+```bash
 git log -p npi_expectations.json
 
 commit cbc127fb27095364c3c1fcbf6e7f078369b07455
@@ -386,7 +386,7 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
 
 To add database credentials, open ``config_variables.yml`` and add the following entry below the ``db_creds`` key: 
 
-```yaml title="YAML"
+```yaml
     db_creds:
       drivername: postgresql
       host: '<your_host_name>'
@@ -401,7 +401,7 @@ To configure the ``config_variables.yml`` file, or additional environment variab
 
 Open ``great_expectations.yml``and find the following entry:
 
-```yaml title="YAML"
+```yaml
 expectations_store_name: expectations_store
 
 stores:
@@ -418,7 +418,7 @@ This configuration tells Great Expectations to look for Expectations in the ``ex
 
 In the following example, `expectations_store_name` is set to ``expectations_postgres_store``, but it can be personalized. You also need to make some changes to the ``store_backend`` settings.  The ``class_name`` is ``DatabaseStoreBackend``, and ``credentials`` is ``${db_creds}`` to reference the corresponding key in the ``config_variables.yml`` file.
 
-```yaml title="YAML"
+```yaml
 expectations_store_name: expectations_postgres_store
 
 stores:

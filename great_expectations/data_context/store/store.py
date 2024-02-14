@@ -283,11 +283,6 @@ class Store:
                 return self._store_backend.has_key(key.to_fixed_length_tuple())
             return self._store_backend.has_key(key.to_tuple())
 
-    def self_check(self, pretty_print: bool) -> None:
-        NotImplementedError(
-            f"The test method is not implemented for Store class {self.__class__.__name__}."
-        )
-
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
         id: Optional[str] = None
         # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).

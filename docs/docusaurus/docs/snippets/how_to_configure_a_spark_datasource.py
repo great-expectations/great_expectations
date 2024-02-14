@@ -809,15 +809,7 @@ def section_10_test_your_configuration_with_test_yaml_config():
             1,
         ),
     ):
-        test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
-        datasource_check = test_result.self_check(max_examples=12)
-
-        # NOTE: The following code is only for testing and can be ignored by users.
-        # Assert that there are no data sets -- those get defined in a Batch Request.
-        assert (
-            datasource_check["data_connectors"][connector_name]["data_asset_count"]
-            == asset_count
-        ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
+        _ = data_context.test_yaml_config(yaml.dump(datasource_config))
 
 
 def section_12_add_your_new_datasource_to_your_datacontext():

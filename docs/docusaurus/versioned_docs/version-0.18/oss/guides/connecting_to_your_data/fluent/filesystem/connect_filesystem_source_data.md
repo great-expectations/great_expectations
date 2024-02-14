@@ -77,7 +77,7 @@ The following information is required when you create an Amazon S3 Data Source:
 
 1. Run the following Python code to define `name`, `bucket_name` and `boto3_options`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py define_add_pandas_s3_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py define_add_pandas_s3_args"
     ```
 
     :::tip Additional options for `boto3_options`
@@ -90,14 +90,14 @@ The following information is required when you create an Amazon S3 Data Source:
 
 2. Run the following Python code to pass `name`, `bucket_name`, and `boto3_options` as parameters when you create your Data Source::
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py create_datasource"
     ```
 
 ### Add data to the Data Source as a Data Asset
 
 Run the following Python code:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py add_asset"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py add_asset"
 ```
 
 <BatchingRegexExplaination storage_location_type="S3 bucket" />
@@ -136,7 +136,7 @@ The following information is required when you create an Amazon S3 Data Source:
 
 1. Run the following Python code to define `name`, `bucket_name`, and `boto3_options`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py define_add_spark_s3_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py define_add_spark_s3_args"
     ```
 
     :::tip Additional options for `boto3_options`
@@ -149,14 +149,14 @@ The following information is required when you create an Amazon S3 Data Source:
 
 2. Run the following Python code to pass `name`, `bucket_name`, and `boto3_options` as parameters when you create your Data Source::
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py create_datasource"
     ```
 
 ### Add data to the Data Source as a Data Asset
 
 Run the following Python code:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py add_asset"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py add_asset"
 ```
 
 <BatchingRegexExplaination storage_location_type="S3 bucket" />
@@ -208,11 +208,11 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 1. Run the following Python code to define `name` and `azure_options`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args"
     ```
 2. Run the following Python code to pass `name` and `azure_options` as parameters when you create your Data Source:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource"
     ```
 
     :::tip Where did that connection string come from?
@@ -225,7 +225,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset"
     ```
 
 <AbsBatchingRegexExample />
@@ -262,11 +262,11 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 1. Run the following Python code to define `name` and `azure_options`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_spark.py define_add_spark_abs_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_spark.py define_add_spark_abs_args"
     ```
 2. Run the following Python code to pass `name` and `azure_options` as parameters when you create your Data Source:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_spark.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_spark.py create_datasource"
     ```
 
     :::tip Where did that connection string come from?
@@ -279,7 +279,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_spark.py add_asset"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_spark.py add_asset"
     ```
 
 <AbsBatchingRegexExample />
@@ -333,19 +333,19 @@ The following information is required when you create a GCS Data Source:
 
 1. Run the following Python code to define `name`, `bucket_or_name`, and `gcs_options`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py define_add_pandas_gcs_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py define_add_pandas_gcs_args"
     ```
 
 2. Run the following Python code to pass `name`, `bucket_or_name`, and `gcs_options` as parameters when you create your Data Source:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py create_datasource"
     ```
 
 ### Add GCS data to the Data Source as a Data Asset
 
 Run the following Python code:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py add_asset"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py add_asset"
 ```
 
 <BatchingRegexExplaination storage_location_type="GCS bucket" />
@@ -391,19 +391,19 @@ The following information is required when you create a GCS Data Source:
 
 1. Run the following Python code to define `name`, `bucket_or_name`, and `gcs_options`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py define_add_spark_gcs_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py define_add_spark_gcs_args"
     ```
 
 2. Run the following Python code to pass `name`, `bucket_or_name`, and `gcs_options` as parameters when you create your Data Source:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py create_datasource"
     ```
 
 ### Add GCS data to the Data Source as a Data Asset
 
 Run the following Python code:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py add_asset"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py add_asset"
 ```
 
 :::info Optional parameters: `header` and `infer_schema`
@@ -462,7 +462,7 @@ Connect to filesystem Data Assets.
 
 Run the following Python code to read the data in individual files directly into a Validator with Pandas:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas.py get_validator"
+```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas.py get_validator"
 ```
 
 <InfoUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv"/>
@@ -522,14 +522,14 @@ The following information is required when you create a Filesystem Data Source:
 
 1. Run the following Python code to define `name` and `base_directory` and store the information in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py define_add_pandas_filesystem_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py define_add_pandas_filesystem_args"
     ```
 
 <InfoFilesystemDatasourceRelativeBasePaths />
 
 2. Run the following Python code to pass `name` and `base_directory` as parameters when you create your Data Source:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource"
     ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
@@ -546,12 +546,12 @@ A Data Asset requires the following information to be defined:
 
 1. Run the following Python code to define `name` and `batching_regex` and store the information in the Python variables `asset_name` and `batching_regex`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py define_add_csv_asset_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py define_add_csv_asset_args"
     ```
 
 2. Run the following Python code to pass `name` and `batching_regex` as parameters when you create your Data Asset:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py add_asset"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py add_asset"
     ```
 
     <TipUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv" />
@@ -596,14 +596,14 @@ The following information is required when you create a Filesystem Data Source:
 
 1. Run the following Python code to define `name` and `base_directory` and store the information in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_spark_filesystem_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_spark_filesystem_args"
     ```
 
     <InfoFilesystemDatasourceRelativeBasePaths />
 
 2. Run the following Python code to pass `name` and `base_directory` as parameters when you create your Data Source:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py create_datasource"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py create_datasource"
     ```
 
     <TipFilesystemDatasourceNestedSourceDataFolders />
@@ -620,14 +620,14 @@ A Data Asset requires the following information to be defined:
 
 1. Run the following Python code to define `name` and `batching_regex` and store the information in the Python variables `asset_name` and `batching_regex`:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_csv_asset_args"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_csv_asset_args"
     ```
 
     In addition, the argument `header` informs the Spark `DataFrame` reader that the files contain a header column, while the argument `infer_schema` instructs the Spark `DataFrame` reader to make a best effort to determine the schema of the columns automatically.
 
 2. Run the following Python code to pass `name` and `batching_regex` and the optional `header` and `infer_schema` arguments as parameters when you create your Data Asset:
 
-    ```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py add_asset"
+    ```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py add_asset"
     ```
 
 ### Add additional files as Data Assets (Optional)

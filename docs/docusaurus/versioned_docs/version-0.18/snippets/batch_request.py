@@ -14,19 +14,19 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/batch_request batch_request">
+# <snippet name="docs/docusaurus/docs/snippets/batch_request batch_request">
 import great_expectations as gx
 
 context = gx.get_context()
 
 # data_directory is the full path to a directory containing csv files
 datasource = context.sources.add_pandas_filesystem(
-    name="version-0.18 my_pandas_datasource", base_directory=data_directory
+    name="my_pandas_datasource", base_directory=data_directory
 )
 
 # The batching_regex should max file names in the data_directory
 asset = datasource.add_csv_asset(
-    name="version-0.18 csv_asset",
+    name="csv_asset",
     batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     order_by=["year", "month"],
 )
@@ -38,7 +38,7 @@ assert batch_request.datasource_name == "my_pandas_datasource"
 assert batch_request.data_asset_name == "csv_asset"
 assert batch_request.options == {"year": "2019", "month": "02"}
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/batch_request options">
+# <snippet name="docs/docusaurus/docs/snippets/batch_request options">
 options = asset.batch_request_options
 print(options)
 # </snippet>

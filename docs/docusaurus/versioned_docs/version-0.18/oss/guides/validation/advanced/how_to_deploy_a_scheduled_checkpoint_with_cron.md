@@ -19,14 +19,14 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 Run the following command to verify that your Checkpoint runs:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/snippets/checkpoints.py retrieve_and_run"
+```python name="docs/docusaurus/docs/snippets/checkpoints.py retrieve_and_run"
 ```
 
 ## Get `great_expectations` full path
 
 To prepare for editing the cron file, you'll need the full path of the project's ``great_expectations`` directory.  You can get full path to the ``great_expectations`` executable by running:
 
-```bash title="Terminal"
+```bash
 which great_expectations
 /full/path/to/your/environment/bin/great_expectations
 ```
@@ -39,7 +39,7 @@ A text editor can be used to open the cron schedule. On most operating systems, 
 
 To run the Checkpoint ``my_checkpoint`` every morning at 0300, add the following line in the text editor that opens:
 
-```bash title="cron file"
+```bash
 0  3  *  *  *    /full/path/to/your/environment/bin/great_expectations checkpoint run ratings --directory /full/path/to/my_project/gx/
 ```
 

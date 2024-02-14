@@ -13,11 +13,11 @@ one_validation = [
 ]
 
 checkpoint = context.add_checkpoint(
-    name="version-0.18 my_test_checkpoint",
+    name="my_test_checkpoint",
     validations=one_validation,
 )
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py add_expectation_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py add_expectation_suite">
 validations = [
     {
         "batch_request": {
@@ -36,13 +36,13 @@ validations = [
 ]
 
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 my_test_checkpoint",
+    name="my_test_checkpoint",
     validations=validations,
 )
 # </snippet>
 assert len(checkpoint.validations) == 2
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py add_validation">
+# <snippet name="docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py add_validation">
 validations = [
     {
         "batch_request": {
@@ -82,7 +82,7 @@ validations = [
 ]
 
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 my_test_checkpoint", validations=validations
+    name="my_test_checkpoint", validations=validations
 )
 # </snippet>
 assert len(checkpoint.validations) == 3

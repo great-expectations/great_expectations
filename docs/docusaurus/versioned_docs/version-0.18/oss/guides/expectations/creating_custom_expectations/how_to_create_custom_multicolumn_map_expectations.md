@@ -29,7 +29,7 @@ By convention, each Expectation is kept in its own python file, named with the s
 
 You can find the template file for a custom [`MulticolumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/multicolumn_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
-```bash title="Terminal input"
+```bash
 cp multicolumn_map_expectation_template.py /SOME_DIRECTORY/expect_multicolumn_values_to_be_multiples_of_three.py
 ```
 
@@ -47,7 +47,7 @@ For more information about Custom Expectations, see [Use a Custom Expectation](.
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
-```bash title="Terminal input"
+```bash
 python expect_multicolumn_values_to_be_multiples_of_three.py
 ```
 
@@ -76,28 +76,28 @@ By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py ExpectMulticolumnValuesToMatchSomeCriteria class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py ExpectMulticolumnValuesToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py ExpectMulticolumnValuesToBeMultiplesOfThree class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py ExpectMulticolumnValuesToBeMultiplesOfThree class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py docstring"
 ```
 
 with something like:
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py docstring"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py docstring"
 ```
 
 Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py diagnostics"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py diagnostics"
 ```
 
 with this one:
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py print_diagnostic_checklist"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py print_diagnostic_checklist"
 ```
 
 Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
@@ -125,7 +125,7 @@ You're going to search for `examples = []` in your file, and replace it with at 
 
 Your examples will look similar to this example:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py examples"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -173,7 +173,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@multicolumn_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values across a set of columns are multiples of 3 using the `PandasExecutionEngine`.
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py _pandas"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py _pandas"
 ```
 
 This is all that you need to define for now. The `MulticolumnMapMetricProvider` and `MulticolumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
@@ -190,22 +190,22 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py metric_name"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py metric_name"
 ```
 
 with
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py condition_metric_name"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py condition_metric_name"
 ```
 
 Second, in the Expectation class, replace
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py map_metric"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py map_metric"
 ```
 
 with
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py map_metric"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py map_metric"
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -214,12 +214,12 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py MulticolumnValuesMatchSomeCriteria class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py MulticolumnValuesMatchSomeCriteria class_def"
 ```
 
 with 
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py MulticolumnValuesMultipleThree class_def"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py MulticolumnValuesMultipleThree class_def"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -241,7 +241,7 @@ Finally, we need to lint our now-functioning Custom Expectation. Our CI system w
 
 If you've [set up your dev environment](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
-```console title="Terminal input"
+```console
 black <PATH/TO/YOUR/EXPECTATION.py>
 ruff <PATH/TO/YOUR/EXPECTATION.py> --fix
 ```
@@ -276,12 +276,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py library_metadata"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py library_metadata"
 ```
 
 would become
 
-```python title="Python" name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py library_metadata"
+```python name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

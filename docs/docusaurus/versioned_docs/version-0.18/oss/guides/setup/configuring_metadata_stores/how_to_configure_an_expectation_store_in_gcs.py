@@ -39,7 +39,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
 ]
 
 expected_existing_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py expected_existing_expectations_store_yaml">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py expected_existing_expectations_store_yaml">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -56,7 +56,7 @@ assert actual_existing_expectations_store == yaml.load(
 )
 
 configured_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py configured_expectations_store_yaml">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py configured_expectations_store_yaml">
 stores:
   expectations_GCS_store:
     class_name: ExpectationsStore
@@ -106,12 +106,12 @@ great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
-expectation_suite_name = "version-0.18 my_expectation_suite"
+expectation_suite_name = "my_expectation_suite"
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_command">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_command">
 gsutil cp expectations/my_expectation_suite.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/my_expectation_suite.json
 # </snippet>
 """
@@ -150,7 +150,7 @@ result = subprocess.run(
 stderr = result.stderr.decode("utf-8")
 
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_output">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py copy_expectation_output">
 Operation completed over 1 objects
 # </snippet>
 """
@@ -164,7 +164,7 @@ assert copy_expectation_output.strip() in stderr
 
 # list expectation stores
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_stores_command">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_stores_command">
 great_expectations store list
 # </snippet>
 """
@@ -182,7 +182,7 @@ result = subprocess.run(
 stdout = result.stdout.decode("utf-8")
 
 list_expectation_stores_output = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_stores_output">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_stores_output">
   - name: expectations_GCS_store
     class_name: ExpectationsStore
     store_backend:
@@ -200,7 +200,7 @@ assert "TupleGCSStoreBackend" in stdout
 
 # list expectation suites
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_command">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_command">
 great_expectations suite list
 # </snippet>
 """
