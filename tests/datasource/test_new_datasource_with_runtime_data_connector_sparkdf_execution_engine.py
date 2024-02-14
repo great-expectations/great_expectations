@@ -75,41 +75,6 @@ def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(
 # Tests with SparkDFExecutionEngine : batch_data
 
 
-@pytest.mark.spark
-def test_sparkdf_execution_engine_self_check(
-    datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
-):
-    report = (
-        datasource_with_runtime_data_connector_and_sparkdf_execution_engine.self_check()
-    )
-    assert report["data_connectors"] == {
-        "count": 1,
-        "test_runtime_data_connector": {
-            "class_name": "RuntimeDataConnector",
-            "data_asset_count": 2,
-            "data_assets": {
-                "asset_a": {
-                    "batch_definition_count": 0,
-                    "example_data_references": [],
-                },
-                "asset_b": {
-                    "batch_definition_count": 0,
-                    "example_data_references": [],
-                },
-            },
-            "example_data_asset_names": ["asset_a", "asset_b"],
-            "example_unmatched_data_references": [],
-            "unmatched_data_reference_count": 0,
-        },
-    }
-    assert report["execution_engine"]["caching"] is True
-    assert report["execution_engine"]["class_name"] == "SparkDFExecutionEngine"
-    assert (
-        report["execution_engine"]["module_name"]
-        == "great_expectations.execution_engine.sparkdf_execution_engine"
-    )
-
-
 def test_batch_data_sparkdf_execution_engine_unknown_datasource(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):

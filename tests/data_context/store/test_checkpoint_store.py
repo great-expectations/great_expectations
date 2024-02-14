@@ -10,7 +10,6 @@ from marshmallow.exceptions import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -208,29 +207,6 @@ def test_checkpoint_store(empty_data_context):
     my_checkpoint_1.yml
 """
     )
-
-    self_check_report: dict = convert_to_json_serializable(
-        data=checkpoint_store.self_check()
-    )
-    assert self_check_report == {
-        "keys": ["my_checkpoint_0", "my_checkpoint_1"],
-        "len_keys": 2,
-        "config": {
-            "store_name": "checkpoint_store",
-            "class_name": "CheckpointStore",
-            "module_name": "great_expectations.data_context.store.checkpoint_store",
-            "overwrite_existing": True,
-            "store_backend": {
-                "base_directory": f"{empty_data_context.root_directory}/checkpoints",
-                "platform_specific_separator": True,
-                "fixed_length_key": False,
-                "suppress_store_backend_id": False,
-                "module_name": "great_expectations.data_context.store.tuple_store_backend",
-                "class_name": "TupleFilesystemStoreBackend",
-                "filepath_suffix": ".yml",
-            },
-        },
-    }
 
     checkpoint_store.remove_key(key=key_0)
     checkpoint_store.remove_key(key=key_1)

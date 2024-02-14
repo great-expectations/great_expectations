@@ -266,7 +266,6 @@ def test_instantiation_with_account_url_and_credential(
             "credential": "my_credential",
         },
     )
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -300,8 +299,6 @@ def test_instantiation_with_conn_str_and_credential(
             "credential": "my_credential",
         },
     )
-
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -803,13 +800,6 @@ def test_return_all_batch_definitions_basic_sorted(
         )
     )
 
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetAzureDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -887,13 +877,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
             },
         )
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetAzureDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
@@ -1002,13 +985,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
             },
         )
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetAzureDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(

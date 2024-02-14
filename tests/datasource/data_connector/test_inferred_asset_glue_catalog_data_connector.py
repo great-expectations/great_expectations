@@ -40,31 +40,6 @@ def test_basic_instantiation(glue_titanic_catalog):
     )
     assert my_data_connector.get_unmatched_data_references() == []
 
-    report = my_data_connector.self_check()
-    assert report == {
-        "class_name": "InferredAssetAWSGlueDataCatalogDataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": [
-            "db_test.tb_titanic_with_partitions",
-            "db_test.tb_titanic_without_partitions",
-        ],
-        "data_assets": {
-            "db_test.tb_titanic_with_partitions": {
-                "batch_definition_count": 6,
-                "example_data_references": [
-                    {"PClass": "1st", "SexCode": "0"},
-                    {"PClass": "1st", "SexCode": "1"},
-                    {"PClass": "2nd", "SexCode": "0"},
-                ],
-            },
-            "db_test.tb_titanic_without_partitions": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-    }
     assert "db_test.tb_titanic_with_partitions" in my_data_connector.assets
     assert my_data_connector.assets["db_test.tb_titanic_with_partitions"] == {
         "database_name": "db_test",

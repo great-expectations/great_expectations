@@ -79,69 +79,6 @@ def test_basic_instantiation():
 
 
 @mock_s3
-def test_simple_regex_example_with_implicit_data_asset_names_self_check():
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    keys: List[str] = [
-        "A-100.csv",
-        "A-101.csv",
-        "B-1.csv",
-        "B-2.csv",
-        "CCC.csv",
-    ]
-    for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-
-    my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": r"(.+)-(\d+)\.csv",
-            "group_names": [
-                "data_asset_name",
-                "number",
-            ],
-        },
-        bucket=bucket,
-        prefix="",
-    )
-
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
-    self_check_report_object = my_data_connector.self_check()
-
-    assert self_check_report_object == {
-        "class_name": "InferredAssetS3DataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": ["CCC.csv"],
-        "unmatched_data_reference_count": 1,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
-
-@mock_s3
 def test_complex_regex_example_with_implicit_data_asset_names():
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -255,65 +192,6 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             ),
         )
     ]
-
-
-@mock_s3
-def test_self_check():
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    keys: List[str] = [
-        "A-100.csv",
-        "A-101.csv",
-        "B-1.csv",
-        "B-2.csv",
-    ]
-    for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-
-    my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": r"(.+)-(\d+)\.csv",
-            "group_names": ["data_asset_name", "number"],
-        },
-        bucket=bucket,
-        prefix="",
-    )
-
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
-    self_check_report_object = my_data_connector.self_check()
-
-    assert self_check_report_object == {
-        "class_name": "InferredAssetS3DataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
 
 
 @mock_s3

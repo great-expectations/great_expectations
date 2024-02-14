@@ -73,7 +73,6 @@ def test_instantiation_without_args(
         bucket_or_name="test_bucket",
         prefix="",
     )
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 4
@@ -113,7 +112,6 @@ def test_instantiation_with_filename_arg(
         bucket_or_name="test_bucket",
         prefix="",
     )
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 4
@@ -153,7 +151,6 @@ def test_instantiation_with_info_arg(
         bucket_or_name="test_bucket",
         prefix="",
     )
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 4
@@ -242,61 +239,6 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
-        "A-100.csv",
-        "A-101.csv",
-        "B-1.csv",
-        "B-2.csv",
-        "CCC.csv",
-    ],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
-def test_simple_regex_example_with_implicit_data_asset_names_self_check(
-    mock_gcs_conn,
-    mock_list_keys,
-):
-    my_data_connector: InferredAssetGCSDataConnector = InferredAssetGCSDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": r"(.+)-(\d+)\.csv",
-            "group_names": [
-                "data_asset_name",
-                "number",
-            ],
-        },
-        bucket_or_name="test_bucket",
-        prefix="",
-    )
-
-    my_data_connector._refresh_data_references_cache()
-
-    self_check_report_object = my_data_connector.self_check()
-
-    assert self_check_report_object == {
-        "class_name": "InferredAssetGCSDataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": ["CCC.csv"],
-        "unmatched_data_reference_count": 1,
-    }
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
-    return_value=[
         "2020/01/alpha-1001.csv",
         "2020/01/beta-1002.csv",
         "2020/02/alpha-1003.csv",
@@ -376,53 +318,6 @@ def test_complex_regex_example_with_implicit_data_asset_names(
             ),
         )
     ]
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
-    return_value=[
-        "A-100.csv",
-        "A-101.csv",
-        "B-1.csv",
-        "B-2.csv",
-    ],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
-def test_self_check(mock_gcs_conn, mock_list_keys):
-    my_data_connector: InferredAssetGCSDataConnector = InferredAssetGCSDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": r"(.+)-(\d+)\.csv",
-            "group_names": ["data_asset_name", "number"],
-        },
-        bucket_or_name="test_bucket",
-        prefix="",
-    )
-
-    my_data_connector._refresh_data_references_cache()
-    self_check_report_object = my_data_connector.self_check()
-
-    assert self_check_report_object == {
-        "class_name": "InferredAssetGCSDataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
 
 
 @mock.patch(

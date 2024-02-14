@@ -1,5 +1,3 @@
-import json
-import os
 from typing import List
 
 import pytest
@@ -48,28 +46,6 @@ def test_basic_instantiation(tmp_path_factory):
         base_directory=base_directory,
         assets={"alpha": {}},
     )
-
-    assert my_data_connector.self_check() == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
@@ -321,13 +297,6 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
             },
         )
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetFilesystemDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -604,13 +573,6 @@ def test_alpha(tmp_path_factory):
             },
         )
     )
-    self_check_report = my_data_connector.self_check()
-    print(json.dumps(self_check_report, indent=2))
-
-    assert self_check_report["class_name"] == "ConfiguredAssetFilesystemDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert set(list(self_check_report["data_assets"].keys())) == {"A"}
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -707,42 +669,6 @@ def test_foxtrot(tmp_path_factory):
             },
         )
     )
-    self_check_report = my_data_connector.self_check()
-    assert self_check_report == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 4,
-        "example_data_asset_names": ["A", "B", "C"],
-        "data_assets": {
-            "A": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "A-1.csv",
-                    "A-2.csv",
-                    "A-3.csv",
-                ],
-            },
-            "B": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "B-1.txt",
-                    "B-2.txt",
-                    "B-3.txt",
-                ],
-            },
-            "C": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "C-2017.csv",
-                    "C-2018.csv",
-                    "C-2019.csv",
-                ],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="general_filesystem_data_connector",
@@ -814,23 +740,6 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         )
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
-    self_check_report = my_data_connector.self_check()
-    assert self_check_report == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": ["A"],
-        "data_assets": {
-            "A": {
-                "batch_definition_count": 1,
-                "example_data_references": ["logfile_0.csv"],
-            }
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",
@@ -905,22 +814,6 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         )
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
-    self_check_report = my_data_connector.self_check()
-    assert self_check_report == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": ["A"],
-        "data_assets": {
-            "A": {
-                "batch_definition_count": 1,
-                "example_data_references": ["logfile_0.csv"],
-            }
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -1162,123 +1055,6 @@ assets:
         )
         == 5
     )
-
-
-def test_basic_instantiation_with_nested_directories(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_basic_instantiation_with_nested_directories")
-    )
-    os.makedirs(os.path.join(base_directory, "foo"))  # noqa: PTH118, PTH103
-    create_files_in_directory(
-        directory=os.path.join(base_directory, "foo"),  # noqa: PTH118
-        file_name_list=[
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-    )
-
-    my_data_connector = ConfiguredAssetFilesystemDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-        base_directory=os.path.join(base_directory, "foo"),  # noqa: PTH118
-        assets={"alpha": {}},
-    )
-
-    assert my_data_connector.self_check() == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
-    my_data_connector = ConfiguredAssetFilesystemDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-        base_directory=base_directory,
-        assets={"alpha": {"base_directory": "foo"}},
-    )
-
-    assert my_data_connector.self_check() == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
-    my_data_connector = ConfiguredAssetFilesystemDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": "foo/alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-        base_directory=base_directory,
-        assets={"alpha": {}},
-    )
-
-    assert my_data_connector.self_check() == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "foo/alpha-1.csv",
-                    "foo/alpha-2.csv",
-                    "foo/alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": ["foo"],
-        "unmatched_data_reference_count": 1,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
 
 
 def test_one_half_year_as_6_data_assets_1_batch_each(

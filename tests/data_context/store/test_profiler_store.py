@@ -3,7 +3,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -76,31 +75,6 @@ def test_profiler_store_integration(
     assert len(profiler_store.list_keys()) == 1
     profiler_store.remove_key(key=key)
     assert len(profiler_store.list_keys()) == 0
-
-    data: dict = profiler_store.self_check()
-    self_check_report: dict = convert_to_json_serializable(data=data)
-
-    # Drop dynamic value to ensure appropriate assert
-    self_check_report["config"]["store_backend"].pop("base_directory")
-
-    assert self_check_report == {
-        "config": {
-            "class_name": "ProfilerStore",
-            "module_name": "great_expectations.data_context.store.profiler_store",
-            "overwrite_existing": True,
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "filepath_suffix": ".yml",
-                "fixed_length_key": False,
-                "module_name": "great_expectations.data_context.store.tuple_store_backend",
-                "platform_specific_separator": True,
-                "suppress_store_backend_id": False,
-            },
-            "store_name": "profiler_store",
-        },
-        "keys": [],
-        "len_keys": 0,
-    }
 
 
 @pytest.mark.cloud

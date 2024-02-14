@@ -64,68 +64,6 @@ def test_basic_instantiation(tmp_path_factory):
         )
 
 
-def test_simple_regex_example_with_implicit_data_asset_names_self_check(
-    tmp_path_factory,
-):
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_simple_regex_example_with_implicit_data_asset_names"
-        )
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "A-100.csv",
-            "A-101.csv",
-            "B-1.csv",
-            "B-2.csv",
-            "CCC.csv",
-        ],
-    )
-
-    my_data_connector: InferredAssetFilesystemDataConnector = (
-        InferredAssetFilesystemDataConnector(
-            name="my_data_connector",
-            datasource_name="FAKE_DATASOURCE_NAME",
-            execution_engine=PandasExecutionEngine(),
-            default_regex={
-                "pattern": r"(.+)-(\d+)\.csv",
-                "group_names": [
-                    "data_asset_name",
-                    "number",
-                ],
-            },
-            glob_directive="*",
-            base_directory=base_directory,
-        )
-    )
-
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
-    self_check_report_object = my_data_connector.self_check()
-
-    assert self_check_report_object == {
-        "class_name": "InferredAssetFilesystemDataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": ["CCC.csv"],
-        "unmatched_data_reference_count": 1,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
-
 def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -237,58 +175,6 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             ),
         )
     ]
-
-
-def test_self_check(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_self_check"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "A-100.csv",
-            "A-101.csv",
-            "B-1.csv",
-            "B-2.csv",
-        ],
-    )
-
-    my_data_connector: InferredAssetFilesystemDataConnector = (
-        InferredAssetFilesystemDataConnector(
-            name="my_data_connector",
-            datasource_name="FAKE_DATASOURCE_NAME",
-            execution_engine=PandasExecutionEngine(),
-            default_regex={
-                "pattern": r"(.+)-(\d+)\.csv",
-                "group_names": ["data_asset_name", "number"],
-            },
-            glob_directive="*",
-            base_directory=base_directory,
-        )
-    )
-
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
-    self_check_report_object = my_data_connector.self_check()
-
-    assert self_check_report_object == {
-        "class_name": "InferredAssetFilesystemDataConnector",
-        "data_asset_count": 2,
-        "example_data_asset_names": ["A", "B"],
-        "data_assets": {
-            "A": {
-                "example_data_references": ["A-100.csv", "A-101.csv"],
-                "batch_definition_count": 2,
-            },
-            "B": {
-                "example_data_references": ["B-1.csv", "B-2.csv"],
-                "batch_definition_count": 2,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
 
 
 def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_factory):

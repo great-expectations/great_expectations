@@ -237,9 +237,6 @@ class _YamlConfigValidator:
                 pretty_print=pretty_print
             )
 
-            if return_mode == "instantiated_class":
-                return instantiated_class
-
             return report_object
 
         except Exception as e:
