@@ -8,7 +8,6 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 ## Prerequisites
 
-This guide assumes you have:
 
 - Installed Python.
 - Installed the GX Core library.
