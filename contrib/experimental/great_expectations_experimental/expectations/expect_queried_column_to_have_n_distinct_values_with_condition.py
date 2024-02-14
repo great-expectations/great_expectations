@@ -21,7 +21,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
 
     query = """
             SELECT {column_to_check}
-            FROM {active_batch}
+            FROM {batch}
             WHERE {condition}
             GROUP BY {column_to_check}
             """

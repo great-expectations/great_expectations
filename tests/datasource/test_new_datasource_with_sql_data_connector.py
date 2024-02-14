@@ -111,94 +111,11 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
 
 
 @pytest.mark.sqlite
-def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_splitting(sa):
-    random.seed(0)
-
-    db_file = file_relative_path(
-        __file__,
-        os.path.join(  # noqa: PTH118
-            "..", "test_sets", "test_cases_for_sql_data_connector.db"
-        ),
-    )
-    # This is a basic integration test demonstrating a Datasource containing a SQL data_connector
-    # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
-    config = yaml.load(
-        f"""
-class_name: Datasource
-
-execution_engine:
-    class_name: SqlAlchemyExecutionEngine
-    connection_string: sqlite:///{db_file}
-
-data_connectors:
-    my_sqlite_db:
-        class_name: ConfiguredAssetSqlDataConnector
-
-        assets:
-            table_partitioned_by_date_column__A:
-                splitter_method: _split_on_converted_datetime
-                splitter_kwargs:
-                    column_name: date
-                    date_format_string: "%Y-%W"
-    """,
-    )
-
-    my_data_source = instantiate_class_from_config(
-        config,
-        config_defaults={"module_name": "great_expectations.datasource"},
-        runtime_environment={"name": "my_sql_datasource"},
-    )
-
-    report = my_data_source.self_check()
-    report["execution_engine"].pop("connection_string")
-    assert report == {
-        "execution_engine": {
-            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
-            "class_name": "SqlAlchemyExecutionEngine",
-        },
-        "data_connectors": {
-            "count": 1,
-            "my_sqlite_db": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "data_asset_count": 1,
-                "example_data_asset_names": ["table_partitioned_by_date_column__A"],
-                "data_assets": {
-                    "table_partitioned_by_date_column__A": {
-                        "batch_definition_count": 9,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    }
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-                # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-                # "example_data_reference": {
-                #     "batch_spec": {
-                #         "table_name": "table_partitioned_by_date_column__A",
-                #         "data_asset_name": "table_partitioned_by_date_column__A",
-                #         "batch_identifiers": {"date": "2020-01"},
-                #         "splitter_method": "_split_on_converted_datetime",
-                #         "splitter_kwargs": {
-                #             "column_name": "date",
-                #             "date_format_string": "%Y-%W",
-                #         },
-                #     },
-                #     "n_rows": 24,
-                # },
-            },
-        },
-    }
-
-
-@pytest.mark.sqlite
-def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
+def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_partitioning_and_sampling(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
     context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
@@ -221,8 +138,8 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
 
             assets:
                 table_partitioned_by_date_column__A:
-                    splitter_method: _split_on_converted_datetime
-                    splitter_kwargs:
+                    partitioner_method: _partition_on_converted_datetime
+                    partitioner_kwargs:
                         column_name: date
                         date_format_string: "%Y-%W"
                     sampling_method: sample_using_limit
@@ -230,43 +147,15 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
                         n: 10
     """
     context.add_datasource(**yaml.load(config))
-    datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
+    _: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
         datasource_name="my_datasource"
     )
-    report: dict = datasource.self_check()
-    report["execution_engine"].pop("connection_string")
-    assert report == {
-        "execution_engine": {
-            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
-            "class_name": "SqlAlchemyExecutionEngine",
-        },
-        "data_connectors": {
-            "count": 1,
-            "my_sqlite_db": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "data_asset_count": 1,
-                "example_data_asset_names": ["table_partitioned_by_date_column__A"],
-                "data_assets": {
-                    "table_partitioned_by_date_column__A": {
-                        "batch_definition_count": 9,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    }
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-        },
-    }
 
 
 @pytest.mark.sqlite
-def test_basic_instantiation_with_InferredAssetSqlDataConnector_splitting(sa):
+def test_basic_instantiation_with_InferredAssetSqlDataConnector_partitioning(sa):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
     random.seed(0)
 
@@ -293,75 +182,26 @@ data_connectors:
         name: whole_table
         data_asset_name_prefix: prefix__
         data_asset_name_suffix: __xiffus
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%W"
     """,
     )
 
-    my_data_source = instantiate_class_from_config(
+    _ = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource"},
         runtime_environment={"name": "my_sql_datasource"},
     )
-    report = my_data_source.self_check()
-    report["execution_engine"].pop("connection_string")
-
-    assert report == {
-        "execution_engine": {
-            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
-            "class_name": "SqlAlchemyExecutionEngine",
-        },
-        "data_connectors": {
-            "count": 1,
-            "my_sqlite_db": {
-                "class_name": "InferredAssetSqlDataConnector",
-                "data_asset_count": 6,
-                "example_data_asset_names": [
-                    "prefix__table_containing_id_spacers_for_D__xiffus",
-                    "prefix__table_full__I__xiffus",
-                    "prefix__table_partitioned_by_date_column__A__xiffus",
-                ],
-                "data_assets": {
-                    "prefix__table_containing_id_spacers_for_D__xiffus": {
-                        "batch_definition_count": 5,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    },
-                    "prefix__table_full__I__xiffus": {
-                        "batch_definition_count": 5,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    },
-                    "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 9,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    },
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-        },
-    }
 
 
 @pytest.mark.sqlite
-def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
+def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_partitioning_and_sampling(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
     context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
@@ -384,8 +224,8 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
             name: whole_table
             data_asset_name_prefix: prefix__
             data_asset_name_suffix: __xiffus
-            splitter_method: _split_on_converted_datetime
-            splitter_kwargs:
+            partitioner_method: _partition_on_converted_datetime
+            partitioner_kwargs:
                 column_name: date
                 date_format_string: "%Y-%W"
             sampling_method: sample_using_limit
@@ -393,57 +233,9 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
                 n: 10
         """
     context.add_datasource(**yaml.load(config))
-    datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
+    _: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
         datasource_name="my_datasource"
     )
-    report: dict = datasource.self_check()
-    report["execution_engine"].pop("connection_string")
-    assert report == {
-        "execution_engine": {
-            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
-            "class_name": "SqlAlchemyExecutionEngine",
-        },
-        "data_connectors": {
-            "count": 1,
-            "my_sqlite_db": {
-                "class_name": "InferredAssetSqlDataConnector",
-                "data_asset_count": 6,
-                "example_data_asset_names": [
-                    "prefix__table_containing_id_spacers_for_D__xiffus",
-                    "prefix__table_full__I__xiffus",
-                    "prefix__table_partitioned_by_date_column__A__xiffus",
-                ],
-                "data_assets": {
-                    "prefix__table_containing_id_spacers_for_D__xiffus": {
-                        "batch_definition_count": 5,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    },
-                    "prefix__table_full__I__xiffus": {
-                        "batch_definition_count": 5,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    },
-                    "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 9,
-                        "example_data_references": [
-                            {"date": "2020-00"},
-                            {"date": "2020-01"},
-                            {"date": "2020-02"},
-                        ],
-                    },
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-        },
-    }
 
 
 @pytest.mark.sqlite
@@ -627,8 +419,8 @@ introspection:
             - main.table_with_fk_reference_from_F
 
     hourly:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: timestamp
             date_format_string: "%Y-%m-%d:%H"
         included_tables:
@@ -642,23 +434,23 @@ tables:
         partitioners:
             daily:
                 data_asset_name_suffix: __daily
-                splitter_method: _split_on_converted_datetime
-                splitter_kwargs:
+                partitioner_method: _partition_on_converted_datetime
+                partitioner_kwargs:
                     column_name: date
                     date_format_string: "%Y-%m-%d"
             weekly:
                 include_schema_name: False
                 data_asset_name_prefix: some_string__
                 data_asset_name_suffix: __some_other_string
-                splitter_method: _split_on_converted_datetime
-                splitter_kwargs:
+                partitioner_method: _partition_on_converted_datetime
+                partitioner_kwargs:
                     column_name: date
                     date_format_string: "%Y-%W"
             by_id_dozens:
                 include_schema_name: True
                 # Note: no data_asset_name_suffix
-                splitter_method: _split_on_divided_integer
-                splitter_kwargs:
+                partitioner_method: _partition_on_divided_integer
+                partitioner_kwargs:
                     column_name: id
                     divisor: 12
 """
@@ -710,18 +502,18 @@ tables:
         partitioners:
             whole_table: {}
             daily:
-                splitter_method: _split_on_converted_datetime
-                splitter_kwargs:
+                partitioner_method: _partition_on_converted_datetime
+                partitioner_kwargs:
                     column_name: date
                     date_format_string: "%Y-%m-%d"
             weekly:
-                splitter_method: _split_on_converted_datetime
-                splitter_kwargs:
+                partitioner_method: _partition_on_converted_datetime
+                partitioner_kwargs:
                     column_name: date
                     date_format_string: "%Y-%W"
             by_id_dozens:
-                splitter_method: _split_on_divided_integer
-                splitter_kwargs:
+                partitioner_method: _partition_on_divided_integer
+                partitioner_kwargs:
                     column_name: id
                     divisor: 12
 """
@@ -822,8 +614,8 @@ connection_string: sqlite:///{db_file}
 introspection:
     daily:
         skip_inapplicable_tables: true
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%m-%d"
 """
@@ -848,8 +640,8 @@ connection_string: sqlite:///{db_file}
 introspection:
     daily:
         skip_inapplicable_tables: false
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%m-%d"
     """

@@ -455,12 +455,12 @@ def test_dataframe_property_given_loaded_batch():
 
 @pytest.mark.unit
 def test_get_batch_data(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
         )
     )
-    assert split_df.dataframe.shape == (120, 10)
+    assert partitioned_df.dataframe.shape == (120, 10)
 
     # No dataset passed to RuntimeDataBatchSpec
     with pytest.raises(gx_exceptions.InvalidBatchSpecError):
@@ -510,7 +510,7 @@ def test_get_batch_with_no_s3_configured():
     batch_spec = S3BatchSpec(
         path="s3a://i_dont_exist",
         reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
+        partitioner_method="_partition_on_whole_table",
     )
     # if S3 was not configured
     execution_engine_no_s3 = PandasExecutionEngine()
@@ -520,12 +520,12 @@ def test_get_batch_with_no_s3_configured():
 
 
 @pytest.mark.big
-def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
+def test_get_batch_with_partition_on_divided_integer_and_sample_on_list(test_df):
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
-            splitter_method="_split_on_divided_integer",
-            splitter_kwargs={
+            partitioner_method="_partition_on_divided_integer",
+            partitioner_kwargs={
                 "column_name": "id",
                 "divisor": 10,
                 "batch_identifiers": {"id": 5},
@@ -538,9 +538,9 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
             },
         )
     )
-    assert split_df.dataframe.shape == (2, 10)
-    assert split_df.dataframe.id.min() == 54
-    assert split_df.dataframe.id.max() == 59
+    assert partitioned_df.dataframe.shape == (2, 10)
+    assert partitioned_df.dataframe.id.min() == 54
+    assert partitioned_df.dataframe.id.max() == 59
 
 
 # noinspection PyUnusedLocal

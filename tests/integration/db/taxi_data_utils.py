@@ -12,9 +12,9 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
-    TaxiSplittingTestCase,
-    TaxiSplittingTestCasesBase,
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+    TaxiPartitioningTestCase,
+    TaxiPartitioningTestCasesBase,
 )
 from tests.test_utils import (
     LoadedTable,
@@ -95,16 +95,18 @@ def loaded_table(dialect: str, connection_string: str) -> LoadedTable:
             )
 
 
-def _execute_taxi_splitting_test_cases(
-    taxi_splitting_test_cases: TaxiSplittingTestCasesBase,
+def _execute_taxi_partitioning_test_cases(
+    taxi_partitioning_test_cases: TaxiPartitioningTestCasesBase,
     connection_string: str,
     table_name: str,
 ) -> None:
-    test_cases: List[TaxiSplittingTestCase] = taxi_splitting_test_cases.test_cases()
+    test_cases: List[
+        TaxiPartitioningTestCase
+    ] = taxi_partitioning_test_cases.test_cases()
 
-    test_case: TaxiSplittingTestCase
+    test_case: TaxiPartitioningTestCase
     for test_case in test_cases:
-        print("Testing splitter method:", test_case.splitter_method_name)
+        print("Testing partitioner method:", test_case.partitioner_method_name)
 
         # 1. Setup
 
@@ -114,16 +116,16 @@ def _execute_taxi_splitting_test_cases(
         data_connector_name: str = "test_data_connector"
         data_asset_name: str = table_name  # Read from generated table name
 
-        column_name: str = taxi_splitting_test_cases.test_column_name
-        column_names: List[str] = taxi_splitting_test_cases.test_column_names
+        column_name: str = taxi_partitioning_test_cases.test_column_name
+        column_names: List[str] = taxi_partitioning_test_cases.test_column_names
 
-        # 2. Set splitter in DataConnector config
+        # 2. Set partitioner in DataConnector config
         data_connector_config: dict = {
             "class_name": "ConfiguredAssetSqlDataConnector",
             "assets": {
                 data_asset_name: {
-                    "splitter_method": test_case.splitter_method_name,
-                    "splitter_kwargs": test_case.splitter_kwargs,
+                    "partitioner_method": test_case.partitioner_method_name,
+                    "partitioner_kwargs": test_case.partitioner_kwargs,
                 }
             },
         }

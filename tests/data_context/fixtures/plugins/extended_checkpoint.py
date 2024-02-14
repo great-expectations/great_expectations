@@ -11,14 +11,12 @@ class ExtendedCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        config_version: int = 1,
         expectation_suite_name: Optional[str] = None,
         action_list: Optional[List[dict]] = None,
     ):
         super().__init__(
             name=name,
             data_context=data_context,
-            config_version=config_version,
             expectation_suite_name=expectation_suite_name,
             action_list=action_list,
         )
@@ -29,14 +27,12 @@ class ExtendedLegacyCheckpoint(LegacyCheckpoint):
         self,
         name: str,
         data_context,
-        config_version: int = 1,
         expectation_suite_name: Optional[str] = None,
         action_list: Optional[List[dict]] = None,
     ):
         super().__init__(
             name=name,
             data_context=data_context,
-            config_version=config_version,
             expectation_suite_name=expectation_suite_name,
             action_list=action_list,
         )
@@ -47,14 +43,12 @@ class ExtendedCheckpointIllegalBaseClass:
         self,
         name: str,
         data_context,
-        config_version: int = 1,
         expectation_suite_name: Optional[str] = None,
         action_list: Optional[List[dict]] = None,
     ):
         super().__init__(
             name=name,
             data_context=data_context,
-            config_version=config_version,
             expectation_suite_name=expectation_suite_name,
             action_list=action_list,
         )

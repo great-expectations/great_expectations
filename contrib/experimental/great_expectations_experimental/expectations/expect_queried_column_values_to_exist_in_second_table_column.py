@@ -30,7 +30,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
     query = """
     select count(1) from (
     SELECT a.{first_table_column}
-                    FROM {active_batch} a
+                    FROM {batch} a
                     LEFT JOIN {second_table_full_name} b
                     ON a.{first_table_column}=b.{second_table_column}
                     WHERE b.{second_table_column} IS NULL

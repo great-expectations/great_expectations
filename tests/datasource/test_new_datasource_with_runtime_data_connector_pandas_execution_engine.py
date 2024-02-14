@@ -67,46 +67,6 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 #########################################
 
 
-# Tests with PandasExecutionEngine : batch_data
-def test_pandas_execution_engine_self_check(
-    datasource_with_runtime_data_connector_and_pandas_execution_engine,
-):
-    report = (
-        datasource_with_runtime_data_connector_and_pandas_execution_engine.self_check()
-    )
-    assert report == {
-        "data_connectors": {
-            "count": 1,
-            "test_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "data_asset_count": 2,
-                "data_assets": {
-                    "asset_a": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    },
-                    "asset_b": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    },
-                },
-                "example_data_asset_names": ["asset_a", "asset_b"],
-                "example_unmatched_data_references": [],
-                "unmatched_data_reference_count": 0,
-            },
-        },
-        "execution_engine": {
-            "boto3_options": {},
-            "azure_options": {},
-            "gcs_options": {},
-            "caching": True,
-            "class_name": "PandasExecutionEngine",
-            "discard_subset_failing_expectations": False,
-            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-        },
-    }
-
-
 def test_batch_data_pandas_execution_engine_unknown_datasource(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):

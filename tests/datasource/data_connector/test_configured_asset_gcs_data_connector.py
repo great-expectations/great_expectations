@@ -259,7 +259,6 @@ def test_instantiation_without_args(
         prefix="",
         assets={"alpha": {}},
     )
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -296,8 +295,6 @@ def test_instantiation_with_filename_arg(
         assets={"alpha": {}},
     )
 
-    assert my_data_connector.self_check() == expected_config_dict
-
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
@@ -333,101 +330,9 @@ def test_instantiation_with_info_arg(
         assets={"alpha": {}},
     )
 
-    assert my_data_connector.self_check() == expected_config_dict
-
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_with_test_yaml_config(
-    mock_gcs_conn,
-    mock_list_keys,
-    empty_data_context_stats_enabled,
-    expected_config_dict,
-):
-    context = empty_data_context_stats_enabled
-
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == expected_config_dict
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
-    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
-
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: beta-(.*)\\.csv
-            group_names:
-                - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetGCSDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-        },
-        "example_unmatched_data_references": [
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-        "unmatched_data_reference_count": 3,
-    }
 
 
 @mock.patch(
@@ -770,13 +675,6 @@ def test_return_all_batch_definitions_basic_sorted(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -847,13 +745,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
@@ -955,13 +846,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(

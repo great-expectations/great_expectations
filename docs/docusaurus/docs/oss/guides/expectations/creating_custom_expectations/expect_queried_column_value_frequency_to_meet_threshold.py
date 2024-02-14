@@ -34,8 +34,8 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query">
     query: str = """
             SELECT {col},
-            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
-            FROM {active_batch}
+            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch})
+            FROM {batch}
             GROUP BY {col}
             """
     # </snippet>

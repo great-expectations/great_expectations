@@ -167,7 +167,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     [
         (
             True,
-            "SELECT COUNT (*) FROM (SELECT * FROM {active_batch} LIMIT 100)",
+            "SELECT COUNT (*) FROM (SELECT * FROM {batch} LIMIT 100)",
             100,
             100,
             'col("Age")>17',

@@ -10,7 +10,7 @@ Data Assets are used to specify how Great Expectations will organize data into <
 
 Data Assets are usually tied to existing data that already has a name (e.g. “the UserEvents table”). In many cases, Data Assets slice the data one step further (e.g. “new records for each day within the UserEvents table.”) To further illustrate with some examples: in a SQL database, rows from a table grouped by the week they were delivered may be a data asset; in an S3 bucket or filesystem, files matching a particular regex pattern may be a data asset. 
 
-The specifics of a filesystem Data Asset are defined by the parameters provided when it is created. With a SQL Data Asset, you can also add splitters after you have initially created the Data Asset.
+The specifics of a filesystem Data Asset are defined by the parameters provided when it is created. With a SQL Data Asset, you can also add Partitioners after you have initially created the Data Asset.
 
 You can define multiple Data Assets from the same Data Source to support different workflows. For example,  interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" /> and  continuous<TechnicalTag relative="../" tag="validation" text="Validations" /> with <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
@@ -90,4 +90,4 @@ You will not need to manually create a Data Asset.  Instead, they will be create
 
 ## Configure
 
-Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling their methods for adding splitters. To configure Data Assets for various environments and Data Sources, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md).
+Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling their methods for adding Partitioners. To configure Data Assets for various environments and Data Sources, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md).

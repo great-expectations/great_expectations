@@ -35,7 +35,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
         SELECT
             COUNT(1)
         FROM
-            {active_batch}
+            {batch}
         WHERE
             ({column_a} is not null and {column_b} is null)
             OR

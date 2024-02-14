@@ -70,8 +70,8 @@ if sa:
         def get_data_for_batch_identifiers(
             self,
             selectable: sa.sql.Selectable,
-            splitter_method_name: str,
-            splitter_kwargs: dict,
+            partitioner_method_name: str,
+            partitioner_kwargs: dict,
         ) -> List[dict]:
             return [{}]
 
@@ -110,79 +110,6 @@ def _datasource_asserts(
             expected_data_assets[name].append(asset_name)
     assert ds.get_available_data_asset_names() == expected_data_assets
 
-    check = ds.self_check()
-    assert set(check.keys()) == {"data_connectors", "execution_engine"}
-    execution_engine_keys = {"class_name", "engine", "module_name"}
-    if connection_str:
-        execution_engine_keys.add("connection_string")
-        assert check["execution_engine"]["connection_string"] == connection_str
-    if url:
-        execution_engine_keys.add("url")
-        assert check["execution_engine"]["url"] == url
-    if credentials:
-        execution_engine_keys.add("credentials")
-        assert check["execution_engine"]["credentials"] == credentials
-    assert check["execution_engine"].keys() == execution_engine_keys
-
-    # We want to validate the data connectors present in `check`. This is a bit ugly because
-    # instead of constructing the expected data connectors from the arguments to this assert
-    # helper function, we use our knowledge of the parameterized values currently being used
-    # in `test_simple_sqlalchemy_datasource_init`. This makes this check a little brittle but
-    # also a little more straightforward to read and write.
-    #
-    # The possible data connectors:
-    daily = {
-        "class_name": "ConfiguredAssetSqlDataConnector",
-        "data_asset_count": 1,
-        "data_assets": {
-            "my_table": {"batch_definition_count": 1, "example_data_references": [{}]}
-        },
-        "example_data_asset_names": ["my_table"],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
-    hourly = {
-        "class_name": "InferredAssetSqlDataConnector",
-        "data_asset_count": 0,
-        "data_assets": {},
-        "example_data_asset_names": [],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
-    whole_table = {
-        "class_name": "InferredAssetSqlDataConnector",
-        "data_asset_count": 0,
-        "data_assets": {},
-        "example_data_asset_names": [],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
-    # The asserts based on how many configured connectors we expect.
-    data_connectors = check["data_connectors"]
-    data_connector_cnt = len(expected_data_connector_types)
-    if data_connector_cnt == 0:
-        assert data_connectors == {"count": 0}
-    elif data_connector_cnt == 1:
-        assert data_connectors == {"count": 1, "daily": daily}
-    elif data_connector_cnt == 2:
-        assert data_connectors == {
-            "count": 2,
-            "hourly": hourly,
-            "whole_table": whole_table,
-        }
-    elif data_connector_cnt == 3:
-        assert data_connectors == {
-            "count": 3,
-            "daily": daily,
-            "hourly": hourly,
-            "whole_table": whole_table,
-        }
-    else:
-        raise Exception(
-            "The paramaterized test cases have changed in _datasource_asserts "
-            "and we don't know what to assert"
-        )
-
 
 # The configured data sources, "whole_table", "hourly", and "daily", all have unique names
 # because if any of them share a name they will clobber each other.
@@ -198,11 +125,11 @@ def _datasource_asserts(
             "whole_table": {"excluded_tables": ["table1"]},
             "hourly": {
                 "included_tables": ["table2"],
-                "splitter_kwargs": {
+                "partitioner_kwargs": {
                     "column_name": "timestamp",
                     "date_format_string": "%Y-%m-%d:%H",
                 },
-                "splitter_method": "_split_on_converted_datetime",
+                "partitioner_method": "_partition_on_converted_datetime",
             },
         },
     ],
@@ -215,11 +142,11 @@ def _datasource_asserts(
             "my_table": {
                 "partitioners": {
                     "daily": {
-                        "splitter_kwargs": {
+                        "partitioner_kwargs": {
                             "column_name": "date",
                             "date_format_string": "%Y-%m-%d",
                         },
-                        "splitter_method": "_split_on_converted_datetime",
+                        "partitioner_method": "_partition_on_converted_datetime",
                     }
                 }
             }

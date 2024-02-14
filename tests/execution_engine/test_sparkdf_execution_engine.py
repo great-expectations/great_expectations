@@ -539,14 +539,14 @@ def test_get_batch_data(test_sparkdf, basic_spark_df_execution_engine):
     assert len(test_sparkdf.columns) == 10
 
 
-def test_split_on_multi_column_values_and_sample_using_random(
+def test_partition_on_multi_column_values_and_sample_using_random(
     test_sparkdf, basic_spark_df_execution_engine
 ):
     returned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
-            splitter_method="_split_on_multi_column_values",
-            splitter_kwargs={
+            partitioner_method="_partition_on_multi_column_values",
+            partitioner_kwargs={
                 "column_names": ["y", "m", "d"],
                 "batch_identifiers": {
                     "y": 2020,

@@ -61,42 +61,6 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
 ####################################
 
 
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_self_check(
-    db_file, datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
-):
-    report = (
-        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.self_check()
-    )
-
-    assert report == {
-        "execution_engine": {
-            "connection_string": f"sqlite:///{db_file}",
-            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
-            "class_name": "SqlAlchemyExecutionEngine",
-        },
-        "data_connectors": {
-            "count": 1,
-            "test_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "data_asset_count": 2,
-                "data_assets": {
-                    "asset_a": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    },
-                    "asset_b": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    },
-                },
-                "example_data_asset_names": ["asset_a", "asset_b"],
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-        },
-    }
-
-
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_available_data_asset(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):

@@ -290,11 +290,6 @@ def pytest_addoption(parser):
         help="If set, execute tests against clickhouse",
     )
     parser.addoption(
-        "--aws-integration",
-        action="store_true",
-        help="If set, run aws integration tests for usage_statistics",
-    )
-    parser.addoption(
         "--docs-tests",
         action="store_true",
         help="If set, run integration tests for docs",
@@ -465,11 +460,6 @@ def pytest_collection_modifyitems(config, items):
         reason: str
 
     categories = (
-        Category(
-            mark="aws_integration",
-            flag="--aws-integration",
-            reason="need --aws-integration option to run",
-        ),
         Category(
             mark="docs",
             flag="--docs-tests",
@@ -1030,10 +1020,8 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1182,10 +1170,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1303,8 +1289,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1351,8 +1335,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
@@ -1409,9 +1391,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1459,9 +1438,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_2",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1512,7 +1488,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add minimal Checkpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1529,7 +1504,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1553,7 +1527,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1575,7 +1548,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -1678,10 +1650,8 @@ def deterministic_asset_data_connector_context(
                     users: {{}}
         """
 
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1913,8 +1883,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1961,8 +1929,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
@@ -2019,9 +1985,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -2069,9 +2032,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_2",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -2121,7 +2081,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -2138,7 +2097,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -2162,7 +2120,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -2184,7 +2141,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
@@ -3179,9 +3135,9 @@ def fds_data_context(
         query="SELECT * FROM table_partitioned_by_date_column__A",
     )
     datasource.add_query_asset(
-        name="trip_asset_split_by_event_type",
+        name="trip_asset_partition_by_event_type",
         query="SELECT * FROM table_partitioned_by_date_column__A",
-    ).add_splitter_column_value("event_type")
+    ).add_partitioner_column_value("event_type")
 
     return context
 
@@ -3199,20 +3155,20 @@ introspection:
     whole_table: {{}}
 
     daily:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%m-%d"
 
     weekly:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%W"
 
     by_id_dozens:
-        splitter_method: _split_on_divided_integer
-        splitter_kwargs:
+        partitioner_method: _partition_on_divided_integer
+        partitioner_kwargs:
             column_name: id
             divisor: 12
 """

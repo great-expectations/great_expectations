@@ -83,7 +83,7 @@ def fake_expectation_with_description() -> Expectation:
     class ExpectColumnAgesToBeLegalAdult(gxe.ExpectColumnValuesToBeBetween):
         column: str = "ages"
         min_value: int = 18
-        description: str = "column values must be a legal adult age"
+        description: str = "column values must be a legal adult age (**18** or older)"
 
     return ExpectColumnAgesToBeLegalAdult()
 
@@ -1217,9 +1217,9 @@ def test_ExpectationSuiteColumnSectionRenderer_render_expectation_with_descripti
 
     content_block = result.content_blocks[1]
     content = content_block.bullet_list[0]
-    template = content.string_template["template"]
+    markdown = content.markdown
 
-    assert template == expectation.description
+    assert markdown == expectation.description
 
 
 @pytest.mark.unit
@@ -1706,9 +1706,9 @@ def test_ValidationResultsTableContentBlockRenderer_render_evr_with_description(
 
     content_block = result.content_blocks[1]
     content = content_block.table[0]
-    template = content.string_template["template"]
+    markdown = content.markdown
 
-    assert template == expectation.description
+    assert markdown == expectation.description
 
 
 # noinspection PyPep8Naming

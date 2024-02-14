@@ -62,7 +62,6 @@ my_checkpoint_name = "my_sql_checkpoint"
 
 checkpoint = Checkpoint(
     name=my_checkpoint_name,
-    run_name_template="%Y%m%d-%H%M%S-my-run-name-template",
     data_context=context,
     batch_request=batch_request,
     expectation_suite_name=expectation_suite_name,

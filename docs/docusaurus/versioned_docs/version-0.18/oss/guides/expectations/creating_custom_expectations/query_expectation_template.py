@@ -17,27 +17,27 @@ from great_expectations.expectations.expectation_configuration import (
 
 
 # This class defines the Expectation itself
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def">
 class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py docstring">
     """TODO: Add a docstring here"""
     # </snippet>
 
     # This is the id string of the Metric(s) used by this Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py metric_dependencies">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py metric_dependencies">
     metric_dependencies = ("METRIC NAME GOES HERE",)
     # </snippet>
 
     # This is the default, baked-in SQL Query for this QueryExpectation
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py sql_query">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py sql_query">
     query: str = """
             SQL QUERY GOES HERE
             """
     # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py success_keys">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py success_keys">
     success_keys = ("query",)
     # </snippet>
 
@@ -71,7 +71,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py _validate">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py _validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -85,12 +85,12 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py examples">
     examples = []
     # </snippet>
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -101,6 +101,6 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py print_diagnostic_checklist">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py print_diagnostic_checklist">
     ExpectQueryToMatchSomeCriteria().print_diagnostic_checklist()
     # </snippet>

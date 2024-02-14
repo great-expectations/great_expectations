@@ -3,7 +3,7 @@
 # The reference fails, and was being silently resolved here, which broke when we
 # moved snippets out of tests. This can be deleted once we remove support for 0.15/0/16 docs.
 
-# <snippet name="version-0.18 tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full">
+# <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full">
 from datetime import timedelta
 
 import airflow

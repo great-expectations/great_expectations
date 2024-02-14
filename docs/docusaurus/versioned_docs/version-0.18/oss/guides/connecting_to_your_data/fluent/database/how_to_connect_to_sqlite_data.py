@@ -22,24 +22,24 @@ sqlite_database_path = str(
     ).resolve(strict=True)
 )
 
-my_table_name = "version-0.18 yellow_tripdata_sample_2019_01"
+my_table_name = "yellow_tripdata_sample_2019_01"
 
 
 import great_expectations as gx
 
 context = gx.get_context()
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py connection_string">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py connection_string">
 my_connection_string = "sqlite:///<PATH_TO_DB_FILE>"
 # </snippet>
 
 my_connection_string = f"sqlite:///{sqlite_database_path}"
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py datasource_name">
-datasource_name = "version-0.18 my_datasource"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py datasource_name">
+datasource_name = "my_datasource"
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py datasource">
 datasource = context.sources.add_sqlite(
     name=datasource_name, connection_string=my_connection_string
 )
@@ -50,23 +50,23 @@ assert "name: my_datasource" in str(datasource)
 assert "type: sqlite" in str(datasource)
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py asset_name">
-asset_name = "version-0.18 my_asset"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py asset_name">
+asset_name = "my_asset"
 asset_table_name = my_table_name
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py table_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py table_asset">
 table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
 # </snippet>
 
 assert table_asset
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py asset_query">
-asset_name = "version-0.18 my_query_asset"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py asset_query">
+asset_name = "my_query_asset"
 query = "SELECT * from yellow_tripdata_sample_2019_01"
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py query_table_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py query_table_asset">
 query_asset = datasource.add_query_asset(name=asset_name, query=query)
 # </snippet>
 

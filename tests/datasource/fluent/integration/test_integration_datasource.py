@@ -101,7 +101,7 @@ def test_batch_head(
 
 @pytest.mark.sqlite
 class TestQueryAssets:
-    def test_success_with_splitters(self, empty_data_context):
+    def test_success_with_partitioners(self, empty_data_context):
         context = empty_data_context
         datasource = sqlite_datasource(context, "yellow_tripdata.db")
         passenger_count_value = 5
@@ -110,7 +110,7 @@ class TestQueryAssets:
                 name="query_asset",
                 query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
             )
-            .add_splitter_year_and_month(column_name="pickup_datetime")
+            .add_partitioner_year_and_month(column_name="pickup_datetime")
             .add_sorters(["year"])
         )
         validator = context.get_validator(
@@ -123,16 +123,16 @@ class TestQueryAssets:
         )
         assert result.success
 
-    def test_splitter_filtering(self, empty_data_context):
+    def test_partitioner_filtering(self, empty_data_context):
         context = empty_data_context
         datasource = sqlite_datasource(
             context, "../../test_cases_for_sql_data_connector.db"
         )
 
         asset = datasource.add_query_asset(
-            name="trip_asset_split_by_event_type",
+            name="trip_asset_partition_by_event_type",
             query="SELECT * FROM table_partitioned_by_date_column__A",
-        ).add_splitter_column_value("event_type")
+        ).add_partitioner_column_value("event_type")
         batch_request = asset.build_batch_request({"event_type": "start"})
         validator = context.get_validator(batch_request=batch_request)
 
@@ -218,8 +218,8 @@ def test_filesystem_data_asset_batching_regex(
     [
         "database",
         "table_name",
-        "splitter_name",
-        "splitter_kwargs",
+        "partitioner_name",
+        "partitioner_kwargs",
         "sorter_args",
         "all_batches_cnt",
         "specified_batch_request",
@@ -230,7 +230,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata_sample_2020_all_months_combined.db",
             "yellow_tripdata_sample_2020",
-            "add_splitter_year",
+            "add_partitioner_year",
             {"column_name": "pickup_datetime"},
             ["year"],
             1,
@@ -242,7 +242,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata_sample_2020_all_months_combined.db",
             "yellow_tripdata_sample_2020",
-            "add_splitter_year_and_month",
+            "add_partitioner_year_and_month",
             {"column_name": "pickup_datetime"},
             ["year", "month"],
             12,
@@ -254,7 +254,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_year_and_month_and_day",
+            "add_partitioner_year_and_month_and_day",
             {"column_name": "pickup_datetime"},
             ["year", "month", "day"],
             28,
@@ -266,7 +266,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_datetime_part",
+            "add_partitioner_datetime_part",
             {
                 "column_name": "pickup_datetime",
                 "datetime_parts": ["year", "month", "day"],
@@ -281,7 +281,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_column_value",
+            "add_partitioner_column_value",
             {"column_name": "passenger_count"},
             ["passenger_count"],
             7,
@@ -293,7 +293,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_column_value",
+            "add_partitioner_column_value",
             {"column_name": "pickup_datetime"},
             ["pickup_datetime"],
             9977,
@@ -305,7 +305,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_divided_integer",
+            "add_partitioner_divided_integer",
             {"column_name": "passenger_count", "divisor": 3},
             ["quotient"],
             3,
@@ -317,7 +317,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_mod_integer",
+            "add_partitioner_mod_integer",
             {"column_name": "passenger_count", "mod": 3},
             ["remainder"],
             3,
@@ -329,7 +329,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_hashed_column",
+            "add_partitioner_hashed_column",
             {"column_name": "passenger_count", "hash_digits": 3},
             ["hash"],
             7,
@@ -341,7 +341,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_converted_datetime",
+            "add_partitioner_converted_datetime",
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             ["datetime"],
             28,
@@ -353,7 +353,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_splitter_multi_column_values",
+            "add_partitioner_multi_column_values",
             {"column_names": ["passenger_count", "payment_type"]},
             ["passenger_count", "payment_type"],
             23,
@@ -364,12 +364,12 @@ def test_filesystem_data_asset_batching_regex(
         ),
     ],
 )
-def test_splitter(
+def test_partitioner(
     empty_data_context,
     database,
     table_name,
-    splitter_name,
-    splitter_kwargs,
+    partitioner_name,
+    partitioner_kwargs,
     sorter_args,
     all_batches_cnt,
     specified_batch_request,
@@ -382,7 +382,7 @@ def test_splitter(
         name="table_asset",
         table_name=table_name,
     )
-    getattr(asset, splitter_name)(**splitter_kwargs)
+    getattr(asset, partitioner_name)(**partitioner_kwargs)
     asset.add_sorters(sorter_args)
     # Test getting all batches
     all_batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
@@ -396,7 +396,7 @@ def test_splitter(
 
 
 @pytest.mark.sqlite
-def test_splitter_build_batch_request_allows_selecting_by_date_and_datetime_as_string(
+def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_as_string(
     empty_data_context,
 ):
     context = empty_data_context
@@ -406,14 +406,14 @@ def test_splitter_build_batch_request_allows_selecting_by_date_and_datetime_as_s
         "query_asset",
         "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
     )
-    asset.add_splitter_column_value(column_name="pickup_date")
+    asset.add_partitioner_column_value(column_name="pickup_date")
     asset.add_sorters(["pickup_date"])
     # Test getting all batches
     all_batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
     assert len(all_batches) == 28
 
     with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource._splitter_and_sql_asset_to_batch_identifier_data"
+        "great_expectations.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
     ) as mock_batch_identifiers:
         mock_batch_identifiers.return_value = [
             {"pickup_date": datetime.date(2019, 2, 1)},
@@ -425,7 +425,7 @@ def test_splitter_build_batch_request_allows_selecting_by_date_and_datetime_as_s
         assert len(specified_batches) == 1
 
     with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource._splitter_and_sql_asset_to_batch_identifier_data"
+        "great_expectations.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
     ) as mock_batch_identifiers:
         mock_batch_identifiers.return_value = [
             {"pickup_date": datetime.datetime(2019, 2, 1)},
@@ -461,7 +461,6 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
     checkpoint = Checkpoint(
         "my_checkpoint",
@@ -481,7 +480,6 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.filesystem
@@ -517,7 +515,6 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.parametrize(
@@ -547,7 +544,7 @@ def test_asset_specified_metadata(
         batch_metadata=asset_specified_metadata,
         **add_asset_kwarg,
     )
-    asset.add_splitter_year_and_month(column_name="pickup_datetime")
+    asset.add_partitioner_year_and_month(column_name="pickup_datetime")
     asset.add_sorters(["year", "month"])
     # Test getting all batches
     batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())

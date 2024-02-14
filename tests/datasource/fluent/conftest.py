@@ -70,7 +70,7 @@ logger = logging.getLogger(__name__)
 def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
-    splitter_query_response: Optional[Union[List[Dict[str, Any]], List[Any]]] = None,
+    partitioner_query_response: Optional[Union[List[Dict[str, Any]], List[Any]]] = None,
 ):
     """Creates a mock gx sql alchemy engine class
 
@@ -78,8 +78,8 @@ def sqlachemy_execution_engine_mock_cls(
         validate_batch_spec: A hook that can be used to validate the generated the batch spec
             passed into get_batch_data_and_markers
         dialect: A string representing the SQL Engine dialect. Examples include: postgresql, sqlite
-        splitter_query_response: An optional list of dictionaries. Each dictionary is a row returned
-            from the splitter query. The keys are the column names and the value is the column values,
+        partitioner_query_response: An optional list of dictionaries. Each dictionary is a row returned
+            from the partitioner query. The keys are the column names and the value is the column values,
             eg: [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
     """
 
@@ -98,20 +98,20 @@ def sqlachemy_execution_engine_mock_cls(
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
 
-        def execute_split_query(self, split_query):
+        def execute_partitioned_query(self, partitioned_query):
             class Row:
                 def __init__(self, attributes):
                     for k, v in attributes.items():
                         setattr(self, k, v)
 
-            # We know that splitter_query_response is non-empty because of validation
+            # We know that partitioner_query_response is non-empty because of validation
             # at the top of the outer function.
-            # In some cases, such as in the datetime splitters,
-            # a dictionary is returned our from out splitter query with the key as the parameter_name.
+            # In some cases, such as in the datetime partitioners,
+            # a dictionary is returned our from out partitioner query with the key as the parameter_name.
             # Otherwise, a list of values is returned.
-            if isinstance(splitter_query_response[0], dict):
-                return [Row(row_dict) for row_dict in splitter_query_response]
-            return splitter_query_response
+            if isinstance(partitioner_query_response[0], dict):
+                return [Row(row_dict) for row_dict in partitioner_query_response]
+            return partitioner_query_response
 
     return MockSqlAlchemyExecutionEngine
 

@@ -651,7 +651,6 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context = FileDataContext.create(
         project_root_dir=project_path,
-        usage_statistics_enabled=False,
     )
 
     CONFIG_VARS = {

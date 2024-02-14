@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 # Batches one wants as returned. The keys represent dimensions one can filter the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
 # will capture all data along this dimension. For example, if we have a year and month
-# splitter, and we want to query all months in the year 2020, the batch request options
+# partitioner, and we want to query all months in the year 2020, the batch request options
 # would look like:
 #   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[StrictStr, Any]
