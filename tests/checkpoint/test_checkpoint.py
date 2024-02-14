@@ -98,28 +98,10 @@ def test_basic_checkpoint_config_validation(
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         checkpoint_config = CheckpointConfig(**config_erroneous)
-    with pytest.raises(KeyError):
-        # noinspection PyUnusedLocal
-        checkpoint: Checkpoint = context.test_yaml_config(
-            yaml_config=yaml_config_erroneous,
-            name="my_erroneous_checkpoint",
-        )
 
     yaml_config_erroneous = """
     name: my_erroneous_checkpoint
     """
-    # noinspection PyUnusedLocal
-    checkpoint: Checkpoint = context.test_yaml_config(
-        yaml_config=yaml_config_erroneous,
-        name="my_erroneous_checkpoint",
-        class_name="Checkpoint",
-    )
-    captured = capsys.readouterr()
-    assert any(
-        'Your current Checkpoint configuration has an empty or missing "validations" attribute'
-        in message
-        for message in [caplog.text, captured.out]
-    )
 
     assert len(context.list_checkpoints()) == 0
     context.add_checkpoint(**yaml.load(yaml_config_erroneous))
@@ -162,14 +144,6 @@ def test_basic_checkpoint_config_validation(
     )
     assert (
         deep_filter_properties_iterable(
-            properties=checkpoint.self_check()["config"],
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        )
-        == filtered_expected_checkpoint_config
-    )
-    assert (
-        deep_filter_properties_iterable(
             properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -181,14 +155,6 @@ def test_basic_checkpoint_config_validation(
         yaml_config=yaml_config,
         name="my_checkpoint",
         class_name="Checkpoint",
-    )
-    assert (
-        deep_filter_properties_iterable(
-            properties=checkpoint.self_check()["config"],
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        )
-        == filtered_expected_checkpoint_config
     )
     assert (
         deep_filter_properties_iterable(

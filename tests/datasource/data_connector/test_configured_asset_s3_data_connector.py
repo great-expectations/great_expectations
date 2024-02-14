@@ -1,4 +1,3 @@
-import json
 import os
 from typing import List
 
@@ -62,28 +61,6 @@ def test_basic_instantiation():
         assets={"alpha": {}},
     )
 
-    assert my_data_connector.self_check() == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -100,140 +77,6 @@ def test_basic_instantiation():
                 )
             )
         )
-
-
-@mock_s3
-def test_instantiation_from_a_config(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
-
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    keys: List[str] = [
-        "alpha-1.csv",
-        "alpha-2.csv",
-        "alpha-3.csv",
-    ]
-    for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-    report_object = context.test_yaml_config(
-        f"""
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetS3DataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        bucket: {bucket}
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
-
-@mock_s3
-def test_instantiation_from_a_config_regex_does_not_match_paths(
-    empty_data_context_stats_enabled,
-):
-    context = empty_data_context_stats_enabled
-
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    keys: List[str] = [
-        "alpha-1.csv",
-        "alpha-2.csv",
-        "alpha-3.csv",
-    ]
-    for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetS3DataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
-
-bucket: {bucket}
-prefix: ""
-
-default_regex:
-    pattern: beta-(.*)\\.csv
-    group_names:
-        - index
-
-assets:
-    alpha:
-
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-        },
-        "example_unmatched_data_references": [
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-        "unmatched_data_reference_count": 3,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
 
 
 @mock_s3
@@ -475,13 +318,6 @@ def test_return_all_batch_definitions_sorted():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetS3DataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -680,13 +516,6 @@ def test_alpha():
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-    self_check_report = my_data_connector.self_check()
-    print(json.dumps(self_check_report, indent=2))
-
-    assert self_check_report["class_name"] == "ConfiguredAssetS3DataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert set(list(self_check_report["data_assets"].keys())) == {"A"}
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -787,42 +616,6 @@ def test_foxtrot():
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-    self_check_report = my_data_connector.self_check()
-    assert self_check_report == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 4,
-        "example_data_asset_names": ["A", "B", "C"],
-        "data_assets": {
-            "A": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "test_dir_foxtrot/A/A-1.csv",
-                    "test_dir_foxtrot/A/A-2.csv",
-                    "test_dir_foxtrot/A/A-3.csv",
-                ],
-            },
-            "B": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "test_dir_foxtrot/B/B-1.txt",
-                    "test_dir_foxtrot/B/B-2.txt",
-                    "test_dir_foxtrot/B/B-3.txt",
-                ],
-            },
-            "C": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "test_dir_foxtrot/C/C-2017.csv",
-                    "test_dir_foxtrot/C/C-2018.csv",
-                    "test_dir_foxtrot/C/C-2019.csv",
-                ],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
     my_batch_request = BatchRequest(

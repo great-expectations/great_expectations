@@ -33,7 +33,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/nested_directories_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config">
@@ -70,11 +72,8 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "../data/nested_directories_data_asset/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
-
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 
@@ -125,7 +124,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/nested_directories_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config_2">
@@ -165,11 +166,9 @@ datasource_config["data_connectors"]["default_configured_data_connector_name"][
 ] = "../data/nested_directories_data_asset/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
