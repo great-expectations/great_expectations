@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, Generator, Iterator, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -538,7 +538,7 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> pyspark.SparkSession:
+def spark_session(test_backends) -> Iterator[pyspark.SparkSession]:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
