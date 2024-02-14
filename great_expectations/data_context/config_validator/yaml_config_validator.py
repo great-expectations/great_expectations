@@ -233,11 +233,7 @@ class _YamlConfigValidator:
                     f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n"
                 )
 
-            report_object: dict = instantiated_class.self_check(
-                pretty_print=pretty_print
-            )
-
-            return report_object
+            return instantiated_class
 
         except Exception as e:
             if shorten_tracebacks:
