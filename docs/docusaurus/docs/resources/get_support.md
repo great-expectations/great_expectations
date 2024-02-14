@@ -55,8 +55,6 @@ Even if you've previously developed a rapport with a specific GX DA, or a commun
 
 GX provides the following resources for questions and support:
 
-## Get support
-
 - If you've encountered an error you can't resolve, get support on the [GX Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11). This is the recommended option as answers aren't removed after 90 days, and you're likely to get a quicker response. GX OSS and GX Cloud specific channels are available. 
 
 - If you want to chat with community members about general issues and solutions, join the [GX Slack community](https://greatexpectationstalk.slack.com/archives/CUTCNHN82). To discuss GX Cloud issues, join the [GX Cloud Slack community](https://greatexpectationstalk.slack.com/archives/C051D941XAL). 

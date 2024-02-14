@@ -4,7 +4,7 @@ name: ci
 # A "reasonable" set of tests will run on every pull request, and a full set will run with:
 #   1. Manual triggering
 #   2. Every 3 hours
-#   3. When we push a tag with a pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
+#   3. When we push a tag with a semver pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
 on:
   merge_group:
@@ -19,8 +19,14 @@ on:
     - cron: "0 */3 * * *"
   workflow_dispatch:  # allows manual triggering with branch picker
   push:
+    # Semantic versioning syntax defined by PyPI: https://pythonpackaging.info/07-Package-Release.html#Versioning-your-code
     tags:
+      # Stable release syntax
       - '[0-9]+.[0-9]+.[0-9]+'
+      # Prerelease syntax
+      - '[0-9]+.[0-9]+.[0-9]+a[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+b[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+rc[0-9]+'
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
