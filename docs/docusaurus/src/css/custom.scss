@@ -103,6 +103,12 @@ h3 {
     color: #404041;
 }
 
+
+.alert {
+    --ifm-color-warning-dark: #223f99;
+    --ifm-alert-background-color: #f4f4f7;
+}
+
 /* pagination overrides */
 .pagination-nav__item {
     flex: inherit;
