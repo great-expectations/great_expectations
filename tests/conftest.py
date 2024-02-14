@@ -1650,10 +1650,8 @@ def deterministic_asset_data_connector_context(
                     users: {{}}
         """
 
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
