@@ -231,17 +231,17 @@ module.exports = {
           // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
             current: {
-              label: '1.0 Prerelease',
-              path: 'next',
+              label: '1.0 prerelease',
+              path: '1.0-prerelease',
             },
             ['0.18']: {
               label: '0.18.8',
-              path: '',
+              path: ''
             },
             ["0.17"]: {
               label: '0.17.23',
-              path: '0.17.23',
-            },
+              path: '0.17.23'
+            }
           }
         },
         theme: {
