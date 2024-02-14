@@ -546,8 +546,8 @@ def spark_session(test_backends) -> Iterator[pyspark.SparkSession]:
 
     if pyspark.SparkSession:
         yield SparkDFExecutionEngine.get_or_create_spark_session()
-
-    raise ValueError("spark tests are requested, but pyspark is not installed")
+    else:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
