@@ -60,7 +60,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
             for filename in test_configuration_files:
                 with subprocess.Popen(filename, shell=True):
                     pk_column: bool = False
-                    test_configuration = json.load(filename)
+                    with open(filename) as fp:
+                        test_configuration = json.load(fp)
                     expectation_type = filename.split(".json")[0].split("/")[-1]
                     for index, test_config in enumerate(
                         test_configuration["datasets"], 1
