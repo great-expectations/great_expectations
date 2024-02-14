@@ -7,22 +7,19 @@ import CtaIcon from "../../../static/img/admonition-cta-icon.svg"
 
 export default function AdmonitionWrapper(props) {
 
-  if (props.type === 'info' || props.type === 'note' || props.type === 'tip') {
-    return <Admonition {...props} icon={<InfoIcon/>} />;
+  switch(props.type) {
+    case 'info':
+    case 'note':
+    case 'tip':
+      return <Admonition {...props} icon={<InfoIcon/>} />;
+    case 'caution':
+    case 'warning':
+      return <Admonition {...props} icon={<CautionIcon/>} />;
+    case 'danger':
+      return <Admonition {...props} icon={<DangerIcon/>} />;
+    case 'cta':
+      return <Admonition {...props} icon={<CtaIcon/>} />;
+    default:
+      return <Admonition {...props} />
   }
-
-  if (props.type === 'caution' || props.type === 'warning') {
-    return <Admonition {...props} icon={<CautionIcon/>} />;
-  }
-
-  if (props.type === 'danger') {
-    return <Admonition {...props} icon={<DangerIcon/>} />;
-  }
-
-  if (props.type === 'cta') {
-    return <Admonition {...props} icon={<CtaIcon/>} />;
-  }
-  return (
-    <Admonition {...props} />
-  );
 }

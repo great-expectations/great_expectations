@@ -3,10 +3,10 @@ import DefaultAdmonitionTypes from '@theme-original/Admonition/Types';
 
 function CtaAdmonition(props) {
     return (
-        <div>
+        <section>
             <h3>{props.title}</h3>
             <div>{props.children}</div>
-        </div>
+        </section>
     );
 }
 
