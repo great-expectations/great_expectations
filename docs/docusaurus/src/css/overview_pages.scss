@@ -25,12 +25,9 @@
 }
 
 @mixin overview-card-title {
+  font-size: var(--ifm-h1-font-size);
   margin-bottom: var(--ifm-heading-margin-bottom);
   max-width: 40rem;
-
-  @media (max-width: 996px) {
-    font-size: var(--h2-font-size);
-  }
 }
 
 @mixin overview-card-description {
