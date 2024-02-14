@@ -860,14 +860,12 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         batch_identifiers=IDDict({}),
         batch_spec_passthrough=None,
     )
-    with spark:
-        validator = build_spark_validator_with_data(
-            df=spark_df,
-            spark=spark,
-            batch_definition=batch_definition,
-            context=context,
-        )
-    return validator
+    return build_spark_validator_with_data(
+        df=spark_df,
+        spark=spark,
+        batch_definition=batch_definition,
+        context=context,
+    )
 
 
 def build_pandas_validator_with_data(
