@@ -295,7 +295,6 @@ data_connectors:
     context.test_yaml_config(
         name="my_directory_datasource",
         yaml_config=yaml_config,
-        return_mode="report_object",
     )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
