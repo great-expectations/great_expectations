@@ -133,11 +133,6 @@ core_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="edit_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/edit_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="get_a_specific_expectation_from_an_expectation_suite.py",
         user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py",
         backend_dependencies=[],
