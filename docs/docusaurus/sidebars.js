@@ -248,20 +248,20 @@ module.exports = {
         },
       ],
   gx_oss: [
-        {type: 'doc', id: 'oss/intro', label: 'About GX OSS'},
-        {
-          type: 'category',
-          label: 'Get started with GX OSS',
-          link: { type: 'doc', id: 'oss/guides/setup/get_started_lp' },
-          items: [
-            'oss/tutorials/quickstart',
-            {
-              type: 'doc', id: 'reference/learn/conceptual_guides/gx_overview', label: 'GX Overview'
-            },
-            'oss/get_started/get_started_with_gx_and_databricks',
-            'oss/get_started/get_started_with_gx_and_sql',
-          ]
-        },
+        // {type: 'doc', id: 'oss/intro', label: 'About GX OSS'},
+        // {
+        //   type: 'category',
+        //   label: 'Get started with GX OSS',
+        //   link: { type: 'doc', id: 'oss/guides/setup/get_started_lp' },
+        //   items: [
+        //     'oss/tutorials/quickstart',
+        //     {
+        //       type: 'doc', id: 'reference/learn/conceptual_guides/gx_overview', label: 'GX Overview'
+        //     },
+        //     'oss/get_started/get_started_with_gx_and_databricks',
+        //     'oss/get_started/get_started_with_gx_and_sql',
+        //   ]
+        // },
         {
           type: 'category',
           label: 'Configure your GX OSS environment',
@@ -308,97 +308,131 @@ module.exports = {
         {
           type: 'category',
           label: 'Create Expectations',
-          link: { type: 'doc', id: 'oss/guides/expectations/expectations_lp' },
+          link: { type: 'doc', id: 'core/create_manage_expectations_lp' },
           items: [
-            'oss/guides/expectations/create_expectations_overview',
+            // 'oss/guides/expectations/create_expectations_overview',
             {
               type: 'category',
-              label: 'Manage Expectations and Expectation Suites',
-              link: { type: 'doc', id: 'oss/guides/expectations/create_manage_expectations_lp' },
+              label: 'Manage Expectations',
+              link: { type: 'doc', id: 'core/expectations/manage_expectations' },
               items: [
-                'oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-                'oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-                'oss/guides/expectations/how_to_edit_an_existing_expectationsuite',
-                'oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-                'oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-                'oss/guides/expectations/advanced/identify_failed_rows_expectations',
+                {
+                  type: 'link',
+                  label: 'Create an Expectation',
+                  href: '/docs/next/core/expectations/manage_expectations#create-an-expectation',
+                },
+                {
+                  type: 'link',
+                  label: 'Test an Expectation',
+                  href: '/docs/next/core/expectations/manage_expectations#test-an-expectation',
+                },
+                {
+                  type: 'link',
+                  label: 'Modify an Expectation',
+                  href: '/docs/next/core/expectations/manage_expectations#modify-an-expectation',
+                },
+                {
+                  type: 'link',
+                  label: 'Customize an Expectation Class',
+                  href: '/docs/next/core/expectations/manage_expectations#customize-an-expectation-class',
+                },
               ]
             },
-            {
+          {
               type: 'category',
-              label: 'Data Assistants',
-              link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
+              label: 'Manage Expectation Suites',
+              link: { type: 'doc', id: 'core/expectation_suites/manage_expectation_suites' },
               items: [
-                'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
+                {
+                  type: 'link',
+                  label: 'Create an Expectation Suite',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
+                },
+                {
+                  type: 'link',
+                  label: 'Get an existing Expectation Suite',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
+                },
+                {
+                  type: 'link',
+                  label: 'Modify an Expectation Suite',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#modify-an-expectation-suite',
+                },
+                {
+                  type: 'link',
+                  label: 'Delete an Expectation Suite',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
+                },
+                {
+                  type: 'link',
+                  label: 'Add Expectations',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#add-expectations',
+                },
+                {
+                  type: 'link',
+                  label: 'Get an Expectation',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#get-an-expectation',
+                },
+                {
+                  type: 'link',
+                  label: 'Edit a single Expectation',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#edit-a-single-expectation',
+                },
+                {
+                  type: 'link',
+                  label: 'Edit multiple Expectations',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#edit-multiple-expectations',
+                },
+                {
+                  type: 'link',
+                  label: 'Delete an Expectation',
+                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#delete-an-expectation',
+                },
               ]
             },
-            {
-              type: 'category',
-              label: 'Create Custom Expectations',
-              link: { type: 'doc', id: 'oss/guides/expectations/custom_expectations_lp' },
-              items: [
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
-                'oss/guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
-                'oss/contributing/contributing_maturity',
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Add Features to Custom Expectations',
-              link: { type: 'doc', id: 'oss/guides/expectations/add_features_custom_expectations_lp' },
-              items: [
-                'oss/guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'oss/guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
-                'oss/guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
-                'oss/guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
-                'oss/guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
-                'oss/guides/expectations/creating_custom_expectations/add_custom_parameters',
-                'oss/guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
-              ]
-            },
-            'oss/guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
+            // {
+            //   type: 'category',
+            //   label: 'Data Assistants',
+            //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
+            //   items: [
+            //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
+            //   ]
+            // },
           ]
         },
-        {
-          type: 'category',
-          label: 'Validate Data',
-          link: { type: 'doc', id: 'oss/guides/validation/validate_data_lp' },
-          items: [
-            'oss/guides/validation/validate_data_overview',
-            {
-              type: 'category',
-              label: 'Manage Checkpoints',
-              link: { type: 'doc', id: 'oss/guides/validation/checkpoints/checkpoint_lp' },
-              items: [
-                'oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint',
-                'oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
-                'oss/guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint',
-                'oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
-                'oss/guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Configure Actions',
-              link: { type: 'doc', id: 'oss/guides/validation/validation_actions/actions_lp' },
-              items: [
-                'oss/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
-                'oss/guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
-                'oss/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
-                'oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-                'oss/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
-              ]
-            },
-            'oss/guides/validation/limit_validation_results',
-          ]
-        },
+        // {
+        //   type: 'category',
+        //   label: 'Validate Data',
+        //   link: { type: 'doc', id: 'oss/guides/validation/validate_data_lp' },
+        //   items: [
+        //     'oss/guides/validation/validate_data_overview',
+        //     {
+        //       type: 'category',
+        //       label: 'Manage Checkpoints',
+        //       link: { type: 'doc', id: 'oss/guides/validation/checkpoints/checkpoint_lp' },
+        //       items: [
+        //         'oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint',
+        //         'oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
+        //         'oss/guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint',
+        //         'oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+        //         'oss/guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
+        //       ]
+        //     },
+        //     {
+        //       type: 'category',
+        //       label: 'Configure Actions',
+        //       link: { type: 'doc', id: 'oss/guides/validation/validation_actions/actions_lp' },
+        //       items: [
+        //         'oss/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
+        //         'oss/guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
+        //         'oss/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
+        //         'oss/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
+        //         'oss/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
+        //       ]
+        //     },
+        //     'oss/guides/validation/limit_validation_results',
+        //   ]
+        // },
         {
           type: 'category',
           label: 'Integrate',

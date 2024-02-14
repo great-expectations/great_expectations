@@ -792,4 +792,23 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
             "great_expectations/expectations/core/expect_column_values_to_be_in_set.py"
         ),
     ),
+    IncludeExcludeDefinition(
+        reason="This validate is a name collision with batch.validate().",
+        name="validate",
+        filepath=pathlib.Path("great_expectations/profile/base.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="We do not want Expectations in our API docs. Expectation docs live in the gallery.",
+        name="ExpectColumnValuesToBeBetween",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_be_between.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="We do not want Expectations in our API docs. Expectation docs live in the gallery.",
+        name="ExpectColumnValuesToNotBeNull",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_not_be_null.py"
+        ),
+    ),
 ]
