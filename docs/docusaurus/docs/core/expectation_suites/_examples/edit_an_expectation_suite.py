@@ -14,10 +14,11 @@ The <snippet> tags are used to insert the corresponding code into the
 import great_expectations as gx
 from great_expectations.core.expectation_suite import ExpectationSuite
 
+context = gx.get_context()
+
 new_suite_name = "my_expectation_suite"
 new_suite = ExpectationSuite(name=new_suite_name)
 
-context = gx.get_context()
 suite = context.suites.add(new_suite)
 # </snippet>
 

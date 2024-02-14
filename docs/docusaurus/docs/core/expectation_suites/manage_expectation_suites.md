@@ -77,38 +77,6 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 </p>
 </details>
 
-## Edit an Expectation Suite
-
-1. [Create a new](#create-a-new-expectation-suite) or [get an existing](#get-an-existing-expectation-suite) Expectation Suite:
-
-  ```python title="Python code" name="core/expectation_suites/_examples/edit_an_expectation_suite.py create expectation suite"
-  ```
-
-2. Modify the Expectation Suite's attributes:
-
-  ```python title="Python code" name="core/expectation_suites/_examples/edit_an_expectation_suite.py edit attribute"
-  ```
-
-3. Save the Expectation Suite:
-
-  ```python title="Python code" name="core/expectation_suites/_examples/edit_an_expectation_suite.py save the Expectation"
-  ```
-
-  :::info  
-
-  The `save()` method also saves any changes that have been made to the Expectation Suite's Expectations.
-
-  :::
-
-<details><summary>Full example code</summary>
-<p>
-
-```python title="Python code" name="core/expectation_suites/_examples/edit_an_expectation_suite.py full example code"
-```
-
-</p>
-</details>
-
 ## Delete an Expectation Suite
 
 1. Import the GX Core library:
