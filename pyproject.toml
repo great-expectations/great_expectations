@@ -456,6 +456,9 @@ filterwarnings = [
     # Found when running test_case_runner_v2_api[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]    'ignore: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate\(\) instead.:FutureWarning',
     # Example Acutal Warning: FutureWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
     'ignore: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance\(dtype, pd.DatetimeTZDtype\)` instead.',
+    # Example Actual Warning:
+    # ResourceWarning: unclosed <socket.socket fd=231, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 60004), raddr=('127.0.0.1', 46627)>
+    "ignore: unclosed <socket.socket fd=231, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 60004), raddr=('127.0.0.1', 46627)>:ResourceWarning",
     # pymysql
     # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
@@ -506,10 +509,6 @@ filterwarnings = [
     # Example Actual Warning:
     # DeprecationWarning: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.
     "ignore: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.:DeprecationWarning",
-    # spark
-    # Example Actual Warning:
-    # ResourceWarning: unclosed <socket.socket fd=231, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 60004), raddr=('127.0.0.1', 46627)>
-    "ignore: unclosed <socket.socket fd=231, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 60004), raddr=('127.0.0.1', 46627)>:ResourceWarning"
     # sqlalchemy
     # Example Actual Warning:
     # sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
