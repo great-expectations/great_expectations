@@ -20,7 +20,7 @@ import boto3
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py imports">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py imports">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -48,7 +48,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
     "expectations_store_name"
 ]
 expected_existing_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_expectations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_expectations_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -66,7 +66,7 @@ assert actual_existing_expectations_store == yaml.load(
 
 # adding expectations store
 configured_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_expectations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_expectations_store">
 stores:
   expectations_S3_store:
     class_name: ExpectationsStore
@@ -128,7 +128,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 ]
 
 expected_existing_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_validations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_validations_store">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -146,7 +146,7 @@ assert actual_existing_validations_store == yaml.load(
 
 # adding validations store
 configured_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_validations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_validations_store">
 stores:
   validations_S3_store:
     class_name: ValidationsStore
@@ -156,7 +156,7 @@ stores:
       prefix: '<YOUR S3 PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py set_new_validations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py set_new_validations_store">
 validations_store_name: validations_S3_store
 # </snippet>
 """
@@ -186,7 +186,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding data docs store
 data_docs_site_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_data_docs_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_data_docs_store">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -225,29 +225,29 @@ awscreds = {
     "aws_secret_access_key": AWS_SECRET_ACCESS_KEY,
 }
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_s3_datasource">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_s3_datasource">
 datasource = context.sources.add_or_update_spark_s3(
-    name="version-0.18 s3_datasource",
+    name="s3_datasource",
     bucket="taxi-data-sample-test",
     boto3_options=awscreds,
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_spark_s3_asset">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_spark_s3_asset">
 asset = datasource.add_csv_asset(
-    name="version-0.18 csv_taxi_s3_asset",
+    name="csv_taxi_s3_asset",
     batching_regex=r".*_(?P<year>\d{4})\.csv",
     header=True,
     infer_schema=True,
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_request">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_request">
 request = asset.build_batch_request({"year": "2021"})
 # </snippet>
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_list">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_list">
 batches = asset.get_batch_list_from_batch_request(request)
 # </snippet>
 
@@ -255,45 +255,43 @@ config = context.fluent_datasources["s3_datasource"].yaml()
 assert "name: s3_datasource" in config
 assert "type: spark_s3" in config
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_validator">
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_suite"
-)
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_validator">
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
-    batch_request=request, expectation_suite_name="version-0.18 test_suite"
+    batch_request=request, expectation_suite_name="test_suite"
 )
 
 print(validator.head())
 # </snippet>
 
 # add expectations to validator
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_expectations">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_expectations">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py save_expectations">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # build Checkpoint
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py create_checkpoint">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py create_checkpoint">
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 my_checkpoint",
+    name="my_checkpoint",
     validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py run checkpoint">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py run checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 
 assert not checkpoint_result.success
 
 # build datadocs
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py build_docs">
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py build_docs">
 context.build_data_docs()
 # </snippet>
 

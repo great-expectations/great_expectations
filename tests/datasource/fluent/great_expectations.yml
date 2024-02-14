@@ -5,16 +5,16 @@ fluent_datasources:
     kwargs:
       echo: True
     assets:
-      my_table_asset_wo_splitters:
+      my_table_asset_wo_partitioners:
         id: 1fe754ee-2b5a-45cf-8c8d-2bbf9806d302
         type: table
         table_name: my_table
-      with_splitter:
+      with_partitioner:
         id: 3cde7b60-5eb5-4612-90ea-88a65ffb5e62
         type: table
         table_name: another_table
-        splitter:
-          method_name: split_on_year_and_month
+        partitioner:
+          method_name: partition_on_year_and_month
           column_name: my_column
       with_sorters:
         id: ddd94d36-1443-4298-b0bf-d2d7918c8f66
@@ -39,9 +39,9 @@ fluent_datasources:
         id: 3bb1ce41-7923-4126-a4f2-1366d0addbd9
         type: table
         table_name: yellow_tripdata_sample_2019_01
-        splitter:
+        partitioner:
             column_name: pickup_datetime
-            method_name: split_on_year_and_month
+            method_name: partition_on_year_and_month
         order_by:
             - key: year
             - key: month
@@ -55,9 +55,9 @@ fluent_datasources:
         id: fa713f58-9825-4b30-816b-eeda511c4b08
         type: table
         table_name: yellow_tripdata_sample_2019_01
-        splitter:
+        partitioner:
             column_name: pickup_datetime
-            method_name: split_on_year_and_month
+            method_name: partition_on_year_and_month
         order_by:
             - key: year
             - key: month
@@ -198,7 +198,7 @@ fluent_datasources:
     type: snowflake
     connection_string: "snowflake://user_login_name:password@account_identifier"
     assets:
-      my_table_asset_wo_splitters:
+      my_table_asset_wo_partitioners:
         id: d8b22f50-d3f9-4d04-9b4c-cfed86b157ff
         type: table
         table_name: my_table
@@ -213,7 +213,7 @@ fluent_datasources:
     role: "admin"
     numpy: true
     assets:
-      my_table_asset_wo_splitters:
+      my_table_asset_wo_partitioners:
         id: e9ac5d80-679b-49d2-8c60-3bbf6530dbb4
         type: table
         table_name: my_table
@@ -221,7 +221,7 @@ fluent_datasources:
     type: databricks_sql
     connection_string: "databricks://token:dapi123@abc-123.cloud.databricks.com:123/default_db?http_path=/sql/1.0/warehouses/abc123&catalog=default&schema=dev"
     assets:
-      my_table_asset_wo_splitters:
+      my_table_asset_wo_partitioners:
         id: f2597c56-eeea-4bfd-b07c-5f35779a71e5
         type: table
         table_name: my_table

@@ -13,7 +13,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root">
 path_to_project_root = "./my_project/"
 # </snippet>
 
@@ -24,7 +24,7 @@ assert context
 assert context.root_directory == str(path_to_context_root_folder)
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context">
 context = gx.get_context(project_root_dir=path_to_project_root)
 # </snippet>
 

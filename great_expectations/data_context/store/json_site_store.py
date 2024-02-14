@@ -69,12 +69,6 @@ class JsonSiteStore(Store):
     def deserialize(self, value):
         return RenderedDocumentContent(**loads(value))
 
-    @override
-    def self_check(self, pretty_print) -> None:
-        NotImplementedError(
-            f"The test method is not implemented for Store class {self.__class__.__name__}."
-        )
-
     @property
     @override
     def config(self) -> dict:

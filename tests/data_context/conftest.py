@@ -637,8 +637,6 @@ def mock_http_unavailable(mock_response_factory: Callable):
 def checkpoint_config() -> dict:
     checkpoint_config = {
         "name": "oss_test_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
         "expectation_suite_name": "oss_test_expectation_suite",
         "validations": [
             {

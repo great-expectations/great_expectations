@@ -38,10 +38,10 @@ connecting_to_your_data = [
     ),
 ]
 
-split_data = []
+partition_data = []
 
 sample_data = []
 
 sqlite_integration_tests += connecting_to_your_data
-sqlite_integration_tests += split_data
+sqlite_integration_tests += partition_data
 sqlite_integration_tests += sample_data

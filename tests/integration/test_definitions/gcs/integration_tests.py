@@ -72,7 +72,7 @@ how_to_configure_metadata_store = [
     # ),
 ]
 
-split_data = []
+partition_data = []
 
 sample_data = []
 
@@ -96,7 +96,7 @@ fluent_datasources = [
 
 gcs_integration_tests += connecting_to_your_data
 gcs_integration_tests += how_to_configure_metadata_store
-gcs_integration_tests += split_data
+gcs_integration_tests += partition_data
 gcs_integration_tests += sample_data
 gcs_integration_tests += deployment_patterns
 gcs_integration_tests += fluent_datasources

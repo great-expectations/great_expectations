@@ -52,15 +52,15 @@ from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricComputationConfiguration,  # noqa: TCH001
-    SplitDomainKwargs,  # noqa: TCH001
+    PartitionDomainKwargs,  # noqa: TCH001
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
+from great_expectations.execution_engine.partition_and_sample.sparkdf_data_partitioner import (
+    SparkDataPartitioner,
+)
+from great_expectations.execution_engine.partition_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
 )
-from great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter import (
-    SparkDataSplitter,
-)
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -220,7 +220,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             }
         )
 
-        self._data_splitter = SparkDataSplitter()
+        self._data_partitioner = SparkDataPartitioner()
         self._data_sampler = SparkDataSampler()
 
     @property
@@ -370,28 +370,30 @@ illegal.  Please check your config."""
                 """
             )
 
-        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
+        batch_data = self._apply_partitioning_and_sampling_methods(
+            batch_spec, batch_data
+        )
         typed_batch_data = SparkDFBatchData(execution_engine=self, dataframe=batch_data)
 
         return typed_batch_data, batch_markers
 
-    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+    def _apply_partitioning_and_sampling_methods(self, batch_spec, batch_data):
         # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
         partitions: Optional[List[str]] = batch_spec.get("partitions")
         if partitions:
-            batch_data = self._data_splitter.split_on_multi_column_values(
+            batch_data = self._data_partitioner.partition_on_multi_column_values(
                 df=batch_data,
                 column_names=partitions,
                 batch_identifiers=batch_spec.get("batch_identifiers"),
             )
 
-        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
-        if splitter_method_name:
-            splitter_fn: Callable = self._data_splitter.get_splitter_method(
-                splitter_method_name
+        partitioner_method_name: Optional[str] = batch_spec.get("partitioner_method")
+        if partitioner_method_name:
+            partitioner_fn: Callable = self._data_partitioner.get_partitioner_method(
+                partitioner_method_name
             )
-            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
-            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+            partitioner_kwargs: dict = batch_spec.get("partitioner_kwargs") or {}
+            batch_data = partitioner_fn(batch_data, **partitioner_kwargs)
 
         sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
         if sampler_method_name:
@@ -662,11 +664,15 @@ illegal.  Please check your config."""
 
         data: pyspark.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
-            domain_kwargs, domain_type, accessor_keys
+        partitioned_domain_kwargs: PartitionDomainKwargs = (
+            self._partition_domain_kwargs(domain_kwargs, domain_type, accessor_keys)
         )
 
-        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
+        return (
+            data,
+            partitioned_domain_kwargs.compute,
+            partitioned_domain_kwargs.accessor,
+        )
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False

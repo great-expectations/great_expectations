@@ -696,7 +696,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason='The "columns()" property in this module is not included in the public API',
         name="columns",
         filepath=pathlib.Path(
-            "great_expectations/datasource/fluent/spark_generic_splitters.py"
+            "great_expectations/datasource/fluent/spark_generic_partitioners.py"
         ),
     ),
     IncludeExcludeDefinition(
@@ -790,6 +790,25 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="ExpectColumnValuesToBeInSet",
         filepath=pathlib.Path(
             "great_expectations/expectations/core/expect_column_values_to_be_in_set.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This validate is a name collision with batch.validate().",
+        name="validate",
+        filepath=pathlib.Path("great_expectations/profile/base.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="We do not want Expectations in our API docs. Expectation docs live in the gallery.",
+        name="ExpectColumnValuesToBeBetween",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_be_between.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="We do not want Expectations in our API docs. Expectation docs live in the gallery.",
+        name="ExpectColumnValuesToNotBeNull",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_not_be_null.py"
         ),
     ),
 ]

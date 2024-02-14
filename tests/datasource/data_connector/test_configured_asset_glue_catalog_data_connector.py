@@ -31,8 +31,8 @@ def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):
         db_test.tb_titanic:
             table_name: tb_titanic_with_partitions
             database_name: db_test
-            splitter_method: split_on_column_value
-            splitter_kwargs:
+            partitioner_method: partition_on_column_value
+            partitioner_kwargs:
                 column_name: PClass
             partitions:
                 - SexCode
@@ -54,115 +54,8 @@ def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):
 
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(**config)
 
-    report = my_data_connector.self_check()
-    assert report == {
-        "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
-        "data_asset_count": 3,
-        "example_data_asset_names": ["asset2", "asset3", "db_test.tb_titanic"],
-        "data_assets": {
-            "asset2": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    {"PClass": "1st"},
-                    {"PClass": "2nd"},
-                    {"PClass": "3rd"},
-                ],
-            },
-            "asset3": {
-                "batch_definition_count": 6,
-                "example_data_references": [
-                    {"PClass": "1st", "SexCode": "0"},
-                    {"PClass": "1st", "SexCode": "1"},
-                    {"PClass": "2nd", "SexCode": "0"},
-                ],
-            },
-            "db_test.tb_titanic": {
-                "batch_definition_count": 2,
-                "example_data_references": [
-                    {"SexCode": "0"},
-                    {"SexCode": "1"},
-                ],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-    }
     # noinspection PyProtectedMember
     assert len(my_data_connector.get_available_data_asset_names()) == 3
-    assert my_data_connector.get_unmatched_data_references() == []
-
-
-def test_basic_instantiation(glue_titanic_catalog):
-    config = yaml.load(
-        """
-    name: my_glue_catalog_data_connector
-    datasource_name: FAKE_Datasource_NAME
-
-    assets:
-        db_test.tb_titanic:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            splitter_method: split_on_column_value
-            splitter_kwargs:
-                column_name: PClass
-        asset2:
-            table_name: tb_titanic_without_partitions
-            database_name: db_test
-            sampling_method: _sample_using_random
-            sampling_kwargs:
-                p: 0.5
-                seed: 0
-            partitions:
-                - PClass
-        asset3:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            partitions:
-                - PClass
-        asset4:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            partitions:
-                - PClass
-                - SexCode
-    """,
-    )
-    config["execution_engine"] = "execution_engine"
-
-    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(**config)
-
-    report = my_data_connector.self_check()
-    assert report == {
-        "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
-        "data_asset_count": 4,
-        "example_data_asset_names": ["asset2", "asset3", "asset4"],
-        "data_assets": {
-            "asset2": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-            "asset3": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    {"PClass": "1st"},
-                    {"PClass": "2nd"},
-                    {"PClass": "3rd"},
-                ],
-            },
-            "asset4": {
-                "batch_definition_count": 6,
-                "example_data_references": [
-                    {"PClass": "1st", "SexCode": "0"},
-                    {"PClass": "1st", "SexCode": "1"},
-                    {"PClass": "2nd", "SexCode": "0"},
-                ],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-    }
-    # noinspection PyProtectedMember
-    assert len(my_data_connector.get_available_data_asset_names()) == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
 
@@ -220,80 +113,6 @@ def test_invalid_instantiation(glue_titanic_catalog):
     with pytest.raises(DataConnectorError) as excinfo:
         ConfiguredAssetAWSGlueDataCatalogDataConnector(**config)
     assert "table_name" in str(excinfo.value)
-
-
-def test_instantiation_from_a_config(
-    empty_data_context_stats_enabled, glue_titanic_catalog
-):
-    context = empty_data_context_stats_enabled
-    report_object = context.test_yaml_config(
-        """
-    module_name: great_expectations.datasource.data_connector
-    class_name: ConfiguredAssetAWSGlueDataCatalogDataConnector
-    name: my_glue_catalog_data_connector
-    datasource_name: FAKE_Datasource_NAME
-
-    assets:
-        db_test.tb_titanic:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            splitter_method: split_on_column_value
-            splitter_kwargs:
-                column_name: PClass
-        asset2:
-            table_name: tb_titanic_without_partitions
-            database_name: db_test
-            sampling_method: _sample_using_random
-            sampling_kwargs:
-                p: 0.5
-                seed: 0
-        asset3:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            partitions:
-                - PClass
-        asset4:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            partitions:
-                - PClass
-                - SexCode
-    """,
-        runtime_environment={
-            "execution_engine": "execution_engine",
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
-        "data_asset_count": 4,
-        "example_data_asset_names": ["asset2", "asset3", "asset4"],
-        "data_assets": {
-            "asset2": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-            "asset3": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    {"PClass": "1st"},
-                    {"PClass": "2nd"},
-                    {"PClass": "3rd"},
-                ],
-            },
-            "asset4": {
-                "batch_definition_count": 6,
-                "example_data_references": [
-                    {"PClass": "1st", "SexCode": "0"},
-                    {"PClass": "1st", "SexCode": "1"},
-                    {"PClass": "2nd", "SexCode": "0"},
-                ],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-    }
 
 
 def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
@@ -490,8 +309,8 @@ def test_instantiation_with_batch_spec_passthrough(
             },
         },
         batch_spec_passthrough={
-            "splitter_method": "_split_on_whole_table",
-            "splitter_kwargs": {},
+            "partitioner_method": "_partition_on_whole_table",
+            "partitioner_kwargs": {},
             "sampling_method": "_sample_using_random",
             "sampling_kwargs": {"p": 0.5, "seed": 0},
         },
@@ -532,9 +351,9 @@ def test_instantiation_with_asset_suffix_and_prefix(glue_titanic_catalog):
     assert "prefix__db_test.tb_titanic__suffix" in my_data_connector.assets
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
-def test_instantiation_with_splitter_sampling_and_prefix(
-    splitter_method_name_prefix, glue_titanic_catalog
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
+def test_instantiation_with_partitioner_sampling_and_prefix(
+    partitioner_method_name_prefix, glue_titanic_catalog
 ):
     # noinspection PyTypeChecker
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
@@ -545,8 +364,8 @@ def test_instantiation_with_splitter_sampling_and_prefix(
             "db_test.tb_titanic": {
                 "table_name": "tb_titanic_with_partitions",
                 "database_name": "db_test",
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {
+                "partitioner_method": f"{partitioner_method_name_prefix}partition_on_column_value",
+                "partitioner_kwargs": {
                     "column_name": "PClass",
                     "batch_identifiers": {"PClass": "1st"},
                 },
@@ -563,8 +382,8 @@ def test_instantiation_with_splitter_sampling_and_prefix(
     assert asset_config and asset_config == {
         "table_name": "tb_titanic_with_partitions",
         "database_name": "db_test",
-        "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-        "splitter_kwargs": {
+        "partitioner_method": f"{partitioner_method_name_prefix}partition_on_column_value",
+        "partitioner_kwargs": {
             "column_name": "PClass",
             "batch_identifiers": {"PClass": "1st"},
         },
@@ -575,9 +394,9 @@ def test_instantiation_with_splitter_sampling_and_prefix(
     }
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_build_batch_spec_with_all_options(
-    splitter_method_name_prefix, glue_titanic_catalog
+    partitioner_method_name_prefix, glue_titanic_catalog
 ):
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
@@ -587,12 +406,12 @@ def test_build_batch_spec_with_all_options(
             "asset_titanic": {
                 "table_name": "tb_titanic_with_partitions",
                 "database_name": "db_test",
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {
+                "partitioner_method": f"{partitioner_method_name_prefix}partition_on_column_value",
+                "partitioner_kwargs": {
                     "column_name": "PClass",
                     "batch_identifiers": {"PClass": "1st"},
                 },
-                "sampling_method": f"{splitter_method_name_prefix}sample_using_random",
+                "sampling_method": f"{partitioner_method_name_prefix}sample_using_random",
                 "sampling_kwargs": {"p": 0.5, "seed": 0},
                 "data_asset_name_prefix": "prefix__",
                 "data_asset_name_suffix": "__suffix",
@@ -611,16 +430,16 @@ def test_build_batch_spec_with_all_options(
     assert batch_spec.table_name == "tb_titanic_with_partitions"
     assert batch_spec.get("data_asset_name", None) == "prefix__asset_titanic__suffix"
     assert (
-        batch_spec.get("splitter_method", None)
-        == f"{splitter_method_name_prefix}split_on_column_value"
+        batch_spec.get("partitioner_method", None)
+        == f"{partitioner_method_name_prefix}partition_on_column_value"
     )
-    assert batch_spec.get("splitter_kwargs", {}) == {
+    assert batch_spec.get("partitioner_kwargs", {}) == {
         "column_name": "PClass",
         "batch_identifiers": {"PClass": "1st"},
     }
     assert (
         batch_spec.get("sampling_method", None)
-        == f"{splitter_method_name_prefix}sample_using_random"
+        == f"{partitioner_method_name_prefix}sample_using_random"
     )
     assert batch_spec.get("sampling_kwargs", {}) == {"p": 0.5, "seed": 0}
     assert batch_spec.get("data_asset_name_prefix", None) == "prefix__"
@@ -702,8 +521,8 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_asset_confi
             "titanic_asset": {
                 "table_name": "tb_titanic_with_partitions",
                 "database_name": "db_test",
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
+                "partitioner_method": "_partition_on_whole_table",
+                "partitioner_kwargs": {},
                 "sampling_method": "_sample_using_random",
                 "sampling_kwargs": {"p": 0.5, "seed": 0},
             },
@@ -754,8 +573,8 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_batch_spec_
             data_asset_name="titanic_asset",
             batch_identifiers=IDDict(),
             batch_spec_passthrough={
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
+                "partitioner_method": "_partition_on_whole_table",
+                "partitioner_kwargs": {},
                 "sampling_method": "_sample_using_random",
                 "sampling_kwargs": {"p": 0.5, "seed": 0},
             },
@@ -803,8 +622,8 @@ def test_get_batch_data_and_metadata_with_sampling_method__mod(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": "_split_on_whole_table",
-            "splitter_kwargs": {},
+            "partitioner_method": "_partition_on_whole_table",
+            "partitioner_kwargs": {},
             "sampling_method": "_sample_using_mod",
             "sampling_kwargs": {"column_name": "Age", "mod": 25, "value": 1},
         },
@@ -856,8 +675,8 @@ def test_get_batch_data_and_metadata_with_sampling_method__list(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": "_split_on_whole_table",
-            "splitter_kwargs": {},
+            "partitioner_method": "_partition_on_whole_table",
+            "partitioner_kwargs": {},
             "sampling_method": "_sample_using_a_list",
             "sampling_kwargs": {"column_name": "PClass", "value_list": ["1st"]},
         },
@@ -909,8 +728,8 @@ def test_get_batch_data_and_metadata_with_sampling_method__hash(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": "_split_on_whole_table",
-            "splitter_kwargs": {},
+            "partitioner_method": "_partition_on_whole_table",
+            "partitioner_kwargs": {},
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
                 "column_name": "Name",
@@ -931,10 +750,10 @@ def test_get_batch_data_and_metadata_with_sampling_method__hash(
     assert len(validator.head(fetch_all=True)) == 77
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
-def test_get_batch_data_and_metadata_with_splitting_method__whole_table(
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
+def test_get_batch_data_and_metadata_with_partitioning_method__whole_table(
     in_memory_runtime_context,
-    splitter_method_name_prefix,
+    partitioner_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
@@ -966,7 +785,7 @@ def test_get_batch_data_and_metadata_with_splitting_method__whole_table(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
+            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_whole_table",
         },
     )
     my_data_connector = in_memory_runtime_context.datasources[
@@ -982,10 +801,10 @@ def test_get_batch_data_and_metadata_with_splitting_method__whole_table(
     assert len(validator.head(fetch_all=True)) == 1313
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
-def test_get_batch_data_and_metadata_with_splitting_method__column_value(
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
+def test_get_batch_data_and_metadata_with_partitioning_method__column_value(
     in_memory_runtime_context,
-    splitter_method_name_prefix,
+    partitioner_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
@@ -1017,8 +836,8 @@ def test_get_batch_data_and_metadata_with_splitting_method__column_value(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-            "splitter_kwargs": {
+            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_column_value",
+            "partitioner_kwargs": {
                 "column_name": "PClass",
                 "batch_identifiers": {"PClass": "1st"},
             },
@@ -1038,10 +857,10 @@ def test_get_batch_data_and_metadata_with_splitting_method__column_value(
     assert len(validator.head(fetch_all=True)) == 322
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
-def test_get_batch_data_and_metadata_with_splitting_method__divided_integer(
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
+def test_get_batch_data_and_metadata_with_partitioning_method__divided_integer(
     in_memory_runtime_context,
-    splitter_method_name_prefix,
+    partitioner_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
@@ -1073,8 +892,8 @@ def test_get_batch_data_and_metadata_with_splitting_method__divided_integer(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": f"{splitter_method_name_prefix}split_on_divided_integer",
-            "splitter_kwargs": {
+            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_divided_integer",
+            "partitioner_kwargs": {
                 "column_name": "Age",
                 "divisor": 20,
                 "batch_identifiers": {"Age": 1},
@@ -1097,10 +916,10 @@ def test_get_batch_data_and_metadata_with_splitting_method__divided_integer(
     assert len(validator.head(fetch_all=True)) == 420
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
-def test_get_batch_data_and_metadata_with_splitting_method__mod_integer(
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
+def test_get_batch_data_and_metadata_with_partitioning_method__mod_integer(
     in_memory_runtime_context,
-    splitter_method_name_prefix,
+    partitioner_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
@@ -1132,8 +951,8 @@ def test_get_batch_data_and_metadata_with_splitting_method__mod_integer(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": f"{splitter_method_name_prefix}split_on_mod_integer",
-            "splitter_kwargs": {
+            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_mod_integer",
+            "partitioner_kwargs": {
                 "column_name": "Age",
                 "mod": 25,
                 "batch_identifiers": {"Age": 1},
@@ -1154,10 +973,10 @@ def test_get_batch_data_and_metadata_with_splitting_method__mod_integer(
     assert len(validator.head(fetch_all=True)) == 38
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
-def test_get_batch_data_and_metadata_with_splitting_method__multi_column_values(
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
+def test_get_batch_data_and_metadata_with_partitioning_method__multi_column_values(
     in_memory_runtime_context,
-    splitter_method_name_prefix,
+    partitioner_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
@@ -1189,8 +1008,8 @@ def test_get_batch_data_and_metadata_with_splitting_method__multi_column_values(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": f"{splitter_method_name_prefix}split_on_multi_column_values",
-            "splitter_kwargs": {
+            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_multi_column_values",
+            "partitioner_kwargs": {
                 "column_names": ["Age", "PClass"],
                 "batch_identifiers": {"Age": 25, "PClass": "1st"},
             },
@@ -1211,10 +1030,10 @@ def test_get_batch_data_and_metadata_with_splitting_method__multi_column_values(
     assert len(validator.head(fetch_all=True)) == 4
 
 
-@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
-def test_get_batch_data_and_metadata_with_splitting_method__hashed_column(
+@pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
+def test_get_batch_data_and_metadata_with_partitioning_method__hashed_column(
     in_memory_runtime_context,
-    splitter_method_name_prefix,
+    partitioner_method_name_prefix,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
@@ -1246,8 +1065,8 @@ def test_get_batch_data_and_metadata_with_splitting_method__hashed_column(
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "splitter_method": f"{splitter_method_name_prefix}split_on_hashed_column",
-            "splitter_kwargs": {
+            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_hashed_column",
+            "partitioner_kwargs": {
                 "column_name": "Name",
                 "hash_digits": 1,
                 "hash_function_name": "md5",

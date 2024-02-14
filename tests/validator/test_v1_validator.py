@@ -53,13 +53,13 @@ def fds_data_asset(
 
 
 @pytest.fixture
-def fds_data_asset_with_event_type_splitter(
+def fds_data_asset_with_event_type_partitioner(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
     datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
-    return datasource.get_asset("trip_asset_split_by_event_type")
+    return datasource.get_asset("trip_asset_partition_by_event_type")
 
 
 @pytest.fixture
@@ -72,11 +72,11 @@ def batch_config(
 
 
 @pytest.fixture
-def batch_config_with_event_type_splitter(
-    fds_data_asset_with_event_type_splitter: DataAsset,
+def batch_config_with_event_type_partitioner(
+    fds_data_asset_with_event_type_partitioner: DataAsset,
 ) -> BatchConfig:
     batch_config = BatchConfig(name="test_batch_config")
-    batch_config.set_data_asset(fds_data_asset_with_event_type_splitter)
+    batch_config.set_data_asset(fds_data_asset_with_event_type_partitioner)
     return batch_config
 
 
@@ -160,12 +160,12 @@ def test_validate_expectation_failure(
 @pytest.mark.unit
 def test_validate_expectation_with_batch_asset_options(
     fds_data_context: AbstractDataContext,
-    batch_config_with_event_type_splitter: BatchConfig,
+    batch_config_with_event_type_partitioner: BatchConfig,
 ):
     desired_event_type = "start"
     validator = Validator(
         context=fds_data_context,
-        batch_config=batch_config_with_event_type_splitter,
+        batch_config=batch_config_with_event_type_partitioner,
         batch_request_options={"event_type": desired_event_type},
     )
 

@@ -27,14 +27,14 @@ All the code used in the examples is available in GitHub at this location: [how_
 
 Run the following code to create a new Data Context with the `get_context()` method:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py get_context"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py get_context"
 ```
 
 ## Create a Validator from Data 
 
 Run the following code to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py create_validator"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py create_validator"
 ```
 
 ## Retrieve an existing Expectation Suite 
@@ -50,7 +50,7 @@ Replace `expectation_suite_name` with the name of your Expectation Suite.
 
 Run the following code to print the Suite to console or Jupyter Notebook the `show_expectations_by_expectation_type()` method:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py show_suite"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py show_suite"
 ```
 
 The output appears similar to the following example: 
@@ -74,32 +74,32 @@ From the Expectation Suite, you can create an ExpectationConfiguration object us
 
 It runs the `expect_column_values_to_be_between` Expectation on the `passenger_count` column and expects the min and max values to be `1` and `6` respectively. 
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py example_dict_1"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py example_dict_1"
 ```
 
 The following is the same configuration with an `ExpectationConfiguration` object:  
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py import_expectation_configuration"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py import_expectation_configuration"
 ```
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py example_configuration_1"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py example_configuration_1"
 ```
 
 ## Update the Configuration and Expectation Suite
 
 In the following example, the `max_value` of the Expectation is adjusted from `4` to `6` with a new `ExpectationConfiguration`: 
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py updated_configuration"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py updated_configuration"
 ```
 
 To update the Expectation Suite you use the `add_expectation()` function. For example:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py add_configuration"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py add_configuration"
 ```
 The `add_expectation()` function performs an 'upsert' into the `ExpectationSuite` and updates the existing Expectation, or adds a new one if it doesn't.
 
 To check that the Expectation Suite has been updated, you can run the `show_expectations_by_expectation_type()` function again, or run `find_expectation()` and then confirm that the expected Expectation exists in the suite. For example:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py find_configuration"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py find_configuration"
 ```
 
 You'll need to perform the search with a new `ExpectationConfiguration`, but you don't need to include all the `kwarg` values.
@@ -108,7 +108,7 @@ You'll need to perform the search with a new `ExpectationConfiguration`, but you
 
 To remove an `ExpectationConfiguration`, you can use the `remove_configuration()` function. Similar to `find_expectation()`, you call the `remove_configuration()` function with `ExpectationConfiguration`. For example:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py remove_configuration"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py remove_configuration"
 ```
 
 The output of `show_expectations_by_expectation_type()` should appear similar to this example: 
@@ -123,7 +123,7 @@ The output of `show_expectations_by_expectation_type()` should appear similar to
 
 After editing an Expectation Suite, you can use the `save_suite()` function to save it to your Data Context. For example:
 
-```python name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py save_suite"
+```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py save_suite"
 ```
 To make sure your Expectation Suite changes are reflected in the Validator, use `context.get_validator()` to overwrite the `validator`, or create a new one from the updated Data Context.
 

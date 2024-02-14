@@ -266,7 +266,6 @@ def test_instantiation_with_account_url_and_credential(
             "credential": "my_credential",
         },
     )
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -300,8 +299,6 @@ def test_instantiation_with_conn_str_and_credential(
             "credential": "my_credential",
         },
     )
-
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -424,139 +421,6 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
             assets={"alpha": {}},
             azure_options={"conn_str": "not_a_valid_conn_str"},
         )
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.azure.BlobServiceClient"
-)
-def test_instantiation_with_test_yaml_config(
-    mock_azure_conn,
-    mock_list_keys,
-    empty_data_context_stats_enabled,
-    expected_config_dict,
-):
-    context = empty_data_context_stats_enabled
-
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetAzureDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        container: my_container
-        name_starts_with: ""
-        assets:
-            alpha:
-        azure_options:
-            account_url: my_account_url.blob.core.windows.net
-            credential: my_credential
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == expected_config_dict
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.azure.BlobServiceClient"
-)
-def test_instantiation_with_test_yaml_config_emits_proper_payload(
-    mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
-
-    context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetAzureDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        container: my_container
-        name_starts_with: ""
-        assets:
-            alpha:
-        azure_options:
-            account_url: my_account_url.blob.core.windows.net
-            credential: my_credential
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.azure.BlobServiceClient"
-)
-def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
-    mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
-
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetAzureDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: beta-(.*)\\.csv
-            group_names:
-                - index
-        container: my_container
-        name_starts_with: ""
-        assets:
-            alpha:
-        azure_options:
-            account_url: my_account_url.blob.core.windows.net
-            credential: my_credential
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetAzureDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-        },
-        "example_unmatched_data_references": [
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-        "unmatched_data_reference_count": 3,
-    }
 
 
 @mock.patch(
@@ -936,13 +800,6 @@ def test_return_all_batch_definitions_basic_sorted(
         )
     )
 
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetAzureDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -1020,13 +877,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
             },
         )
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetAzureDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
@@ -1135,13 +985,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
             },
         )
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetAzureDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(

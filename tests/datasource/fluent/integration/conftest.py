@@ -129,7 +129,7 @@ def sql_data(
             name="my_asset",
             table_name="yellow_tripdata_sample_2019_01",
         )
-        .add_splitter_year_and_month(column_name="pickup_datetime")
+        .add_partitioner_year_and_month(column_name="pickup_datetime")
         .add_sorters(["year", "month"])
     )
     batch_request = asset.build_batch_request({"year": 2019, "month": 1})
@@ -200,7 +200,7 @@ def multibatch_sql_data(
             name="my_asset",
             table_name="yellow_tripdata_sample_2020",
         )
-        .add_splitter_year_and_month(column_name="pickup_datetime")
+        .add_partitioner_year_and_month(column_name="pickup_datetime")
         .add_sorters(["year", "month"])
     )
     batch_request = asset.build_batch_request({"year": 2020})

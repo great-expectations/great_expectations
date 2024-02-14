@@ -39,12 +39,15 @@ def create_db_and_instantiate_simple_sql_datasource():
                 "partitioners": {
                     "whole_table": {},
                     "by_vendor_id": {
-                        "splitter_method": "split_on_divided_integer",
-                        "splitter_kwargs": {"column_name": "vendor_id", "divisor": 1},
+                        "partitioner_method": "partition_on_divided_integer",
+                        "partitioner_kwargs": {
+                            "column_name": "vendor_id",
+                            "divisor": 1,
+                        },
                     },
                     "by_pickup_date_time": {
-                        "splitter_method": "split_on_converted_datetime",
-                        "splitter_kwargs": {
+                        "partitioner_method": "partition_on_converted_datetime",
+                        "partitioner_kwargs": {
                             "column_name": "pickup_datetime",
                             "date_format_string": "%Y-%m-%d %H",
                         },

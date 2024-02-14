@@ -1019,8 +1019,8 @@ def _get_block_batch_request(  # noqa: PLR0913
     custom_filter_function: Callable | None = None,
     sampling_method: str | None = None,
     sampling_kwargs: dict | None = None,
-    splitter_method: str | None = None,
-    splitter_kwargs: dict | None = None,
+    partitioner_method: str | None = None,
+    partitioner_kwargs: dict | None = None,
     **kwargs,
 ):
     """Returns a block-config batch request based on the provided parameters
@@ -1068,13 +1068,13 @@ def _get_block_batch_request(  # noqa: PLR0913
             if sampling_kwargs is not None:
                 sampling_params["sampling_kwargs"] = sampling_kwargs
             batch_spec_passthrough.update(sampling_params)
-        if splitter_method is not None:
-            splitter_params: dict = {
-                "splitter_method": splitter_method,
+        if partitioner_method is not None:
+            partitioner_params: dict = {
+                "partitioner_method": partitioner_method,
             }
-            if splitter_kwargs is not None:
-                splitter_params["splitter_kwargs"] = splitter_kwargs
-            batch_spec_passthrough.update(splitter_params)
+            if partitioner_kwargs is not None:
+                partitioner_params["partitioner_kwargs"] = partitioner_kwargs
+            batch_spec_passthrough.update(partitioner_params)
 
     batch_request_as_dict: dict = {
         "datasource_name": datasource_name,
@@ -1180,8 +1180,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     batch_spec_passthrough: dict | None = None,
     sampling_method: str | None = None,
     sampling_kwargs: dict | None = None,
-    splitter_method: str | None = None,
-    splitter_kwargs: dict | None = None,
+    partitioner_method: str | None = None,
+    partitioner_kwargs: dict | None = None,
     runtime_parameters: dict | None = None,
     query: str | None = None,
     path: str | None = None,
@@ -1213,8 +1213,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         sampling_method
         sampling_kwargs
 
-        splitter_method
-        splitter_kwargs
+        partitioner_method
+        partitioner_kwargs
 
         batch_spec_passthrough
 
@@ -1240,8 +1240,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         "custom_filter_function": custom_filter_function,
         "sampling_method": sampling_method,
         "sampling_kwargs": sampling_kwargs,
-        "splitter_method": splitter_method,
-        "splitter_kwargs": splitter_kwargs,
+        "partitioner_method": partitioner_method,
+        "partitioner_kwargs": partitioner_kwargs,
         "batch_spec_passthrough": batch_spec_passthrough,
     }
 
@@ -1315,8 +1315,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         custom_filter_function=custom_filter_function,
         sampling_method=sampling_method,
         sampling_kwargs=sampling_kwargs,
-        splitter_method=splitter_method,
-        splitter_kwargs=splitter_kwargs,
+        partitioner_method=partitioner_method,
+        partitioner_kwargs=partitioner_kwargs,
         **kwargs,
     )
 

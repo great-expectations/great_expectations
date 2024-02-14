@@ -11,8 +11,8 @@ import great_expectations as gx
 context = gx.get_context()
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_spark_filesystem_args">
-datasource_name = "version-0.18 my_new_datasource"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_spark_filesystem_args">
+datasource_name = "my_new_datasource"
 path_to_folder_containing_csv_files = "<INSERT_PATH_TO_FILES_HERE>"
 # </snippet>
 
@@ -28,7 +28,7 @@ path_to_folder_containing_csv_files = str(
 )
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py create_datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py create_datasource">
 datasource = context.sources.add_spark_filesystem(
     name=datasource_name, base_directory=path_to_folder_containing_csv_files
 )
@@ -37,13 +37,13 @@ datasource = context.sources.add_spark_filesystem(
 assert datasource_name in context.datasources
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_csv_asset_args">
-asset_name = "version-0.18 my_taxi_data_asset"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_csv_asset_args">
+asset_name = "my_taxi_data_asset"
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py add_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py add_asset">
 datasource.add_csv_asset(
     name=asset_name, batching_regex=batching_regex, header=True, infer_schema=True
 )
