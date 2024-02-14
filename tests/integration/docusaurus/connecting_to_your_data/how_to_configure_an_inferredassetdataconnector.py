@@ -35,7 +35,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 datasource_config = {
@@ -65,7 +67,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "../data/single_directory_one_data_asset/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 assert test_yaml == test_python
@@ -107,7 +109,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config each file own data asset">
@@ -139,7 +143,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "../data/single_directory_one_data_asset/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 assert test_yaml == test_python
@@ -186,7 +190,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_tripdata_samples/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config add an InferredAssetDataConnector to a Datasource configuration">
@@ -222,7 +228,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "data/taxi_yellow_tripdata_samples/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 assert test_yaml == test_python
@@ -264,7 +270,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config basic configuration with more than one Data Asset">
@@ -296,7 +304,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "../data/single_directory_one_data_asset/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 assert test_yaml == test_python
@@ -376,7 +384,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/nested_directories_time/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the inside">
@@ -409,7 +419,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "../data/nested_directories_time/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -459,7 +469,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/nested_directories_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the outside">
@@ -497,7 +509,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "../data/nested_directories_data_asset/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -546,7 +558,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/nested_directories_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py python datasource_config redundant information in the naming convention">
@@ -583,7 +597,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "../data/nested_directories_data_asset/"
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.

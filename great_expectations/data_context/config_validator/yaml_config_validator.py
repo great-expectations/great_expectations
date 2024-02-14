@@ -12,7 +12,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -117,9 +117,6 @@ class _YamlConfigValidator:
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Literal[
-            "instantiated_class", "report_object"
-        ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
         """Convenience method for testing yaml configs
@@ -145,8 +142,6 @@ class _YamlConfigValidator:
             class_name: Optional, overridden if provided in the config
             runtime_environment: Optional override for config items
             pretty_print: Determines whether to print human-readable output
-            return_mode: Determines what type of object test_yaml_config will return.
-                Valid modes are "instantiated_class" and "report_object"
             shorten_tracebacks:If true, catch any errors during instantiation and print only the
                 last element of the traceback stack. This can be helpful for
                 rapid iteration on configs in a notebook, because it can remove
@@ -158,9 +153,6 @@ class _YamlConfigValidator:
             a json object containing metadata from the component's self_check method.
             The returned object is determined by return_mode.
         """
-        if return_mode not in ["instantiated_class", "report_object"]:
-            raise ValueError(f"Unknown return_mode: {return_mode}.")
-
         if runtime_environment is None:
             runtime_environment = {}
 
