@@ -515,7 +515,6 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
         # We need to allow null values in some column types that do not support them natively, so we skip
@@ -1190,11 +1189,12 @@ def build_spark_validator_with_data(
         )
 
     batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type] # got DataFrame
-    execution_engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark,
-        df=df,
-        batch_id=batch.id,
-    )
+    with spark:
+        execution_engine: SparkDFExecutionEngine = build_spark_engine(
+            spark=spark,
+            df=df,
+            batch_id=batch.id,
+        )
 
     if context is None:
         context = build_in_memory_runtime_context(include_pandas=False)
