@@ -8,7 +8,6 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 ## Prerequisites
 
-This guide assumes you have:
 
 - Installed Python.
 - Installed the GX Core library.
