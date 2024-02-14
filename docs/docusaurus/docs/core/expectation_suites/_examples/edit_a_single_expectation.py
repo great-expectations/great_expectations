@@ -19,12 +19,12 @@ import great_expectations.expectations as gxe
 # Disregard this code if you are retrieving an existing Expectation Suite..
 from great_expectations.core.expectation_suite import ExpectationSuite
 
-new_suite_name = "my_empty_expectation_suite"
-new_suite = ExpectationSuite(name=new_suite_name)
-
 # <snippet name="core/expectation_suites/_examples/edit_a_single_expectation.py get data context">
 context = gx.get_context()
 # </snippet>
+
+new_suite_name = "my_empty_expectation_suite"
+new_suite = ExpectationSuite(name=new_suite_name)
 
 # This section adds the Expectation Suite created earlier to the Data Context.
 # Disregard this line if the Expectation Suite you are retrieving has already
