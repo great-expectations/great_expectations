@@ -1,6 +1,7 @@
 import glob
 import json
 import os
+import subprocess
 from typing import cast
 
 import pandas as pd
@@ -57,7 +58,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         )
         for backend in backends:
             for filename in test_configuration_files:
-                with open(filename) as file:
+                with subprocess.Popen(filename) as file:
                     pk_column: bool = False
                     test_configuration = json.load(file)
                     expectation_type = filename.split(".json")[0].split("/")[-1]
