@@ -1020,10 +1020,8 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1172,10 +1170,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1654,10 +1650,8 @@ def deterministic_asset_data_connector_context(
                     users: {{}}
         """
 
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context

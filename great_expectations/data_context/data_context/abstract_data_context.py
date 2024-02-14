@@ -19,7 +19,6 @@ from typing import (
     Callable,
     Dict,
     List,
-    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -3985,9 +3984,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Literal[
-            "instantiated_class", "report_object"
-        ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
         """Convenience method for testing yaml configs.
@@ -4011,8 +4007,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             class_name: Optional, overridden if provided in the config
             runtime_environment: Optional override for config items
             pretty_print: Determines whether to print human-readable output
-            return_mode: Determines what type of object test_yaml_config will return.
-                Valid modes are "instantiated_class" and "report_object"
             shorten_tracebacks: If true, catch any errors during instantiation and print only the
                 last element of the traceback stack. This can be helpful for
                 rapid iteration on configs in a notebook, because it can remove
@@ -4034,7 +4028,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             class_name=class_name,
             runtime_environment=runtime_environment,
             pretty_print=pretty_print,
-            return_mode=return_mode,
             shorten_tracebacks=shorten_tracebacks,
         )
 

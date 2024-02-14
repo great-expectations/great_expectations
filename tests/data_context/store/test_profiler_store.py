@@ -1,9 +1,7 @@
 from pathlib import Path
-from unittest import mock
 
 import pytest
 
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -77,31 +75,6 @@ def test_profiler_store_integration(
     profiler_store.remove_key(key=key)
     assert len(profiler_store.list_keys()) == 0
 
-    data: dict = profiler_store.self_check()
-    self_check_report: dict = convert_to_json_serializable(data=data)
-
-    # Drop dynamic value to ensure appropriate assert
-    self_check_report["config"]["store_backend"].pop("base_directory")
-
-    assert self_check_report == {
-        "config": {
-            "class_name": "ProfilerStore",
-            "module_name": "great_expectations.data_context.store.profiler_store",
-            "overwrite_existing": True,
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "filepath_suffix": ".yml",
-                "fixed_length_key": False,
-                "module_name": "great_expectations.data_context.store.tuple_store_backend",
-                "platform_specific_separator": True,
-                "suppress_store_backend_id": False,
-            },
-            "store_name": "profiler_store",
-        },
-        "keys": [],
-        "len_keys": 0,
-    }
-
 
 @pytest.mark.cloud
 def test_gx_cloud_response_json_to_object_dict(
@@ -125,26 +98,3 @@ def test_gx_cloud_response_json_to_object_dict(
     actual = ProfilerStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
-
-
-@pytest.mark.unit
-def test_serialization_self_check(capsys) -> None:
-    store = ProfilerStore(store_name="profiler_store")
-
-    with mock.patch("random.choice", lambda _: "0"):
-        store.serialization_self_check(pretty_print=True)
-
-    stdout = capsys.readouterr().out
-
-    test_key = "ConfigurationIdentifier::profiler_00000000000000000000"
-    messages = [
-        f"Attempting to add a new test key {test_key} to Profiler store...",
-        f"Test key {test_key} successfully added to Profiler store.",
-        f"Attempting to retrieve the test value associated with key {test_key} from Profiler store...",
-        "Test value successfully retrieved from Profiler store",
-        f"Cleaning up test key {test_key} and value from Profiler store...",
-        "Test key and value successfully removed from Profiler store",
-    ]
-
-    for message in messages:
-        assert message in stdout
