@@ -144,7 +144,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python name="core/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py create an Expectation"
   ```
 
-  The specific parameters provided when initializing an Expectation depend on the Expectation class.  You can view available Expectations and the parameters they take in the [Expectation Gallery](https://greatexpectations.io/expectations).
+  The specific parameters you provide when initializing an Expectation are determined by the Expectation class.  You can view available Expectations and the parameters they take in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
 
 5. Add the Expectation to the Expectation Suite.
