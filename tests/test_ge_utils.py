@@ -78,15 +78,11 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
     with pytest.raises(
         ValueError, match=r"The validate util method only supports dataset validations"
     ):
-        with pytest.warns(
-            Warning,
-            match="No great_expectations version found in configuration object.",
-        ):
-            gx.validate(
-                file_data_asset,
-                empty_expectation_suite,
-                data_asset_class=gx.data_asset.FileDataAsset,
-            )
+        gx.validate(
+            file_data_asset,
+            empty_expectation_suite,
+            data_asset_class=gx.data_asset.FileDataAsset,
+        )
 
 
 @pytest.mark.unit

@@ -15,12 +15,14 @@ import pytest
 import requests
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -40,9 +42,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 yaml = YAMLHandler()
 
@@ -164,6 +163,7 @@ def basic_data_context_config():
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {},
             "stores": {
@@ -172,6 +172,13 @@ def basic_data_context_config():
                     "store_backend": {
                         "class_name": "TupleFilesystemStoreBackend",
                         "base_directory": "expectations/",
+                    },
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
                     },
                 },
                 "evaluation_parameter_store": {
@@ -225,6 +232,7 @@ def data_context_config_with_datasources(conn_string_password):
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {
                 "Datasource 1: Redshift": {
@@ -324,6 +332,13 @@ def data_context_config_with_datasources(conn_string_password):
                     "store_backend": {
                         "class_name": "TupleFilesystemStoreBackend",
                         "base_directory": "expectations/",
+                    },
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
                     },
                 },
                 "evaluation_parameter_store": {
@@ -636,8 +651,6 @@ def mock_http_unavailable(mock_response_factory: Callable):
 def checkpoint_config() -> dict:
     checkpoint_config = {
         "name": "oss_test_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
         "expectation_suite_name": "oss_test_expectation_suite",
         "validations": [
             {
@@ -757,10 +770,10 @@ def mocked_datasource_post_response(
 
 @pytest.fixture
 def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode: DataContext,
+    empty_data_context_in_cloud_mode,
     mocked_datasource_get_response,
 ):
-    context: DataContext = empty_data_context_in_cloud_mode
+    context = empty_data_context_in_cloud_mode
     with patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), patch(
