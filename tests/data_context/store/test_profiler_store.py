@@ -1,5 +1,4 @@
 from pathlib import Path
-from unittest import mock
 
 import pytest
 
@@ -99,26 +98,3 @@ def test_gx_cloud_response_json_to_object_dict(
     actual = ProfilerStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
-
-
-@pytest.mark.unit
-def test_serialization_self_check(capsys) -> None:
-    store = ProfilerStore(store_name="profiler_store")
-
-    with mock.patch("random.choice", lambda _: "0"):
-        store.serialization_self_check(pretty_print=True)
-
-    stdout = capsys.readouterr().out
-
-    test_key = "ConfigurationIdentifier::profiler_00000000000000000000"
-    messages = [
-        f"Attempting to add a new test key {test_key} to Profiler store...",
-        f"Test key {test_key} successfully added to Profiler store.",
-        f"Attempting to retrieve the test value associated with key {test_key} from Profiler store...",
-        "Test value successfully retrieved from Profiler store",
-        f"Cleaning up test key {test_key} and value from Profiler store...",
-        "Test key and value successfully removed from Profiler store",
-    ]
-
-    for message in messages:
-        assert message in stdout

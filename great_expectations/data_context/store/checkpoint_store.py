@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import random
-import uuid
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
@@ -12,7 +10,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -66,46 +63,6 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_config_dict.pop("id", None)
 
         return checkpoint_config_dict
-
-    @override
-    def serialization_self_check(self, pretty_print: bool) -> None:
-        test_checkpoint_name: str = "test-name-" + "".join(
-            [random.choice(list("0123456789ABCDEF")) for i in range(20)]
-        )
-        test_checkpoint_configuration = CheckpointConfig(
-            **{"name": test_checkpoint_name}  # type: ignore[arg-type]
-        )
-        if self.cloud_mode:
-            test_key: GXCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
-                resource_type=GXCloudRESTResource.CHECKPOINT,
-                ge_cloud_id=str(uuid.uuid4()),
-            )
-        else:
-            test_key = self.key_class(configuration_key=test_checkpoint_name)  # type: ignore[call-arg,assignment]
-
-        if pretty_print:
-            print(f"Attempting to add a new test key {test_key} to Checkpoint store...")
-        self.set(key=test_key, value=test_checkpoint_configuration)
-        if pretty_print:
-            print(f"\tTest key {test_key} successfully added to Checkpoint store.\n")
-
-        if pretty_print:
-            print(
-                f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store..."
-            )
-
-        self.get(key=test_key)
-        if pretty_print:
-            print("\tTest value successfully retrieved from Checkpoint store.")
-            print()
-
-        if pretty_print:
-            print(f"Cleaning up test key {test_key} and value from Checkpoint store...")
-
-        self.remove_key(key=test_key)
-        if pretty_print:
-            print("\tTest key and value successfully removed from Checkpoint store.")
-            print()
 
     @staticmethod
     def default_checkpoints_exist(directory_path: str) -> bool:

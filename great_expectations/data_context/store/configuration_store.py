@@ -126,9 +126,6 @@ class ConfigurationStore(Store):
     def config(self) -> dict:
         return self._config
 
-    def serialization_self_check(self, pretty_print: bool) -> None:
-        raise NotImplementedError
-
     def _determine_key(
         self, name: Optional[str] = None, id: Optional[str] = None
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:

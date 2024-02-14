@@ -317,29 +317,6 @@ def test_gx_cloud_response_json_to_object_dict(
         assert actual == expected
 
 
-@pytest.mark.unit
-def test_serialization_self_check(capsys) -> None:
-    store = CheckpointStore(store_name="checkpoint_store")
-
-    with mock.patch("random.choice", lambda _: "0"):
-        store.serialization_self_check(pretty_print=True)
-
-    stdout = capsys.readouterr().out
-
-    test_key = "ConfigurationIdentifier::test-name-00000000000000000000"
-    messages = [
-        f"Attempting to add a new test key {test_key} to Checkpoint store...",
-        f"Test key {test_key} successfully added to Checkpoint store.",
-        f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store...",
-        "Test value successfully retrieved from Checkpoint store",
-        f"Cleaning up test key {test_key} and value from Checkpoint store...",
-        "Test key and value successfully removed from Checkpoint store",
-    ]
-
-    for message in messages:
-        assert message in stdout
-
-
 @pytest.mark.parametrize(
     "path,exists",
     [

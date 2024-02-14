@@ -70,10 +70,6 @@ class SampleConfigSchema(Schema):
 class SampleConfigurationStore(ConfigurationStore):
     _configuration_class = SampleConfig
 
-    def serialization_self_check(self, pretty_print: bool) -> None:
-        # Required to fulfill contract set by parent
-        pass
-
     def list_keys(self) -> List[DataContextKey]:
         # Mock values to work with self.self_check
         return [
