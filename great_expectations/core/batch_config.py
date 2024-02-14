@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, Optional
 from great_expectations.compatibility import pydantic
 
 if TYPE_CHECKING:
+    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest,
         BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.interfaces import DataAsset
-    from great_expectations.datasource.fluent.partitioners import Partitioner
 
 
 class BatchConfig(pydantic.BaseModel):
