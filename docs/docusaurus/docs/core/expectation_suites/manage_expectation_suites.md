@@ -1,10 +1,10 @@
 ---
 sidebar_label: 'Manage Expectation Suites'
 title: 'Manage Expectation Suites'
-description: Create and manage sets of Expectations in Python with GX Core.
+description: Create and manage GX Core Expectation Suites with Python.
 ---
 
-An Expectation Suite contains a group of Expectations that describe the same set of data.  All of the Expectations that you apply to your data will grouped into Expectation Suites.
+An Expectation Suite contains a group of Expectations that describe the same set of data.  All the Expectations that you apply to your data are grouped into an Expectation Suite.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ This guide assumes you have:
 
 ## Create an Expectation Suite
 
-1. Import the GX Core library and the `ExpectationSuite` class.
+1. Import the GX Core library and the `ExpectationSuite` class:
   ```python name="core/expectation_suites/_examples/create_an_expectation_suite.py imports"
   ```
 
