@@ -1,6 +1,6 @@
 from typing import List
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py imports for spark data context">
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py imports for spark data context">
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -25,7 +25,7 @@ data_context_config = DataContextConfig(
 context = get_context(project_config=data_context_config)
 
 datasource_yaml = r"""
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py datasource config">
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py datasource config">
 name: my_s3_datasource
 class_name: Datasource
 execution_engine:
@@ -55,20 +55,20 @@ datasource_yaml = datasource_yaml.replace(
     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py test datasource config">
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py test datasource config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py add datasource config">
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py add datasource config">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 1">
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 1">
 batch_request = RuntimeBatchRequest(
-    datasource_name="version-0.18 my_s3_datasource",
-    data_connector_name="version-0.18 default_runtime_data_connector_name",
-    data_asset_name="version-0.18 <YOUR_MEANGINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
+    datasource_name="my_s3_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your S3 path here.
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
@@ -80,12 +80,10 @@ batch_request.runtime_parameters[
     "path"
 ] = "s3a://superconductive-docs-test/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 1">
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_suite"
-)
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 1">
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="version-0.18 test_suite"
+    batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 # </snippet>
@@ -94,11 +92,11 @@ print(validator.head())
 assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a data_asset
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 2">
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 2">
 batch_request = BatchRequest(
-    datasource_name="version-0.18 my_s3_datasource",
-    data_connector_name="version-0.18 default_inferred_data_connector_name",
-    data_asset_name="version-0.18 <YOUR_DATA_ASSET_NAME>",
+    datasource_name="my_s3_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="<YOUR_DATA_ASSET_NAME>",
     batch_spec_passthrough={"reader_method": "csv", "reader_options": {"header": True}},
 )
 # </snippet>
@@ -109,12 +107,10 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 2">
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_suite"
-)
+# <snippet name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 2">
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="version-0.18 test_suite"
+    batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 # </snippet>

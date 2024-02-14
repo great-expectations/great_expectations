@@ -25,17 +25,17 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most BatchExpectations, the main business logic for calculation will live in this class.
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py BatchMeetsSomeCriteria class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py BatchMeetsSomeCriteria class_def">
 class BatchMeetsSomeCriteria(TableMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your Metric.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py metric_name">
-    metric_name = "version-0.18 METRIC NAME GOES HERE"
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py metric_name">
+    metric_name = "METRIC NAME GOES HERE"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py pandas">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py pandas">
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
@@ -88,21 +88,21 @@ class BatchMeetsSomeCriteria(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py ExpectBatchToMeetSomeCriteria class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py ExpectBatchToMeetSomeCriteria class_def">
 class ExpectBatchToMeetSomeCriteria(BatchExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py docstring">
     """TODO: add a docstring here"""
     # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py examples">
     examples = []
     # </snippet>
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py metric_dependencies">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py metric_dependencies">
     metric_dependencies = ("METRIC NAME GOES HERE",)
     # </snippet>
 
@@ -138,7 +138,7 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py validate">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py validate">
     def _validate(
         self,
         metrics: Dict,
@@ -149,7 +149,7 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
         raise NotImplementedError
 
     # This object contains metadata for display in the public Gallery
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -162,6 +162,6 @@ class ExpectBatchToMeetSomeCriteria(BatchExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py diagnostics">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py diagnostics">
     ExpectBatchToMeetSomeCriteria().print_diagnostic_checklist()
 #     </snippet>

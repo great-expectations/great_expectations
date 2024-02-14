@@ -132,9 +132,7 @@ buggy_datasource_yaml = buggy_datasource_yaml.replace(
     "<PATH_TO_BAD_DATA_DIRECTORY_HERE>", data_dir_path
 )
 
-report = context.test_yaml_config(
-    buggy_datasource_yaml, return_mode="report_object", shorten_tracebacks=True
-)
+report = context.test_yaml_config(buggy_datasource_yaml, shorten_tracebacks=True)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))

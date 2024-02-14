@@ -1428,27 +1428,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             configuration_key=name,
         )
 
-    def self_check(self, pretty_print: bool = True) -> dict:
-        """
-        Necessary to enable integration with `AbstractDataContext.test_yaml_config`
-        Args:
-            pretty_print: flag to turn on verbose output
-        Returns:
-            Dictionary that contains RuleBasedProfiler state
-        """
-        report_object: dict = {"config": self.config.to_json_dict()}
-
-        if pretty_print:
-            print(f"\nRuleBasedProfiler class name: {self.name}")
-
-            if not self.variables:
-                print(
-                    'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
-                    Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
-                )
-
-        return report_object
-
     @property
     def config(self) -> RuleBasedProfilerConfig:
         return self._profiler_config

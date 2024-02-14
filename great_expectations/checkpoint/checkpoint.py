@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import datetime
 import logging
 from typing import (
@@ -10,9 +9,7 @@ from typing import (
     Literal,
     Optional,
     Sequence,
-    Type,
     Union,
-    cast,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -31,7 +28,6 @@ from great_expectations.checkpoint.util import (
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
     substitute_runtime_config,
-    substitute_template_config,
     validate_validation_dict,
 )
 from great_expectations.compatibility.typing_extensions import override
@@ -78,13 +74,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _get_validator_class() -> Type[Validator]:
-    """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.validator.validator"
-    class_name = "Validator"
-    return load_class(class_name=class_name, module_name=module_name)
-
-
 def _does_validation_contain_batch_request(
     validations: list[CheckpointValidationConfig],
 ) -> bool:
@@ -129,8 +118,6 @@ class BaseCheckpoint(ConfigPeer):
     )
     def run(  # noqa: C901, PLR0913, PLR0915
         self,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         validator: Validator | None = None,
@@ -138,7 +125,6 @@ class BaseCheckpoint(ConfigPeer):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] | None = None,
         run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
@@ -150,9 +136,6 @@ class BaseCheckpoint(ConfigPeer):
         Arguments allow for override of the current Checkpoint configuration.
 
         Args:
-            template_name: The name of another checkpoint to use as a base template.
-            run_name_template: A template to create run names, using environment
-                variables and datetime-template syntax (e.g. "%Y-%M-staging-$MY_ENV_VAR").
             expectation_suite_name: Expectation suite associated with checkpoint.
             batch_request: Batch request describing the batch of data to validate.
             validator: Validator objects, loaded with Batch data samples, can be supplied (in lieu of  "batch_request")
@@ -161,7 +144,6 @@ class BaseCheckpoint(ConfigPeer):
             runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
                 (e.g. `result_format`).
             validations: Validations to be executed as part of checkpoint.
-            profilers: Profilers to use in generating this checkpoint.
             run_id: The run_id for the validation; if None, a default value will be used.
             run_name: The run_name for the validation; if None, a default value will be used.
             run_time: The date/time of the run.
@@ -234,15 +216,12 @@ class BaseCheckpoint(ConfigPeer):
         )
 
         runtime_kwargs: dict = {
-            "template_name": template_name,
-            "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request or {},
             "action_list": action_list or [],
             "evaluation_parameters": evaluation_parameters or {},
             "runtime_configuration": runtime_configuration or {},
             "validations": validations or [],
-            "profilers": profilers or [],
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
@@ -250,15 +229,10 @@ class BaseCheckpoint(ConfigPeer):
             runtime_kwargs=runtime_kwargs
         )
 
-        run_name_template = substituted_runtime_config.get("run_name_template")
-
         batch_request = substituted_runtime_config.get("batch_request")
         validations = convert_validations_list_to_checkpoint_validation_configs(
             substituted_runtime_config.get("validations") or []
         )
-
-        if run_name is None and run_name_template is not None:
-            run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
@@ -353,51 +327,11 @@ class BaseCheckpoint(ConfigPeer):
 
         config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)  # type: ignore[assignment] # always returns a dict
 
-        template_name: str | None = runtime_kwargs.get("template_name")
-        if template_name:
-            config_kwargs["template_name"] = template_name
-
-        substituted_runtime_config: dict = self._get_substituted_template(
-            source_config=config_kwargs
-        )
         substituted_runtime_config = self._get_substituted_runtime_kwargs(
-            source_config=substituted_runtime_config, runtime_kwargs=runtime_kwargs
+            source_config=config_kwargs, runtime_kwargs=runtime_kwargs
         )
 
         return substituted_runtime_config
-
-    def _get_substituted_template(
-        self,
-        source_config: dict,
-    ) -> dict:
-        substituted_config: dict
-
-        template_name = source_config.get("template_name")
-        if template_name:
-            checkpoint: Checkpoint = self.data_context.get_checkpoint(
-                name=template_name
-            )
-            template_config: dict = checkpoint.config.to_json_dict()
-
-            if template_config["config_version"] != source_config["config_version"]:
-                raise gx_exceptions.CheckpointError(
-                    f"Invalid template '{template_name}' (ver. {template_config['config_version']}) for Checkpoint "
-                    f"'{source_config}' (ver. {source_config['config_version']}. Checkpoints can only use templates with the same config_version."
-                )
-
-            substituted_template_config: dict = self._get_substituted_template(
-                source_config=template_config
-            )
-            substituted_config = substitute_template_config(
-                source_config=source_config, template_config=substituted_template_config
-            )
-        else:
-            substituted_config = copy.deepcopy(source_config)
-
-        if self._using_cloud_context:
-            return substituted_config
-
-        return self._substitute_config_variables(config=substituted_config)
 
     def _get_substituted_runtime_kwargs(
         self,
@@ -534,82 +468,6 @@ class BaseCheckpoint(ConfigPeer):
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
             ) from e
 
-    def self_check(self, pretty_print: bool = True) -> dict:
-        """Method that is intended to provide visibility into parameters that Checkpoint was instantiated with.
-
-        If used as part of the test_yaml_config() workflow, the user will be able to know if the Checkpoint is
-        configured with all necessary parameters.
-
-        When run with self_check()::
-
-            yaml_config: str = # [a checkpoint yaml configuration]
-            config: CommentedMap = yaml.load(yaml_config)
-            checkpoint_config: CheckpointConfig = CheckpointConfig(**config)
-            checkpoint: Checkpoint = Checkpoint(
-                data_context=context,
-                checkpoint_config.to_json_dict()
-            )
-            checkpoint.self_check()
-
-        When run with test_yaml_config::
-
-            checkpoint: Checkpoint = context.test_yaml_config(
-                yaml_config=yaml_config,
-                name="my_checkpoint"
-                )
-
-        Args:
-            pretty_print (bool): If True, then additional messages if Checkpoint configuration is missing
-                a "validations" or "action_list" attribute.
-
-        Returns:
-            Dictionary containing Checkpoint configuration converted into json dictionary.
-
-        """
-        report_object: dict = {"config": self.config.to_json_dict()}
-
-        if pretty_print:
-            print(f"\nCheckpoint class name: {self.__class__.__name__}")
-
-        validations_present: bool = bool(
-            self.validations
-            and isinstance(self.validations, list)
-            and len(self.validations) > 0
-        )
-        action_list: Sequence[ActionDict] | None = self.action_list
-        action_list_present: bool = (
-            action_list is not None
-            and isinstance(action_list, list)
-            and len(action_list) > 0
-        ) or (
-            validations_present
-            and all(
-                (
-                    validation.get("action_list")
-                    and isinstance(validation["action_list"], list)
-                    and len(validation["action_list"]) > 0
-                )
-                for validation in self.validations
-            )
-        )
-        if pretty_print:
-            if not validations_present:
-                print(
-                    """Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
-means you must either update your Checkpoint configuration or provide an appropriate validations
-list programmatically (i.e., when your Checkpoint is run).
-                    """
-                )
-            if not action_list_present:
-                print(
-                    """Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
-means you must provide an appropriate validations list programmatically (i.e., when your Checkpoint
-is run), with each validation having its own defined "action_list" attribute.
-                    """
-                )
-
-        return report_object
-
     @property
     @override
     def config(self) -> CheckpointConfig:
@@ -618,13 +476,6 @@ is run), with each validation having its own defined "action_list" attribute.
     @property
     def name(self) -> str | None:
         return self.config.name
-
-    @property
-    def config_version(self) -> float | None:
-        try:
-            return self.config.config_version
-        except AttributeError:
-            return None
 
     @property
     def action_list(self) -> Sequence[ActionDict]:
@@ -690,12 +541,8 @@ class Checkpoint(BaseCheckpoint):
     being performed if they are configured to do so.
 
     Args:
-        name: User-selected cCheckpoint name (e.g. "staging_tables").
+        name: User-selected checkpoint name (e.g. "staging_tables").
         data_context: Data context that is associated with the current checkpoint.
-        config_version: Version number of the checkpoint configuration.
-        template_name: The name of another checkpoint to use as a base template.
-        run_name_template: A template to create run names, using environment
-            variables and datetime-template syntax (e.g. "%Y-%M-staging-$MY_ENV_VAR").
         expectation_suite_name: Expectation suite associated with checkpoint.
         batch_request: Batch request describing the batch of data to validate.
         action_list: A list of actions to perform after each batch is validated.
@@ -703,7 +550,6 @@ class Checkpoint(BaseCheckpoint):
         runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
             (e.g. `result_format`).
         validations: Validations to be executed as part of checkpoint.
-        profilers: Profilers to use in generating this checkpoint.
         validation_operator_name: List of validation Operators configured by the Checkpoint.
         batches: List of Batches for validation by Checkpoint.
         ge_cloud_id: Great Expectations Cloud id for this Checkpoint.
@@ -739,9 +585,6 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: int | float = 1.0,  # noqa: PYI041
-        template_name: str | None = None,
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         validator: Validator | None = None,
@@ -749,7 +592,6 @@ class Checkpoint(BaseCheckpoint):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -797,10 +639,6 @@ constructor arguments.
 
         checkpoint_config = CheckpointConfig(
             name=name,
-            config_version=config_version,
-            class_name=self.__class__.__name__,
-            template_name=template_name,
-            run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,  # type: ignore[arg-type] # FluentBatchRequest is not a dict
             # TODO: check if `pydantic.BaseModel` and call `batch_request.dict()`??
@@ -808,7 +646,6 @@ constructor arguments.
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             default_validation_id=default_validation_id,
@@ -820,94 +657,14 @@ constructor arguments.
 
         self._validator = validator
 
-    def run_with_runtime_args(  # noqa: PLR0913
-        self,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
-        validator: Validator | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,  # noqa: PYI041
-        run_name: str | None = None,
-        run_time: datetime.datetime | None = None,
-        result_format: str | dict | None = None,  # TODO: type-dict?
-        expectation_suite_ge_cloud_id: str | None = None,
-        **kwargs,
-    ) -> CheckpointResult:
-        checkpoint_config_from_store: CheckpointConfig = cast(
-            CheckpointConfig, self.get_config()
-        )
-
-        if (
-            "runtime_configuration" in checkpoint_config_from_store
-            and checkpoint_config_from_store.runtime_configuration
-            and "result_format" in checkpoint_config_from_store.runtime_configuration
-        ):
-            result_format = (
-                result_format
-                or checkpoint_config_from_store.runtime_configuration.get(
-                    "result_format"
-                )
-            )
-
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
-
-        batch_request = get_batch_request_as_dict(batch_request=batch_request)
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
-
-        checkpoint_config_from_call_args: dict = {
-            "template_name": template_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "validator": validator,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "profilers": profilers,
-            "run_id": run_id,
-            "run_name": run_name,
-            "run_time": run_time,
-            "result_format": result_format,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-        }
-
-        checkpoint_config: dict = {
-            key: value
-            for key, value in checkpoint_config_from_store.items()
-            if key in checkpoint_config_from_call_args
-        }
-        checkpoint_config.update(checkpoint_config_from_call_args)
-
-        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
-        filter_properties_dict(
-            properties=checkpoint_run_arguments,
-            clean_falsy=True,
-            inplace=True,
-        )
-
-        return self.run(**checkpoint_run_arguments)
-
     @classmethod
     def construct_from_config_args(  # noqa: PLR0913
         cls,
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
-        config_version: Optional[Union[int, float]] = 1.0,
-        template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: Literal["Checkpoint"] = "Checkpoint",
-        run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
         action_list: Optional[Sequence[ActionDict]] = None,
@@ -916,7 +673,6 @@ constructor arguments.
         validations: Optional[
             Union[list[dict], list[CheckpointValidationConfig]]
         ] = None,
-        profilers: Optional[list[dict]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -949,18 +705,14 @@ constructor arguments.
 
         checkpoint_config = {
             "name": name,
-            "config_version": config_version,
-            "template_name": template_name,
             "module_name": module_name,
             "class_name": class_name,
-            "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "profilers": profilers,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "default_validation_id": default_validation_id,
@@ -1031,14 +783,4 @@ constructor arguments.
             clean_falsy=True,
         )
 
-        checkpoint: Checkpoint = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": data_context,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint",
-            },
-        )
-
-        return checkpoint
+        return Checkpoint(**config, data_context=data_context)

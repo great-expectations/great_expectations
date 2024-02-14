@@ -252,8 +252,6 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     assert context.root_directory == context_path
 
     datasource_config: str = f"""
-        class_name: Datasource
-
         execution_engine:
             class_name: SparkDFExecutionEngine
 
@@ -304,9 +302,9 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
                     - airflow_run_id
     """
 
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
+    yaml = YAMLHandler()
+    config = yaml.load(datasource_config)
+    context.add_datasource(**config)
 
     # noinspection PyProtectedMember
     context._save_project_config()

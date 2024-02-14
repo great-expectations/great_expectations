@@ -107,8 +107,6 @@ checkpoint_config = {
             },
         }
     ],
-    "config_version": 1,
-    "class_name": "Checkpoint",
 }
 
 checkpoint: Checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
