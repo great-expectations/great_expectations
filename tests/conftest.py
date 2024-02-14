@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Final, Generator, Iterator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -538,16 +538,16 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> Iterator[pyspark.SparkSession]:
+def spark_session(test_backends) -> pyspark.SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:
-        yield SparkDFExecutionEngine.get_or_create_spark_session()
-    else:
-        raise ValueError("spark tests are requested, but pyspark is not installed")
+        return SparkDFExecutionEngine.get_or_create_spark_session()
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
