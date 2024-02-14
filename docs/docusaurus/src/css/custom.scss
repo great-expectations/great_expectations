@@ -92,7 +92,8 @@
       --gray-700: #65686f;
       --gray-800: #414246;
       --gray-900: #1a1c1f;
-    
+
+      --link-hover-color: #A03E0A;
 }
 
 p > a {
@@ -212,6 +213,15 @@ a.pagination-nav__link:hover {
 
 .navbar__item.navbar__link svg {
     display: none;
+}
+
+table a {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--link-hover-color);
+  }
 }
 
 table.borderless {
