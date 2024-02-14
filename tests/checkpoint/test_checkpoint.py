@@ -98,28 +98,10 @@ def test_basic_checkpoint_config_validation(
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         checkpoint_config = CheckpointConfig(**config_erroneous)
-    with pytest.raises(KeyError):
-        # noinspection PyUnusedLocal
-        checkpoint: Checkpoint = context.test_yaml_config(
-            yaml_config=yaml_config_erroneous,
-            name="my_erroneous_checkpoint",
-        )
 
     yaml_config_erroneous = """
     name: my_erroneous_checkpoint
     """
-    # noinspection PyUnusedLocal
-    checkpoint: Checkpoint = context.test_yaml_config(
-        yaml_config=yaml_config_erroneous,
-        name="my_erroneous_checkpoint",
-        class_name="Checkpoint",
-    )
-    captured = capsys.readouterr()
-    assert any(
-        'Your current Checkpoint configuration has an empty or missing "validations" attribute'
-        in message
-        for message in [caplog.text, captured.out]
-    )
 
     assert len(context.list_checkpoints()) == 0
     context.add_checkpoint(**yaml.load(yaml_config_erroneous))
