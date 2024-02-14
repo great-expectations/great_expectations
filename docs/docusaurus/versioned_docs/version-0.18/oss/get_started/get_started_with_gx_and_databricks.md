@@ -215,7 +215,7 @@ Because you used the DBFS for your Data Docs store, you need to download your Da
 
 If you have the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) installed and configured locally, run the following commands from your local terminal to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
 
-```bash
+```bash title="Terminal input"
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 
 cd great_expectations/uncommitted/data_docs/local_site
