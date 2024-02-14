@@ -117,5 +117,6 @@ Run the following command to run your Checkpoint and test `StoreMetricsAction`:
 import great_expectations as gx
 context = gx.get_context()
 checkpoint_name = "your checkpoint name here"
-context.run_checkpoint(checkpoint_name=checkpoint_name)
+checkpoint = context.get_checkpoint(checkpoint_name)
+checkpoint.run()
 ```

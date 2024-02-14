@@ -461,7 +461,6 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
     checkpoint = Checkpoint(
         "my_checkpoint",
@@ -481,7 +480,6 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.filesystem
@@ -517,7 +515,6 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.parametrize(

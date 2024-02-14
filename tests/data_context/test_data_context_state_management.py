@@ -849,7 +849,6 @@ def test_add_or_update_checkpoint_adds_successfully(
     context = in_memory_data_context
 
     if use_existing_checkpoint:
-        checkpoint_config.pop("class_name")
         checkpoint = Checkpoint(**checkpoint_config, data_context=context)
         checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
     else:
@@ -875,12 +874,8 @@ def test_add_or_update_checkpoint_adds_successfully(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
                 "expectation_suite_name": "oss_test_expectation_suite",
-                "module_name": "great_expectations.checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
@@ -907,13 +902,9 @@ def test_add_or_update_checkpoint_adds_successfully(
                 **{
                     "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
-                    "class_name": "Checkpoint",
-                    "config_version": 1.0,
                     "evaluation_parameters": {},
                     "expectation_suite_name": "oss_test_expectation_suite",
-                    "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
-                    "profilers": [],
                     "runtime_configuration": {},
                     "validations": [
                         {
@@ -941,9 +932,6 @@ def test_add_or_update_checkpoint_adds_successfully(
         ),
         pytest.param(
             {
-                "class_name": "Checkpoint",
-                "module_name": "great_expectations.checkpoint",
-                "config_version": 1.0,
                 "validations": [],
                 "evaluation_parameters": {
                     "environment": "$GE_ENVIRONMENT",
@@ -956,8 +944,6 @@ def test_add_or_update_checkpoint_adds_successfully(
                 **{
                     "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
-                    "class_name": "Checkpoint",
-                    "config_version": 1.0,
                     "evaluation_parameters": {
                         "environment": "$GE_ENVIRONMENT",
                         "tolerance": 1.0e-2,
@@ -965,9 +951,7 @@ def test_add_or_update_checkpoint_adds_successfully(
                         "aux_param_1": "1 + $MY_PARAM",
                     },
                     "expectation_suite_name": None,
-                    "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
-                    "profilers": [],
                     "runtime_configuration": {},
                     "validations": [],
                 }
@@ -1006,12 +990,11 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
     name = "my_checkpoint"
     checkpoint_config["name"] = name
 
-    checkpoint = context.add_checkpoint(name=name, class_name="Checkpoint")
+    checkpoint = context.add_checkpoint(name=name)
 
     assert len(checkpoint.validations) == 0
     assert context.checkpoint_store.save_count == 1
 
-    checkpoint_config.pop("class_name")
     checkpoint = Checkpoint(**checkpoint_config, data_context=context)
     checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
 

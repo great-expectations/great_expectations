@@ -10,6 +10,15 @@ from great_expectations.datasource.fluent.interfaces import (
     GxDatasourceWarning,
     TestConnectionError,
 )
+from great_expectations.datasource.fluent.partitioners import Partitioner
+
+# Now that DataAsset and Partitioner have both been defined, we need to
+# provide them to the BatchConfig pydantic model.
+from great_expectations.core.batch_config import BatchConfig
+
+BatchConfig.update_forward_refs(Partitioner=Partitioner, DataAsset=DataAsset)
+
+
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,

@@ -97,7 +97,6 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
 my_checkpoint_config = """
 name: getting_started_checkpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: getting_started_datasource
@@ -133,7 +132,6 @@ assert checkpoint_result.run_results
 # <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config">
 yaml_config = """
 name: getting_started_checkpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: getting_started_datasource
