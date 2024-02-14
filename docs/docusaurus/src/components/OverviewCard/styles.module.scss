@@ -1,43 +1,13 @@
+@import '../../css/overview_pages';
+
 .overviewCard {
-  background-color: #404041;
-  color: var(--ifm-footer-link-color);
-  padding: 2.5rem 3rem 2rem;
-  position: relative;
-  width: 100%;
-  z-index: 1;
-}
-
-.overviewCard::before {
-  background: url('/img/repeating_hex_overview.png');
-  bottom: 0;
-  content: '';
-  left: 0;
-  opacity: 0.05;
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-
-.overviewCard__inner_container {
-  position: relative;
-  z-index: 1;
+  @include overview-card-container;
 }
 
 .overviewCard__title {
-  max-width: 40rem;
+  @include overview-card-title;
 }
 
 .overviewCard__description {
-  font-weight: normal;
-  max-width: 40rem;
-}
-
-@media (max-width: 996px) {
-  .overviewCard {
-    padding: 3rem 2rem 2rem;
-  }
-
-  .overviewCard__title {
-    font-size: var(--h2-font-size);
-  }
+  @include overview-card-description;
 }

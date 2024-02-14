@@ -11,7 +11,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  This is where you'll find information for setting up Great Expectations (GX) in your specific environment.
+  This is where you'll find information for setting up GX in your specific environment.
 </OverviewCard>
 
 #### Install and configure

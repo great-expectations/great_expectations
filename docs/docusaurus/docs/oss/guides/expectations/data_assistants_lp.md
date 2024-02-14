@@ -3,7 +3,7 @@ sidebar_label: 'Data Assistants'
 title: 'Data Assistants'
 hide_title: true
 id: data_assistants_lp
-description: Use the Onboarding Data Assistant to create Expectation Suites.
+description: Use the Missingness Data Assistant to create Expectation Suites.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
@@ -11,7 +11,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Use the Onboarding Data Assistant to create Expectation Suites.
+  Use the Missingness Data Assistant to create Expectation Suites.
 </OverviewCard>
 
 <LinkCardGrid>

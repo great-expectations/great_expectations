@@ -10,9 +10,7 @@ import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
-<OverviewCard title={frontMatter.title}>
-  Integrate Great Expectations (GX) with AWS Glue, AWS with S3 and Pandas, AWS with S3 and Spark, AWS with Athena, AWS with Redshift, AWS EMR Serverless, and EMR Spark.
-</OverviewCard>
+<OverviewCard title={frontMatter.title}/>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Use GX with an Amazon EMR Spark cluster" description="Instantiate a Data Context on an EMR Spark cluster" to="/oss/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster" icon="/img/integrations/spark_icon.png" />

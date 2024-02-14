@@ -10,9 +10,7 @@ import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
-<OverviewCard title={frontMatter.title}>
-  Create, edit, and implement Expectations and Expectation Suites. An Expectation is a verifiable assertion about your data, and an  Expectation Suite is a collection of verifiable assertions about your data.
-</OverviewCard>
+<OverviewCard title={frontMatter.title}/>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Create and edit Expectations based on domain knowledge" description="Create an Expectation Suite without a sample Batch" to="/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly" icon="/img/expectation_icon.svg" />

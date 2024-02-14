@@ -11,7 +11,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Create Custom Expectations to extend the functionality of Great Expectations (GX) and satisfy your unique business requirements.
+  Create Custom Expectations to extend GX functionality and solve unique business requirements.
 </OverviewCard>
 
 <LinkCardGrid>

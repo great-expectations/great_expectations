@@ -14,9 +14,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Use GX OSS to connect, test, and validate your Data Assets.
-  <br/>
-  If you don't want to manage your configurations and infrastructure, see the GX cloud documentation.
+  Test and validate your Data Assets with our original offering.
 </OverviewCard>
 
 ### Prepare
