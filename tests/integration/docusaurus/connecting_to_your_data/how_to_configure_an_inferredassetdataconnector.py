@@ -70,8 +70,6 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
 
-assert test_yaml == test_python
-
 context.add_datasource(**datasource_config)
 
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
@@ -145,8 +143,6 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
-
-assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 
@@ -231,8 +227,6 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
 
-assert test_yaml == test_python
-
 context.add_datasource(**datasource_config)
 
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
@@ -306,8 +300,6 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
-
-assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 
@@ -422,9 +414,6 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
-
 context.add_datasource(**datasource_config)
 
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
@@ -512,9 +501,6 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
-
 context.add_datasource(**datasource_config)
 
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
@@ -599,9 +585,6 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
-
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 

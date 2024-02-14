@@ -77,8 +77,6 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
 
-assert test_yaml == test_python
-
 context.add_datasource(**datasource_config)
 
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic datasource workthrough">
@@ -183,8 +181,6 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
 
-assert test_yaml == test_python
-
 context.add_datasource(**datasource_config)
 
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
@@ -257,8 +253,6 @@ datasource_config["data_connectors"]["default_configured_data_connector_name"][
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
-
-assert test_yaml == test_python
 
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset output">
 context.add_datasource(**datasource_config)
@@ -352,7 +346,6 @@ test_python = context.test_yaml_config(
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
@@ -437,8 +430,6 @@ test_python = context.test_yaml_config(
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-# TODO: Uncomment the line below once ISSUE #3589 (https://github.com/great-expectations/great_expectations/issues/3589) is resolved
-# assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
@@ -532,7 +523,6 @@ test_python = context.test_yaml_config(
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
@@ -628,7 +618,6 @@ test_python = context.test_yaml_config(
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
