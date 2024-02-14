@@ -46,7 +46,7 @@ The `data_docs_sites` key in your `great_expectations.yml` file defines your Dat
 
 Run the following Python command to view your Stores:
 
-```python
+```python title="Python"
 import great_expectations as gx
 
 context = gx.get_context()

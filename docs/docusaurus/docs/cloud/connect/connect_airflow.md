@@ -33,7 +33,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 2. Start the Airflow Scheduler and Web Server
 
-    ```
+    ``` title="Terminal input"
     airflow scheduler
     airflow webserver
     ```

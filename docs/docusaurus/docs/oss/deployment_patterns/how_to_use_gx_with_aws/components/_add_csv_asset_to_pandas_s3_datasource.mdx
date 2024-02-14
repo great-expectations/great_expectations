@@ -8,7 +8,7 @@ indicates which files to treat as Batches in the Asset, and how to identify them
 
 In our example, the pattern `r".*_(?P<year>\d{4})\.csv",` is intended to build a Batch for each file in the S3 bucket, which are:
 
-```
+``` title="File names"
     yellow_tripdata_sample_2020.csv
     yellow_tripdata_sample_2021.csv
     yellow_tripdata_sample_2022.csv

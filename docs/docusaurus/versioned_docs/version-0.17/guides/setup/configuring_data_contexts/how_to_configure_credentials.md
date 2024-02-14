@@ -20,12 +20,12 @@ The quickest way to get started is by setting up your credentials as environment
 
 First set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
-```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
+```bash title="Terminal input" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
 ```
 
 These can then be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
+```bash title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
 ```
 
 
@@ -47,7 +47,7 @@ A more advanced option is to use the config variables YAML file. YAML files make
 
 If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml``:
 
-```yaml name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
+```YAML title="YAML" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
 ```
 
 :::note
@@ -59,7 +59,7 @@ If using a YAML file, save desired credentials or config values to ``great_expec
 
 Then the config variable can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
+```bash title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
 ```
 
 ## Additional Notes
@@ -131,7 +131,7 @@ Or like this:
 
 **Example config_variables.yml:**
 
-```yaml
+```YAML title="YAML"
 # We can configure a single connection string
 my_aws_creds:  secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|connection_string
 
@@ -146,7 +146,7 @@ database: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_d
 
 Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```python 
+```python title="Python" 
 # We can use a single connection string
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_aws_creds}"
@@ -205,7 +205,7 @@ Or like this:
 
 **Example config_variables.yml:**
 
-```yaml
+```YAML title="YAML"
 # We can configure a single connection string
 my_gcp_creds: secret|projects/${PROJECT_ID}/secrets/dev_db_credentials|connection_string
 
@@ -220,7 +220,7 @@ database: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DATABASE
 
 Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```python 
+```python title="Python" 
 # We can use a single connection string 
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_gcp_creds}"
@@ -280,7 +280,7 @@ Or like this:
 
 **Example config_variables.yml:**
 
-```yaml
+```YAML title="YAML"
 # We can configure a single connection string
 my_abs_creds: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|connection_string
 
@@ -295,7 +295,7 @@ database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credential
 
 Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```python 
+```python title="Python" 
 # We can use a single connection string
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_gcp_creds}"
