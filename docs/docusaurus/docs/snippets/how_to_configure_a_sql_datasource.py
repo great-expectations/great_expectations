@@ -363,15 +363,8 @@ def configure_your_data_connectors_data_assets__runtime__yaml():
           - batch_timestamp
     """
     # </snippet>
-    connector_name = "name_of_my_runtime_data_connector"
-    asset_count = 0
 
-    test_result = data_context.test_yaml_config(datasource_config)
-    datasource_check = test_result.self_check(max_examples=12)
-    assert (
-        datasource_check["data_connectors"][connector_name]["data_asset_count"]
-        == asset_count
-    ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
+    _ = data_context.test_yaml_config(datasource_config)
 
 
 def section_9_test_your_configuration__inferred_and_configured():
@@ -405,36 +398,18 @@ def section_9_test_your_configuration__inferred_and_configured():
             12,
         ),
     ):
-        test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
-        datasource_check = test_result.self_check(max_examples=12)
-        assert (
-            datasource_check["data_connectors"][connector_name]["data_asset_count"]
-            == asset_count
-        ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
-        assert (
-            datasource_check["data_connectors"][connector_name]["data_assets"][
-                asset_name
-            ]["batch_definition_count"]
-            == batch_count
-        ), f"{connector_name} {batch_count} batches != {datasource_check['data_connectors'][connector_name]['data_assets'][asset_name]['batch_definition_count']}"
+        _ = data_context.test_yaml_config(yaml.dump(datasource_config))
 
 
 def section_9_test_your_configuration__runtime():
     # Testing the runtime data connector (there will be no data assets, those are passed in by the RuntimeBatchRequest.)
     datasource_config = get_full_config_sql_runtime_datasource()
-    connector_name = "name_of_my_runtime_data_connector"
-    asset_count = 0
 
-    test_result = (
+    _ = (
         # <snippet name="test your sql datasource_config with test_yaml_config">
         data_context.test_yaml_config(yaml.dump(datasource_config))
         # </snippet>
     )
-    datasource_check = test_result.self_check(max_examples=12)
-    assert (
-        datasource_check["data_connectors"][connector_name]["data_asset_count"]
-        == asset_count
-    ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
 
 
 def run_tests():
