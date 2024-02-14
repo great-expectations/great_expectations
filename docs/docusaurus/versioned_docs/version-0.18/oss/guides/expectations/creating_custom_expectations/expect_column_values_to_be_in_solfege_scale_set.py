@@ -3,13 +3,13 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 )
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py ExpectColumnValuesToBeInSolfegeScaleSet class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py ExpectColumnValuesToBeInSolfegeScaleSet class_def">
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py docstring">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py docstring">
     """Expect values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py set">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py set">
     set_ = [
         "do",
         "re",
@@ -34,12 +34,12 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         "TI",
     ]
 
-    set_camel_name = "version-0.18 SolfegeScale"
+    set_camel_name = "SolfegeScale"
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py semantic_name">
-    set_semantic_name = "version-0.18 the Solfege scale"
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py semantic_name">
+    set_semantic_name = "the Solfege scale"
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py examples">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py examples">
     examples = [
         {
             "data": {
@@ -113,7 +113,7 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         set_camel_name=set_camel_name,
         set_=set_,
     )
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py library_metadata">
     library_metadata = {
         "tags": ["set-based"],
         "contributors": ["@joegargery"],
@@ -122,7 +122,7 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py diagnostics">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py diagnostics">
     ExpectColumnValuesToBeInSolfegeScaleSet(
         column="lowercase_solfege_scale"
     ).print_diagnostic_checklist()

@@ -40,10 +40,10 @@ data_connectors:
 """
 datasource = context.add_datasource(**yaml.load(datasource_config))
 
-expectation_suite_name = "version-0.18 my_expectation_suite"
+expectation_suite_name = "my_expectation_suite"
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
-checkpoint_name = "version-0.18 my_checkpoint"
+checkpoint_name = "my_checkpoint"
 context.add_or_update_checkpoint(
     name=checkpoint_name,
     validations=[
@@ -81,7 +81,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 ]
 
 expected_existing_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -98,7 +98,7 @@ assert actual_existing_validations_store == yaml.load(
 )
 
 configured_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml">
 stores:
   validations_GCS_store:
     class_name: ValidationsStore
@@ -153,7 +153,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_command">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_command">
 gsutil cp uncommitted/validations/my_expectation_suite/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
 gsutil cp uncommitted/validations/my_expectation_suite/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
 # </snippet>
@@ -218,13 +218,13 @@ stderr = result.stderr.decode("utf-8")
 assert "Operation completed over 1 objects" in stderr
 
 copy_validation_output = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_output">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_output">
 Operation completed over 2 objects
 # </snippet>
 """
 
 """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_command">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_command">
 great_expectations store list
 # </snippet>
 """
@@ -243,7 +243,7 @@ result = subprocess.run(
 stdout = result.stdout.decode("utf-8")
 
 list_validation_stores_output = """
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_output">
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_output">
   - name: validations_GCS_store
     class_name: ValidationsStore
     store_backend:

@@ -14,18 +14,18 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_context">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_context">
 import great_expectations as gx
 
 context = gx.get_context(project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite">
-suite = context.add_expectation_suite(expectation_suite_name="version-0.18 my_suite")
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite">
+suite = context.add_expectation_suite(expectation_suite_name="my_suite")
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -63,7 +63,7 @@ suite.add_expectation_configuration(
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2">
 expectation_configuration_2 = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_in_set",
     kwargs={
@@ -77,7 +77,7 @@ suite.add_expectation_configuration(
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3">
 expectation_configuration_3 = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={
@@ -96,7 +96,7 @@ suite.add_expectation_configuration(
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4">
 expectation_configuration_4 = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={
@@ -122,6 +122,6 @@ assert suite.expectations[1] == expectation_configuration_2.to_domain_obj()
 assert suite.expectations[2] == expectation_configuration_3.to_domain_obj()
 assert suite.expectations[3] == expectation_configuration_4.to_domain_obj()
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)
 # </snippet>

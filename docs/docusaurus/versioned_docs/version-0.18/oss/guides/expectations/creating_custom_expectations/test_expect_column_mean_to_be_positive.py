@@ -11,7 +11,7 @@ from great_expectations.core.evaluation_parameters import (
 )
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def">
 class ExpectColumnMeanToBePositive(gxe.ExpectColumnMeanToBeBetween):
     """Expect the mean of values in this column to be positive."""
 
@@ -19,7 +19,7 @@ class ExpectColumnMeanToBePositive(gxe.ExpectColumnMeanToBeBetween):
     strict_min = True
 
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py validate_config">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py validate_config">
     def validate_configuration(self, configuration):
         super().validate_configuration(configuration)
         assert "min_value" not in configuration.kwargs, "min_value cannot be altered"
@@ -28,7 +28,7 @@ class ExpectColumnMeanToBePositive(gxe.ExpectColumnMeanToBeBetween):
         assert "strict_max" not in configuration.kwargs, "strict_max cannot be altered"
 
     # </snippet>
-    # <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py library_metadata">
+    # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py library_metadata">
     library_metadata = {"tags": ["basic stats"], "contributors": ["@joegargery"]}
 
 
@@ -42,15 +42,15 @@ def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_e
     df = pd.DataFrame({"a": [0, 1, 3, 4, 5]})
 
     batch_request = RuntimeBatchRequest(
-        datasource_name="version-0.18 my_datasource",
-        data_connector_name="version-0.18 default_runtime_data_connector_name",
-        data_asset_name="version-0.18 my_data_asset",
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="my_data_asset",
         runtime_parameters={"batch_data": df},
         batch_identifiers={"default_identifier_name": "my_identifier"},
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="version-0.18 test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_mean_to_be_positive(column="a")

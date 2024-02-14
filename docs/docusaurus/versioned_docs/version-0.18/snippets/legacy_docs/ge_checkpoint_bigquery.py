@@ -1,6 +1,6 @@
 # a v17 doc requires this legacy snippet path:
 
-# <snippet name="version-0.18 tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full">
+# <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full">
 from datetime import timedelta
 
 import airflow
