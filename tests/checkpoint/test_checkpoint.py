@@ -162,14 +162,6 @@ def test_basic_checkpoint_config_validation(
     )
     assert (
         deep_filter_properties_iterable(
-            properties=checkpoint.self_check()["config"],
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        )
-        == filtered_expected_checkpoint_config
-    )
-    assert (
-        deep_filter_properties_iterable(
             properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -181,14 +173,6 @@ def test_basic_checkpoint_config_validation(
         yaml_config=yaml_config,
         name="my_checkpoint",
         class_name="Checkpoint",
-    )
-    assert (
-        deep_filter_properties_iterable(
-            properties=checkpoint.self_check()["config"],
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        )
-        == filtered_expected_checkpoint_config
     )
     assert (
         deep_filter_properties_iterable(
