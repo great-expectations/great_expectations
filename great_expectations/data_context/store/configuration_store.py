@@ -126,7 +126,7 @@ class ConfigurationStore(Store):
     def config(self) -> dict:
         return self._config
 
-    def self_check(self, pretty_print: bool = True) -> dict:  # type: ignore[override]
+    def self_check(self, pretty_print: bool = True) -> dict:
         # Provide visibility into parameters that ConfigurationStore was instantiated with.
         report_object: dict = {"config": self.config}
 
