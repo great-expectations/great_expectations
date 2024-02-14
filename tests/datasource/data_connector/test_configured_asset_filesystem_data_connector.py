@@ -89,132 +89,6 @@ def test_basic_instantiation(tmp_path_factory):
         )
 
 
-def test_instantiation_from_a_config(
-    empty_data_context_stats_enabled, tmp_path_factory
-):
-    context = empty_data_context_stats_enabled
-
-    base_directory = str(tmp_path_factory.mktemp("test_instantiation_from_a_config"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-    )
-
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetFilesystemDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
-
-base_directory: {base_directory}
-# glob_directive: "*.csv"
-
-default_regex:
-    pattern: alpha-(.*)\\.csv
-    group_names:
-        - index
-
-assets:
-    alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
-
-def test_instantiation_from_a_config_regex_does_not_match_paths(
-    empty_data_context_stats_enabled, tmp_path_factory
-):
-    context = empty_data_context_stats_enabled
-
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_instantiation_from_a_config_regex_does_not_match_paths"
-        )
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-    )
-
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetFilesystemDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
-
-base_directory: {base_directory}
-# glob_directive: "*.csv"
-
-default_regex:
-    pattern: beta-(.*)\\.csv
-    group_names:
-        - index
-
-assets:
-    alpha:
-
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-        },
-        "example_unmatched_data_references": [
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-        "unmatched_data_reference_count": 3,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
-
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted")
@@ -1455,7 +1329,6 @@ def test_one_half_year_as_6_data_assets_1_batch_each(
                     - year
                     - month
     """
-    context.test_yaml_config(datasource_yaml)
     context.add_datasource(**yaml.load(datasource_yaml))
     datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
     data_asset_names: dict = datasource.get_available_data_asset_names(
@@ -1516,7 +1389,6 @@ def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factor
                         - year
                         - month
         """
-    context.test_yaml_config(datasource_yaml)
     context.add_datasource(**yaml.load(datasource_yaml))
     datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
     data_asset_names: dict = datasource.get_available_data_asset_names(

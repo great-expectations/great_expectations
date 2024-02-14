@@ -83,50 +83,6 @@ def test_basic_instantiation(glue_titanic_catalog):
     }
 
 
-def test_instantiation_from_a_config(
-    glue_titanic_catalog, empty_data_context_stats_enabled
-):
-    random.seed(0)
-    report_object = empty_data_context_stats_enabled.test_yaml_config(
-        f"""
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetAWSGlueDataCatalogDataConnector
-        name: my_data_connector
-        datasource_name: FAKE_Datasource_NAME
-        data_asset_name_prefix: prefix__
-        data_asset_name_suffix: __suffix
-        excluded_tables:
-            - db_test.tb_titanic_without_partitions
-        glue_introspection_directives:
-            database_name: db_test
-        """,  # noqa: F541
-        runtime_environment={
-            "execution_engine": "execution_engine",
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "InferredAssetAWSGlueDataCatalogDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "prefix__db_test.tb_titanic_with_partitions__suffix",
-        ],
-        "data_assets": {
-            "prefix__db_test.tb_titanic_with_partitions__suffix": {
-                "batch_definition_count": 6,
-                "example_data_references": [
-                    {"PClass": "1st", "SexCode": "0"},
-                    {"PClass": "1st", "SexCode": "1"},
-                    {"PClass": "2nd", "SexCode": "0"},
-                ],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-    }
-
-
 def test_instantiation_with_included_tables(glue_titanic_catalog):
     my_data_connector = InferredAssetAWSGlueDataCatalogDataConnector(
         name="my_data_connector",
