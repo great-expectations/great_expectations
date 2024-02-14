@@ -92,7 +92,8 @@
       --gray-700: #65686f;
       --gray-800: #414246;
       --gray-900: #1a1c1f;
-    
+
+      --link-hover-color: #A03E0A;
 }
 
 p > a {
@@ -219,7 +220,7 @@ table a {
   text-decoration: underline;
 
   &:hover {
-    color: #A03E0A;
+    color: var(--link-hover-color);
   }
 }
 
