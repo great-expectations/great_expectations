@@ -860,12 +860,14 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         batch_identifiers=IDDict({}),
         batch_spec_passthrough=None,
     )
-    return build_spark_validator_with_data(
-        df=spark_df,
-        spark=spark,
-        batch_definition=batch_definition,
-        context=context,
-    )
+    with spark:
+        validator = build_spark_validator_with_data(
+            df=spark_df,
+            spark=spark,
+            batch_definition=batch_definition,
+            context=context,
+        )
+    return validator
 
 
 def build_pandas_validator_with_data(
@@ -1189,12 +1191,11 @@ def build_spark_validator_with_data(
         )
 
     batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type] # got DataFrame
-    with spark:
-        execution_engine: SparkDFExecutionEngine = build_spark_engine(
-            spark=spark,
-            df=df,
-            batch_id=batch.id,
-        )
+    execution_engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark,
+        df=df,
+        batch_id=batch.id,
+    )
 
     if context is None:
         context = build_in_memory_runtime_context(include_pandas=False)
