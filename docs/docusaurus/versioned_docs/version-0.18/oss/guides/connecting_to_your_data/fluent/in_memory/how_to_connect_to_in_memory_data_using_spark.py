@@ -23,13 +23,13 @@ context = gx.get_context()
 spark = gx.core.util.get_or_create_spark_application()
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py datasource">
 datasource = context.sources.add_spark("my_spark_datasource")
 # </snippet>
 
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py dataframe">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py dataframe">
 df = pd.DataFrame(
     {
         "a": [1, 2, 3, 4, 5, 6],
@@ -43,17 +43,17 @@ dataframe = spark.createDataFrame(data=df)
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py name">
-name = "version-0.18 my_df_asset"
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py name">
+name = "my_df_asset"
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py data_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py data_asset">
 data_asset = datasource.add_dataframe_asset(name=name)
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py build_batch_request_with_dataframe">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py build_batch_request_with_dataframe">
 my_batch_request = data_asset.build_batch_request(dataframe=dataframe)
 # </snippet>
 

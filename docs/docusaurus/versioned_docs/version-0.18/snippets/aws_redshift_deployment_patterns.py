@@ -14,7 +14,7 @@ full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml: YAMLHandler = YAMLHandler()
 CONNECTION_STRING = get_redshift_connection_url()
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py imports">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py imports">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -42,7 +42,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
     "expectations_store_name"
 ]
 expected_existing_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_expectations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_expectations_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -60,7 +60,7 @@ assert actual_existing_expectations_store == yaml.load(
 
 # adding expectations store
 configured_expectations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_expectations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_expectations_store">
 stores:
   expectations_S3_store:
     class_name: ExpectationsStore
@@ -122,7 +122,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 ]
 
 expected_existing_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_validations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_validations_store">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -140,7 +140,7 @@ assert actual_existing_validations_store == yaml.load(
 
 # adding validations store
 configured_validations_store_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_validations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_validations_store">
 stores:
   validations_S3_store:
     class_name: ValidationsStore
@@ -150,7 +150,7 @@ stores:
       prefix: '<YOUR S3 PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py set_new_validations_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py set_new_validations_store">
 validations_store_name: validations_S3_store
 # </snippet>
 """
@@ -180,7 +180,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding data docs store
 data_docs_site_yaml = """
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_data_docs_store">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_data_docs_store">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -215,67 +215,63 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py vars">
-datasource_name = "version-0.18 my_redshift_datasource"
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py vars">
+datasource_name = "my_redshift_datasource"
 connection_string = "redshift+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>"
 # </snippet>
 
 # For tests, we are replacing the `connection_string`
 connection_string = CONNECTION_STRING
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py datasource">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py datasource">
 datasource = context.sources.add_or_update_sql(
     name=datasource_name,
     connection_string=connection_string,
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py table_asset">
-table_asset = datasource.add_table_asset(
-    name="my_table_asset", table_name="version-0.18 taxi_data"
-)
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py table_asset">
+table_asset = datasource.add_table_asset(name="my_table_asset", table_name="taxi_data")
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py query_asset">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py query_asset">
 query_asset = datasource.add_query_asset(
-    name="version-0.18 my_query_asset", query="SELECT * from taxi_data"
+    name="my_query_asset", query="SELECT * from taxi_data"
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_suite_and_get_validator">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_suite_and_get_validator">
 request = table_asset.build_batch_request()
 
-context.add_or_update_expectation_suite(
-    expectation_suite_name="version-0.18 test_suite"
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 
 validator = context.get_validator(
-    batch_request=request, expectation_suite_name="version-0.18 test_suite"
+    batch_request=request, expectation_suite_name="test_suite"
 )
 
 print(validator.head())
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py validator_calls">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py save_expectations">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # build Checkpoint
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py create_checkpoint">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py create_checkpoint">
 checkpoint = context.add_or_update_checkpoint(
-    name="version-0.18 my_checkpoint",
+    name="my_checkpoint",
     validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
 )
 # </snippet>
 
-# <snippet name="version-0.18 docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py run checkpoint">
+# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py run checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 

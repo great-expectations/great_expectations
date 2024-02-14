@@ -20,12 +20,12 @@ The quickest way to get started is by setting up your credentials as environment
 
 First set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
-```bash name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
 ```
 
 These can then be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
 ```
 
 
@@ -47,7 +47,7 @@ A more advanced option is to use the config variables YAML file. YAML files make
 
 If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml``:
 
-```yaml name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
+```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
 ```
 
 :::note
@@ -59,7 +59,7 @@ If using a YAML file, save desired credentials or config values to ``great_expec
 
 Then the config variable can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="version-0.18 docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
+```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
 ```
 
 ## Additional Notes
@@ -149,12 +149,12 @@ Once configured, the credentials can be loaded into the `connection_string` para
 ```python 
 # We can use a single connection string
 pg_datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_postgres_db", connection_string="${my_aws_creds}"
+    name="my_postgres_db", connection_string="${my_aws_creds}"
 )
 
 # Or each component of the connection string separately
 pg_datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
 )
 ```
 
@@ -223,12 +223,12 @@ Once configured, the credentials can be loaded into the `connection_string` para
 ```python 
 # We can use a single connection string 
 pg_datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_postgres_db", connection_string="${my_gcp_creds}"
+    name="my_postgres_db", connection_string="${my_gcp_creds}"
 )
 
 # Or each component of the connection string separately
 pg_datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
 )
 ```
 
@@ -298,12 +298,12 @@ Once configured, the credentials can be loaded into the `connection_string` para
 ```python 
 # We can use a single connection string
 pg_datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_postgres_db", connection_string="${my_gcp_creds}"
+    name="my_postgres_db", connection_string="${my_gcp_creds}"
 )
 
 # Or each component of the connection string separately
 pg_datasource = context.sources.add_or_update_sql(
-    name="version-0.18 my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
 )
 ```
 </TabItem>

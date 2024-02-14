@@ -389,8 +389,8 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
             },
         ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False
 
 
@@ -510,8 +510,8 @@ def test_spark_happy_path_growth_numeric_data_assistant(
             },
         ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False
 
 
@@ -627,6 +627,6 @@ def test_sql_happy_path_growth_numeric_data_assistant(
             },
         ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False

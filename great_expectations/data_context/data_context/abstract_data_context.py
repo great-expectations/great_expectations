@@ -1404,18 +1404,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: str = ...,
-        config_version: float = ...,
-        template_name: str | None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
-        profilers: list[dict] | None = ...,
         ge_cloud_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1435,18 +1429,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: None = ...,
-        config_version: float = ...,
-        template_name: None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
-        profilers: None = ...,
         ge_cloud_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1485,18 +1473,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: float = 1.0,
-        template_name: str | None = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1512,18 +1494,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             name: The name to give the checkpoint.
-            config_version: The config version of this checkpoint.
-            template_name: The template to use in generating this checkpoint.
-            module_name: The module name to use in generating this checkpoint.
-            class_name: The class name to use in generating this checkpoint.
-            run_name_template: The run name template to use in generating this checkpoint.
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            profilers: The profilers to use in generating this checkpoint.
             ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1548,18 +1524,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            template_name=template_name,
-            module_name=module_name,
-            class_name=class_name,
-            run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1608,18 +1578,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str = ...,
         id: str | None = ...,
-        config_version: float = ...,
-        template_name: str | None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
-        profilers: list[dict] | None = ...,
         expectation_suite_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1637,18 +1601,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         id: None = ...,
-        config_version: float = ...,
-        template_name: None = ...,
-        module_name: str = ...,
-        class_name: str = ...,
-        run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
-        profilers: None = ...,
         expectation_suite_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1672,18 +1630,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: float = 1.0,
-        template_name: str | None = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         expectation_suite_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1695,18 +1647,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name to give the checkpoint.
             id: The ID to associate with this checkpoint.
-            config_version: The config version of this checkpoint.
-            template_name: The template to use in generating this checkpoint.
-            module_name: The module name to use in generating this checkpoint.
-            class_name: The class name to use in generating this checkpoint.
-            run_name_template: The run name template to use in generating this checkpoint.
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            profilers: The profilers to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1725,18 +1671,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            template_name=template_name,
-            module_name=module_name,
-            class_name=class_name,
-            run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1758,18 +1698,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: float = 1.0,
-        template_name: str | None = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
@@ -1793,18 +1727,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 data_context=self,
                 checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
                 name=name,
-                config_version=config_version,
-                template_name=template_name,
-                module_name=module_name,
-                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
-                run_name_template=run_name_template,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
                 action_list=action_list,
                 evaluation_parameters=evaluation_parameters,
                 runtime_configuration=runtime_configuration,
                 validations=validations,
-                profilers=profilers,
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
@@ -1891,136 +1819,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         del ge_cloud_id
 
         return self.checkpoint_store.delete_checkpoint(name=name, id=id)
-
-    @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
-    @new_argument(
-        argument_name="expectation_suite_id",
-        version="0.15.48",
-        message="To be used in place of `expectation_suite_ge_cloud_id`",
-    )
-    def run_checkpoint(  # noqa: PLR0913
-        self,
-        checkpoint_name: str | None = None,
-        ge_cloud_id: str | None = None,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
-        profilers: list[dict] | None = None,
-        run_id: str | float | None = None,
-        run_name: str | None = None,
-        run_time: datetime.datetime | None = None,
-        result_format: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
-        id: str | None = None,
-        expectation_suite_id: str | None = None,
-        **kwargs,
-    ) -> CheckpointResult:
-        """Validate using an existing Checkpoint.
-
-        Args:
-            checkpoint_name: The name of a Checkpoint
-            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
-            run_name_template: The template to use for run_name
-            expectation_suite_name: Expectation suite to be used by Checkpoint run
-            batch_request: Batch request to be used by Checkpoint run
-            action_list: List of actions to be performed by the Checkpoint
-            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
-            runtime_configuration: Runtime configuration override parameters
-            validations: Validations to be performed by the Checkpoint run
-            profilers: Profilers to be used by the Checkpoint run
-            run_id: The run_id for the validation; if None, a default value will be used
-            run_name: The run_name for the validation; if None, a default value will be used
-            run_time: The date/time of the run
-            result_format: One of several supported formatting directives for expectation validation results
-            ge_cloud_id: Great Expectations Cloud id for the checkpoint
-            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
-            id: Great Expectations Cloud id for the checkpoint (preferred over `ge_cloud_id`)
-            expectation_suite_id: Great Expectations Cloud id for the expectation suite (preferred over `expectation_suite_ge_cloud_id`)
-            **kwargs: Additional kwargs to pass to the validation operator
-
-        Returns:
-            CheckpointResult
-        """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
-            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
-        )
-        del ge_cloud_id
-        del expectation_suite_ge_cloud_id
-
-        return self._run_checkpoint(
-            checkpoint_name=checkpoint_name,
-            id=id,
-            template_name=template_name,
-            run_name_template=run_name_template,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            profilers=profilers,
-            run_id=run_id,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            expectation_suite_ge_cloud_id=expectation_suite_id,
-            **kwargs,
-        )
-
-    def _run_checkpoint(  # noqa: PLR0913
-        self,
-        checkpoint_name: str | None = None,
-        id: str | None = None,
-        template_name: str | None = None,
-        run_name_template: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        profilers: list[dict] | None = None,
-        run_id: str | float | None = None,
-        run_name: str | None = None,
-        run_time: datetime.datetime | None = None,
-        result_format: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
-        **kwargs,
-    ) -> CheckpointResult:
-        checkpoint: Checkpoint = self.get_checkpoint(
-            name=checkpoint_name,
-            id=id,
-        )
-        result: CheckpointResult = checkpoint.run_with_runtime_args(
-            template_name=template_name,
-            run_name_template=run_name_template,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            profilers=profilers,
-            run_id=run_id,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-            **kwargs,
-        )
-        return result
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None

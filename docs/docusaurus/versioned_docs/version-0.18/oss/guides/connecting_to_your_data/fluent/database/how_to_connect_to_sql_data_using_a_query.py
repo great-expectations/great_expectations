@@ -31,20 +31,20 @@ with warnings.catch_warnings():
     # TODO: Remove create_temp_table=True once the bug fix goes in to develop that's equivalent of this PR for 0.18.6:
     #       https://github.com/great-expectations/great_expectations/pull/9148
     datasource = context.sources.add_sql(
-        name="version-0.18 my_datasource",
+        name="my_datasource",
         connection_string=connection_string,
         create_temp_table=True,
     )
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py datasource">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py datasource">
 datasource = context.get_datasource("my_datasource")
 # </snippet>
 
 # Python
-# <snippet name="version-0.18 docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py add_query_asset">
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py add_query_asset">
 query_asset = datasource.add_query_asset(
-    name="version-0.18 my_asset",
+    name="my_asset",
     query="SELECT passenger_count, total_amount FROM yellow_tripdata_sample_2019_01",
 )
 # </snippet>
