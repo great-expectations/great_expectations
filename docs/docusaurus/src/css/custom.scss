@@ -37,9 +37,6 @@
     --color-primary-dark: #DE550A;
     --ifm-code-font-size: 95%;
 
-    /* declare mobile breakpoint */
-    --mobile-breakpoint: 996px;
-
     /* make pagination look like the nice buttons */
     --ifm-pagination-nav-border-radius: 35px;
 
@@ -136,7 +133,7 @@ h3 {
     padding: 3px 0;
 }
 
-@media (max-width: var(--mobile-breakpoint)) {
+@media (max-width: 996px) {
     .footer__links {
         display: block !important;
     }
@@ -254,7 +251,7 @@ table.borderless tr:nth-child(2n) {
   visibility: visible;
 }
 
-@media (max-width: var(--mobile-breakpoint)) {
+@media (max-width: 996px) {
     .main-wrapper {
         overflow: hidden;
     }
