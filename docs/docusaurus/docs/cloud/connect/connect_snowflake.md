@@ -7,7 +7,7 @@ description: Connect GX Cloud to a Snowflake Data Source.
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-To validate data stored in a Snowflake data warehouse from GX Cloud, you must add the GX Agent to your production environment. The GX Agent acts as an intermediary between GX Cloud and Snowflake and allows you to securely access and validate your data in GX Cloud.
+To validate data stored in a Snowflake data warehouse from GX Cloud, you must add the GX Agent to your deployment environment. The GX Agent acts as an intermediary between GX Cloud and Snowflake and allows you to securely access and validate your data in GX Cloud.
 
 New to GX Cloud and not sure that it's the right solution for your organization? See [Try GX Cloud](../try_gx_cloud.md).
 
@@ -93,7 +93,7 @@ You'll need your access token and organization ID to set your access credentials
 
 ## Deploy the GX Agent
 
-You deploy and run the GX Agent within your production cloud services environment. You can deploy the GX Agent container in any environment where you can run Docker container images or create Kubernetes clusters.
+You deploy and run the GX Agent within your deployment environment. You can deploy the GX Agent container in any environment where you can run Docker container images or create Kubernetes clusters.
 
 To learn how to deploy a Docker container image in a specific environment, see the following documentation:
 

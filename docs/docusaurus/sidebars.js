@@ -23,11 +23,6 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Workflow optimization',
-              href: '/docs/cloud/about_gx#workflow-optimization',
-            },
-            {
-              type: 'link',
               label: 'GX Cloud workflow',
               href: '/docs/cloud/about_gx#gx-cloud-workflow',
             },
@@ -49,6 +44,7 @@ module.exports = {
           label: 'Connect GX Cloud',
           link: { type: 'doc', id: 'cloud/connect/connect_lp' },
           items: [
+            'cloud/connect/connect_postgresql',
             'cloud/connect/connect_snowflake',
             'cloud/connect/connect_airflow',
             'cloud/connect/connect_python',
