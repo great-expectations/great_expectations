@@ -707,7 +707,7 @@ class TestEvaluationParameterOptions:
 
         assert expectation_suite.evaluation_parameter_options == (
             self.EVALUATION_PARAMETER_MAX,
-            self.EVALUATION_PARAMETER_MAX,
+            self.EVALUATION_PARAMETER_MIN,
         )
 
     @pytest.mark.unit
@@ -724,7 +724,7 @@ class TestEvaluationParameterOptions:
 
         assert expectation_suite.evaluation_parameter_options == (
             self.EVALUATION_PARAMETER_MAX,
-            self.EVALUATION_PARAMETER_MAX,
+            self.EVALUATION_PARAMETER_MIN,
             self.EVALUATION_PARAMETER_VALUE_SET,
         )
 

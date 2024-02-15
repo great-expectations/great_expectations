@@ -385,7 +385,9 @@ class TestEvaluationParameterOptions:
 
     @pytest.mark.unit
     def test_expectation_without_evaluation_parameter(self):
-        expectation = gxe.ExpectColumnValuesToBeBetween(min_value=0, max_value=10)
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo", min_value=0, max_value=10
+        )
         assert expectation.evaluation_parameter_options == tuple()
 
     @pytest.mark.unit

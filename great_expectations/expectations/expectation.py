@@ -37,7 +37,10 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import is_evaluation_parameter
+from great_expectations.core.evaluation_parameters import (
+    get_evaluation_parameter_key,
+    is_evaluation_parameter,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -132,7 +135,9 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
                 if is_evaluation_parameter(value):
-                    current_expectation_params.append(value["$PARAMETER"])
+                    current_expectation_params.append(
+                        get_evaluation_parameter_key(value)
+                    )
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
@@ -1228,7 +1233,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @property
     def evaluation_parameter_options(self) -> tuple[str, ...]:
         output: set[str] = set()
-        # this
+        as_dict = self.dict(exclude_defaults=True)
+        for value in as_dict.values():
+            if is_evaluation_parameter(value):
+                output.add(get_evaluation_parameter_key(value))
         return tuple(sorted(output))
 
     @property
