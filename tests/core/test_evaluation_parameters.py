@@ -15,12 +15,30 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
+    is_evaluation_parameter,
     parse_evaluation_parameter,
 )
 from great_expectations.exceptions import EvaluationParameterError
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (None, False),
+        (1, False),
+        ("foo", False),
+        ({}, False),
+        ({"PARAMETER": 123}, False),
+        ({"$PARAMETER": 123}, True),
+        ({"$PARAMETER": 123, "another_field": 234}, True),
+    ],
+)
+@pytest.mark.unit
+def test_is_evaluation_parameter(value: Any, expected: bool):
+    assert is_evaluation_parameter(value) == expected
 
 
 @pytest.mark.unit

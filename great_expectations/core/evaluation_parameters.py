@@ -32,7 +32,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.data_context import AbstractDataContext
 
@@ -41,6 +41,10 @@ _epsilon = 1e-12
 
 # NOTE: Temporary alias - to be converted to a rich type
 EvaluationParameterDict: TypeAlias = dict
+
+
+def is_evaluation_parameter(value: Any) -> TypeGuard[EvaluationParameterDict]:
+    return isinstance(value, dict) and "$PARAMETER" in value.keys()
 
 
 class EvaluationParameterParser:
