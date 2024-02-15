@@ -199,6 +199,11 @@ module.exports = {
               href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
             },
             {
+              "type": "link",
+              "label": "Configure the Checkpoint result format parameter",
+          "href": "/docs/cloud/checkpoints/manage_checkpoints#configure-the-checkpoint-result-format-parameter"
+            },
+            {
               type: 'link',
               label: 'Delete a Checkpoint',
               href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
