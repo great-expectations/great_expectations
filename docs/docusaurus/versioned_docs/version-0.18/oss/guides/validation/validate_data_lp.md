@@ -1,14 +1,18 @@
 ---
 sidebar_label: 'Validate Data'
 title: 'Validate Data'
+hide_title: true
 id: validate_data_lp
 description: Validate Data, save Validation Results, run Actions, and create Data Docs.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">Validate Data, save Validation Results, run Actions, and create Data Docs.</p>
+<OverviewCard title={frontMatter.title}>
+  Validate Data, save Validation Results, run Actions, and create Data Docs.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Data Validation workflow" description="Learn more about the GX Data Validation process" to="/oss/guides/validation/validate_data_overview" icon="/img/workflow_icon.svg" />
