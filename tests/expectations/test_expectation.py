@@ -371,3 +371,53 @@ def test_unexpected_rows_expectation_validate(
 
     unexpected_rows = res["details"]["unexpected_rows"]
     assert unexpected_rows == expected_unexpected_rows
+
+
+class TestEvaluationParameterOptions:
+    """Tests around the evaluation_parameter_options property of Expectations.
+
+    Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
+    """
+
+    EVALUATION_PARAMETER_MIN = "my_min"
+    EVALUATION_PARAMETER_MAX = "my_max"
+    EVALUATION_PARAMETER_VALUE = "my_value"
+
+    @pytest.mark.unit
+    def test_expectation_without_evaluation_parameter(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(min_value=0, max_value=10)
+        assert expectation.evaluation_parameter_options == tuple()
+
+    @pytest.mark.unit
+    def test_expectation_with_evaluation_parameter(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo",
+            min_value=0,
+            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
+        )
+        assert expectation.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_MAX,
+        )
+
+    @pytest.mark.unit
+    def test_expectation_with_multiple_evaluation_parameters(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo",
+            min_value={"$PARAMETER": self.EVALUATION_PARAMETER_MIN},
+            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
+        )
+        assert expectation.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_MAX,
+            self.EVALUATION_PARAMETER_MIN,
+        )
+
+    @pytest.mark.unit
+    def test_expectation_with_duplicate_evaluation_parameters(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo",
+            min_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
+            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
+        )
+        assert expectation.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_VALUE,
+        )

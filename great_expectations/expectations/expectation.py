@@ -1226,6 +1226,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return expectation_validation_result_list[0]
 
     @property
+    def evaluation_parameter_options(self) -> tuple[str, ...]:
+        output: set[str] = set()
+        # this
+        return tuple(sorted(output))
+
+    @property
     def configuration(self) -> ExpectationConfiguration:
         kwargs = self.dict(exclude_defaults=True)
         meta = kwargs.pop("meta", None)

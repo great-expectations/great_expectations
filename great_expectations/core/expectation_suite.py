@@ -152,7 +152,10 @@ class ExpectationSuite(SerializableDictDot):
 
     @property
     def evaluation_parameter_options(self) -> tuple[str, ...]:
-        return tuple()
+        output: set[str] = set()
+        for expectation in self.expectations:
+            output.update(expectation.evaluation_parameter_options)
+        return tuple(sorted(output))
 
     @public_api
     def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
