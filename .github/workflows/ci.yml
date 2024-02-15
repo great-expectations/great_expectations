@@ -1,6 +1,6 @@
 name: ci
 
-# This pipeline is intended to facilicate the full coverage of tests for OSS GX.
+# This pipeline is intended to facilitate the full coverage of tests for OSS GX.
 # A "reasonable" set of tests will run on every pull request, and a full set will run with:
 #   1. Manual triggering
 #   2. Every 3 hours
@@ -80,8 +80,8 @@ jobs:
     needs: [unit-tests, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
-      github.event.pull_request.draft == false ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+      (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -225,8 +225,8 @@ jobs:
     needs: [doc-checks]
     # run on non-draft PRs
     if: |
-      github.event.pull_request.draft == false ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+      (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
