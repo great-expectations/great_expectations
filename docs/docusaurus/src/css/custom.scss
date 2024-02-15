@@ -14,6 +14,8 @@
 @import "navbar.scss";
 @import "tabs.scss";
 @import "searchBar.scss";
+@import "alerts.scss";
+@import "pagination.scss";
 
 /* You can override the default Infima variables here. */
 :root {
@@ -31,11 +33,11 @@
     --ifm-color-primary-lighter: #fe85a7;
     --ifm-color-primary-lightest: #feb7cb;
     --color-primary-10: rgba(255, 99, 16, .1);
+    --color-primary-dark: #DE550A;
     --ifm-code-font-size: 95%;
 
     /* make pagination look like the nice buttons */
     --ifm-pagination-nav-border-radius: 35px;
-    --ifm-pagination-nav-padding: 16px;
 
     --ifm-tabs-padding-vertical: 0.7em;
 
@@ -102,33 +104,6 @@ p > a {
 
 h3 {
     color: #404041;
-}
-
-/* pagination overrides */
-.pagination-nav__item {
-    flex: inherit;
-}
-
-.pagination-nav {
-    justify-content: space-between;
-}
-
-.pagination-nav__sublabel {
-    color: #fff;
-    display: none;
-}
-
-.pagination-nav__link {
-    border: none;
-    color: #fff;
-    padding: var(--ifm-pagination-nav-padding);
-    background: var(--ifm-link-color);
-    text-align: center;
-}
-
-a.pagination-nav__link:hover {
-    color: #fff;
-    background-color: #DE550A;
 }
 
 .docusaurus-highlight-code-line {
