@@ -6,7 +6,7 @@
     padding-right: 2rem;
 }
 
-@media (max-width: var(--mobile-breakpoint)) {
+@media (max-width: 996px) {
     .githubBadge {
         display: none;
     }

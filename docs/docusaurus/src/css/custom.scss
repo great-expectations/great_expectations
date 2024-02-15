@@ -33,9 +33,6 @@
     --color-primary-10: rgba(255, 99, 16, .1);
     --ifm-code-font-size: 95%;
 
-    /* declare mobile breakpoint */
-    --mobile-breakpoint: 996px;
-
     /* make pagination look like the nice buttons */
     --ifm-pagination-nav-border-radius: 35px;
     --ifm-pagination-nav-padding: 16px;
@@ -160,7 +157,7 @@ a.pagination-nav__link:hover {
     padding: 3px 0;
 }
 
-@media (max-width: var(--mobile-breakpoint)) {
+@media (max-width: 996px) {
     .footer__links {
         display: block !important;
     }
@@ -278,7 +275,7 @@ table.borderless tr:nth-child(2n) {
   visibility: visible;
 }
 
-@media (max-width: var(--mobile-breakpoint)) {
+@media (max-width: 996px) {
     .main-wrapper {
         overflow: hidden;
     }
