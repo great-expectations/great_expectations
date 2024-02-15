@@ -375,7 +375,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: |
-            reqs/requirements-dev-test.txt
             setup.py
 
       - name: Install dependencies
