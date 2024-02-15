@@ -47,6 +47,10 @@ def is_evaluation_parameter(value: Any) -> TypeGuard[EvaluationParameterDict]:
     return isinstance(value, dict) and "$PARAMETER" in value.keys()
 
 
+def get_evaluation_parameter_key(evaluation_parameter: EvaluationParameterDict) -> str:
+    return evaluation_parameter["$PARAMETER"]
+
+
 class EvaluationParameterParser:
     """
     This Evaluation Parameter Parser uses pyparsing to provide a basic expression language capable of evaluating
