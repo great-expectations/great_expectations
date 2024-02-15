@@ -197,7 +197,12 @@ def add_dataframe_to_db(  # noqa: PLR0913
             # warning type only exists in sqlalchemy < 2.0.
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             # BDIRKS line that dies
-            print(f"BDIRKS - con is {con}")
+            print(f"BDIRKS - con is {con}.")
+            print(
+                f"BDIRKS is a a connectable? {isinstance(con, (str, sqlalchemy.engine.Connectable))}"
+            )
+            # sqlalchemy.engine.base.Connection # => This seems right
+            # con.engine.raw_connection()
             df.to_sql(
                 name=name,
                 con=con,
