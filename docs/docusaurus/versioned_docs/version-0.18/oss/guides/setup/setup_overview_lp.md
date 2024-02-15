@@ -1,14 +1,18 @@
 ---
 sidebar_label: 'Configure your Great Expectations environment'
 title: 'Configure your Great Expectations environment'
+hide_title: true
 id: setup_overview_lp
 description: Configure GX in your specific environment.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">This is where you'll find information for setting up Great Expectations (GX) in your specific environment.</p>
+<OverviewCard title={frontMatter.title}>
+  This is where you'll find information for setting up GX in your specific environment.
+</OverviewCard>
 
 #### Install and configure
 

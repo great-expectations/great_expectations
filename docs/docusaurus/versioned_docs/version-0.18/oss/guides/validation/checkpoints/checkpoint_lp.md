@@ -1,14 +1,18 @@
 ---
 sidebar_label: 'Manage Checkpoints'
 title: 'Manage Checkpoints'
+hide_title: true
 id: checkpoint_lp
 description: Add validation data, create and configure Checkpoints, and pass in-mameory DataFrames.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">This is where you'll find information about managing your Checkpoints including adding validation data, creating and configuring Checkpoints, and passing in-memory DataFrames.</p>
+<OverviewCard title={frontMatter.title}>
+  This is where you'll find information about managing your Checkpoints including adding validation data, creating and configuring Checkpoints, and passing in-memory DataFrames.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Create a new Checkpoint" description="Create a new Checkpoint" to="/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint" icon="/img/checkpoint_icon.svg" />

@@ -1,5 +1,6 @@
 ---
 title: 'GX OSS'
+hide_title: true
 description: Get started with GX OSS and learn more about GX OSS features and functionality.
 hide_table_of_contents: true
 pagination_next: null
@@ -10,11 +11,11 @@ displayed_sidebar: gx_oss
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">Use GX OSS to connect, test, and validate your Data Assets. If you're ready to get started see <a href='/docs/oss/guides/setup/get_started_lp'>Get started with GX OSS</a>.
-
- GX Cloud might be the solution if you don't want to manage your own configurations and infrastructure. <a href='https://greatexpectations.io/cloud'>Sign up here</a> to learn more and get early access to GX Cloud.
-</p>
+<OverviewCard title={frontMatter.title}>
+  Test and validate your Data Assets with our open source offering.
+</OverviewCard>
 
 ### Prepare
 
