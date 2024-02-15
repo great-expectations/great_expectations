@@ -13,6 +13,13 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 logger = logging.getLogger(__name__)
 
 
+def bdirks_test():
+    from pandas.compat._optional import import_optional_dependency
+
+    sqlalchemy = import_optional_dependency("sqlalchemy", errors="ignore")
+    print(f"BDIRKS pandas option import is {sqlalchemy}")
+
+
 def read_sql_table_as_df(  # noqa: PLR0913
     table_name,
     con,
@@ -199,6 +206,7 @@ def add_dataframe_to_db(  # noqa: PLR0913
             # BDIRKS line that dies
             print(f"BDIRKS - con is {con}.")
             print(f"BDIRKS sqlalchemy is not None? {sqlalchemy is not None}")
+            bdirks_test()
             print(
                 f"BDIRKS is a a connectable? {isinstance(con, (str, sqlalchemy.engine.Connectable))}"
             )
