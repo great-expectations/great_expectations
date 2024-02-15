@@ -258,7 +258,7 @@ module.exports = {
           // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
             ['0.18']: {
-              label: '0.18.8',
+              label: '1.0.0a1',
               path: ''
             },
             ["0.17"]: {
