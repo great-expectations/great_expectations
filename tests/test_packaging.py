@@ -184,7 +184,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 77
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 78
     assert set(sorted_packages_with_pins_or_upper_bounds) == {
         (
             "requirements-dev-api-docs-test.txt",
@@ -192,6 +192,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
             (("==", "0.15"),),
         ),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
+        ("requirements-dev-clickhouse.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev-contrib.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev-contrib.txt", "black", (("==", "23.10.1"),)),
         ("requirements-dev-contrib.txt", "mypy", (("==", "1.7.1"),)),
