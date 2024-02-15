@@ -14,7 +14,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Test and validate your Data Assets with our original offering.
+  Test and validate your Data Assets with our open source offering.
 </OverviewCard>
 
 ### Prepare

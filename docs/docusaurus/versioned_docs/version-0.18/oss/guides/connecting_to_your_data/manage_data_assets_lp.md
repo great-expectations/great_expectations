@@ -11,7 +11,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  This is where you'll find information for managing your Data Assets. A Data Asset is a collection of records within a Data Source that define how Great Expectations (GX) organizes data into Batches.
+  This is where you'll find information for managing your Data Assets. A Data Asset is a collection of records within a Data Source that define how GX organizes data into Batches.
 </OverviewCard>
 
 <LinkCardGrid>
