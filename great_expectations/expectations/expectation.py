@@ -37,6 +37,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import is_evaluation_parameter
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -130,7 +131,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
-                if isinstance(value, dict) and "$PARAMETER" in value.keys():
+                if is_evaluation_parameter(value):
                     current_expectation_params.append(value["$PARAMETER"])
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
