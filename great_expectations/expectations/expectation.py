@@ -1231,6 +1231,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @property
     def evaluation_parameter_options(self) -> tuple[str, ...]:
+        """EvaluationParameter options for this Expectation.
+
+        Returns:
+            tuple[str, ...]: The keys of the evaluation parameters used in this Expectation at runtime.
+        """
         output: set[str] = set()
         as_dict = self.dict(exclude_defaults=True)
         for value in as_dict.values():
