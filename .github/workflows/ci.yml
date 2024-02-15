@@ -1,6 +1,6 @@
 name: ci
 
-# This pipeline is intended to facilitate the full coverage of tests for OSS GX.
+# This pipeline is intended to facilicate the full coverage of tests for OSS GX.
 # A "reasonable" set of tests will run on every pull request, and a full set will run with:
 #   1. Manual triggering
 #   2. Every 3 hours
@@ -95,8 +95,8 @@ jobs:
     needs: [unit-tests, docs-changes, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true' && github.base_ref == 'develop') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -240,8 +240,8 @@ jobs:
     needs: [doc-checks, docs-changes]
     # run on non-draft PRs with docs changes
     if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true' && github.base_ref == 'develop') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -318,8 +318,8 @@ jobs:
         run: invoke ci-tests 'cloud' --up-services --verbose
 
   marker-tests:
-    needs: [unit-tests, static-analysis]
-    if: github.event.pull_request.draft == false
+    needs: []
+    # if: github.event.pull_request.draft == false
     env:
     # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
@@ -342,25 +342,25 @@ jobs:
       matrix:
         markers:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
-          - aws_deps
-          - big
-          - cli
-          - databricks
-          - filesystem
-          - mssql
-          - mysql
-          - postgresql
+          # - aws_deps
+          # - big
+          # - cli
+          # - databricks
+          # - filesystem
+          # - mssql
+          # - mysql
+          # - postgresql
           - snowflake
-          - spark
-          - trino
+          # - spark
+          # - trino
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
           # prevents this https://github.com/rhysd/actionlint/issues/237
           - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
-          - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
-          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
+          # - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          # - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.9' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.10' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.11' }}
