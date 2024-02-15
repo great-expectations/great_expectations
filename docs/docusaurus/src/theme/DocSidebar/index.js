@@ -1,9 +1,9 @@
 import React from 'react';
 import DocSidebar from '@theme-original/DocSidebar';
-import {useLocation} from '@docusaurus/router';
+import { useLocation } from '@docusaurus/router';
 
 export default function DocSidebarWrapper(props) {
-  const {pathname, hash} = useLocation();
+  const { pathname, hash} = useLocation();
 
   let path = pathname;
   if (hash) {
