@@ -962,6 +962,7 @@ def deps(  # noqa: PLR0913
     if constraints:
         cmds.append("-c constraints-dev.txt")
 
+    print(cmds)
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
