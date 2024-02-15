@@ -201,7 +201,7 @@ module.exports = {
             {
               "type": "link",
               "label": "Configure the Checkpoint result format parameter",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#configure_the_checkpoint_result_format_parameter"
+          "href": "/docs/cloud/checkpoints/manage_checkpoints#configure-the-checkpoint-result-format-parameter"
             },
             {
               type: 'link',
