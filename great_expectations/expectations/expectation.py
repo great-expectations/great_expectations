@@ -133,11 +133,10 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
-            for key, value in kwargs_dict.items():
+            for value in kwargs_dict.values():
                 if is_evaluation_parameter(value):
-                    current_expectation_params.append(
-                        get_evaluation_parameter_key(value)
-                    )
+                    x = get_evaluation_parameter_key(value)
+                    current_expectation_params.append(x)
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
