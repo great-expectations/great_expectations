@@ -19,7 +19,7 @@ export default function WasThisHelpful(){
     };
 
     return <div className={styles.feedbackCard}>
-            <h3>Was this helpful?</h3>
+            <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
             <div className={styles.feedbackCardBody}>
                 <img src={thumbsUpImg} className={styles.feedbackIcon}
                      alt="Thumbs up icon" onClick={handleThumbsUp}/>
