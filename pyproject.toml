@@ -467,9 +467,6 @@ filterwarnings = [
     'ignore: distutils Version classes are deprecated. Use packaging.version instead.:DeprecationWarning',
 
     # pandas
-    # Example Actual Warning: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
-    'ignore: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection:UserWarning',
-    # Found when runing pytest tests/test_definitions/test_expectations_v3_api.py
     # Example Actual Warning: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
     # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
     'ignore: In a future version of pandas, parsing datetimes with mixed time zones:FutureWarning',
