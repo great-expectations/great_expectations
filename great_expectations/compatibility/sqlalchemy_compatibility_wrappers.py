@@ -198,6 +198,7 @@ def add_dataframe_to_db(  # noqa: PLR0913
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             # BDIRKS line that dies
             print(f"BDIRKS - con is {con}.")
+            print(f"BDIRKS sqlalchemy is not None? {sqlalchemy is not None}")
             print(
                 f"BDIRKS is a a connectable? {isinstance(con, (str, sqlalchemy.engine.Connectable))}"
             )
