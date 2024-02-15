@@ -501,6 +501,8 @@ filterwarnings = [
     # Example Actual Warning: DeprecationWarning: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.
     # This is a legacy pattern that will be removed from GX
     'ignore: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
+    # Example Actual Warning: DeprecationWarning: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.
+    'ignore: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
