@@ -447,6 +447,9 @@ filterwarnings = [
     'ignore: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.',
     # Example Actual Warning: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
     'ignore: In a future version of pandas, parsing datetimes with mixed time zones will raise an error:FutureWarning',
+    # Example Actual Warning: test_cli_datasource_new_from_misc_directory - DeprecationWarning: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.
+    # This is a legacy pattern that will be removed from GX
+    'ignore: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
