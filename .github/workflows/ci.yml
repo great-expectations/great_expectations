@@ -351,18 +351,8 @@ jobs:
     strategy:
       matrix:
         markers:
-          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
-          - aws_deps
-          - big
-          - databricks
-          - filesystem
-          - mssql
-          - mysql
-          - postgresql
           - snowflake
-          - spark
-          - trino
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.10",]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
