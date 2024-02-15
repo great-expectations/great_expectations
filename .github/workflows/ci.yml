@@ -329,7 +329,6 @@ jobs:
 
 
   marker-tests:
-    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
     # aws

@@ -38,6 +38,7 @@ except (ImportError, AttributeError):
 
 def pytest_generate_tests(metafunc):  # noqa C901 - 35
     # Load all the JSON files in the directory
+    # breakpoint()
     dir_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     expectation_dirs = [
         dir_
@@ -132,6 +133,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         index=index,
                                     )
                                 )
+                                # BDIRKS this is the line that dies
                                 validator_with_data = get_test_validator_with_data(
                                     execution_engine=backend,
                                     data=dataset,
@@ -455,8 +457,10 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
 @pytest.mark.order(index=0)
 @pytest.mark.slow  # 12.68s
 def test_case_runner_v3_api(test_case):
-    if test_case["skip"]:
-        pytest.skip()
+    # breakpoint()
+
+    # if test_case["skip"]:
+    #     pytest.skip()
 
     evaluate_json_test_v3_api(
         validator=test_case["validator_with_data"],

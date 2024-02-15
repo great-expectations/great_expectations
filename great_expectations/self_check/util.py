@@ -637,6 +637,7 @@ def get_test_validator_with_data(  # noqa: PLR0913
             pk_column=pk_column,
         )
     elif execution_engine in SQL_DIALECT_NAMES:
+        # BDIRKS this is the line that dies - 1
         return _get_test_validator_with_data_sqlalchemy(
             df=df,
             execution_engine=execution_engine,
@@ -732,6 +733,7 @@ def _get_test_validator_with_data_sqlalchemy(  # noqa: PLR0913
         raise ExecutionEngineError(
             "Initializing a Validator for SqlAlchemyExecutionEngine in tests requires `table_name` to be defined. Please check your configuration"
         )
+    # BDIRKS line that dies 2
     return build_sa_validator_with_data(
         df=df,
         sa_engine_name=execution_engine,
@@ -1086,6 +1088,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     with execution_engine.get_connection() as connection:
         _debug("Calling df.to_sql")
         _start = time.time()
+        # BDIRKS line that dies 3
         add_dataframe_to_db(
             df=df,
             name=table_name,

@@ -1025,7 +1025,7 @@ def ci_tests(  # noqa: PLR0913
 
     Defined this as a new invoke task to avoid some of the baggage of our old test setup.
     """
-    pytest_options = [f"--durations={slowest}", "-rEf"]
+    pytest_options = [f"--durations={slowest}", "-rEf", "--collect-only", "-s"]
 
     if xdist:
         pytest_options.append("-n auto")
