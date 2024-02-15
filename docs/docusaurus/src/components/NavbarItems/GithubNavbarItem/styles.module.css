@@ -6,6 +6,12 @@
     padding-right: 2rem;
 }
 
+@media (max-width: var(--mobile-breakpoint)) {
+    .githubBadge {
+        display: none;
+    }
+}
+
 .githubBadgeNoErrors {
     min-width: 8.5rem;
 }
