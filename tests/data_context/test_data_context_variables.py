@@ -466,6 +466,9 @@ def test_data_context_variables_save_config(
         ):
             expected_config_dict[attr] = data_context_config_dict[attr]
 
+        # Add null values for stores that are not configured
+        expected_config_dict["profiler_store_name"] = None
+
         assert mock_put.call_count == 1
         mock_put.assert_called_with(
             mock.ANY,  # requests.Session object
