@@ -345,14 +345,14 @@ jobs:
           # - aws_deps
           # - big
           # - cli
-          # - databricks
+          - databricks
           # - filesystem
-          # - mssql
-          # - mysql
-          # - postgresql
+          - mssql
+          - mysql
+          - postgresql
           - snowflake
           # - spark
-          # - trino
+          - trino
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
