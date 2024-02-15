@@ -18,11 +18,8 @@ export default function WasThisHelpful(){
         posthog.capture('test_docs.thumbs_down', { doc_url: pathname });
     };
 
-    return <>
-        <div className={styles.feedbackCard}>
-            <div className={styles.feedbackCardTitle}>
-                <h3>Was this helpful?</h3>
-            </div>
+    return <div className={styles.feedbackCard}>
+            <h3>Was this helpful?</h3>
             <div className={styles.feedbackCardBody}>
                 <img src={thumbsUpImg} className={styles.feedbackIcon}
                      alt="Thumbs up icon" onClick={handleThumbsUp}/>
@@ -30,5 +27,4 @@ export default function WasThisHelpful(){
                      alt="Thumbs down icon" onClick={handleThumbsDown}/>
             </div>
         </div>
-    </>
 }
