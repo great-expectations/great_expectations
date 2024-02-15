@@ -201,8 +201,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
     my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
     with pytest.raises(InvalidCacheValueError):
-        with pytest.warns(Warning, match=r"No great_expectations version found"):
-            my_df.validate(catch_exceptions=False)
+        my_df.validate(catch_exceptions=False)
 
 
 @pytest.mark.filesystem

@@ -10,7 +10,6 @@ To show task help page `invoke <NAME> --help`
 """
 from __future__ import annotations
 
-import json
 import logging
 import os
 import pathlib
@@ -319,50 +318,6 @@ def type_check(  # noqa: PLR0913, PLR0912
         cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
-
-
-@invoke.task(aliases=["get-stats"])
-def get_usage_stats_json(ctx: Context):
-    """
-    Dump usage stats event examples to json file
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    events = usage_stats_utils.get_usage_stats_example_events()
-    version = usage_stats_utils.get_gx_version()
-
-    outfile = f"v{version}_example_events.json"
-    with open(outfile, "w") as f:
-        json.dump(events, f)
-
-    print(f"File written to '{outfile}'.")
-
-
-@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx: Context):
-    """
-    Use databricks-cli lib to move usage stats event examples to dbfs:/
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    version = usage_stats_utils.get_gx_version()
-    outfile = f"v{version}_example_events.json"
-    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
-    cmd = cmd.format(outfile)
-    ctx.run(cmd)
-    print(f"'{outfile}' copied to dbfs.")
 
 
 UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
