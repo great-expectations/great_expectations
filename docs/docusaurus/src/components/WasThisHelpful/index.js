@@ -15,7 +15,7 @@ export default function WasThisHelpful(){
     };
 
     const handleThumbsDown = () => {
-        posthog.capture('test_docs.thumbs_down', { doc_url: pathname });
+        posthog.capture('test_docs.thumbs_down', { doc_url: pathname })
     };
 
     return <div className={styles.feedbackCard}>
