@@ -276,6 +276,7 @@ def filesystem_datasource(test_backends, empty_data_context, request) -> Datasou
 
     return request.param(empty_data_context)
 
+
 @pytest.fixture
 def context() -> EphemeralDataContext:
     """Return an ephemeral data context for testing."""
