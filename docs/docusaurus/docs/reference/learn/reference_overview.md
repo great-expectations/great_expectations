@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Learn'
 title: 'Learn'
+hide_title: true
 id: reference_overview
 description: Supplemental information that will help you get the most out of Great Expectations.
 slug: '/reference/learn/'
@@ -10,8 +11,11 @@ hide_table_of_contents: true
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">This is where you'll find supplemental information that will help you get the most out of Great Expectations (GX).</p>
+<OverviewCard title={frontMatter.title}>
+  Use longer format conceptual information to learn more about GX features and functionality.
+</OverviewCard>
 
 ## Supplemental Information
 
