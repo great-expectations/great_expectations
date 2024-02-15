@@ -155,7 +155,7 @@ class ExpectationSuite(SerializableDictDot):
         """EvaluationParameter options for this ExpectationSuite.
 
         Returns:
-            tuple[str, ...]: The keys of the evaluation parameters used in by all Expectations of this suite at runtime.
+            tuple[str, ...]: The keys of the evaluation parameters used by all Expectations of this suite at runtime.
         """
         output: set[str] = set()
         for expectation in self.expectations:
