@@ -107,6 +107,7 @@ def test_batch_request_config_serialization_round_trips(
         f'"datasource_name": "{datasource_name}", '
         f'"data_asset_name": "{data_asset_name}", '
         f'"options": {options_json}, '
+        '"partitioner": null, '
         f'"batch_slice": {batch_slice_json}'
         "}"
     )

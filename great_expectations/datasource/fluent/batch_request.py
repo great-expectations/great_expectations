@@ -21,6 +21,9 @@ from great_expectations.compatibility.pydantic import (
 
 # default_ref_template
 from great_expectations.compatibility.typing_extensions import override
+
+# moving this import into TYPE_CHECKING requires forward refs to be updated.
+from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
@@ -28,8 +31,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
-
-    from great_expectations.core.partitioners import Partitioner
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
