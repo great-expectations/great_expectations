@@ -888,6 +888,9 @@ class InvalidDatasource(Datasource):
     class Config:
         extra = "allow"
         arbitrary_types_allowed = True
+        json_encoders = {
+            pydantic.ValidationError: lambda v: v.errors(),
+        }
 
     # TODO: override more methods to raise helpful errors
 
