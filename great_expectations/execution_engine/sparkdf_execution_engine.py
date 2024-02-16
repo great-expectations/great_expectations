@@ -22,12 +22,12 @@ from typing import (
 
 from dateutil.parser import parse
 
+from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility import py4j, pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
