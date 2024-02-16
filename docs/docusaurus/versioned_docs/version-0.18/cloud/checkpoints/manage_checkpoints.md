@@ -82,7 +82,7 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
 4. Click **Run Checkpoint** for the Checkpoint you want to run.
 
 
-## Add a Validation and an Expectation Suite to a Checkpoint
+## Add a Validation to a Checkpoint
 
 Add validation data to a Checkpoint to aggregate individual Expectation Suite or Data Source Validations into a single Checkpoint. For more information, see [Add Validation data or Expectation Suites to a Checkpoint](../../oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md) in the GX OSS documentaion.
 
