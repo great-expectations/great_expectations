@@ -99,14 +99,15 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
     import great_expectations as gx
     context = gx.get_context()
     ```
-2. Run the following Python code to retrieve the Checkpoint:
+2. In GX Cloud, click **Checkpoints**.
 
-    ```python title="Jupyter Notebook"
-    retrieved_checkpoint = context.get_checkpoint(name="<checkpoint_name>") 
-    ```
-3. Edit the Checkpoint configuration. 
+3. Click **Edit Checkpoint** in the **Checkpoints** list for the Checkpoint you want to edit.
 
-4. Run the following code to update the Checkpoint configuration:
+4. Copy the code snippet and then close the **Edit checkpoint** dialog.
+
+5. Paste the the code snippet into Jupyter Notebook and then edit the Checkpoint configuration.
+
+6. Run the following code to update the Checkpoint configuration:
 
     ```python title="Jupyter Notebook"
     checkpoint = context.add_or_update_checkpoint(**checkpoint_config) 
