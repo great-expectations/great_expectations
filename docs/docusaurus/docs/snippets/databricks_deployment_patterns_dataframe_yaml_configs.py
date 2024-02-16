@@ -12,12 +12,13 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
 )
-from great_expectations.execution_engine.sparkdf_execution_engine import (
-    SparkDFExecutionEngine,
-)
 
 yaml = YAMLHandler()
 # </snippet>
+
+from great_expectations.execution_engine.sparkdf_execution_engine import (
+    SparkDFExecutionEngine,
+)
 
 spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
