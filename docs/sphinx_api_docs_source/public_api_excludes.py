@@ -818,4 +818,14 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
             "great_expectations/execution_engine/sparkdf_execution_engine.py"
         ),
     ),
+    IncludeExcludeDefinition(
+        reason="This method can be removed in 1.0",
+        name="get_or_create_spark_application",
+        filepath=pathlib.Path("great_expectations/core/util.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method can be removed in 1.0",
+        name="get_or_create_spark_session",
+        filepath=pathlib.Path("great_expectations/core/util.py"),
+    ),
 ]

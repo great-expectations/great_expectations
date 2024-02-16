@@ -288,7 +288,7 @@ def filesystem_datasource(test_backends, empty_data_context, request) -> Datasou
     if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    return request.param(empty_data_context)
+    return request.param(test_backends, empty_data_context)
 
 
 @pytest.fixture
