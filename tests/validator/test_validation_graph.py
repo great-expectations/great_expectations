@@ -1,4 +1,5 @@
 import sys
+import uuid
 from typing import Dict, Iterable, Optional, Set, Tuple, Union, cast
 from unittest import mock
 
@@ -20,6 +21,42 @@ from great_expectations.validator.validation_graph import (
     ValidationGraph,
 )
 from great_expectations.validator.validator import ValidationDependencies
+
+
+@pytest.fixture
+def pandas_execution_engine_fake(
+    failed_metric_config: MetricConfiguration,
+) -> ExecutionEngine:
+    class PandasExecutionEngineFake:
+        # noinspection PyUnusedLocal
+        @staticmethod
+        def resolve_metrics(
+            metrics_to_resolve: Iterable[MetricConfiguration],
+            metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
+            runtime_configuration: Optional[dict] = None,
+        ) -> Dict[Tuple[str, str, str], MetricValue]:
+            """
+            This stub method implementation insures that specified "MetricConfiguration", designed to fail, will cause
+            appropriate exception to be raised, while its dependencies resolve to actual values ("my_value" is used here
+            as placeholder).  This makes "ValidationGraph.resolve()" -- method under test -- evaluate every
+            "MetricConfiguration" of parsed "ValidationGraph" successfully, except "failed" "MetricConfiguration".
+            """
+            metric_configuration: MetricConfiguration
+            if failed_metric_config.id in [
+                metric_configuration.id for metric_configuration in metrics_to_resolve
+            ]:
+                raise gx_exceptions.MetricResolutionError(
+                    message=f'Error: The column "not_in_table" in BatchData does not exist.{uuid.uuid4()!s}',  # Randomizing the message to assert that only one exception is kept
+                    failed_metrics=[failed_metric_config],
+                )
+
+            return {
+                metric_configuration.id: "my_value"
+                for metric_configuration in metrics_to_resolve
+            }
+
+    PandasExecutionEngineFake.__name__ = "PandasExecutionEngine"
+    return cast(ExecutionEngine, PandasExecutionEngineFake())
 
 
 @pytest.fixture
@@ -323,47 +360,24 @@ def test_populate_dependencies_with_incorrect_metric_name():
 
 
 @pytest.mark.unit
-def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
-    failed_metric_configuration = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={
-            "column": "not_in_table",
-        },
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": False,
-        },
-    )
-
-    class PandasExecutionEngineFake:
-        # noinspection PyUnusedLocal
-        @staticmethod
-        def resolve_metrics(
-            metrics_to_resolve: Iterable[MetricConfiguration],
-            metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
-            runtime_configuration: Optional[dict] = None,
-        ) -> Dict[Tuple[str, str, str], MetricValue]:
-            """
-            This stub method implementation insures that specified "MetricConfiguration", designed to fail, will cause
-            appropriate exception to be raised, while its dependencies resolve to actual values ("my_value" is used here
-            as placeholder).  This makes "ValidationGraph.resolve()" -- method under test -- evaluate every
-            "MetricConfiguration" of parsed "ValidationGraph" successfully, except "failed" "MetricConfiguration".
-            """
-            metric_configuration: MetricConfiguration
-            if failed_metric_configuration.id in [
-                metric_configuration.id for metric_configuration in metrics_to_resolve
-            ]:
-                raise gx_exceptions.MetricResolutionError(
-                    message='Error: The column "not_in_table" in BatchData does not exist.',
-                    failed_metrics=[failed_metric_configuration],
-                )
-
-            return {
-                metric_configuration.id: "my_value"
-                for metric_configuration in metrics_to_resolve
-            }
-
-    PandasExecutionEngineFake.__name__ = "PandasExecutionEngine"
-    execution_engine = cast(ExecutionEngine, PandasExecutionEngineFake())
+@pytest.mark.parametrize(
+    "failed_metric_config",
+    [
+        MetricConfiguration(
+            metric_name="column.max",
+            metric_domain_kwargs={
+                "column": "not_in_table",
+            },
+            metric_value_kwargs={
+                "parse_strings_as_datetimes": False,
+            },
+        ),
+    ],
+)
+def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
+    pandas_execution_engine_fake, failed_metric_config
+):
+    execution_engine = pandas_execution_engine_fake
 
     graph = ValidationGraph(execution_engine=execution_engine)
 
@@ -373,7 +387,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
     }
 
     graph.build_metric_dependency_graph(
-        metric_configuration=failed_metric_configuration,
+        metric_configuration=failed_metric_config,
         runtime_configuration=runtime_configuration,
     )
 
@@ -397,8 +411,8 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
 
     exception_info = next(iter(aborted_metric_info_item["exception_info"]))
     assert (
-        exception_info["exception_message"]
-        == 'Error: The column "not_in_table" in BatchData does not exist.'
+            'Error: The column "not_in_table" in BatchData does not exist.'
+            in exception_info["exception_message"]
     )
 
 
