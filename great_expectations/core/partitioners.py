@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import List, Literal, Union
 
 from great_expectations.compatibility import pydantic
 
@@ -21,7 +21,7 @@ class PartitionerYearAndMonthAndDay(pydantic.BaseModel):
 
 
 class PartitionerDatetimePart(pydantic.BaseModel):
-    datetime_parts: list[str]
+    datetime_parts: List[str]
     column_name: str
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
 
@@ -46,7 +46,7 @@ class PartitionerColumnValue(pydantic.BaseModel):
 
 
 class PartitionerMultiColumnValue(pydantic.BaseModel):
-    column_names: list[str]
+    column_names: List[str]
     method_name: Literal[
         "partition_on_multi_column_values"
     ] = "partition_on_multi_column_values"
