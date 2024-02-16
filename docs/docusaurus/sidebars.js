@@ -199,6 +199,11 @@ module.exports = {
               href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
             },
             {
+              "type": "link",
+              "label": "Configure the Checkpoint result format parameter",
+          "href": "/docs/cloud/checkpoints/manage_checkpoints#configure-the-checkpoint-result-format-parameter"
+            },
+            {
               type: 'link',
               label: 'Delete a Checkpoint',
               href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
@@ -315,22 +320,22 @@ module.exports = {
                 {
                   type: 'link',
                   label: 'Create an Expectation',
-                  href: '/docs/next/core/expectations/manage_expectations#create-an-expectation',
+                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#create-an-expectation',
                 },
                 {
                   type: 'link',
                   label: 'Test an Expectation',
-                  href: '/docs/next/core/expectations/manage_expectations#test-an-expectation',
+                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#test-an-expectation',
                 },
                 {
                   type: 'link',
                   label: 'Modify an Expectation',
-                  href: '/docs/next/core/expectations/manage_expectations#modify-an-expectation',
+                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#modify-an-expectation',
                 },
                 {
                   type: 'link',
                   label: 'Customize an Expectation Class',
-                  href: '/docs/next/core/expectations/manage_expectations#customize-an-expectation-class',
+                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#customize-an-expectation-class',
                 },
               ]
             },
@@ -342,47 +347,47 @@ module.exports = {
                 {
                   type: 'link',
                   label: 'Create an Expectation Suite',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
                 },
                 {
                   type: 'link',
                   label: 'Get an existing Expectation Suite',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
                 },
                 {
                   type: 'link',
                   label: 'Modify an Expectation Suite',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#modify-an-expectation-suite',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#modify-an-expectation-suite',
                 },
                 {
                   type: 'link',
                   label: 'Delete an Expectation Suite',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
                 },
                 {
                   type: 'link',
                   label: 'Add Expectations',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#add-expectations',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#add-expectations',
                 },
                 {
                   type: 'link',
                   label: 'Get an Expectation',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#get-an-expectation',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#get-an-expectation',
                 },
                 {
                   type: 'link',
                   label: 'Edit a single Expectation',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#edit-a-single-expectation',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#edit-a-single-expectation',
                 },
                 {
                   type: 'link',
                   label: 'Edit multiple Expectations',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#edit-multiple-expectations',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#edit-multiple-expectations',
                 },
                 {
                   type: 'link',
                   label: 'Delete an Expectation',
-                  href: '/docs/next/core/expectation_suites/manage_expectation_suites#delete-an-expectation',
+                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#delete-an-expectation',
                 },
               ]
             },

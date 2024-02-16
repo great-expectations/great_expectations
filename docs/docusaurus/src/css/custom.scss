@@ -16,6 +16,7 @@
 @import "searchBar.scss";
 @import "alerts.scss";
 @import "pagination.scss";
+@import "overview_pages";
 
 /* You can override the default Infima variables here. */
 :root {
@@ -270,6 +271,10 @@ li ol {
 li p + ul,
 li p + ol {
   margin-top: calc( -1 * var(--ifm-paragraph-margin-bottom) + 0.5em);
+}
+
+.theme-doc-version-badge {
+  display: none;
 }
 
 @import "api_docs/api_docs.scss";
