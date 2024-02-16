@@ -105,12 +105,6 @@ class GxDatasourceWarning(UserWarning):
     """
 
 
-class GxInvalidDatasourceWarning(GxDatasourceWarning):
-    """
-    A warning that the Datasource configuration is invalid and will must be updated before it can used.
-    """
-
-
 class GxSerializationWarning(GxDatasourceWarning):
     pass
 
@@ -863,49 +857,6 @@ class Datasource(
         return cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS.union(_BASE_DATASOURCE_FIELD_NAMES)
 
     # End Abstract Methods
-
-
-class InvalidAsset(DataAsset):
-    """A DataAsset that is invalid."""
-
-    type: str = "invalid"  # TODO: ensure this isn't registered as a real data asset
-    name: str = "invalid"
-
-    class Config:
-        extra = "allow"
-        arbitrary_types_allowed = True
-
-
-class InvalidDatasource(Datasource):
-    """A Datasource that is invalid.
-
-    This is used to represent a Datasource that is invalid and cannot be used.
-    """
-
-    # class var definitions
-    asset_types: ClassVar[List[Type[DataAsset]]] = [InvalidAsset]
-    _type_lookup: ClassVar[TypeLookup]  # TODO: set this to always return InvalidAsset
-
-    type: str = "invalid"
-    config_error: pydantic.ValidationError = Field(
-        ..., description="The error that caused the Datasource to be invalid."
-    )
-    assets: List[InvalidAsset] = []
-
-    class Config:
-        extra = "allow"
-        arbitrary_types_allowed = True
-        json_encoders = {
-            pydantic.ValidationError: lambda v: v.errors(),
-        }
-
-    # TODO: override more methods to raise helpful errors
-
-    @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        raise TestConnectionError(
-            "This Datasource configuration is invalid and cannot be used. Please fix the error and try again"
-        ) from self.config_error
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
