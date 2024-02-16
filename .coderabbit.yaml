@@ -1,3 +1,4 @@
+# Only enables summaries for PRs. Disables auto-review
 language: "en"
 early_access: false
 reviews:
@@ -9,14 +10,6 @@ reviews:
   path_filters:
     - "!**/.xml"
     - "great_expectations/**"
-  # path_instructions:
-  #     - path: "**/*.js"
-  #       instructions: "Review the JavaScript code for conformity with the Google JavaScript style guide, highlighting any deviations."
-  #     - path: "tests/**/*"
-  #       instructions: |
-  #           "Assess the unit test code employing the Mocha testing framework. Confirm that:
-  #           - The tests adhere to Mocha's established best practices.
-  #           - Test descriptions are sufficiently detailed to clarify the purpose of each test."
   auto_review:
     enabled: false
     ignore_title_keywords:
