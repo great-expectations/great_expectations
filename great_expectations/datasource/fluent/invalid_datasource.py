@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import ClassVar, List, Type, overload
+import warnings
+from typing import TYPE_CHECKING, ClassVar, List, NoReturn, Type, overload
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
@@ -12,6 +13,10 @@ from great_expectations.datasource.fluent import (
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch_config import BatchConfig
+    from great_expectations.datasource.fluent.batch_request import BatchRequest
 
 
 class GxInvalidDatasourceWarning(GxDatasourceWarning):
@@ -50,9 +55,16 @@ class InvalidAssetTypeLookup(TypeLookup):
 
 
 class InvalidDatasource(Datasource):
-    """A Datasource that is invalid.
+    """
+    A Datasource that is invalid.
 
     This is used to represent a Datasource that is invalid and cannot be used.
+
+    This class should override all methods that would commonly be called when a user intends to use the Datasource.
+    The overridden methods should indicate to the user that the Datasource configuration is invalid and provide details about
+    why it was considered invalid.
+
+    Any errors raised should raise `from self.config_error`.
     """
 
     # class var definitions
@@ -71,10 +83,30 @@ class InvalidDatasource(Datasource):
             pydantic.ValidationError: lambda v: v.errors(),
         }
 
-    # TODO: override more methods to raise helpful errors
-
     @override
     def test_connection(self, test_assets: bool = True) -> None:
         raise TestConnectionError(
             "This Datasource configuration is invalid and cannot be used. Please fix the error and try again"
         ) from self.config_error
+
+    @override
+    def get_asset(self, asset_name: str) -> InvalidAsset:
+        """
+        Always raise a warning and return an InvalidAsset.
+        Don't raise an error because the users may want to inspect the asset config.
+        """
+        warnings.warn(
+            f"The {self.name} Datasource configuration for this asset is invalid and cannot be used. Please fix the error and try again",
+            GxInvalidDatasourceWarning,
+        )
+        return super().get_asset(asset_name)
+
+    @override
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> NoReturn:
+        raise TypeError(f"{self.name} Datasource is invalid") from self.config_error
+
+    @override
+    def add_batch_config(self, batch_config: BatchConfig) -> NoReturn:
+        raise TypeError(f"{self.name} Datasource is invalid") from self.config_error

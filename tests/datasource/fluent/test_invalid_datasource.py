@@ -16,9 +16,9 @@ def invalid_datasource_factory() -> (
     Callable[[dict[Literal["name", "type", "assets"] | Any, Any]], InvalidDatasource]
 ):
     def _invalid_ds_fct(config: dict) -> InvalidDatasource:
-        ds_type: Datasource = _SourceFactories.type_lookup[config["type"]]
+        ds_type: type[Datasource] = _SourceFactories.type_lookup[config["type"]]
         try:
-            return ds_type(**config)
+            ds_type(**config)
         except pydantic.ValidationError as config_error:
             return InvalidDatasource(**config, config_error=config_error)
         raise ValueError("The Datasource was valid")
