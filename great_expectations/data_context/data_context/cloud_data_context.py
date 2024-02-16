@@ -76,6 +76,8 @@ if TYPE_CHECKING:
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
     )
+    from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.validator.validator import Validator
 
@@ -463,31 +465,6 @@ class CloudDataContext(SerializableDataContext):
         )
 
         return self._data_asset_store.remove_key(key)
-
-    @override
-    @public_api
-    def get_datasource(self, datasource_name: str = "default") -> FluentDatasource:
-        """
-        Get a datasource by name.
-
-        Args:
-            datasource_name: the name of the datasource to get
-
-        Returns:
-            Datasource
-        """
-        if datasource_name is None:
-            raise ValueError(
-                "Must provide a datasource_name to retrieve an existing Datasource"
-            )
-
-        try:
-            datasource: FluentDatasource = self.datasources[datasource_name]  # type: ignore[assignment] # cloud context does not support BDS
-        except KeyError as e:
-            raise ValueError(str(e)) from e
-
-        datasource._data_context = self
-        return datasource
 
     @override
     def list_expectation_suite_names(self) -> List[str]:
@@ -974,14 +951,14 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: FluentDatasource | None = None,  # type: ignore[override] # cloud context does not support BDS
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
-    ) -> FluentDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         if datasource and not isinstance(datasource, FluentDatasource):
             raise TypeError(
                 "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."
             )
-        return super()._add_datasource(  # type: ignore[return-value] # cloud context does not support BDS
+        return super()._add_datasource(
             name=name,
             initialize=initialize,
             datasource=datasource,
