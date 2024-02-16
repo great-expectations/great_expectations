@@ -58,6 +58,8 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import Self, TypeAlias, TypeGuard
 
+    from great_expectations.core.partitioners import Partitioner
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     from great_expectations.core import (
@@ -79,7 +81,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         BatchRequestOptions,
-        Partitioner,
     )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
