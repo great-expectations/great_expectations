@@ -6,6 +6,9 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pydantic import (
+    ValidationError as PydanticValidationError,
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import (
     DataContextKey,
@@ -18,6 +21,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.datasource.fluent import InvalidDatasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
@@ -118,7 +122,10 @@ class DatasourceStore(Store):
                 datasource_model = _SourceFactories.type_lookup.get(type_)
                 if not datasource_model:
                     raise LookupError(f"Unknown Datasource 'type': '{type_}'")
-                return datasource_model(**value)
+                try:
+                    return datasource_model(**value)
+                except PydanticValidationError as config_error:
+                    return InvalidDatasource(config_error=config_error, **value)
             return self._schema.load(value)
         else:
             return self._schema.loads(value)

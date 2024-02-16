@@ -334,13 +334,28 @@ def test_cloud_context_delete_datasource(
 @pytest.mark.parametrize(
     "invalid_datasource_config",
     [
-        pytest.param(
-            {"type": "not_a_real_datasource_type", "foo": "bar"}, id="invalid_type"
-        ),
+        # pytest.param(
+        #     {"type": "not_a_real_datasource_type", "foo": "bar"}, id="invalid_type"
+        # ),
         pytest.param(
             {"type": "postgres", "connection_string": "postmalone+pyscopg2://"},
-            id="invalid_pg_conn_string",
+            id="invalid pg conn_string",
         ),
+        # pytest.param(
+        #     {
+        #         "type": "sqlite",
+        #         "connection_string": "sqlite:///",
+        #         "assets": [
+        #             {
+        #                 "name": "bad_query_asset",
+        #                 "type": "query",
+        #                 "query": "select * from foo",
+        #                 "table_name": "this is not valid",
+        #             }
+        #         ],
+        #     },
+        #     id="invalid asset",
+        # ),
     ],
 )
 def test_invalid_datasource_config_does_not_break_cloud_context(

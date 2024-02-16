@@ -9,6 +9,7 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchMetadata,
     GxDatasourceWarning,
     TestConnectionError,
+    InvalidDatasource,
 )
 from great_expectations.datasource.fluent.partitioners import Partitioner
 
