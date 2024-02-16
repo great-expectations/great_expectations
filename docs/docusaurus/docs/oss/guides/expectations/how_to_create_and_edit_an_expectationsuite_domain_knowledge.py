@@ -26,7 +26,7 @@ suite = context.add_expectation_suite(expectation_suite_name="my_suite")
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
 )
 
@@ -59,7 +59,7 @@ expectation_configuration_1 = ExpectationConfiguration(
 )
 # Add the Expectation to the suite
 suite.add_expectation_configuration(
-    expectation_configuration=expectation_configuration_1
+    [expectation_configuration_1]
 )
 # </snippet>
 
@@ -73,7 +73,7 @@ expectation_configuration_2 = ExpectationConfiguration(
     # Note optional comments omitted
 )
 suite.add_expectation_configuration(
-    expectation_configuration=expectation_configuration_2
+    [expectation_configuration_2]
 )
 # </snippet>
 
@@ -92,7 +92,7 @@ expectation_configuration_3 = ExpectationConfiguration(
     },
 )
 suite.add_expectation_configuration(
-    expectation_configuration=expectation_configuration_3
+    [expectation_configuration_3]
 )
 # </snippet>
 
@@ -111,7 +111,7 @@ expectation_configuration_4 = ExpectationConfiguration(
     },
 )
 suite.add_expectation_configuration(
-    expectation_configuration=expectation_configuration_4
+    [expectation_configuration_4]
 )
 # </snippet>
 
