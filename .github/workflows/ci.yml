@@ -241,9 +241,6 @@ jobs:
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
-      - name: Add Env Variables
-        run: |
-          echo "POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}" >> .env
       - name: Build docs
         env:
           NODE_OPTIONS: --max_old_space_size=4096
