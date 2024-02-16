@@ -2290,8 +2290,6 @@ class DataContextConfig(BaseYamlConfig):
         validation_operators: list of validation operators configured by this DataContext.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
-        notebooks (Optional[NotebookConfig]): Configurations for Jupyter Notebooks associated with DataContext, such as
-            the `suite_edit` Notebook.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
         anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
             anonymous usage statistics for GX.
