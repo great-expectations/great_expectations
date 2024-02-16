@@ -226,6 +226,8 @@ def serialized_configuration_bundle() -> dict:
             "data_docs_sites": None,
             "evaluation_parameter_store_name": None,
             "expectations_store_name": None,
+            "checkpoint_store_name": None,
+            "profiler_store_name": None,
             "include_rendered_content": {
                 "expectation_suite": False,
                 "expectation_validation_result": False,
