@@ -73,6 +73,7 @@ class InvalidDatasource(Datasource):
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [InvalidAsset]
     _type_lookup: ClassVar[TypeLookup] = InvalidAssetTypeLookup()
+   
     type: str = "invalid"
     config_error: pydantic.ValidationError = Field(
         ..., description="The error that caused the Datasource to be invalid."
@@ -99,7 +100,7 @@ class InvalidDatasource(Datasource):
         Don't raise an error because the users may want to inspect the asset config.
         """
         warnings.warn(
-            f"The {self.name} Datasource configuration for this asset is invalid and cannot be used. Please fix the error and try again",
+            f"The {self.name} Datasource configuration is invalid and cannot be used. Please fix the error and try again",
             GxInvalidDatasourceWarning,
         )
         return super().get_asset(asset_name)
