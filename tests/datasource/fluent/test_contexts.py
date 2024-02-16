@@ -16,7 +16,10 @@ import requests
 from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
-from great_expectations.datasource.fluent import InvalidDatasource
+from great_expectations.datasource.fluent import (
+    GxInvalidDatasourceWarning,
+    InvalidDatasource,
+)
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
@@ -381,13 +384,14 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
             },
         }
     }
-
-    context = get_context(
-        cloud_base_url=cloud_details.base_url,
-        cloud_organization_id=cloud_details.org_id,
-        cloud_access_token=cloud_details.access_token,
-    )
-    bad_datasource = context.get_datasource(datasource_name)
+    with pytest.warns(GxInvalidDatasourceWarning):
+        context = get_context(
+            cloud_base_url=cloud_details.base_url,
+            cloud_organization_id=cloud_details.org_id,
+            cloud_access_token=cloud_details.access_token,
+        )
+        assert datasource_name in context.datasources
+        bad_datasource = context.get_datasource(datasource_name)
     # test __repr__ and __str__
     print(f"{bad_datasource!r}\n{bad_datasource!s}")
     assert isinstance(bad_datasource, InvalidDatasource)

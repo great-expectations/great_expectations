@@ -10,6 +10,7 @@ from great_expectations.datasource.fluent.interfaces import (
     GxDatasourceWarning,
     TestConnectionError,
     InvalidDatasource,
+    GxInvalidDatasourceWarning,
 )
 from great_expectations.datasource.fluent.partitioners import Partitioner
 

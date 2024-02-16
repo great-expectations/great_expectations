@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import warnings
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
 
@@ -21,7 +22,10 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
-from great_expectations.datasource.fluent import InvalidDatasource
+from great_expectations.datasource.fluent import (
+    GxInvalidDatasourceWarning,
+    InvalidDatasource,
+)
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
@@ -125,6 +129,10 @@ class DatasourceStore(Store):
                 try:
                     return datasource_model(**value)
                 except PydanticValidationError as config_error:
+                    warnings.warn(
+                        f"Datasource {value.get('name', '')} configuration is invalid. Check `.config_error` attribute for more details.",
+                        GxInvalidDatasourceWarning,
+                    )
                     return InvalidDatasource(config_error=config_error, **value)
             return self._schema.load(value)
         else:

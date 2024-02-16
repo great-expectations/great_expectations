@@ -104,6 +104,12 @@ class GxDatasourceWarning(UserWarning):
     """
 
 
+class GxInvalidDatasourceWarning(GxDatasourceWarning):
+    """
+    A warning that the Datasource configuration is invalid and will must be updated before it can used.
+    """
+
+
 class GxSerializationWarning(GxDatasourceWarning):
     pass
 
