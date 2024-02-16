@@ -413,16 +413,14 @@ class ExpectationValidationGraph:
             _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
-    ) -> Set[ExceptionInfo]:
+    ) -> Dict[str, ExceptionInfo]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
-        metric_exception_info: Set[ExceptionInfo] = set()
+        metric_exception_info: Dict[str, ExceptionInfo] = {}
         metric_id: _MetricKey
         metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
         for metric_id, metric_info_item in metric_info.items():  # type: ignore[assignment]  # Incorrect flagging of 'Incompatible types in assignment (expression has type "Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]", variable has type "Union[MetricConfiguration, Set[ExceptionInfo], int]")' in deep "Union" structure.
             # noinspection PyUnresolvedReferences
-            metric_exception_info.update(
-                cast(Set[ExceptionInfo], metric_info_item["exception_info"])  # type: ignore[index]  # Incorrect flagging of 'Value of type "Union[MetricConfiguration, Set[ExceptionInfo], int]" is not indexable' in deep "Union" structure.
-            )
+            metric_exception_info[str(metric_id)] = metric_info_item["exception_info"]
 
         return metric_exception_info
 
