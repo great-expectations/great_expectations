@@ -37,6 +37,10 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (
+    get_evaluation_parameter_key,
+    is_evaluation_parameter,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -129,9 +133,10 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
-            for key, value in kwargs_dict.items():
-                if isinstance(value, dict) and "$PARAMETER" in value.keys():
-                    current_expectation_params.append(value["$PARAMETER"])
+            for value in kwargs_dict.values():
+                if is_evaluation_parameter(value):
+                    key = get_evaluation_parameter_key(value)
+                    current_expectation_params.append(key)
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
@@ -1223,6 +1228,20 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             runtime_configuration=runtime_configuration,
         )
         return expectation_validation_result_list[0]
+
+    @property
+    def evaluation_parameter_options(self) -> tuple[str, ...]:
+        """EvaluationParameter options for this Expectation.
+
+        Returns:
+            tuple[str, ...]: The keys of the evaluation parameters used in this Expectation at runtime.
+        """
+        output: set[str] = set()
+        as_dict = self.dict(exclude_defaults=True)
+        for value in as_dict.values():
+            if is_evaluation_parameter(value):
+                output.add(get_evaluation_parameter_key(value))
+        return tuple(sorted(output))
 
     @property
     def configuration(self) -> ExpectationConfiguration:
