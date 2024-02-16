@@ -26,9 +26,12 @@ class GxInvalidDatasourceWarning(GxDatasourceWarning):
 
 
 class InvalidAsset(DataAsset):
-    """A DataAsset that is invalid."""
+    """
+    A DataAsset that is invalid.
+    The DataAsset itself may be valid, but it is classified as invalid because its parent Datasource or sibling assets are invalid.
+    """
 
-    type: str = "invalid"  # TODO: ensure this isn't registered as a real data asset
+    type: str = "invalid"
     name: str = "invalid"
 
     class Config:

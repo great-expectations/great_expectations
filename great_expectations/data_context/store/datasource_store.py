@@ -130,7 +130,7 @@ class DatasourceStore(Store):
                     return datasource_model(**value)
                 except PydanticValidationError as config_error:
                     warnings.warn(
-                        f"Datasource {value.get('name', '')} configuration is invalid. Check `.config_error` attribute for more details.",
+                        f"Datasource {value.get('name', '')} configuration is invalid. Check `my_datasource.config_error` attribute for more details.",
                         GxInvalidDatasourceWarning,
                     )
                     return InvalidDatasource(config_error=config_error, **value)
