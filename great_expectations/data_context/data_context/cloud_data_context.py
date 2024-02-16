@@ -467,6 +467,31 @@ class CloudDataContext(SerializableDataContext):
         return self._data_asset_store.remove_key(key)
 
     @override
+    @public_api
+    def get_datasource(self, datasource_name: str = "default") -> FluentDatasource:
+        """
+        Get a datasource by name.
+
+        Args:
+            datasource_name: the name of the datasource to get
+
+        Returns:
+            Datasource
+        """
+        if datasource_name is None:
+            raise ValueError(
+                "Must provide a datasource_name to retrieve an existing Datasource"
+            )
+
+        try:
+            datasource: FluentDatasource = self.datasources[datasource_name]
+        except KeyError as e:
+            raise ValueError(str(e)) from e
+
+        datasource._data_context = self
+        return datasource
+
+    @override
     def list_expectation_suite_names(self) -> List[str]:
         """
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
