@@ -468,7 +468,7 @@ module.exports = {
       { type: 'doc', id: 'oss/changelog' },
       ],
   gx_apis: [
-      {
+    {
       type: 'category',
       label: 'GX API',
       link: {
