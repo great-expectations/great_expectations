@@ -137,7 +137,7 @@ class TestInvalidDatasource:
     ):
         invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
         with pytest.raises(TypeError) as err:
-            invalid_ds.get_batch_list_from_batch_request({})
+            invalid_ds.get_batch_list_from_batch_request({})  # type: ignore[arg-type] # expect error
         assert invalid_ds.config_error == err.value.__cause__
 
 
