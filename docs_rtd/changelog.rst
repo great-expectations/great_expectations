@@ -4,6 +4,23 @@
 Changelog
 #########
 
+0.18.9
+-----------------
+* [BUGFIX] Re-enable GCS Docs Integration test ([#9237](GxURL.PULL_REQUESTS/9237))
+* [BUGFIX] Fix add or update expectation suite ([#9268](GxURL.PULL_REQUESTS/9268))
+* [BUGFIX] Misconfigured Expectations affecting unassociated Checkpoints ([#9431](GxURL.PULL_REQUESTS/9431))
+* [BUGFIX] Should not fail loading utils if an integration is missing a type ([#9428](GxURL.PULL_REQUESTS/9428))
+* [BUGFIX] Snowflake ci fix ([#9458](GxURL.PULL_REQUESTS/9458))
+* [BUGFIX] Fix incorrect python version in Snowflake reqs ([#9464](GxURL.PULL_REQUESTS/9464))
+* [BUGFIX] Fix clickhouse CI failure with pandas 2.2 ([#9470](GxURL.PULL_REQUESTS/9470))
+* [MAINTENANCE] Add upper bound for numpy ([#9257](GxURL.PULL_REQUESTS/9257))
+* [MAINTENANCE] Remove Click constraint in 0.18.x ([#9255](GxURL.PULL_REQUESTS/9255))
+* [MAINTENANCE] Only do docs checks and build on develop ([#9463](GxURL.PULL_REQUESTS/9463))
+* [MAINTENANCE] Ignore `Pandas` `DeprecationWarning` for legacy `PandasDataset` ([#9471](GxURL.PULL_REQUESTS/9471))
+* [MAINTENANCE] Ignore pandas `DeprecationWarning` for legacy `CustomPandasDataset` ([#9473](GxURL.PULL_REQUESTS/9473))
+* [MAINTENANCE] Fix pandas usage due to `DeprecationWarning` ([#9478](GxURL.PULL_REQUESTS/9478))
+* [MAINTENANCE] Release without `docs-snippets` tests for `0.18.x` ([#9480](GxURL.PULL_REQUESTS/9480))
+
 0.18.8
 -----------------
 * [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](https://github.com/great-expectations/great_expectations/pull/9207))
