@@ -1,16 +1,18 @@
 ---
 sidebar_label: 'Get started with GX'
 title: 'Get started with Great Expectations'
+hide_title: true
 id: get_started_lp
 description: Install Great Expectations and initialize your deployment.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">Start here if you're unfamiliar with Great Expectations (GX), or you want to use GX with Databricks or a SQL Data Source in a production environment. To install and configure GX in your specific production environment, see <a href='/docs/oss/guides/setup/setup_overview_lp'>Set up your Great Expectations environment</a>. </p>
-
-
+<OverviewCard title={frontMatter.title}>
+  Start here if you're unfamiliar with GX or want to use GX with Databricks or a SQL Data Source in a deployment environment.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Quickstart" description="Install GX, connect to sample data, build your first Expectation, validate data, and review the validation results" to="/oss/tutorials/quickstart/" icon="/img/test_icon.svg" />

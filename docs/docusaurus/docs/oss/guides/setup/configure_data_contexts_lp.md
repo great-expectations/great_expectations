@@ -1,14 +1,18 @@
 ---
 sidebar_label: 'Configure Data Contexts'
 title: 'Configure Data Contexts'
+hide_title: true
 id: configure_data_contexts_lp
 description: Instantiate and convert a Data Context.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">This is where you'll find information for instantiating and converting a Data Context.</p>
+<OverviewCard title={frontMatter.title}>
+  This is where you'll find information for instantiating and converting a Data Context.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Instantiate a Data Context" description="Instantiate a Data Context so that you can continue working with previously defined GX configurations" to="/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context" icon="/img/instantiate_icon.svg" />

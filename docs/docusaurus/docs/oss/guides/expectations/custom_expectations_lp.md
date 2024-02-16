@@ -1,15 +1,18 @@
 ---
 sidebar_label: 'Create and manage Custom Expectations'
 title: 'Create and manage Custom Expectations'
+hide_title: true
 id: custom_expectations_lp
 description: Create and manage Custom Expectations.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">Create Custom Expectations to extend the functionality of Great Expectations (GX) and satisfy your unique business requirements. To contribute new Expectations to the open source project, see <a href="https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md">Contribute Custom Expectations</a>.
-</p>
+<OverviewCard title={frontMatter.title}>
+  Create Custom Expectations to extend GX functionality and solve unique business requirements.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Create a Custom Column Aggregate Expectation" description="Evaluates a single column and produces an aggregate Metric" to="/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations" icon="/img/custom_expectation_icon.svg" />
