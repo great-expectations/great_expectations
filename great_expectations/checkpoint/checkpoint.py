@@ -127,7 +127,7 @@ class BaseCheckpoint(ConfigPeer):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
-    def run(  # noqa: C901, PLR0913, PLR0915
+    def run(  # noqa: C901, PLR0913, PLR0915, PLR0912
         self,
         template_name: str | None = None,
         run_name_template: str | None = None,
@@ -261,6 +261,14 @@ class BaseCheckpoint(ConfigPeer):
             run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
+
+        if len(validations) == 0 and not (batch_request or self._validator):
+            if not batch_request:
+                raise gx_exceptions.CheckpointMissingBatchRequest(
+                    name=self.name,
+                )
+            else:
+                ...
 
         if len(validations) == 0 and not (batch_request or self._validator):
             raise gx_exceptions.CheckpointError(

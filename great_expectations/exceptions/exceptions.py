@@ -48,31 +48,28 @@ class ExpectationSuiteError(DataContextError):
     pass
 
 
-class CheckpointError(DataContextError):
+class CheckpointMissingBatchRequest(DataContextError):
     def __init__(
         self,
-        message: str,
         name: str,
-        validation_index: int,
-        error: CheckpointError | ExecutionEngineError | MetricError,
     ) -> None:
-        """CheckpointError is a base class for all Checkpoint-related errors.
+        """CheckpointMissingBatchRequest error is raised when a checkpoint is missing a batch request.
 
         Args:
-            message (str): The error message.
             name (str): The name of the checkpoint.
-            validation_index (int): The index of the validation that failed.
         """
         self.name = name
-        self.validation_index = validation_index
-        self.error = error
-        super().__init__(message)
+        super().__init__(self.human_readable())
 
-    def __str__(self) -> str:
-        ## TODO: We should probably add a check for the type of error and return a more specific message
-        ##   for each type of error. Might be better to put the message in the other error type instead of this
-        ##   CheckpointError catch all class.
-        return f"Error running checkpoint {self.name} validation[{self.validation_index}]: {type(self.error)}"
+    def human_readable(self) -> str:
+        return f"Error running checkpoint {self.name}, missing batch request."
+
+    # Note: __str__ is not overridden here, so it will return the default implementation from Exception
+    #  which can be used for the stack trace.
+
+
+class CheckpointError(DataContextError):
+    pass
 
 
 class CheckpointNotFoundError(CheckpointError):
