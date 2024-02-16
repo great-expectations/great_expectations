@@ -238,11 +238,11 @@ class ValidationGraph:
 
         failed_metric_info: Dict[
             _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
         ] = {}
         aborted_metrics_info: Dict[
             _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
         ] = {}
 
         ready_metrics: Set[MetricConfiguration]
@@ -301,16 +301,19 @@ class ValidationGraph:
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
                             failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
-                            failed_metric_info[failed_metric.id]["exception_info"].add(exception_info)  # type: ignore[union-attr]  # Incorrect flagging of 'Item "MetricConfiguration" of "Union[MetricConfiguration, Set[ExceptionInfo], int]" has no attribute "add" and Item "int" of "Union[MetricConfiguration, Set[ExceptionInfo], int]" has no attribute "add"' in deep "Union" structure.
+                            failed_metric_info[failed_metric.id][
+                                "exception_info"
+                            ] = exception_info
                         else:
                             failed_metric_info[failed_metric.id] = {}
                             failed_metric_info[failed_metric.id][
                                 "metric_configuration"
                             ] = failed_metric
                             failed_metric_info[failed_metric.id]["num_failures"] = 1
-                            failed_metric_info[failed_metric.id]["exception_info"] = {
-                                exception_info
-                            }
+                            failed_metric_info[failed_metric.id][
+                                "exception_info"
+                            ] = exception_info
+
                 else:
                     raise err
             except Exception as e:

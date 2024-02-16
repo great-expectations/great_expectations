@@ -1005,21 +1005,20 @@ class Validator:
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
-            metric_exception_info: Set[
-                ExceptionInfo
+            metric_exception_info: Dict[
+                str, ExceptionInfo
             ] = expectation_validation_graph.get_exception_info(
                 metric_info=aborted_metrics_info
             )
             # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
             if len(metric_exception_info) > 0:
                 configuration = expectation_validation_graph.configuration
-                for exception_info in metric_exception_info:
-                    result = ExpectationValidationResult(
-                        success=False,
-                        exception_info=exception_info,
-                        expectation_config=configuration,
-                    )
-                    evrs.append(result)
+                result = ExpectationValidationResult(
+                    success=False,
+                    exception_info=metric_exception_info,
+                    expectation_config=configuration,
+                )
+                evrs.append(result)
 
                 if configuration not in rejected_configurations:
                     rejected_configurations.append(configuration)
