@@ -12,13 +12,14 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
 )
+from great_expectations.execution_engine.sparkdf_execution_engine import (
+    SparkDFExecutionEngine,
+)
 
 yaml = YAMLHandler()
 # </snippet>
 
-from great_expectations.core.util import get_or_create_spark_application
-
-spark = get_or_create_spark_application()
+spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # 1. Install Great Expectations
 # %pip install great-expectations
