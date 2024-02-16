@@ -1,14 +1,18 @@
 ---
 sidebar_label: 'Configure Actions'
 title: 'Configure Actions'
+hide_title: true
 id: actions_lp
 description: Configure Actions to send Validation Result notifications, update Data Docs, and store Validation Results.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">This is where you'll find information about using Actions to send Validation Result notifications, update Data Docs, and store Validation Results.</p>
+<OverviewCard title={frontMatter.title}>
+  This is where you'll find information about using Actions to send Validation Result notifications, update Data Docs, and store Validation Results.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Trigger Email as an Action" description="Create an Action that sends an email with Validation Result information, including Validation success or failure" to="/oss/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action" icon="/img/email_action_icon.svg" />

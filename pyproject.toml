@@ -493,6 +493,16 @@ filterwarnings = [
     'ignore: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.',
     # Example Actual Warning: FutureWarning: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.
     'ignore: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.',
+    # Example Actual Warning: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+    # Found when runing pytest tests/test_definitions/test_expectations_v3_api.py
+    'ignore: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection:UserWarning',
+    # Example Actual Warning: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+    'ignore: In a future version of pandas, parsing datetimes with mixed time zones will raise an error:FutureWarning',
+    # Example Actual Warning: DeprecationWarning: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.
+    # This is a legacy pattern that will be removed from GX
+    'ignore: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
+    # Example Actual Warning: DeprecationWarning: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.
+    'ignore: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.

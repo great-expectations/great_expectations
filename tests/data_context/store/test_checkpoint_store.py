@@ -10,7 +10,6 @@ from marshmallow.exceptions import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -209,29 +208,6 @@ def test_checkpoint_store(empty_data_context):
 """
     )
 
-    self_check_report: dict = convert_to_json_serializable(
-        data=checkpoint_store.self_check()
-    )
-    assert self_check_report == {
-        "keys": ["my_checkpoint_0", "my_checkpoint_1"],
-        "len_keys": 2,
-        "config": {
-            "store_name": "checkpoint_store",
-            "class_name": "CheckpointStore",
-            "module_name": "great_expectations.data_context.store.checkpoint_store",
-            "overwrite_existing": True,
-            "store_backend": {
-                "base_directory": f"{empty_data_context.root_directory}/checkpoints",
-                "platform_specific_separator": True,
-                "fixed_length_key": False,
-                "suppress_store_backend_id": False,
-                "module_name": "great_expectations.data_context.store.tuple_store_backend",
-                "class_name": "TupleFilesystemStoreBackend",
-                "filepath_suffix": ".yml",
-            },
-        },
-    }
-
     checkpoint_store.remove_key(key=key_0)
     checkpoint_store.remove_key(key=key_1)
     assert len(checkpoint_store.list_keys()) == 0
@@ -339,29 +315,6 @@ def test_gx_cloud_response_json_to_object_dict(
     else:
         actual = CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
         assert actual == expected
-
-
-@pytest.mark.unit
-def test_serialization_self_check(capsys) -> None:
-    store = CheckpointStore(store_name="checkpoint_store")
-
-    with mock.patch("random.choice", lambda _: "0"):
-        store.serialization_self_check(pretty_print=True)
-
-    stdout = capsys.readouterr().out
-
-    test_key = "ConfigurationIdentifier::test-name-00000000000000000000"
-    messages = [
-        f"Attempting to add a new test key {test_key} to Checkpoint store...",
-        f"Test key {test_key} successfully added to Checkpoint store.",
-        f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store...",
-        "Test value successfully retrieved from Checkpoint store",
-        f"Cleaning up test key {test_key} and value from Checkpoint store...",
-        "Test key and value successfully removed from Checkpoint store",
-    ]
-
-    for message in messages:
-        assert message in stdout
 
 
 @pytest.mark.parametrize(

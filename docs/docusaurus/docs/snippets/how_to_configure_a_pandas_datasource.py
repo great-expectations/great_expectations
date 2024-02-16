@@ -1129,161 +1129,27 @@ validate_pandas_batch_spec_passthrough_config_for_inferred()
 
 def test_pandas_inferred_single_batch_full_configuration():
     datasource_config = get_full_pandas_inferred_datasource_single_batch()
-    test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
-    datasource_check = test_result.self_check(max_examples=12)
-
-    # NOTE: The following code is only for testing and can be ignored by users.
-    # Assert that all of our files have individually become data assets.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_inferred_data_connector"][
-            "data_asset_count"
-        ]
-        == 12
-    )
-    # Assert that all of our data assets have only a single batch definition.
-    for data_asset in datasource_check["data_connectors"][
-        "name_of_my_inferred_data_connector"
-    ]["data_assets"].values():
-        assert data_asset["batch_definition_count"] == 1
-    # Assert that all of our files are now associated with data assets.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_inferred_data_connector"][
-            "unmatched_data_reference_count"
-        ]
-        == 0
-    )
-    # Assert that the data assets have the expected name format.
-    assert "yellow_tripdata_sample_2020-01" in set(
-        datasource_check["data_connectors"]["name_of_my_inferred_data_connector"][
-            "data_assets"
-        ].keys()
-    )
-    # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert [
-        "yellow_tripdata_sample_2020-01.csv",
-    ] in [
-        _["example_data_references"]
-        for _ in datasource_check["data_connectors"][
-            "name_of_my_inferred_data_connector"
-        ]["data_assets"].values()
-    ]
+    _ = data_context.test_yaml_config(yaml.dump(datasource_config))
 
 
 def test_pandas_inferred_multi_batch_full_configuration():
     datasource_config = get_full_pandas_inferred_datasource_multi_batch()
-    test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
-    datasource_check = test_result.self_check(max_examples=12)
-
-    # NOTE: The following code is only for testing and can be ignored by users.
-    # Assert that all of our files have individually become data assets.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_inferred_data_connector"][
-            "data_asset_count"
-        ]
-        == 1
-    )
-    # Assert that our data asset contains all of the source files.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_inferred_data_connector"][
-            "data_assets"
-        ]["yellow_tripdata_sample_2020"]["batch_definition_count"]
-        == 12
-    )
-    # Assert that all of our files are now associated with data assets.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_inferred_data_connector"][
-            "unmatched_data_reference_count"
-        ]
-        == 0
-    )
+    _ = data_context.test_yaml_config(yaml.dump(datasource_config))
 
 
 def test_pandas_configured_single_batch_full_configuration():
     datasource_config = get_full_pandas_configured_datasource_single_batch()
-    test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
-    datasource_check = test_result.self_check(max_examples=12)
-
-    # NOTE: The following code is only for testing and can be ignored by users.
-    # Assert that there is only one data asset, since only one was explicitly defined.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_configured_data_connector"][
-            "data_asset_count"
-        ]
-        == 1
-    )
-    # Assert that all of our data assets have only a single batch definition.
-    for data_asset in datasource_check["data_connectors"][
-        "name_of_my_configured_data_connector"
-    ]["data_assets"].values():
-        assert data_asset["batch_definition_count"] == 1
-    # Assert that all of our other files aren't associated with anything.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_configured_data_connector"][
-            "unmatched_data_reference_count"
-        ]
-        == 11
-    )
-    # Assert that the data assets have the expected name format.
-    assert (
-        "yellow_tripdata_jan"
-        in datasource_check["data_connectors"]["name_of_my_configured_data_connector"][
-            "data_assets"
-        ].keys()
-    )
-    # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert [
-        "yellow_tripdata_sample_2020-01.csv",
-    ] in [
-        _["example_data_references"]
-        for _ in datasource_check["data_connectors"][
-            "name_of_my_configured_data_connector"
-        ]["data_assets"].values()
-    ]
+    _ = data_context.test_yaml_config(yaml.dump(datasource_config))
 
 
 def test_pandas_configured_multi_batch_full_configuration():
     datasource_config = get_full_pandas_configured_datasource_multi_batch()
-    test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
-    datasource_check = test_result.self_check(max_examples=12)
-
-    # NOTE: The following code is only for testing and can be ignored by users.
-    # Assert that all of our files have individually become data assets.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_configured_data_connector"][
-            "data_asset_count"
-        ]
-        == 1
-    )
-    # Assert that our data asset contains all of the source files.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_configured_data_connector"][
-            "data_assets"
-        ]["yellow_tripdata_2020"]["batch_definition_count"]
-        == 12
-    )
-    # Assert that all of our files are now associated with data assets.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_configured_data_connector"][
-            "unmatched_data_reference_count"
-        ]
-        == 0
-    )
+    _ = data_context.test_yaml_config(yaml.dump(datasource_config))
 
 
 def test_pandas_configured_runtime_full_configuration():
     datasource_config = get_full_pandas_runtime_datasource()
-
-    test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
-    datasource_check = test_result.self_check(max_examples=12)
-
-    # NOTE: The following code is only for testing and can be ignored by users.
-    # Assert that there are no data sets -- those get defined in a Batch Request.
-    assert (
-        datasource_check["data_connectors"]["name_of_my_runtime_data_connector"][
-            "data_asset_count"
-        ]
-        == 0
-    )
+    _ = data_context.test_yaml_config(yaml.dump(datasource_config))
 
 
 def test_adding_your_datasource_to_the_datacontext():

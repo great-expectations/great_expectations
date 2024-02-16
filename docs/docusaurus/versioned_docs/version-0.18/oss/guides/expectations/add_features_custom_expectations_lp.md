@@ -1,14 +1,18 @@
 ---
 sidebar_label: 'Add features to Custom Expectations'
 title: 'Add features to Custom Expectations'
+hide_title: true
 id: add_features_custom_expectations_lp
 description: Add additional functionality to your Custom Expectations.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">Add additional functionality to your Custom Expectations.</p>
+<OverviewCard title={frontMatter.title}>
+  Add additional functionality to your Custom Expectations.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Add comments to Expectations and display them in Data Docs" description="Add descriptive comments to Expectations and display them in Data Docs" to="/oss/guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs" icon="/img/comment_icon.svg" />

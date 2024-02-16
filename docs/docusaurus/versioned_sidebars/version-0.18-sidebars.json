@@ -29,11 +29,6 @@
         },
         {
           "type": "link",
-          "label": "Workflow optimization",
-          "href": "/docs/cloud/about_gx#workflow-optimization"
-        },
-        {
-          "type": "link",
           "label": "GX Cloud workflow",
           "href": "/docs/cloud/about_gx#gx-cloud-workflow"
         },
@@ -61,6 +56,7 @@
         "id": "cloud/connect/connect_lp"
       },
       "items": [
+        "cloud/connect/connect_postgresql",
         "cloud/connect/connect_snowflake",
         "cloud/connect/connect_airflow",
         "cloud/connect/connect_python"
@@ -228,6 +224,11 @@
           "type": "link",
           "label": "Edit a Checkpoint configuration",
           "href": "/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration"
+        },
+        {
+          "type": "link",
+          "label": "Configure the Checkpoint result format parameter",
+          "href": "/docs/cloud/checkpoints/manage_checkpoints#configure-the-checkpoint-result-format-parameter"
         },
         {
           "type": "link",

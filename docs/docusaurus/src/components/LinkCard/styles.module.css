@@ -1,10 +1,11 @@
 .linkCard {
-    border: 1px solid var(--gray-300);
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
     border-radius: 6px;
+    box-shadow: 0 3px 6px -1px var(--gray-300);
     padding: 1.5rem 1rem;
     text-decoration: none !important;
     transition: 0.2s ease;
-  
     display: flex;
     gap: 1.25rem;
     font-size: 15px;
