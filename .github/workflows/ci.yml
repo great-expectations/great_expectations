@@ -523,7 +523,6 @@ jobs:
       ci-is-on-main-repo,
       doc-checks,
       static-analysis,
-      docs-snippets,
       unit-tests,
       cloud-tests,
       marker-tests,
