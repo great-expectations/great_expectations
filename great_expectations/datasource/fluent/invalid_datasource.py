@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Type
+from typing import ClassVar, List, Type, overload
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
@@ -11,9 +11,7 @@ from great_expectations.datasource.fluent import (
     GxDatasourceWarning,
     TestConnectionError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.type_lookup import TypeLookup
+from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
 
 
 class GxInvalidDatasourceWarning(GxDatasourceWarning):
@@ -33,6 +31,24 @@ class InvalidAsset(DataAsset):
         arbitrary_types_allowed = True
 
 
+class InvalidAssetTypeLookup(TypeLookup):
+    """A TypeLookup that always returns InvalidAsset for any type."""
+
+    @overload
+    def __getitem__(self, key: str) -> Type:
+        ...
+
+    @overload
+    def __getitem__(self, key: Type) -> str:
+        ...
+
+    @override
+    def __getitem__(self, key: ValidTypes) -> ValidTypes:
+        if isinstance(key, str):
+            return InvalidAsset
+        return "invalid"
+
+
 class InvalidDatasource(Datasource):
     """A Datasource that is invalid.
 
@@ -41,8 +57,7 @@ class InvalidDatasource(Datasource):
 
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [InvalidAsset]
-    _type_lookup: ClassVar[TypeLookup]  # TODO: set this to always return InvalidAsset
-
+    _type_lookup: ClassVar[TypeLookup] = InvalidAssetTypeLookup()
     type: str = "invalid"
     config_error: pydantic.ValidationError = Field(
         ..., description="The error that caused the Datasource to be invalid."
