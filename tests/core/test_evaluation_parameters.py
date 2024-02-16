@@ -42,6 +42,7 @@ def test_is_evaluation_parameter(value: Any, expected: bool):
     assert is_evaluation_parameter(value) == expected
 
 
+@pytest.mark.unit
 def test_get_evaluation_parameter_key():
     key = "foo"
     assert get_evaluation_parameter_key({"$PARAMETER": key}) == key
