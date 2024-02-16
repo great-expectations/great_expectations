@@ -1,0 +1,13 @@
+@import '../../css/overview_pages';
+
+.overviewCard {
+  @include overview-card-container;
+}
+
+.overviewCard__title {
+  @include overview-card-title;
+}
+
+.overviewCard__description {
+  @include overview-card-description;
+}

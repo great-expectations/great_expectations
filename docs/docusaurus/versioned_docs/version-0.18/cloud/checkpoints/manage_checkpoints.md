@@ -112,6 +112,17 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
     checkpoint = context.add_or_update_checkpoint(**checkpoint_config) 
     ```
 
+## Configure the Checkpoint result format parameter 
+
+You can use the `result_format` parameter to define the level of detail you want returned with your Validation Results. For example, you can return a success or failure message, a summary of observed values, a list of failing values, or you can add a query or a filter function that returns all failing rows. For more information, see [Result format](../../reference/learn/expectations/result_format.md).
+
+Run the following code to apply `result_format` to every Expectation in a Suite:
+
+```python name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example"
+```
+
+Replace `my_checkpoint` and `test_suite` with your own values. You define your Checkpoint configuration below the `runtime_configuration` key. The results are stored in the Validation Result after you run the Checkpoint.
+
 ## Delete a Checkpoint
 
 1. In GX Cloud, click **Checkpoints**.
