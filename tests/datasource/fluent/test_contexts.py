@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 import urllib.parse
+import uuid
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -12,6 +13,7 @@ import pandas as pd
 import pytest
 import requests
 
+from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.constants import (
@@ -326,6 +328,51 @@ def test_cloud_context_delete_datasource(
     )
     print(f"After Delete -> {response2}\n{pf(response2.json())}")
     assert response2.status_code == 404
+
+
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "invalid_datasource_config",
+    [
+        pytest.param(
+            {"type": "not_a_real_datasource_type", "foo": "bar"}, id="invalid_type"
+        ),
+        pytest.param(
+            {"type": "postgres", "connection_string": "postmalone+pyscopg2://"},
+            id="invalid_pg_conn_string",
+        ),
+    ],
+)
+def test_invalid_datasource_config_does_not_break_cloud_context(
+    cloud_api_fake: RequestsMock,
+    cloud_details: CloudDetails,
+    cloud_api_fake_db: dict,
+    invalid_datasource_config: dict,
+):
+    """
+    Ensure that a datasource with an invalid config does not break the cloud context
+    """
+    datasource_id: str = str(uuid.uuid4())
+    datasource_name: str = "invalid_datasource"
+    invalid_datasource_config["name"] = datasource_name
+    cloud_api_fake_db["datasources"][datasource_id] = {
+        "data": {
+            "id": datasource_id,
+            "type": "datasource",
+            "attributes": {
+                "name": datasource_name,
+                "datasource_config": invalid_datasource_config,
+            },
+        }
+    }
+
+    context = get_context(
+        cloud_base_url=cloud_details.base_url,
+        cloud_organization_id=cloud_details.org_id,
+        cloud_access_token=cloud_details.access_token,
+    )
+    bad_datasource = context.get_datasource(datasource_name)
+    assert bad_datasource
 
 
 @pytest.fixture
