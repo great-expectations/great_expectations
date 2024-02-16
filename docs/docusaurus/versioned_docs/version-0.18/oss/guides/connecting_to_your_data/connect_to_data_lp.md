@@ -1,14 +1,18 @@
 ---
 sidebar_label: 'Connect to a Data Source'
 title: 'Connect to a Data Source'
+hide_title: true
 id: connect_to_data_lp
 description: Connect to data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems.
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">This is where you'll find information for connecting to data stored on databases and local filesystems, how to request data from a Data Source, how to organize Batches in a file-based Data Asset, and how to connect Great Expectations (GX) to SQL tables and data returned by SQL database queries.</p>
+<OverviewCard title={frontMatter.title}>
+  Connect to data stored on databases and local filesystems, request data from a Data Source, organize Batches in a file-based Data Asset, and connect GX to SQL tables and data returned by SQL database queries.
+</OverviewCard>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Connect to filesystem Data Assets" description="Connect to filesystem Data Assets" to="/oss/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data" icon="/img/connect_icon.svg" />
