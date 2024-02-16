@@ -27,6 +27,31 @@ export default function FeedbackModal(){
         setFile(file);
     };
 
+    const sendReview = async (form) => {
+        let review = {
+            fields: {
+                project:
+                    {
+                        key: "DOC"
+                    },
+                summary: "Test",
+                description: `Author: ${formData.name} \n Mail: ${formData.workEmail}`,
+                issuetype: {
+                    id: "10011"
+                }
+            }
+        }
+        let response = await fetch('https://greatexpectations.atlassian.net/rest/api/2/issue', {
+            method: "POST",
+            headers: new Headers({
+                'Authorization': 'Basic ' + btoa('deborah.niesz@10pines.com' + ":" + 'ATATT3xFfGF0foMVOVSEkGchoO_dqXKjQY9asPf0ktM_8tN2YxTcBr0qUbyyhlk0Nl5-Rj5X5hmxaYDcdo61eY3GpXjTjky8Goa76YRjsxXayuLnG4Ug68KcxNdJthaZCXHe6FF-WyFwbf1hQUcGGgGr885WULj5PL-MiKNTYt5-8Ggbv8XTVCE=0699A582'),
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(review),
+        });
+        setIsOpen(false)
+    }
+
     const thumbsUpImg = useBaseUrl(`img/thumbs_up_icon.svg`);
     const thumbsDownImg = useBaseUrl(`img/thumbs_down_icon.svg`);
     const closeImg = useBaseUrl(`img/close_icon.svg`);
@@ -102,7 +127,7 @@ export default function FeedbackModal(){
                     <FileUploader handleChange={handleChangeFile} classes={styles.drop_area}
                                   name="file" types={fileTypes} children={dragAndDrop}/>
                     <p>{file ? `File name: ${file[0].name}` : "no files uploaded yet"}</p>
-                    <button className={styles.submitButton} onClick={() => setIsOpen(false)}> Submit</button>
+                    <button className={styles.submitButton} onClick={sendReview}> Submit</button>
                 </div>
             </div>
         </>}
