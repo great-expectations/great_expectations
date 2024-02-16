@@ -29,6 +29,8 @@ from great_expectations.datasource.data_connector.batch_filter import (
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.core.partitioners import Partitioner
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
@@ -83,6 +85,7 @@ class BatchRequest(pydantic.BaseModel):
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )
+    partitioner: Optional[Partitioner] = None
 
     def __init__(self, **kwargs) -> None:
         _batch_slice_input: Optional[BatchSlice] = None
