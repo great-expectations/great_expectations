@@ -482,7 +482,7 @@ class CloudDataContext(SerializableDataContext):
             )
 
         try:
-            datasource: FluentDatasource = self.datasources[datasource_name]
+            datasource: FluentDatasource = self.datasources[datasource_name]  # type: ignore[assignment] # cloud context does not support BDS
         except KeyError as e:
             raise ValueError(str(e)) from e
 
@@ -974,14 +974,14 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: FluentDatasource | None = None,
+        datasource: FluentDatasource | None = None,  # type: ignore[override] # cloud context does not support BDS
         **kwargs,
     ) -> FluentDatasource | None:
         if datasource and not isinstance(datasource, FluentDatasource):
             raise TypeError(
                 "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."
             )
-        return super()._add_datasource(
+        return super()._add_datasource(  # type: ignore[return-value] # cloud context does not support BDS
             name=name,
             initialize=initialize,
             datasource=datasource,
