@@ -879,7 +879,7 @@ class InvalidDatasource(Datasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = [InvalidAsset]
     _type_lookup: ClassVar[TypeLookup]  # TODO: set this to always return InvalidAsset
 
-    type: str = "invalid"  # TODO: ensure this isn't registered as a real datasource
+    type: str = "invalid"
     config_error: pydantic.ValidationError = Field(
         ..., description="The error that caused the Datasource to be invalid."
     )
