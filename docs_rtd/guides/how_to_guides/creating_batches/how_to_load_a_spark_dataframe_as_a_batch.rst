@@ -114,7 +114,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
             from great_expectations import DataContext
             from great_expectations.core import ExpectationSuite
             from great_expectations.core.batch import RuntimeBatchRequest
-            from great_expectations.core.util import get_or_create_spark_application
+            from great_expectations.core.util import get_or_create_spark_session
             from great_expectations.validator.validator import Validator
 
             context = gx.get_context()
@@ -166,7 +166,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
           .. code-block:: python
 
-            spark_application: pyspark.sql.session.SparkSession = get_or_create_spark_application()
+            spark_application: pyspark.sql.session.SparkSession = get_or_create_spark_session()
             df: pyspark.sql.dataframe.DataFrame = spark_application.read.csv("some_path.csv")
             runtime_batch_request = RuntimeBatchRequest(
                 datasource_name="my_spark_datasource",
