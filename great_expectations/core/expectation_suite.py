@@ -150,6 +150,18 @@ class ExpectationSuite(SerializableDictDot):
     def expectation_suite_name(self, value) -> None:
         self.name = value
 
+    @property
+    def evaluation_parameter_options(self) -> tuple[str, ...]:
+        """EvaluationParameter options for this ExpectationSuite.
+
+        Returns:
+            tuple[str, ...]: The keys of the evaluation parameters used by all Expectations of this suite at runtime.
+        """
+        output: set[str] = set()
+        for expectation in self.expectations:
+            output.update(expectation.evaluation_parameter_options)
+        return tuple(sorted(output))
+
     @public_api
     def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
         """Add an Expectation to the collection."""
