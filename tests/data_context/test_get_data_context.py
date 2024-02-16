@@ -224,9 +224,11 @@ def test_cloud_context_with_in_memory_config_overrides(
             plugins_directory=None,
             evaluation_parameter_store_name="new_evaluation_parameter_store",
             expectations_store_name="new_expectations_store",
+            checkpoint_store_name="new_checkpoint_store",
             datasources={},
             stores={
                 "new_expectations_store": {"class_name": "ExpectationsStore"},
+                "new_checkpoint_store": {"class_name": "CheckpointStore"},
                 "new_evaluation_parameter_store": {
                     "class_name": "EvaluationParameterStore"
                 },
