@@ -3,6 +3,7 @@ from typing import List
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -11,7 +12,6 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
-from great_expectations.datasource.fluent.sql_datasource import PartitionerYear
 
 DATASOURCE_NAME = "my datasource for batch configs"
 EMPTY_DATA_ASSET_NAME = "my data asset for batch configs"
