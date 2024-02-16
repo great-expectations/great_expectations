@@ -63,6 +63,8 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeAlias
 
+    from great_expectations.core.partitioners import Partitioner
+
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
@@ -398,6 +400,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -405,6 +408,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
+            partitioner: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -418,6 +422,11 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         if batch_slice is not None:
             raise ValueError(
                 "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
+        if partitioner is not None:
+            raise ValueError(
+                "partitioner is not currently supported and must be None for this DataAsset."
             )
 
         if dataframe is None:

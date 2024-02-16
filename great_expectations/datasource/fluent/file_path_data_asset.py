@@ -59,6 +59,7 @@ if TYPE_CHECKING:
 
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.core.partitioners import Partitioner as AbstractPartitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -172,6 +173,7 @@ class _FilePathDataAsset(DataAsset):
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[AbstractPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -181,6 +183,7 @@ class _FilePathDataAsset(DataAsset):
                 calling batch_request_options.
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+            partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -217,6 +220,7 @@ class _FilePathDataAsset(DataAsset):
             data_asset_name=self.name,
             options=options or {},
             batch_slice=batch_slice,
+            partitioner=partitioner,
         )
 
     @override
