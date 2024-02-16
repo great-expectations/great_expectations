@@ -4,13 +4,16 @@ from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility import pydantic
 
+# if we move this import into the TYPE_CHECKING block, we need to provide the
+# Partitioner class when we update forward refs, so we just import here.
+from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
+
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest,
         BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.interfaces import DataAsset
-    from great_expectations.datasource.fluent.partitioners import Partitioner
 
 
 class BatchConfig(pydantic.BaseModel):
