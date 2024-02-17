@@ -412,9 +412,8 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     aborted_metric_info_item = list(aborted_metrics_info.values())[0]
     assert aborted_metric_info_item["num_failures"] == MAX_METRIC_COMPUTATION_RETRIES
 
-    assert len(aborted_metric_info_item["exception_info"]) == 1
+    exception_info = aborted_metric_info_item["exception_info"]
 
-    exception_info = next(iter(aborted_metric_info_item["exception_info"]))
     assert (
         'Error: The column "not_in_table" in BatchData does not exist.'
         in exception_info["exception_message"]
