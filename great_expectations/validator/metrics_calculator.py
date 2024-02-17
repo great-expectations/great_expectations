@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Hashable
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.validator.computed_metric import MetricValue
@@ -218,10 +218,7 @@ class MetricsCalculator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> Tuple[
-        _MetricsDict,
-        _AbortedMetricsInfoDict,
-    ]:
+    ) -> Tuple[_MetricsDict, _AbortedMetricsInfoDict,]:
         """
         Args:
             graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
@@ -259,10 +256,7 @@ class MetricsCalculator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> Tuple[
-        _MetricsDict,
-        _AbortedMetricsInfoDict,
-    ]:
+    ) -> Tuple[_MetricsDict, _AbortedMetricsInfoDict,]:
         """
         Calls "ValidationGraph.resolve()" method with supplied arguments.
 

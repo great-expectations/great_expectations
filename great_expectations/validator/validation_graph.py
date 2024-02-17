@@ -30,7 +30,10 @@ if TYPE_CHECKING:
     )
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.validator.computed_metric import MetricValue
-    from great_expectations.validator.metrics_calculator import _MetricKey, _AbortedMetricsInfoDict
+    from great_expectations.validator.metrics_calculator import (
+        _AbortedMetricsInfoDict,
+        _MetricKey,
+    )
 
 __all__ = [
     "ExpectationValidationGraph",
@@ -193,10 +196,7 @@ class ValidationGraph:
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
-    ) -> Tuple[
-        Dict[_MetricKey, MetricValue],
-        _AbortedMetricsInfoDict,
-    ]:
+    ) -> Tuple[Dict[_MetricKey, MetricValue], _AbortedMetricsInfoDict,]:
         resolved_metrics: Dict[_MetricKey, MetricValue] = {}
 
         # updates graph with aborted metrics
@@ -215,10 +215,7 @@ class ValidationGraph:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
-    ) -> Dict[
-        _MetricKey,
-        Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
-    ]:
+    ) -> Dict[_MetricKey, Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],]:
         if metrics is None:
             metrics = {}
 

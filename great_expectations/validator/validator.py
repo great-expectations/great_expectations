@@ -74,7 +74,6 @@ from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
     _AbortedMetricsInfoDict,
-    _MetricKey,
     _MetricsDict,
 )
 from great_expectations.validator.validation_graph import (

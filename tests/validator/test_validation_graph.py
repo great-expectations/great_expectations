@@ -300,6 +300,7 @@ def test_ExpectationValidationGraph_get_exception_info(
         else:
             assert False, f"Unexpected key: {key}"
 
+
 @pytest.mark.unit
 def test_parse_validation_graph(
     expect_column_value_z_scores_to_be_less_than_expectation_validation_graph: ValidationGraph,
@@ -415,8 +416,8 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
 
     exception_info = next(iter(aborted_metric_info_item["exception_info"]))
     assert (
-            'Error: The column "not_in_table" in BatchData does not exist.'
-            in exception_info["exception_message"]
+        'Error: The column "not_in_table" in BatchData does not exist.'
+        in exception_info["exception_message"]
     )
 
 
