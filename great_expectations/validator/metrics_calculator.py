@@ -24,7 +24,7 @@ _MetricKey: TypeAlias = Union[Tuple[str, Hashable, Hashable], Tuple[str, str, st
 _MetricsDict: TypeAlias = Dict[_MetricKey, MetricValue]
 _AbortedMetricsInfoDict: TypeAlias = Dict[
     _MetricKey,
-    Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+    Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
 ]
 
 
@@ -220,10 +220,7 @@ class MetricsCalculator:
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Tuple[
         _MetricsDict,
-        Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
+        _AbortedMetricsInfoDict,
     ]:
         """
         Args:
@@ -235,10 +232,7 @@ class MetricsCalculator:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
         resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
+        aborted_metrics_info: _AbortedMetricsInfoDict
         (
             resolved_metrics,
             aborted_metrics_info,
@@ -266,10 +260,7 @@ class MetricsCalculator:
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Tuple[
         _MetricsDict,
-        Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
+        _AbortedMetricsInfoDict,
     ]:
         """
         Calls "ValidationGraph.resolve()" method with supplied arguments.
@@ -284,10 +275,7 @@ class MetricsCalculator:
             Aborted metrics information, with metric ID as key.
         """
         resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
+        aborted_metrics_info: _AbortedMetricsInfoDict
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,

@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.validator.computed_metric import MetricValue
-    from great_expectations.validator.metrics_calculator import _MetricKey
+    from great_expectations.validator.metrics_calculator import _MetricKey, _AbortedMetricsInfoDict
 
 __all__ = [
     "ExpectationValidationGraph",
@@ -195,18 +195,12 @@ class ValidationGraph:
         show_progress_bars: bool = True,
     ) -> Tuple[
         Dict[_MetricKey, MetricValue],
-        Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
+        _AbortedMetricsInfoDict,
     ]:
         resolved_metrics: Dict[_MetricKey, MetricValue] = {}
 
         # updates graph with aborted metrics
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = self._resolve(
+        aborted_metrics_info: _AbortedMetricsInfoDict = self._resolve(
             metrics=resolved_metrics,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -223,7 +217,7 @@ class ValidationGraph:
         show_progress_bars: bool = True,
     ) -> Dict[
         _MetricKey,
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
     ]:
         if metrics is None:
             metrics = {}
@@ -240,10 +234,7 @@ class ValidationGraph:
             _MetricKey,
             Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
         ] = {}
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
-        ] = {}
+        aborted_metrics_info: _AbortedMetricsInfoDict = {}
 
         ready_metrics: Set[MetricConfiguration]
         needed_metrics: Set[MetricConfiguration]
@@ -414,7 +405,7 @@ class ExpectationValidationGraph:
         self,
         metric_info: Dict[
             _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
         ],
     ) -> Dict[str, ExceptionInfo]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)

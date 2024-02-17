@@ -989,10 +989,7 @@ class Validator:
     ]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
+        aborted_metrics_info: _AbortedMetricsInfoDict
         (
             resolved_metrics,
             aborted_metrics_info,
