@@ -281,8 +281,8 @@ def test_ExpectationValidationGraph_get_exception_info(
     )
 
     metric_info = {
-        left.id: {"exception_info": {left_exception}},
-        right.id: {"exception_info": {right_exception}},
+        left.id: {"exception_info": left_exception},
+        right.id: {"exception_info": right_exception},
     }
 
     expect_column_values_to_be_unique_expectation_validation_graph.update(
@@ -292,9 +292,13 @@ def test_ExpectationValidationGraph_get_exception_info(
         metric_info=metric_info
     )
 
-    assert left_exception in exception_info
-    assert right_exception in exception_info
-
+    for key, value in exception_info.items():
+        if key == str(left.id):
+            assert value == left_exception
+        elif key == str(right.id):
+            assert value == right_exception
+        else:
+            assert False, f"Unexpected key: {key}"
 
 @pytest.mark.unit
 def test_parse_validation_graph(
