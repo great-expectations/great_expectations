@@ -230,6 +230,7 @@ class MetricsCalculator:
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+            Dictionary with aborted metrics information, with metric ID as key.
         """
         resolved_metrics: _MetricsDict
         aborted_metrics_info: _AbortedMetricsInfoDict
@@ -272,7 +273,7 @@ class MetricsCalculator:
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
-            Aborted metrics information, with metric ID as key.
+            Dictionary with aborted metrics information, with metric ID as key.
         """
         resolved_metrics: _MetricsDict
         aborted_metrics_info: _AbortedMetricsInfoDict
