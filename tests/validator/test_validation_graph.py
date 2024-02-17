@@ -46,7 +46,7 @@ def pandas_execution_engine_fake(
                 metric_configuration.id for metric_configuration in metrics_to_resolve
             ]:
                 raise gx_exceptions.MetricResolutionError(
-                    message=f'Error: The column "not_in_table" in BatchData does not exist.{uuid.uuid4()!s}',  # Randomizing the message to assert that only one exception is kept
+                    message=f'Error: The column "not_in_table" in BatchData does not exist.{uuid.uuid4()}',  # Randomizing the message to assert that only one exception is kept
                     failed_metrics=[failed_metric_config],
                 )
 
