@@ -83,7 +83,7 @@ export default function DocsVersionDropdownNavbarItem({
       {...props}
       mobile={mobile}
       label={dropdownLabel}
-      to={dropdownTo}
+      to={'#'}
       items={items}
       isActive={dropdownActiveClassDisabled ? () => false : undefined}
     />
