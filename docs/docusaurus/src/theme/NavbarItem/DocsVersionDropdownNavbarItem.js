@@ -59,8 +59,8 @@ export default function DocsVersionDropdownNavbarItem({
       : getVersionMainDoc(dropdownVersion).path;
 
   // If section corresponds to homepage or GX Cloud, version dropdown should not be shown
-  const activePath = activeDocContext.activeDoc.path;
-  if (activePath.includes('home') || activePath.includes('docs/cloud')) {
+  const activePath = activeDocContext?.activeDoc?.path;
+  if (!!activePath && (activePath.includes('home') || activePath.includes('docs/cloud'))) {
     return <></>;
   }
 
