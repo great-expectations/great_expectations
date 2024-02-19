@@ -1,15 +1,19 @@
-.custom-search-bar .DocSearch-Button {
-  background: none;
+.custom-search-bar {
+  margin-left: auto;
 
-  &-Placeholder {
-    display: none;
-  }
+  .DocSearch-Button {
+    background: none;
 
-  &-Container svg path {
-    stroke-width: 3;
-  }
+    &-Placeholder {
+      display: none;
+    }
 
-  &-Keys {
-    display: none;
+    &-Container svg path {
+      stroke-width: 3;
+    }
+
+    &-Keys {
+      display: none;
+    }
   }
 }
