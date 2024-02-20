@@ -22,6 +22,30 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import (
+    PartitionerColumnValue as GenericPartitionerColumnValue,
+)
+from great_expectations.core.partitioners import (
+    PartitionerDatetimePart as GenericPartitionerDatetimePart,
+)
+from great_expectations.core.partitioners import (
+    PartitionerDividedInteger as GenericPartitionerDividedInteger,
+)
+from great_expectations.core.partitioners import (
+    PartitionerModInteger as GenericPartitionerModInteger,
+)
+from great_expectations.core.partitioners import (
+    PartitionerMultiColumnValue as GenericPartitionerMultiColumnValue,
+)
+from great_expectations.core.partitioners import (
+    PartitionerYear as GenericPartitionerYear,
+)
+from great_expectations.core.partitioners import (
+    PartitionerYearAndMonth as GenericPartitionerYearAndMonth,
+)
+from great_expectations.core.partitioners import (
+    PartitionerYearAndMonthAndDay as GenericPartitionerYearAndMonthAndDay,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -139,6 +163,16 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
+        self._partitioner_implementation_map = {
+            GenericPartitionerYear: PartitionerYear,
+            GenericPartitionerYearAndMonth: PartitionerYearAndMonth,
+            GenericPartitionerYearAndMonthAndDay: PartitionerYearAndMonthAndDay,
+            GenericPartitionerColumnValue: PartitionerColumnValue,
+            GenericPartitionerDatetimePart: PartitionerDatetimePart,
+            GenericPartitionerDividedInteger: PartitionerDividedInteger,
+            GenericPartitionerModInteger: PartitionerModInteger,
+            GenericPartitionerMultiColumnValue: PartitionerMultiColumnValue,
+        }
 
     @property
     @override
