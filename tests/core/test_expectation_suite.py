@@ -13,7 +13,7 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
-from great_expectations import set_context
+from great_expectations import get_context, set_context
 from great_expectations.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
     ExpectationSuiteExpectationDeletedEvent,
@@ -606,6 +606,130 @@ class TestCRUDMethods:
         assert suite.name == new_name
 
 
+class TestEvaluationParameterOptions:
+    """Tests around the evaluation_parameter_options property of ExpectationSuites.
+
+    Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
+    """
+
+    EVALUATION_PARAMETER_VALUE_SET = "my_value_set"
+    EVALUATION_PARAMETER_MIN = "my_min"
+    EVALUATION_PARAMETER_MAX = "my_max"
+
+    @pytest.fixture
+    def expectation_suite(self) -> ExpectationSuite:
+        get_context()
+        return ExpectationSuite("test-suite")
+
+    @pytest.fixture
+    def expectation_with_evaluation_parameter(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnDistinctValuesToBeInSet(
+            column="a", value_set={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE_SET}
+        )
+
+    @pytest.fixture
+    def expectation_with_duplicate_evaluation_parameter(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnDistinctValuesToContainSet(
+            column="a", value_set={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE_SET}
+        )
+
+    @pytest.fixture
+    def expectation_with_multiple_evaluation_parameters(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnValuesToBeBetween(
+            column="c",
+            min_value={"$PARAMETER": self.EVALUATION_PARAMETER_MIN},
+            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
+        )
+
+    @pytest.fixture
+    def expectation_without_evaluation_parameters(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnDistinctValuesToBeInSet(column="d", value_set=[1, 2])
+
+    @pytest.mark.unit
+    def test_empty_suite(self, expectation_suite: ExpectationSuite):
+        assert expectation_suite.evaluation_parameter_options == tuple()
+
+    @pytest.mark.unit
+    def test_expectations_but_no_evaluation_params(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_without_evaluation_parameters: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_without_evaluation_parameters)
+
+        assert expectation_suite.evaluation_parameter_options == tuple()
+
+    @pytest.mark.unit
+    def test_expectation_with_evaluation_parameter(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_evaluation_parameter: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_VALUE_SET,
+        )
+
+    @pytest.mark.unit
+    def test_duplicate_evaluation_parameters_only_show_once(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_evaluation_parameter: Expectation,
+        expectation_with_duplicate_evaluation_parameter: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+        expectation_suite.add_expectation(
+            expectation_with_duplicate_evaluation_parameter
+        )
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_VALUE_SET,
+        )
+
+    @pytest.mark.unit
+    def test_multiple_evaluation_parameters_on_one_expectation(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_multiple_evaluation_parameters: Expectation,
+    ):
+        expectation_suite.add_expectation(
+            expectation_with_multiple_evaluation_parameters
+        )
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_MAX,
+            self.EVALUATION_PARAMETER_MIN,
+        )
+
+    @pytest.mark.unit
+    def test_multiple_evaluation_parameters_across_multiple_expectation(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_evaluation_parameter: Expectation,
+        expectation_with_multiple_evaluation_parameters: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+        expectation_suite.add_expectation(
+            expectation_with_multiple_evaluation_parameters
+        )
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_MAX,
+            self.EVALUATION_PARAMETER_MIN,
+            self.EVALUATION_PARAMETER_VALUE_SET,
+        )
+
+
+@pytest.mark.unit
 class TestAddCitation:
     @pytest.mark.unit
     def test_empty_suite_with_meta_fixture(
