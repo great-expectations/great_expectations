@@ -54,7 +54,11 @@ class InvalidAssetTypeLookup(TypeLookup):
     def __getitem__(self, key: ValidTypes) -> ValidTypes:
         if isinstance(key, str):
             return InvalidAsset
-        return "invalid"
+        # if a type is passed, normally we would return the type name but that doesn't make sense here
+        # for an InvalidAsset
+        raise NotImplementedError(
+            f"Looking up the `type` name for {InvalidAsset.__name__} is not supported"
+        )
 
 
 class InvalidDatasource(Datasource):
