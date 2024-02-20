@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.core.partitioners import SqlPartitioner as AbstractPartitioner
+    from great_expectations.core.partitioners import Partitioner
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -747,7 +747,7 @@ class _SQLAsset(DataAsset):
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[AbstractPartitioner] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 

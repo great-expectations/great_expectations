@@ -43,31 +43,15 @@ from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    Partitioner as SparkPartitioner,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerColumnValue as SparkPartitionerColumnValue,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerDatetimePart as SparkPartitionerDatetimePart,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerDividedInteger as SparkPartitionerDividedInteger,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerModInteger as SparkPartitionerModInteger,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerMultiColumnValue as SparkPartitionerMultiColumnValue,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerYear as SparkPartitionerYear,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerYearAndMonth as SparkPartitionerYearAndMonth,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    PartitionerYearAndMonthAndDay as SparkPartitionerYearAndMonthAndDay,
+    SparkPartitioner,
+    SparkPartitionerColumnValue,
+    SparkPartitionerDatetimePart,
+    SparkPartitionerDividedInteger,
+    SparkPartitionerModInteger,
+    SparkPartitionerMultiColumnValue,
+    SparkPartitionerYear,
+    SparkPartitionerYearAndMonth,
+    SparkPartitionerYearAndMonthAndDay,
 )
 
 if TYPE_CHECKING:
@@ -75,7 +59,7 @@ if TYPE_CHECKING:
 
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.core.partitioners import Partitioner as AbstractPartitioner
+    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -189,7 +173,7 @@ class _FilePathDataAsset(DataAsset):
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[AbstractPartitioner] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
