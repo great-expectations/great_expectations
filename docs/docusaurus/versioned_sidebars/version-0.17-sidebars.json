@@ -1,6 +1,6 @@
 {
   "docs": [
-    "intro",
+    "gx_welcome",
     {
       "type": "category",
       "label": "GX Cloud",
@@ -227,7 +227,7 @@
       "label": "Get started with GX",
       "link": {
         "type": "doc",
-        "id": "guides/setup/get_started_lp"
+        "id": "oss/oss"
       },
       "items": [
         "tutorials/quickstart/quickstart",
@@ -462,7 +462,7 @@
       "label": "Reference",
       "link": {
         "type": "doc",
-        "id": "reference/reference_overview"
+        "id": "reference/learn/reference_overview"
       },
       "items": [
         "contributing/contributing_maturity",

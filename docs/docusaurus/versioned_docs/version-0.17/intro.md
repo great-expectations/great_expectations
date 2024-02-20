@@ -1,6 +1,7 @@
 ---
 title: Welcome
 slug: /
+id: gx_welcome
 ---
 
 Great Expectations is the leading tool for [validating](./terms/validation.md) and [documenting](./terms/data_docs.md) your data. If you're ready to get started, see the [Quickstart](tutorials/quickstart/quickstart.md).

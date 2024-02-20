@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Get started with GX'
 title: 'Get started with Great Expectations'
-id: get_started_lp
+id: oss
 description: Install Great Expectations and initialize your deployment.
 ---
 

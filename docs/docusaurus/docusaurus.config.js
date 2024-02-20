@@ -116,28 +116,33 @@ module.exports = {
           repository: 'great_expectations'
         },
         {
+          type: 'doc',
           label: 'Home',
-          to: '/docs/home/',
+          docId: 'gx_welcome',
           position: 'right'
         },
         {
+          type: 'doc',
           label: 'GX Cloud',
-          to: '/docs/cloud/',
+          docId: 'cloud/gx_cloud_lp',
           position: 'right'
         },
         {
+          type: 'doc',
           label: 'GX OSS',
-          to: '/docs/oss/',
+          docId: 'oss/oss',
           position: 'right'
         },
         {
+          type: 'doc',
           label: 'Learn',
-          to: '/docs/reference/learn/',
+          docId: 'reference/learn/reference_overview',
           position: 'right'
         },
         {
+          type: 'doc',
           label: 'API',
-          to: '/docs/reference/api',
+          docId: 'reference/api_reference',
           position: 'right'
         },
         {
