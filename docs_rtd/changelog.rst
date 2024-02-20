@@ -163,6 +163,23 @@ Changelog
 * [MAINTENANCE] Only do docs checks and build on develop. ([#9454](https://github.com/great-expectations/great_expectations/pull/9454))
 * [MAINTENANCE] Ignore pandas `DeprecationWarning` for legacy `PandasDataset` ([#9472](https://github.com/great-expectations/great_expectations/pull/9472))
 
+0.18.9
+-----------------
+* [BUGFIX] Re-enable GCS Docs Integration test ([#9237](https://github.com/great-expectations/great_expectations/pull/9237))
+* [BUGFIX] Fix add or update expectation suite ([#9268](https://github.com/great-expectations/great_expectations/pull/9268))
+* [BUGFIX] Misconfigured Expectations affecting unassociated Checkpoints ([#9431](https://github.com/great-expectations/great_expectations/pull/9431))
+* [BUGFIX] Should not fail loading utils if an integration is missing a type ([#9428](https://github.com/great-expectations/great_expectations/pull/9428))
+* [BUGFIX] Snowflake ci fix ([#9458](https://github.com/great-expectations/great_expectations/pull/9458))
+* [BUGFIX] Fix incorrect python version in Snowflake reqs ([#9464](https://github.com/great-expectations/great_expectations/pull/9464))
+* [BUGFIX] Fix clickhouse CI failure with pandas 2.2 ([#9470](https://github.com/great-expectations/great_expectations/pull/9470))
+* [MAINTENANCE] Add upper bound for numpy ([#9257](https://github.com/great-expectations/great_expectations/pull/9257))
+* [MAINTENANCE] Remove Click constraint in 0.18.x ([#9255](https://github.com/great-expectations/great_expectations/pull/9255))
+* [MAINTENANCE] Only do docs checks and build on develop ([#9463](https://github.com/great-expectations/great_expectations/pull/9463))
+* [MAINTENANCE] Ignore `Pandas` `DeprecationWarning` for legacy `PandasDataset` ([#9471](https://github.com/great-expectations/great_expectations/pull/9471))
+* [MAINTENANCE] Ignore pandas `DeprecationWarning` for legacy `CustomPandasDataset` ([#9473](https://github.com/great-expectations/great_expectations/pull/9473))
+* [MAINTENANCE] Fix pandas usage due to `DeprecationWarning` ([#9478](https://github.com/great-expectations/great_expectations/pull/9478))
+* [MAINTENANCE] Release without `docs-snippets` tests for `0.18.x` ([#9480](https://github.com/great-expectations/great_expectations/pull/9480))
+
 0.18.8
 -----------------
 * [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](https://github.com/great-expectations/great_expectations/pull/9207))
