@@ -651,7 +651,7 @@ def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
         checkpoint_list = [
             d
             for d in checkpoint_list
-            if d["data"]["attributes"]["checkpoint_name"] in queried_names
+            if d["attributes"]["checkpoint_config"]["name"] in queried_names
         ]
 
     resp_body = {"data": checkpoint_list}
@@ -719,7 +719,7 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     else:
         id_ = FAKE_CHECKPOINT_ID
         payload["data"]["id"] = id_
-        checkpoints[id_] = payload
+        checkpoints[id_] = payload["data"]
         checkpoint_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 

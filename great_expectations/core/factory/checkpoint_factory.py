@@ -33,6 +33,8 @@ class CheckpointFactory(Factory[Checkpoint]):
         Raises:
             DataContextError if Checkpoint already exists
         """
+        # TODO: Refactor to use basic store API
+        # checkpoint = self._store.add_checkpoint(checkpoint=checkpoint)
         key = self._store.get_key(name=checkpoint.name, id=None)
         if self._store.has_key(key=key):
             raise DataContextError(
