@@ -81,7 +81,8 @@ jobs:
     # run on non-draft PRs with docs changes
     if: |
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
+      github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -226,7 +227,8 @@ jobs:
     # run on non-draft PRs
     if: |
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
+      github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
