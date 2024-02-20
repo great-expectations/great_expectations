@@ -735,7 +735,7 @@ def delete_checkpoint_by_name_cb(
 
     parsed_url = urllib.parse.urlparse(url)
     query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
-    queried_names: list[str] = query_params.get("name", [])
+    queried_names: list[str] = query_params.get("name", [])  # type: ignore[assignment]
     if not queried_names:
         raise ValueError("Must provide checkpoint name for deletion.")
 
