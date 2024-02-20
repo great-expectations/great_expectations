@@ -45,5 +45,10 @@ class BatchConfig(pydantic.BaseModel):
             options=batch_request_options, partitioner=self.partitioner
         )
 
+    def batch_request_option_keys(self) -> tuple[str, ...]:
+        return self._data_asset.get_batch_request_options_keys(
+            partitioner=self.partitioner
+        )
+
     def save(self) -> None:
         self.data_asset._save_batch_config(self)

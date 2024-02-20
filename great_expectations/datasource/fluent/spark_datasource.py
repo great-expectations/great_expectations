@@ -196,6 +196,11 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def batch_request_options(self) -> tuple[str, ...]:
         return tuple()
 
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner]
+    ) -> tuple[str, ...]:
+        return tuple()
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """Spark DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""

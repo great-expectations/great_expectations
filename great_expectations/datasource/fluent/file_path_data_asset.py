@@ -187,6 +187,17 @@ class _FilePathDataAsset(DataAsset):
             + partitioner_options
         )
 
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner]
+    ) -> tuple[str, ...]:
+        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (
+            FILE_PATH_BATCH_SPEC_KEY,
+        )
+        if partitioner:
+            partitioner = self.get_partitioner_implementation(partitioner)
+            option_keys += tuple(partitioner.param_names)
+        return option_keys
+
     @public_api
     @override
     def build_batch_request(

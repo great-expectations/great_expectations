@@ -232,6 +232,13 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT, _PartitionerT]):
             """One needs to implement "batch_request_options" on a DataAsset subclass."""
         )
 
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner]
+    ) -> tuple[str, ...]:
+        raise NotImplementedError(
+            """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
+        )
+
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
@@ -357,7 +364,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT, _PartitionerT]):
             raise KeyError(f"Multiple keys for {batch_config_name} found")
         return batch_configs[0]
 
-    def _get_partitioner_implementation(
+    def get_partitioner_implementation(
         self, abstract_partitioner: Partitioner
     ) -> _PartitionerT:
         PartitionerClass = self._partitioner_implementation_map.get(

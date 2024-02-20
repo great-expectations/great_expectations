@@ -493,6 +493,15 @@ class _SQLAsset(DataAsset):
             options = tuple(self.partitioner.param_names)
         return options
 
+    def get_batch_request_options_tuple(
+        self, partitioner: Optional[Partitioner]
+    ) -> tuple[str, ...]:
+        option_keys = tuple()
+        if partitioner:
+            partitioner = self.get_partitioner_implementation(partitioner)
+            option_keys += tuple(partitioner.param_names)
+        return option_keys
+
     def _add_partitioner(self: Self, partitioner: SqlPartitioner) -> Self:
         self.partitioner = partitioner
         self.test_partitioner_connection()
