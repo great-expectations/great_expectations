@@ -35,6 +35,7 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
             "expectation_validation_result": False,
             "globally": False,
         },
+        "profiler_store_name": None,
         "plugins_directory": "plugins/",
         "stores": {
             "evaluation_parameter_store": {
