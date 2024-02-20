@@ -265,6 +265,7 @@ class CloudDataContext(SerializableDataContext):
             cloud_config=cloud_config, uri="data-context-configuration"
         )
         config = response.json()
+        config.pop("notebooks", None)
         config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 

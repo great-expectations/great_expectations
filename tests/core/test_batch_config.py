@@ -48,4 +48,6 @@ def test_build_batch_request(
 
     mock_build_batch_request = batch_config.data_asset.build_batch_request
     assert isinstance(mock_build_batch_request, Mock)
-    mock_build_batch_request.assert_called_once_with(options=batch_request_options)
+    mock_build_batch_request.assert_called_once_with(
+        options=batch_request_options, partitioner=None
+    )

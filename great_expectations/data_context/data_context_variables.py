@@ -51,7 +51,6 @@ class DataContextVariableSchema(str, enum.Enum):
     VALIDATION_OPERATORS = "validation_operators"
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
-    NOTEBOOKS = "notebooks"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
     ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
     CONCURRENCY = "concurrency"
