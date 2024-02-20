@@ -18,6 +18,7 @@
 .feedbackCardTitle {
     font-size: var(--p-font-size);
     font-weight: var(--ifm-font-weight-semibold);
+    margin: 0;
 }
 
 .feedbackCardActions{
@@ -28,7 +29,7 @@
 .feedbackButton {
     border-color: var(--ifm-color-primary);
     background: none;
-    border: 1px solid var(--ifm-color-primary);
+    border: 2px solid var(--ifm-color-primary);
     border-radius: 50rem;
     color: var(--ifm-color-primary);
     cursor: pointer;
@@ -45,11 +46,10 @@
 }
 
 .inactiveFeedbackButton {
-    border-color: var(--gray-500);
     background: var(--gray-200);
     border: 1px solid transparent;
     border-radius: 50rem;
-    color: var(--gray-700);
+    color: var(--gray-500);
     font-size: var(--p-font-size);
     font-weight: var(--ifm-font-weight-semibold);
     padding: 0.25rem;
