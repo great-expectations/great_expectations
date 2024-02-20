@@ -15,7 +15,7 @@
 
 ## About GX OSS
 
-With GX OSS, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are unit tests for your data. Not only that, but Great Expectations also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use Great Expectations to:
+With GX OSS, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are unit tests for your data. Not only that, but GX OSS also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use GX OSS to:
 
 - Test data they ingest from other teams or vendors and ensure its validity.
 - Validate data they transform as a step in their data pipeline to ensure the correctness of transformations.
@@ -23,7 +23,7 @@ With GX OSS, you can assert what you expect from the data you load and transform
 - Streamline knowledge capture from subject-matter experts and make implicit knowledge explicit.
 - Develop rich, shared documentation of their data.
 
-To learn more about how data teams are using Great Expectations, see [Case studies from Great Expectations](https://greatexpectations.io/case-studies/).
+To learn more about how data teams are using GX OSS, see [Case studies from Great Expectations](https://greatexpectations.io/case-studies/).
 
 See [Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to our pipeline data quality testing philosophy.
 
@@ -44,8 +44,7 @@ Learn more about our plans for 1.0 and how we’ll be making this transition in 
 
 ## Get started
 
-Visit [https://docs.greatexpectations.io/docs/oss/](https://docs.greatexpectations.io/docs/oss/).
-
+Visit [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/guides/setup/get_started_lp).
 
 ## Get support
 
@@ -61,4 +60,4 @@ Hold onto your fantastic ideas and PRs until after the 1.0 release, when we will
 
 ## Code of conduct
 
-Everyone interacting in Great Expectations project codebases, Discourse forums, Slack channels, and email communications is expected to adhere to the [GX Community Code of Conduct](https://discourse.greatexpectations.io/t/gx-community-code-of-conduct/1199).
+Everyone interacting in GX OSS project codebases, Discourse forums, Slack channels, and email communications is expected to adhere to the [GX Community Code of Conduct](https://discourse.greatexpectations.io/t/gx-community-code-of-conduct/1199).
