@@ -1,6 +1,7 @@
 import copy
 import os
 from typing import Dict, Final, Optional
+from unittest import mock
 
 import pytest
 
@@ -1560,3 +1561,38 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         ),
         DataContextConfig,
     )
+
+
+@pytest.mark.unit
+def test_data_context_config_defaults():
+    config = DataContextConfig()
+    assert config.to_json_dict() == {
+        "anonymous_usage_statistics": {
+            "data_context_id": mock.ANY,
+            "enabled": True,
+            "explicit_id": False,
+            "explicit_url": False,
+            "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics",
+        },
+        "batch_configs": {},
+        "checkpoint_store_name": None,
+        "concurrency": None,
+        "config_variables_file_path": None,
+        "config_version": 3,
+        "data_docs_sites": None,
+        "datasources": {},
+        "evaluation_parameter_store_name": None,
+        "expectations_store_name": None,
+        "fluent_datasources": {},
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
+        "plugins_directory": None,
+        "profiler_store_name": None,
+        "progress_bars": None,
+        "stores": {},
+        "validation_operators": None,
+        "validations_store_name": None,
+    }
