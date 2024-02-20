@@ -36,7 +36,7 @@ Clearly explain the issue you're experiencing, or the problem you're trying to s
 
 ## GX Cloud Support
 
-- If you've encountered an error you can't resolve, first try creating a new topic on the [GX Discourse - GX Cloud Support](https://discourse.greatexpectations.io/c/oss-support/11) forum. This is the recommended option as answers aren't removed after 90 days, and you're likely to get a quicker response.
+- Create a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17) if you've encountered an error you can't resolve. This is the recommended option, as answers aren't removed after 90 days, and you're likely to get a quicker response.
 - You can also email us at support@greatexpectations.io or create a ticket on our [support portal](https://support.greatexpectations.io).
 
 ## GX OSS Support
