@@ -171,9 +171,10 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
 _DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
+_PartitionerT = TypeVar("_PartitionerT")
 
 
-class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
+class DataAsset(FluentBaseModel, Generic[_DatasourceT, _PartitionerT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -193,6 +194,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
+    _partitioner_implementation_map: dict[
+        type[Partitioner], _PartitionerT
+    ] = pydantic.PrivateAttr(default_factory=dict)
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -352,6 +356,18 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         elif len(batch_configs) > 1:
             raise KeyError(f"Multiple keys for {batch_config_name} found")
         return batch_configs[0]
+
+    def _get_partitioner_implementation(
+        self, abstract_partitioner: Partitioner
+    ) -> _PartitionerT:
+        PartitionerClass = self._partitioner_implementation_map.get(
+            type(abstract_partitioner)
+        )
+        if not PartitionerClass:
+            raise ValueError(
+                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
+            )
+        return PartitionerClass(**abstract_partitioner.dict())
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
         return set(options.keys()).issubset(set(self.batch_request_options))
