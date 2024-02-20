@@ -50,6 +50,7 @@ def data_context_config_dict() -> dict:
         "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
+        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -455,16 +456,31 @@ def test_data_context_variables_save_config(
 
         cloud_data_context_variables.save_config()
 
-        expected_config_dict: dict = {}
-        for attr in (
-            "config_variables_file_path",
-            "config_version",
-            "data_docs_sites",
-            "plugins_directory",
-            "stores",
-            "include_rendered_content",
-        ):
-            expected_config_dict[attr] = data_context_config_dict[attr]
+        expected_config_dict = {
+            "config_variables_file_path": "uncommitted/config_variables.yml",
+            "config_version": 3.0,
+            "data_docs_sites": {},
+            "plugins_directory": "plugins/",
+            "stores": {
+                "expectations_store": {
+                    "class_name": "ExpectationsStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "expectations/",
+                    },
+                },
+                "evaluation_parameter_store": {
+                    "module_name": "great_expectations.data_context.store",
+                    "class_name": "EvaluationParameterStore",
+                },
+            },
+            "include_rendered_content": {
+                "expectation_suite": False,
+                "expectation_validation_result": False,
+                "globally": False,
+            },
+            "profiler_store_name": "profiler_store",
+        }
 
         assert mock_put.call_count == 1
         mock_put.assert_called_with(
