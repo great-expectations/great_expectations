@@ -34,28 +34,14 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.core.partitioners import (
-    PartitionerColumnValue as GenericPartitionerColumnValue,
-)
-from great_expectations.core.partitioners import (
-    PartitionerDatetimePart as GenericPartitionerDatetimePart,
-)
-from great_expectations.core.partitioners import (
-    PartitionerDividedInteger as GenericPartitionerDividedInteger,
-)
-from great_expectations.core.partitioners import (
-    PartitionerModInteger as GenericPartitionerModInteger,
-)
-from great_expectations.core.partitioners import (
-    PartitionerMultiColumnValue as GenericPartitionerMultiColumnValue,
-)
-from great_expectations.core.partitioners import (
-    PartitionerYear as GenericPartitionerYear,
-)
-from great_expectations.core.partitioners import (
-    PartitionerYearAndMonth as GenericPartitionerYearAndMonth,
-)
-from great_expectations.core.partitioners import (
-    PartitionerYearAndMonthAndDay as GenericPartitionerYearAndMonthAndDay,
+    PartitionerColumnValue,
+    PartitionerDatetimePart,
+    PartitionerDividedInteger,
+    PartitionerModInteger,
+    PartitionerMultiColumnValue,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
@@ -476,14 +462,14 @@ class _SQLAsset(DataAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._partitioner_implementation_map = {
-            GenericPartitionerYear: PartitionerYear,
-            GenericPartitionerYearAndMonth: PartitionerYearAndMonth,
-            GenericPartitionerYearAndMonthAndDay: PartitionerYearAndMonthAndDay,
-            GenericPartitionerColumnValue: PartitionerColumnValue,
-            GenericPartitionerDatetimePart: PartitionerDatetimePart,
-            GenericPartitionerDividedInteger: PartitionerDividedInteger,
-            GenericPartitionerModInteger: PartitionerModInteger,
-            GenericPartitionerMultiColumnValue: PartitionerMultiColumnValue,
+            PartitionerYear: SqlPartitionerYear,
+            PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
+            PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
+            PartitionerColumnValue: SqlPartitionerColumnValue,
+            PartitionerDatetimePart: SqlPartitionerDatetimePart,
+            PartitionerDividedInteger: SqlPartitionerDividedInteger,
+            PartitionerModInteger: SqlPartitionerModInteger,
+            PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
         }
 
     @property
