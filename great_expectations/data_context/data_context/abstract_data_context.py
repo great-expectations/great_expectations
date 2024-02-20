@@ -81,6 +81,7 @@ from great_expectations.data_context.types.base import (
     CheckpointValidationConfig,
     ConcurrencyConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
     DatasourceConfig,
     IncludeRenderedContentConfig,
     ProgressBarsConfig,
@@ -605,7 +606,20 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:
-        return self.variables.checkpoint_store_name
+        from great_expectations.data_context.store.checkpoint_store import (
+            CheckpointStore,
+        )
+
+        name = self.variables.checkpoint_store_name
+        if not name and CheckpointStore.default_checkpoints_exist(directory_path=self.root_directory):  # type: ignore[arg-type]
+            name = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+
+        if not name:
+            raise gx_exceptions.InvalidTopLevelConfigKeyError(
+                "Must have checkpoint_store_name in DataContextConfig."
+            )
+
+        return name
 
     @checkpoint_store_name.setter
     @public_api
