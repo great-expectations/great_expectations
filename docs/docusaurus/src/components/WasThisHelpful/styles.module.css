@@ -5,33 +5,54 @@
     box-shadow: 0 3px 6px -1px var(--gray-300);
 
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-direction: row;
+    gap: 1.5rem;
     margin: auto;
     padding: 0.75rem;
     width: 100%;
     max-width: 30rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .feedbackCardTitle {
-    margin: auto;
+    font-size: var(--p-font-size);
+    font-weight: var(--ifm-font-weight-semibold);
 }
 
-.feedbackCardBody {
+.feedbackCardActions{
     display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    margin: auto;
+    gap: 0.5rem;
 }
 
-.feedbackIcon {
-    border: 2px solid var(--ifm-color-primary);
-    border-radius: 50%;
-    height: 50px;
-    padding: 7px;
-}
-
-.feedbackIcon:hover {
-    background-color: var(--orange-200);
+.feedbackButton {
+    border-color: var(--ifm-color-primary);
+    background: none;
+    border: 1px solid var(--ifm-color-primary);
+    border-radius: 50rem;
+    color: var(--ifm-color-primary);
     cursor: pointer;
+    font-size: var(--p-font-size);
+    font-weight: var(--ifm-font-weight-semibold);
+    padding: 0.25rem;
+    text-align: center;
+    min-width: 4.5rem;
+}
+
+.feedbackButton:hover {
+    background: var(--orange-100);
+    color: var(--ifm-color-primary);
+}
+
+.inactiveFeedbackButton {
+    border-color: var(--gray-500);
+    background: var(--gray-200);
+    border: 1px solid transparent;
+    border-radius: 50rem;
+    color: var(--gray-700);
+    font-size: var(--p-font-size);
+    font-weight: var(--ifm-font-weight-semibold);
+    padding: 0.25rem;
+    text-align: center;
+    min-width: 4.5rem;
 }
