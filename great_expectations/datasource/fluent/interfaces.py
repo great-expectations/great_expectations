@@ -232,6 +232,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -241,6 +242,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                 calling batch_request_options.
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+            partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the

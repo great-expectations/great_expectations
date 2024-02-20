@@ -115,7 +115,7 @@ class _PartitionerDatetime(FluentBaseModel):
         raise NotImplementedError
 
 
-class PartitionerYear(_PartitionerDatetime):
+class SparkPartitionerYear(_PartitionerDatetime):
     column_name: str
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
@@ -129,7 +129,7 @@ class PartitionerYear(_PartitionerDatetime):
         return {"column_name": self.column_name}
 
 
-class PartitionerYearAndMonth(_PartitionerDatetime):
+class SparkPartitionerYearAndMonth(_PartitionerDatetime):
     column_name: str
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
@@ -143,7 +143,7 @@ class PartitionerYearAndMonth(_PartitionerDatetime):
         return {"column_name": self.column_name}
 
 
-class PartitionerYearAndMonthAndDay(_PartitionerDatetime):
+class SparkPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
     method_name: Literal[
         "partition_on_year_and_month_and_day"
@@ -159,7 +159,7 @@ class PartitionerYearAndMonthAndDay(_PartitionerDatetime):
         return {"column_name": self.column_name}
 
 
-class PartitionerDatetimePart(_PartitionerDatetime):
+class SparkPartitionerDatetimePart(_PartitionerDatetime):
     datetime_parts: List[str]
     column_name: str
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
@@ -203,7 +203,7 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
         raise NotImplementedError
 
 
-class PartitionerDividedInteger(_PartitionerOneColumnOneParam):
+class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
     method_name: Literal[
@@ -230,7 +230,7 @@ class PartitionerDividedInteger(_PartitionerOneColumnOneParam):
         return {self.column_name: options["quotient"]}
 
 
-class PartitionerModInteger(_PartitionerOneColumnOneParam):
+class SparkPartitionerModInteger(_PartitionerOneColumnOneParam):
     mod: int
     column_name: str
     method_name: Literal["partition_on_mod_integer"] = "partition_on_mod_integer"
@@ -255,7 +255,7 @@ class PartitionerModInteger(_PartitionerOneColumnOneParam):
         return {self.column_name: options["remainder"]}
 
 
-class PartitionerColumnValue(_PartitionerOneColumnOneParam):
+class SparkPartitionerColumnValue(_PartitionerOneColumnOneParam):
     column_name: str
     method_name: Literal["partition_on_column_value"] = "partition_on_column_value"
 
@@ -279,7 +279,7 @@ class PartitionerColumnValue(_PartitionerOneColumnOneParam):
         return {self.column_name: options[self.column_name]}
 
 
-class PartitionerMultiColumnValue(FluentBaseModel):
+class SparkPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
     method_name: Literal[
         "partition_on_multi_column_values"
@@ -309,13 +309,13 @@ class PartitionerMultiColumnValue(FluentBaseModel):
 
 # We create this type instead of using _Partitioner so pydantic can use to this to
 # coerce the partitioner to the right type during deserialization from config.
-Partitioner = Union[
-    PartitionerColumnValue,
-    PartitionerMultiColumnValue,
-    PartitionerDividedInteger,
-    PartitionerModInteger,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
-    PartitionerDatetimePart,
+SparkPartitioner = Union[
+    SparkPartitionerColumnValue,
+    SparkPartitionerMultiColumnValue,
+    SparkPartitionerDividedInteger,
+    SparkPartitionerModInteger,
+    SparkPartitionerYear,
+    SparkPartitionerYearAndMonth,
+    SparkPartitionerYearAndMonthAndDay,
+    SparkPartitionerDatetimePart,
 ]

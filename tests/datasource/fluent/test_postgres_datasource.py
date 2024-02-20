@@ -41,8 +41,8 @@ from great_expectations.datasource.fluent.postgres_datasource import (
     PostgresDatasource,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    Partitioner,
-    PartitionerYearAndMonth,
+    SqlPartitioner,
+    SqlPartitionerYearAndMonth,
     TableAsset,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -247,7 +247,7 @@ def create_and_add_table_asset_without_testing_connection(
     source: PostgresDatasource,
     name: str,
     table_name: str,
-    partitioner: Optional[Partitioner] = None,
+    partitioner: Optional[SqlPartitioner] = None,
 ) -> Tuple[PostgresDatasource, TableAsset]:
     table_asset = TableAsset(
         name=name,
@@ -260,8 +260,8 @@ def create_and_add_table_asset_without_testing_connection(
     return source, table_asset
 
 
-def year_month_partitioner(column_name: str) -> PartitionerYearAndMonth:
-    return PartitionerYearAndMonth(
+def year_month_partitioner(column_name: str) -> SqlPartitionerYearAndMonth:
+    return SqlPartitionerYearAndMonth(
         column_name=column_name,
         method_name="partition_on_year_and_month",
     )
