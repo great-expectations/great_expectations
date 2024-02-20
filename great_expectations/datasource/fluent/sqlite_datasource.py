@@ -18,7 +18,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
-    Partitioner,
+    SqlPartitioner,
     SQLDatasource,
     _PartitionerOneColumnOneParam,
 )
@@ -134,7 +134,7 @@ class SqliteDsn(pydantic.AnyUrl):
 
 
 SqlitePartitioner = Union[
-    Partitioner, PartitionerHashedColumn, PartitionerConvertedDateTime
+    SqlPartitioner, PartitionerHashedColumn, PartitionerConvertedDateTime
 ]
 
 

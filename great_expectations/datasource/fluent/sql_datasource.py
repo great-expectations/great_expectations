@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.core.partitioners import Partitioner as AbstractPartitioner
+    from great_expectations.core.partitioners import SqlPartitioner as AbstractPartitioner
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -206,7 +206,7 @@ class _PartitionerDatetime(FluentBaseModel):
         raise NotImplementedError
 
 
-class PartitionerYear(_PartitionerDatetime):
+class SqlPartitionerYear(_PartitionerDatetime):
     column_name: str
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
@@ -220,7 +220,7 @@ class PartitionerYear(_PartitionerDatetime):
         return {"column_name": self.column_name}
 
 
-class PartitionerYearAndMonth(_PartitionerDatetime):
+class SqlPartitionerYearAndMonth(_PartitionerDatetime):
     column_name: str
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
@@ -234,7 +234,7 @@ class PartitionerYearAndMonth(_PartitionerDatetime):
         return {"column_name": self.column_name}
 
 
-class PartitionerYearAndMonthAndDay(_PartitionerDatetime):
+class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
     method_name: Literal[
         "partition_on_year_and_month_and_day"
@@ -250,7 +250,7 @@ class PartitionerYearAndMonthAndDay(_PartitionerDatetime):
         return {"column_name": self.column_name}
 
 
-class PartitionerDatetimePart(_PartitionerDatetime):
+class SqlPartitionerDatetimePart(_PartitionerDatetime):
     datetime_parts: List[str]
     column_name: str
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
@@ -303,7 +303,7 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
         raise NotImplementedError
 
 
-class PartitionerDividedInteger(_PartitionerOneColumnOneParam):
+class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
     method_name: Literal[
@@ -330,7 +330,7 @@ class PartitionerDividedInteger(_PartitionerOneColumnOneParam):
         return {self.column_name: options["quotient"]}
 
 
-class PartitionerModInteger(_PartitionerOneColumnOneParam):
+class SqlPartitionerModInteger(_PartitionerOneColumnOneParam):
     mod: int
     column_name: str
     method_name: Literal["partition_on_mod_integer"] = "partition_on_mod_integer"
@@ -355,7 +355,7 @@ class PartitionerModInteger(_PartitionerOneColumnOneParam):
         return {self.column_name: options["remainder"]}
 
 
-class PartitionerColumnValue(_PartitionerOneColumnOneParam):
+class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
     column_name: str
     method_name: Literal["partition_on_column_value"] = "partition_on_column_value"
 
@@ -387,7 +387,7 @@ class PartitionerColumnValue(_PartitionerOneColumnOneParam):
         )
 
 
-class PartitionerMultiColumnValue(FluentBaseModel):
+class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
     method_name: Literal[
         "partition_on_multi_column_values"
@@ -422,15 +422,15 @@ class PartitionerMultiColumnValue(FluentBaseModel):
 
 # We create this type instead of using _Partitioner so pydantic can use to this to
 # coerce the partitioner to the right type during deserialization from config.
-Partitioner = Union[
-    PartitionerColumnValue,
-    PartitionerMultiColumnValue,
-    PartitionerDividedInteger,
-    PartitionerModInteger,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
-    PartitionerDatetimePart,
+SqlPartitioner = Union[
+    SqlPartitionerColumnValue,
+    SqlPartitionerMultiColumnValue,
+    SqlPartitionerDividedInteger,
+    SqlPartitionerModInteger,
+    SqlPartitionerYear,
+    SqlPartitionerYearAndMonth,
+    SqlPartitionerYearAndMonthAndDay,
+    SqlPartitionerDatetimePart,
 ]
 
 
@@ -446,7 +446,7 @@ class _SQLAsset(DataAsset):
 
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
-    partitioner: Optional[Partitioner] = None
+    partitioner: Optional[SqlPartitioner] = None
     name: str
 
     @property
@@ -470,7 +470,7 @@ class _SQLAsset(DataAsset):
             options = tuple(self.partitioner.param_names)
         return options
 
-    def _add_partitioner(self: Self, partitioner: Partitioner) -> Self:
+    def _add_partitioner(self: Self, partitioner: SqlPartitioner) -> Self:
         self.partitioner = partitioner
         self.test_partitioner_connection()
         # persist the config changes
@@ -492,7 +492,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerYear(method_name="partition_on_year", column_name=column_name)
+            SqlPartitionerYear(method_name="partition_on_year", column_name=column_name)
         )
 
     @public_api
@@ -507,7 +507,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerYearAndMonth(
+            SqlPartitionerYearAndMonth(
                 method_name="partition_on_year_and_month", column_name=column_name
             )
         )
@@ -524,7 +524,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerYearAndMonthAndDay(
+            SqlPartitionerYearAndMonthAndDay(
                 method_name="partition_on_year_and_month_and_day",
                 column_name=column_name,
             )
@@ -542,7 +542,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerDatetimePart(
+            SqlPartitionerDatetimePart(
                 method_name="partition_on_date_parts",
                 column_name=column_name,
                 datetime_parts=datetime_parts,
@@ -558,7 +558,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerColumnValue(
+            SqlPartitionerColumnValue(
                 method_name="partition_on_column_value",
                 column_name=column_name,
             )
@@ -576,7 +576,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerDividedInteger(
+            SqlPartitionerDividedInteger(
                 method_name="partition_on_divided_integer",
                 column_name=column_name,
                 divisor=divisor,
@@ -593,7 +593,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerModInteger(
+            SqlPartitionerModInteger(
                 method_name="partition_on_mod_integer",
                 column_name=column_name,
                 mod=mod,
@@ -611,7 +611,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerMultiColumnValue(
+            SqlPartitionerMultiColumnValue(
                 column_names=column_names,
                 method_name="partition_on_multi_column_values",
             )

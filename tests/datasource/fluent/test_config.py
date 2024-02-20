@@ -43,7 +43,7 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    PartitionerYearAndMonth,
+    SqlPartitionerYearAndMonth,
     TableAsset,
 )
 from tests.datasource.fluent.conftest import FLUENT_DATASOURCE_TEST_DIR
@@ -619,7 +619,7 @@ def test_general_partitioner_errors(
     expected_msg: str,
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        PartitionerYearAndMonth(**bad_column_kwargs)
+        SqlPartitionerYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -761,7 +761,7 @@ def test_partitioners_deserialization(
     table_asset: TableAsset = from_all_config.get_datasource(
         datasource_name="my_pg_ds"
     ).get_asset(asset_name="with_partitioner")
-    assert isinstance(table_asset.partitioner, PartitionerYearAndMonth)
+    assert isinstance(table_asset.partitioner, SqlPartitionerYearAndMonth)
     assert table_asset.partitioner.method_name == "partition_on_year_and_month"
 
 
