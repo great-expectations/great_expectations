@@ -67,15 +67,15 @@ from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    Partitioner,
-    PartitionerColumnValue,
-    PartitionerDatetimePart,
-    PartitionerDividedInteger,
-    PartitionerModInteger,
-    PartitionerMultiColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
+    SparkPartitioner,
+    SparkPartitionerColumnValue,
+    SparkPartitionerDatetimePart,
+    SparkPartitionerDividedInteger,
+    SparkPartitionerModInteger,
+    SparkPartitionerMultiColumnValue,
+    SparkPartitionerYear,
+    SparkPartitionerYearAndMonth,
+    SparkPartitionerYearAndMonthAndDay,
 )
 
 if TYPE_CHECKING:
@@ -83,7 +83,7 @@ if TYPE_CHECKING:
 
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.core.partitioners import Partitioner as AbstractPartitioner
+    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -120,7 +120,7 @@ class _FilePathDataAsset(DataAsset):
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )
-    partitioner: Optional[Partitioner] = None
+    partitioner: Optional[SparkPartitioner] = None
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -207,7 +207,7 @@ class _FilePathDataAsset(DataAsset):
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[AbstractPartitioner] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -446,7 +446,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 to use as its "include" directive for File-Path style DataAsset processing."""
         )
 
-    def _add_partitioner(self: Self, partitioner: Partitioner) -> Self:
+    def _add_partitioner(self: Self, partitioner: SparkPartitioner) -> Self:
         self.partitioner = partitioner
         return self
 
@@ -462,7 +462,9 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerYear(method_name="partition_on_year", column_name=column_name)
+            SparkPartitionerYear(
+                method_name="partition_on_year", column_name=column_name
+            )
         )
 
     @public_api
@@ -477,7 +479,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerYearAndMonth(
+            SparkPartitionerYearAndMonth(
                 method_name="partition_on_year_and_month", column_name=column_name
             )
         )
@@ -494,7 +496,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerYearAndMonthAndDay(
+            SparkPartitionerYearAndMonthAndDay(
                 method_name="partition_on_year_and_month_and_day",
                 column_name=column_name,
             )
@@ -512,7 +514,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerDatetimePart(
+            SparkPartitionerDatetimePart(
                 method_name="partition_on_date_parts",
                 column_name=column_name,
                 datetime_parts=datetime_parts,
@@ -528,7 +530,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerColumnValue(
+            SparkPartitionerColumnValue(
                 method_name="partition_on_column_value",
                 column_name=column_name,
             )
@@ -546,7 +548,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerDividedInteger(
+            SparkPartitionerDividedInteger(
                 method_name="partition_on_divided_integer",
                 column_name=column_name,
                 divisor=divisor,
@@ -563,7 +565,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerModInteger(
+            SparkPartitionerModInteger(
                 method_name="partition_on_mod_integer",
                 column_name=column_name,
                 mod=mod,
@@ -581,7 +583,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This asset so we can use this method fluently.
         """
         return self._add_partitioner(
-            PartitionerMultiColumnValue(
+            SparkPartitionerMultiColumnValue(
                 column_names=column_names,
                 method_name="partition_on_multi_column_values",
             )

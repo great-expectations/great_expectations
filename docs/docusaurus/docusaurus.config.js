@@ -262,7 +262,7 @@ module.exports = {
               path: '1.0-prerelease',
             },
             ['0.18']: {
-              label: '0.18.8',
+              label: '0.18.9',
               path: ''
             },
             ["0.17"]: {

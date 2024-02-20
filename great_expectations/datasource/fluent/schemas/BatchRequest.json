@@ -18,6 +18,35 @@
             "description": "A map that can be used to filter the batch groups associated with the Data Asset. The structure and types depends on the asset type.",
             "type": "object"
         },
+        "partitioner": {
+            "title": "Partitioner",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/PartitionerColumnValue"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerMultiColumnValue"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerDividedInteger"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerModInteger"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerYear"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerYearAndMonth"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerDatetimePart"
+                }
+            ]
+        },
         "batch_slice": {
             "title": "Batch Slice",
             "anyOf": [
@@ -60,5 +89,196 @@
         "datasource_name",
         "data_asset_name"
     ],
-    "additionalProperties": false
+    "additionalProperties": false,
+    "definitions": {
+        "PartitionerColumnValue": {
+            "title": "PartitionerColumnValue",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_column_value",
+                    "enum": [
+                        "partition_on_column_value"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerMultiColumnValue": {
+            "title": "PartitionerMultiColumnValue",
+            "type": "object",
+            "properties": {
+                "column_names": {
+                    "title": "Column Names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_multi_column_values",
+                    "enum": [
+                        "partition_on_multi_column_values"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_names"
+            ]
+        },
+        "PartitionerDividedInteger": {
+            "title": "PartitionerDividedInteger",
+            "type": "object",
+            "properties": {
+                "divisor": {
+                    "title": "Divisor",
+                    "type": "integer"
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_divided_integer",
+                    "enum": [
+                        "partition_on_divided_integer"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "divisor",
+                "column_name"
+            ]
+        },
+        "PartitionerModInteger": {
+            "title": "PartitionerModInteger",
+            "type": "object",
+            "properties": {
+                "mod": {
+                    "title": "Mod",
+                    "type": "integer"
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_mod_integer",
+                    "enum": [
+                        "partition_on_mod_integer"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "mod",
+                "column_name"
+            ]
+        },
+        "PartitionerYear": {
+            "title": "PartitionerYear",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_year",
+                    "enum": [
+                        "partition_on_year"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerYearAndMonth": {
+            "title": "PartitionerYearAndMonth",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_year_and_month",
+                    "enum": [
+                        "partition_on_year_and_month"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerYearAndMonthAndDay": {
+            "title": "PartitionerYearAndMonthAndDay",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_year_and_month_and_day",
+                    "enum": [
+                        "partition_on_year_and_month_and_day"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerDatetimePart": {
+            "title": "PartitionerDatetimePart",
+            "type": "object",
+            "properties": {
+                "datetime_parts": {
+                    "title": "Datetime Parts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_date_parts",
+                    "enum": [
+                        "partition_on_date_parts"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "datetime_parts",
+                "column_name"
+            ]
+        }
+    }
 }

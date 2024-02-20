@@ -43,28 +43,28 @@
             "title": "Partitioner",
             "anyOf": [
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerColumnValue"
+                    "$ref": "#/definitions/SqlPartitionerColumnValue"
                 },
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerMultiColumnValue"
+                    "$ref": "#/definitions/SqlPartitionerMultiColumnValue"
                 },
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerDividedInteger"
+                    "$ref": "#/definitions/SqlPartitionerDividedInteger"
                 },
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerModInteger"
+                    "$ref": "#/definitions/SqlPartitionerModInteger"
                 },
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerYear"
+                    "$ref": "#/definitions/SqlPartitionerYear"
                 },
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonth"
+                    "$ref": "#/definitions/SqlPartitionerYearAndMonth"
                 },
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonthAndDay"
+                    "$ref": "#/definitions/SqlPartitionerYearAndMonthAndDay"
                 },
                 {
-                    "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerDatetimePart"
+                    "$ref": "#/definitions/SqlPartitionerDatetimePart"
                 },
                 {
                     "$ref": "#/definitions/PartitionerHashedColumn"
@@ -103,7 +103,7 @@
                 "key"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerColumnValue": {
+        "PartitionerColumnValue": {
             "title": "PartitionerColumnValue",
             "type": "object",
             "properties": {
@@ -124,7 +124,7 @@
                 "column_name"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerMultiColumnValue": {
+        "PartitionerMultiColumnValue": {
             "title": "PartitionerMultiColumnValue",
             "type": "object",
             "properties": {
@@ -148,7 +148,7 @@
                 "column_names"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerDividedInteger": {
+        "PartitionerDividedInteger": {
             "title": "PartitionerDividedInteger",
             "type": "object",
             "properties": {
@@ -174,7 +174,7 @@
                 "column_name"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerModInteger": {
+        "PartitionerModInteger": {
             "title": "PartitionerModInteger",
             "type": "object",
             "properties": {
@@ -200,7 +200,7 @@
                 "column_name"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerYear": {
+        "PartitionerYear": {
             "title": "PartitionerYear",
             "type": "object",
             "properties": {
@@ -221,7 +221,7 @@
                 "column_name"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerYearAndMonth": {
+        "PartitionerYearAndMonth": {
             "title": "PartitionerYearAndMonth",
             "type": "object",
             "properties": {
@@ -242,7 +242,7 @@
                 "column_name"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerYearAndMonthAndDay": {
+        "PartitionerYearAndMonthAndDay": {
             "title": "PartitionerYearAndMonthAndDay",
             "type": "object",
             "properties": {
@@ -263,7 +263,7 @@
                 "column_name"
             ]
         },
-        "great_expectations__core__partitioners__PartitionerDatetimePart": {
+        "PartitionerDatetimePart": {
             "title": "PartitionerDatetimePart",
             "type": "object",
             "properties": {
@@ -309,28 +309,28 @@
                     "title": "Partitioner",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerColumnValue"
+                            "$ref": "#/definitions/PartitionerColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerMultiColumnValue"
+                            "$ref": "#/definitions/PartitionerMultiColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerDividedInteger"
+                            "$ref": "#/definitions/PartitionerDividedInteger"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerModInteger"
+                            "$ref": "#/definitions/PartitionerModInteger"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerYear"
+                            "$ref": "#/definitions/PartitionerYear"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerYearAndMonth"
+                            "$ref": "#/definitions/PartitionerYearAndMonth"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerYearAndMonthAndDay"
+                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__core__partitioners__PartitionerDatetimePart"
+                            "$ref": "#/definitions/PartitionerDatetimePart"
                         }
                     ]
                 }
@@ -339,8 +339,8 @@
                 "name"
             ]
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerColumnValue": {
-            "title": "PartitionerColumnValue",
+        "SqlPartitionerColumnValue": {
+            "title": "SqlPartitionerColumnValue",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -362,8 +362,8 @@
             ],
             "additionalProperties": false
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerMultiColumnValue": {
-            "title": "PartitionerMultiColumnValue",
+        "SqlPartitionerMultiColumnValue": {
+            "title": "SqlPartitionerMultiColumnValue",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -388,8 +388,8 @@
             ],
             "additionalProperties": false
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerDividedInteger": {
-            "title": "PartitionerDividedInteger",
+        "SqlPartitionerDividedInteger": {
+            "title": "SqlPartitionerDividedInteger",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -416,8 +416,8 @@
             ],
             "additionalProperties": false
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerModInteger": {
-            "title": "PartitionerModInteger",
+        "SqlPartitionerModInteger": {
+            "title": "SqlPartitionerModInteger",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -444,8 +444,8 @@
             ],
             "additionalProperties": false
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerYear": {
-            "title": "PartitionerYear",
+        "SqlPartitionerYear": {
+            "title": "SqlPartitionerYear",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -467,8 +467,8 @@
             ],
             "additionalProperties": false
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonth": {
-            "title": "PartitionerYearAndMonth",
+        "SqlPartitionerYearAndMonth": {
+            "title": "SqlPartitionerYearAndMonth",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -490,8 +490,8 @@
             ],
             "additionalProperties": false
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonthAndDay": {
-            "title": "PartitionerYearAndMonthAndDay",
+        "SqlPartitionerYearAndMonthAndDay": {
+            "title": "SqlPartitionerYearAndMonthAndDay",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -513,8 +513,8 @@
             ],
             "additionalProperties": false
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerDatetimePart": {
-            "title": "PartitionerDatetimePart",
+        "SqlPartitionerDatetimePart": {
+            "title": "SqlPartitionerDatetimePart",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {

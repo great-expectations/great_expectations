@@ -83,10 +83,10 @@ class BatchRequest(pydantic.BaseModel):
             "The structure and types depends on the asset type."
         ),
     )
+    partitioner: Optional[Partitioner] = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )
-    partitioner: Optional[Partitioner] = None
 
     def __init__(self, **kwargs) -> None:
         _batch_slice_input: Optional[BatchSlice] = None
