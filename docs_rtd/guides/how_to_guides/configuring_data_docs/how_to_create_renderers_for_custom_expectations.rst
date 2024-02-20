@@ -461,7 +461,7 @@ Steps
               import altair as alt
 
 
-              class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
+              class ExpectColumnKLDivergenceToBeLessThan(TableExpectation):
                   ...
 
                   @classmethod
