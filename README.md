@@ -44,7 +44,7 @@ Learn more about our plans for 1.0 and how we’ll be making this transition in 
 
 ## Get started
 
-Visit [https://docs.greatexpectations.io/docs/oss/](https://docs.greatexpectations.io/).
+Visit [https://docs.greatexpectations.io/docs/oss/](https://docs.greatexpectations.io/docs/oss/).
 
 
 ## Get support
