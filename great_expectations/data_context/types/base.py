@@ -1540,11 +1540,6 @@ class DataContextConfigSchema(Schema):
         allow_none=True,
         load_only=True,
     )
-    expectations_store_name = fields.Str()
-    validations_store_name = fields.Str()
-    evaluation_parameter_store_name = fields.Str()
-    checkpoint_store_name = fields.Str(required=False, allow_none=True)
-    profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
@@ -1640,24 +1635,6 @@ class DataContextConfigSchema(Schema):
                     data["config_version"], CURRENT_GX_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(message="config version too high"),
-            )
-
-        if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
-            "checkpoint_store_name" in data
-            or any(
-                store_config["class_name"] == "CheckpointStore"
-                for store_config in data["stores"].values()
-            )
-        ):
-            raise gx_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
-                    data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
-                ),
-                validation_error=ValidationError(
-                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
-                        data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
-                    )
-                ),
             )
 
         if (
@@ -1798,24 +1775,29 @@ class BaseStoreBackendDefaults(DictDot):
     For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults and you may be able to specify less parameters.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
-        expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
-        evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
-        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
-        profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
         validation_operators: Optional[dict] = None,
         stores: Optional[dict] = None,
         data_docs_sites: Optional[dict] = None,
     ) -> None:
-        self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
         self.validation_operators = validation_operators
+        self.expectations_store_name = (
+            DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
+        )
+        self.validations_store_name = (
+            DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
+        )
+        self.evaluation_parameter_store_name: str = (
+            DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        )
+        self.checkpoint_store_name = (
+            DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        )
+        self.profiler_store_name = (
+            DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
+        )
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
 
@@ -1845,11 +1827,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
         profiler_store_prefix: Overrides default if supplied
-        expectations_store_name: Overrides default if supplied
-        validations_store_name: Overrides default if supplied
-        evaluation_parameter_store_name: Overrides default if supplied
-        checkpoint_store_name: Overrides default if supplied
-        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(  # noqa: PLR0913
@@ -1865,11 +1842,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
         profiler_store_prefix: str = "profilers",
-        expectations_store_name: str = "expectations_S3_store",
-        validations_store_name: str = "validations_S3_store",
-        evaluation_parameter_store_name: str = "evaluation_parameter_store",
-        checkpoint_store_name: str = "checkpoint_S3_store",
-        profiler_store_name: str = "profiler_S3_store",
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -1887,13 +1859,8 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             profiler_store_bucket_name = default_bucket_name
 
         # Overwrite defaults
-        self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
         self.stores = {
-            expectations_store_name: {
+            DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value: {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -1901,7 +1868,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": expectations_store_prefix,
                 },
             },
-            validations_store_name: {
+            DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value: {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -1909,8 +1876,10 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validations_store_prefix,
                 },
             },
-            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
-            checkpoint_store_name: {
+            DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value: {
+                "class_name": "EvaluationParameterStore"
+            },
+            DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -1918,7 +1887,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": checkpoint_store_prefix,
                 },
             },
-            profiler_store_name: {
+            DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value: {
                 "class_name": "ProfilerStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -2306,7 +2275,7 @@ class DataContextConfig(BaseYamlConfig):
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: PLR0913
         self,
         batch_configs: Optional[Dict] = None,
         config_version: Optional[float] = None,
@@ -2317,11 +2286,6 @@ class DataContextConfig(BaseYamlConfig):
             ]
         ] = None,
         fluent_datasources: Optional[dict] = None,
-        expectations_store_name: Optional[str] = None,
-        validations_store_name: Optional[str] = None,
-        evaluation_parameter_store_name: Optional[str] = None,
-        checkpoint_store_name: Optional[str] = None,
-        profiler_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
@@ -2343,20 +2307,8 @@ class DataContextConfig(BaseYamlConfig):
         if store_backend_defaults is not None:
             if stores is None:
                 stores = store_backend_defaults.stores
-            if expectations_store_name is None:
-                expectations_store_name = store_backend_defaults.expectations_store_name
-            if validations_store_name is None:
-                validations_store_name = store_backend_defaults.validations_store_name
-            if evaluation_parameter_store_name is None:
-                evaluation_parameter_store_name = (
-                    store_backend_defaults.evaluation_parameter_store_name
-                )
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
-            if checkpoint_store_name is None:
-                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
-            if profiler_store_name is None:
-                profiler_store_name = store_backend_defaults.profiler_store_name
 
         self._config_version = config_version
         if datasources is None:
@@ -2364,11 +2316,6 @@ class DataContextConfig(BaseYamlConfig):
         self.batch_configs = batch_configs or {}
         self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
-        self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
         self.validation_operators = validation_operators
         self.stores = stores or {}

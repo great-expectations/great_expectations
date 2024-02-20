@@ -50,11 +50,6 @@ stores:
       bucket: 'bucket_name'
       prefix: 'great_expectations/checkpoints/'
 
-expectations_store_name: expectations_S3_store
-validations_store_name: validations_S3_store
-evaluation_parameter_store_name: evaluation_parameter_store
-checkpoint_store_name: checkpoint_S3_store
-
 data_docs_sites:
   s3_site:
     class_name: SiteBuilder

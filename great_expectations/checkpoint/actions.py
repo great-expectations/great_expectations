@@ -27,7 +27,6 @@ from great_expectations.checkpoint.util import (
     send_sns_notification,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -871,15 +870,11 @@ class StoreValidationResultAction(ValidationAction):
         - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          # name of the store where the actions will store validation results
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: validations_store
         ```
 
 
     Args:
         data_context: GX Data Context.
-        target_store_name: The name of the store where the actions will store the validation result.
 
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
@@ -888,13 +883,9 @@ class StoreValidationResultAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
-        target_store_name: Optional[str] = None,
     ) -> None:
         super().__init__(data_context)
-        if target_store_name is None:
-            self.target_store = data_context.stores[data_context.validations_store_name]
-        else:
-            self.target_store = data_context.stores[target_store_name]
+        self.target_store = data_context.validations_store
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -988,26 +979,18 @@ class StoreEvaluationParametersAction(ValidationAction):
         - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
         ```
 
     Args:
         data_context: GX Data Context.
-        target_store_name: The name of the store in the Data Context to store the evaluation parameters.
 
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
-    def __init__(
-        self, data_context: AbstractDataContext, target_store_name: Optional[str] = None
-    ) -> None:
+    def __init__(self, data_context: AbstractDataContext) -> None:
         super().__init__(data_context)
-
-        if target_store_name is None:
-            self.target_store = data_context.evaluation_parameter_store
-        else:
-            self.target_store = data_context.stores[target_store_name]
+        self.target_store = data_context.evaluation_parameter_store
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -1051,8 +1034,6 @@ class StoreMetricsAction(ValidationAction):
         - name: store_evaluation_params
         action:
          class_name: StoreMetricsAction
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: my_metrics_store
         ```
 
     Args:
@@ -1067,8 +1048,6 @@ class StoreMetricsAction(ValidationAction):
                     ```
             You may use "*" to denote that any expectation suite should match.
 
-        target_store_name: The name of the store where the action will store the metrics.
-
     Raises:
         DataContextError: Unable to find store {} in your DataContext configuration.
         DataContextError: StoreMetricsAction must have a valid MetricsStore for its target store.
@@ -1079,23 +1058,9 @@ class StoreMetricsAction(ValidationAction):
         self,
         data_context: AbstractDataContext,
         requested_metrics: dict,
-        target_store_name: Optional[str] = "metrics_store",
     ) -> None:
         super().__init__(data_context)
         self._requested_metrics = requested_metrics
-        self._target_store_name = target_store_name
-        try:
-            store = data_context.stores[target_store_name]
-        except KeyError:
-            raise DataContextError(
-                "Unable to find store {} in your DataContext configuration.".format(
-                    target_store_name
-                )
-            )
-        if not isinstance(store, MetricStore):
-            raise DataContextError(
-                "StoreMetricsAction must have a valid MetricsStore for its target store."
-            )
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -1130,7 +1095,6 @@ class StoreMetricsAction(ValidationAction):
         self.data_context.store_validation_result_metrics(
             requested_metrics=self._requested_metrics,
             validation_results=validation_result_suite,
-            target_store_name=self._target_store_name,
         )
 
 

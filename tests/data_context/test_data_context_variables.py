@@ -46,11 +46,6 @@ def data_context_config_dict() -> dict:
     config: dict = {
         "config_version": 3.0,
         "plugins_directory": "plugins/",
-        "evaluation_parameter_store_name": "evaluation_parameter_store",
-        "validations_store_name": "validations_store",
-        "expectations_store_name": "expectations_store",
-        "checkpoint_store_name": "checkpoint_store",
-        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -239,22 +234,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
             DataContextVariableSchema.PLUGINS_DIRECTORY,
             id="plugins_directory getter",
         ),
-        pytest.param(
-            DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-            id="expectations_store getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            id="evaluation_parameter_store getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
-            id="checkpoint_store getter",
-        ),
         pytest.param(DataContextVariableSchema.STORES, id="stores getter"),
         pytest.param(
             DataContextVariableSchema.DATA_DOCS_SITES,
@@ -341,31 +320,6 @@ def test_data_context_variables_get_with_substitutions(
             "other_plugins/",
             DataContextVariableSchema.PLUGINS_DIRECTORY,
             id="plugins_directory setter",
-        ),
-        pytest.param(
-            "my_expectations_store",
-            DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-            id="expectations_store setter",
-        ),
-        pytest.param(
-            "my_validations_store",
-            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store setter",
-        ),
-        pytest.param(
-            "my_evaluation_parameter_store",
-            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            id="evaluation_parameter_store setter",
-        ),
-        pytest.param(
-            "my_checkpoint_store",
-            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
-            id="checkpoint_store setter",
-        ),
-        pytest.param(
-            "my_profiler_store",
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            id="profiler_store setter",
         ),
         pytest.param(stores, DataContextVariableSchema.STORES, id="stores setter"),
         pytest.param(
@@ -479,7 +433,6 @@ def test_data_context_variables_save_config(
                 "expectation_validation_result": False,
                 "globally": False,
             },
-            "profiler_store_name": "profiler_store",
         }
 
         assert mock_put.call_count == 1

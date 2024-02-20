@@ -30,10 +30,6 @@ config_variables_file_path: uncommitted/config_variables.yml
 
 
 plugins_directory: ${l}
-evaluation_parameter_store_name: ${m}
-expectations_store_name: ${n}
-validations_store_name: ${o}
-checkpoint_store_name: ${cps}
 
 data_docs_sites:
   local_site:

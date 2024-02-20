@@ -27,9 +27,4 @@ stores:
   checkpoint_store:
       class_name: CheckpointStore
 
-evaluation_parameter_store_name: evaluation_parameter_store
-validations_store_name: validations_store
-expectations_store_name: expectations_store
-checkpoint_store_name: checkpoint_store
-
 plugins_directory: plugins/

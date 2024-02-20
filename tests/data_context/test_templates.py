@@ -56,11 +56,6 @@ stores:
       suppress_store_backend_id: true
       base_directory: profilers/
 
-expectations_store_name: expectations_store
-validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
-checkpoint_store_name: checkpoint_store
-
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
   # include Expectations, Validations & Profiles. The are built for all

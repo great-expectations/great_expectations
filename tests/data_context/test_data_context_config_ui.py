@@ -46,11 +46,6 @@ def construct_data_context_config():
         data_context_id: str,
         datasources: Dict,
         config_version: float = _DEFAULT_CONFIG_VERSION,
-        expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
-        evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
-        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
-        profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
         validation_operators: Optional[Dict] = None,
@@ -66,11 +61,6 @@ def construct_data_context_config():
         return {
             "config_version": config_version,
             "datasources": datasources,
-            "expectations_store_name": expectations_store_name,
-            "validations_store_name": validations_store_name,
-            "evaluation_parameter_store_name": evaluation_parameter_store_name,
-            "checkpoint_store_name": checkpoint_store_name,
-            "profiler_store_name": profiler_store_name,
             "plugins_directory": plugins_directory,
             "validation_operators": validation_operators,
             "stores": stores,
@@ -149,8 +139,6 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
-        profiler_store_name=store_backend_defaults.profiler_store_name,
     )
 
     desired_config = construct_data_context_config(

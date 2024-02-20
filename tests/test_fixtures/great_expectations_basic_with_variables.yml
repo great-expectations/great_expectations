@@ -26,11 +26,8 @@ datasources:
           test_escaped_manually_entered_value_from_config: $escaped_password_already_in_config_yml
 
 config_variables_file_path: uncommitted/config_variables.yml
-expectations_store_name: expectations_store
 
 plugins_directory: plugins/
-evaluation_parameter_store_name: evaluation_parameter_store
-validations_store_name: validation_store
 
 data_docs_sites:
 
@@ -54,11 +51,9 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validation_store
       - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:

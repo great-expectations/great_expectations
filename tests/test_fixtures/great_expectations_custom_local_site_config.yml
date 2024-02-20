@@ -14,10 +14,6 @@ datasources:
         base_directory: ../data
 plugins_directory: plugins/
 
-expectations_store_name: expectations_store
-evaluation_parameter_store_name: evaluation_parameter_store
-validations_store_name: validations_store
-
 stores:
   expectations_store:
     class_name: ExpectationsStore
