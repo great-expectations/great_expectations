@@ -95,12 +95,14 @@ def test_checkpoint_factory_add_uses_store_add():
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
     checkpoint = Checkpoint(name=name, data_context=context)
+    config = checkpoint.get_config()
+    store.get.return_value = config
 
     # Act
     factory.add(checkpoint=checkpoint)
 
     # Assert
-    store.add.assert_called_once_with(key=key, value=checkpoint.get_config())
+    store.add.assert_called_once_with(key=key, value=config)
 
 
 @pytest.mark.unit

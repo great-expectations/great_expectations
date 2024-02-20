@@ -14,6 +14,10 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
     from great_expectations.data_context.store import CheckpointStore
+    from great_expectations.data_context.types.resource_identifiers import (
+        ConfigurationIdentifier,
+        GXCloudIdentifier,
+    )
 
 
 # TODO: Add analytics as needed
@@ -33,8 +37,6 @@ class CheckpointFactory(Factory[Checkpoint]):
         Raises:
             DataContextError if Checkpoint already exists
         """
-        # TODO: Refactor to use basic store API
-        # checkpoint = self._store.add_checkpoint(checkpoint=checkpoint)
         key = self._store.get_key(name=checkpoint.name, id=None)
         if self._store.has_key(key=key):
             raise DataContextError(
@@ -42,7 +44,9 @@ class CheckpointFactory(Factory[Checkpoint]):
             )
 
         self._store.add(key=key, value=checkpoint.get_config())
-        return checkpoint
+
+        # TODO: Add id adding logic to CheckpointStore to prevent round trip
+        return self._get(key=key)
 
     @public_api
     @override
@@ -55,7 +59,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         Raises:
             DataContextError if Checkpoint doesn't exist
         """
-        key = self._store.get_key(name=checkpoint.name, id=checkpoint.ge_cloud_id)
+        key = self._store.get_key(name=checkpoint.name, id=None)
         if not self._store.has_key(key=key):
             raise DataContextError(
                 f"Cannot delete Checkpoint with name {checkpoint.name} because it cannot be found."
@@ -79,6 +83,9 @@ class CheckpointFactory(Factory[Checkpoint]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
 
+        return self._get(key=key)
+
+    def _get(self, key: GXCloudIdentifier | ConfigurationIdentifier) -> Checkpoint:
         config: dict | CheckpointConfig = self._store.get(key=key)  # type: ignore[assignment]
         if isinstance(config, CheckpointConfig):
             config = config.to_json_dict()
