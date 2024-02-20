@@ -929,14 +929,19 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        if not inspector.has_table(
-            table_name=self.table_name,
-            schema=self.schema_name,
-        ):
-            raise TestConnectionError(
-                f"Attempt to connect to table: {self.qualified_name} failed because the table"
-                f" {self.table_name} does not exist."
+        try:
+            with engine.connect() as connection:
+                table = sa.table(self.table_name, schema=self.schema_name)
+                # don't need to fetch any data, just want to make sure the table is accessible
+                connection.execute(sa.select(1, table).limit(1))
+        except Exception as query_error:
+            LOGGER.info(
+                f"{self.name} `.test_connection()` query failed: {query_error!r}"
             )
+            raise TestConnectionError(
+                f"Attempt to connect to table: {self.qualified_name} failed because the test query "
+                f"failed. Ensure the table exists and the user has access to select data from the table: {query_error}"
+            ) from query_error
 
     @override
     def test_partitioner_connection(self) -> None:

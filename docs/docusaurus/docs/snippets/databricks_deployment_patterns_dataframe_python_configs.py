@@ -7,9 +7,11 @@ from great_expectations.checkpoint import Checkpoint
 
 # </snippet>
 
-from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.execution_engine.sparkdf_execution_engine import (
+    SparkDFExecutionEngine,
+)
 
-spark = get_or_create_spark_application()
+spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py choose context_root_dir">
 context_root_dir = "/dbfs/great_expectations/"

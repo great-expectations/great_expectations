@@ -242,7 +242,7 @@ module.exports = {
     },
     mermaid: {
       theme: {light: "neutral", dark: "neutral"},
-    }
+    },
   },
   themes: ['@docusaurus/theme-mermaid'],
 
@@ -251,21 +251,28 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          includeCurrentVersion: false,
+          includeCurrentVersion: true,
           sidebarPath: require.resolve('./sidebars.js'),
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
           // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
+            current: {
+              label: '1.0 prerelease',
+              path: '1.0-prerelease',
+            },
             ['0.18']: {
-              label: '0.18.8',
+              label: '0.18.9',
               path: ''
             },
             ["0.17"]: {
               label: '0.17.23',
               path: '0.17.23'
             }
-          }
+          },
+          admonitions: {
+            keywords: ['note', 'info', 'tip', 'warning', 'caution', 'danger', 'cta'],
+          },
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss'),
