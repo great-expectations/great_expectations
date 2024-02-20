@@ -42,5 +42,5 @@ Clearly explain the issue you're experiencing, or the problem you're trying to s
 
 ## GX OSS Support
 
-- If you want to chat with community members about general issues and solutions, join the [GX Slack community](https://greatexpectationstalk.slack.com/archives/CUTCNHN82). To discuss GX Cloud issues, join the [GX Cloud Slack community](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
+- Chat with community members about general issues and seek solutions on the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82). 
 - If you've found a bug, open an issue in one of the [GX GitHub repositories](https://github.com/great-expectations).
