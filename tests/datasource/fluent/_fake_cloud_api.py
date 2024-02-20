@@ -735,7 +735,7 @@ def delete_checkpoint_by_name_cb(
 
     parsed_url = urllib.parse.urlparse(url)
     query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
-    queried_names: list[str] | None = query_params.get("name", [])
+    queried_names: list[str] = query_params.get("name", [])
     if not queried_names:
         raise ValueError("Must provide checkpoint name for deletion.")
 
@@ -748,20 +748,18 @@ def delete_checkpoint_by_name_cb(
             checkpoint_id = checkpoint["id"]
             break
 
-    deleted_cp = checkpoints.pop(checkpoint_id, None)
-    print(pf(deleted_cp, depth=5))
-
-    if deleted_cp:
-        _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"].remove(cp_name)
-        LOGGER.debug(f"Deleted checkpoint '{cp_name}'")
-        result = CallbackResult(204, headers={}, body="")
-    else:
+    if not checkpoint_id:
         errors = ErrorPayloadSchema(
             errors=[{"code": "mock 404", "detail": None, "source": None}]
         )
-        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
+        return CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
 
-    return result
+    deleted_cp = checkpoints.pop(checkpoint_id)
+    print(pf(deleted_cp, depth=5))
+
+    _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"].remove(cp_name)
+    LOGGER.debug(f"Deleted checkpoint '{cp_name}'")
+    return CallbackResult(204, headers={}, body="")
 
 
 def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
