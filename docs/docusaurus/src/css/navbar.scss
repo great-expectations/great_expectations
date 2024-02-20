@@ -25,6 +25,13 @@
   box-shadow: unset;
   height: unset;
   padding: 0;
+
+  &:has(.home-section.navbar__link--active),
+  &:has(.gx-cloud-section.navbar__link--active) {
+    .navbar__items .dropdown {
+      display: none;
+    }
+  }
 }
 
 .navbar__item {
@@ -86,6 +93,11 @@
 
 .navbar__link--active {
   border-bottom: 2px solid var(--ifm-color-primary);
+
+  &[href*="0.17"] {
+    border-bottom: none;
+    color: var(--ifm-navbar-link-color);
+  }
 }
 
 .header-cloud-link {
