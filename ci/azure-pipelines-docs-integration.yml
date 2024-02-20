@@ -15,34 +15,14 @@ variables:
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
-  - stage: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
-    jobs:
-      - job: changes
-        steps:
-          - task: ChangedFiles@1
-            name: CheckDocsChanges
-            inputs:
-              verbose: true
-              rules: |
-                [DocsChanged]
-                docs/**
-                tests/integration/docusaurus/**
-                tests/integration/fixtures/**
-                tests/integration/test_definitions/**
-                tests/integration/test_script_runner.py
-                tests/test_sets/**
-
   - stage: docusaurus_tests
-    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
 
     - job: test_docs_aws_spark
       timeoutInMinutes: 30
-      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
+      condition: and(or(eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
         spark.version: '3.3.2'
@@ -80,7 +60,7 @@ stages:
 
     - job: test_docs_athena
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: or(eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
         python.version: '3.8'
 
