@@ -13,9 +13,9 @@
 
 <img align="right" src="./docs/docusaurus/static/img/gx-mark-160.png">
 
-## About Great Expectations
+## About GX OSS
 
-With Great Expectations, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are unit tests for your data. Not only that, but Great Expectations also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use Great Expectations to:
+With GX OSS, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are unit tests for your data. Not only that, but Great Expectations also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use Great Expectations to:
 
 - Test data they ingest from other teams or vendors and ensure its validity.
 - Validate data they transform as a step in their data pipeline to ensure the correctness of transformations.
@@ -26,7 +26,6 @@ With Great Expectations, you can assert what you expect from the data you load a
 To learn more about how data teams are using Great Expectations, see [Case studies from Great Expectations](https://greatexpectations.io/case-studies/).
 
 See [Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to our pipeline data quality testing philosophy.
-
 
 ## Our upcoming 1.0 release
 
