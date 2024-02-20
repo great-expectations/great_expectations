@@ -50,6 +50,7 @@ def data_context_config_dict() -> dict:
         "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
+        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
