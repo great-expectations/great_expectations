@@ -1002,7 +1002,7 @@ class Validator:
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
             metric_exception_info: Dict[
-                str, ExceptionInfo
+                str, Union[MetricConfiguration, ExceptionInfo, int]
             ] = expectation_validation_graph.get_exception_info(
                 metric_info=aborted_metrics_info
             )
