@@ -209,7 +209,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
         autospec=True,
         side_effect=mocked_get_by_name_response_1_result,
     ) as mock_get:
-        checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
+        checkpoint = context.checkpoints.get(name=checkpoint_config["name"])
 
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
@@ -234,7 +234,7 @@ def test_get_checkpoint_no_identifier_raises_error(
     context = empty_cloud_data_context
 
     with pytest.raises(ValueError):
-        context.get_checkpoint()
+        context.checkpoints.get()
 
 
 @pytest.mark.cloud

@@ -359,7 +359,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
@@ -414,7 +414,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
@@ -457,7 +457,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
         expectations_list=[expect_column_pair_values_to_be_equal],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
@@ -510,7 +510,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
         expectations_list=[expect_column_pair_values_to_be_equal],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
@@ -566,7 +566,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
@@ -625,7 +625,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
@@ -684,7 +684,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
@@ -731,7 +731,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_1"],
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(result_format=result_format)
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
@@ -777,7 +777,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         "partial_unexpected_count": 1,
         "unexpected_index_column_names": ["pk_1"],
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(result_format=result_format)
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
@@ -820,7 +820,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["i_dont_exist"],
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     with pytest.raises(CheckpointError) as e:
         checkpoint.run(
             result_format=result_format,
@@ -862,7 +862,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
         "unexpected_index_column_names": ["pk_1"],
     }
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(result_format=result_format)
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
@@ -922,7 +922,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
@@ -966,7 +966,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
 
@@ -1005,7 +1005,7 @@ def test_sql_complete_output_no_id_pk_fallback(
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run()
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
@@ -1055,7 +1055,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1105,7 +1105,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1155,7 +1155,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1202,7 +1202,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1247,7 +1247,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_1"],
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         result_format=result_format,
@@ -1292,7 +1292,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "partial_unexpected_count": 1,
         "unexpected_index_column_names": ["pk_1"],
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         result_format=result_format,
@@ -1333,7 +1333,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     with pytest.raises(CheckpointError) as e:
         checkpoint.run(
             expectation_suite_name="metrics_exp",
@@ -1372,7 +1372,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1432,7 +1432,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1478,7 +1478,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "unexpected_index_column_names": ["pk_1"],
     }
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         result_format=result_format,
@@ -1516,7 +1516,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "unexpected_index_column_names": ["pk_1"],
     }
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         result_format=result_format,
@@ -1551,7 +1551,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     with pytest.raises(CheckpointError) as e:
         checkpoint.run(
             expectation_suite_name="metrics_exp",
@@ -1590,7 +1590,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1642,7 +1642,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1680,7 +1680,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1728,7 +1728,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -1774,7 +1774,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_1"],
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -1830,7 +1830,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         "unexpected_index_column_names": ["pk_1"],
         "return_unexpected_index_query": True,
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -1886,7 +1886,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         "unexpected_index_column_names": ["pk_1"],
         "return_unexpected_index_query": False,
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -1932,7 +1932,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["i_dont_exist"],
     }
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     with pytest.raises(CheckpointError) as e:
         checkpoint.run(
             expectation_suite_name="metrics_exp",
@@ -1977,7 +1977,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_o
         "unexpected_index_column_names": ["pk_1"],
     }
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -2043,7 +2043,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -2095,7 +2095,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -2149,7 +2149,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -2192,7 +2192,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_column_pair,
@@ -2247,7 +2247,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_column_pair,
@@ -2295,7 +2295,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_out
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_column_pair,
@@ -2341,7 +2341,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_compl
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
@@ -2401,7 +2401,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summa
         expectations_list=[expect_multicolumn_sum_to_equal],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
@@ -2449,7 +2449,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
@@ -2493,7 +2493,7 @@ def test_spark_complete_output_no_id_pk_fallback(
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -2544,7 +2544,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -2609,7 +2609,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -2680,7 +2680,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     with pytest.raises(CheckpointError) as e:
         checkpoint.run(
             expectation_suite_name="metrics_exp",
@@ -2736,7 +2736,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -2808,7 +2808,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -2870,7 +2870,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -2943,7 +2943,7 @@ def test_pandas_result_format_in_checkpoint_named_index_different_column_specifi
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     with pytest.raises(CheckpointError) as e:
         checkpoint.run(
             expectation_suite_name="metrics_exp",
@@ -2998,7 +2998,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -3049,7 +3049,7 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -3087,7 +3087,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index_column_pair,
@@ -3158,7 +3158,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -3231,7 +3231,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -3286,7 +3286,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index_multicolumn_sum,
@@ -3364,7 +3364,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -3441,7 +3441,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name="metrics_exp",
         batch_request=batch_request,
@@ -3539,7 +3539,7 @@ runtime_configuration:
 
     result: CheckpointResult
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result: CheckpointResult = checkpoint.run(
         expectation_suite_name=expectation_suite_name,
     )

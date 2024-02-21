@@ -285,7 +285,7 @@ assert (
 
 # get the updated context and run a checkpoint to ensure validation store is updated
 context = gx.get_context()
-checkpoint = context.get_checkpoint(checkpoint_name)
+checkpoint = context.checkpoints.get(checkpoint_name)
 validation_result = checkpoint.run()
 assert validation_result["success"] is True
 list_validation_store_files = (
