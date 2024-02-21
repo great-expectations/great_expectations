@@ -29,7 +29,7 @@
   &:has(.home-section.navbar__link--active),
   &:has(.gx-cloud-section.navbar__link--active) {
     .navbar__items .dropdown {
-      display: none;
+      visibility: hidden;
     }
   }
 }
