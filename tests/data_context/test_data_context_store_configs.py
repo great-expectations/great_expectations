@@ -23,11 +23,12 @@ def totally_empty_data_context(tmp_path_factory):
     )
 
     config = {
-        "config_version": 2,
+        "config_version": 3,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "not_a_real_store_name",
         "validations_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
+        "checkpoint_store_name": "checkpoint_store",
         "datasources": {},
         "stores": {
             "expectations_store": {
@@ -35,6 +36,13 @@ def totally_empty_data_context(tmp_path_factory):
                 "store_backend": {
                     "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
+                },
+            },
+            "checkpoint_store": {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": "checkpoints/",
                 },
             },
         },
@@ -66,7 +74,7 @@ def test_create(tmp_path_factory):
 
 @pytest.mark.filesystem
 def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 1
+    assert len(totally_empty_data_context.stores.keys()) == 2
 
     totally_empty_data_context.add_store(
         "my_new_store",
@@ -76,7 +84,7 @@ def test_add_store(totally_empty_data_context):
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 2
+    assert len(totally_empty_data_context.stores.keys()) == 3
 
 
 @pytest.mark.filesystem

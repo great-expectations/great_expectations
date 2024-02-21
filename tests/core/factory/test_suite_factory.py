@@ -9,7 +9,7 @@ from great_expectations.analytics.events import (
     ExpectationSuiteDeletedEvent,
 )
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.suite_factory import SuiteFactory
+from great_expectations.core.factory.suite_factory import SuiteFactory
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.exceptions import DataContextError
@@ -217,7 +217,7 @@ class TestSuiteFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations.core.suite_factory.submit_event", autospec=True
+            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
             _ = context.suites.add(suite=suite)
 
@@ -242,7 +242,7 @@ class TestSuiteFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations.core.suite_factory.submit_event", autospec=True
+            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
             context.suites.delete(suite=suite)
 

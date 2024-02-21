@@ -46,10 +46,6 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import (
-    MetricsCalculator,
-    _MetricsDict,
-)
 
 if TYPE_CHECKING:
     from great_expectations.core import (
@@ -226,11 +222,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # validation_dependencies, so we use a validator
                 #
+                from great_expectations.validator.metrics_calculator import (
+                    MetricsCalculator,
+                )
+
                 metrics_calculator = MetricsCalculator(
                     execution_engine=execution_engine,
                     show_progress_bars=True,
                 )
-                resolved_metrics: _MetricsDict
                 resolved_metrics, _ = metrics_calculator.compute_metrics(
                     metric_configurations=[partition_metric_configuration],
                     runtime_configuration=None,
