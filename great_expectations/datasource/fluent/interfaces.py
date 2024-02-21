@@ -364,18 +364,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT, _PartitionerT]):
             raise KeyError(f"Multiple keys for {batch_config_name} found")
         return batch_configs[0]
 
-    def get_partitioner_implementation(
-        self, abstract_partitioner: Partitioner
-    ) -> _PartitionerT:
-        PartitionerClass = self._partitioner_implementation_map.get(
-            type(abstract_partitioner)
-        )
-        if not PartitionerClass:
-            raise ValueError(
-                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
-            )
-        return PartitionerClass(**abstract_partitioner.dict())
-
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
         return set(options.keys()).issubset(set(self.batch_request_options))
 

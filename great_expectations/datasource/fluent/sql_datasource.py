@@ -15,6 +15,7 @@ from typing import (
     Literal,
     Optional,
     Protocol,
+    Tuple,
     Type,
     Union,
     cast,
@@ -461,7 +462,9 @@ class _SQLAsset(DataAsset):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._partitioner_implementation_map = {
+        self._partitioner_implementation_map: dict[
+            type[Partitioner], type[SqlPartitioner]
+        ] = {
             PartitionerYear: SqlPartitionerYear,
             PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
             PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
@@ -471,6 +474,18 @@ class _SQLAsset(DataAsset):
             PartitionerModInteger: SqlPartitionerModInteger,
             PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
         }
+
+    def get_partitioner_implementation(
+        self, abstract_partitioner: Partitioner
+    ) -> SqlPartitioner:
+        PartitionerClass = self._partitioner_implementation_map.get(
+            type(abstract_partitioner)
+        )
+        if not PartitionerClass:
+            raise ValueError(
+                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
+            )
+        return PartitionerClass(**abstract_partitioner.dict())
 
     @property
     @override
@@ -496,10 +511,10 @@ class _SQLAsset(DataAsset):
     def get_batch_request_options_tuple(
         self, partitioner: Optional[Partitioner]
     ) -> tuple[str, ...]:
-        option_keys = tuple()
+        option_keys: Tuple[str, ...] = tuple()
         if partitioner:
-            partitioner = self.get_partitioner_implementation(partitioner)
-            option_keys += tuple(partitioner.param_names)
+            sql_partitioner = self.get_partitioner_implementation(partitioner)
+            option_keys += tuple(sql_partitioner.param_names)
         return option_keys
 
     def _add_partitioner(self: Self, partitioner: SqlPartitioner) -> Self:

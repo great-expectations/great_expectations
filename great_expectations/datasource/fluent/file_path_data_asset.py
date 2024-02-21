@@ -149,7 +149,9 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-        self._partitioner_implementation_map = {
+        self._partitioner_implementation_map: dict[
+            type[Partitioner], type[SparkPartitioner]
+        ] = {
             PartitionerYear: SparkPartitionerYear,
             PartitionerYearAndMonth: SparkPartitionerYearAndMonth,
             PartitionerYearAndMonthAndDay: SparkPartitionerYearAndMonthAndDay,
@@ -159,6 +161,18 @@ class _FilePathDataAsset(DataAsset):
             PartitionerModInteger: SparkPartitionerModInteger,
             PartitionerMultiColumnValue: SparkPartitionerMultiColumnValue,
         }
+
+    def get_partitioner_implementation(
+        self, abstract_partitioner: Partitioner
+    ) -> SparkPartitioner:
+        PartitionerClass = self._partitioner_implementation_map.get(
+            type(abstract_partitioner)
+        )
+        if PartitionerClass is None:
+            raise ValueError(
+                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
+            )
+        return PartitionerClass(**abstract_partitioner.dict())
 
     @property
     @override
