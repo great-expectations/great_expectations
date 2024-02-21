@@ -333,9 +333,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
+        # TODO: Update to follow existing pattern once new ValidationStore is implemented
         self._validations: ValidationFactory | None = None
-        if validation_store := self.stores.get(self.validations_store_name):
-            self._validations = ValidationFactory(store=validation_store)
 
     def _init_analytics(self) -> None:
         init_analytics(
@@ -562,6 +561,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "DataContext requires a configured CheckpointStore to persist Checkpoints."
             )
         return self._checkpoints
+
+    @property
+    def validations(self) -> ValidationFactory:
+        if not self._validations:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured ValidationStore to persist Validations."
+            )
+        return self._validations
 
     @property
     def expectations_store_name(self) -> Optional[str]:

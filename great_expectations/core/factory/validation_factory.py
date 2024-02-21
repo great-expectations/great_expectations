@@ -8,12 +8,12 @@ from great_expectations.core.factory.factory import Factory
 
 if TYPE_CHECKING:
     from great_expectations.core.validation import Validation
-    from great_expectations.data_context.store.validations_store import ValidationsStore
 
 
 # TODO: Add analytics as needed
 class ValidationFactory(Factory[Validation]):
-    def __init__(self, store: ValidationsStore) -> None:
+    def __init__(self, store) -> None:
+        # TODO: Update type hints when new ValidationStore is implemented
         self._store = store
 
     @public_api
