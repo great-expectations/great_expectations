@@ -13,7 +13,7 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 ## Prerequisites
 
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
 
 - You have a PostgreSQL database, schema, and table.
 
