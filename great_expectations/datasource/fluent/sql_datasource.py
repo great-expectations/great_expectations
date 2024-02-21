@@ -459,9 +459,11 @@ class _SQLAsset(DataAsset):
     type: str = pydantic.Field("_sql_asset")
     partitioner: Optional[SqlPartitioner] = None
     name: str
+    _partitioner_implementation_map: dict[
+        type[Partitioner], type[SqlPartitioner]
+    ] = pydantic.PrivateAttr(default_factory=dict)
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
         self._partitioner_implementation_map: dict[
             type[Partitioner], type[SqlPartitioner]
         ] = {
@@ -474,6 +476,7 @@ class _SQLAsset(DataAsset):
             PartitionerModInteger: SqlPartitionerModInteger,
             PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
         }
+        super().__init__(**kwargs)
 
     def get_partitioner_implementation(
         self, abstract_partitioner: Partitioner

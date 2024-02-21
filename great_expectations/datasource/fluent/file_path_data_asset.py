@@ -123,6 +123,9 @@ class _FilePathDataAsset(DataAsset):
     _test_connection_error_message: str = pydantic.PrivateAttr(
         "Could not connect to your asset"
     )
+    _partitioner_implementation_map: dict[
+        type[Partitioner], type[SparkPartitioner]
+    ] = pydantic.PrivateAttr()
 
     class Config:
         """
