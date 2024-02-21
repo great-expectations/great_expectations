@@ -946,30 +946,22 @@ def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
     base_directory: str = str(tmp_path_factory.mktemp("test_s3_checkpoint_run"))
     context = gx.data_context.FileDataContext.create(base_directory)
     # Configure the stores
-    context.add_store(
-        "expectations_S3_store",
-        store_config={
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "bucket": "test_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "gx_titanic_expectations",
-            },
+    context.expectations_store = {
+        "class_name": "ExpectationsStore",
+        "store_backend": {
+            "bucket": "test_bucket",
+            "class_name": "TupleS3StoreBackend",
+            "prefix": "gx_titanic_expectations",
         },
-    )
-    context.add_store(
-        "validations_S3_store",
-        store_config={
-            "class_name": "ValidationsStore",
-            "store_backend": {
-                "bucket": "test_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "gx_titanic_validations",
-            },
+    }
+    context.validations_store = {
+        "class_name": "ValidationsStore",
+        "store_backend": {
+            "bucket": "test_bucket",
+            "class_name": "TupleS3StoreBackend",
+            "prefix": "gx_titanic_validations",
         },
-    )
-    context.validations_store_name = "validations_S3_store"
-    context.expectations_store_name = "expectations_S3_store"
+    }
     assert len(context.stores) == 7
     assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
 

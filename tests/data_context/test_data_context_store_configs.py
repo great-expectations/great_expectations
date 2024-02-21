@@ -65,21 +65,6 @@ def test_create(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 1
-
-    totally_empty_data_context.add_store(
-        "my_new_store",
-        {
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
-        },
-    )
-    assert "my_new_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 2
-
-
-@pytest.mark.filesystem
 def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)

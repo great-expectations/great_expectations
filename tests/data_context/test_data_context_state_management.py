@@ -147,29 +147,6 @@ def in_memory_data_context(
 
 
 @pytest.mark.unit
-def test_add_store(in_memory_data_context: EphemeralDataContextSpy):
-    context = in_memory_data_context
-
-    num_stores_before = len(context.stores)
-    num_store_configs_before = len(context.config.stores)
-
-    context.add_store(
-        store_name="my_new_store",
-        store_config={
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "ExpectationsStore",
-        },
-    )
-
-    num_stores_after = len(context.stores)
-    num_store_configs_after = len(context.config.stores)
-
-    assert num_stores_after == num_stores_before + 1
-    assert num_store_configs_after == num_store_configs_before + 1
-    assert context.save_count == 1
-
-
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "config",
     [

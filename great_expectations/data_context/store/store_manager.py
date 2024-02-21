@@ -16,17 +16,17 @@ if TYPE_CHECKING:
 
 
 class StoreManager:
-    CHECKPOINTS_STORE_NAME = (
+    CHECKPOINT_STORE_NAME = (
         DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
     )
-    EVALUATION_PARAMETERS_STORE_NAME = (
+    EVALUATION_PARAMETER_STORE_NAME = (
         DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
     )
-    EXPECTATION_SUITES_STORE_NAME = (
+    EXPECTATION_SUITE_STORE_NAME = (
         DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
     )
-    PROFILERS_STORE_NAME = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
-    VALIDATIONS_STORE_NAME = (
+    PROFILER_STORE_NAME = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
+    VALIDATION_STORE_NAME = (
         DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
     )
 
@@ -38,23 +38,23 @@ class StoreManager:
         self._root_directory = root_directory
 
         self._checkpoints = self._build_store_from_config(
-            store_name=self.CHECKPOINTS_STORE_NAME,
+            store_name=self.CHECKPOINT_STORE_NAME,
             config=store_configs,
         )
         self._evaluation_parameters = self._build_store_from_config(
-            store_name=self.EVALUATION_PARAMETERS_STORE_NAME,
+            store_name=self.EVALUATION_PARAMETER_STORE_NAME,
             config=store_configs,
         )
         self._expectaton_suites = self._build_store_from_config(
-            store_name=self.EXPECTATION_SUITES_STORE_NAME,
+            store_name=self.EXPECTATION_SUITE_STORE_NAME,
             config=store_configs,
         )
         self._profilers = self._build_store_from_config(
-            store_name=self.PROFILERS_STORE_NAME,
+            store_name=self.PROFILER_STORE_NAME,
             config=store_configs,
         )
         self._validations = self._build_store_from_config(
-            store_name=self.VALIDATIONS_STORE_NAME,
+            store_name=self.VALIDATION_STORE_NAME,
             config=store_configs,
         )
 
@@ -69,11 +69,11 @@ class StoreManager:
 
     def dict(self) -> dict[str, Store]:
         return {
-            self.CHECKPOINTS_STORE_NAME: self._checkpoints,
-            self.EVALUATION_PARAMETERS_STORE_NAME: self._evaluation_parameters,
-            self.EXPECTATION_SUITES_STORE_NAME: self._expectaton_suites,
-            self.PROFILERS_STORE_NAME: self._profilers,
-            self.VALIDATIONS_STORE_NAME: self._validations,
+            self.CHECKPOINT_STORE_NAME: self._checkpoints,
+            self.EVALUATION_PARAMETER_STORE_NAME: self._evaluation_parameters,
+            self.EXPECTATION_SUITE_STORE_NAME: self._expectaton_suites,
+            self.PROFILER_STORE_NAME: self._profilers,
+            self.VALIDATION_STORE_NAME: self._validations,
         }
 
     def _build_store_from_config(

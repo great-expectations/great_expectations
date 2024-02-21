@@ -988,10 +988,12 @@ class StoreEvaluationParametersAction(ValidationAction):
         - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
+          target_store_name: evaluation_parameter_store
         ```
 
     Args:
         data_context: GX Data Context.
+        target_store_name: The name of the store in the Data Context to store the evaluation parameters.
 
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.

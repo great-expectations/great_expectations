@@ -292,7 +292,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._sources: _SourceFactories = _SourceFactories(self)
 
-        self._suites: Union[SuiteFactory, None]
         self._suites = SuiteFactory(
             store=self.expectations_store,
             include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
@@ -1641,12 +1640,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not self._evaluation_parameter_dependencies_compiled:
             self._compile_evaluation_parameter_dependencies()
 
-        target_store = self.evaluation_parameter_store
+        if target_store_name is None:
+            target_store_name = self.evaluation_parameter_store.store_name
 
         self._store_metrics(
             self._evaluation_parameter_dependencies,
             validation_results,
-            target_store,
+            target_store_name,
         )
 
     @public_api
@@ -3640,7 +3640,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_result
 
         """
-        selected_store = self.stores.validations_store
+        if validations_store_name is None:
+            validations_store_name = self.validations_store.store_name
+        selected_store = self.stores[validations_store_name]
 
         if run_id is None or batch_identifier is None:
             # Get most recent run id
@@ -3698,16 +3700,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         return validation_result
 
     def store_validation_result_metrics(
-        self, requested_metrics, validation_results, target_store
+        self, requested_metrics, validation_results, target_store_name
     ) -> None:
         self._store_metrics(
             requested_metrics=requested_metrics,
             validation_results=validation_results,
-            target_store=target_store,
+            target_store_name=target_store_name,
         )
 
     def _store_metrics(
-        self, requested_metrics, validation_results, target_store
+        self, requested_metrics, validation_results, target_store_name
     ) -> None:
         """
         requested_metrics is a dictionary like this:
@@ -3751,7 +3753,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                         metric_value = validation_results.get_metric(
                             metric_name, **metric_kwargs
                         )
-                        target_store.set(
+                        self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,
                                 data_asset_name=data_asset_name,
