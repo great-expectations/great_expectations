@@ -266,7 +266,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # We want to have directories set up before initializing usage statistics so
         # that we can obtain a context instance id
-        self._in_memory_instance_id = (
+        self._in_memory_instance_id: str | None = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
         # Init stores
@@ -481,7 +481,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id  # type: ignore[assignment]
+            self._in_memory_instance_id = instance_id
         return instance_id
 
     @property
