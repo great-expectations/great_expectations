@@ -31,7 +31,7 @@ To avoid surprises, it can be helpful to determine beforehand what backends and 
 
 Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to use for testing. If a backend is not specified, Great Expectations attempts testing on all supported backends. Run the following command to add entries corresponding to the functionality you want to add: 
     
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -69,7 +69,7 @@ The decorated method takes in an SQLAlchemy `Column` object and will either retu
   
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to leverage SQLAlchemy's `in_` ColumnOperator and the `@column_condition_partial` decorator.
 
-```python name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py sqlalchemy"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py sqlalchemy"
 ```
 
 <details>
@@ -81,7 +81,7 @@ giving us the flexibility to not have write that targeted code ourselves!
 <br/><br/>
 Here's an example from <a href="https://greatexpectations.io/expectations/expect_column_sum_to_be_between">ExpectColumnSumToBeBetween</a>:
 
-```python
+```python title="Python"
 
 @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
 def _sqlalchemy(cls, column, **kwargs):
@@ -110,7 +110,7 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to implement the `@metric_value` decorator, 
 specifying the type of value we're computing (`AGGREGATE_VALUE`) and the domain over which we're computing (`COLUMN`):
 
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_def"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_def"
 ```
 
 The decorated method takes in a valid <TechnicalTag tag="execution_engine" text="Execution Engine"/> and relevant key word arguments,
@@ -118,12 +118,12 @@ and will return a computed value.
 
 To do this, we need to access our Compute Domain directly:
 
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_selectable"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_selectable"
 ```
 
 This allows us to build a query and use our Execution Engine to execute that query against our data to return the actual value we're looking for, instead of returning a query to find that value:
 
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_query"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_query"
 ```
 
 <details>
@@ -145,7 +145,7 @@ If you now run your file, `print_diagnostic_checklist()` will attempt to execute
 If your implementation is correctly defined, and the rest of the core logic in your Custom Expectation is already complete,
 you will see the following in your Diagnostic Checklist:
 
-```console
+```console title="Output"
 ✔ Has at least one positive and negative example case, and all test cases pass
 ```
 
@@ -153,7 +153,7 @@ If you've already implemented the Pandas backend covered in our How-To guides fo
 and the Spark backend covered in our guide on [how to add Spark support for Custom Expectations](./how_to_add_spark_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
-```console
+```console title="Output"
 ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 ```
 

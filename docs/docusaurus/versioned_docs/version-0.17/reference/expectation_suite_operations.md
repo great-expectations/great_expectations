@@ -23,7 +23,7 @@ main parameters - `expectation_configuration` and `match_type`.
 
 To add an Expectation to a Suite, you can use
 
-```python
+```python title="Python"
 suite.add_expectation(
     expectation_configuration, 
     match_type, 
@@ -41,7 +41,7 @@ suite.add_expectation(
 
 To remove an Expectation from an Expectation Suite, you can use
 
-```python
+```python title="Python"
 suite.remove_expectation(
     expectation_configuration, 
     match_type, 
@@ -57,7 +57,7 @@ suite.remove_expectation(
 If you are interactively working with an Expectation Suite using a Validator, you can access this functionality by
 directly calling 
 
-```python
+```python title="Python"
 validator.remove_expectation(
     expectation_configuration, 
     match_type, 

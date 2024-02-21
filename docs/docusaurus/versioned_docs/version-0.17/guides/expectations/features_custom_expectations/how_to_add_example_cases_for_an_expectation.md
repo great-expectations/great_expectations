@@ -91,7 +91,7 @@ Each example is a dictionary with two keys:
 
 In our example, `data` will have two columns, "x" and "y", each with five rows. If you define multiple columns, make sure that they have the same number of rows. When possible, include test data and tests that includes null values (`None` in the Python test definition).
 
-```python
+```python title="Python"
 "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
 ```
 
@@ -137,7 +137,7 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publicly displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py examples"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note

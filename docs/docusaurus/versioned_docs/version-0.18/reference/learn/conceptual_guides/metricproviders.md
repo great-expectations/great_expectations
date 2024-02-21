@@ -29,7 +29,7 @@ To get the most out of the information provided here, you should have an underst
 
 Although the class hierarchy for MetricProviders and Expectations is different, they use the same naming conventions. The following is the MetricProviders class hierarchy:
 
-```text
+```text title="MetricProvider class hierarchy"
 MetricProvider
     QueryMetricProvider
     TableMetricProvider

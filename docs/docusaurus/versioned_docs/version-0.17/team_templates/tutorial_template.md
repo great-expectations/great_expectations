@@ -32,12 +32,12 @@ title: <!-- Add the topic title here -->
 
 2. Open Jupyter Notebook, a command line, or a terminal and then run the following command to import the `great_expectations` module:
 
-    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py import_gx"
+    ```python title="Python" name="version-0.17.23 tutorials/quickstart/quickstart.py import_gx"
     ```
 
 3. Run the following command to import the `DataContext` object:
 
-    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py get_context"
+    ```python title="Python" name="version-0.17.23 tutorials/quickstart/quickstart.py get_context"
     ```
 4. Add a comment when the prompt appears:
 
@@ -51,7 +51,7 @@ title: <!-- Add the topic title here -->
 
 1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column. 
 
-    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py create_expectation"
+    ```python title="Python" name="version-0.17.23 tutorials/quickstart/quickstart.py create_expectation"
     ```
     The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
 
@@ -63,12 +63,12 @@ title: <!-- Add the topic title here -->
 
 1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
 
-    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py create_checkpoint"
+    ```python title="Python" name="version-0.17.23 tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
 2. Run the following command to return the Validation results:
 
-    ```python name="version-0.17.23 tutorials/quickstart/quickstart.py run_checkpoint"
+    ```python title="Python" name="version-0.17.23 tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
 ## Additional tasks

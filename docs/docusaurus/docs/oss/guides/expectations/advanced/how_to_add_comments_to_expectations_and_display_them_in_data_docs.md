@@ -18,7 +18,7 @@ This guide will help you add descriptive comments (or notes, here used interchan
 
 ## Edit your Expectation Suite
 
-```bash
+```bash title="Terminal input"
 great_expectations suite edit <your_suite_name>
 ```
 
@@ -26,7 +26,7 @@ great_expectations suite edit <your_suite_name>
 
 For each Expectation you wish to add notes to, add a dictionary to the ``meta`` field with the key ``notes`` and your comment as the value. Here is an example.
 
-```python
+```python title="Python"
 validator.expect_table_row_count_to_be_between(
   max_value=1000000, min_value=1,
   meta={"notes": "Example notes about this expectation."}
@@ -43,7 +43,7 @@ To add styling to your comments, you can add formatted notes. Here are a few exa
 
 A single line of markdown is rendered in red, with any Markdown formatting applied.
 
-```python
+```python title="Python"
 validator.expect_column_values_to_not_be_null(
   column="column_name",
   notes="Example notes about this expectation. **Markdown** `Supported`.",
@@ -54,7 +54,7 @@ validator.expect_column_values_to_not_be_null(
 
 Multiple lines can be rendered by using a list of notes; these lines are rendered in black text with any Markdown formatting applied.
 
-```python
+```python title="Python"
 validator.expect_column_values_to_not_be_null(
   column="column_name",
   notes=[

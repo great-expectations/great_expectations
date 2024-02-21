@@ -29,7 +29,7 @@ To avoid surprises and help clearly define your Custom Expectation, it can be he
 
 Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to use for testing. If a backend is not specified, Great Expectations attempts testing on all supported backends. Run the following command to add entries corresponding to the functionality you want to add: 
     
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -70,7 +70,7 @@ The decorated method takes in a Spark `Column` object and will either return a `
 
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to leverage PySpark's `max` SQL Function and the `@column_aggregate_partial` decorator.
 
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py _spark"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py _spark"
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
@@ -85,7 +85,7 @@ giving us the ability to define custom functions and apply them to our data.
 <br/><br/>
 Here is an example of <code>F.udf</code> applied to <code>ExpectColumnValuesToEqualThree</code>:
 
-```python
+```python title="Python"
 @column_condition_partial(engine=SparkDFExecutionEngine)
 def _spark(cls, column, strftime_format, **kwargs):
     def is_equal_to_three(val):
@@ -115,7 +115,7 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to implement the `@metric_partial` decorator, 
 specifying the type of value we're computing (`MAP_CONDITION_FN`) and the domain over which we're computing (`COLUMN`):
 
-```python name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_definition"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_definition"
 ```
 
 The decorated method takes in a valid Execution Engine and relevant `kwargs`,
@@ -128,12 +128,12 @@ These will be used to execute our query and compute the results of our metric.
 
 To do this, we need to access our Compute Domain directly:
 
-```python name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_selectable"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_selectable"
 ```
 
 This allows us to build and return a query to be executed, providing the result of our metric:
 
-```python name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_query"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_query"
 ```
 
 :::note
@@ -149,7 +149,7 @@ If you now run your file, `print_diagnostic_checklist()` will attempt to execute
 
 If your implementation is correctly defined, and the rest of the core logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
-```console
+```console title="Output"
 ✔ Has at least one positive and negative example case, and all test cases pass
 ```
 
@@ -157,7 +157,7 @@ If you've already implemented the Pandas backend covered in our How-To guides fo
 and the SQLAlchemy backend covered in our guide on [how to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
-```console
+```console title="Output"
 ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 ```
 
