@@ -460,7 +460,7 @@ class _SQLAsset(DataAsset):
     partitioner: Optional[SqlPartitioner] = None
     name: str
     _partitioner_implementation_map: dict[
-        type[Partitioner], type[SqlPartitioner]
+        type[Partitioner], SqlPartitioner
     ] = pydantic.PrivateAttr(default_factory=dict)
 
     def __init__(self, **kwargs):
