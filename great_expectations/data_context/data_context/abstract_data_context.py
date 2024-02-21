@@ -1714,52 +1714,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="To be used in place of `ge_cloud_id`",
     )
-    def get_checkpoint(
-        self,
-        name: str | None = None,
-        ge_cloud_id: str | None = None,
-        id: str | None = None,
-    ) -> Checkpoint:
-        """Retrieves a given Checkpoint by either name or id.
-
-        Args:
-            name: The name of the target Checkpoint.
-            ge_cloud_id: The id associated with the target Checkpoint.
-            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
-
-        Returns:
-            The requested Checkpoint.
-
-        Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exist.
-        """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-
-        if not name and not id:
-            raise ValueError("name and id cannot both be None")
-
-        del ge_cloud_id
-
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
-            name=name, id=id
-        )
-        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config,
-            data_context=self,
-            name=name,
-        )
-
-        return checkpoint
-
-    @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
     def delete_checkpoint(
         self,
         name: str | None = None,
