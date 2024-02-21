@@ -44,7 +44,13 @@ Learn more about our plans for 1.0 and how we’ll be making this transition in 
 
 ## Get started
 
-Visit [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/guides/setup/get_started_lp).
+ Run the following command in an empty base directory inside a Python virtual environment to install GX OSS:
+
+    ```bash title="Terminal input"
+    pip install great_expectations
+    ```
+
+For more information about getting started with GX OSS, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/guides/setup/get_started_lp).
 
 ## Get support
 
