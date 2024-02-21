@@ -84,7 +84,7 @@ class FileMigrator:
 
     def _migrate_primary_stores(self, target_stores: dict[str, Store]) -> None:
         source_stores = self._primary_stores
-        for name, source_store in source_stores.items():
+        for name, source_store in source_stores.dict().items():
             target_store = target_stores.get(name)
             if target_store:
                 self._migrate_store(

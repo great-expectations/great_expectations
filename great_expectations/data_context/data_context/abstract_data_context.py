@@ -1000,7 +1000,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         for (
             name,
             value,
-        ) in self.variables.stores.items():  # type: ignore[union-attr]
+        ) in self.variables.stores.dict().items():  # type: ignore[union-attr]
             store_config = copy.deepcopy(value)
             store_config["name"] = name
             masked_config = PasswordMasker.sanitize_config(store_config)
@@ -1536,7 +1536,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
             checkpoint = Checkpoint.construct_from_config_args(
                 data_context=self,
-                checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+                checkpoint_store_name=self.checkpoint_store.store_name,  # type: ignore[arg-type]
                 name=name,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,

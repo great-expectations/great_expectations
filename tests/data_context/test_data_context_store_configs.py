@@ -77,19 +77,15 @@ def test_default_config_yml_stores(tmp_path_factory):
         "checkpoint_store",
     }
 
-    context.add_store(
-        "my_new_validations_store",
-        {
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
-        },
-    )
+    context.validations_store = {
+        "module_name": "great_expectations.data_context.store",
+        "class_name": "ValidationsStore",
+    }
 
-    assert set(context.stores.keys()) == {
+    assert set(context.stores.dict()) == {
         "checkpoint_store",
         "expectations_store",
         "validations_store",
         "evaluation_parameter_store",
         "profiler_store",
-        "my_new_validations_store",
     }

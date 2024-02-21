@@ -76,6 +76,9 @@ class StoreManager:
             self.VALIDATION_STORE_NAME: self._validations,
         }
 
+    def get(self, name: str) -> Store | None:
+        return self.dict().get(name)
+
     def _build_store_from_config(
         self,
         store_name: str,
