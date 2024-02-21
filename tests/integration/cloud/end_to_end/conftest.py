@@ -134,9 +134,8 @@ def checkpoint(
         len(checkpoint.validations) == 1
     ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
-    context.delete_checkpoint(
-        name=checkpoint_name,
-    )
+    context.checkpoints.delete(checkpoint)
+
     with pytest.raises(gx_exceptions.DataContextError):
         context.checkpoints.get(name=checkpoint_name)
 

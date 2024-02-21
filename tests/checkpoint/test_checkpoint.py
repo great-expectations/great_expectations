@@ -104,7 +104,7 @@ def test_basic_checkpoint_config_validation(
     """
 
     assert len(context.list_checkpoints()) == 0
-    context.add_checkpoint(**yaml.load(yaml_config_erroneous))
+    erroneous_checkpoint = context.add_checkpoint(**yaml.load(yaml_config_erroneous))
     assert len(context.list_checkpoints()) == 1
 
     yaml_config: str = """
@@ -177,8 +177,8 @@ def test_basic_checkpoint_config_validation(
     ):
         checkpoint.run()
 
-    context.delete_checkpoint(name="my_erroneous_checkpoint")
-    context.delete_checkpoint(name="my_checkpoint")
+    context.checkpoints.delete(erroneous_checkpoint)
+    context.checkpoints.delete(checkpoint)
     assert len(context.list_checkpoints()) == 0
 
 
