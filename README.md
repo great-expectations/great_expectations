@@ -44,13 +44,20 @@ Learn more about our plans for 1.0 and how we’ll be making this transition in 
 
 ## Get started
 
- Run the following command in an empty base directory inside a Python virtual environment to install GX OSS:
+GX recommends deploying GX OSS within a virtual environment. For more information about getting started with GX OSS, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/guides/setup/get_started_lp).
+
+1. Run the following command in an empty base directory inside a Python virtual environment to install GX OSS:
 
     ```bash title="Terminal input"
     pip install great_expectations
     ```
+2. Run the following command to import the `great_expectations module` and create a Data Context:
 
-For more information about getting started with GX OSS, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/guides/setup/get_started_lp).
+	```python
+	import great_expectations as gx
+
+	context = gx.get_context()
+	```
 
 ## Get support
 
