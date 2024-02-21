@@ -11,7 +11,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 ## Prerequisites
 
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud).
 
 - You have installed Apache Airflow and initialized the database (__airflow db init__).
 
