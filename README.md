@@ -29,7 +29,7 @@ See [Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipel
 
 ## Our upcoming 1.0 release
 
-We’re planning a ton of work to take GX OSS to the next level as we officially graduate it to 1.0!
+We’re planning a ton of work to take GX OSS to the next level as we move to 1.0!
 
 Our biggest goal is to improve the user and contributor experiences by **streamlining the API**, based on the feedback we’ve received from the community (thank you!) over the years.
 
