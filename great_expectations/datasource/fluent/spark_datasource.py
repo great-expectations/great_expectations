@@ -196,6 +196,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def batch_request_options(self) -> tuple[str, ...]:
         return tuple()
 
+    @override
     def get_batch_request_options_keys(
         self, partitioner: Optional[Partitioner]
     ) -> tuple[str, ...]:

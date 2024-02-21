@@ -119,6 +119,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     def batch_request_options(self) -> tuple[str, ...]:
         return tuple()
 
+    @override
     def get_batch_request_options_keys(self, partitioner):
         return tuple()
 
