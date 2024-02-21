@@ -31,7 +31,7 @@ The `validation_results_limit` is an option for the `site_index_builder` paramet
 
 The following example limits the Validation Results on a local Data Docs site to the five most recent:
 
-```yaml
+```YAML title="YAML"
 data_docs_sites:
  local_site:
    class_name: SiteBuilder

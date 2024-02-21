@@ -10,7 +10,7 @@ import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.
 
 At this point, your configuration should look like:
 
-```python name="sql datasource configuration with empty configured sql data_connector"
+```python title="Python" name="sql datasource configuration with empty configured sql data_connector"
 ```
 
 #### Required Data Connector configuration keys
@@ -19,14 +19,14 @@ At this point, your configuration should look like:
 
 For this example, you will be using the `ConfiguredAssetSqlDataConnector` as your `class_name`.  This is a subclass of the `ConfiguredAssetDataConnector` that is specialized to support SQL Execution Engines, such as the `SqlAlchemyExecutionEngine`.  This key/value entry will therefore look like:
 
-```python name="define data_connector class_name for configured sql datasource"
+```python title="Python" name="define data_connector class_name for configured sql datasource"
 ```
 
 <TipCustomDataConnectorModuleName />
 
 With this value added, along with a blank dictionary for `assets`, your full configuration should now look like:
 
-```python name="configured sql datasource configuration with data_connector class_name defined"
+```python title="Python" name="configured sql datasource configuration with data_connector class_name defined"
 ```
 
 #### Optional Data Connector configuration keys for partitioning Data Assets into Batches

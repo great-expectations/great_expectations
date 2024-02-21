@@ -43,7 +43,7 @@ For this guide, we will use a previously defined Data Source named `"my_datasour
 
 To retrieve this Data Source, we will supply the `get_datasource(...)` method of our Data Context with the name of the Data Source we wish to retrieve:
 
-```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_datasource"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_datasource"
 ```
 
 ## Create a `batching_regex`
@@ -57,7 +57,7 @@ For this example, our Data Source points to a folder that contains the following
 
 To create a `batching_regex` that matches multiple files, we will include a named group in our regular expression:
 
-```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_batching_regex"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_batching_regex"
 ```
 
 In the above example, the named group "`year`" will match any four numeric characters in a file name.  This will result in each of our Data Source files matching the regular expression.
@@ -78,7 +78,7 @@ For more information on how to format regular expressions, we recommend referenc
 
 Now that we have put together a regular expression that will match one or more of the files in our Data Source's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Data Source's `base_folder` are csv files, we will use the `add_pandas_csv(...)` method of our Data Source to create the new Data Asset:
 
-```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_asset"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_asset"
 ```
 
 :::tip What if I don't provide a `batching_regex`?
@@ -97,19 +97,19 @@ When there are multiple named groups, we can include multiple items in our sorte
 
 In this example we have two named groups, `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the regex group `"year"` and a descending sorter based on the contents of the regex group `"month"`:
 
-```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py add_sorters"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py add_sorters"
 ```
 
 ## Use a Batch Request to verify the Data Asset works as desired
 
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 
-```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_batch_list"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_batch_list"
 ```
 
 Because a Batch List contains a lot of metadata, it will be easiest to verify which files were included in the returned Batches if we only look at the `batch_spec` of each returned Batch:
 
-```python name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py print_batch_spec"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py print_batch_spec"
 ```
 
 ## Related documentation

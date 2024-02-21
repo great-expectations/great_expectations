@@ -34,7 +34,7 @@ This guide will help you set up Opsgenie alert notifications when running Great 
 
 Using the API Key you copied from Step 1, update your Great Expectations configuration variables in your `config_variables.yml` file
 
-```yaml
+```YAML title="YAML"
 opsgenie_api_key: YOUR-API-KEY
 ```
 
@@ -42,7 +42,7 @@ opsgenie_api_key: YOUR-API-KEY
 
 Next, update your Checkpoint configuration file to add a new action to the <TechnicalTag tag="action" text="Actions" /> list in great_expectations.yml
 
- ```yaml
+ ```YAML title="YAML"
 action_list:
  - name: send_opsgenie_alert_on_validation_result
    action:

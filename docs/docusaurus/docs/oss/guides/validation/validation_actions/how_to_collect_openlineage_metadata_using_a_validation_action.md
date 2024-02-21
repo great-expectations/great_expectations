@@ -25,7 +25,7 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 ## Ensure that the `openlineage-integration-common` package has been installed in your Python environment.
 
- ```bash
+ ```bash title="Terminal input"
  % pip3 install openlineage-integration-common
  ```
 
@@ -33,7 +33,7 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
  Add the ``OpenLineageValidationAction`` action to the ``action_list`` key your Checkpoint configuration.
 
- ```yaml
+ ```yaml title="YAML"
 action_list:
  - name: openlineage
    action:
@@ -53,7 +53,7 @@ action_list:
 
 Run the following command to retrieve and run a Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and then emit lineage events to the OpenLineage backend:
 
-```python name="docs/docusaurus/docs/snippets/checkpoints.py retrieve_and_run"
+```python title="Python" name="docs/docusaurus/docs/snippets/checkpoints.py retrieve_and_run"
 ```
 
 :::note Reminder

@@ -74,7 +74,7 @@ Actions are configured inside of the `action_list` parameter for Checkpoints.  I
 
 The following is an example of an `action_list` configuration that performs some common Actions that are built in to the Great Expectations code base:
 
-```yaml
+```YAML title="YAML"
 action_list:
 - name: store_validation_result
   action:
