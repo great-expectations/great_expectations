@@ -10,18 +10,24 @@ if TYPE_CHECKING:
 
 class Validation:
     """
-    TBD
+    Responsible for running a suite against data and returning a validation result.
+
+    Args:
+        name: The name of the validation.
+        data: An asset or batch config to validate.
+        suite: A grouping of expectations to validate against the data.
+
     """
 
     def __init__(
         self,
         name: str,
         data: DataAsset | BatchConfig,
-        expectation_suite: ExpectationSuite,
+        suite: ExpectationSuite,
     ) -> None:
         self._name = name
         self._data = data
-        self._suite = expectation_suite
+        self._suite = suite
 
     @property
     def name(self) -> str:
