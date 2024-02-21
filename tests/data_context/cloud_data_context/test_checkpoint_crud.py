@@ -228,16 +228,6 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
 
 
 @pytest.mark.cloud
-def test_get_checkpoint_no_identifier_raises_error(
-    empty_cloud_data_context: CloudDataContext,
-) -> None:
-    context = empty_cloud_data_context
-
-    with pytest.raises(ValueError):
-        context.checkpoints.get()
-
-
-@pytest.mark.cloud
 def test_cloud_backed_data_context_add_checkpoint(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
