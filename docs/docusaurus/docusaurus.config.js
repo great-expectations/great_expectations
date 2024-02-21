@@ -30,6 +30,8 @@ module.exports = {
       {
         apiKey: process.env.POSTHOG_API_KEY,
         enableInDevelopment: true
+        // for more information on how to set up this value go to
+        // https://greatexpectations.atlassian.net/wiki/spaces/DVRL/pages/956334083/Manage+the+feedback+survey
       },
     ],
   ],
