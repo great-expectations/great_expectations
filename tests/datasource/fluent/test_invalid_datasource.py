@@ -154,7 +154,11 @@ class TestInvalidDatasource:
         invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
         for asset in invalid_ds.assets:
             with pytest.warns(GxInvalidDatasourceWarning):
-                assert invalid_ds.get_asset(asset.name), "No asset was returned"
+                invalid_asset = invalid_ds.get_asset(asset.name)
+                assert invalid_asset, "No asset was returned"
+
+            with pytest.raises(TestConnectionError):
+                invalid_asset.test_connection()
 
 
 if __name__ == "__main__":

@@ -38,6 +38,17 @@ class InvalidAsset(DataAsset):
         extra = "allow"
         arbitrary_types_allowed = True
 
+    @override
+    def test_connection(self) -> None:
+        if self._datasource:
+            raise TestConnectionError(
+                f"The Datasource configuration for {self.name} is invalid and cannot be used. Please fix the error and try again"
+            ) from self._datasource.config_error
+        # the asset should always have a datasource, but if it doesn't, we should still raise an error
+        raise TestConnectionError(
+            "This Asset configuration is invalid and cannot be used. Please fix the error and try again"
+        )
+
 
 class InvalidAssetTypeLookup(TypeLookup):
     """A TypeLookup that always returns InvalidAsset for any type."""
