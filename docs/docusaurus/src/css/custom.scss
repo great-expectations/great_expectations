@@ -99,8 +99,14 @@
       --link-hover-color: #A03E0A;
 }
 
+.markdown a,
 p > a {
+    color: var(--ifm-color-primary);
     text-decoration: underline;
+
+  &:hover {
+    color: var(--link-hover-color);
+  }
 }
 
 h3 {
