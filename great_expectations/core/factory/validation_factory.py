@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
-
-if TYPE_CHECKING:
-    from great_expectations.core.validation import Validation
+from great_expectations.core.validation import Validation
 
 
 # TODO: Add analytics as needed
