@@ -210,8 +210,8 @@ class _FilePathDataAsset(DataAsset):
             FILE_PATH_BATCH_SPEC_KEY,
         )
         if partitioner:
-            partitioner = self.get_partitioner_implementation(partitioner)
-            option_keys += tuple(partitioner.param_names)
+            spark_partitioner = self.get_partitioner_implementation(partitioner)
+            option_keys += tuple(spark_partitioner.param_names)
         return option_keys
 
     @public_api
