@@ -401,13 +401,13 @@ class ExpectationValidationGraph:
         self,
         metric_info: Dict[
             _MetricKey,
-            Dict[str, ExceptionInfo],
+            Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
         ],
-    ) -> Dict[str, ExceptionInfo]:
+    ) -> Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
-        metric_exception_info: Dict[str, ExceptionInfo] = {}
+        metric_exception_info: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]] = {}
         metric_id: _MetricKey
-        metric_info_item: Dict[str, ExceptionInfo]
+        metric_info_item: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]
         for metric_id, metric_info_item in metric_info.items():
             metric_exception_info[str(metric_id)] = metric_info_item["exception_info"]
 
