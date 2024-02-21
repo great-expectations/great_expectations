@@ -5,6 +5,7 @@ from typing import Any, Final
 
 import pytest
 
+from great_expectations.core.partitioners import PartitionerColumnValue
 from great_expectations.datasource.fluent import BatchRequest
 
 
@@ -66,6 +67,7 @@ def test_batch_request_config_serialization_round_trips(
     batch_request_config: dict[str, Any] = {
         "datasource_name": datasource_name,
         "data_asset_name": data_asset_name,
+        "partitioner": PartitionerColumnValue(column_name="my_column"),
     }
     batch_request_config.update(optional_batch_request_config)
     batch_request = BatchRequest(**batch_request_config)
@@ -107,6 +109,7 @@ def test_batch_request_config_serialization_round_trips(
         f'"datasource_name": "{datasource_name}", '
         f'"data_asset_name": "{data_asset_name}", '
         f'"options": {options_json}, '
+        '"partitioner": {"column_name": "my_column", "method_name": "partition_on_column_value"}, '
         f'"batch_slice": {batch_slice_json}'
         "}"
     )
