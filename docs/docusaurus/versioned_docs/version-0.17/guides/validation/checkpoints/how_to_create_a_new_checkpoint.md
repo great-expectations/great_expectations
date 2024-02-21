@@ -15,7 +15,7 @@ import AdditionalResources from './components_how_to_create_a_new_checkpoint/_ad
 
 To modify the following code for your use case, replace `batch_request` and `expectation_suite_name` with your own paremeters.
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
 For other Checkpoint configuration options, see [Manage Checkpoints](../../../guides/validation/checkpoints/checkpoint_lp.md).
@@ -23,7 +23,7 @@ For other Checkpoint configuration options, see [Manage Checkpoints](../../../gu
 
 ## Run your Checkpoint (Optional)
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py run checkpoint batch_request"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py run checkpoint batch_request"
 ```
 
 The returned `checkpoint_result` contains information about the checkpoint run.
@@ -32,14 +32,14 @@ The returned `checkpoint_result` contains information about the checkpoint run.
 
 Run the following Python code to build <TechnicalTag tag="data_docs" text="Data Docs" /> with the latest checkpoint run results:
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py build data docs"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py build data docs"
 ```
 
 ## Retrieve your Checkpoint (Optional)
 
 Run the following Python code to retrieve the Checkpoint:
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py get checkpoint"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/how_to_create_a_new_checkpoint.py get checkpoint"
 ```
 
 ## Related documentation

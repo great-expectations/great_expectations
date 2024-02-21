@@ -25,7 +25,7 @@ Common developer tasks such as linting, formatting, type-checking are defined in
 
 To see the available task run `invoke --list` from the project root.
 
-```console
+```console title="Terminal"
 $ invoke --list
 Available tasks:
 
@@ -39,7 +39,7 @@ Available tasks:
 
 For detailed usage guide, `invoke <TASK-NAME> --help`
 
-```console
+```console title="Terminal"
 $ invoke fmt --help
 Usage: inv[oke] [--core-opts] fmt [--options] [other tasks here ...]
 
@@ -59,7 +59,7 @@ Our CI system will check using `black`, and `ruff`.
 
 If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
 
-```console
+```console title="Terminal input"
 black <PATH/TO/YOUR/CHANGES>
 ruff <PATH/TO/YOUR/CHANGES> --fix
 ```

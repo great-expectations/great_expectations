@@ -39,7 +39,7 @@ Nunc sed velit dignissim sodales ut eu.
 #### 1. Step1
 #### 2. `Step2`
 #### 3. Run following command
-```python
+```python title="Python"
 import step from steps
 ```
 
@@ -62,7 +62,7 @@ Stand up and take a breath
 #### 3. Step three
 #### 4. Step four
 #### 5. Result
-```bash
+```bash title="Terminal output"
  It worked!
 ```
 
@@ -77,7 +77,7 @@ This process is destructive, so proceed with extreme care.
 #### 2. Stufe zwei
 #### 3. Stufe drei
 #### 4. Ergebnis
-```shell
+```shell title="Terminal output"
 Vollständig!
 ```
 

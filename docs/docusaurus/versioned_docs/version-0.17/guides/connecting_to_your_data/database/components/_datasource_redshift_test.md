@@ -15,7 +15,7 @@ Verify your new <TechnicalTag tag="datasource" text="Data Source" /> by loading 
 
 Here is an example of loading data by specifying a SQL query.
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/redshift_yaml_example.py load data with query"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/redshift_yaml_example.py load data with query"
 ```
 
 </TabItem>
@@ -24,7 +24,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/redshift_python_example.py load data with table name"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/redshift_python_example.py load data with table name"
 ```
 
 </TabItem>

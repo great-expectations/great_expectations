@@ -10,7 +10,7 @@ credentials:
 
 To reference these values in a connection string, you would simply include the relevant key in the string, denoted by containing `$` characters.  For example:
 
-```python
+```python title="Python"
 my_connection_string = "${credentials}"
 ```
 
