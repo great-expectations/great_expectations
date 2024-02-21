@@ -444,8 +444,6 @@ SqlPartitioner = Union[
     SqlPartitionerDatetimePart,
 ]
 
-type_function_workaround = type
-
 
 class _SQLAsset(DataAsset):
     """A _SQLAsset Mixin
@@ -461,13 +459,13 @@ class _SQLAsset(DataAsset):
     type: str = pydantic.Field("_sql_asset")
     partitioner: Optional[SqlPartitioner] = None
     name: str
-    _partitioner_implementation_map: dict[
-        type_function_workaround[Partitioner], type_function_workaround[SqlPartitioner]
+    _partitioner_implementation_map: Dict[
+        Type[Partitioner], Type[SqlPartitioner]
     ] = pydantic.PrivateAttr(default_factory=dict)
 
     def __init__(self, **kwargs):
-        self._partitioner_implementation_map: dict[
-            type[Partitioner], type[SqlPartitioner]
+        self._partitioner_implementation_map: Dict[
+            Type[Partitioner], Type[SqlPartitioner]
         ] = {
             PartitionerYear: SqlPartitionerYear,
             PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
