@@ -16,6 +16,11 @@ from typing import (
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import (
+    Partitioner,
+    PartitionerConvertedDatetime,
+    PartitionerHashedColumn,
+)
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
@@ -48,7 +53,7 @@ if TYPE_CHECKING:
 # See SqliteDatasource, SqliteTableAsset, and SqliteQueryAsset below.
 
 
-class PartitionerHashedColumn(_PartitionerOneColumnOneParam):
+class SqlitePartitionerHashedColumn(_PartitionerOneColumnOneParam):
     """Partition on hash value of a column.
 
     Args:
@@ -81,7 +86,7 @@ class PartitionerHashedColumn(_PartitionerOneColumnOneParam):
         return {self.column_name: options["hash"]}
 
 
-class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
+class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     """A partitioner than can be used for sql engines that represents datetimes as strings.
 
     The SQL engine that this currently supports is SQLite since it stores its datetimes as
@@ -134,7 +139,7 @@ class SqliteDsn(pydantic.AnyUrl):
 
 
 SqlitePartitioner = Union[
-    SqlPartitioner, PartitionerHashedColumn, PartitionerConvertedDateTime
+    SqlPartitioner, SqlitePartitionerHashedColumn, SqlitePartitionerConvertedDateTime
 ]
 
 
@@ -151,7 +156,7 @@ class _SQLiteAssetMixin:
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            PartitionerHashedColumn(
+            SqlitePartitionerHashedColumn(
                 method_name="partition_on_hashed_column",
                 column_name=column_name,
                 hash_digits=hash_digits,
@@ -170,7 +175,7 @@ class _SQLiteAssetMixin:
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            PartitionerConvertedDateTime(
+            SqlitePartitionerConvertedDateTime(
                 method_name="partition_on_converted_datetime",
                 column_name=column_name,
                 date_format_string=date_format_string,
@@ -179,11 +184,43 @@ class _SQLiteAssetMixin:
 
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
+    # TODO: remove SQLiteAssetMixin
+
+    _partitioner_implementation_map: Dict[
+        Type[Partitioner], Type[SqlitePartitioner]
+    ] = pydantic.PrivateAttr(default_factory=dict)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the two Sqlite specific partitioners
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
+        self._partitioner_implementation_map[
+            PartitionerHashedColumn
+        ] = SqlitePartitionerHashedColumn
+
     type: Literal["table"] = "table"
     partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
+    # TODO: remove SQLiteAssetMixin
+
+    _partitioner_implementation_map: Dict[
+        Type[Partitioner], Type[SqlitePartitioner]
+    ] = pydantic.PrivateAttr(default_factory=dict)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the two Sqlite specific partitioners
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
+        self._partitioner_implementation_map[
+            PartitionerHashedColumn
+        ] = SqlitePartitionerHashedColumn
+
     type: Literal["query"] = "query"
     partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
