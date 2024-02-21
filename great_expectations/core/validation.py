@@ -34,7 +34,7 @@ class Validation:
         return self._name
 
     @property
-    def data(self) -> BatchConfig:
+    def data(self) -> DataAsset | BatchConfig:
         return self._data
 
     @property
