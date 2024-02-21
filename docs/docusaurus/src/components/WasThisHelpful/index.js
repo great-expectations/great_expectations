@@ -14,11 +14,14 @@ export default function WasThisHelpful(){
         }
     };
 
-    return <div className={styles.feedbackCard}>
-            <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
-            <div className={styles.feedbackCardActions}>
-                <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('test_docs.thumbs_up')}>Yes</button>
-                <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('test_docs.thumbs_down')}>No</button>
+    return <>
+            <hr className={styles.feedbackDivider}></hr>
+            <div className={styles.feedbackCard}>
+                <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
+                <div className={styles.feedbackCardActions}>
+                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('test_docs.thumbs_up')}>Yes</button>
+                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('test_docs.thumbs_down')}>No</button>
+                </div>
             </div>
-        </div>
+        </>
 }
