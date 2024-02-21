@@ -61,7 +61,11 @@ from great_expectations.core.config_provider import (
     _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
-from great_expectations.core.factory import CheckpointFactory, SuiteFactory
+from great_expectations.core.factory import (
+    CheckpointFactory,
+    SuiteFactory,
+    ValidationFactory,
+)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -328,6 +332,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                 store=checkpoint_store,
                 context=self,
             )
+
+        self._validations: ValidationFactory | None = None
+        if validation_store := self.stores.get(self.validations_store_name):
+            self._validations = ValidationFactory(store=validation_store)
 
     def _init_analytics(self) -> None:
         init_analytics(
