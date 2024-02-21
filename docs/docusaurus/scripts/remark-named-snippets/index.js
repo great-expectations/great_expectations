@@ -48,7 +48,7 @@ function codeImport () {
         continue
       }
 
-      const nameMeta = /\bname=(?<snippetName>["'].+["'])$/.exec(
+      const nameMeta = /\bname=(?<snippetName>["'].+["'])/.exec(
         meta
       )
       if (!nameMeta) {
