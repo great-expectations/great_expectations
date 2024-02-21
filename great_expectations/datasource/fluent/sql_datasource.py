@@ -692,7 +692,8 @@ class _SQLAsset(DataAsset):
         self, batch_request: BatchRequest
     ) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
-        if self.partitioner is None:
+
+        if batch_request.partitioner is None:
             # Currently batch_request.options is complete determined by the presence of a
             # partitioner. If partitioner is None, then there are no specifiable options
             # so we return early. Since the passed in batch_request is verified, it must be the
@@ -701,9 +702,11 @@ class _SQLAsset(DataAsset):
             # this check will have to be generalized.
             return [batch_request]
 
+        sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
+
         batch_requests: List[BatchRequest] = []
         # We iterate through all possible batches as determined by the partitioner
-        for params in self.partitioner.param_defaults(self):
+        for params in sql_partitioner.param_defaults(self):
             # If the params from the partitioner don't match the batch request options
             # we don't create this batch.
             if not _SQLAsset._matches_request_options(params, batch_request.options):
@@ -735,22 +738,27 @@ class _SQLAsset(DataAsset):
         self._validate_batch_request(batch_request)
 
         batch_list: List[Batch] = []
-        partitioner = self.partitioner
+        if batch_request.partitioner:
+            sql_partitioner = self.get_partitioner_implementation(
+                batch_request.partitioner
+            )
+        else:
+            sql_partitioner = None
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
             batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
                 batch_request=request
             )
             batch_spec_kwargs = self._create_batch_spec_kwargs()
-            if partitioner:
-                batch_spec_kwargs["partitioner_method"] = partitioner.method_name
+            if sql_partitioner:
+                batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
                 batch_spec_kwargs[
                     "partitioner_kwargs"
-                ] = partitioner.partitioner_method_kwargs()
+                ] = sql_partitioner.partitioner_method_kwargs()
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    sql_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
                         request.options
                     )
                 )
