@@ -202,6 +202,7 @@ class _FilePathDataAsset(DataAsset):
             + partitioner_options
         )
 
+    @override
     def get_batch_request_options_keys(
         self, partitioner: Optional[Partitioner]
     ) -> tuple[str, ...]:

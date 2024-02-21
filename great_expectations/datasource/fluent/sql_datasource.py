@@ -509,7 +509,8 @@ class _SQLAsset(DataAsset):
             options = tuple(self.partitioner.param_names)
         return options
 
-    def get_batch_request_options_tuple(
+    @override
+    def get_batch_request_options_keys(
         self, partitioner: Optional[Partitioner]
     ) -> tuple[str, ...]:
         option_keys: Tuple[str, ...] = tuple()
