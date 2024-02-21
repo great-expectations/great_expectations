@@ -26,8 +26,7 @@
   height: unset;
   padding: 0;
 
-  &:has(.home-section.navbar__link--active),
-  &:has(.gx-cloud-section.navbar__link--active) {
+  &:has(.non-versioned-section.navbar__link--active) {
     .navbar__items .dropdown {
       visibility: hidden;
     }

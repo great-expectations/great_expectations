@@ -121,14 +121,14 @@ module.exports = {
           label: 'Home',
           docId: 'gx_welcome',
           position: 'right',
-          className: 'home-section',
+          className: 'non-versioned-section',
         },
         {
           type: 'doc',
           label: 'GX Cloud',
           docId: 'cloud/gx_cloud_lp',
           position: 'right',
-          className: 'gx-cloud-section',
+          className: 'non-versioned-section',
         },
         {
           type: 'doc',
