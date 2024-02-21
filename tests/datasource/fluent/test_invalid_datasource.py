@@ -9,6 +9,7 @@ import pytest
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import (
     Datasource,
+    GxInvalidDatasourceWarning,
     InvalidDatasource,
     TestConnectionError,
 )
@@ -95,7 +96,7 @@ def invalid_datasource_factory() -> InvalidDSFn:
                 "connection_string": "postgresql+psycopg2://postgres:@localhost/test_database",
                 "assets": [
                     {
-                        "name": "my_table",
+                        "name": "my_bad_asset",
                         "type": "table",
                         "query": "table assets don't have a query",
                     }
@@ -109,6 +110,9 @@ def invalid_datasource_factory() -> InvalidDSFn:
                 "type": "snowflake",
                 "connection_string": "${MY_CONN_STR}",
                 "user": "invalid_extra_field",
+                "assets": [
+                    {"name": "my_asset", "type": "table", "table_name": "foobar"}
+                ],
             },
             id="extra field",
         ),
@@ -139,6 +143,18 @@ class TestInvalidDatasource:
         with pytest.raises(TypeError) as err:
             invalid_ds.get_batch_list_from_batch_request({})  # type: ignore[arg-type] # expect error
         assert invalid_ds.config_error == err.value.__cause__
+
+    def test_get_asset_raises_warning(
+        self,
+        invalid_ds_cfg: dict,
+        invalid_datasource_factory: Callable[
+            [dict[Literal["name", "type", "assets"] | Any, Any]], InvalidDatasource
+        ],
+    ):
+        invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
+        for asset in invalid_ds.assets:
+            with pytest.warns(GxInvalidDatasourceWarning):
+                assert invalid_ds.get_asset(asset.name), "No asset was returned"
 
 
 if __name__ == "__main__":
