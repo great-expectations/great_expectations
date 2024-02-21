@@ -444,8 +444,8 @@ SqlPartitioner = Union[
     SqlPartitionerDatetimePart,
 ]
 
-PartitionerT: TypeAlias = type(Partitioner)
-SqlPartitionerT: TypeAlias = type(SqlPartitioner)
+PartitionerT: TypeAlias = type[Partitioner]
+SqlPartitionerT: TypeAlias = type[SqlPartitioner]
 
 
 class _SQLAsset(DataAsset):
