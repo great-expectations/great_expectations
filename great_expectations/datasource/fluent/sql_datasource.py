@@ -17,12 +17,11 @@ from typing import (
     Protocol,
     Tuple,
     Type,
-    TypeAlias,
     Union,
     cast,
 )
 
-from typing_extensions import Annotated
+from typing_extensions import Annotated, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
