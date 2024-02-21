@@ -1,3 +1,9 @@
+.feedbackDivider {
+    border-top: 2px solid var(--gray-400);
+    margin-top: 3rem;
+    margin-bottom: 3em;
+}
+
 .feedbackCard {
     background-color: var(--gray-100);
     border: 1px solid var(--gray-200);
