@@ -26,7 +26,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import Datasource
-from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -168,41 +167,6 @@ def test_add_store(in_memory_data_context: EphemeralDataContextSpy):
     assert num_stores_after == num_stores_before + 1
     assert num_store_configs_after == num_store_configs_before + 1
     assert context.save_count == 1
-
-
-@pytest.mark.unit
-def test_delete_store_success(in_memory_data_context: EphemeralDataContextSpy):
-    context = in_memory_data_context
-
-    num_stores_before = len(context.stores)
-    num_store_configs_before = len(context.config.stores)
-
-    context.delete_store("checkpoint_store")  # We know this to be a default name
-
-    num_stores_after = len(context.stores)
-    num_store_configs_after = len(context.config.stores)
-
-    assert num_stores_after == num_stores_before - 1
-    assert num_store_configs_after == num_store_configs_before - 1
-    assert context.save_count == 1
-
-
-@pytest.mark.unit
-def test_delete_store_failure(in_memory_data_context: EphemeralDataContextSpy):
-    context = in_memory_data_context
-
-    num_stores_before = len(context.stores)
-    num_store_configs_before = len(context.config.stores)
-
-    with pytest.raises(StoreConfigurationError):
-        context.delete_store("my_fake_store_name")
-
-    num_stores_after = len(context.stores)
-    num_store_configs_after = len(context.config.stores)
-
-    assert num_stores_after == num_stores_before
-    assert num_store_configs_after == num_store_configs_before
-    assert context.save_count == 0
 
 
 @pytest.mark.unit

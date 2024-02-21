@@ -1967,7 +1967,7 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
         self.plugins_directory = str(plugins_directory)
         if root_directory is not None:
             root_directory = str(root_directory)
-            self.stores[self.expectations_store_name]["store_backend"][  # type: ignore[index]
+            self.stores["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
             self.stores[self.validations_store_name]["store_backend"][  # type: ignore[index]

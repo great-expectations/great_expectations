@@ -892,7 +892,7 @@ class StoreValidationResultAction(ValidationAction):
     ) -> None:
         super().__init__(data_context)
         if target_store_name is None:
-            self.target_store = data_context.stores[data_context.validations_store_name]
+            self.target_store = data_context.validations_store
         else:
             self.target_store = data_context.stores[target_store_name]
 
@@ -988,12 +988,10 @@ class StoreEvaluationParametersAction(ValidationAction):
         - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
         ```
 
     Args:
         data_context: GX Data Context.
-        target_store_name: The name of the store in the Data Context to store the evaluation parameters.
 
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.

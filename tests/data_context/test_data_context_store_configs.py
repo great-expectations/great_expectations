@@ -84,7 +84,7 @@ def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)
 
-    assert set(context.stores.keys()) == {
+    assert set(context.stores.dict()) == {
         "expectations_store",
         "validations_store",
         "evaluation_parameter_store",

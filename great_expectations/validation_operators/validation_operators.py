@@ -845,9 +845,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
             failure_expectation_suite = None
             try:
-                failure_expectation_suite = self.data_context.stores[
-                    self.data_context.expectations_store_name
-                ].get(failure_expectation_suite_identifier)
+                failure_expectation_suite = self.data_context.expectations_store.get(
+                    failure_expectation_suite_identifier
+                )
 
             # NOTE : Abe 2019/09/17 : I'm concerned that this may be too permissive, since
             # it will catch any error in the Store, not just KeyErrors. In the longer term, a better
@@ -897,9 +897,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
             warning_expectation_suite = None
             try:
-                warning_expectation_suite = self.data_context.stores[
-                    self.data_context.expectations_store_name
-                ].get(warning_expectation_suite_identifier)
+                warning_expectation_suite = self.data_context.expectations_store.get(
+                    warning_expectation_suite_identifier
+                )
             except Exception:
                 logger.debug(
                     "Warning expectation suite not found: {}".format(

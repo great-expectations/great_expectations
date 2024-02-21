@@ -188,12 +188,12 @@ class SiteBuilder:
         default_site_section_builders_config = {
             "expectations": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name": data_context.expectations_store_name,
+                "source_store_name": data_context.stores.EXPECTATION_SUITES_STORE_NAME,
                 "renderer": {"class_name": "ExpectationSuitePageRenderer"},
             },
             "validations": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name": data_context.validations_store_name,
+                "source_store_name": data_context.stores.VALIDATIONS_STORE_NAME,
                 "renderer": {"class_name": "ValidationResultsPageRenderer"},
                 "validation_results_limit": site_index_builder.get(
                     "validation_results_limit"
@@ -201,7 +201,7 @@ class SiteBuilder:
             },
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name": data_context.validations_store_name,
+                "source_store_name": data_context.stores.VALIDATIONS_STORE_NAME,
                 "renderer": {"class_name": "ProfilingResultsPageRenderer"},
             },
         }
@@ -367,7 +367,7 @@ class DefaultSiteSectionBuilder:
     ) -> None:
         self.name = name
         self.data_context = data_context
-        self.source_store = data_context.stores[source_store_name]
+        self.source_store = data_context.sources[source_store_name]
         self.target_store = target_store
         self.run_name_filter = run_name_filter
         self.validation_results_limit = validation_results_limit
