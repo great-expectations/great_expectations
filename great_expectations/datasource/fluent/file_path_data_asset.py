@@ -172,6 +172,7 @@ class _FilePathDataAsset(DataAsset):
             raise ValueError(
                 f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
             )
+        assert PartitionerClass is not None
         return PartitionerClass(**abstract_partitioner.dict())
 
     @property
