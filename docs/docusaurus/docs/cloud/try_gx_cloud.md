@@ -16,7 +16,7 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 ## Prerequisites
 
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud).
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 

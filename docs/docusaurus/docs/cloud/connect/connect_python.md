@@ -14,7 +14,7 @@ In this quickstart, you'll learn how to use GX Cloud from a Python script or int
 ## Prerequisites
 
 - You have internet access and download permissions.
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud).
 
 ## Prepare your environment
 
