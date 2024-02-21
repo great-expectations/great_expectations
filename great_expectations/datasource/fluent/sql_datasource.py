@@ -21,7 +21,7 @@ from typing import (
     cast,
 )
 
-from typing_extensions import Annotated, TypeAlias
+from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -444,8 +444,7 @@ SqlPartitioner = Union[
     SqlPartitionerDatetimePart,
 ]
 
-PartitionerT: TypeAlias = type[Partitioner]
-SqlPartitionerT: TypeAlias = type[SqlPartitioner]
+type_function_workaround = type
 
 
 class _SQLAsset(DataAsset):
@@ -463,7 +462,7 @@ class _SQLAsset(DataAsset):
     partitioner: Optional[SqlPartitioner] = None
     name: str
     _partitioner_implementation_map: dict[
-        PartitionerT, SqlPartitionerT
+        type_function_workaround[Partitioner], type_function_workaround[SqlPartitioner]
     ] = pydantic.PrivateAttr(default_factory=dict)
 
     def __init__(self, **kwargs):
