@@ -36,6 +36,7 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.core.partitioners import (
+    Partitioner,
     PartitionerColumnValue,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
@@ -77,7 +78,6 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.core.partitioners import Partitioner
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
