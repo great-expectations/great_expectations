@@ -13,7 +13,7 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 ## Prerequisites
 
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
 
 - You have a Snowflake database, schema, and table.
 
@@ -31,7 +31,7 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 2. Copy and paste the following code into the SQL worksheet:
 
-   ```sh
+   ```sh title="SQL worksheet"
    use role accountadmin;
    create user gx_user password="secure_password";
    create role gx_role;
@@ -45,7 +45,7 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 5. Copy the following code and paste it into the SQL worksheet:
 
-   ```sh
+   ```sh title="SQL worksheet"
    create warehouse gx_wh
    warehouse_size=xsmall 
    auto_suspend=10  
@@ -58,7 +58,7 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 7. Copy the following code and paste it into the SQL worksheet:
 
-   ```sh
+   ```sh title="SQL worksheet"
    grant usage, operate on warehouse gx_wh to role gx_role;
    grant usage on database "database_name" to role gx_role;
    grant usage on schema "database_name.schema_name" to role gx_role;
@@ -156,7 +156,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 
 2. Run the following command to provide the access credentials to the Kubernetes container:
     
-   ```sh
+   ```sh title="Terminal command"
    kubectl create secret generic gx-agent-secret \
    --from-literal=GX_CLOUD_ORGANIZATION_ID=YOUR_ORGANIZATION_ID \
    --from-literal=GX_CLOUD_ACCESS_TOKEN=YOUR_ACCESS_TOKEN \
@@ -167,7 +167,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 
 4. Create and save a file named `deployment.yaml`, with the following configuration:
 
-   ```yaml
+   ```yaml title="YAML"
    apiVersion: apps/v1
    kind: Deployment
    metadata:
@@ -193,17 +193,17 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    ```
 5. Run the following command to use the `deployment.yaml`configuration file to deploy the GX Agent:
 
-   ```sh
+   ```sh title="Terminal command"
    kubectl apply -f deployment.yaml
    ```
 6. Optional. Run the following command to confirm the agent is running:
 
-   ```sh
+   ```sh title="Terminal command"
    kubectl logs -l app=gx-agent
    ```
 7. Optional. Run the following command to terminate running resources gracefully:
 
-   ```sh
+   ```sh title="Terminal command"
    kubectl delete -f deployment.yaml
    kubectl delete secret gx-agent-secret
    ```

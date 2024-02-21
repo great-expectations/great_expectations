@@ -35,7 +35,7 @@ If you're using a Custom Expectation without a Filesystem Data Context, you'll n
 
 <!--A snippet is required for this code block.-->
 
-```python
+```python title="Python"
 from expectations.expect_column_values_to_be_alphabetical import ExpectColumnValuesToBeAlphabetical
 # ...
 validator.expect_column_values_to_be_alphabetical(column="test")
@@ -51,7 +51,7 @@ If you're using a Custom Expectation from the `Great Expectations Experimental` 
 
 <!--A snippet is required for this code block.-->
 
-```python
+```python title="Python"
 from great_expectations_experimental.expectations.expect_column_values_to_be_alphabetical import ExpectColumnValuesToBeAlphabetical
 # ...
 validator.expect_column_values_to_be_alphabetical(column="test")

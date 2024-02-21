@@ -27,7 +27,7 @@ module.exports = {
 
   scripts: [
     {
-      src: "/scripts/set-tab.js",
+      src: '/scripts/set-tab.js',
       async: true,
       defer: true,
     },
@@ -35,26 +35,27 @@ module.exports = {
 
   themeConfig: {
     announcementBar: {
-        id: 'cta_bar',
-        content:
-          '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
-        backgroundColor: '#141432',
-        textColor: '#fff',
-        isCloseable: true,
-      },
+      id: 'cta_bar',
+      content:
+        '<a style="font-weight:600" href="https://hubs.li/Q02lHZ_j0">Sign up for our Snowflake workshop, or join the waitlist for future workshops.</a>',
+      backgroundColor: '#141432',
+      textColor: '#fff',
+      isCloseable: true,
+    },
     gxCard: {
-      title: "What is GX Cloud?",
-      description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
+      title: 'What is GX Cloud?',
+      description:
+        'GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.',
       buttons: {
         primary: {
-          label: "Sign up for GX Cloud",
-          href: "https://greatexpectations.io/cloud"
+          label: 'Sign up for GX Cloud',
+          href: 'https://greatexpectations.io/cloud',
         },
         secondary: {
-          label: "Why GX Cloud?",
-          href: "https://docs.greatexpectations.io/docs/cloud/why_gx_cloud"
-        }
-      }
+          label: 'Why GX Cloud?',
+          href: 'https://docs.greatexpectations.io/docs/cloud/why_gx_cloud',
+        },
+      },
     },
     docs: {
       sidebar: {
@@ -107,61 +108,66 @@ module.exports = {
         {
           type: 'search',
           position: 'left',
-          className: 'custom-search-bar'
+          className: 'custom-search-bar',
         },
         {
           type: 'custom-githubNavbarItem',
           position: 'left',
           owner: 'great-expectations',
-          repository: 'great_expectations'
+          repository: 'great_expectations',
         },
         {
+          type: 'doc',
           label: 'Home',
-          to: '/docs/home/',
-          position: 'right'
+          docId: 'gx_welcome',
+          position: 'right',
         },
         {
+          type: 'doc',
           label: 'GX Cloud',
-          to: '/docs/cloud/',
-          position: 'right'
+          docId: 'cloud/gx_cloud_lp',
+          position: 'right',
         },
         {
+          type: 'doc',
           label: 'GX OSS',
-          to: '/docs/oss/',
-          position: 'right'
+          docId: 'oss/oss',
+          position: 'right',
         },
         {
+          type: 'doc',
           label: 'Learn',
-          to: '/docs/reference/learn/',
-          position: 'right'
+          docId: 'reference/learn/reference_overview',
+          position: 'right',
         },
         {
+          type: 'doc',
           label: 'API',
-          to: '/docs/reference/api',
-          position: 'right'
+          docId: 'reference/api_reference',
+          position: 'right',
         },
         {
           type: 'dropdown',
           label: 'Resources',
           items: [
             {
-              label: 'How to get support',
-              to: '/docs/resources/get_support'
+              label: 'Get support',
+              to: '/docs/resources/get_support',
             },
             {
               label: 'Expectations gallery',
-              to: 'https://greatexpectations.io/expectations'
+              to: 'https://greatexpectations.io/expectations',
             },
             {
               label: 'Integration support policy',
-              to: '/docs/application_integration_support'
+              to: '/docs/application_integration_support',
             },
             {
               label: 'Community',
-              to: 'https://greatexpectations.io/community'
-            }
+              to: 'https://greatexpectations.io/community',
+            },
           ],
-          position: 'right'
+          position: 'right',
         },
         {
           to: 'https://greatexpectations.io/cloud',
@@ -195,8 +201,8 @@ module.exports = {
             },
             {
               label: 'Integration support policy',
-              to: '/docs/application_integration_support'
-            }
+              to: '/docs/application_integration_support',
+            },
           ],
         },
         {
@@ -241,7 +247,7 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`,
     },
     mermaid: {
-      theme: {light: "neutral", dark: "neutral"},
+      theme: { light: 'neutral', dark: 'neutral' },
     },
   },
   themes: ['@docusaurus/theme-mermaid'],
@@ -263,15 +269,23 @@ module.exports = {
             },
             ['0.18']: {
               label: '0.18.9',
-              path: ''
+              path: '',
             },
-            ["0.17"]: {
+            ['0.17']: {
               label: '0.17.23',
-              path: '0.17.23'
-            }
+              path: '0.17.23',
+            },
           },
           admonitions: {
-            keywords: ['note', 'info', 'tip', 'warning', 'caution', 'danger', 'cta'],
+            keywords: [
+              'note',
+              'info',
+              'tip',
+              'warning',
+              'caution',
+              'danger',
+              'cta',
+            ],
           },
         },
         theme: {

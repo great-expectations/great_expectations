@@ -2,7 +2,7 @@ import TechnicalTag from '../../../../term_tags/_tag.mdx';
 
 To manually add a Validation Results Store, add the following configuration to the `stores` section of your `great_expectations.yml` file:
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/aws_cloud_storage_pandas.py new_validations_store"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/aws_cloud_storage_pandas.py new_validations_store"
 ```
 
 As shown in the previous example, you need to change the default ``store_backend`` settings to make the Store work with S3.  The ``class_name`` is set to ``TupleS3StoreBackend``, ``bucket`` is the address of your S3 bucket, and ``prefix`` is the folder in your S3 bucket where Validation Results are located.
@@ -21,7 +21,7 @@ store_backend:
 ```
 In the previous example, the Store name is ``validations_S3_store``. If you use a personalized Store name, you must also update the value of the `validations_store_name` key to match the Store name. For example:
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/aws_cloud_storage_pandas.py set_new_validations_store"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/aws_cloud_storage_pandas.py set_new_validations_store"
 ```
 When you update the `validations_store_name` key value, Great Expectations uses the new Store for Validation Results.
 

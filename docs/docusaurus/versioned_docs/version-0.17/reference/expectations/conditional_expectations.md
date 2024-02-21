@@ -22,7 +22,7 @@ To test if different encodings of identical pieces of information are consistent
 
 <!--A snippet is required for this code block.-->
 
-```python
+```python title="Python"
 validator.expect_column_values_to_be_in_set(
     column='Sex',
     value_set=['male'],
@@ -33,7 +33,7 @@ validator.expect_column_values_to_be_in_set(
 
 This returns:
 
-```python
+```python title="Python"
 {
     "success": true,
     "result": {
@@ -54,7 +54,7 @@ To get a Validator object, see [How to create Expectations interactively in Pyth
 
 It is possible to add multiple Expectations of the same type to the Expectation Suite for a single column. One Expectation can be unconditional while an arbitrary number of Expectations (each with a different condition) can be conditional. For example:
 
-```python
+```python title="Python"
 validator.expect_column_values_to_be_in_set(
         column='Survived',
         value_set=[0, 1]
@@ -73,7 +73,7 @@ validator.get_expectation_suite(
 
 This results in the following Expectation Suite:
 
-```python
+```python title="Python"
 {
     "expectation_suite_name": "default",
     "expectations": [
@@ -105,11 +105,11 @@ This results in the following Expectation Suite:
 
 Do not use single quotes or `\n` inside the specified `row_condition` as shown in the following examples:
 
-```python 
+```python title="Python" 
 row_condition="PClass=='1st'"  # never use single quotes inside !!!
 ```
 
-```python 
+```python title="Python" 
 row_condition="""
 PClass=="1st"
 """  # never use \n inside !!!
@@ -119,7 +119,7 @@ For Spark and SQL, you will also want to specify your columns using the `col()` 
 
 Some examples of valid `row_condition` values include: 
 
-```python
+```python title="Python"
 row_condition='col("foo") == "Two  Two"'  # foo is 'Two Two'
 
 row_condition='col("foo").notNull()'  # foo is not null
@@ -146,9 +146,9 @@ If *'row_condition_string'* is a complex expression, it is split into several co
 
 While conditions can be attached to most Expectations, the following Expectations cannot be conditioned and do not take the `row_condition` argument:
 
-* ```expect_column_to_exist```
-* ```expect_table_columns_to_match_ordered_list```
-* ```expect_table_column_count_to_be_between```
-* ```expect_table_column_count_to_equal```
+* `expect_column_to_exist`
+* `expect_table_columns_to_match_ordered_list`
+* `expect_table_column_count_to_be_between`
+* `expect_table_column_count_to_equal`
 
 For more information, see the [Data Docs](../../terms/data_docs.md).

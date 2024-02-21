@@ -126,7 +126,7 @@ class ConfigurationStore(Store):
     def config(self) -> dict:
         return self._config
 
-    def _determine_key(
+    def get_key(
         self, name: Optional[str] = None, id: Optional[str] = None
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(id), "Must provide either name or id."

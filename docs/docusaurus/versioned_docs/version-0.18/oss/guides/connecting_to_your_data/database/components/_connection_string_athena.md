@@ -9,7 +9,7 @@ The following urls don't include credentials as it is recommended to use either 
 
 To connect Great Expectations to your Athena instance (without specifying a particular database), the URL is:
 
-```bash
+```bash title="Connection string"
 awsathena+rest://@athena.{region}.amazonaws.com/?s3_staging_dir={s3_path}
 ```
 
@@ -17,7 +17,7 @@ Note the url parameter "s3_staging_dir" needed for storing query results in S3.
 
 To connect Great Expectations to a specific Athena database, the URL is:
 
-```bash
+```bash title="Connection string"
 awsathena+rest://@athena.{region}.amazonaws.com/{database}?s3_staging_dir={s3_path}
 ```
 
