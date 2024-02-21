@@ -610,16 +610,15 @@ class AbstractDataContext(ConfigPeer, ABC):
             CheckpointStore,
         )
 
-        name = self.variables.checkpoint_store_name
-        if not name and CheckpointStore.default_checkpoints_exist(directory_path=self.root_directory):  # type: ignore[arg-type]
-            name = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+        if name := self.variables.checkpoint_store_name:
+            return name
 
-        if not name:
-            raise gx_exceptions.InvalidTopLevelConfigKeyError(
-                "Must have checkpoint_store_name in DataContextConfig."
-            )
+        if CheckpointStore.default_checkpoints_exist(directory_path=self.root_directory):  # type: ignore[arg-type]
+            return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
 
-        return name
+        raise gx_exceptions.InvalidTopLevelConfigKeyError(
+            "Must have checkpoint_store_name in DataContextConfig."
+        )
 
     @checkpoint_store_name.setter
     @public_api
