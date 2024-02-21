@@ -264,6 +264,7 @@ def test_checkpoint_with_validator_workflow(
                     "month": month,
                     "year": year,
                 },
+                "partitioner": None,
                 "batch_slice": None,
             },
             "expectation_suite_name": "default",

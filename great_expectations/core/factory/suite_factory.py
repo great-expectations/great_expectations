@@ -8,19 +8,22 @@ from great_expectations.analytics.events import (
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.factory.factory import Factory
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store import ExpectationsStore
 
 
-class SuiteFactory:
+class SuiteFactory(Factory[ExpectationSuite]):
     def __init__(self, store: ExpectationsStore, include_rendered_content: bool):
         self._store = store
         self._include_rendered_content = include_rendered_content
 
     @public_api
+    @override
     def add(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Add an ExpectationSuite to the collection.
 
@@ -46,6 +49,7 @@ class SuiteFactory:
         return suite
 
     @public_api
+    @override
     def delete(self, suite: ExpectationSuite) -> ExpectationSuite:
         """Delete an ExpectationSuite from the collection.
 
@@ -71,6 +75,7 @@ class SuiteFactory:
         return suite
 
     @public_api
+    @override
     def get(self, name: str) -> ExpectationSuite:
         """Get an ExpectationSuite from the collection by name.
 

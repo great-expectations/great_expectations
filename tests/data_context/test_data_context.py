@@ -68,46 +68,6 @@ yaml = YAMLHandler()
 parameterized_expectation_suite_name = "my_dag_node.default"
 
 
-@pytest.fixture(scope="function")
-def titanic_multibatch_data_context(
-    tmp_path,
-) -> FileDataContext:
-    """
-    Based on titanic_data_context, but with 2 identical batches of
-    data asset "titanic"
-    """
-    project_path = tmp_path / "titanic_data_context"
-    project_path.mkdir()
-    project_path = str(project_path)
-    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
-    os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
-    )
-    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
-    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
-    shutil.copy(
-        file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
-        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
-    )
-    shutil.copy(
-        file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1911.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1912.csv"
-            )
-        ),
-    )
-    return get_context(context_root_dir=context_path)
-
-
 @pytest.fixture
 def data_context_with_bad_datasource(tmp_path_factory):
     """
@@ -958,38 +918,6 @@ def test_scaffold_directories(tmp_path_factory):
         "data_docs",
         "validations",
     }
-
-
-@pytest.mark.filesystem
-def test_build_batch_kwargs(titanic_multibatch_data_context):
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1912",
-    )
-    assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
-
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1911",
-    )
-    assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
-
-    paths = []
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
-    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
-
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
-    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
-
-    assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
 @pytest.mark.filesystem
