@@ -171,10 +171,9 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
 _DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
-_PartitionerT = TypeVar("_PartitionerT")
 
 
-class DataAsset(FluentBaseModel, Generic[_DatasourceT, _PartitionerT]):
+class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -194,9 +193,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT, _PartitionerT]):
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
-    _partitioner_implementation_map: dict[
-        type[Partitioner], _PartitionerT
-    ] = pydantic.PrivateAttr(default_factory=dict)
 
     @property
     def datasource(self) -> _DatasourceT:
