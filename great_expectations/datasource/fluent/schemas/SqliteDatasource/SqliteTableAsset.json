@@ -70,7 +70,7 @@
                     "$ref": "#/definitions/SqlitePartitionerConvertedDateTime"
                 },
                 {
-                    "$ref": "#/definitions/SqlitePartitionerHashedColumn"
+                    "$ref": "#/definitions/PartitionerConvertedDateTime"
                 }
             ]
         },
@@ -635,9 +635,9 @@
             ],
             "additionalProperties": false
         },
-        "SqlitePartitionerHashedColumn": {
-            "title": "SqlitePartitionerHashedColumn",
-            "description": "Partition on hash value of a column.\n\nArgs:\n    hash_digits: The number of digits to truncate the hash to.\n    method_name: Literal[\"partition_on_hashed_column\"]",
+        "PartitionerConvertedDateTime": {
+            "title": "PartitionerConvertedDateTime",
+            "description": "A partitioner than can be used for sql engines that represents datetimes as strings.\n\nThe SQL engine that this currently supports is SQLite since it stores its datetimes as\nstrings.\nThe DatetimePartitioner will also work for SQLite and may be more intuitive.",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -646,20 +646,20 @@
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "partition_on_hashed_column",
+                    "default": "partition_on_converted_datetime",
                     "enum": [
-                        "partition_on_hashed_column"
+                        "partition_on_converted_datetime"
                     ],
                     "type": "string"
                 },
-                "hash_digits": {
-                    "title": "Hash Digits",
-                    "type": "integer"
+                "date_format_string": {
+                    "title": "Date Format String",
+                    "type": "string"
                 }
             },
             "required": [
                 "column_name",
-                "hash_digits"
+                "date_format_string"
             ],
             "additionalProperties": false
         }
