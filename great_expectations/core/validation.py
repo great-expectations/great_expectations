@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import BaseModel
 
 if TYPE_CHECKING:
@@ -25,5 +26,6 @@ class Validation(BaseModel):
     data: DataAsset | BatchConfig
     suite: ExpectationSuite
 
+    @public_api
     def run(self):
         raise NotImplementedError
