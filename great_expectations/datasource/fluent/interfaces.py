@@ -360,7 +360,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             raise KeyError(f"Multiple keys for {batch_config_name} found")
         return batch_configs[0]
 
-    def _valid_batch_request_options(
+    def _batch_request_options_are_valid(
         self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
     ) -> bool:
         valid_options = self.get_batch_request_options_keys(partitioner=partitioner)

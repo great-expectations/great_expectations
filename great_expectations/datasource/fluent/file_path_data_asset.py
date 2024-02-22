@@ -256,11 +256,15 @@ class _FilePathDataAsset(DataAsset):
                         f"not a string: {value}"
                     )
 
-        if options is not None and not self._valid_batch_request_options(
+        if options is not None and not self._batch_request_options_are_valid(
             options=options,
             partitioner=partitioner,
         ):
-            allowed_keys = set(self.batch_request_options)
+            allowed_keys = set(
+                self.get_batch_request_options_keys(
+                    options=options, partitioner=partitioner
+                )
+            )
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -286,13 +290,12 @@ class _FilePathDataAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(
+            and self._batch_request_options_are_valid(
                 options=batch_request.options, partitioner=batch_request.partitioner
             )
         ):
             valid_options = self.get_batch_request_options_keys(
-                options=batch_request.options,
-                partitioner=batch_request.partitioner
+                options=batch_request.options, partitioner=batch_request.partitioner
             )
             options = {option: None for option in valid_options}
             expect_batch_request_form = BatchRequest(
@@ -382,8 +385,7 @@ class _FilePathDataAsset(DataAsset):
             )
             # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
             valid_options = self.get_batch_request_options_keys(
-                options=batch_request.options,
-                partitioner=batch_request.partitioner
+                options=batch_request.options, partitioner=batch_request.partitioner
             )
             batch_request_options_counts = Counter(valid_options)
             batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)

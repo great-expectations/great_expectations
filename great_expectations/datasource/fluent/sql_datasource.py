@@ -823,7 +823,7 @@ class _SQLAsset(DataAsset):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options is not None and not self._valid_batch_request_options(
+        if options is not None and not self._batch_request_options_are_valid(
             options=options, partitioner=partitioner
         ):
             allowed_keys = set(self.batch_request_options)
@@ -852,7 +852,7 @@ class _SQLAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(
+            and self._batch_request_options_are_valid(
                 options=batch_request.options,
                 partitioner=batch_request.partitioner,
             )
