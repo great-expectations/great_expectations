@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import random
 from pprint import pformat as pf
 from typing import Any, Callable, Final, Literal, Protocol
 
@@ -8,12 +9,16 @@ import pytest
 
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import (
+    DataAsset,
     Datasource,
     GxInvalidDatasourceWarning,
+    InvalidAsset,
     InvalidDatasource,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
+
+pytestmark = pytest.mark.unit
 
 _EXCLUDE_METHODS: Final[set[str]] = {
     # we don't care about overriding these methods for InvalidDatasource
@@ -22,10 +27,11 @@ _EXCLUDE_METHODS: Final[set[str]] = {
     "delete_batch_config",
     "dict",
     "get_asset_names",
-    "get_execution_engine",
     "get_assets_as_dict",
-    "parse_order_by_sorters",
+    "get_execution_engine",
     "json",
+    "parse_order_by_sorters",
+    "update_batch_config_field_set",  # DataAsset
     "yaml",
 }
 DATASOURCE_PUBLIC_METHODS: Final[list[str]] = [
@@ -33,26 +39,42 @@ DATASOURCE_PUBLIC_METHODS: Final[list[str]] = [
     for f in inspect.getmembers(Datasource, predicate=inspect.isfunction)
     if not f[0].startswith("_") and f[0] not in _EXCLUDE_METHODS
 ]
+DATA_ASSET_PUBLIC_METHODS: Final[list[str]] = [
+    f[0]
+    for f in inspect.getmembers(DataAsset, predicate=inspect.isfunction)
+    if not f[0].startswith("_") and f[0] not in _EXCLUDE_METHODS
+]
 
 
-@pytest.mark.unit
-@pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
-def test_public_methods_are_overridden(base_ds_method_name: str):
+class TestPublicMethodsAreOverridden:
     """
-    Ensure that applicable Datasource public methods are overridden.
+    Ensure that applicable Datasource/DataAsset public methods are overridden.
     Applicable public methods are those that would typically be called when a users is trying to run some action on a Datasource
     and would want to know if the Datasource is invalid.
 
     If a method is not overridden, it will be inherited from the base class and will not be present in the InvalidDatasource.__dict__.
     """
-    print(f"InvalidDatasource.__dict__ attributes\n{pf(InvalidDatasource.__dict__)}")
-    invalid_ds_public_attributes = [
-        m for m in InvalidDatasource.__dict__.keys() if not m.startswith("_")
-    ]
-    assert base_ds_method_name in invalid_ds_public_attributes
+
+    @pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
+    def test_datasource_methods(self, base_ds_method_name: str):
+        print(
+            f"InvalidDatasource.__dict__ attributes\n{pf(InvalidDatasource.__dict__)}"
+        )
+        invalid_ds_public_attributes = [
+            m for m in InvalidDatasource.__dict__.keys() if not m.startswith("_")
+        ]
+        assert base_ds_method_name in invalid_ds_public_attributes
+
+    @pytest.mark.parametrize("base_ds_method_name", DATA_ASSET_PUBLIC_METHODS)
+    def test_data_asset(self, base_ds_method_name: str):
+        print(f"InvalidAsset.__dict__ attributes\n{pf(InvalidAsset.__dict__)}")
+        invalid_da_public_attributes = [
+            m for m in InvalidAsset.__dict__.keys() if not m.startswith("_")
+        ]
+        assert base_ds_method_name in invalid_da_public_attributes
 
 
-class InvalidDSFn(Protocol):
+class InvalidDSFactory(Protocol):
     """
     Accept a datasource config and return an InvalidDatasource instance.
     Raises an error if the config was valid.
@@ -65,7 +87,7 @@ class InvalidDSFn(Protocol):
 
 
 @pytest.fixture
-def invalid_datasource_factory() -> InvalidDSFn:
+def invalid_datasource_factory() -> InvalidDSFactory:
     def _invalid_ds_fct(config: dict) -> InvalidDatasource:
         ds_type: type[Datasource] = _SourceFactories.type_lookup[config["type"]]
         try:
@@ -77,7 +99,6 @@ def invalid_datasource_factory() -> InvalidDSFn:
     return _invalid_ds_fct
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "invalid_ds_cfg",
     [
@@ -122,7 +143,7 @@ class TestInvalidDatasource:
     def test_connection_raises_informative_error(
         self,
         invalid_ds_cfg: dict,
-        invalid_datasource_factory: InvalidDSFn,
+        invalid_datasource_factory: InvalidDSFactory,
     ):
         invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
         print(invalid_ds)
@@ -158,6 +179,39 @@ class TestInvalidDatasource:
                 assert invalid_asset, "No asset was returned"
 
             with pytest.raises(TestConnectionError):
+                invalid_asset.test_connection()
+
+
+class TestInvalidDataAsset:
+    def test_connection_raises_informative_error(
+        self, invalid_datasource_factory: InvalidDSFactory
+    ):
+        random_ds_type = random.choice(list(_SourceFactories.type_lookup.type_names()))
+        print(f"{random_ds_type=}")
+        invalid_datasource: InvalidDatasource = invalid_datasource_factory(
+            {
+                "name": "my invalid ds",
+                "type": random_ds_type,
+                "foo": "bar",  # regardless of the type this extra field should make the datasource invalid
+                "assets": [
+                    {"name": "maybe_valid", "type": "table", "table_name": "my_table"},
+                    {"name": "definitely_invalid", "type": "NOT_A_VALID_TYPE"},
+                    {"name": "missing type"},
+                ],
+            }
+        )
+        print(repr(invalid_datasource))
+        print(invalid_datasource._type_lookup)
+
+        assert invalid_datasource.assets, "Expected assets to be present"
+        for invalid_asset in invalid_datasource.assets:
+            with pytest.raises(TestConnectionError) as conn_err:
+                invalid_asset.test_connection()
+            assert invalid_datasource.config_error == conn_err.value.__cause__
+
+            # simulate an asset that has no datasource attached for some reason
+            invalid_asset._datasource = None
+            with pytest.raises(TestConnectionError) as conn_err:
                 invalid_asset.test_connection()
 
 
