@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, ClassVar, List, NoReturn, Type, overload
+from typing import TYPE_CHECKING, Any, ClassVar, List, NoReturn, Type, overload
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
@@ -17,6 +17,7 @@ from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTy
 if TYPE_CHECKING:
     from great_expectations.core.batch_config import BatchConfig
     from great_expectations.datasource.fluent.batch_request import BatchRequest
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 class GxInvalidDatasourceWarning(GxDatasourceWarning):
@@ -38,16 +39,53 @@ class InvalidAsset(DataAsset):
         extra = "allow"
         arbitrary_types_allowed = True
 
+    def _raise_type_error(self) -> NoReturn:
+        """
+        Raise a TypeError indicating that the Asset is invalid.
+        If available, raise from the original config error that caused the Datasource to be invalid.
+        """
+        error = TypeError(f"{self.name} Asset is invalid")
+        if datasource := getattr(self, "datasource", None):
+            raise error from datasource.config_error
+        raise error
+
     @override
     def test_connection(self) -> None:
-        if self._datasource:
+        if datasource := getattr(self, "datasource", None):
             raise TestConnectionError(
                 f"The Datasource configuration for {self.name} is invalid and cannot be used. Please fix the error and try again"
-            ) from self._datasource.config_error
+            ) from datasource.config_error
         # the asset should always have a datasource, but if it doesn't, we should still raise an error
         raise TestConnectionError(
             "This Asset configuration is invalid and cannot be used. Please fix the error and try again"
         )
+
+    @override
+    def add_batch_config(self, name: str, partitioner: Any | None = None) -> NoReturn:
+        self._raise_type_error()
+
+    @override
+    def add_sorters(self, sorters: List[Any]) -> NoReturn:
+        self._raise_type_error()
+
+    @override
+    def build_batch_request(
+        self,
+        options: dict | None = None,
+        batch_slice: Any = None,
+        partitioner: Any = None,
+    ) -> NoReturn:
+        self._raise_type_error()
+
+    @override
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> NoReturn:
+        self._raise_type_error()
+
+    @override
+    def sort_batches(self, batch_list: List[Batch]) -> None:
+        self._raise_type_error()
 
 
 class InvalidAssetTypeLookup(TypeLookup):
