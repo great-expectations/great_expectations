@@ -291,6 +291,58 @@
                 "column_name"
             ]
         },
+        "PartitionerConvertedDatetime": {
+            "title": "PartitionerConvertedDatetime",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_converted_datetime",
+                    "enum": [
+                        "partition_on_converted_datetime"
+                    ],
+                    "type": "string"
+                },
+                "date_format_string": {
+                    "title": "Date Format String",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name",
+                "date_format_string"
+            ]
+        },
+        "PartitionerHashedColumn": {
+            "title": "PartitionerHashedColumn",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_hashed_column",
+                    "enum": [
+                        "partition_on_hashed_column"
+                    ],
+                    "type": "string"
+                },
+                "hash_digits": {
+                    "title": "Hash Digits",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "hash_digits"
+            ]
+        },
         "BatchConfig": {
             "title": "BatchConfig",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
@@ -330,6 +382,12 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerDatetimePart"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerConvertedDatetime"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerHashedColumn"
                         }
                     ]
                 }
@@ -543,6 +601,34 @@
             ],
             "additionalProperties": false
         },
+        "SqlitePartitionerConvertedDateTime": {
+            "title": "SqlitePartitionerConvertedDateTime",
+            "description": "A partitioner than can be used for sql engines that represents datetimes as strings.\n\nThe SQL engine that this currently supports is SQLite since it stores its datetimes as\nstrings.\nThe DatetimePartitioner will also work for SQLite and may be more intuitive.",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_converted_datetime",
+                    "enum": [
+                        "partition_on_converted_datetime"
+                    ],
+                    "type": "string"
+                },
+                "date_format_string": {
+                    "title": "Date Format String",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name",
+                "date_format_string"
+            ],
+            "additionalProperties": false
+        },
         "TableAsset": {
             "title": "TableAsset",
             "description": "--Public API--",
@@ -610,6 +696,9 @@
                         },
                         {
                             "$ref": "#/definitions/SqlPartitionerDatetimePart"
+                        },
+                        {
+                            "$ref": "#/definitions/SqlitePartitionerConvertedDateTime"
                         }
                     ]
                 },
@@ -696,6 +785,9 @@
                         },
                         {
                             "$ref": "#/definitions/SqlPartitionerDatetimePart"
+                        },
+                        {
+                            "$ref": "#/definitions/SqlitePartitionerConvertedDateTime"
                         }
                     ]
                 },
