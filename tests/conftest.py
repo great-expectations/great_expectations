@@ -3745,7 +3745,7 @@ def populated_profiler_store(
 
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
-def alice_columnar_table_single_batch(empty_data_context):
+def alice_columnar_table_single_batch():
     """
     About the "Alice" User Workflow Fixture
 
@@ -4000,7 +4000,7 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
     expected_expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name, data_context=empty_data_context
+        expectation_suite_name=expectation_suite_name
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
