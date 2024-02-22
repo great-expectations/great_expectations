@@ -427,7 +427,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
     with mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
     ) as mock_get:
-        suite = context.suites.get(expectation_suite_name=suite_1.name)
+        suite = context.suites.get(name=suite_1.name)
         mock_get.assert_called_with(
             mock.ANY,
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-suites",
@@ -452,16 +452,6 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
             context.suites.get(suite_name)
 
     assert suite_name in str(e.value)
-
-
-@pytest.mark.cloud
-def test_get_expectation_suite_no_identifier_raises_error(
-    empty_base_data_context_in_cloud_mode: CloudDataContext,
-) -> None:
-    context = empty_base_data_context_in_cloud_mode
-
-    with pytest.raises(ValueError):
-        context.suites.get()
 
 
 @pytest.mark.cloud
@@ -655,7 +645,7 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
     ]
 
     expectation_suite_include_rendered_content: ExpectationSuite = context.suites.get(
-        expectation_suite_name=expectation_suite_name,
+        name=expectation_suite_name,
         include_rendered_content=True,
     )
     assert (

@@ -73,10 +73,10 @@ def expectation_suite(
         expectation_suite=expectation_suite
     )
     assert len(expectation_suite.expectations) > 0
-    _ = context.suites.get(expectation_suite_name=expectation_suite_name)
+    _ = context.suites.get(name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
-        _ = context.suites.get(expectation_suite_name=expectation_suite_name)
+        _ = context.suites.get(name=expectation_suite_name)
 
 
 @pytest.fixture(scope="module")
@@ -94,7 +94,7 @@ def validator(
     validator.save_expectation_suite()
     expectation_suite = validator.get_expectation_suite()
     _ = context.suites.get(
-        expectation_suite_name=expectation_suite.expectation_suite_name,
+        name=expectation_suite.expectation_suite_name,
     )
 
 

@@ -27,7 +27,7 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 2. Run the following code to retrieve the Expectation Suite:
 
     ```python title="Jupyter Notebook"
-    expectation_suite = context.suites.get(expectation_suite_name=<expectation_name>)
+    expectation_suite = context.get_expectation_suite(expectation_suite_name=<expectation_name>)
     ```
 
 3. Run the following code to assign a name to the Checkpoint:
