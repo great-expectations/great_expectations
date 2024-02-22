@@ -7,6 +7,10 @@ from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 import pytest
 
 from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.core.partitioners import (
+    PartitionerConvertedDatetime,
+    PartitionerHashedColumn,
+)
 from great_expectations.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 
@@ -122,7 +126,7 @@ def create_sqlite_source() -> (
 @pytest.mark.unit
 @pytest.mark.parametrize(
     [
-        "add_partitioner_method_name",
+        "partitioner_class",
         "partitioner_kwargs",
         "partitioner_query_responses",
         "sorter_args",
@@ -133,7 +137,7 @@ def create_sqlite_source() -> (
     ],
     [
         pytest.param(
-            "add_partitioner_hashed_column",
+            PartitionerHashedColumn,
             {"column_name": "passenger_count", "hash_digits": 3},
             [("abc",), ("bcd",), ("xyz",)],
             ["hash"],
@@ -144,7 +148,7 @@ def create_sqlite_source() -> (
             id="hash",
         ),
         pytest.param(
-            "add_partitioner_converted_datetime",
+            PartitionerConvertedDatetime,
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             [("2019-02-01",), ("2019-02-23",)],
             ["datetime"],
@@ -159,7 +163,7 @@ def create_sqlite_source() -> (
 def test_sqlite_specific_partitioner(
     empty_data_context,
     create_sqlite_source,
-    add_partitioner_method_name,
+    partitioner_class,
     partitioner_kwargs,
     partitioner_query_responses,
     sorter_args,
@@ -175,11 +179,11 @@ def test_sqlite_specific_partitioner(
         ],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
-        getattr(asset, add_partitioner_method_name)(**partitioner_kwargs)
         asset.add_sorters(sorter_args)
         # Test getting all batches
+        partitioner = partitioner_class(**partitioner_kwargs)
         all_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request()
+            asset.build_batch_request(partitioner=partitioner)
         )
         assert len(all_batches) == all_batches_cnt
         # Test getting specified batches
