@@ -19,6 +19,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.data_context import get_context
@@ -1079,6 +1080,104 @@ def test_validator_include_rendered_content_diagnostic(
         expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
+
+
+@pytest.mark.parametrize(
+    "value_set, expected",
+    [
+        (list(range(2)), False),  # value set won't pass for the actual data
+        (list(range(5)), True),  # value set will pass for the actual data
+    ],
+)
+@pytest.mark.big
+def test_validator_validate_substitutes_evaluation_parameters(
+    value_set: list[int],
+    expected: bool,
+):
+    """Integration test to ensure evaluation parameters are respected when validating.
+    The setup here is to provide very simple data, and a variety of evaluation_parameter inputs,
+    just checking for result.success as a proxy for the evaluation_parameter being respected.
+    """
+
+    context = get_context(mode="ephemeral")
+    suite_name = "my_suite"
+    column_name = "my_column"
+    datasource = context.sources.add_pandas(name="my_datasource")
+    asset = datasource.add_dataframe_asset(
+        "my_asset", dataframe=pd.DataFrame({column_name: [0, 1, 2, 3, 4]})
+    )
+    suite = context.suites.add(ExpectationSuite(suite_name))
+    suite.add_expectation(
+        gxe.ExpectColumnDistinctValuesToBeInSet(
+            column=column_name, value_set={"$PARAMETER": "value_set"}
+        )
+    )
+    validator = context.get_validator(
+        batch_request=asset.build_batch_request(),
+        expectation_suite_name=suite_name,
+    )
+
+    result = validator.validate(evaluation_parameters={"value_set": value_set})
+    assert result.success == expected
+
+
+@pytest.mark.parametrize(
+    "provided, in_expectation_suite, expected",
+    [
+        ([0, 1], [2, 3], [0, 1]),
+        (None, [2, 3], [2, 3]),
+        (
+            None,
+            None,
+            [4, 5],  # expected here is set on the expectation in the test
+        ),
+    ],
+)
+@pytest.mark.big
+def test_validator_validate_evaluation_parameters_substitution_order(
+    provided: list[int],
+    in_expectation_suite: list[int],
+    expected: bool,
+):
+    """Integration test to ensure evaluation parameters are respected when validating.
+    The setup here is to provide very simple data, and a variety of evaluation_parameter inputs,
+    just checking for result.success as a proxy for the evaluation_parameter being respected.
+    """
+
+    def to_eval_param_dict(value_set: list[int] | None) -> dict:
+        return {"value_set": value_set} if value_set is not None else {}
+
+    context = get_context(mode="ephemeral")
+    suite_name = "my_suite"
+    column_name = "my_column"
+    datasource = context.sources.add_pandas(name="my_datasource")
+    asset = datasource.add_dataframe_asset(
+        "my_asset", dataframe=pd.DataFrame({column_name: []})
+    )
+    suite = context.suites.add(
+        ExpectationSuite(
+            suite_name, evaluation_parameters=to_eval_param_dict(in_expectation_suite)
+        )
+    )
+
+    suite.add_expectation(
+        gxe.ExpectColumnDistinctValuesToEqualSet(
+            column=column_name,
+            # value_set={"$PARAMETER": "value_set"},
+            value_set={"$PARAMETER": "value_set", "$PARAMETER.value_set": [5, 6]},
+        )
+    )
+    validator = context.get_validator(
+        batch_request=asset.build_batch_request(),
+        expectation_suite_name=suite_name,
+    )
+
+    result = validator.validate(evaluation_parameters=to_eval_param_dict(provided))
+    assert isinstance(result, ExpectationSuiteValidationResult)
+    evaluation_parameters_used = result.results[0]["expectation_config"]["kwargs"][
+        "value_set"
+    ]
+    assert evaluation_parameters_used == expected
 
 
 @pytest.mark.unit
