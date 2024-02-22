@@ -261,9 +261,7 @@ class _FilePathDataAsset(DataAsset):
             partitioner=partitioner,
         ):
             allowed_keys = set(
-                self.get_batch_request_options_keys(
-                    options=options, partitioner=partitioner
-                )
+                self.get_batch_request_options_keys(partitioner=partitioner)
             )
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
@@ -295,7 +293,7 @@ class _FilePathDataAsset(DataAsset):
             )
         ):
             valid_options = self.get_batch_request_options_keys(
-                options=batch_request.options, partitioner=batch_request.partitioner
+                partitioner=batch_request.partitioner
             )
             options = {option: None for option in valid_options}
             expect_batch_request_form = BatchRequest(
@@ -385,7 +383,7 @@ class _FilePathDataAsset(DataAsset):
             )
             # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
             valid_options = self.get_batch_request_options_keys(
-                options=batch_request.options, partitioner=batch_request.partitioner
+                partitioner=batch_request.partitioner
             )
             batch_request_options_counts = Counter(valid_options)
             batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)
