@@ -475,7 +475,7 @@ class TestCRUDMethods:
         expectation.column = updated_column_name
         expectation.save()
         assert suite.expectations[0].column == updated_column_name
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.suites.get(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
 
@@ -502,7 +502,7 @@ class TestCRUDMethods:
         expectation.column = updated_column_name
         expectation.save()
         assert suite.expectations[0].column == updated_column_name
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.suites.get(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
 

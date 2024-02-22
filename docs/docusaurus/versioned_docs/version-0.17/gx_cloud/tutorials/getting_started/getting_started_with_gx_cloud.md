@@ -115,7 +115,7 @@ Modify and run this snippet to add an <TechnicalTag tag="expectation" text="Expe
 ```python title="Jupyter Notebook"
 # Get an existing Expectation Suite
 expectation_suite_id = expectation_suite.ge_cloud_id
-expectation_suite = context.get_expectation_suite(ge_cloud_id=expectation_suite_id)
+expectation_suite = context.suites.get(ge_cloud_id=expectation_suite_id)
 column_name = None # set column name you want to test here
 assert column_name is not None, "Please set column_name."
 

@@ -1300,7 +1300,7 @@ class Validator:
                 expectation_suite=expectation_suite
             )
             if self.cloud_mode:
-                updated_suite = self._data_context.get_expectation_suite(
+                updated_suite = self._data_context.suites.get(
                     ge_cloud_id=expectation_suite.ge_cloud_id
                 )
                 self._initialize_expectations(expectation_suite=updated_suite)
