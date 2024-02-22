@@ -362,6 +362,19 @@ def test_cloud_context_delete_datasource(
             },
             id="invalid asset",
         ),
+        pytest.param(
+            {
+                "type": "sqlite",
+                "connection_string": "sqlite:///",
+                "assets": [
+                    {
+                        "name": "bad_asset_type",
+                        "type": "NOT_A_VALID_ASSET_TYPE",
+                    }
+                ],
+            },
+            id="invalid asset type",
+        ),
     ],
 )
 def test_invalid_datasource_config_does_not_break_cloud_context(
@@ -397,6 +410,10 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
     # test __repr__ and __str__
     print(f"{bad_datasource!r}\n{bad_datasource!s}")
     assert isinstance(bad_datasource, InvalidDatasource)
+    assert bad_datasource.name == datasource_name
+    assert len(bad_datasource.assets) == len(
+        invalid_datasource_config.get("assets", [])
+    )
 
 
 @pytest.fixture
