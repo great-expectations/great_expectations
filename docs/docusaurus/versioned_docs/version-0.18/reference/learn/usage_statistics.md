@@ -6,7 +6,7 @@ To help us improve Great Expectations, by default we track event data when certa
 
 While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the following to your data context configuration:
 
-```yaml
+```yaml title="YAML"
     anonymous_usage_statistics:
       data_context_id: <randomly-generated-uuid>
       enabled: false
@@ -14,7 +14,7 @@ While we hope you'll leave them on, you can easily disable usage statistics for 
 
 You can also disable usage statistics system-wide by setting the `GE_USAGE_STATS` environment variable to `FALSE` or adding the following code block to a file called `great_expectations.conf` located in `/etc/` or `~/.great_expectations`:
 
-```ini
+```ini title="great_expectations.conf"
     [anonymous_usage_statistics]
     enabled=FALSE
 ```

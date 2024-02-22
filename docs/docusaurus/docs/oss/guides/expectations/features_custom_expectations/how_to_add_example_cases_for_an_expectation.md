@@ -91,14 +91,14 @@ Each example is a dictionary with two keys:
 
 In our example, `data` will have two columns, "x" and "y", each with five rows. If you define multiple columns, make sure that they have the same number of rows. When possible, include test data and tests that includes null values (`None` in the Python test definition).
 
-```python
+```python title="Python"
 "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
 ```
 
 When you define data in your examples, we will mostly guess the type of the columns. 
 Sometimes you need to specify the precise type of the columns for each backend. Then you use the `schemas` attribute (on the same level as `data` and `tests` in the dictionary):
 
-```console
+```console title="Dictionary"
 "schemas": {
   "spark": {
     "x": "IntegerType",
@@ -114,7 +114,7 @@ While Pandas is fairly flexible in typing, Spark and many SQL dialects are much 
 You may find you wish to use data that is incompatible with a given backend, or write different individual tests for different backends. 
 To do this, you can use the `only_for` attribute, which accepts a list containing `pandas`, `spark`, `sqlite`, a SQL dialect, or a combination of any of the above:
 
-```console
+```console title="Dictionary"
 "only_for": ["spark", "pandas"]
 ```
 
@@ -137,7 +137,7 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publicly displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -166,7 +166,7 @@ If you now run your file, `print_diagnostic_checklist()` will attempt to execute
 
 If the tests are correctly defined, and the rest of the logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
-```console
+```console title="Output"
 ✔ Has at least one positive and negative example case, and all test cases pass
 ```
 

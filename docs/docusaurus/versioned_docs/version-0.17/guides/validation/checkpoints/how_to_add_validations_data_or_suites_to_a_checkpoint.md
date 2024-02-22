@@ -21,7 +21,7 @@ Add validation data or <TechnicalTag tag="expectation_suite" text="Expectation S
 
 Open your Checkpoint in a text editor. Your Checkpoint should appear similar to the following example:
 
-```yaml
+```YAML title="YAML"
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -54,7 +54,7 @@ validations:
 
 To add a second Expectation Suite (in this example we add ``users.error``) to your Checkpoint configuration, modify the file to add an additional `batch_request` key and corresponding information, including `evaluation_parameters`, `action_list`, `runtime_configuration`, and `expectation_suite_name`.  In fact, the simplest way to run a different Expectation Suite on the same <TechnicalTag tag="batch" text="Batch" /> of data is to make a copy of the original `batch_request` entry and then edit the `expectation_suite_name` value to correspond to a different Expectation Suite.  The resulting configuration will look like this:
 
-```yaml
+```YAML title="YAML"
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -111,7 +111,7 @@ validations:
 
 In the prvious example, the entry you added with your Expectation Suite was paired with the same Batch of data as the original Expectation Suite.  However, you may also specify different <TechnicalTag tag="batch_request" text="Batch Requests" /> (and thus different Batches of data) when you add an Expectation Suite.  The flexibility of easily adding multiple Validations of Batches of data with different Expectation Suites and specific <TechnicalTag tag="action" text="Actions" /> can be demonstrated using the following example of a Checkpoint configuration file:
 
-```yaml
+```YAML title="YAML"
 name: my_fancy_checkpoint
 config_version: 1
 class_name: Checkpoint

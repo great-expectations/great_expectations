@@ -31,7 +31,7 @@ continuous data or categorical classes and their associated weights.
 
 #### Example continuous partition object:
 
-```python
+```python title="Python"
 partition = {
     "bins": [0, 1, 2, 10],
     "weights": [0.2, 0.3, 0.3],
@@ -42,7 +42,7 @@ json.dumps(partition, indent=2)
 
 results in:
 
-```python
+```python title="Python"
 {
     "bins": [ 0, 1, 2, 10],
     "weights": [0.2, 0.3, 0.3],
@@ -57,7 +57,7 @@ results in:
 
 #### Example discrete partition object:
 
-```python
+```python title="Python"
 {
     "values": ["cat", "dog", "fish"],
     "weights": [0.3, 0.3, 0.4]
@@ -68,13 +68,13 @@ results in:
 
 Convenience functions are available to easily construct partition objects from existing data:
 
-* ```build_continuous_partition_object```
-* ```build_categorical_partition_object```
+* `build_continuous_partition_object`
+* `build_categorical_partition_object`
 
 Convenience functions are also provided to validate that an object is valid:
 
-* ```is_valid_continuous_partition_object```
-* ```is_valid_categorical_partition_object```
+* `is_valid_continuous_partition_object`
+* `is_valid_categorical_partition_object`
 
 Tests interpret partition objects literally, so care should be taken when a partition includes a segment with zero
 weight. The convenience methods consequently allow you to include small amounts of residual weight on the "tails" of a
