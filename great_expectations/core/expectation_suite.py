@@ -81,7 +81,6 @@ class ExpectationSuite(SerializableDictDot):
     Args:
         name: Name of the Expectation Suite
         expectation_suite_name (deprecated): Name of the Expectation Suite.
-        data_context: Data Context associated with this Expectation Suite.
         expectations: Expectation Configurations to associate with this Expectation Suite.
         evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
         data_asset_type: Type of data asset to associate with this suite.

@@ -571,7 +571,7 @@ class CloudDataContext(SerializableDataContext):
             raise ValueError("overwrite_existing must be of type bool.")
 
         expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
+            expectation_suite_name=expectation_suite_name
         )
 
         existing_suite_names = self.list_expectation_suite_names()
@@ -707,9 +707,7 @@ class CloudDataContext(SerializableDataContext):
             )
 
         # create the ExpectationSuite from constructor
-        expectation_suite = ExpectationSuite(
-            **expectations_schema_dict, data_context=self
-        )
+        expectation_suite = ExpectationSuite(**expectations_schema_dict)
         if include_rendered_content:
             expectation_suite.render()
         return expectation_suite
