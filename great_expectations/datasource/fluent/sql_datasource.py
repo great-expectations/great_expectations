@@ -718,6 +718,7 @@ class _SQLAsset(DataAsset):
                     datasource_name=batch_request.datasource_name,
                     data_asset_name=batch_request.data_asset_name,
                     options=options,
+                    partitioner=batch_request.partitioner,
                 )
             )
         return batch_requests
@@ -826,7 +827,9 @@ class _SQLAsset(DataAsset):
         if options is not None and not self._batch_request_options_are_valid(
             options=options, partitioner=partitioner
         ):
-            allowed_keys = set(self.batch_request_options)
+            allowed_keys = set(
+                self.get_batch_request_options_keys(partitioner=partitioner)
+            )
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"

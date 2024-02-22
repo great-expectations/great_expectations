@@ -170,13 +170,14 @@ def test_sqlite_specific_partitioner(
         asset.add_sorters(sorter_args)
         # Test getting all batches
         partitioner = partitioner_class(**partitioner_kwargs)
+        batch_request = asset.build_batch_request(partitioner=partitioner)
         all_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request(partitioner=partitioner)
+            batch_request=batch_request
         )
         assert len(all_batches) == all_batches_cnt
         # Test getting specified batches
         specified_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request(specified_batch_request)
+            asset.build_batch_request(specified_batch_request, partitioner=partitioner)
         )
         assert len(specified_batches) == specified_batch_cnt
         assert specified_batches[-1].metadata == last_specified_batch_metadata
