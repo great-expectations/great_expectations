@@ -52,37 +52,46 @@ if TYPE_CHECKING:
 # See SqliteDatasource, SqliteTableAsset, and SqliteQueryAsset below.
 
 
-class SqlitePartitionerHashedColumn(_PartitionerOneColumnOneParam):
-    """Partition on hash value of a column.
+class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
+    """A partitioner than can be used for sql engines that represents datetimes as strings.
 
-    Args:
-        hash_digits: The number of digits to truncate the hash to.
-        method_name: Literal["partition_on_hashed_column"]
+    The SQL engine that this currently supports is SQLite since it stores its datetimes as
+    strings.
+    The DatetimePartitioner will also work for SQLite and may be more intuitive.
     """
 
-    # hash digits is the length of the hash. The md5 of the column is truncated to this length.
-    hash_digits: int
+    # date_format_strings syntax is documented here:
+    # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
+    # It allows for arbitrary strings so can't be validated until conversion time.
+    date_format_string: str
     column_name: str
-    method_name: Literal["partition_on_hashed_column"] = "partition_on_hashed_column"
+    method_name: Literal[
+        "partition_on_converted_datetime"
+    ] = "partition_on_converted_datetime"
 
     @property
     @override
     def param_names(self) -> List[str]:
-        return ["hash"]
+        # The datetime parameter will be a string representing a datetime in the format
+        # given by self.date_format_string.
+        return ["datetime"]
 
     @override
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
-        return {"column_name": self.column_name, "hash_digits": self.hash_digits}
+        return {
+            "column_name": self.column_name,
+            "date_format_string": self.date_format_string,
+        }
 
     @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
-        if "hash" not in options:
+        if "datetime" not in options:
             raise ValueError(
-                "'hash' must be specified in the batch request options to create a batch identifier"
+                "'datetime' must be specified in the batch request options to create a batch identifier"
             )
-        return {self.column_name: options["hash"]}
+        return {self.column_name: options["datetime"]}
 
 
 class SqliteDsn(pydantic.AnyUrl):
@@ -95,31 +104,10 @@ class SqliteDsn(pydantic.AnyUrl):
     host_required = False
 
 
-SqlitePartitioner = Union[
-    SqlPartitioner, SqlitePartitionerHashedColumn, SqlitePartitionerConvertedDateTime
-]
+SqlitePartitioner = Union[SqlPartitioner, PartitionerConvertedDateTime]
 
 
 class _SQLiteAssetMixin:
-    @public_api
-    def add_partitioner_hashed_column(
-        self: Self, column_name: str, hash_digits: int
-    ) -> Self:
-        """Associates a hashed column partitioner with this sqlite data asset.
-        Args:
-            column_name: The column name of the date column where year and month will be parsed out.
-            hash_digits: Number of digits to truncate output of hashing function (to limit length of hashed result).
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            SqlitePartitionerHashedColumn(
-                method_name="partition_on_hashed_column",
-                column_name=column_name,
-                hash_digits=hash_digits,
-            )
-        )
-
     @public_api
     def add_partitioner_converted_datetime(
         self: Self, column_name: str, date_format_string: str

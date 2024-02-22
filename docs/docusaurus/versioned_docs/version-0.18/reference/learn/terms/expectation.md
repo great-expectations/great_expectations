@@ -35,7 +35,7 @@ When you create your Checkpoints, you will be able to configure them to use spec
 
 Expectations are especially useful when they capture critical aspects of data understanding that analysts and practitioners know based on its *semantic* meaning. It's common to want to extend Great Expectations with application or domain specific Expectations. For example:
 
-```bash
+```bash title="Expectation names"
 expect_column_text_to_be_in_english
 expect_column_value_to_be_valid_icd_code
 ```

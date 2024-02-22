@@ -618,7 +618,7 @@ class TestEvaluationParameterOptions:
 
     @pytest.fixture
     def expectation_suite(self) -> ExpectationSuite:
-        get_context()
+        get_context(mode="ephemeral")
         return ExpectationSuite("test-suite")
 
     @pytest.fixture

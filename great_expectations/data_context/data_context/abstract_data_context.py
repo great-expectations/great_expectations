@@ -61,12 +61,12 @@ from great_expectations.core.config_provider import (
     _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
+from great_expectations.core.factory import CheckpointFactory, SuiteFactory
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
-from great_expectations.core.suite_factory import SuiteFactory
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset
@@ -76,7 +76,6 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GX_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -267,7 +266,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # We want to have directories set up before initializing usage statistics so
         # that we can obtain a context instance id
-        self._in_memory_instance_id = (
+        self._in_memory_instance_id: str | None = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
         # Init stores
@@ -290,16 +289,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
-        self._sources: _SourceFactories = _SourceFactories(self)
-
-        self._suites: Union[SuiteFactory, None]
-        if self.stores.get(self.expectations_store_name):
-            self._suites = SuiteFactory(
-                store=self.expectations_store,
-                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
-            )
-        else:
-            self._suites = None
+        self._init_factories()
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
@@ -321,6 +311,23 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
+
+    def _init_factories(self) -> None:
+        self._sources: _SourceFactories = _SourceFactories(self)
+
+        self._suites: SuiteFactory | None = None
+        if expectations_store := self.stores.get(self.expectations_store_name):
+            self._suites = SuiteFactory(
+                store=expectations_store,
+                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
+            )
+
+        self._checkpoints: CheckpointFactory | None = None
+        if checkpoint_store := self.stores.get(self.checkpoint_store_name):
+            self._checkpoints = CheckpointFactory(
+                store=checkpoint_store,
+                context=self,
+            )
 
     def _init_analytics(self) -> None:
         init_analytics(
@@ -541,6 +548,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._suites
 
     @property
+    def checkpoints(self) -> CheckpointFactory:
+        if not self._checkpoints:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured CheckpointStore to persist Checkpoints."
+            )
+        return self._checkpoints
+
+    @property
     def expectations_store_name(self) -> Optional[str]:
         return self.variables.expectations_store_name
 
@@ -591,43 +606,17 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:
-        try:
-            return self.variables.checkpoint_store_name
-        except AttributeError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
+        from great_expectations.data_context.store.checkpoint_store import (
+            CheckpointStore,
+        )
 
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory  # type: ignore[arg-type]
-            ):
-                return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
-                    self.root_directory,
-                    DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-                )
-                error_message: str = (
-                    f"Attempted to access the 'checkpoint_store_name' field "
-                    f"with no `checkpoints` directory.\n "
-                    f"Please create the following directory: {checkpoint_store_directory}.\n "
-                    f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
-                    f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
-                    f"to learn more about the upgrade process."
-                )
-            else:
-                error_message = (
-                    f"Attempted to access the 'checkpoint_store_name' field "
-                    f"with no `checkpoints` directory.\n  "
-                    f"Please create a `checkpoints` directory in your Great Expectations directory."
-                    f"To use the new 'Checkpoint Store' feature, please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)}.\n  "
-                    f"Visit {AbstractDataContext.MIGRATION_WEBSITE} "
-                    f"to learn more about the upgrade process."
-                )
+        if name := self.variables.checkpoint_store_name:
+            return name
 
-            raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
+        if CheckpointStore.default_checkpoints_exist(directory_path=self.root_directory):  # type: ignore[arg-type]
+            return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+
+        return None
 
     @checkpoint_store_name.setter
     @public_api
@@ -643,33 +632,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def checkpoint_store(self) -> CheckpointStore:
-        checkpoint_store_name: str = self.checkpoint_store_name  # type: ignore[assignment]
-        try:
-            return self.stores[checkpoint_store_name]
-        except KeyError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
-
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory  # type: ignore[arg-type]
-            ):
-                logger.warning(
-                    f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
-                    f"so will try to use default Checkpoint store.\n  Please update your configuration "
-                    f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)} in order to use the new "
-                    f"'Checkpoint Store' feature.\n  Visit {AbstractDataContext.MIGRATION_WEBSITE} "
-                    f"to learn more about the upgrade process."
-                )
-                return self._build_store_from_config(  # type: ignore[return-value]
-                    checkpoint_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[  # type: ignore[arg-type]
-                        checkpoint_store_name
-                    ],
-                )
-            raise gx_exceptions.StoreConfigurationError(
-                f'Attempted to access the Checkpoint store: "{checkpoint_store_name}". It is not a configured store.'
-            )
+        return self.stores[self.checkpoint_store_name]
 
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:

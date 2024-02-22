@@ -85,7 +85,7 @@ Use the information provided here to configure a new storage location for Valida
 
 GX recommends that you store Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following code adds Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``: 
 
-```yaml
+```YAML title="YAML"
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
 
@@ -95,7 +95,7 @@ To learn more about the additional options for configuring the ``config_variable
 
 Your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> configuration is provided in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry: 
 
-```yaml
+```YAML title="YAML"
 validations_store_name: validations_store
 
 stores:
@@ -111,7 +111,7 @@ This configuration tells Great Expectations to look for Validation Results in a 
 
 In the following example, `validations_store_name` is set to ``validations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Validation Results are stored, ``prefix`` is the folder in the container where Validation Result files are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}``to reference the corresponding key in the ``config_variables.yml`` file.
 
-```yaml
+```YAML title="YAML"
 validations_store_name: validations_AZ_store
 
 stores:
@@ -190,7 +190,7 @@ For more information about validating your GCP authentication credentials, see [
 
 The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml``and find the following entry: 
 
-```yaml name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml"
+```YAML title="YAML" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml"
 ```
 This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
@@ -198,7 +198,7 @@ This configuration tells Great Expectations to look for Validation Results in th
 
 In the following example, `validations_store_name` is set to ``validations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Validation Result files are stored.
 
-```yaml name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml"
+```YAML title="YAML" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml"
 ```
 
 :::warning
@@ -209,11 +209,11 @@ If you are also storing [Expectations in GCS](../configuring_metadata_stores/con
 
 Use the ``gsutil cp`` command to copy Validation Results into GCS. For example, the following command copies the Validation results ``validation_1`` and ``validation_2``into a GCS bucket: 
 
-```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_command"
+```bash title="Terminal input" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_command"
 ```
 The following confirmation message is returned:
 
-```bash name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_output"
+```bash title="Terminal output" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_output"
 ```
 Additional methods for copying Validation Results into GCS are available. See [Upload objects from a filesystem](https://cloud.google.com/storage/docs/uploading-objects).
 
@@ -258,7 +258,7 @@ In this example, the name of the Validation Result is ``npi_validations`` and th
 
 The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  Open ``great_expectations.yml``and find the following entry: 
 
-```yaml
+```YAML title="YAML"
 validations_store_name: validations_store
 
 stores:
@@ -275,7 +275,7 @@ This configuration tells Great Expectations to look for Validation Results in th
 
 In the following example, `validations_store_name` is set to ``shared_validations_filesystem_store``, but it can be personalized.  Also, ``base_directory`` is set to ``uncommitted/shared_validations/``, but you can set it to another path that is accessible by Great Expectations.
 
-```yaml
+```YAML title="YAML"
 validations_store_name: shared_validations_filesystem_store
 
 stores:
@@ -314,7 +314,7 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
 
 1. To add database credentials, open ``config_variables.yml`` and add the following entry below the ``db_creds`` key: 
 
-    ```yaml
+    ```YAML title="YAML"
     db_creds:
       drivername: postgresql
       host: '<your_host_name>'
@@ -327,7 +327,7 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
 
 2. Optional. To use a specific schema as the backend, specify `schema` as an additional keyword argument. For example:
 
-    ```yaml
+    ```YAML title="YAML"
     db_creds:
       drivername: postgresql
       host: '<your_host_name>'
@@ -342,7 +342,7 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
 
 The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  Open ``great_expectations.yml``and find the following entry:
 
-```yaml
+```YAML title="YAML"
 validations_store_name: validations_store
 
 stores:
@@ -358,7 +358,7 @@ This configuration tells Great Expectations to look for Validation Results in th
 
 Add the following entry to your ``great_expectations.yml``: 
 
-```yaml
+```YAML title="YAML"
 validations_store_name: validations_postgres_store
 
 stores:

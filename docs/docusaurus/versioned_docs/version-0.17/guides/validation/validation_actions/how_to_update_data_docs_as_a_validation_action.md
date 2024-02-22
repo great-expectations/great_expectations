@@ -30,7 +30,7 @@ Add ``class_name: UpdateDataDocsAction`` to the Action.
 The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsAction`` Action, since Data Docs are rendered from Validation Results from the <TechnicalTag tag="store" text="Store" />.
 :::
 
-```yaml
+```YAML title="YAML"
  action_list:
    - name: store_validation_result
      action:
@@ -49,7 +49,7 @@ The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsA
   To specify which Data Docs sites to update, provide a ``site_names`` key to the ``action`` config inside your ``UpdateDataDocsAction``.
   This field accepts a list of Data Docs site names, and when provided, will only update the specified sites.
 
-```yaml
+```YAML title="YAML"
  action_list:
    - name: store_validation_result
      action:
@@ -70,7 +70,7 @@ Test that your new Action is configured correctly:
 
 Run the following command to run the Checkpoint and verify that no errors are returned:
 
-```python
+```python title="Python"
 import great_expectations as gx
 context = gx.get_context()
 checkpoint_name = "your checkpoint name here"

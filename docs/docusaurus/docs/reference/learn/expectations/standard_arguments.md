@@ -27,7 +27,7 @@ Expectations will intercept any exceptions so that execution will not fail if th
 Instead, if Great Excpectations catches an exception while evaluating an Expectation, the Expectation result will (
 in `BASIC` and `SUMMARY` modes) return the following informative error message:
 
-```python
+```python title="Python output"
 {
     "result": False,
     "catch_exceptions": True,
@@ -44,7 +44,7 @@ passed through to the `expectation_result` object without modification. The `met
 helpful markdown annotations to Expectations (shown below). These Expectation "notes" are rendered within \
 Expectation Suite pages in Data Docs.
 
-```python
+```python title="Python"
 validator.expect_column_values_to_be_in_set(
     "my_column",
     ["a", "b", "c"],
@@ -78,7 +78,7 @@ validator.expect_column_values_to_be_in_set(
 it as a percentage, allowing some wiggle room when evaluating Expectations: as long as `mostly` percent
 of rows evaluate to `True`, the Expectation returns `"success": True`.
 
-```python
+```python title="Python"
 [0,1,2,3,4,5,6,7,8,9]
 
 validator.expect_column_values_to_be_between(
@@ -107,7 +107,7 @@ validator.expect_column_values_to_be_between(
 
 Expectations with `mostly` return exception lists even if they succeed:
 
-```python
+```python title="Python"
 validator.expect_column_values_to_be_between(
     "my_column",
     min_value=0,

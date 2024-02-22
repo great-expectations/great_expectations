@@ -1,7 +1,6 @@
 ---
 sidebar_label: 'Get support'
 title: 'Get support'
-hide_table_of_contents: true
 description: Learn what resources are available to help you resolve issues with GX Cloud and GX OSS.
 ---
 

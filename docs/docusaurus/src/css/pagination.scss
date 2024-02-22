@@ -25,6 +25,10 @@
   max-width: 14rem;
   text-align: center;
   width: 100%;
+
+  &--next {
+    margin-left: auto;
+  }
 }
 
 a.pagination-nav__link:hover {

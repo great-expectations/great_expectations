@@ -37,7 +37,7 @@ module.exports = {
     announcementBar: {
       id: 'cta_bar',
       content:
-        '<a style="font-weight:600" href="https://hubs.ly/Q02jbpZl0">GX Cloud public preview starts on February 21!  Join us for a community kickoff event, workshop, or both.</a>',
+        '<a style="font-weight:600" href="https://hubs.li/Q02lHZ_j0">Sign up for our Snowflake workshop, or join the waitlist for future workshops.</a>',
       backgroundColor: '#141432',
       textColor: '#fff',
       isCloseable: true,
@@ -117,16 +117,16 @@ module.exports = {
           repository: 'great_expectations',
         },
         {
-          type: 'doc',
           label: 'Home',
-          docId: 'gx_welcome',
+          to: '/docs/home',
           position: 'right',
+          className: 'non-versioned-section',
         },
         {
-          type: 'doc',
           label: 'GX Cloud',
-          docId: 'cloud/gx_cloud_lp',
+          to: 'docs/cloud',
           position: 'right',
+          className: 'non-versioned-section',
         },
         {
           type: 'doc',
