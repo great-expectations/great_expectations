@@ -644,9 +644,11 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     ]
 
-    expectation_suite_include_rendered_content: ExpectationSuite = context.suites.get(
-        name=expectation_suite_name,
-        include_rendered_content=True,
+    expectation_suite_include_rendered_content: ExpectationSuite = (
+        context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            include_rendered_content=True,
+        )
     )
     assert (
         expectation_suite_include_rendered_content.expectation_configurations[
