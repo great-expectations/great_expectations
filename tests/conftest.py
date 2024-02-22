@@ -3405,7 +3405,7 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-  default_validations_store:
+  default_validation_results_store:
     class_name: ValidationResultsStore
     store_backend:
       class_name: {GXCloudStoreBackend.__name__}
@@ -3440,7 +3440,7 @@ stores:
 
 evaluation_parameter_store_name: default_evaluation_parameter_store
 expectations_store_name: default_expectations_store
-validations_store_name: default_validations_store
+validation_results_store_name: default_validation_results_store
 checkpoint_store_name: default_checkpoint_store
 profiler_store_name: default_profiler_store
 

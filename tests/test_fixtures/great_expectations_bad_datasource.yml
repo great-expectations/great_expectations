@@ -23,7 +23,7 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 
 data_docs_sites:
   local_site:
@@ -45,7 +45,7 @@ stores:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
 
-  validations_store:
+  validation_results_store:
     class_name: ValidationResultsStore
 
 validation_operators:
@@ -56,7 +56,7 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validations_store
+          target_store_name: validation_results_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:

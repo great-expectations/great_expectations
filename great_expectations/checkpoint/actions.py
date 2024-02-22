@@ -873,7 +873,7 @@ class StoreValidationResultAction(ValidationAction):
           class_name: StoreValidationResultAction
           # name of the store where the actions will store validation results
           # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: validations_store
+          target_store_name: validation_results_store
         ```
 
 
@@ -892,7 +892,9 @@ class StoreValidationResultAction(ValidationAction):
     ) -> None:
         super().__init__(data_context)
         if target_store_name is None:
-            self.target_store = data_context.stores[data_context.validations_store_name]
+            self.target_store = data_context.stores[
+                data_context.validation_results_store_name
+            ]
         else:
             self.target_store = data_context.stores[target_store_name]
 

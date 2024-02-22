@@ -47,7 +47,7 @@ def data_context_config_dict() -> dict:
         "config_version": 3.0,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "evaluation_parameter_store",
-        "validations_store_name": "validations_store",
+        "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
         "profiler_store_name": "profiler_store",
@@ -244,8 +244,8 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
             id="expectations_store getter",
         ),
         pytest.param(
-            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store getter",
+            DataContextVariableSchema.validation_results_store_NAME,
+            id="validation_results_store getter",
         ),
         pytest.param(
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
@@ -348,9 +348,9 @@ def test_data_context_variables_get_with_substitutions(
             id="expectations_store setter",
         ),
         pytest.param(
-            "my_validations_store",
-            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store setter",
+            "my_validation_results_store",
+            DataContextVariableSchema.validation_results_store_NAME,
+            id="validation_results_store setter",
         ),
         pytest.param(
             "my_evaluation_parameter_store",

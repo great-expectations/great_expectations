@@ -100,13 +100,13 @@ class ProjectManager:
             )
         return self._project.checkpoint_store
 
-    def get_validations_store(self) -> ValidationResultsStore:
+    def get_validation_results_store(self) -> ValidationResultsStore:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
                 + "Please call `get_context()` first, then try your action again."
             )
-        return self._project.validations_store
+        return self._project.validation_results_store
 
     def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
         if not self._project:

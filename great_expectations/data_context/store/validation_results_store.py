@@ -27,7 +27,7 @@ class ValidationResultsStore(Store):
 
     --ge-feature-maturity-info--
 
-        id: validations_store_filesystem
+        id: validation_results_store_filesystem
         title: Validations Store - Filesystem
         icon:
         short_description: Filesystem
@@ -42,7 +42,7 @@ class ValidationResultsStore(Store):
             documentation_completeness: Complete
             bug_risk: Low
 
-        id: validations_store_s3
+        id: validation_results_store_s3
         title: Validations Store - S3
         icon:
         short_description: S3
@@ -57,7 +57,7 @@ class ValidationResultsStore(Store):
             documentation_completeness: Complete
             bug_risk: Low
 
-        id: validations_store_gcs
+        id: validation_results_store_gcs
         title: Validations Store - GCS
         icon:
         short_description:
@@ -72,7 +72,7 @@ class ValidationResultsStore(Store):
             documentation_completeness: Partial
             bug_risk: Low
 
-        id: validations_store_azure_blob_storage
+        id: validation_results_store_azure_blob_storage
         title: Validations Store - Azure
         icon:
         short_description: Azure Blob Storage
@@ -120,7 +120,7 @@ class ValidationResultsStore(Store):
             elif issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_validations_store"
+                    "table_name", "ge_validation_results_store"
                 )
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns",

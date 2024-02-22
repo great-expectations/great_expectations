@@ -45,7 +45,7 @@ stores:
       prefix: <YOUR GCS PREFIX NAME>
 # </snippet>
 
-  validations_store:
+  validation_results_store:
     class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
@@ -76,8 +76,8 @@ stores:
 # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name">
 expectations_store_name: expectations_GCS_store
 # </snippet>
-# <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name">
-validations_store_name: validations_GCS_store
+# <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_store_name">
+validation_results_store_name: validations_GCS_store
 # </snippet>
 evaluation_parameter_store_name: evaluation_parameter_store
 checkpoint_store_name: checkpoint_store

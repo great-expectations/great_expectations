@@ -141,7 +141,7 @@ class StubBaseDataContext:
         return StubCheckpointStore()
 
     @property
-    def validations_store(self) -> StubValidationResultsStore:
+    def validation_results_store(self) -> StubValidationResultsStore:
         return StubValidationResultsStore(keys=self._validation_results_keys)
 
     def list_expectation_suite_names(self) -> List[str]:
@@ -198,7 +198,7 @@ def empty_serialized_configuration_bundle() -> dict:
             "profiler_store_name": None,
             "stores": {},
             "validation_operators": None,
-            "validations_store_name": None,
+            "validation_results_store_name": None,
         },
         "datasources": [],
         "expectation_suites": [],
@@ -239,7 +239,7 @@ def serialized_configuration_bundle() -> dict:
             "plugins_directory": None,
             "stores": {},
             "validation_operators": None,
-            "validations_store_name": None,
+            "validation_results_store_name": None,
         },
         "datasources": [
             {

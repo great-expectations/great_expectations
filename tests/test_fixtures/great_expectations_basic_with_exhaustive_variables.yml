@@ -32,7 +32,7 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: ${l}
 evaluation_parameter_store_name: ${m}
 expectations_store_name: ${n}
-validations_store_name: ${o}
+validation_results_store_name: ${o}
 
 data_docs_sites:
   local_site:
@@ -55,7 +55,7 @@ stores:
     module_name: ${x}
     class_name: ${y}
 
-  validations_store:
+  validation_results_store:
     class_name: ${z}
 
 validation_operators:

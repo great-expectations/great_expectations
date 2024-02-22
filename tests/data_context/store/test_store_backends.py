@@ -59,7 +59,7 @@ def basic_data_context_config_for_validation_operator():
             "validation_result_store": {"class_name": "ValidationResultsStore"},
             "metrics_store": {"class_name": "MetricStore"},
         },
-        validations_store_name="validation_result_store",
+        validation_results_store_name="validation_result_store",
         data_docs_sites={},
         validation_operators={
             "store_val_res_and_extract_eval_params": {
@@ -1362,7 +1362,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("progress_bars",),
         ("stores",),
         ("validation_operators",),
-        ("validations_store_name",),
+        ("validation_results_store_name",),
     ]
 
     # test .move

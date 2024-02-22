@@ -96,23 +96,23 @@ To learn more about the additional options for configuring the ``config_variable
 Your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> configuration is provided in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry: 
 
 ```yaml title="YAML"
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 
 stores:
-  validations_store:
+  validation_results_store:
       class_name: ValidationResultsStore
       store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
 ```
-This configuration tells Great Expectations to look for Validation Results in a Store named ``validations_store``. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
+This configuration tells Great Expectations to look for Validation Results in a Store named ``validation_results_store``. The default ``base_directory`` for ``validation_results_store`` is ``uncommitted/validations/``.
 
 ### Update your configuration file to include a new Store for Validation Results on Azure Storage account
 
-In the following example, `validations_store_name` is set to ``validations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Validation Results are stored, ``prefix`` is the folder in the container where Validation Result files are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}``to reference the corresponding key in the ``config_variables.yml`` file.
+In the following example, `validation_results_store_name` is set to ``validations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Validation Results are stored, ``prefix`` is the folder in the container where Validation Result files are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}``to reference the corresponding key in the ``config_variables.yml`` file.
 
 ```yaml title="YAML"
-validations_store_name: validations_AZ_store
+validation_results_store_name: validations_AZ_store
 
 stores:
   validations_AZ_store:
@@ -149,7 +149,7 @@ To learn more about other methods that are available to copy Validation Result J
 
 ### Reference the new configuration
 
-To make Great Expectations look for Validation Results on the Azure store, set the ``validations_store_name`` variable to the name of your Azure Validations Store. In the previous example this was `validations_AZ_store`.
+To make Great Expectations look for Validation Results on the Azure store, set the ``validation_results_store_name`` variable to the name of your Azure Validations Store. In the previous example this was `validations_AZ_store`.
 
 ### Confirm that the Validation Results Store has been correctly configured
 
@@ -190,15 +190,15 @@ For more information about validating your GCP authentication credentials, see [
 
 The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml``and find the following entry: 
 
-```yaml title="YAML"name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml"
+```yaml title="YAML"name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validation_results_store_yaml"
 ```
-This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
+This configuration tells Great Expectations to look for Validation Results in the ``validation_results_store`` Store. The default ``base_directory`` for ``validation_results_store`` is ``uncommitted/validations/``.
 
 ### Update your configuration file to include a new Store for Validation Results
 
-In the following example, `validations_store_name` is set to ``validations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Validation Result files are stored.
+In the following example, `validation_results_store_name` is set to ``validations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Validation Result files are stored.
 
-```yaml title="YAML"name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml"
+```yaml title="YAML"name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validation_results_store_yaml"
 ```
 
 :::warning
@@ -219,7 +219,7 @@ Additional methods for copying Validation Results into GCS are available. See [U
 
 ### Reference the new configuration
 
-To make Great Expectations look for Validation Results on the GCS store, set the ``validations_store_name`` variable to the name of your GCS Validations Store. In the previous example this was `validations_GCS_store`.
+To make Great Expectations look for Validation Results on the GCS store, set the ``validation_results_store_name`` variable to the name of your GCS Validations Store. In the previous example this was `validations_GCS_store`.
 
 ### Confirm that the Validation Results Store has been correctly configured
 
@@ -259,24 +259,24 @@ In this example, the name of the Validation Result is ``npi_validations`` and th
 The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  Open ``great_expectations.yml``and find the following entry: 
 
 ```yaml title="YAML"
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 
 stores:
-   validations_store:
+   validation_results_store:
        class_name: ValidationResultsStore
        store_backend:
            class_name: TupleFilesystemStoreBackend
            base_directory: uncommitted/validations/
 ```
 
-This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
+This configuration tells Great Expectations to look for Validation Results in the ``validation_results_store`` Store. The default ``base_directory`` for ``validation_results_store`` is ``uncommitted/validations/``.
 
 ### Update your configuration file to include a new Store for Validation results
 
-In the following example, `validations_store_name` is set to ``shared_validations_filesystem_store``, but it can be personalized.  Also, ``base_directory`` is set to ``uncommitted/shared_validations/``, but you can set it to another path that is accessible by Great Expectations.
+In the following example, `validation_results_store_name` is set to ``shared_validations_filesystem_store``, but it can be personalized.  Also, ``base_directory`` is set to ``uncommitted/shared_validations/``, but you can set it to another path that is accessible by Great Expectations.
 
 ```yaml title="YAML"
-validations_store_name: shared_validations_filesystem_store
+validation_results_store_name: shared_validations_filesystem_store
 
 stores:
    shared_validations_filesystem_store:
@@ -343,23 +343,23 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
 The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  Open ``great_expectations.yml``and find the following entry:
 
 ```yaml title="YAML"
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 
 stores:
-  validations_store:
+  validation_results_store:
       class_name: ValidationResultsStore
       store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
 ```
-This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
+This configuration tells Great Expectations to look for Validation Results in the ``validation_results_store`` Store. The default ``base_directory`` for ``validation_results_store`` is ``uncommitted/validations/``.
 
 ### Update your configuration file to include a new Validation Results Store
 
 Add the following entry to your ``great_expectations.yml``: 
 
 ```yaml title="YAML"
-validations_store_name: validations_postgres_store
+validation_results_store_name: validations_postgres_store
 
 stores:
   validations_postgres_store:
@@ -369,16 +369,16 @@ stores:
           credentials: ${db_creds}
 ```
 
-In the previous example, `validations_store_name` is set to ``validations_postgres_store``, but it can be personalized.  Also, ``class_name`` is set to ``DatabaseStoreBackend``, and ``credentials`` is set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.  
+In the previous example, `validation_results_store_name` is set to ``validations_postgres_store``, but it can be personalized.  Also, ``class_name`` is set to ``DatabaseStoreBackend``, and ``credentials`` is set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.  
 
 ### Confirm the addition of the new Validation Results Store
 
-In the previous example, a ``validations_store`` on the local filesystem and a ``validations_postgres_store`` are configured.  Great Expectations looks for Validation Results in PostgreSQL when the ``validations_store_name`` variable is set to ``validations_postgres_store``. Run the following command to remove ``validations_store`` and confirm the ``validations_postgres_store`` configuration:
+In the previous example, a ``validation_results_store`` on the local filesystem and a ``validations_postgres_store`` are configured.  Great Expectations looks for Validation Results in PostgreSQL when the ``validation_results_store_name`` variable is set to ``validations_postgres_store``. Run the following command to remove ``validation_results_store`` and confirm the ``validations_postgres_store`` configuration:
 
 ```bash title="Terminal input and YAML"
 great_expectations store list
 
-- name: validations_store
+- name: validation_results_store
 class_name: ValidationResultsStore
 store_backend:
   class_name: TupleFilesystemStoreBackend
@@ -401,7 +401,7 @@ store_backend:
 
 [Run a Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md#run-your-checkpoint-optional) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](/reference/learn/terms/data_docs.md).
 
-Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
+Great Expectations creates a new table in your database named ``ge_validation_results_store``, and populates the fields with information from the Validation Results.
 
 </TabItem>
 </Tabs>

@@ -1145,7 +1145,7 @@ def test_run_checkpoint_new_style(
     ):
         checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
@@ -1155,7 +1155,7 @@ def test_run_checkpoint_new_style(
 
     result: CheckpointResult = checkpoint.run()
     assert len(result.list_validation_results()) == 1
-    assert len(context.validations_store.list_keys()) == 2
+    assert len(context.validation_results_store.list_keys()) == 2
     assert result.success
 
 

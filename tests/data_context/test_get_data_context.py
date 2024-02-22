@@ -62,7 +62,7 @@ def test_base_context(clear_env_vars):
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "validation_result_store": {"class_name": "ValidationResultsStore"},
         },
-        validations_store_name="validation_result_store",
+        validation_results_store_name="validation_result_store",
         data_docs_sites={},
         validation_operators={},
     )
@@ -94,7 +94,7 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
             },
             "new_validation_result_store": {"class_name": "ValidationResultsStore"},
         },
-        validations_store_name="new_validation_result_store",
+        validation_results_store_name="new_validation_result_store",
         data_docs_sites={},
         validation_operators={},
     )
@@ -141,7 +141,7 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "validation_result_store": {"class_name": "ValidationResultsStore"},
         },
-        validations_store_name="validation_result_store",
+        validation_results_store_name="validation_result_store",
         data_docs_sites={},
         validation_operators={},
     )
@@ -234,7 +234,7 @@ def test_cloud_context_with_in_memory_config_overrides(
                 },
                 "new_validation_result_store": {"class_name": "ValidationResultsStore"},
             },
-            validations_store_name="new_validation_result_store",
+            validation_results_store_name="new_validation_result_store",
             data_docs_sites={},
             validation_operators={},
         )

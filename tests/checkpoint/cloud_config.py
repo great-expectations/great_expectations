@@ -200,7 +200,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_validations_store": {
+            "default_validation_results_store": {
                 "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "GXCloudStoreBackend",
@@ -225,7 +225,7 @@ def _cloud_config(data_dir):
                 },
             },
         },
-        "validations_store_name": "default_validations_store",
+        "validation_results_store_name": "default_validation_results_store",
     }
 
 

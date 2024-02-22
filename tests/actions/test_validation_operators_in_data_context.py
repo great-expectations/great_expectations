@@ -286,7 +286,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
     # NOTE: 20200130 - JPC - currently the warning and failure validation operator ignores the batch-provided suite and
     # fetches its own
 
-    assert data_context.validations_store.list_keys() == []
+    assert data_context.validation_results_store.list_keys() == []
 
     # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
     # a tuple of parameters for get_batch
@@ -297,7 +297,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
         base_expectation_suite_name="f1",
     )
 
-    validations_keys = data_context.validations_store.list_keys()
+    validations_keys = data_context.validation_results_store.list_keys()
     assert (
         len(validations_keys) == 2
     )  # we should have run two suites even though there was only one batch
