@@ -1661,9 +1661,7 @@ class Validator:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self._data_context
-                )
+                expectation_suite = ExpectationSuite(**expectation_suite_dict)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite: ExpectationSuite = expectation_suite
@@ -1685,8 +1683,7 @@ class Validator:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
+                expectation_suite_name=expectation_suite_name
             )
 
         self._expectation_suite.execution_engine_type = type(self._execution_engine)

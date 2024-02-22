@@ -2363,7 +2363,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                data_context=self,
                 ge_cloud_id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2509,7 +2508,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                data_context=self,
                 ge_cloud_id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2606,9 +2604,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 dict, self.expectations_store.get(key)
             )
             # create the ExpectationSuite from constructor
-            expectation_suite = ExpectationSuite(
-                **expectations_schema_dict, data_context=self
-            )
+            expectation_suite = ExpectationSuite(**expectations_schema_dict)
             if include_rendered_content:
                 expectation_suite.render()
             return expectation_suite
@@ -3793,9 +3789,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
-            expectation_suite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
+            expectation_suite = ExpectationSuite(**expectation_suite_dict)
 
             dependencies: dict = (
                 expectation_suite.get_evaluation_parameter_dependencies()

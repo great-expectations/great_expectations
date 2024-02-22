@@ -35,15 +35,14 @@ from great_expectations.self_check.util import (
 
 
 @pytest.fixture(scope="module")
-def titanic_expectations(empty_data_context_module_scoped):
-    context = empty_data_context_module_scoped
+def titanic_expectations():
     with open(
         file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:
         titanic_expectation_suite_dict: dict = expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )
-        return ExpectationSuite(**titanic_expectation_suite_dict, data_context=context)
+        return ExpectationSuite(**titanic_expectation_suite_dict)
 
 
 @pytest.fixture
