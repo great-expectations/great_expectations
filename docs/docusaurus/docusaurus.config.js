@@ -117,16 +117,16 @@ module.exports = {
           repository: 'great_expectations',
         },
         {
-          type: 'doc',
           label: 'Home',
-          docId: 'gx_welcome',
+          to: '/docs/home',
           position: 'right',
+          className: 'non-versioned-section',
         },
         {
-          type: 'doc',
           label: 'GX Cloud',
-          docId: 'cloud/gx_cloud_lp',
+          to: 'docs/cloud',
           position: 'right',
+          className: 'non-versioned-section',
         },
         {
           type: 'doc',

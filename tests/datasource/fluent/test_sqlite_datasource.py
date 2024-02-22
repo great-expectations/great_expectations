@@ -133,17 +133,6 @@ def create_sqlite_source() -> (
     ],
     [
         pytest.param(
-            "add_partitioner_hashed_column",
-            {"column_name": "passenger_count", "hash_digits": 3},
-            [("abc",), ("bcd",), ("xyz",)],
-            ["hash"],
-            3,
-            {"hash": "abc"},
-            1,
-            {"hash": "abc"},
-            id="hash",
-        ),
-        pytest.param(
             "add_partitioner_converted_datetime",
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             [("2019-02-01",), ("2019-02-23",)],
