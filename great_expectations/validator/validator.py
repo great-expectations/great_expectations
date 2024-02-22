@@ -1685,8 +1685,7 @@ class Validator:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
+                expectation_suite_name=expectation_suite_name
             )
 
         self._expectation_suite.execution_engine_type = type(self._execution_engine)

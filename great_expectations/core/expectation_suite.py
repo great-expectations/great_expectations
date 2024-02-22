@@ -57,7 +57,6 @@ from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
-    from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.expectation_configuration import (
@@ -94,7 +93,6 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        data_context: Optional[AbstractDataContext] = None,
         expectations: Optional[
             Sequence[Union[dict, ExpectationConfiguration, Expectation]]
         ] = None,
@@ -115,7 +113,6 @@ class ExpectationSuite(SerializableDictDot):
             assert isinstance(expectation_suite_name, str), "Name is a required field."
             self.name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
-        self._data_context = data_context
 
         self.expectations = [
             self._process_expectation(exp) for exp in expectations or []
@@ -380,9 +377,7 @@ class ExpectationSuite(SerializableDictDot):
                 try:
                     # noinspection PyNoneFunctionAssignment,PyTypeChecker
                     other_dict: dict = expectationSuiteSchema.load(other)
-                    other = ExpectationSuite(
-                        **other_dict, data_context=self._data_context
-                    )
+                    other = ExpectationSuite(**other_dict)
                 except ValidationError:
                     logger.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
@@ -438,8 +433,6 @@ class ExpectationSuite(SerializableDictDot):
         attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key), memo))
-
-        result._data_context = self._data_context
 
         return result
 

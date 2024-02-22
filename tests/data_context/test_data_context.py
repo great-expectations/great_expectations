@@ -503,7 +503,6 @@ def test_data_context_updates_expectation_suite_names(
         loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
         loaded_suite = ExpectationSuite(
             **loaded_suite_dict,
-            data_context=data_context_parameterized_expectation_suite,
         )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
@@ -1209,9 +1208,7 @@ data_connectors:
         batch_identifiers={
             "alphanumeric": "some_file",
         },
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 

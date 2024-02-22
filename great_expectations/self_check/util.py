@@ -2260,9 +2260,7 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     else:
         _debug = lambda x: x  # noqa: E731
 
-    expectation_suite = ExpectationSuite(
-        "json_test_suite", data_context=validator._data_context
-    )
+    expectation_suite = ExpectationSuite("json_test_suite")
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
