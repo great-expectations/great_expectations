@@ -1,5 +1,5 @@
 .feedbackDivider {
-    border-top: 2px solid var(--gray-400);
+    border-top: 1px solid var(--gray-400);
     margin-top: 3rem;
     margin-bottom: 3em;
 }
@@ -35,11 +35,11 @@
 .feedbackButton {
     border-color: var(--ifm-color-primary);
     background: none;
-    border: 2px solid var(--ifm-color-primary);
+    border: 1px solid var(--ifm-color-primary);
     border-radius: 50rem;
     color: var(--ifm-color-primary);
     cursor: pointer;
-    font-size: var(--p-font-size);
+    font-size: var(--p-md-font-size);
     font-weight: var(--ifm-font-weight-semibold);
     padding: 0.25rem;
     text-align: center;

@@ -19,8 +19,8 @@ export default function WasThisHelpful(){
             <div className={styles.feedbackCard}>
                 <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
                 <div className={styles.feedbackCardActions}>
-                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('test_docs.thumbs_up')}>Yes</button>
-                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('test_docs.thumbs_down')}>No</button>
+                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
+                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.no')}>No</button>
                 </div>
             </div>
         </>
