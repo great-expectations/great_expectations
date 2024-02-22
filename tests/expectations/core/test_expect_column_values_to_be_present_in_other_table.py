@@ -130,10 +130,9 @@ def test_configuration_invalid_column_name(sqlite_datasource):
     )
 
     assert res.success is False
-    assert res["exception_info"]["raised_exception"] is True
-    assert (
-        "no such column: a.I_DONT_EXIST" in res["exception_info"]["exception_message"]
-    )
+    for k, v in res["exception_info"].items():
+        assert v["raised_exception"] is True
+        assert "no such column: a.I_DONT_EXIST" in v["exception_message"]
 
 
 @pytest.mark.unit
