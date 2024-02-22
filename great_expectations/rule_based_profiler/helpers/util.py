@@ -1064,7 +1064,6 @@ def get_or_create_expectation_suite(
         else:
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                data_context=data_context,
             )
 
     return expectation_suite

@@ -643,8 +643,7 @@ def spark_session_v012(test_backends):
 
 
 @pytest.fixture
-def basic_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def basic_expectation_suite():
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={},
@@ -664,7 +663,6 @@ def basic_expectation_suite(empty_data_context_stats_enabled):
                 kwargs={"column": "naturals"},
             ),
         ],
-        data_context=context,
     )
     return expectation_suite
 
