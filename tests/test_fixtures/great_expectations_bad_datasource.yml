@@ -46,7 +46,7 @@ stores:
     class_name: EvaluationParameterStore
 
   validations_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html

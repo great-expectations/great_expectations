@@ -158,7 +158,7 @@ stores:
     class_name: EvaluationParameterStore
 
   validations_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
 
   checkpoint_store:
     class_name: CheckpointStore

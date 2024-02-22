@@ -100,7 +100,7 @@ validations_store_name: validations_store
 
 stores:
   validations_store:
-      class_name: ValidationsStore
+      class_name: ValidationResultsStore
       store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
@@ -116,7 +116,7 @@ validations_store_name: validations_AZ_store
 
 stores:
   validations_AZ_store:
-      class_name: ValidationsStore
+      class_name: ValidationResultsStore
       store_backend:
           class_name: TupleAzureBlobStoreBackend
           container: <blob-container>
@@ -263,7 +263,7 @@ validations_store_name: validations_store
 
 stores:
    validations_store:
-       class_name: ValidationsStore
+       class_name: ValidationResultsStore
        store_backend:
            class_name: TupleFilesystemStoreBackend
            base_directory: uncommitted/validations/
@@ -280,7 +280,7 @@ validations_store_name: shared_validations_filesystem_store
 
 stores:
    shared_validations_filesystem_store:
-       class_name: ValidationsStore
+       class_name: ValidationResultsStore
        store_backend:
            class_name: TupleFilesystemStoreBackend
            base_directory: uncommitted/shared_validations/
@@ -347,7 +347,7 @@ validations_store_name: validations_store
 
 stores:
   validations_store:
-      class_name: ValidationsStore
+      class_name: ValidationResultsStore
       store_backend:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
@@ -363,7 +363,7 @@ validations_store_name: validations_postgres_store
 
 stores:
   validations_postgres_store:
-      class_name: ValidationsStore
+      class_name: ValidationResultsStore
       store_backend:
           class_name: DatabaseStoreBackend
           credentials: ${db_creds}
@@ -379,13 +379,13 @@ In the previous example, a ``validations_store`` on the local filesystem and a `
 great_expectations store list
 
 - name: validations_store
-class_name: ValidationsStore
+class_name: ValidationResultsStore
 store_backend:
   class_name: TupleFilesystemStoreBackend
   base_directory: uncommitted/validations/
 
 - name: validations_postgres_store
-class_name: ValidationsStore
+class_name: ValidationResultsStore
 store_backend:
   class_name: DatabaseStoreBackend
   credentials:

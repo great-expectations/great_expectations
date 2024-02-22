@@ -56,7 +56,7 @@ def basic_data_context_config_for_validation_operator():
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
+            "validation_result_store": {"class_name": "ValidationResultsStore"},
             "metrics_store": {"class_name": "MetricStore"},
         },
         validations_store_name="validation_result_store",

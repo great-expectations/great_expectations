@@ -34,7 +34,7 @@ stores:
       prefix: 'great_expectations/expectations/'
 
   validations_S3_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleS3StoreBackend
       bucket: 'bucket_name'

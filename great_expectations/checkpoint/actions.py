@@ -862,7 +862,7 @@ class EmailAction(ValidationAction):
 
 @public_api
 class StoreValidationResultAction(ValidationAction):
-    """Store a validation result in the ValidationsStore.
+    """Store a validation result in the ValidationResultsStore.
 
     Typical usage example:
 

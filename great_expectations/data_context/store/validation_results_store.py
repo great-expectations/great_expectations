@@ -21,9 +21,9 @@ from great_expectations.util import (
 )
 
 
-class ValidationsStore(Store):
+class ValidationResultsStore(Store):
     """
-    A ValidationsStore manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.
+    A ValidationResultsStore manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.
 
     --ge-feature-maturity-info--
 

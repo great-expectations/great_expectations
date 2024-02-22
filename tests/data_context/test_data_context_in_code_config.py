@@ -46,7 +46,7 @@ def build_in_code_data_context_project_config(
                 },
             },
             "validations_S3_store": {
-                "class_name": "ValidationsStore",
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
                     "bucket": bucket,
@@ -393,7 +393,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
             },
         },
         "validations_S3_store": {
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
                 "bucket": bucket,
@@ -410,7 +410,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
             },
         },
         "inactive_validations_S3_store": {
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
                 "bucket": inactive_bucket,
@@ -507,7 +507,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
             },
         },
         "validations_S3_store": {
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
                 "bucket": inactive_bucket,
@@ -571,7 +571,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
             },
         },
         "validations_S3_store": {
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
                 "bucket": bucket,
@@ -588,7 +588,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
             },
         },
         "inactive_validations_S3_store": {
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
                 "bucket": inactive_bucket,

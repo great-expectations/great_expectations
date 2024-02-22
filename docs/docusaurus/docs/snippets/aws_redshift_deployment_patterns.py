@@ -125,7 +125,7 @@ expected_existing_validations_store_yaml = """
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_validations_store">
 stores:
   validations_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -143,7 +143,7 @@ configured_validations_store_yaml = """
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_validations_store">
 stores:
   validations_S3_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleS3StoreBackend
       bucket: '<YOUR S3 BUCKET NAME>'

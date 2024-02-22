@@ -137,7 +137,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 expected_existing_validations_store_yaml = """
 stores:
   validations_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -151,7 +151,7 @@ assert actual_existing_validations_store == yaml.load(
 configured_validations_store_yaml = """
 stores:
   validations_GCS_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>

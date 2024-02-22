@@ -32,7 +32,7 @@ class StubCheckpointStore:
         return CheckpointConfig(name=name)
 
 
-class StubValidationsStore:
+class StubValidationResultsStore:
     def __init__(self, keys: Tuple[Optional[str]] = ("some_key",)):
         self._keys = keys
 
@@ -141,8 +141,8 @@ class StubBaseDataContext:
         return StubCheckpointStore()
 
     @property
-    def validations_store(self) -> StubValidationsStore:
-        return StubValidationsStore(keys=self._validation_results_keys)
+    def validations_store(self) -> StubValidationResultsStore:
+        return StubValidationResultsStore(keys=self._validation_results_keys)
 
     def list_expectation_suite_names(self) -> List[str]:
         return list(self._expectation_suite_names)

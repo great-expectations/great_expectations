@@ -1613,7 +1613,7 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and any(
-            store_config["class_name"] == "ValidationsStore"
+            store_config["class_name"] == "ValidationResultsStore"
             for store_config in data["stores"].values()
         ):
             raise gx_exceptions.UnsupportedConfigVersionError(
@@ -1744,7 +1744,7 @@ class DataContextConfigDefaults(enum.Enum):
             },
         },
         DEFAULT_VALIDATIONS_STORE_NAME: {
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
@@ -1896,7 +1896,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             validations_store_name: {
-                "class_name": "ValidationsStore",
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
                     "bucket": validations_store_bucket_name,
@@ -2000,7 +2000,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             self.validations_store_name: {
-                "class_name": "ValidationsStore",
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 },
@@ -2129,7 +2129,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             validations_store_name: {
-                "class_name": "ValidationsStore",
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleGCSStoreBackend",
                     "project": validations_store_project_name,
@@ -2232,7 +2232,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             validations_store_name: {
-                "class_name": "ValidationsStore",
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
                     "credentials": validations_store_credentials,
@@ -2275,7 +2275,7 @@ class DataContextConfig(BaseYamlConfig):
             DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
-        validations_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
+        validations_store_name (Optional[str]): name of ValidationResultsStore to be used by DataContext.
         evaluation_parameter_store_name (Optional[str]): name of EvaluationParamterStore to be used by DataContext.
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.

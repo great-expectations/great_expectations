@@ -32,7 +32,7 @@ stores:
       base_directory: expectations/
 
   validations_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/

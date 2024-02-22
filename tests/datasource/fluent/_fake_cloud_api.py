@@ -199,7 +199,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
                     },
                 },
                 "default_validations_store": {
-                    "class_name": "ValidationsStore",
+                    "class_name": "ValidationResultsStore",
                     "store_backend": {
                         "class_name": "GXCloudStoreBackend",
                         "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",

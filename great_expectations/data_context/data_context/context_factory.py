@@ -41,7 +41,7 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
         ExpectationsStore,
-        ValidationsStore,
+        ValidationResultsStore,
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
@@ -100,7 +100,7 @@ class ProjectManager:
             )
         return self._project.checkpoint_store
 
-    def get_validations_store(self) -> ValidationsStore:
+    def get_validations_store(self) -> ValidationResultsStore:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "

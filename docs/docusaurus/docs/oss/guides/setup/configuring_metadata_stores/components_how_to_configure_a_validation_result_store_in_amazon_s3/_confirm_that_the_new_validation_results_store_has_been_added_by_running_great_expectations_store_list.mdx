@@ -3,7 +3,7 @@ To make Great Expectations look for Validation Results on the S3 bucket, you mus
 Additional options are available for a more fine-grained customization of the TupleS3StoreBackend.
 
 ```yaml title="File contents: great_expectations.yml"
-class_name: ValidationsStore
+class_name: ValidationResultsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'

@@ -201,7 +201,7 @@ def _cloud_config(data_dir):
                 },
             },
             "default_validations_store": {
-                "class_name": "ValidationsStore",
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "GXCloudStoreBackend",
                     "ge_cloud_base_url": os.environ["GX_CLOUD_BASE_URL"],

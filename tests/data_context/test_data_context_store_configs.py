@@ -80,7 +80,7 @@ def test_add_store(totally_empty_data_context):
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores.keys()
@@ -104,7 +104,7 @@ def test_default_config_yml_stores(tmp_path_factory):
         "my_new_validations_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
         },
     )
 

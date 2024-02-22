@@ -46,14 +46,14 @@ stores:
 # </snippet>
 
   validations_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
 # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store">
   validations_GCS_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>

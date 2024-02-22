@@ -10,7 +10,7 @@ As shown in the previous example, you need to change the default ``store_backend
 The following example shows the additional options that are available to customize `TupleS3StoreBackend`:
 
 ```yaml title="File contents: great_expectations.yml"
-class_name: ValidationsStore
+class_name: ValidationResultsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'
@@ -28,7 +28,7 @@ When you update the `validations_store_name` key value, Great Expectations uses 
 Add the following code to `great_expectations.yml` to configure the IAM user:
 
 ```yaml title="File contents: great_expectations.yml"
-class_name: ValidationsStore
+class_name: ValidationResultsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'
@@ -42,7 +42,7 @@ store_backend:
 Add the following code to `great_expectations.yml` to configure the IAM Assume Role:
 
 ```yaml title="File contents: great_expectations.yml"
-class_name: ValidationsStore
+class_name: ValidationResultsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'

@@ -15,7 +15,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context.store import ValidationsStore
+from great_expectations.data_context.store import ValidationResultsStore
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
@@ -61,7 +61,7 @@ class MockCloudResponse:
 @pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreAction():
-    fake_in_memory_store = ValidationsStore(
+    fake_in_memory_store = ValidationResultsStore(
         store_backend={
             "class_name": "InMemoryStoreBackend",
         }
@@ -666,7 +666,7 @@ def test_api_action_run(
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():
-#     fake_in_memory_store = ValidationsStore(
+#     fake_in_memory_store = ValidationResultsStore(
 #         root_directory = None,
 #         store_backend = {
 #             "class_name": "InMemoryStoreBackend",
