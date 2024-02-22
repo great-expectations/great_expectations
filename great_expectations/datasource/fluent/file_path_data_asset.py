@@ -290,7 +290,11 @@ class _FilePathDataAsset(DataAsset):
                 options=batch_request.options, partitioner=batch_request.partitioner
             )
         ):
-            options = {option: None for option in self.batch_request_options}
+            valid_options = self.get_batch_request_options_keys(
+                options=batch_request.options,
+                partitioner=batch_request.partitioner
+            )
+            options = {option: None for option in valid_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
@@ -377,7 +381,11 @@ class _FilePathDataAsset(DataAsset):
                 batch_request.partitioner
             )
             # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
-            batch_request_options_counts = Counter(self.batch_request_options)
+            valid_options = self.get_batch_request_options_keys(
+                options=batch_request.options,
+                partitioner=batch_request.partitioner
+            )
+            batch_request_options_counts = Counter(valid_options)
             batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)
             for param_name in spark_partitioner.param_names:
                 # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.
