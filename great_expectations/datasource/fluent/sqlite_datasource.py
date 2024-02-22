@@ -186,9 +186,7 @@ class _SQLiteAssetMixin:
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
     # TODO: remove SQLiteAssetMixin
 
-    _partitioner_implementation_map: Dict[
-        Type[Partitioner], Type[SqlitePartitioner]
-    ] = pydantic.PrivateAttr(default_factory=dict)
+    _partitioner_implementation_map: Dict[Type[Partitioner], Type[SqlitePartitioner]]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -207,9 +205,7 @@ class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
     # TODO: remove SQLiteAssetMixin
 
-    _partitioner_implementation_map: Dict[
-        Type[Partitioner], Type[SqlitePartitioner]
-    ] = pydantic.PrivateAttr(default_factory=dict)
+    _partitioner_implementation_map: Dict[Type[Partitioner], Type[SqlitePartitioner]]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
