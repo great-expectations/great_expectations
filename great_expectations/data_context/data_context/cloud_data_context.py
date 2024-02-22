@@ -264,10 +264,34 @@ class CloudDataContext(SerializableDataContext):
         response = cls._request_cloud_backend(
             cloud_config=cloud_config, uri="data-context-configuration"
         )
+
         config = response.json()
-        config.pop("notebooks", None)
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
+        config = cls._process_v1_config(
+            config
+        )  # We'll want to remove this extra processing step in V1
+
         return DataContextConfig(**config)
+
+    @staticmethod
+    def _process_v1_config(config: dict) -> dict:
+        # Notebooks are not supported in V1.
+        config.pop("notebooks", None)
+
+        # In V1, ValidationsStore were renamed to ValidationResultsStore.
+        using_outdated_config = (
+            "validations_store_name" in config
+            and "validation_results_store_name" not in config
+        )
+        if using_outdated_config:
+            name = config.pop("validations_store_name")
+            config["validation_results_store_name"] = name
+            config["stores"][name]["class_name"] = "ValidationResultsStore"
+
+        # When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+        # We need to separate them to prevent downstream issues.
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
+
+        return config
 
     @classmethod
     def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
