@@ -505,10 +505,8 @@ class _SQLAsset(DataAsset):
     name: str
     _partitioner_implementation_map: Dict[
         Type[Partitioner], Optional[Type[SqlPartitioner]]
-    ] = pydantic.PrivateAttr(default_factory=dict)
-
-    def __init__(self, **kwargs):
-        self._partitioner_implementation_map = {
+    ] = pydantic.PrivateAttr(
+        default={
             PartitionerYear: SqlPartitionerYear,
             PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
             PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
@@ -519,7 +517,7 @@ class _SQLAsset(DataAsset):
             PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
             PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
         }
-        super().__init__(**kwargs)
+    )
 
     def get_partitioner_implementation(
         self, abstract_partitioner: Partitioner

@@ -125,7 +125,18 @@ class _FilePathDataAsset(DataAsset):
     )
     _partitioner_implementation_map: dict[
         type[Partitioner], type[SparkPartitioner]
-    ] = pydantic.PrivateAttr()
+    ] = pydantic.PrivateAttr(
+        default={
+            PartitionerYear: SparkPartitionerYear,
+            PartitionerYearAndMonth: SparkPartitionerYearAndMonth,
+            PartitionerYearAndMonthAndDay: SparkPartitionerYearAndMonthAndDay,
+            PartitionerColumnValue: SparkPartitionerColumnValue,
+            PartitionerDatetimePart: SparkPartitionerDatetimePart,
+            PartitionerDividedInteger: SparkPartitionerDividedInteger,
+            PartitionerModInteger: SparkPartitionerModInteger,
+            PartitionerMultiColumnValue: SparkPartitionerMultiColumnValue,
+        }
+    )
 
     class Config:
         """
@@ -152,18 +163,6 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-        self._partitioner_implementation_map: dict[
-            type[Partitioner], type[SparkPartitioner]
-        ] = {
-            PartitionerYear: SparkPartitionerYear,
-            PartitionerYearAndMonth: SparkPartitionerYearAndMonth,
-            PartitionerYearAndMonthAndDay: SparkPartitionerYearAndMonthAndDay,
-            PartitionerColumnValue: SparkPartitionerColumnValue,
-            PartitionerDatetimePart: SparkPartitionerDatetimePart,
-            PartitionerDividedInteger: SparkPartitionerDividedInteger,
-            PartitionerModInteger: SparkPartitionerModInteger,
-            PartitionerMultiColumnValue: SparkPartitionerMultiColumnValue,
-        }
 
     def get_partitioner_implementation(
         self, abstract_partitioner: Partitioner
