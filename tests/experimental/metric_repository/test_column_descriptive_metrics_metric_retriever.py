@@ -377,12 +377,12 @@ def test_get_metrics_with_exception(
         ("table.row_count", (), ()): {
             "metric_configuration": {},  # Leaving out for brevity
             "num_failures": 3,
-            "exception_info": {exception_info},
+            "exception_info": exception_info,
         },
         ("column.min", "column=col1", ()): {
             "metric_configuration": {},  # Leaving out for brevity
             "num_failures": 3,
-            "exception_info": {exception_info},
+            "exception_info": exception_info,
         },
     }
 
@@ -525,12 +525,12 @@ def test_get_metrics_with_column_type_missing(
         ("table.row_count", (), ()): {
             "metric_configuration": {},  # Leaving out for brevity
             "num_failures": 3,
-            "exception_info": {exception_info},
+            "exception_info": exception_info,
         },
         ("column.min", "column=col1", ()): {
             "metric_configuration": {},  # Leaving out for brevity
             "num_failures": 3,
-            "exception_info": {exception_info},
+            "exception_info": exception_info,
         },
     }
 
