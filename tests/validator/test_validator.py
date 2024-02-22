@@ -1597,7 +1597,7 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
     ]
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_validator_with_exception_info_in_result():
     get_context()
     validator = Validator(execution_engine=PandasExecutionEngine())
