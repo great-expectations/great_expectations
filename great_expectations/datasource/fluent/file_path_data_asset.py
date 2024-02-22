@@ -256,7 +256,10 @@ class _FilePathDataAsset(DataAsset):
                         f"not a string: {value}"
                     )
 
-        if options is not None and not self._valid_batch_request_options(options):
+        if options is not None and not self._valid_batch_request_options(
+            options=options,
+            partitioner=partitioner,
+        ):
             allowed_keys = set(self.batch_request_options)
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
@@ -283,7 +286,9 @@ class _FilePathDataAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
+            and self._valid_batch_request_options(
+                options=batch_request.options, partitioner=batch_request.partitioner
+            )
         ):
             options = {option: None for option in self.batch_request_options}
             expect_batch_request_form = BatchRequest(

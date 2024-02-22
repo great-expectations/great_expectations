@@ -817,12 +817,15 @@ class _SQLAsset(DataAsset):
                 calling batch_request_options.
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+            partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options is not None and not self._valid_batch_request_options(options):
+        if options is not None and not self._valid_batch_request_options(
+            options=options, partitioner=partitioner
+        ):
             allowed_keys = set(self.batch_request_options)
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
@@ -836,6 +839,7 @@ class _SQLAsset(DataAsset):
             data_asset_name=self.name,
             options=options or {},
             batch_slice=batch_slice,
+            partitioner=partitioner,
         )
 
     @override
@@ -848,7 +852,10 @@ class _SQLAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
+            and self._valid_batch_request_options(
+                options=batch_request.options,
+                partitioner=batch_request.partitioner,
+            )
         ):
             options = {option: None for option in self.batch_request_options}
             expect_batch_request_form = BatchRequest(

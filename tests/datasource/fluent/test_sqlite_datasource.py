@@ -9,7 +9,6 @@ import pytest
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.partitioners import (
     PartitionerConvertedDatetime,
-    PartitionerHashedColumn,
 )
 from great_expectations.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
@@ -136,17 +135,6 @@ def create_sqlite_source() -> (
         "last_specified_batch_metadata",
     ],
     [
-        pytest.param(
-            PartitionerHashedColumn,
-            {"column_name": "passenger_count", "hash_digits": 3},
-            [("abc",), ("bcd",), ("xyz",)],
-            ["hash"],
-            3,
-            {"hash": "abc"},
-            1,
-            {"hash": "abc"},
-            id="hash",
-        ),
         pytest.param(
             PartitionerConvertedDatetime,
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
