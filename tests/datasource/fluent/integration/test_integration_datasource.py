@@ -329,18 +329,6 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            "add_partitioner_hashed_column",
-            {"column_name": "passenger_count", "hash_digits": 3},
-            ["hash"],
-            7,
-            {"hash": "af3"},
-            1,
-            {"hash": "af3"},
-            id="hash",
-        ),
-        pytest.param(
-            "yellow_tripdata.db",
-            "yellow_tripdata_sample_2019_02",
             "add_partitioner_converted_datetime",
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             ["datetime"],
