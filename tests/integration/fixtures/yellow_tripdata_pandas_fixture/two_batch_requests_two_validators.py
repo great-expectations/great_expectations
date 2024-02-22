@@ -3,7 +3,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 context = gx.get_context()
-suite = context.get_expectation_suite("yellow_tripdata_validations")
+suite = context.suites.get("yellow_tripdata_validations")
 
 # Get February BatchRequest and Validator
 batch_request_february = BatchRequest(

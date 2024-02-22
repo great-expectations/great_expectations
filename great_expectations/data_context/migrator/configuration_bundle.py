@@ -100,7 +100,7 @@ class ConfigurationBundle:
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
         return [
-            self._context.get_expectation_suite(name)
+            self._context.suites.get(name)
             for name in self._context.list_expectation_suite_names()
         ]
 
