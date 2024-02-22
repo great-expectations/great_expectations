@@ -8,7 +8,7 @@ from .expect_column_distinct_values_to_equal_set import (
     ExpectColumnDistinctValuesToEqualSet,
 )
 from .expect_column_kl_divergence_to_be_less_than import (
-    ExpectColumnKlDivergenceToBeLessThan,
+    ExpectColumnKLDivergenceToBeLessThan,
 )
 from .expect_column_max_to_be_between import ExpectColumnMaxToBeBetween
 from .expect_column_mean_to_be_between import ExpectColumnMeanToBeBetween
