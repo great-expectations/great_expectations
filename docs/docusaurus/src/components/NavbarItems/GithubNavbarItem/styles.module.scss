@@ -1,9 +1,17 @@
+@import '../../../css/sass_variables';
+
 .githubBadge {
     display: flex;
     gap: 0.25rem;
     align-items: flex-start;
     font-size: var(--p-tiny-font-size);
     padding-right: 2rem;
+}
+
+@media (max-width: $mobile-breakpoint) {
+    .githubBadge {
+        display: none;
+    }
 }
 
 .githubBadgeNoErrors {
