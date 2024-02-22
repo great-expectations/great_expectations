@@ -17,9 +17,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
-    Partitioner,
     PartitionerConvertedDatetime,
-    PartitionerHashedColumn,
 )
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
@@ -27,6 +25,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
+    SqlitePartitionerConvertedDateTime,
     SqlPartitioner,
     _PartitionerOneColumnOneParam,
 )
@@ -84,48 +83,6 @@ class SqlitePartitionerHashedColumn(_PartitionerOneColumnOneParam):
                 "'hash' must be specified in the batch request options to create a batch identifier"
             )
         return {self.column_name: options["hash"]}
-
-
-class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
-    """A partitioner than can be used for sql engines that represents datetimes as strings.
-
-    The SQL engine that this currently supports is SQLite since it stores its datetimes as
-    strings.
-    The DatetimePartitioner will also work for SQLite and may be more intuitive.
-    """
-
-    # date_format_strings syntax is documented here:
-    # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
-    # It allows for arbitrary strings so can't be validated until conversion time.
-    date_format_string: str
-    column_name: str
-    method_name: Literal[
-        "partition_on_converted_datetime"
-    ] = "partition_on_converted_datetime"
-
-    @property
-    @override
-    def param_names(self) -> List[str]:
-        # The datetime parameter will be a string representing a datetime in the format
-        # given by self.date_format_string.
-        return ["datetime"]
-
-    @override
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
-        return {
-            "column_name": self.column_name,
-            "date_format_string": self.date_format_string,
-        }
-
-    @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
-        if "datetime" not in options:
-            raise ValueError(
-                "'datetime' must be specified in the batch request options to create a batch identifier"
-            )
-        return {self.column_name: options["datetime"]}
 
 
 class SqliteDsn(pydantic.AnyUrl):
@@ -186,17 +143,12 @@ class _SQLiteAssetMixin:
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
     # TODO: remove SQLiteAssetMixin
 
-    _partitioner_implementation_map: Dict[Type[Partitioner], Type[SqlitePartitioner]]
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # update the partitioner map with the two Sqlite specific partitioners
+        # update the partitioner map with the Sqlite specific partitioner
         self._partitioner_implementation_map[
             PartitionerConvertedDatetime
         ] = SqlitePartitionerConvertedDateTime
-        self._partitioner_implementation_map[
-            PartitionerHashedColumn
-        ] = SqlitePartitionerHashedColumn
 
     type: Literal["table"] = "table"
     partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
@@ -205,17 +157,12 @@ class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
     # TODO: remove SQLiteAssetMixin
 
-    _partitioner_implementation_map: Dict[Type[Partitioner], Type[SqlitePartitioner]]
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # update the partitioner map with the two Sqlite specific partitioners
+        # update the partitioner map with the  Sqlite specific partitioner
         self._partitioner_implementation_map[
             PartitionerConvertedDatetime
         ] = SqlitePartitionerConvertedDateTime
-        self._partitioner_implementation_map[
-            PartitionerHashedColumn
-        ] = SqlitePartitionerHashedColumn
 
     type: Literal["query"] = "query"
     partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type

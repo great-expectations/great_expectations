@@ -37,6 +37,7 @@ from great_expectations.core.batch_spec import (
 from great_expectations.core.partitioners import (
     Partitioner,
     PartitionerColumnValue,
+    PartitionerConvertedDatetime,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
     PartitionerModInteger,
@@ -47,7 +48,6 @@ from great_expectations.core.partitioners import (
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
@@ -78,6 +78,7 @@ if TYPE_CHECKING:
 
     from great_expectations.compatibility import sqlalchemy
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent import BatchRequestOptions
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -431,6 +432,48 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
         )
 
 
+class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
+    """A partitioner than can be used for sql engines that represents datetimes as strings.
+
+    The SQL engine that this currently supports is SQLite since it stores its datetimes as
+    strings.
+    The DatetimePartitioner will also work for SQLite and may be more intuitive.
+    """
+
+    # date_format_strings syntax is documented here:
+    # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
+    # It allows for arbitrary strings so can't be validated until conversion time.
+    date_format_string: str
+    column_name: str
+    method_name: Literal[
+        "partition_on_converted_datetime"
+    ] = "partition_on_converted_datetime"
+
+    @property
+    @override
+    def param_names(self) -> List[str]:
+        # The datetime parameter will be a string representing a datetime in the format
+        # given by self.date_format_string.
+        return ["datetime"]
+
+    @override
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
+        return {
+            "column_name": self.column_name,
+            "date_format_string": self.date_format_string,
+        }
+
+    @override
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
+        self, options: BatchRequestOptions
+    ) -> Dict[str, Any]:
+        if "datetime" not in options:
+            raise ValueError(
+                "'datetime' must be specified in the batch request options to create a batch identifier"
+            )
+        return {self.column_name: options["datetime"]}
+
+
 # We create this type instead of using _Partitioner so pydantic can use to this to
 # coerce the partitioner to the right type during deserialization from config.
 SqlPartitioner = Union[
@@ -442,6 +485,7 @@ SqlPartitioner = Union[
     SqlPartitionerYearAndMonth,
     SqlPartitionerYearAndMonthAndDay,
     SqlPartitionerDatetimePart,
+    SqlitePartitionerConvertedDateTime,
 ]
 
 
@@ -460,7 +504,7 @@ class _SQLAsset(DataAsset):
     partitioner: Optional[SqlPartitioner] = None
     name: str
     _partitioner_implementation_map: Dict[
-        Type[Partitioner], Type[SqlPartitioner]
+        Type[Partitioner], Optional[Type[SqlPartitioner]]
     ] = pydantic.PrivateAttr(default_factory=dict)
 
     def __init__(self, **kwargs):
@@ -473,6 +517,7 @@ class _SQLAsset(DataAsset):
             PartitionerDividedInteger: SqlPartitionerDividedInteger,
             PartitionerModInteger: SqlPartitionerModInteger,
             PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
+            PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
         }
         super().__init__(**kwargs)
 
