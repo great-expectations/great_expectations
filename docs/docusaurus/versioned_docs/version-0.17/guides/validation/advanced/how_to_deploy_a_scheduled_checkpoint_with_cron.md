@@ -19,7 +19,7 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 Run the following command to verify that your Checkpoint runs:
 
-```python name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/checkpoints.py retrieve_and_run"
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/checkpoints.py retrieve_and_run"
 ```
 
 ## Get `great_expectations` full path

@@ -26,7 +26,7 @@ To learn more about how data teams are using Great Expectations, see [Case studi
 
 Expectations are assertions about your data. In Great Expectations, those assertions are expressed in a declarative language in the form of simple, human-readable Python methods. For example, in order to assert that you want the column “passenger_count” to be between 1 and 6, you can say:
 
-```python
+```python title="Python"
 expect_column_values_to_be_between(
     column="passenger_count",
     min_value=1,

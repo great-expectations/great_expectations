@@ -11,7 +11,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 ## Prerequisites
 
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud).
 
 - You have installed Apache Airflow and initialized the database (__airflow db init__).
 
@@ -55,7 +55,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 2. Open the `gx_dag.py` DAG file and add the following code:
 
-    ```python
+    ```python title="Python"
     import os
     import great_expectations as gx
     from airflow import DAG

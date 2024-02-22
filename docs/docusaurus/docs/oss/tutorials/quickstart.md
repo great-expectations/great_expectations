@@ -30,7 +30,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 The following diagram illustrates the end-to-end GX data validation workflow that you'll implement with this quickstart. Click a workflow step to view the related content.
 
-```mermaid
+```mermaid title="GX data validation workflow"
 flowchart LR
 %%{init: {"themeVariables": {"fontSize" : "24px"}}}%%
 
@@ -77,19 +77,19 @@ click 7 "#validate-data"
 
 2. Run the following Python code to import the `great_expectations` module:
 
-    ```python name="tutorials/quickstart/quickstart.py import_gx"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py import_gx"
     ```
 ## Create a Data Context
 
 - Run the following command to create a <TechnicalTag tag="data_context" text="Data Context"/> object:
 
-    ```python name="tutorials/quickstart/quickstart.py get_context"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py get_context"
     ```
 ## Connect to data
 
 - Run the following command to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a <TechnicalTag tag="validator" text="Validator"/> object:
 
-    ```python name="tutorials/quickstart/quickstart.py connect_to_data"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
     The code example uses the default <TechnicalTag tag="data_context" text="Data Context"/> <TechnicalTag tag="datasource" text="Data Source"/> for Pandas to access the `.csv` data from the file at the specified URL path.
@@ -98,7 +98,7 @@ click 7 "#validate-data"
 
 - Run the following commands to create two <TechnicalTag tag="expectation" text="Expectations"/> and save them to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
 
-    ```python name="tutorials/quickstart/quickstart.py create_expectation"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py create_expectation"
     ```
 
   The first <TechnicalTag tag="expectation" text="Expectation"/> uses domain knowledge (the `pickup_datetime` shouldn't be null).
@@ -109,17 +109,17 @@ click 7 "#validate-data"
 
 1. Run the following command to define a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and examine the data to determine if it matches the defined <TechnicalTag tag="expectation" text="Expectations"/>:
 
-    ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
 2. Run the following command to return the <TechnicalTag tag="validation_result" text="Validation Results"/>:
 
-    ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
 3. Run the following command to view an HTML representation of the <TechnicalTag tag="validation_result" text="Validation Results"/> in the generated <TechnicalTag tag="data_docs" text="Data Docs"/>:
 
-    ```python name="tutorials/quickstart/quickstart.py view_results"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py view_results"
     ```
 
 ## Related documentation
