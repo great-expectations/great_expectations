@@ -409,10 +409,12 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
         "query_asset",
         "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
     )
-    asset.add_partitioner_column_value(column_name="pickup_date")
+    partitioner = PartitionerColumnValue(column_name="pickup_date")
     asset.add_sorters(["pickup_date"])
     # Test getting all batches
-    all_batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    all_batches = asset.get_batch_list_from_batch_request(
+        asset.build_batch_request(partitioner=partitioner)
+    )
     assert len(all_batches) == 28
 
     with mock.patch(
@@ -423,7 +425,9 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
             {"pickup_date": datetime.date(2019, 2, 2)},
         ]
         specified_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request({"pickup_date": "2019-02-01"})
+            asset.build_batch_request(
+                options={"pickup_date": "2019-02-01"}, partitioner=partitioner
+            )
         )
         assert len(specified_batches) == 1
 
@@ -435,7 +439,9 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
             {"pickup_date": datetime.datetime(2019, 2, 2)},
         ]
         specified_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request({"pickup_date": "2019-02-01 00:00:00"})
+            asset.build_batch_request(
+                options={"pickup_date": "2019-02-01 00:00:00"}, partitioner=partitioner
+            )
         )
         assert len(specified_batches) == 1
 
@@ -547,10 +553,12 @@ def test_asset_specified_metadata(
         batch_metadata=asset_specified_metadata,
         **add_asset_kwarg,
     )
-    asset.add_partitioner_year_and_month(column_name="pickup_datetime")
+    partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
     asset.add_sorters(["year", "month"])
     # Test getting all batches
-    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    batches = asset.get_batch_list_from_batch_request(
+        asset.build_batch_request(partitioner=partitioner)
+    )
     assert len(batches) == 1
     # Update the batch_metadata from the request with the metadata inherited from the asset
     assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
