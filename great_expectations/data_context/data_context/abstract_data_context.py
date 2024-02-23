@@ -76,7 +76,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
+    AnalyticsConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
     ConcurrencyConfig,
@@ -3397,7 +3397,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._variables
 
     @property
-    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
+    def anonymous_usage_statistics(self) -> AnalyticsConfig:
         return self.variables.anonymous_usage_statistics  # type: ignore[return-value]
 
     @property

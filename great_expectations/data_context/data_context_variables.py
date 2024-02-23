@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import DataContextStore
     from great_expectations.data_context.types.base import (
-        AnonymizedUsageStatisticsConfig,
+        AnalyticsConfig,
         ConcurrencyConfig,
         DataContextConfig,
         IncludeRenderedContentConfig,
@@ -238,12 +238,12 @@ class DataContextVariables(ABC):
     @property
     def anonymous_usage_statistics(
         self,
-    ) -> Optional[AnonymizedUsageStatisticsConfig]:
+    ) -> Optional[AnalyticsConfig]:
         return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
 
     @anonymous_usage_statistics.setter
     def anonymous_usage_statistics(
-        self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
+        self, anonymous_usage_statistics: AnalyticsConfig
     ) -> None:
         self._set(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,

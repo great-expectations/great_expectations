@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import datetime
 import enum
 import itertools
 import json
@@ -45,9 +44,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
@@ -57,12 +54,11 @@ if TYPE_CHECKING:
     from io import TextIOWrapper
 
     from great_expectations.alias_types import JSONValues, PathStr
-    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.core.batch import BatchRequestBase
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
     )
-    from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -1306,7 +1302,7 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
         return DatasourceConfig(**data)
 
 
-class AnonymizedUsageStatisticsConfig(DictDot):
+class AnalyticsConfig(DictDot):
     def __init__(
         self, enabled=True, data_context_id=None, usage_statistics_url=None
     ) -> None:
@@ -1373,7 +1369,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._explicit_url = True
 
 
-class AnonymizedUsageStatisticsConfigSchema(Schema):
+class AnalyticsConfigSchema(Schema):
     data_context_id = fields.UUID()
     enabled = fields.Boolean(default=True)
     usage_statistics_url = fields.URL(allow_none=True)
@@ -1384,7 +1380,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
     def make_usage_statistics_config(self, data, **kwargs):
         if "data_context_id" in data:
             data["data_context_id"] = str(data["data_context_id"])
-        return AnonymizedUsageStatisticsConfig(**data)
+        return AnalyticsConfig(**data)
 
     # noinspection PyUnusedLocal
     @post_dump()
@@ -1548,7 +1544,7 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Dict(), allow_none=True
     )
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    anonymous_usage_statistics = fields.Nested(AnalyticsConfigSchema)
     progress_bars = fields.Nested(
         ProgressBarsConfigSchema, required=False, allow_none=True
     )
@@ -2284,7 +2280,7 @@ class DataContextConfig(BaseYamlConfig):
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
-        anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
+        anonymous_usage_statistics (Optional[AnalyticsConfig]): configuration for enabling or disabling
             anonymous usage statistics for GX.
         store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
             For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
@@ -2319,7 +2315,7 @@ class DataContextConfig(BaseYamlConfig):
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
+        anonymous_usage_statistics: Optional[AnalyticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
@@ -2366,11 +2362,9 @@ class DataContextConfig(BaseYamlConfig):
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
+            anonymous_usage_statistics = AnalyticsConfig()
         elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
+            anonymous_usage_statistics = AnalyticsConfig(**anonymous_usage_statistics)
         self.anonymous_usage_statistics = anonymous_usage_statistics
         if isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
@@ -2816,114 +2810,6 @@ class CheckpointConfig(BaseYamlConfig):
         """
         return self.__repr__()
 
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
-    @staticmethod
-    def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
-        checkpoint: Checkpoint,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[
-            Union[List[dict], List[CheckpointValidationConfig]]
-        ] = None,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-    ) -> dict:
-        """
-        This method reconciles the Checkpoint configuration (e.g., obtained from the Checkpoint store) with dynamically
-        supplied arguments in order to obtain that Checkpoint specification that is ready for running validation on it.
-        This procedure is necessecitated by the fact that the Checkpoint configuration is hierarchical in its form,
-        which was established for the purposes of making the specification of different Checkpoint capabilities easy.
-        In particular, entities, such as BatchRequest, expectation_suite_name, and action_list, can be specified at the
-        top Checkpoint level with the suitable ovverrides provided at lower levels (e.g., in the validations section).
-        Reconciling and normalizing the Checkpoint configuration is essential for usage statistics, because the exact
-        values of the entities in their formally validated form (e.g., BatchRequest) is the required level of detail.
-        """
-        assert not (run_id and run_name) and not (
-            run_id and run_time
-        ), "Please provide either a run_id or run_name and/or run_time."
-
-        run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
-        runtime_configuration = runtime_configuration or {}
-
-        from great_expectations.checkpoint.util import (
-            get_substituted_validation_dict,
-            get_validations_with_batch_request_as_dict,
-            validate_validation_dict,
-        )
-
-        batch_request = get_batch_request_as_dict(batch_request=batch_request)
-
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
-
-        runtime_kwargs: dict = {
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "validator": validator,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-        }
-        substituted_runtime_config: dict = checkpoint.get_substituted_config(
-            runtime_kwargs=runtime_kwargs
-        )
-        validations = substituted_runtime_config.get("validations") or []
-        batch_request = substituted_runtime_config.get("batch_request")
-        if len(validations) == 0 and not batch_request:
-            raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
-            )
-
-        run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
-
-        validation_dict: CheckpointValidationConfig
-
-        for validation_dict in validations:  # type: ignore[assignment]
-            substituted_validation_dict: dict = get_substituted_validation_dict(
-                substituted_runtime_config=substituted_runtime_config,
-                validation_dict=validation_dict,
-            )
-            validate_validation_dict(
-                validation_dict=substituted_validation_dict,
-                batch_request_required=False,
-            )
-            validation_batch_request: BatchRequestBase = (
-                substituted_validation_dict.get(  # type: ignore[assignment]
-                    "batch_request"
-                )
-            )
-            validation_dict["batch_request"] = validation_batch_request
-            validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
-                "expectation_suite_name"
-            )
-            validation_dict[
-                "expectation_suite_name"
-            ] = validation_expectation_suite_name
-            validation_expectation_suite_ge_cloud_id: str = (
-                substituted_validation_dict.get(  # type: ignore[assignment]
-                    "expectation_suite_ge_cloud_id"
-                )
-            )
-            validation_dict[
-                "expectation_suite_ge_cloud_id"
-            ] = validation_expectation_suite_ge_cloud_id
-            validation_action_list: list = substituted_validation_dict.get(  # type: ignore[assignment]
-                "action_list"
-            )
-            validation_dict["action_list"] = validation_action_list
-
-        return substituted_runtime_config
-
 
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
@@ -2932,7 +2818,7 @@ executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
-anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
+anonymizedUsageStatisticsSchema = AnalyticsConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

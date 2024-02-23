@@ -23,7 +23,7 @@ from great_expectations.data_context.templates import (
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig,
+    AnalyticsConfig,
     DataContextConfig,
     DataContextConfigDefaults,
 )
@@ -127,10 +127,10 @@ class SerializableDataContext(AbstractDataContext):
             to be persisted in order to recognize changes made to usage statistics.
         """
         project_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
+            AnalyticsConfig
         ] = project_config.anonymous_usage_statistics
         context_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
+            AnalyticsConfig
         ] = self.config.anonymous_usage_statistics
 
         if (

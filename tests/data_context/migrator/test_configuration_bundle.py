@@ -43,7 +43,7 @@ class TestConfigurationBundleCreate:
 
         config_bundle = ConfigurationBundle(context)
 
-        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+        # If not supplied, an AnalyticsConfig is created in a
         # DataContextConfig and enabled by default.
         assert config_bundle.is_usage_stats_enabled()
 

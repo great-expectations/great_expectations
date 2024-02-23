@@ -10,7 +10,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations import CloudMigrator
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.migrator.cloud_migrator import MigrationResponse
-from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
+from great_expectations.data_context.types.base import AnalyticsConfig
 from tests.data_context.migrator.conftest import StubBaseDataContext
 
 
@@ -201,9 +201,7 @@ def test__migrate_to_cloud_outputs_warnings(
     enable_usage_stats: bool,
     caplog,
 ):
-    anonymized_usage_statistics_config = AnonymizedUsageStatisticsConfig(
-        enabled=enable_usage_stats
-    )
+    anonymized_usage_statistics_config = AnalyticsConfig(enabled=enable_usage_stats)
     datasource_names = ("my_datasource",) if include_datasources else tuple()
 
     context = StubBaseDataContext(
