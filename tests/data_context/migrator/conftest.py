@@ -17,12 +17,12 @@ from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
 
 class StubUsageStats:
-    def __init__(self, anonymized_usage_statistics_config: AnalyticsConfig):
-        self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
+    def __init__(self, analytics_config: AnalyticsConfig):
+        self._analytics_config = analytics_config
 
     @property
     def analytics(self) -> AnalyticsConfig:
-        return self._anonymized_usage_statistics_config
+        return self._analytics_config
 
 
 class StubCheckpointStore:
@@ -69,7 +69,7 @@ class StubConfigurationProvider:
         return config
 
 
-_ANONYMIZED_USAGE_STATS_CONFIG: Final = AnalyticsConfig(enabled=True)
+_ANALYTICS_CONFIG: Final = AnalyticsConfig(enabled=True)
 
 
 class StubBaseDataContext:
@@ -79,9 +79,7 @@ class StubBaseDataContext:
 
     def __init__(
         self,
-        anonymized_usage_statistics_config: Optional[
-            AnalyticsConfig
-        ] = _ANONYMIZED_USAGE_STATS_CONFIG,
+        analytics_config: Optional[AnalyticsConfig] = _ANALYTICS_CONFIG,
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
         validation_results_keys: Tuple[Optional[str]] = ("some_key",),
@@ -90,9 +88,9 @@ class StubBaseDataContext:
         """Set the configuration of the stub data context.
 
         Args:
-            anonymized_usage_statistics_config: Config to use for anonymous usage statistics
+            analytics_config: Config to use for usage statistics
         """
-        self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
+        self._analytics_config = analytics_config
         self._checkpoint_names = checkpoint_names
         self._expectation_suite_names = expectation_suite_names
         self._validation_results_keys = validation_results_keys
@@ -100,9 +98,7 @@ class StubBaseDataContext:
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
-        return StubUsageStats(
-            anonymized_usage_statistics_config=self._anonymized_usage_statistics_config
-        )
+        return StubUsageStats(analytics_config=self._analytics_config)
 
     @property
     def analytics(self) -> AnalyticsConfig:
@@ -114,7 +110,7 @@ class StubBaseDataContext:
 
     @property
     def variables(self) -> DataContextVariables:
-        config = DataContextConfig(analytics=self._anonymized_usage_statistics_config)
+        config = DataContextConfig(analytics=self._analytics_config)
         return EphemeralDataContextVariables(
             config=config, config_provider=StubConfigurationProvider()
         )
@@ -157,23 +153,17 @@ class StubBaseDataContext:
 
 @pytest.fixture
 def stub_base_data_context() -> StubBaseDataContext:
-    return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnalyticsConfig(enabled=True)
-    )
+    return StubBaseDataContext(analytics_config=AnalyticsConfig(enabled=True))
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
-    StubBaseDataContext
-):
-    return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnalyticsConfig(enabled=False)
-    )
+def stub_data_context_analytics_present_but_disabled() -> StubBaseDataContext:
+    return StubBaseDataContext(analytics_config=AnalyticsConfig(enabled=False))
 
 
 @pytest.fixture
-def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymized_usage_statistics_config=None)
+def stub_data_context_no_analytics() -> StubBaseDataContext:
+    return StubBaseDataContext(analytics_config=None)
 
 
 @pytest.fixture

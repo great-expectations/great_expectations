@@ -32,14 +32,14 @@ class TestConfigurationBundleCreate:
         assert len(config_bundle.datasources) == 1
 
     def test_is_usage_statistics_key_set_if_key_not_present(
-        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
+        self, stub_data_context_no_analytics: StubBaseDataContext
     ):
         """What does this test and why?
 
         The ConfigurationBundle should handle a context that has not set the config for
          analytics.
         """
-        context = stub_base_data_context_no_anonymous_usage_stats
+        context = stub_data_context_no_analytics
 
         config_bundle = ConfigurationBundle(context)
 
@@ -49,14 +49,14 @@ class TestConfigurationBundleCreate:
 
     def test_configuration_bundle_created_usage_stats_disabled(
         self,
-        stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
+        stub_data_context_analytics_present_but_disabled: StubBaseDataContext,
     ):
         """What does this test and why?
 
         Make sure the configuration bundle successfully parses the usage stats settings.
         """
 
-        context = stub_base_data_context_anonymous_usage_stats_present_but_disabled
+        context = stub_data_context_analytics_present_but_disabled
 
         config_bundle = ConfigurationBundle(context)
 

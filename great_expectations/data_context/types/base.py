@@ -2264,8 +2264,7 @@ class DataContextConfig(BaseYamlConfig):
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
-        analytics (Optional[AnalyticsConfig]): configuration for enabling or disabling
-            anonymous usage statistics for GX.
+        analytics (Optional[AnalyticsConfig]): configuration for enabling or disabling telemetry for GX.
         store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
             For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
             and you may be able to specify fewer parameters.
