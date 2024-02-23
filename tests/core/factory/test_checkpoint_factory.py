@@ -58,9 +58,7 @@ def test_checkpoint_factory_get_uses_store_get(checkpoint_dict: dict):
 
     # Assert
     store.get.assert_called_once_with(key=key)
-    _assert_checkpoint_equality(
-        actual=result, expected=Checkpoint(**checkpoint_dict, data_context=context)
-    )
+    _assert_checkpoint_equality(actual=result, expected=Checkpoint(**checkpoint_dict))
 
 
 @pytest.mark.unit
@@ -94,7 +92,7 @@ def test_checkpoint_factory_add_uses_store_add():
     context = Mock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
-    checkpoint = Checkpoint(name=name, data_context=context)
+    checkpoint = Checkpoint(name=name)
     config = checkpoint.get_config()
     store.get.return_value = config
 
@@ -114,7 +112,7 @@ def test_checkpoint_factory_add_raises_for_duplicate_key():
     context = Mock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
-    checkpoint = Checkpoint(name=name, data_context=context)
+    checkpoint = Checkpoint(name=name)
 
     # Act
     with pytest.raises(
@@ -137,7 +135,7 @@ def test_checkpoint_factory_delete_uses_store_remove_key():
     context = Mock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
-    checkpoint = Checkpoint(name=name, data_context=context)
+    checkpoint = Checkpoint(name=name)
 
     # Act
     factory.delete(checkpoint=checkpoint)
@@ -157,7 +155,7 @@ def test_checkpoint_factory_delete_raises_for_missing_checkpoint():
     context = Mock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
-    checkpoint = Checkpoint(name=name, data_context=context)
+    checkpoint = Checkpoint(name=name)
 
     # Act
     with pytest.raises(
@@ -193,7 +191,7 @@ def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_add_success(context):
     # Arrange
     name = "test-checkpoint"
-    checkpoint = Checkpoint(name=name, data_context=context)
+    checkpoint = Checkpoint(name=name)
     with pytest.raises(
         DataContextError, match=f"Checkpoint with name {name} was not found."
     ):
@@ -221,7 +219,7 @@ def test_checkpoint_factory_delete_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_delete_success(context):
     # Arrange
     name = "test-checkpoint"
-    checkpoint = Checkpoint(name=name, data_context=context)
+    checkpoint = Checkpoint(name=name)
     checkpoint = context.checkpoints.add(checkpoint=checkpoint)
 
     # Act

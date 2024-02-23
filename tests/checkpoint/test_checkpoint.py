@@ -2811,3 +2811,9 @@ def test_checkpoint_run_with_runtime_overrides(
 
     result = checkpoint.run(batch_request=batch_request)
     assert result.success
+
+
+def test_checkpoint_run_raises_error_if_not_associated_with_context():
+    checkpoint = Checkpoint(name="my_checkpoint")
+    with pytest.raises(ValueError):
+        checkpoint.run()
