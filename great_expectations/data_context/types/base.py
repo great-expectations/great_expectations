@@ -1679,9 +1679,9 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{EXPECTATIONS_BASE_DIRECTORY}/"
     )
-    DEFAULT_validation_results_store_NAME = "validation_results_store"
-    VALIDATIONS_BASE_DIRECTORY = "validations"
-    DEFAULT_validation_results_store_BASE_DIRECTORY_RELATIVE_NAME = (
+    DEFAULT_VALIDATION_RESULTS_STORE_NAME = "validation_results_store"
+    VALIDATIONS_BASE_DIRECTORY = "validation_results"
+    DEFAULT_VALIDATION_RESULTS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
     )
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
@@ -1743,11 +1743,11 @@ class DataContextConfigDefaults(enum.Enum):
                 "base_directory": DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
-        DEFAULT_validation_results_store_NAME: {
+        DEFAULT_VALIDATION_RESULTS_STORE_NAME: {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": DEFAULT_validation_results_store_BASE_DIRECTORY_RELATIVE_NAME,
+                "base_directory": DEFAULT_VALIDATION_RESULTS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
         DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
@@ -1795,7 +1795,7 @@ class BaseStoreBackendDefaults(DictDot):
     def __init__(  # noqa: PLR0913
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_validation_results_store_NAME.value,
+        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATION_RESULTS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
