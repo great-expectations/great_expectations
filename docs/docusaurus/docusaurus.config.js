@@ -271,10 +271,6 @@ module.exports = {
               label: '0.18.9',
               path: '',
             },
-            ['0.17']: {
-              label: '0.17.23',
-              path: '0.17.23',
-            },
           },
           admonitions: {
             keywords: [
