@@ -579,7 +579,7 @@ class Checkpoint(BaseCheckpoint):
     def __init__(  # noqa: PLR0913
         self,
         name: str,
-        data_context: AbstractDataContext,
+        data_context: AbstractDataContext | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         validator: Validator | None = None,
