@@ -230,7 +230,7 @@ class BaseCheckpoint(ConfigPeer):
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
-        substituted_runtime_config: dict = self.get_substituted_config(
+        substituted_runtime_config: dict = self._get_substituted_config(
             config_provider=context.config_provider, runtime_kwargs=runtime_kwargs
         )
 
@@ -325,7 +325,7 @@ class BaseCheckpoint(ConfigPeer):
             checkpoint_config=self.config,
         )
 
-    def get_substituted_config(
+    def _get_substituted_config(
         self,
         config_provider: _ConfigurationProvider,
         runtime_kwargs: dict | None = None,
