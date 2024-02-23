@@ -13,7 +13,7 @@ class ValidationConfigStore(Store):
         runtime_environment: dict | None = None,
     ) -> None:
         super().__init__(
+            store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            store_name=store_name,  # type: ignore[arg-type]
         )
