@@ -8,9 +8,6 @@ from moto import mock_s3
 from great_expectations.data_context import get_context
 from great_expectations.data_context.store import StoreBackend, TupleS3StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
-from tests.data_context.conftest import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 
 def build_in_code_data_context_project_config(
@@ -110,8 +107,6 @@ def build_in_code_data_context_project_config(
         },
         analytics={
             "enabled": True,
-            # NOTE: No data_context_id set here
-            "usage_statistics_url": USAGE_STATISTICS_QA_URL,
         },
     )
     return project_config

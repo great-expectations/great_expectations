@@ -20,9 +20,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.validator.validator import Validator
-from tests.data_context.conftest import (
-    USAGE_STATISTICS_QA_URL,
-)
 from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
 
 yaml = YAMLHandler()
@@ -65,7 +62,6 @@ def basic_data_context_v013_config():
             "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
     )

@@ -1308,7 +1308,7 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
 
 class AnalyticsConfig(DictDot):
     def __init__(
-        self, enabled=True, data_context_id=None, usage_statistics_url=None
+        self, enabled: bool = True, data_context_id: str | None = None
     ) -> None:
         self._enabled = enabled
 
@@ -1319,14 +1319,6 @@ class AnalyticsConfig(DictDot):
             self._explicit_id = True
 
         self._data_context_id = data_context_id
-
-        if usage_statistics_url is None:
-            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
-            self._explicit_url = False
-        else:
-            self._explicit_url = True
-
-        self._usage_statistics_url = usage_statistics_url
 
     @property
     def enabled(self) -> bool:
@@ -1363,20 +1355,10 @@ class AnalyticsConfig(DictDot):
     def explicit_url(self) -> bool:
         return self._explicit_url
 
-    @property
-    def usage_statistics_url(self) -> str:
-        return self._usage_statistics_url
-
-    @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url) -> None:
-        self._usage_statistics_url = usage_statistics_url
-        self._explicit_url = True
-
 
 class AnalyticsConfigSchema(Schema):
     data_context_id = fields.UUID()
     enabled = fields.Boolean(default=True)
-    usage_statistics_url = fields.URL(allow_none=True)
     _explicit_url = fields.Boolean(required=False)
 
     # noinspection PyUnusedLocal
@@ -1389,8 +1371,6 @@ class AnalyticsConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_dump()
     def filter_implicit(self, data, **kwargs):
-        if not data.get("_explicit_url") and "usage_statistics_url" in data:
-            del data["usage_statistics_url"]
         if "_explicit_url" in data:
             del data["_explicit_url"]
         return data

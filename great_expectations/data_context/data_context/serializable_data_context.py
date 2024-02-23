@@ -106,9 +106,7 @@ class SerializableDataContext(AbstractDataContext):
 
         return context_root_dir
 
-    def _check_for_usage_stats_sync(  # noqa: PLR0911
-        self, project_config: DataContextConfig
-    ) -> bool:
+    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
         """
         If there are differences between the DataContextConfig used to instantiate
         the DataContext and the DataContextConfig assigned to `self.config`, we want
@@ -150,16 +148,6 @@ class SerializableDataContext(AbstractDataContext):
             project_config_usage_stats.data_context_id  # noqa: PLR1714
             != context_config_usage_stats.data_context_id
             and context_config_usage_stats.data_context_id != global_data_context_id
-        ):
-            return True
-
-        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
-        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
-        if (
-            project_config_usage_stats.usage_statistics_url  # noqa: PLR1714
-            != context_config_usage_stats.usage_statistics_url
-            and context_config_usage_stats.usage_statistics_url
-            != global_usage_stats_url
         ):
             return True
 

@@ -34,9 +34,6 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from tests.data_context.conftest import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 yaml = YAMLHandler()
 
@@ -69,7 +66,6 @@ def data_context_config_dict() -> dict:
         "analytics": AnalyticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
         "concurrency": None,
         "progress_bars": None,

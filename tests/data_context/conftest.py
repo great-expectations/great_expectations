@@ -42,11 +42,6 @@ from great_expectations.datasource.fluent import PandasDatasource
 
 yaml = YAMLHandler()
 
-# No longer used but keeping around for tests
-USAGE_STATISTICS_QA_URL = (
-    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-)
-
 
 @pytest.fixture()
 def data_context_without_config_variables_filepath_configured(tmp_path_factory):
@@ -198,7 +193,6 @@ def basic_data_context_config():
             "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
     )
@@ -358,7 +352,6 @@ def data_context_config_with_datasources(conn_string_password):
             "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
     )
@@ -437,7 +430,6 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
             "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
             },
         }
     )

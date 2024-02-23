@@ -3143,7 +3143,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Applies global configuration overrides for
             - usage_statistics being enabled
             - data_context_id for usage_statistics
-            - global_usage_statistics_url
 
         Args:
             config (DataContextConfig): Config that is passed into the DataContext constructor
@@ -3175,23 +3174,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             else:
                 validation_errors.update(data_context_id_errors)
 
-        # usage statistics url
-        global_usage_statistics_url: Optional[
-            str
-        ] = self._get_usage_stats_url_override()
-        if global_usage_statistics_url:
-            usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
-                {"usage_statistics_url": global_usage_statistics_url}
-            )
-            if not usage_statistics_url_errors:
-                logger.debug(
-                    "usage_statistics_url is defined globally. Applying override to project_config."
-                )
-                config_with_global_config_overrides.analytics.usage_statistics_url = (
-                    global_usage_statistics_url
-                )
-            else:
-                validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
             logger.warning(
                 "The following globally-defined config variables failed validation:\n{}\n\n"
@@ -3263,19 +3245,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             environment_variable="GE_DATA_CONTEXT_ID",
             conf_file_section="analytics",
             conf_file_option="data_context_id",
-        )
-
-    def _get_usage_stats_url_override(self) -> Optional[str]:
-        """
-        Return GE_USAGE_STATISTICS_URL from environment variable if it exists
-
-        Returns:
-            Optional string that represents GE_USAGE_STATISTICS_URL
-        """
-        return self._get_global_config_value(
-            environment_variable="GE_USAGE_STATISTICS_URL",
-            conf_file_section="analytics",
-            conf_file_option="usage_statistics_url",
         )
 
     def _build_store_from_config(
@@ -3422,7 +3391,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         oss_id = uuid.uuid4()
 
-        # If the section already exists, don't overwite usage_statistics_url
+        # If the section already exists, don't overwrite it
         section = "analytics"
         if not config.has_section(section):
             config[section] = {}

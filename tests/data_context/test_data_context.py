@@ -1509,7 +1509,7 @@ def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
 ) -> None:
     context = empty_data_context
     project_config = data_context_config_with_datasources
-    project_config.anonymous_usage_statistics.enabled = False
+    project_config.analytics.enabled = False
 
     res = context._check_for_usage_stats_sync(project_config=project_config)
     assert res is False
@@ -1747,36 +1747,25 @@ def test_set_oss_id_with_empty_config(in_memory_runtime_context: EphemeralDataCo
 
     oss_id = context._set_oss_id(config)
 
-    assert config.sections() == ["anonymous_usage_statistics"]
-    assert list(config["anonymous_usage_statistics"]) == ["oss_id"]
-    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])
+    assert config.sections() == ["analytics"]
+    assert list(config["analytics"]) == ["oss_id"]
+    assert oss_id == uuid.UUID(config["analytics"]["oss_id"])
 
 
 @pytest.mark.unit
-def test_set_oss_id_with_existing_config(
+def test_set_oss_id_with_legacy_config(
     in_memory_runtime_context: EphemeralDataContext,
 ):
     context = in_memory_runtime_context
 
     # Set up existing config
-    # [anonymous_usage_statistics]
-    # usage_statistics_url=https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
     config = configparser.ConfigParser()
-    config["anonymous_usage_statistics"] = {}
-    usage_statistics_url = (
-        "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-    )
-    config["anonymous_usage_statistics"]["usage_statistics_url"] = usage_statistics_url
+    config["analytics"] = {}
 
     oss_id = context._set_oss_id(config)
 
-    assert config.sections() == ["anonymous_usage_statistics"]
-    assert list(config["anonymous_usage_statistics"]) == [
-        "usage_statistics_url",
+    assert config.sections() == ["analytics"]
+    assert list(config["analytics"]) == [
         "oss_id",
     ]
-    assert (
-        usage_statistics_url
-        == config["anonymous_usage_statistics"]["usage_statistics_url"]
-    )
-    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])
+    assert oss_id == uuid.UUID(config["analytics"]["oss_id"])
