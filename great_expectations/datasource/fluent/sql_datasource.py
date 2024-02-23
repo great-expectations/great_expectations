@@ -574,25 +574,6 @@ class _SQLAsset(DataAsset):
         return self
 
     @public_api
-    def add_partitioner_divided_integer(
-        self: Self, column_name: str, divisor: int
-    ) -> Self:
-        """Associates a divided integer partitioner with this sql asset.
-        Args:
-            column_name: A column name of the column to partition on.
-            divisor: The divisor to use when partitioning.
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SqlPartitionerDividedInteger(
-                method_name="partition_on_divided_integer",
-                column_name=column_name,
-                divisor=divisor,
-            )
-        )
-
-    @public_api
     def add_partitioner_mod_integer(self: Self, column_name: str, mod: int) -> Self:
         """Associates a mod integer partitioner with this sql asset.
         Args:
