@@ -1,7 +1,6 @@
 ---
 sidebar_label: 'GX installation and configuration workflow'
 title: "Great Expectations installation and configuration workflow"
-hide_feedback_survey: true
 ---
 import TechnicalTag from '../../../reference/learn/term_tags/_tag.mdx';
 import GxData from '../../../components/_data.jsx';
