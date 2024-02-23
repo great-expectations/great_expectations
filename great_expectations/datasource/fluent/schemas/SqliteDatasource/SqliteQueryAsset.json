@@ -318,32 +318,6 @@
                 "date_format_string"
             ]
         },
-        "PartitionerHashedColumn": {
-            "title": "PartitionerHashedColumn",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_hashed_column",
-                    "enum": [
-                        "partition_on_hashed_column"
-                    ],
-                    "type": "string"
-                },
-                "hash_digits": {
-                    "title": "Hash Digits",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "hash_digits"
-            ]
-        },
         "BatchConfig": {
             "title": "BatchConfig",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
@@ -386,9 +360,6 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerHashedColumn"
                         }
                     ]
                 }
