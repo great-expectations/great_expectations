@@ -60,12 +60,6 @@ class PartitionerConvertedDatetime(pydantic.BaseModel):
     date_format_string: str
 
 
-class PartitionerHashedColumn(pydantic.BaseModel):
-    column_name: str
-    method_name: Literal["partition_on_hashed_column"] = "partition_on_hashed_column"
-    hash_digits: int
-
-
 Partitioner = Union[
     PartitionerColumnValue,
     PartitionerMultiColumnValue,
@@ -76,5 +70,4 @@ Partitioner = Union[
     PartitionerYearAndMonthAndDay,
     PartitionerDatetimePart,
     PartitionerConvertedDatetime,
-    PartitionerHashedColumn,
 ]
