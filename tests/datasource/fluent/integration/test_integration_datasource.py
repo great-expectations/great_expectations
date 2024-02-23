@@ -547,10 +547,12 @@ def test_asset_specified_metadata(
         batch_metadata=asset_specified_metadata,
         **add_asset_kwarg,
     )
-    asset.add_partitioner_year_and_month(column_name="pickup_datetime")
+    partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
     asset.add_sorters(["year", "month"])
     # Test getting all batches
-    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    batches = asset.get_batch_list_from_batch_request(
+        asset.build_batch_request(partitioner=partitioner)
+    )
     assert len(batches) == 1
     # Update the batch_metadata from the request with the metadata inherited from the asset
     assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}

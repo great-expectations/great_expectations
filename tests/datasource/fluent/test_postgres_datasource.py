@@ -23,7 +23,10 @@ from sqlalchemy.exc import SQLAlchemyError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.partitioners import PartitionerYear
+from great_expectations.core.partitioners import (
+    PartitionerYear,
+    PartitionerYearAndMonth,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -173,7 +176,7 @@ def test_add_table_asset_with_partitioner(mocker, create_source: CreateSourceFix
         has_table.return_value = True
 
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
-        asset.add_partitioner_year_and_month(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         assert len(source.assets) == 1
         assert asset == source.assets[0]
         assert_table_asset(
@@ -184,7 +187,9 @@ def test_add_table_asset_with_partitioner(mocker, create_source: CreateSourceFix
             batch_request_options=("year", "month"),
         )
         assert_batch_request(
-            batch_request=asset.build_batch_request({"year": 2021, "month": 10}),
+            batch_request=asset.build_batch_request(
+                options={"year": 2021, "month": 10}, partitioner=partitioner
+            ),
             source_name="my_datasource",
             asset_name="my_asset",
             options={"year": 2021, "month": 10},
@@ -1201,8 +1206,10 @@ def test_partitioner_year_and_month(
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["year", "month"]
         )
-        asset.add_partitioner_year_and_month(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years) * len(months)
         for i, year in enumerate(years):
             for j, month in enumerate(months):
