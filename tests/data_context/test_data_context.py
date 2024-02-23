@@ -700,7 +700,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
     # mangle project
     shutil.rmtree(
         os.path.join(  # noqa: PTH118
-            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"
+            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validation_results"
         )
     )
 
@@ -781,7 +781,7 @@ gx/
     uncommitted/
         config_variables.yml
         data_docs/
-        validations/
+        validation_results/
             .ge_store_backend_id
 """
     )
@@ -808,7 +808,7 @@ gx/
     uncommitted/
         config_variables.yml
         data_docs/
-        validations/
+        validation_results/
             .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
@@ -835,7 +835,7 @@ def test_data_context_do_all_uncommitted_dirs_exist(tmp_path_factory):
 uncommitted/
     config_variables.yml
     data_docs/
-    validations/
+    validation_results/
         .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
@@ -850,7 +850,7 @@ uncommitted/
 
     # remove a few
     shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))  # noqa: PTH118
-    shutil.rmtree(os.path.join(uncommitted_dir, "validations"))  # noqa: PTH118
+    shutil.rmtree(os.path.join(uncommitted_dir, "validation_results"))  # noqa: PTH118
 
     # Test that not all exist
     assert not FileDataContext.all_uncommitted_directories_exist(project_path)
@@ -916,7 +916,7 @@ def test_scaffold_directories(tmp_path_factory):
         os.listdir(os.path.join(empty_directory, "uncommitted"))  # noqa: PTH118
     ) == {
         "data_docs",
-        "validations",
+        "validation_results",
     }
 
 

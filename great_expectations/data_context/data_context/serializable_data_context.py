@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 
 class SerializableDataContext(AbstractDataContext):
-    UNCOMMITTED_DIRECTORIES: ClassVar[list[str]] = ["data_docs", "validations"]
+    UNCOMMITTED_DIRECTORIES: ClassVar[list[str]] = ["data_docs", "validation_results"]
     GX_UNCOMMITTED_DIR: ClassVar[str] = "uncommitted"
     GITIGNORE: ClassVar[str] = ".gitignore"
     GX_CONFIG_VARIABLES: ClassVar[str] = "config_variables.yml"
