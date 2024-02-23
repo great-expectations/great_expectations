@@ -35,7 +35,7 @@ stores:
     class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validations/
+      base_directory: uncommitted/validation_results/
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
