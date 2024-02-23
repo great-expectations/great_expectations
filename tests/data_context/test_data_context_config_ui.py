@@ -47,7 +47,7 @@ def construct_data_context_config():
         datasources: Dict,
         config_version: float = _DEFAULT_CONFIG_VERSION,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_validation_results_store_NAME.value,
+        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATION_RESULTS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
