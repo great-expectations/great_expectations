@@ -3,6 +3,7 @@ sidebar_label: 'Validate Data'
 title: 'Validate Data'
 id: validate_data_lp
 description: Validate Data, save Validation Results, run Actions, and create Data Docs.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
