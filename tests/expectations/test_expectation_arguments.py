@@ -23,30 +23,47 @@ logger = logging.getLogger(__name__)
 def assert_exception_info(
     result: ExpectationValidationResult, expected_exception_message: Union[str, None]
 ):
-    result_failed = not result.success
-    if "raised_exception" in result["exception_info"]:
+    if result.success:
+        if "raised_exception" in result["exception_info"]:
+            assert (
+                "exception_traceback" not in result.exception_info
+            ) or not result.exception_info["exception_traceback"]
+            assert (
+                "exception_message" not in result.exception_info
+            ) or not result.exception_info["exception_message"]
+        else:
+            # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+            #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+            for k, v in result["exception_info"].items():
+                if v:
+                    assert ("exception_traceback" not in v.exception_info) or not v[
+                        "exception_traceback"
+                    ]
+                    assert ("exception_traceback" not in v.exception_info) or not v[
+                        "exception_traceback"
+                    ]
+    elif "raised_exception" in result["exception_info"]:
         assert (
             "exception_traceback" in result.exception_info
-            and result.exception_info["exception_traceback"] == result_failed
-        )
-        assert (
-            "exception_message" in result.exception_info
-            and result.exception_info["exception_message"] == result_failed
-        )
-        assert result.exception_info["exception_message"] == expected_exception_message
+        ) and result.exception_info["exception_traceback"]
+        assert ("exception_message" in result.exception_info) and result.exception_info[
+            "exception_message"
+        ]
         if expected_exception_message:
             assert result["exception_message"] == expected_exception_message
     else:
         # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
         #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
         for k, v in result["exception_info"].items():
-            assert (
-                "exception_traceback" in v.exception_info
-                and v["exception_traceback"] == result_failed
-            )
-            assert "exception_message" in v.exception_info
-            if expected_exception_message:
-                assert v["exception_message"] == expected_exception_message
+            if v:
+                assert ("exception_traceback" in v.exception_info) and v[
+                    "exception_traceback"
+                ]
+                assert ("exception_message" in v.exception_info) and v[
+                    "exception_message"
+                ]
+                if expected_exception_message:
+                    assert v["exception_message"] == expected_exception_message
 
 
 @pytest.fixture
