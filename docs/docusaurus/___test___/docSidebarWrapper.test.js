@@ -11,7 +11,7 @@ jest.mock('@theme-original/DocSidebar', () => {
 })
 
 describe("doc sidebar", () => {
-    test("should retrieve url with hash if it exists", async () => {
+    test("should retrieve url with hash if it exists", () => {
         render(
             <DocSidebarWrapper/>
         );
