@@ -643,8 +643,7 @@ def spark_session_v012(test_backends):
 
 
 @pytest.fixture
-def basic_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def basic_expectation_suite():
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={},
@@ -664,7 +663,6 @@ def basic_expectation_suite(empty_data_context_stats_enabled):
                 kwargs={"column": "naturals"},
             ),
         ],
-        data_context=context,
     )
     return expectation_suite
 
@@ -3747,7 +3745,7 @@ def populated_profiler_store(
 
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
-def alice_columnar_table_single_batch(empty_data_context):
+def alice_columnar_table_single_batch():
     """
     About the "Alice" User Workflow Fixture
 
@@ -4002,7 +4000,7 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
     expected_expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name, data_context=empty_data_context
+        expectation_suite_name=expectation_suite_name
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
@@ -5345,7 +5343,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     )
     expected_expectation_suite_quantiles_estimator: ExpectationSuite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name_quantiles_estimator,
-        data_context=empty_data_context,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:

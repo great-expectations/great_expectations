@@ -680,9 +680,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=RuntimeBatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
@@ -700,9 +698,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=RuntimeBatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)
@@ -715,9 +711,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
@@ -730,9 +724,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)
@@ -745,9 +737,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
@@ -760,9 +750,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)
@@ -775,9 +763,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
@@ -790,9 +776,7 @@ def test_batch_request_sql_with_schema(
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)

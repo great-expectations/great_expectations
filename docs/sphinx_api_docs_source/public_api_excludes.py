@@ -151,7 +151,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
-        reason="False match for context.get_expectation_suite()",
+        reason="False match for context.suites.get()",
         name="get_expectation_suite",
         filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
     ),

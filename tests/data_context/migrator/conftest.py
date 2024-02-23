@@ -147,8 +147,13 @@ class StubBaseDataContext:
     def list_expectation_suite_names(self) -> List[str]:
         return list(self._expectation_suite_names)
 
-    def get_expectation_suite(self, name: str) -> ExpectationSuite:
-        return ExpectationSuite(expectation_suite_name=name)
+    @property
+    def suites(self):
+        class _MockSuites:
+            def get(self, name: str) -> ExpectationSuite:
+                return ExpectationSuite(expectation_suite_name=name)
+
+        return _MockSuites()
 
     def list_checkpoints(self) -> List[str]:
         return list(self._checkpoint_names)

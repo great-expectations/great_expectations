@@ -314,7 +314,7 @@ def _add_expectations_and_checkpoint(
 
     context = data_context
     context.suites.add(ExpectationSuite(name="metrics_exp"))
-    animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
+    animals_suite = context.suites.get(name="metrics_exp")
     for expectation in expectations_list:
         animals_suite.add_expectation(expectation=expectation)
 
