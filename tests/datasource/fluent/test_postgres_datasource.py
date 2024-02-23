@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-import pathlib
 from contextlib import contextmanager
-from pprint import pformat as pf
 from pprint import pprint
 from typing import (
     TYPE_CHECKING,
@@ -25,10 +23,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
+from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -1144,32 +1139,6 @@ def test_non_select_query_data_asset(create_source):
             source.add_query_asset(name="query_asset", query="* FROM my_table")
 
 
-@pytest.mark.filesystem
-def test_adding_partitioner_persists_results(
-    empty_data_context: FileDataContext,
-    mock_test_connection,
-):
-    gx_yaml = pathlib.Path(
-        empty_data_context.root_directory, FileDataContext.GX_YML
-    ).resolve(strict=True)
-
-    empty_data_context.sources.add_postgres(
-        "my_datasource",
-        connection_string="postgresql://postgres:@localhost/not_a_real_db",
-    ).add_query_asset(
-        name="my_asset", query="select * from table", order_by=["year"]
-    ).add_partitioner_year(
-        column_name="my_col"
-    )
-
-    final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
-        gx_yaml.read_text(),
-    )["fluent_datasources"]
-    print(f"final_yaml:\n{pf(final_yaml, depth=5)}")
-
-    assert final_yaml["my_datasource"]["assets"]["my_asset"]["partitioner"]
-
-
 @pytest.mark.postgresql
 def test_partitioner_year(
     empty_data_context,
@@ -1192,8 +1161,10 @@ def test_partitioner_year(
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["year"]
         )
-        asset.add_partitioner_year(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYear(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years)
         for i, year in enumerate(years):
             assert "year" in batches[i].metadata
@@ -1466,8 +1437,10 @@ def test_sorting_none_in_metadata(
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["-year"]
         )
-        asset.add_partitioner_year(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYear(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years)
         assert batches[-1].metadata["year"] is None
 
@@ -1514,8 +1487,10 @@ def test_add_postgres_query_asset_with_batch_metadata(
             order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
-        asset.add_partitioner_year(column_name="col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYear(column_name="col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years)
         substituted_batch_metadata: BatchMetadata = copy.deepcopy(
             asset_specified_metadata
@@ -1560,8 +1535,10 @@ def test_add_postgres_table_asset_with_batch_metadata(
             order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
-        asset.add_partitioner_year(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYear(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years)
         substituted_batch_metadata: BatchMetadata = copy.deepcopy(
             asset_specified_metadata

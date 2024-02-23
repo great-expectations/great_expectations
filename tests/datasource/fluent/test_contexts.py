@@ -92,31 +92,6 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     assert datasource_name not in yaml_dict["datasources"]
 
 
-@pytest.mark.cloud
-def test_partitioners_are_persisted_on_creation(
-    empty_cloud_context_fluent: CloudDataContext,
-    cloud_api_fake_db: FakeDBTypedDict,
-    db_file: pathlib.Path,
-):
-    context = empty_cloud_context_fluent
-
-    datasource_name = "save_ds_partitioners_test"
-    datasource = context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    )
-    my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
-    my_asset.test_connection()
-    my_asset.add_partitioner_year("date")
-
-    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
-        "attributes"
-    ]["datasource_config"]
-    print(f"'{datasource_name}' config -> \n\n{pf(datasource_config)}")
-
-    # partitioners should be present
-    assert datasource_config["assets"][0]["partitioner"]
-
-
 @pytest.mark.filesystem
 def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     empty_file_context: FileDataContext,
