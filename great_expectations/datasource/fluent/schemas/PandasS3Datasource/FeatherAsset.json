@@ -121,6 +121,7 @@
         },
         "PartitionerColumnValue": {
             "title": "PartitionerColumnValue",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -142,6 +143,7 @@
         },
         "PartitionerMultiColumnValue": {
             "title": "PartitionerMultiColumnValue",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_names": {
@@ -166,6 +168,7 @@
         },
         "PartitionerDividedInteger": {
             "title": "PartitionerDividedInteger",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "divisor": {
@@ -192,6 +195,7 @@
         },
         "PartitionerModInteger": {
             "title": "PartitionerModInteger",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "mod": {
@@ -218,6 +222,7 @@
         },
         "PartitionerYear": {
             "title": "PartitionerYear",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -239,6 +244,7 @@
         },
         "PartitionerYearAndMonth": {
             "title": "PartitionerYearAndMonth",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -260,6 +266,7 @@
         },
         "PartitionerYearAndMonthAndDay": {
             "title": "PartitionerYearAndMonthAndDay",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -281,6 +288,7 @@
         },
         "PartitionerDatetimePart": {
             "title": "PartitionerDatetimePart",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "datetime_parts": {
@@ -310,6 +318,7 @@
         },
         "PartitionerConvertedDatetime": {
             "title": "PartitionerConvertedDatetime",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
