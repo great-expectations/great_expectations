@@ -3,50 +3,50 @@ from __future__ import annotations
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
-from great_expectations.core.validation import Validation
+from great_expectations.core.validation_config import ValidationConfig
 
 
 # TODO: Add analytics as needed
-class ValidationFactory(Factory[Validation]):
+class ValidationFactory(Factory[ValidationConfig]):
     def __init__(self, store) -> None:
-        # TODO: Update type hints when new ValidationStore is implemented
+        # TODO: Update type hints when new ValidationConfigStore is implemented
         self._store = store
 
     @public_api
     @override
-    def add(self, validation: Validation) -> Validation:
-        """Add a Validation to the collection.
+    def add(self, validation: ValidationConfig) -> ValidationConfig:
+        """Add a ValidationConfig to the collection.
 
         Parameters:
-            validation: Validation to add
+            validation: ValidationConfig to add
 
         Raises:
-            DataContextError if Validation already exists
+            DataContextError if ValidationConfig already exists
         """
         raise NotImplementedError
 
     @public_api
     @override
-    def delete(self, validation: Validation) -> Validation:
-        """Delete a Validation from the collection.
+    def delete(self, validation: ValidationConfig) -> ValidationConfig:
+        """Delete a ValidationConfig from the collection.
 
         Parameters:
-            validation: Validation to delete
+            validation: ValidationConfig to delete
 
         Raises:
-            DataContextError if Validation doesn't exist
+            DataContextError if ValidationConfig doesn't exist
         """
         raise NotImplementedError
 
     @public_api
     @override
-    def get(self, name: str) -> Validation:
-        """Get a Validation from the collection by name.
+    def get(self, name: str) -> ValidationConfig:
+        """Get a ValidationConfig from the collection by name.
 
         Parameters:
-            name: Name of Validation to get
+            name: Name of ValidationConfig to get
 
         Raises:
-            DataContextError when Validation is not found.
+            DataContextError when ValidationConfig is not found.
         """
         raise NotImplementedError

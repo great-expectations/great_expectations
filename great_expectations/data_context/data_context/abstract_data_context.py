@@ -333,7 +333,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
-        # TODO: Update to follow existing pattern once new ValidationStore is implemented
+        # TODO: Update to follow existing pattern once new ValidationConfigStore is implemented
         self._validations: ValidationFactory | None = None
 
     def _init_analytics(self) -> None:
@@ -566,7 +566,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def validations(self) -> ValidationFactory:
         if not self._validations:
             raise gx_exceptions.DataContextError(
-                "DataContext requires a configured ValidationStore to persist Validations."
+                "DataContext requires a configured ValidationConfigStore to persist Validations."
             )
         return self._validations
 
