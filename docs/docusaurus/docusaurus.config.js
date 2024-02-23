@@ -110,8 +110,8 @@ module.exports = {
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: 'https://legacy.016.docs.greatexpectations.io',
-              label: '0.16.x and earlier',
+              to: 'https://legacy.017.docs.greatexpectations.io',
+              label: '0.17.x and earlier',
             },
           ],
           dropdownActiveClassDisabled: true,
@@ -281,10 +281,6 @@ module.exports = {
             ['0.18']: {
               label: '0.18.9',
               path: '',
-            },
-            ['0.17']: {
-              label: '0.17.23',
-              path: '0.17.23',
             },
           },
           admonitions: {
