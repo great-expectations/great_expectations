@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def assert_exception_info(
-    result: ExpectationValidationResult, expected_exception_message: str | None
+    result: ExpectationValidationResult, expected_exception_message: Union[str, None]
 ):
     result_failed = not result.success
     if "raised_exception" in result["exception_info"]:
