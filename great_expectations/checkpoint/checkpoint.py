@@ -493,7 +493,7 @@ class BaseCheckpoint(ConfigPeer):
             return None
 
     @property
-    def data_context(self) -> AbstractDataContext:
+    def data_context(self) -> AbstractDataContext | None:
         return self._data_context
 
     @property
@@ -503,9 +503,6 @@ class BaseCheckpoint(ConfigPeer):
         from great_expectations.data_context.data_context.cloud_data_context import (
             CloudDataContext,
         )
-
-        if not self.data_context:
-            return False
 
         return isinstance(self.data_context, CloudDataContext)
 
