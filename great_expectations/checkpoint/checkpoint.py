@@ -267,9 +267,9 @@ class BaseCheckpoint(ConfigPeer):
 
             validation_result_url: str | None = None
             for run_result in run_results.values():
-                validation_result = run_result.get("validation_result")  # type: ignore[assignment] # could be dict
+                validation_result = run_result.get("validation_result")
                 if validation_result:
-                    meta = validation_result.meta  # type: ignore[assignment] # could be dict
+                    meta = validation_result["meta"]
                     id = self.ge_cloud_id
                     meta["checkpoint_id"] = id
                 # TODO: We only currently support 1 validation_result_url per checkpoint and use the first one we
