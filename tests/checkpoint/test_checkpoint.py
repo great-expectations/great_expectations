@@ -215,12 +215,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     ):
         checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
