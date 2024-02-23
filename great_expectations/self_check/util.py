@@ -2710,15 +2710,27 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
 
             elif key == "traceback_substring":
-                assert result["exception_info"][
-                    "raised_exception"
-                ], f"{result['exception_info']['raised_exception']}"
-                assert value in result["exception_info"]["exception_traceback"], (
-                    "expected to find "
-                    + value
-                    + " in "
-                    + result["exception_info"]["exception_traceback"]
-                )
+                if "raised_exception" not in result["exception_info"]:
+                    # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                    #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                    for k, v in result["exception_info"].items():
+                        assert v["raised_exception"], f"{v['raised_exception']}"
+                        assert value in v["exception_traceback"], (
+                            "expected to find "
+                            + value
+                            + " in "
+                            + value["exception_traceback"]
+                        )
+                else:
+                    assert result["exception_info"][
+                        "raised_exception"
+                    ], f"{result['exception_info']['raised_exception']}"
+                    assert value in result["exception_info"]["exception_traceback"], (
+                        "expected to find "
+                        + value
+                        + " in "
+                        + result["exception_info"]["exception_traceback"]
+                    )
 
             elif key == "expected_partition":
                 assert np.allclose(

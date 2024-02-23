@@ -566,6 +566,9 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         )
         myself["statistics"] = convert_to_json_serializable(myself["statistics"])
         myself["meta"] = convert_to_json_serializable(myself["meta"])
+        myself["results"] = [
+            convert_to_json_serializable(result) for result in myself["results"]
+        ]
         myself = expectationSuiteValidationResultSchema.dump(myself)
         return myself
 

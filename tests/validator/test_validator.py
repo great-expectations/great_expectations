@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -33,6 +34,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -1654,3 +1656,69 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
             exception_info=None,
         ),
     ]
+
+
+@pytest.mark.unit
+def test_validator_with_exception_info_in_result():
+    get_context()
+    validator = Validator(execution_engine=PandasExecutionEngine())
+
+    mock_resolved_metrics = []
+
+    metric_id = (
+        "table.column_types",
+        "a351bbf72b281f0b7a62dbbf3599ce5c",
+        "include_nested=True",
+    )
+    exception_message = "Danger Will Robinson! Danger!"
+    exception_traceback = 'Traceback (most recent call last):\n File "lostinspace.py", line 42, in <module>\n    raise Exception("Danger Will Robinson! Danger!")\nException: Danger Will Robinson! Danger!'
+
+    mock_aborted_metrics_info = {
+        metric_id: {
+            "exception_info": ExceptionInfo(
+                exception_traceback=exception_traceback,
+                exception_message=exception_message,
+            ),
+        }
+    }
+
+    with patch.object(
+        validator._metrics_calculator,
+        "resolve_validation_graph",
+        return_value=(mock_resolved_metrics, mock_aborted_metrics_info),
+    ):
+        result = validator.graph_validate(
+            configurations=[
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_unique",
+                    kwargs={
+                        "column": "animals",
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_set",
+                    kwargs={
+                        "column": "animals",
+                        "value_set": ["cat", "fish", "dog"],
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_not_be_null",
+                    kwargs={
+                        "column": "animals",
+                    },
+                ),
+            ],
+            runtime_configuration={"result_format": "COMPLETE"},
+        )
+        assert len(result) == 3  # One to one mapping of Expectations to results
+        for evr in result:
+            assert evr.exception_info is not None
+            assert (
+                evr.exception_info[str(metric_id)].exception_traceback
+                == exception_traceback
+            )
+            assert (
+                evr.exception_info[str(metric_id)].exception_message
+                == exception_message
+            )
