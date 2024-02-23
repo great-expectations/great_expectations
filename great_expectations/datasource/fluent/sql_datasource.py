@@ -573,23 +573,6 @@ class _SQLAsset(DataAsset):
             context._save_project_config()
         return self
 
-    @public_api
-    def add_partitioner_multi_column_values(
-        self: Self, column_names: list[str]
-    ) -> Self:
-        """Associates a multi column value partitioner with this sql asset.
-        Args:
-            column_names: A list of column names to partition on.
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SqlPartitionerMultiColumnValue(
-                column_names=column_names,
-                method_name="partition_on_multi_column_values",
-            )
-        )
-
     @override
     def test_connection(self) -> None:
         pass
