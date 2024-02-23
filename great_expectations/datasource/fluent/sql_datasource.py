@@ -74,10 +74,8 @@ from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_pa
 
 if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
-    from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent import BatchRequestOptions
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -563,21 +561,8 @@ class _SQLAsset(DataAsset):
             option_keys += tuple(sql_partitioner.param_names)
         return option_keys
 
-    def _add_partitioner(self: Self, partitioner: SqlPartitioner) -> Self:
-        self.partitioner = partitioner
-        self.test_partitioner_connection()
-        # persist the config changes
-        context: AbstractDataContext | None
-        if context := self._datasource._data_context:
-            context.datasources[self._datasource.name] = self._datasource
-            context._save_project_config()
-        return self
-
     @override
     def test_connection(self) -> None:
-        pass
-
-    def test_partitioner_connection(self) -> None:
         pass
 
     @staticmethod
