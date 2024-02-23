@@ -51,19 +51,16 @@ def assert_exception_info(
         ]
         if expected_exception_message:
             assert result["exception_message"] == expected_exception_message
-    else:
+    elif result["exception_info"]:
         # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
         #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
         for k, v in result["exception_info"].items():
-            if v:
-                assert ("exception_traceback" in v.exception_info) and v[
-                    "exception_traceback"
-                ]
-                assert ("exception_message" in v.exception_info) and v[
-                    "exception_message"
-                ]
-                if expected_exception_message:
-                    assert v["exception_message"] == expected_exception_message
+            assert ("exception_traceback" in v.exception_info) and v[
+                "exception_traceback"
+            ]
+            assert ("exception_message" in v.exception_info) and v["exception_message"]
+            if expected_exception_message:
+                assert v["exception_message"] == expected_exception_message
 
 
 @pytest.fixture
