@@ -9,7 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
-@import "sass_variables";
+@import "sass_variables.scss";
 @import "typography.scss";
 @import "left_navigation.scss";
 @import "navbar.scss";
@@ -17,8 +17,10 @@
 @import "searchBar.scss";
 @import "alerts.scss";
 @import "pagination.scss";
-@import "overview_pages";
 @import "breadcrumbs.scss";
+@import "overview_pages.scss";
+@import "code_block.scss";
+
 /* You can override the default Infima variables here. */
 :root {
     --ifm-font-color-base: #404041;
@@ -108,42 +110,6 @@
   &:hover {
     .codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module + div button {
       opacity: 1;
-    }
-  }
-}
-
-.theme-code-block pre code {
-  background-color: #373F58;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  font-size: var(--p-md-font-size);
-}
-
-div.codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module {
-  border-bottom: none;
-  color: #FAFAFA;
-  font-size: var(--p-md-font-size);
-  opacity: 0.75;
-  text-transform: capitalize;
-
-  & + div {
-    position: static;
-  }
-
-  & + div > div {
-    top: calc(var(--ifm-pre-padding) / 2);
-
-    &:hover {
-      opacity: 0.75;
-    }
-
-    button {
-      border: none;
-      opacity: 0.75;
-
-      svg path {
-        fill: #FAFAFA;
-      }
     }
   }
 }

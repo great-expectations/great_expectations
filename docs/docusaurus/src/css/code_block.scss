@@ -1,0 +1,61 @@
+.theme-code-block {
+  position: relative;
+
+  &:hover {
+    .codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module + div button {
+      opacity: 1;
+    }
+  }
+}
+
+.theme-code-block pre code {
+  background-color: #373F58;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  font-size: var(--p-md-font-size);
+}
+
+span.codeLineNumber_src-theme-CodeBlock-Line-styles-module {
+  background: transparent;
+}
+
+div.codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module,
+div.codeBlockTitle_src-theme-CodeBlock-Content-styles-module {
+  align-items: baseline;
+  border-bottom: none;
+  color: #FAFAFA;
+  display: flex;
+  font-size: var(--p-md-font-size);
+  opacity: 0.75;
+  text-transform: capitalize;
+
+  &::before {
+    background: url('/img/file-solid.svg') 0 50% no-repeat;
+    content: '';
+    display: inline-block;
+    height: 1em;
+    margin-right: 0.5rem;
+    width: 1em;
+  }
+
+  & + div {
+    position: static;
+  }
+
+  & + div > div {
+    top: calc(var(--ifm-pre-padding) / 2);
+
+    &:hover {
+      opacity: 0.75;
+    }
+
+    button {
+      border: none;
+      opacity: 0.75;
+
+      svg path {
+        fill: #FAFAFA;
+      }
+    }
+  }
+}
