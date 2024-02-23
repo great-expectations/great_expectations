@@ -3,6 +3,7 @@ sidebar_label: 'Get started with GX'
 title: 'Get started with Great Expectations'
 id: get_started_lp
 description: Install Great Expectations and initialize your deployment.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

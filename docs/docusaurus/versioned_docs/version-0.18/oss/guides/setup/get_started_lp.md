@@ -4,6 +4,7 @@ title: 'Get started with Great Expectations'
 hide_title: true
 id: get_started_lp
 description: Install Great Expectations and initialize your deployment.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

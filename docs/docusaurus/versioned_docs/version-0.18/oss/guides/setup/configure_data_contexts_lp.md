@@ -4,6 +4,7 @@ title: 'Configure Data Contexts'
 hide_title: true
 id: configure_data_contexts_lp
 description: Instantiate and convert a Data Context.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
