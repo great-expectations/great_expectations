@@ -15,13 +15,13 @@ export default function WasThisHelpful(){
     };
 
     return <>
-            <hr className={styles.feedbackDivider}></hr>
+            <hr className={styles.feedbackDivider}/>
             <div className={styles.feedbackCard}>
                 <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
-                <div className={styles.feedbackCardActions}>
+                <section className={styles.feedbackCardActions}>
                     <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
                     <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.no')}>No</button>
-                </div>
+                </section>
             </div>
         </>
 }
