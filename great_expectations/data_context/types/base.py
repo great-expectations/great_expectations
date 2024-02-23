@@ -1684,6 +1684,12 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
     )
+    DEFAULT_VALIDATION_CONFIG_STORE_NAME = "validation_config_store"
+    VALIDATION_CONFIGS_BASE_DIRECTORY = "validation_configs"
+    DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{VALIDATION_CONFIGS_BASE_DIRECTORY}/"
+    )
+
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         "evaluation_parameters/"
@@ -1748,6 +1754,13 @@ class DataContextConfigDefaults(enum.Enum):
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+            },
+        },
+        DEFAULT_VALIDATION_CONFIG_STORE_NAME: {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
         DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
