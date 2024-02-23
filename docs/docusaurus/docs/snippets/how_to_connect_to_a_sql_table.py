@@ -76,7 +76,6 @@ assert set(batches[0].columns()) == {
 }
 
 # <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py add_vendor_id_splitter">
-table_asset.add_partitioner_column_value("vendor_id")
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request">
