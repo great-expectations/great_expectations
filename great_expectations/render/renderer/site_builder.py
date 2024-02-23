@@ -137,7 +137,7 @@ class SiteBuilder:
         self.cloud_mode = cloud_mode
         self.ge_cloud_mode = cloud_mode
 
-        usage_statistics_config = data_context.anonymous_usage_statistics
+        usage_statistics_config = data_context.analytics
         data_context_id = None
         if (
             usage_statistics_config

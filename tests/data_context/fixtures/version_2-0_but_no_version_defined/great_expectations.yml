@@ -114,6 +114,6 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-anonymous_usage_statistics:
+analytics:
   enabled: false
   data_context_id: 00000000-0000-0000-0000-0000000000a9

@@ -58,8 +58,8 @@ class ConfigurationBundle:
         Returns: Boolean of whether the usage statistics are enabled.
 
         """
-        if self._data_context_variables.anonymous_usage_statistics:
-            return self._data_context_variables.anonymous_usage_statistics.enabled
+        if self._data_context_variables.analytics:
+            return self._data_context_variables.analytics.enabled
         else:
             return False
 
@@ -154,7 +154,7 @@ class ConfigurationBundleSchema(Schema):
     @post_dump
     def clean_up(self, data, **kwargs) -> dict:
         data_context_variables = data.get("data_context_variables", {})
-        data_context_variables.pop("anonymous_usage_statistics", None)
+        data_context_variables.pop("analytics", None)
         return data
 
 

@@ -195,7 +195,7 @@ def basic_data_context_config():
                     "action_list": [],
                 }
             },
-            "anonymous_usage_statistics": {
+            "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,
@@ -355,7 +355,7 @@ def data_context_config_with_datasources(conn_string_password):
                     "action_list": [],
                 }
             },
-            "anonymous_usage_statistics": {
+            "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,
@@ -434,7 +434,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                     "action_list": [],
                 }
             },
-            "anonymous_usage_statistics": {
+            "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,

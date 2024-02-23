@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
-    "anonymous_usage_statistics": pact.Like(
+    "analytics": pact.Like(
         {
             "data_context_id": pact.Format().uuid,
             "enabled": False,

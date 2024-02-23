@@ -76,7 +76,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
+    AnalyticsConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
     ConcurrencyConfig,
@@ -282,7 +282,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._data_context_id = self._construct_data_context_id()
 
         # Override the project_config data_context_id if an expectations_store was already set up
-        self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
+        self.config.analytics.data_context_id = self._data_context_id
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -3158,9 +3158,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             logger.debug(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
-            config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
-                False
-            )
+            config_with_global_config_overrides.analytics.enabled = False
         global_data_context_id: Optional[str] = self._get_data_context_id_override()
         # data_context_id
         if global_data_context_id:
@@ -3171,7 +3169,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
+                config_with_global_config_overrides.analytics.data_context_id = (
                     global_data_context_id
                 )
             else:
@@ -3189,7 +3187,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.debug(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
+                config_with_global_config_overrides.analytics.usage_statistics_url = (
                     global_usage_statistics_url
                 )
             else:
@@ -3219,7 +3217,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             - GE_USAGE_STATS, which is an environment_variable
             - GLOBAL_CONFIG_PATHS
         If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
-        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for analytics
         Returns True otherwise
 
         Returns:
@@ -3247,7 +3245,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
             config.read(config_path)
             try:
-                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                if not config.getboolean("analytics", "enabled"):
                     usage_statistics_enabled = False
 
             except (ValueError, configparser.Error):
@@ -3263,7 +3261,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return self._get_global_config_value(
             environment_variable="GE_DATA_CONTEXT_ID",
-            conf_file_section="anonymous_usage_statistics",
+            conf_file_section="analytics",
             conf_file_option="data_context_id",
         )
 
@@ -3276,7 +3274,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return self._get_global_config_value(
             environment_variable="GE_USAGE_STATISTICS_URL",
-            conf_file_section="anonymous_usage_statistics",
+            conf_file_section="analytics",
             conf_file_option="usage_statistics_url",
         )
 
@@ -3293,7 +3291,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ):
             store_config["store_backend"].update(
                 {
-                    "manually_initialize_store_backend_id": self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
+                    "manually_initialize_store_backend_id": self.variables.analytics.data_context_id  # type: ignore[union-attr]
                 }
             )
 
@@ -3323,8 +3321,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._variables
 
     @property
-    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
-        return self.variables.anonymous_usage_statistics  # type: ignore[return-value]
+    def analytics(self) -> AnalyticsConfig:
+        return self.variables.analytics  # type: ignore[return-value]
 
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
@@ -3349,7 +3347,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def data_context_id(self) -> str:
-        return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
+        return self.variables.analytics.data_context_id  # type: ignore[union-attr]
 
     def _init_primary_stores(
         self, store_configs: Dict[str, StoreConfigTypedDict]
@@ -3405,7 +3403,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             return None
 
-        oss_id = config.get("anonymous_usage_statistics", "oss_id", fallback=None)
+        oss_id = config.get("analytics", "oss_id", fallback=None)
         if not oss_id:
             return cls._set_oss_id(config)
 
@@ -3425,7 +3423,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         oss_id = uuid.uuid4()
 
         # If the section already exists, don't overwite usage_statistics_url
-        section = "anonymous_usage_statistics"
+        section = "analytics"
         if not config.has_section(section):
             config[section] = {}
         config[section]["oss_id"] = str(oss_id)
@@ -3704,7 +3702,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Otherwise choose the id stored in the project_config
         else:
-            return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
+            return self.variables.analytics.data_context_id  # type: ignore[union-attr]
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}

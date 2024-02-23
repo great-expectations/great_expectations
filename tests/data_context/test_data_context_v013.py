@@ -62,7 +62,7 @@ def basic_data_context_v013_config():
                 },
             },
             "data_docs_sites": {},
-            "anonymous_usage_statistics": {
+            "analytics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
                 "usage_statistics_url": USAGE_STATISTICS_QA_URL,
@@ -236,7 +236,7 @@ def test_get_config(empty_data_context):
         "evaluation_parameter_store_name",
         "checkpoint_store_name",
         "data_docs_sites",
-        "anonymous_usage_statistics",
+        "analytics",
         "include_rendered_content",
     }
 

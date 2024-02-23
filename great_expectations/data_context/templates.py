@@ -153,12 +153,12 @@ data_docs_sites:
 )
 
 ANONYMIZED_USAGE_STATISTICS_ENABLED = """
-anonymous_usage_statistics:
+analytics:
   enabled: True
 """
 
 ANONYMIZED_USAGE_STATISTICS_DISABLED = """
-anonymous_usage_statistics:
+analytics:
   enabled: False
 """
 

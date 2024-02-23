@@ -267,7 +267,7 @@ def _create_context(
     data_context_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
         data_docs_sites=data_docs_sites,
-        anonymous_usage_statistics={"enabled": False},
+        analytics={"enabled": False},
         concurrency=concurrency_config(),
     )
 

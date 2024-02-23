@@ -37,13 +37,13 @@ class TestConfigurationBundleCreate:
         """What does this test and why?
 
         The ConfigurationBundle should handle a context that has not set the config for
-         anonymous_usage_statistics.
+         analytics.
         """
         context = stub_base_data_context_no_anonymous_usage_stats
 
         config_bundle = ConfigurationBundle(context)
 
-        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+        # If not supplied, an AnalyticsConfig is created in a
         # DataContextConfig and enabled by default.
         assert config_bundle.is_usage_stats_enabled()
 
@@ -121,18 +121,18 @@ class TestConfigurationBundleSerialization:
 
         assert serialized_bundle == empty_serialized_configuration_bundle
 
-    def test_anonymous_usage_statistics_removed_during_serialization(
+    def test_analytics_removed_during_serialization(
         self,
         stub_base_data_context: StubBaseDataContext,
     ):
         """What does this test and why?
         When serializing a ConfigurationBundle we need to remove the
-        anonymous_usage_statistics key.
+        analytics key.
         """
 
         context: StubBaseDataContext = stub_base_data_context
 
-        assert context.anonymous_usage_statistics is not None
+        assert context.analytics is not None
 
         config_bundle = ConfigurationBundle(context)
 
@@ -142,9 +142,4 @@ class TestConfigurationBundleSerialization:
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
-        assert (
-            serialized_bundle["data_context_variables"].get(
-                "anonymous_usage_statistics"
-            )
-            is None
-        )
+        assert serialized_bundle["data_context_variables"].get("analytics") is None

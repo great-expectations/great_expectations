@@ -24,7 +24,7 @@ from great_expectations.data_context.data_context_variables import (
     FileDataContextVariables,
 )
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
+    AnalyticsConfig,
     ConcurrencyConfig,
     DataContextConfig,
     GXCloudConfig,
@@ -66,7 +66,7 @@ def data_context_config_dict() -> dict:
             },
         },
         "data_docs_sites": {},
-        "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
+        "analytics": AnalyticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
@@ -195,8 +195,8 @@ def data_docs_sites() -> dict:
 
 
 @pytest.fixture
-def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
-    return AnonymizedUsageStatisticsConfig(
+def analytics() -> AnalyticsConfig:
+    return AnalyticsConfig(
         enabled=False,
     )
 
@@ -262,7 +262,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         ),
         pytest.param(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics getter",
+            id="analytics getter",
         ),
         pytest.param(
             DataContextVariableSchema.CONCURRENCY,
@@ -374,9 +374,9 @@ def test_data_context_variables_get_with_substitutions(
             id="data_docs_sites setter",
         ),
         pytest.param(
-            anonymous_usage_statistics,
+            analytics,
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics setter",
+            id="analytics setter",
         ),
         pytest.param(
             concurrency,

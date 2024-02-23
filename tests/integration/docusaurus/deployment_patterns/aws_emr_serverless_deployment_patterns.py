@@ -39,7 +39,7 @@ if __name__ == "__main__":
         stores=config_file["stores"],
         data_docs_sites=config_file["data_docs_sites"],
         config_variables_file_path=config_file["config_variables_file_path"],
-        anonymous_usage_statistics=config_file["anonymous_usage_statistics"],
+        analytics=config_file["analytics"],
         checkpoint_store_name=config_file["checkpoint_store_name"],
         store_backend_defaults=S3StoreBackendDefaults(
             default_bucket_name=config_file["data_docs_sites"]["s3_site"][

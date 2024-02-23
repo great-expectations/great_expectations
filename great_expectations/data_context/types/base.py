@@ -1306,7 +1306,7 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
         return DatasourceConfig(**data)
 
 
-class AnonymizedUsageStatisticsConfig(DictDot):
+class AnalyticsConfig(DictDot):
     def __init__(
         self, enabled=True, data_context_id=None, usage_statistics_url=None
     ) -> None:
@@ -1373,7 +1373,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._explicit_url = True
 
 
-class AnonymizedUsageStatisticsConfigSchema(Schema):
+class AnalyticsConfigSchema(Schema):
     data_context_id = fields.UUID()
     enabled = fields.Boolean(default=True)
     usage_statistics_url = fields.URL(allow_none=True)
@@ -1384,7 +1384,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
     def make_usage_statistics_config(self, data, **kwargs):
         if "data_context_id" in data:
             data["data_context_id"] = str(data["data_context_id"])
-        return AnonymizedUsageStatisticsConfig(**data)
+        return AnalyticsConfig(**data)
 
     # noinspection PyUnusedLocal
     @post_dump()
@@ -1548,7 +1548,7 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Dict(), allow_none=True
     )
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    analytics = fields.Nested(AnalyticsConfigSchema)
     progress_bars = fields.Nested(
         ProgressBarsConfigSchema, required=False, allow_none=True
     )
@@ -2284,7 +2284,7 @@ class DataContextConfig(BaseYamlConfig):
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
-        anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
+        analytics (Optional[AnalyticsConfig]): configuration for enabling or disabling
             anonymous usage statistics for GX.
         store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
             For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
@@ -2319,7 +2319,7 @@ class DataContextConfig(BaseYamlConfig):
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
+        analytics: Optional[AnalyticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
@@ -2365,13 +2365,11 @@ class DataContextConfig(BaseYamlConfig):
         self.stores = stores or {}
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
+        if analytics is None:
+            analytics = AnalyticsConfig()
+        elif isinstance(analytics, dict):
+            analytics = AnalyticsConfig(**analytics)
+        self.analytics = analytics
         if isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency = concurrency
@@ -2932,7 +2930,7 @@ executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
-anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
+anonymizedUsageStatisticsSchema = AnalyticsConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

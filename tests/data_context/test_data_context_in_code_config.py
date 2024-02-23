@@ -108,7 +108,7 @@ def build_in_code_data_context_project_config(
                 ],
             }
         },
-        anonymous_usage_statistics={
+        analytics={
             "enabled": True,
             # NOTE: No data_context_id set here
             "usage_statistics_url": USAGE_STATISTICS_QA_URL,
@@ -294,7 +294,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
         data_docs_store_prefix=data_docs_store_prefix,
     )
     # Manually set the data_context_id in the project_config
-    in_code_data_context_project_config.anonymous_usage_statistics.data_context_id = (
+    in_code_data_context_project_config.analytics.data_context_id = (
         manually_created_uuid
     )
     in_code_data_context = get_context(

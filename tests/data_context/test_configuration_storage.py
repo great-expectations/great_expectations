@@ -188,7 +188,7 @@ validation_operators:
         action:
           class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
-anonymous_usage_statistics:
+analytics:
   usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
   enabled: false
   data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
