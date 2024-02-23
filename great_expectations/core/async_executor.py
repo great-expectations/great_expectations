@@ -68,12 +68,7 @@ class AsyncExecutor(AbstractContextManager):
         Execution occurs either concurrently on a different thread or synchronously (e.g. on the main thread) depending
         on how the AsyncExecutor instance was initialized.
         """
-        if self._execute_concurrently:
-            return AsyncResult(
-                future=self._thread_pool_executor.submit(fn, *args, **kwargs)  # type: ignore[union-attr]
-            )
-        else:
-            return AsyncResult(value=fn(*args, **kwargs))
+        return AsyncResult(value=fn(*args, **kwargs))
 
     def shutdown(self) -> None:
         """Clean-up the resources associated with the AsyncExecutor and blocks until all running async results finish
