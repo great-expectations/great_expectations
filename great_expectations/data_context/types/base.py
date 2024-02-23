@@ -1351,10 +1351,6 @@ class AnalyticsConfig(DictDot):
     def explicit_id(self) -> bool:
         return self._explicit_id
 
-    @property
-    def explicit_url(self) -> bool:
-        return self._explicit_url
-
 
 class AnalyticsConfigSchema(Schema):
     data_context_id = fields.UUID()
