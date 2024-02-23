@@ -257,7 +257,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
             id="data_docs_sites getter",
         ),
         pytest.param(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            DataContextVariableSchema.ANALYTICS,
             id="analytics getter",
         ),
         pytest.param(
@@ -371,7 +371,7 @@ def test_data_context_variables_get_with_substitutions(
         ),
         pytest.param(
             analytics,
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            DataContextVariableSchema.ANALYTICS,
             id="analytics setter",
         ),
         pytest.param(

@@ -2909,7 +2909,7 @@ executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
-anonymizedUsageStatisticsSchema = AnalyticsConfigSchema()
+analyticsSchema = AnalyticsConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

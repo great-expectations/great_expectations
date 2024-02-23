@@ -85,7 +85,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     IncludeRenderedContentConfig,
     ProgressBarsConfig,
-    anonymizedUsageStatisticsSchema,
+    analyticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
@@ -3161,7 +3161,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         global_data_context_id: Optional[str] = self._get_data_context_id_override()
         # data_context_id
         if global_data_context_id:
-            data_context_id_errors = anonymizedUsageStatisticsSchema.validate(
+            data_context_id_errors = analyticsSchema.validate(
                 {"data_context_id": global_data_context_id}
             )
             if not data_context_id_errors:

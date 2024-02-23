@@ -201,11 +201,11 @@ def test__migrate_to_cloud_outputs_warnings(
     enable_usage_stats: bool,
     caplog,
 ):
-    anonymized_usage_statistics_config = AnalyticsConfig(enabled=enable_usage_stats)
+    analytics_config = AnalyticsConfig(enabled=enable_usage_stats)
     datasource_names = ("my_datasource",) if include_datasources else tuple()
 
     context = StubBaseDataContext(
-        anonymized_usage_statistics_config=anonymized_usage_statistics_config,
+        analytics_config=analytics_config,
         datasource_names=datasource_names,
     )
 

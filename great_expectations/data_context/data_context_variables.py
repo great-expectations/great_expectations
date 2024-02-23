@@ -52,7 +52,7 @@ class DataContextVariableSchema(str, enum.Enum):
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANONYMOUS_USAGE_STATISTICS = "analytics"
+    ANALYTICS = "analytics"
     CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
     INCLUDE_RENDERED_CONTENT = "include_rendered_content"
@@ -239,12 +239,12 @@ class DataContextVariables(ABC):
     def analytics(
         self,
     ) -> Optional[AnalyticsConfig]:
-        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
+        return self._get(DataContextVariableSchema.ANALYTICS)
 
     @analytics.setter
     def analytics(self, analytics: AnalyticsConfig) -> None:
         self._set(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            DataContextVariableSchema.ANALYTICS,
             analytics,
         )
 
