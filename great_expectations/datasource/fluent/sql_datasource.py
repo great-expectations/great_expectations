@@ -574,24 +574,6 @@ class _SQLAsset(DataAsset):
         return self
 
     @public_api
-    def add_partitioner_year_and_month_and_day(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year, month, day partitioner with this sql asset.
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SqlPartitionerYearAndMonthAndDay(
-                method_name="partition_on_year_and_month_and_day",
-                column_name=column_name,
-            )
-        )
-
-    @public_api
     def add_partitioner_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:

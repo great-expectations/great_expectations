@@ -26,6 +26,7 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.partitioners import (
     PartitionerYear,
     PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
@@ -1256,8 +1257,10 @@ def test_partitioner_year_and_month_and_day(
             query="select * from table",
             order_by=["year", "month", "day"],
         )
-        asset.add_partitioner_year_and_month_and_day(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYearAndMonthAndDay(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years) * len(months) * len(days)
         for i, year in enumerate(years):
             for j, month in enumerate(months):
