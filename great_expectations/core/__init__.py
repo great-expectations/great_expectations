@@ -31,7 +31,7 @@ __all__ = [
     "IDDict",
     "RunIdentifier",
     "RunIdentifierSchema",
-    "Validation",
+    "ValidationConfig",
     "expectationSuiteSchema",
     "expectationSuiteValidationResultSchema",
     "expectationValidationResultSchema",
