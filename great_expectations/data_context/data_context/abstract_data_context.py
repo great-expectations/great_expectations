@@ -79,7 +79,6 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
-    ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
@@ -633,10 +632,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def checkpoint_store(self) -> CheckpointStore:
         return self.stores[self.checkpoint_store_name]
-
-    @property
-    def concurrency(self) -> Optional[ConcurrencyConfig]:
-        return self.variables.concurrency
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
@@ -3640,7 +3635,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
             config=substituted_config_dict,
-            runtime_environment={"data_context": self, "concurrency": self.concurrency},
+            runtime_environment={"data_context": self},
             config_defaults={"module_name": module_name},
         )
         if not datasource:

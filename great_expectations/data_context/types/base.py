@@ -17,7 +17,6 @@ from typing import (
     Dict,
     List,
     Mapping,
-    MutableMapping,
     Optional,
     Sequence,
     Set,
@@ -1434,57 +1433,6 @@ class IncludeRenderedContentConfigSchema(Schema):
     expectation_validation_result = fields.Boolean(default=False)
 
 
-class ConcurrencyConfig(DictDot):
-    """WARNING: This class is experimental."""
-
-    def __init__(self, enabled: bool = False) -> None:
-        """Initialize a concurrency configuration to control multithreaded execution.
-
-        Args:
-            enabled: Whether or not multithreading is enabled.
-        """
-        self._enabled = enabled
-
-    @property
-    def enabled(self):
-        """Whether or not multithreading is enabled."""
-        return self._enabled
-
-    @property
-    def max_database_query_concurrency(self) -> int:
-        """Max number of concurrent database queries to execute with mulithreading."""
-        # BigQuery has a limit of 100 for "Concurrent rate limit for interactive queries" as described at
-        # (https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
-        # databases and/or be manually user configurable.
-        return 100
-
-    def add_sqlalchemy_create_engine_parameters(
-        self, parameters: MutableMapping[str, Any]
-    ):
-        """Update SqlAlchemy parameters to prevent concurrency errors (e.g. http://sqlalche.me/e/14/3o7r) and
-        bottlenecks.
-
-        Args:
-            parameters: SqlAlchemy create_engine parameters to which we add concurrency appropriate parameters. If the
-                concurrency parameters are already set, those parameters are left unchanged.
-        """
-        if not self._enabled:
-            return
-
-        if "pool_size" not in parameters:
-            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.pool_size
-            parameters["pool_size"] = 0
-        if "max_overflow" not in parameters:
-            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.max_overflow
-            parameters["max_overflow"] = -1
-
-
-class ConcurrencyConfigSchema(Schema):
-    """WARNING: This class is experimental."""
-
-    enabled = fields.Boolean(default=False)
-
-
 class GXCloudConfig(DictDot):
     def __init__(
         self,
@@ -1555,14 +1503,10 @@ class DataContextConfigSchema(Schema):
     include_rendered_content = fields.Nested(
         IncludeRenderedContentConfigSchema, required=False, allow_none=True
     )
-    concurrency = fields.Nested(
-        ConcurrencyConfigSchema, required=False, allow_none=True
-    )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
     REMOVE_KEYS_IF_NONE = [
-        "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
         "include_rendered_content",  # 0.15.19,
         "fluent_datasources",
@@ -2291,15 +2235,13 @@ class DataContextConfig(BaseYamlConfig):
             and you may be able to specify fewer parameters.
         commented_map (Optional[CommentedMap]): the CommentedMap associated with DataContext configuration. Used when
             instantiating with yml file.
-        concurrency (Optional[Union[ConcurrencyConfig, Dict]]): if enabled, Checkpoints associated with the DataContext
-            can run validations in parallel with multithreading.
         progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
             profilers, or metrics calculations.
         include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: PLR0912, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2322,7 +2264,6 @@ class DataContextConfig(BaseYamlConfig):
         anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
-        concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
@@ -2372,9 +2313,6 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
-        if isinstance(concurrency, dict):
-            concurrency = ConcurrencyConfig(**concurrency)
-        self.concurrency = concurrency
         self.progress_bars = progress_bars
         if include_rendered_content is None:
             include_rendered_content = IncludeRenderedContentConfig()
@@ -2934,5 +2872,4 @@ sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
-concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

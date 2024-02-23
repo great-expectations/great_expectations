@@ -247,13 +247,8 @@ class BaseCheckpoint(ConfigPeer):
             for validation in validations:
                 validation.id = self.config.default_validation_id
 
-        # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
-        # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
-        # AsyncExecutor and the corresponding AsyncExecutor docstring for more details on when multiple threads are
-        # used.
-        with AsyncExecutor(
-            self.data_context.concurrency, max_workers=len(validations)
-        ) as async_executor:
+        # AsyncExecutor is slated for deletion and does not utilize multithreading.
+        with AsyncExecutor() as async_executor:
             # noinspection PyUnresolvedReferences
             async_validation_operator_results: list[
                 AsyncResult[ValidationOperatorResult]

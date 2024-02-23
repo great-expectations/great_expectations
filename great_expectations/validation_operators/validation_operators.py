@@ -336,22 +336,8 @@ class ActionListValidationOperator(ValidationOperator):
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        ###
-        # NOTE: 20211010 - jdimatteo: This method is called by Checkpoint.run and below
-        # usage of AsyncExecutor may speed up I/O bound validations by running them in parallel with multithreading
-        # (if concurrency is enabled in the data context configuration).
-        #
-        # When this method is called by Checkpoint.run, len(assets_to_validate) may be 1 even if there are multiple
-        # validations, because Checkpoint.run calls this method in a loop for each validation. AsyncExecutor is also
-        # used in the Checkpoint.run loop to optionally run each validation in parallel with multithreading, so this
-        # method's AsyncExecutor is nested within the Checkpoint.run AsyncExecutor. The AsyncExecutor logic to only use
-        # multithreading when max_workers > 1 ensures that no nested multithreading is ever used when
-        # len(assets_to_validate) is equal to 1. So no unnecessary multithreading is ever used here even though it may
-        # be nested inside another AsyncExecutor (and this is a good thing because it avoids extra overhead associated
-        # with each thread and minimizes the total number of threads to simplify debugging).
-        with AsyncExecutor(
-            self.data_context.concurrency, max_workers=len(assets_to_validate)
-        ) as async_executor:
+        # AsyncExecutor is slated for deletion and does not utilize multithreading.
+        with AsyncExecutor() as async_executor:
             batch_and_async_result_tuples = []
             for item in assets_to_validate:
                 batch = self._build_batch_from_item(item)
