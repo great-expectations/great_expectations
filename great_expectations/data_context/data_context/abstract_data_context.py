@@ -61,7 +61,11 @@ from great_expectations.core.config_provider import (
     _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
-from great_expectations.core.factory import CheckpointFactory, SuiteFactory
+from great_expectations.core.factory import (
+    CheckpointFactory,
+    SuiteFactory,
+    ValidationFactory,
+)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -329,6 +333,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
+        # TODO: Update to follow existing pattern once new ValidationConfigStore is implemented
+        self._validations: ValidationFactory | None = None
+
     def _init_analytics(self) -> None:
         init_analytics(
             data_context_id=uuid.UUID(self._data_context_id),
@@ -554,6 +561,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "DataContext requires a configured CheckpointStore to persist Checkpoints."
             )
         return self._checkpoints
+
+    @property
+    def validations(self) -> ValidationFactory:
+        if not self._validations:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured ValidationConfigStore to persist Validations."
+            )
+        return self._validations
 
     @property
     def expectations_store_name(self) -> Optional[str]:
