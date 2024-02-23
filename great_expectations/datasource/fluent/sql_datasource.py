@@ -905,23 +905,6 @@ class TableAsset(_SQLAsset):
             ) from query_error
 
     @override
-    def test_partitioner_connection(self) -> None:
-        if self.partitioner:
-            datasource: SQLDatasource = self.datasource
-            engine: sqlalchemy.Engine = datasource.get_engine()
-            inspector: sqlalchemy.Inspector = sa.inspect(engine)
-
-            columns: list[dict[str, Any]] = inspector.get_columns(
-                table_name=self.table_name, schema=self.schema_name
-            )
-            column_names: list[str] = [column["name"] for column in columns]
-            for partitioner_column_name in self.partitioner.columns:
-                if partitioner_column_name not in column_names:
-                    raise TestConnectionError(
-                        f'The column "{partitioner_column_name}" was not found in table "{self.qualified_name}"'
-                    )
-
-    @override
     def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns the table as a sqlalchemy Selectable.
 
