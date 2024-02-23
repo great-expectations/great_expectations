@@ -574,23 +574,6 @@ class _SQLAsset(DataAsset):
         return self
 
     @public_api
-    def add_partitioner_mod_integer(self: Self, column_name: str, mod: int) -> Self:
-        """Associates a mod integer partitioner with this sql asset.
-        Args:
-            column_name: A column name of the column to partition on.
-            mod: The mod to use when partitioning.
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SqlPartitionerModInteger(
-                method_name="partition_on_mod_integer",
-                column_name=column_name,
-                mod=mod,
-            )
-        )
-
-    @public_api
     def add_partitioner_multi_column_values(
         self: Self, column_names: list[str]
     ) -> Self:
