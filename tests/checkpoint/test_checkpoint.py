@@ -2813,6 +2813,7 @@ def test_checkpoint_run_with_runtime_overrides(
     assert result.success
 
 
+@pytest.mark.unit
 def test_checkpoint_run_raises_error_if_not_associated_with_context():
     checkpoint = Checkpoint(name="my_checkpoint")
     with pytest.raises(ValueError):
