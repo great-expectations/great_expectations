@@ -14,6 +14,7 @@ from great_expectations.alias_types import PathStr
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
+from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
@@ -1354,12 +1355,11 @@ class TestPartitionerFileAsset:
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_batch_request_options(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
-        asset_with_conflicting_partitioner = (
-            file_asset_with_no_partitioner.add_partitioner_year_and_month(
-                column_name="pickup_datetime"
-            )
-        )
-        assert asset_with_conflicting_partitioner.batch_request_options == (
+        asset_with_conflicting_partitioner = file_asset_with_no_partitioner
+        partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+        assert asset_with_conflicting_partitioner.get_batch_request_options_keys(
+            partitioner=partitioner
+        ) == (
             "year",
             "month",
             "path",

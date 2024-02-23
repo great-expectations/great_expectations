@@ -530,27 +530,6 @@ class _SQLAsset(DataAsset):
         assert PartitionerClass is not None
         return PartitionerClass(**abstract_partitioner.dict())
 
-    @property
-    @override
-    def batch_request_options(self) -> tuple[str, ...]:
-        """The potential keys for BatchRequestOptions.
-
-        Example:
-        ```python
-        >>> print(asset.batch_request_options)
-        ("day", "month", "year")
-        >>> options = {"year": "2023"}
-        >>> batch_request = asset.build_batch_request(options=options)
-        ```
-
-        Returns:
-            A tuple of keys that can be used in a BatchRequestOptions dictionary.
-        """
-        options: tuple[str, ...] = tuple()
-        if self.partitioner:
-            options = tuple(self.partitioner.param_names)
-        return options
-
     @override
     def get_batch_request_options_keys(
         self, partitioner: Optional[Partitioner]
