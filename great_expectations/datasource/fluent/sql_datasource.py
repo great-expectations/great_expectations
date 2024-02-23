@@ -749,12 +749,18 @@ class _SQLAsset(DataAsset):
                 partitioner=batch_request.partitioner,
             )
         ):
-            options = {option: None for option in self.batch_request_options}
+            options = {
+                option: None
+                for option in self.get_batch_request_options_keys(
+                    partitioner=batch_request.partitioner
+                )
+            }
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
+                partitioner=batch_request.partitioner,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"

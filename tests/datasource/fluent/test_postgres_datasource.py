@@ -147,7 +147,9 @@ def assert_table_asset(
     assert asset.name == name
     assert asset.table_name == table_name
     assert asset.datasource == source
-    assert asset.batch_request_options == batch_request_options
+    assert (
+        asset.get_batch_request_options_keys(partitioner=None) == batch_request_options
+    )
 
 
 def assert_batch_request(
@@ -401,10 +403,13 @@ def test_datasource_gets_batch_list_partitioner_with_batch_request_options_set_t
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.partitioner = year_month_partitioner(column_name="my_col")
-        assert asset.batch_request_options == ("year", "month")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        assert asset.get_batch_request_options_keys(partitioner=partitioner) == (
+            "year",
+            "month",
+        )
         batch_request_with_none = asset.build_batch_request(
-            {"year": None, "month": None}
+            options={"year": None, "month": None}, partitioner=partitioner
         )
         assert batch_request_with_none.options == {"year": None, "month": None}
         batches = source.get_batch_list_from_batch_request(batch_request_with_none)
