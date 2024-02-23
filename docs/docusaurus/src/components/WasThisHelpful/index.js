@@ -16,12 +16,12 @@ export default function WasThisHelpful(){
 
     return <>
             <hr className={styles.feedbackDivider}/>
-            <div className={styles.feedbackCard}>
+            <section className={styles.feedbackCard}>
                 <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
-                <section className={styles.feedbackCardActions}>
+                <div className={styles.feedbackCardActions}>
                     <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
                     <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.no')}>No</button>
-                </section>
-            </div>
+                </div>
+            </section>
         </>
 }
