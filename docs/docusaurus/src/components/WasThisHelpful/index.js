@@ -35,13 +35,21 @@ export default function WasThisHelpful(){
         handleFeedbackReaction('docs_feedback.no')
     }
 
-    const sendReview = () => {
-        posthog.capture('form_submitted', {
-            form_data: formData,
+    const dismissFeedbackModal = () => {
+        posthog.capture("survey dismissed", {
+            $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0'
         })
-        console.log('AAAAAAAAAAAAAAAAAAAA',posthog.capture('form_submitted', {
-            form_data: formData,
-        }))
+        setIsOpen(false)
+    }
+
+    const sendReview = () => {
+        posthog.capture("survey sent", {
+            $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
+            $survey_response: formData.name,
+            $survey_response_1: formData.workEmail,
+            $survey_response_2: formData.description,
+            $survey_response_3: pathname
+        })
         setIsOpen(false)
     }
 
@@ -58,7 +66,7 @@ export default function WasThisHelpful(){
             </div>
 
             {isOpen && <>
-                <div className={styles.overlay} onClick={() => setIsOpen(false)}/>
+                <div className={styles.overlay} onClick={dismissFeedbackModal}/>
                 <div className={styles.modal}>
                     <div className={styles.modalHeader}>
                         <h5 className={styles.modalHeaderTitle}>Tell Us More</h5>
