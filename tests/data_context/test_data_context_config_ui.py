@@ -1571,7 +1571,6 @@ def test_data_context_config_defaults():
             "data_context_id": mock.ANY,
             "enabled": True,
             "explicit_id": False,
-            "explicit_url": False,
         },
         "checkpoint_store_name": None,
         "concurrency": None,
