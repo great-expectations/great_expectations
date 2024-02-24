@@ -3,6 +3,7 @@ sidebar_label: 'Configure Actions'
 title: 'Configure Actions'
 id: actions_lp
 description: Configure Actions to send Validation Result notifications, update Data Docs, and store Validation Results.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

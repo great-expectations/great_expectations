@@ -61,7 +61,11 @@ from great_expectations.core.config_provider import (
     _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
-from great_expectations.core.factory import CheckpointFactory, SuiteFactory
+from great_expectations.core.factory import (
+    CheckpointFactory,
+    SuiteFactory,
+    ValidationFactory,
+)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -329,6 +333,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
+        # TODO: Update to follow existing pattern once new ValidationConfigStore is implemented
+        self._validations: ValidationFactory | None = None
+
     def _init_analytics(self) -> None:
         init_analytics(
             data_context_id=uuid.UUID(self._data_context_id),
@@ -554,6 +561,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "DataContext requires a configured CheckpointStore to persist Checkpoints."
             )
         return self._checkpoints
+
+    @property
+    def validations(self) -> ValidationFactory:
+        if not self._validations:
+            raise gx_exceptions.DataContextError(
+                "DataContext requires a configured ValidationConfigStore to persist Validations."
+            )
+        return self._validations
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -1708,80 +1723,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return Checkpoint.DEFAULT_ACTION_LIST
 
-    @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
-    def get_checkpoint(
-        self,
-        name: str | None = None,
-        ge_cloud_id: str | None = None,
-        id: str | None = None,
-    ) -> Checkpoint:
-        """Retrieves a given Checkpoint by either name or id.
-
-        Args:
-            name: The name of the target Checkpoint.
-            ge_cloud_id: The id associated with the target Checkpoint.
-            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
-
-        Returns:
-            The requested Checkpoint.
-
-        Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exist.
-        """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-
-        if not name and not id:
-            raise ValueError("name and id cannot both be None")
-
-        del ge_cloud_id
-
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
-            name=name, id=id
-        )
-        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config,
-            data_context=self,
-            name=name,
-        )
-
-        return checkpoint
-
-    @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
-    def delete_checkpoint(
-        self,
-        name: str | None = None,
-        ge_cloud_id: str | None = None,
-        id: str | None = None,
-    ) -> None:
-        """Deletes a given Checkpoint by either name or id.
-
-        Args:
-            name: The name of the target Checkpoint.
-            ge_cloud_id: The id associated with the target Checkpoint.
-            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
-
-        Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exist.
-        """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        del ge_cloud_id
-
-        return self.checkpoint_store.delete_checkpoint(name=name, id=id)
-
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
     ) -> None:
@@ -2363,7 +2304,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                data_context=self,
                 ge_cloud_id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2509,7 +2449,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                data_context=self,
                 ge_cloud_id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2606,9 +2545,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 dict, self.expectations_store.get(key)
             )
             # create the ExpectationSuite from constructor
-            expectation_suite = ExpectationSuite(
-                **expectations_schema_dict, data_context=self
-            )
+            expectation_suite = ExpectationSuite(**expectations_schema_dict)
             if include_rendered_content:
                 expectation_suite.render()
             return expectation_suite
@@ -3793,9 +3730,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
-            expectation_suite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
+            expectation_suite = ExpectationSuite(**expectation_suite_dict)
 
             dependencies: dict = (
                 expectation_suite.get_evaluation_parameter_dependencies()

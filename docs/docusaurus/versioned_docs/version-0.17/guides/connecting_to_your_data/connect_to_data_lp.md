@@ -3,6 +3,7 @@ sidebar_label: 'Connect to source data'
 title: 'Connect to source data'
 id: connect_to_data_lp
 description: Connect to source data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

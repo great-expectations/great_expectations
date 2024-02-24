@@ -52,8 +52,7 @@ def validation_operator_result():
 
 
 @pytest.fixture()
-def expectation_suite_to_render_with_notes(empty_data_context):
-    context = empty_data_context
+def expectation_suite_to_render_with_notes():
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={"great_expectations_version": "0.13.0-test"},
@@ -81,7 +80,6 @@ def expectation_suite_to_render_with_notes(empty_data_context):
                 ],
             ),
         ],
-        data_context=context,
     )
     return expectation_suite
 

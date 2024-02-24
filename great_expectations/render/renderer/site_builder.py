@@ -443,9 +443,7 @@ class DefaultSiteSectionBuilder:
             try:
                 resource = self.source_store.get(resource_key)
                 if isinstance(resource_key, ExpectationSuiteIdentifier):
-                    resource = ExpectationSuite(
-                        **resource, data_context=self.data_context
-                    )
+                    resource = ExpectationSuite(**resource)
             except exceptions.InvalidKeyError:
                 logger.warning(
                     f"Object with Key: {resource_key!s} could not be retrieved. Skipping..."

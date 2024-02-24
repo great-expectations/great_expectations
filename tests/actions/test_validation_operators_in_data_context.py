@@ -12,8 +12,7 @@ from great_expectations.self_check.util import expectationSuiteSchema
 
 
 @pytest.fixture()
-def parameterized_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def parameterized_expectation_suite():
     fixture_path = file_relative_path(
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
@@ -22,7 +21,7 @@ def parameterized_expectation_suite(empty_data_context_stats_enabled):
         fixture_path,
     ) as suite:
         expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(suite))
-        return ExpectationSuite(**expectation_suite_dict, data_context=context)
+        return ExpectationSuite(**expectation_suite_dict)
 
 
 @pytest.fixture

@@ -2,6 +2,7 @@
 sidebar_label: 'GX Cloud'
 title: 'GX Cloud'
 description: Get started with GX Cloud and learn more about GX Cloud features and functionality.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
