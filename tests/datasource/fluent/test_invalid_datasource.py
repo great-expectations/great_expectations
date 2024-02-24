@@ -75,6 +75,18 @@ class TestPublicMethodsAreOverridden:
         assert base_ds_method_name in invalid_da_public_attributes
 
 
+@pytest.fixture(scope="module")
+def datasource_fields() -> set[str]:
+    """Return a set of all the fields in the base Datasource model."""
+    return set(Datasource.__fields__.keys())
+
+
+@pytest.fixture(scope="module")
+def data_asset_fields() -> set[str]:
+    """Return a set of all the fields in the base DataAsset model."""
+    return set(DataAsset.__fields__.keys())
+
+
 class InvalidDSFactory(Protocol):
     """
     Accept a datasource config and return an InvalidDatasource instance.
@@ -185,6 +197,46 @@ class TestInvalidDatasource:
 
             with pytest.raises(TestConnectionError):
                 invalid_asset.test_connection()
+
+    def test_extra_fields_are_ignored(
+        self,
+        datasource_fields: set[str],
+        data_asset_fields: set[str],
+        invalid_ds_cfg: dict,
+        invalid_datasource_factory: Callable[
+            [dict[Literal["name", "type", "assets"] | Any, Any]], InvalidDatasource
+        ],
+    ):
+        """
+        Ensure that extra fields are ignored when creating the InvalidDatasource instance.
+        These fields could include secrets or other sensitive information that should not be included
+        in the InvalidDatasource instance.
+
+        Standard fields such as `type`, `name`, `id` etc. should be included in the InvalidDatasource instance and should
+        never be sensitive.
+        """
+        print(f"Datasource config:\n{pf(invalid_ds_cfg)}")
+        invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
+
+        ds_dict = invalid_ds._json_dict()
+        print(f"\nInvalidDatasource dict:\n{pf(ds_dict)}")
+
+        assert set(ds_dict.keys()) >= {
+            "name",
+            "type",
+        }, "Expected standard fields to be present"
+
+        extra_ds_fields = set(invalid_ds_cfg.keys()) - datasource_fields
+        for field in extra_ds_fields:
+            assert field not in ds_dict, f"Expected `{field}` to be ignored"
+
+        for asset in invalid_ds.assets:
+            asset_dict = asset.dict()
+            extra_asset_fields = set(asset_dict.keys()) - data_asset_fields
+            for field in extra_asset_fields:
+                assert (
+                    field not in asset_dict
+                ), f"Expected asset `{field}` to be ignored"
 
 
 class TestInvalidDataAsset:

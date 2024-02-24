@@ -36,8 +36,7 @@ class InvalidAsset(DataAsset):
     name: str = "invalid"
 
     class Config:
-        extra = "allow"
-        arbitrary_types_allowed = True
+        extra = "ignore"
 
     def _raise_type_error(self) -> NoReturn:
         """
@@ -134,7 +133,7 @@ class InvalidDatasource(Datasource):
     assets: List[InvalidAsset] = []
 
     class Config:
-        extra = "allow"
+        extra = "ignore"
         arbitrary_types_allowed = True
         json_encoders = {
             pydantic.ValidationError: lambda v: v.errors(),
