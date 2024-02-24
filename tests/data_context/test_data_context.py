@@ -1606,7 +1606,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
                             "value": "expect_sky_to_be_color",
                         },
                         "kwargs": {
-                            "schema": {"type": "string"},
+                            "schema": {"type": "object"},
                             "value": {"color": "blue"},
                         },
                     },
@@ -1629,7 +1629,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
                             "value": "expect_sky_to_be_color",
                         },
                         "kwargs": {
-                            "schema": {"type": "string"},
+                            "schema": {"type": "object"},
                             "value": {"color": "blue"},
                         },
                     },
