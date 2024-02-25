@@ -80,7 +80,7 @@ batch_request = {
 
 expectation_suite_name = "my_awsathena_expectation_suite"
 try:
-    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    suite = context.suites.get(name=expectation_suite_name)
     print(
         f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.'
     )

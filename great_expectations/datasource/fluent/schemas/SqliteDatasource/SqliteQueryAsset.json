@@ -67,9 +67,6 @@
                     "$ref": "#/definitions/SqlPartitionerDatetimePart"
                 },
                 {
-                    "$ref": "#/definitions/PartitionerHashedColumn"
-                },
-                {
                     "$ref": "#/definitions/PartitionerConvertedDateTime"
                 }
             ]
@@ -541,34 +538,6 @@
             "required": [
                 "column_name",
                 "datetime_parts"
-            ],
-            "additionalProperties": false
-        },
-        "PartitionerHashedColumn": {
-            "title": "PartitionerHashedColumn",
-            "description": "Partition on hash value of a column.\n\nArgs:\n    hash_digits: The number of digits to truncate the hash to.\n    method_name: Literal[\"partition_on_hashed_column\"]",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_hashed_column",
-                    "enum": [
-                        "partition_on_hashed_column"
-                    ],
-                    "type": "string"
-                },
-                "hash_digits": {
-                    "title": "Hash Digits",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "hash_digits"
             ],
             "additionalProperties": false
         },

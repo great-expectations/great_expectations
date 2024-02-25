@@ -10,6 +10,6 @@ For more information on Actions that Checkpoints can perform and how to add them
 
 Run the following code to view the new entry for the rendered Validation Result:
 
-```python
+```python title="Python"
 context.open_data_docs()
 ```

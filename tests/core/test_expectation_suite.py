@@ -93,7 +93,6 @@ class TestInit:
         default_meta = {"great_expectations_version": ge_version}
 
         assert suite.expectation_suite_name == fake_expectation_suite_name
-        assert suite._data_context is None
         assert suite.expectations == []
         assert suite.evaluation_parameters == {}
         assert suite.data_asset_type is None
@@ -107,13 +106,9 @@ class TestInit:
         fake_expectation_suite_name: str,
         expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
     ):
-        class DummyDataContext:
-            pass
-
         class DummyExecutionEngine:
             pass
 
-        dummy_data_context = DummyDataContext()
         test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
         test_data_asset_type = "test_data_asset_type"
         dummy_execution_engine_type = type(DummyExecutionEngine())
@@ -124,7 +119,6 @@ class TestInit:
 
         suite = ExpectationSuite(
             expectation_suite_name=fake_expectation_suite_name,
-            data_context=dummy_data_context,  # type: ignore[arg-type]
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
             evaluation_parameters=test_evaluation_parameters,
             data_asset_type=test_data_asset_type,
@@ -133,7 +127,6 @@ class TestInit:
             ge_cloud_id=test_id,
         )
         assert suite.expectation_suite_name == fake_expectation_suite_name
-        assert suite._data_context == dummy_data_context
         assert suite.expectation_configurations == [
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
@@ -475,7 +468,7 @@ class TestCRUDMethods:
         expectation.column = updated_column_name
         expectation.save()
         assert suite.expectations[0].column == updated_column_name
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.suites.get(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
 
@@ -502,7 +495,7 @@ class TestCRUDMethods:
         expectation.column = updated_column_name
         expectation.save()
         assert suite.expectations[0].column == updated_column_name
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.suites.get(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
 
@@ -618,7 +611,7 @@ class TestEvaluationParameterOptions:
 
     @pytest.fixture
     def expectation_suite(self) -> ExpectationSuite:
-        get_context()
+        get_context(mode="ephemeral")
         return ExpectationSuite("test-suite")
 
     @pytest.fixture
@@ -1130,13 +1123,11 @@ def table_exp3() -> ExpectationConfiguration:
 
 
 @pytest.fixture
-def empty_suite(empty_data_context) -> ExpectationSuite:
-    context = empty_data_context
+def empty_suite() -> ExpectationSuite:
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
-        data_context=context,
     )
 
 
@@ -1150,9 +1141,7 @@ def suite_with_table_and_column_expectations(
     table_exp1,
     table_exp2,
     table_exp3,
-    empty_data_context,
 ) -> ExpectationSuite:
-    context = empty_data_context
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -1166,21 +1155,18 @@ def suite_with_table_and_column_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
-        data_context=context,
     )
     return suite
 
 
 @pytest.fixture
 def baseline_suite(
-    expect_column_values_to_be_in_set_col_a_with_meta, exp2, empty_data_context
+    expect_column_values_to_be_in_set_col_a_with_meta, exp2
 ) -> ExpectationSuite:
-    context = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp2],
         meta={"notes": "This is an expectation suite."},
-        data_context=context,
     )
 
 

@@ -651,7 +651,7 @@ def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
         checkpoint_list = [
             d
             for d in checkpoint_list
-            if d["data"]["attributes"]["checkpoint_name"] in queried_names
+            if d["attributes"]["checkpoint_config"]["name"] in queried_names
         ]
 
     resp_body = {"data": checkpoint_list}
@@ -719,12 +719,47 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     else:
         id_ = FAKE_CHECKPOINT_ID
         payload["data"]["id"] = id_
-        checkpoints[id_] = payload
+        checkpoints[id_] = payload["data"]
         checkpoint_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 
     LOGGER.debug(f"Response {result.status}")
     return result
+
+
+def delete_checkpoint_by_name_cb(
+    request: PreparedRequest,
+) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
+    queried_names: list[str] = query_params.get("name", [])  # type: ignore[assignment]
+    if not queried_names:
+        raise ValueError("Must provide checkpoint name for deletion.")
+
+    cp_name = queried_names[0]
+    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
+
+    checkpoint_id: str | None = None
+    for checkpoint in checkpoints.values():
+        if checkpoint["attributes"]["checkpoint_config"]["name"] == cp_name:
+            checkpoint_id = checkpoint["id"]
+            break
+
+    if not checkpoint_id:
+        errors = ErrorPayloadSchema(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        return CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
+
+    deleted_cp = checkpoints.pop(checkpoint_id)
+    print(pf(deleted_cp, depth=5))
+
+    _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"].remove(cp_name)
+    LOGGER.debug(f"Deleted checkpoint '{cp_name}'")
+    return CallbackResult(204, headers={}, body="")
 
 
 def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
@@ -849,6 +884,11 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base}/checkpoints",
             post_checkpoints_cb,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            f"{org_url_base}/checkpoints",
+            delete_checkpoint_by_name_cb,
         )
         resp_mocker.add_callback(
             responses.GET,

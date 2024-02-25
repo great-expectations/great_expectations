@@ -74,7 +74,6 @@ from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
     _AbortedMetricsInfoDict,
-    _MetricKey,
     _MetricsDict,
 )
 from great_expectations.validator.validation_graph import (
@@ -989,10 +988,7 @@ class Validator:
     ]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
+        aborted_metrics_info: _AbortedMetricsInfoDict
         (
             resolved_metrics,
             aborted_metrics_info,
@@ -1005,21 +1001,20 @@ class Validator:
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
-            metric_exception_info: Set[
-                ExceptionInfo
+            metric_exception_info: Dict[
+                str, Union[MetricConfiguration, ExceptionInfo, int]
             ] = expectation_validation_graph.get_exception_info(
                 metric_info=aborted_metrics_info
             )
             # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
             if len(metric_exception_info) > 0:
                 configuration = expectation_validation_graph.configuration
-                for exception_info in metric_exception_info:
-                    result = ExpectationValidationResult(
-                        success=False,
-                        exception_info=exception_info,
-                        expectation_config=configuration,
-                    )
-                    evrs.append(result)
+                result = ExpectationValidationResult(
+                    success=False,
+                    exception_info=metric_exception_info,
+                    expectation_config=configuration,
+                )
+                evrs.append(result)
 
                 if configuration not in rejected_configurations:
                     rejected_configurations.append(configuration)
@@ -1661,9 +1656,7 @@ class Validator:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self._data_context
-                )
+                expectation_suite = ExpectationSuite(**expectation_suite_dict)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite: ExpectationSuite = expectation_suite
@@ -1685,8 +1678,7 @@ class Validator:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
+                expectation_suite_name=expectation_suite_name
             )
 
         self._expectation_suite.execution_engine_type = type(self._execution_engine)

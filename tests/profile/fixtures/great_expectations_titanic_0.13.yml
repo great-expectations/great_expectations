@@ -8,7 +8,7 @@
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 2.0
+config_version: 3 
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
@@ -86,6 +86,12 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
+
   validations_store:
     class_name: ValidationsStore
     store_backend:
@@ -98,6 +104,7 @@ stores:
     class_name: EvaluationParameterStore
 
 expectations_store_name: expectations_store
+checkpoint_store_name: checkpoint_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
 
