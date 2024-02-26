@@ -249,10 +249,16 @@ lint.select = [
     "NPY201", # numpy 2.0 compatibility (see https://numpy.org/devdocs/numpy_2_0_migration_guide.html#ruff-plugin) -- Explicitly listed to view preview rule errors
 ]
 lint.ignore = [
+    # formatting related ignores
+    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191", # tab-identation
+    "E111", # indentation-with-invalid-multiple
+    "E114", # indentation-with-invalid-multiple-comment
+    "E117", # over-idented
+    "E501", # line-too-long
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
     "F842", # variable annotated but unused # TODO enable
     # https://beta.ruff.rs/docs/rules/#pycodestyle-e-w
-    "E501", # line-length # TODO: too many violations
     "E402", # module level import not at top of file
     # https://beta.ruff.rs/docs/rules/#flake8-comprehensions-c4
     "C400", # TODO enable
