@@ -992,20 +992,13 @@ def test_validator_include_rendered_content_diagnostic(
     assert len(validation_result.rendered_content) == 1
     assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
 
-    # test evaluation parameters render
-    validator_include_rendered_content.set_evaluation_parameter(
-        "upstream_column_min", 1
-    )
-    validator_include_rendered_content.set_evaluation_parameter(
-        "upstream_column_max", 8
-    )
-
     validation_result: ExpectationValidationResult = (
         validator_include_rendered_content.expect_column_max_to_be_between(
             column="passenger_count",
             min_value={"$PARAMETER": "upstream_column_min"},
             max_value={"$PARAMETER": "upstream_column_max"},
             result_format={"result_format": "BOOLEAN_ONLY"},
+            evaluation_parameters={"upstream_column_min": 1, "upstream_column_max": 8},
         )
     )
 

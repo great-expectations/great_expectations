@@ -44,8 +44,6 @@ def test_save_expectation_suite_with_datetime_objects(
         batch = context._get_batch_v2(
             batch_kwargs=batch_kwargs, expectation_suite_name=empty_suite
         )
-        for param in evaluation_parameters:
-            batch.set_evaluation_parameter(param, evaluation_parameters[param])
 
         # Add expectation that will succeed using the datetime in a $PARAMETER
         batch.expect_column_max_to_be_between(

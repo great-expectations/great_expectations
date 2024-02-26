@@ -2239,7 +2239,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: Sequence[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
@@ -2264,7 +2263,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
-                evaluation_parameters=evaluation_parameters,
                 data_asset_type=data_asset_type,
                 execution_engine_type=execution_engine_type,
                 meta=meta,
@@ -2335,7 +2333,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
         data_asset_type: str | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
@@ -2354,7 +2351,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
         data_asset_type: str | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
@@ -2374,7 +2370,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
@@ -2386,7 +2381,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of the suite to create or replace.
             id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
-            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
             data_asset_type: Type of Data Asset to associate with this suite.
             execution_engine_type: Name of the Execution Engine type.
             meta: Metadata related to the suite.
@@ -2409,7 +2403,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
-                evaluation_parameters=evaluation_parameters,
                 data_asset_type=data_asset_type,
                 execution_engine_type=execution_engine_type,
                 meta=meta,

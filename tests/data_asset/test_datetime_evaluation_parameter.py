@@ -24,12 +24,10 @@ def test_pandas_datetime_evaluation_parameter():
     _df = pd.DataFrame(test_data)
     df = PandasDataset(_df)
 
-    for param in evaluation_parameters:
-        df.set_evaluation_parameter(param, evaluation_parameters[param])
     df.expect_column_max_to_be_between(
         column="data_refresh", min_value={"$PARAMETER": "now_minus_48h"}
     )
 
-    result = df.validate()
+    result = df.validate(evaluation_parameters=evaluation_parameters)
 
     assert result.success

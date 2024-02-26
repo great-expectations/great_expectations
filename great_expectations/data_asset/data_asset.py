@@ -879,33 +879,6 @@ class DataAsset:
 
         return result
 
-    def get_evaluation_parameter(self, parameter_name, default_value=None):
-        """Get an evaluation parameter value that has been stored in meta.
-
-        Args:
-            parameter_name (string): The name of the parameter to store.
-            default_value (any): The default value to be returned if the parameter is not found.
-
-        Returns:
-            The current value of the evaluation parameter.
-        """
-        if parameter_name in self._expectation_suite.evaluation_parameters:
-            return self._expectation_suite.evaluation_parameters[parameter_name]
-        else:
-            return default_value
-
-    def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
-        """Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
-        parameterized expectations.
-
-        Args:
-            parameter_name (string): The name of the kwarg to be replaced at evaluation time
-            parameter_value (any): The value to be used
-        """
-        self._expectation_suite.evaluation_parameters.update(
-            {parameter_name: parameter_value}
-        )
-
     def add_citation(  # noqa: PLR0913
         self,
         comment,
