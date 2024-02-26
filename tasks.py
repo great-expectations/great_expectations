@@ -107,7 +107,7 @@ def fmt(  # noqa: PLR0913
     if sort_:
         sort(ctx, path, check=check, exclude=exclude, pty=pty)
 
-    cmds = ["black", path]
+    cmds = ["ruff", "format", path]
     if check:
         cmds.append("--check")
     if exclude:
@@ -132,7 +132,7 @@ def lint(  # noqa: PLR0913
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run formatter (black) and linter (ruff)"""
+    """Run formatter (ruff format) and linter (ruff)"""
     if fmt_:
         fmt(ctx, path, check=not fix, pty=pty)
 
@@ -1097,8 +1097,7 @@ def service(
             cmds = []
 
             if (
-                service_name == "mercury"
-                and os.environ.get("CI") != "true"  # noqa: TID251
+                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
             ):
                 cmds.extend(
                     [

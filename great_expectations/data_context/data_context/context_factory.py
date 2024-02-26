@@ -17,6 +17,7 @@ from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
 
+# TODO: update this for using ruff format
 try:
     import black
 except ImportError:

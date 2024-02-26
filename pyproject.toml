@@ -4,21 +4,6 @@ requires = ["setuptools", "wheel"]
 # https://github.com/python-versioneer/python-versioneer/issues/193
 # build-backend = "setuptools.build_meta"
 
-[tool.black]
-target-version = ["py38", "py39", "py310"]
-extend_excludes = '''
-(
-     docs/.*
-    | tests/.*.fixture
-    | .*.ge_store_backend_id
-)
-'''
-# exclude unparseable notebooks
-# https://stackoverflow.com/a/73296261/6304433
-force-exclude = '''
-(tests/data_context/fixtures/post_init_project_v0.8.0_A/great_expectations/notebooks/.*\.ipynb)
-'''
-
 [tool.isort]
 profile = "black"
 skip_gitignore = true
