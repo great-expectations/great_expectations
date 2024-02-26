@@ -213,7 +213,9 @@ warn_untyped_fields = true
 [tool.ruff]
 target-version = "py38"
 line-length = 88
-select = [
+lint.preview = true  # This enables preview rules for specified rules e.g. NPY201
+lint.explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-single-preview-rules
+lint.select = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
     "F", # Pyflakes
     # https://beta.ruff.rs/docs/rules/#pycodestyle-e-w
@@ -246,7 +248,7 @@ select = [
     "NPY", # NumPy-specific rules TODO: Enable after fixing or ignoring errors
     "NPY201", # numpy 2.0 compatibility (see https://numpy.org/devdocs/numpy_2_0_migration_guide.html#ruff-plugin) -- Explicitly listed to view preview rule errors
 ]
-ignore = [
+lint.ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
     "F842", # variable annotated but unused # TODO enable
     # https://beta.ruff.rs/docs/rules/#pycodestyle-e-w
@@ -294,12 +296,7 @@ extend-exclude = [
     "tests/dataset",                                            # 10 warnings
 ]
 
-[tool.ruff.lint]
-# This enables preview rules for specified rules e.g. NPY201
-preview = true
-explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-single-preview-rules
-
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "assets/benchmark/benchmark.py" = [
     "DTZ", # flake8-datetimez-dtz - doesn't matter for benchmark tests
 ]
@@ -326,7 +323,7 @@ explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-
     "F841", # local variable is assigned to but never used - ignored for code used in snippets
 ]
 
-[tool.ruff.flake8-type-checking]
+[tool.ruff.lint.flake8-type-checking]
 # pydantic models use annotations at runtime
 runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
@@ -337,14 +334,13 @@ runtime-evaluated-base-classes = [
 ]
 runtime-evaluated-decorators = ["pydantic.dataclasses.dataclass"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 15
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.flake8-tidy-imports]
-[tool.ruff.flake8-tidy-imports.banned-api]
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
 "os.environ".msg = """Please do not use os.environ outside of configuration files.
 If you are working in a configuration file you may use the inline comment \
 "# noqa: TID251 # os.environ allowed in config files" to ignore this error."""
