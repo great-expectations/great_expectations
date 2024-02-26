@@ -62,7 +62,7 @@ def yellow_trip_pandas_data_context(
     )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"),
-        exist_ok=True,  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103

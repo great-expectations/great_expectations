@@ -94,7 +94,7 @@ def create_data_context_files(
         os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         os.makedirs(  # noqa: PTH103
             os.path.join(context_path, "uncommitted"),
-            exist_ok=True,  # noqa: PTH118
+            exist_ok=True,
         )
         copy_relative_path(
             f"../test_fixtures/{config_variables_fixture_filename}",
@@ -133,7 +133,7 @@ def create_common_data_context_files(context_path, asset_config_path):
     )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "plugins"),
-        exist_ok=True,  # noqa: PTH118
+        exist_ok=True,
     )
     copy_relative_path(
         "../test_fixtures/custom_pandas_dataset.py",

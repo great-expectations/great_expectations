@@ -106,7 +106,7 @@ if __name__ == "__main__":
     root = os.path.join(  # noqa: PTH118
         os.path.dirname(os.path.abspath(__file__)),
         "..",
-        "..",  # noqa: PTH100, PTH120
+        "..",
     )
     try:
         os.chdir(root)

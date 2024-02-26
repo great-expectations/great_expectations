@@ -52,7 +52,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
     )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "plugins"),
-        exist_ok=True,  # noqa: PTH118
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118

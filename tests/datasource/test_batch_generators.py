@@ -77,12 +77,12 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     os.mkdir(os.path.join(basedir, "f3"))  # noqa: PTH102, PTH118
     with open(
         os.path.join(basedir, "f3", "f3_1.blarg"),
-        "w",  # noqa: PTH118
+        "w",
     ) as outfile:
         outfile.write("\n\n\n")
     with open(
         os.path.join(basedir, "f3", "f3_2.blarg"),
-        "w",  # noqa: PTH118
+        "w",
     ) as outfile:
         outfile.write("\n\n\n")
     # Include: valid subdir with valid files
