@@ -10,6 +10,9 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.10
+* [BUGFIX] - Prevent duplicate Expectations in Validation Results ([#9533](https://github.com/great-expectations/great_expectations/pull/9533))
+
 ### 0.18.9
 * [BUGFIX] Re-enable GCS Docs Integration test ([#9237](https://github.com/great-expectations/great_expectations/pull/9237))
 * [BUGFIX] Fix add or update expectation suite ([#9268](https://github.com/great-expectations/great_expectations/pull/9268))
