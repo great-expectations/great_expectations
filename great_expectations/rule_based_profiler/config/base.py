@@ -716,7 +716,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     config_version = fields.Float(
         required=True,
         allow_none=False,
-        validate=lambda x: x == 1.0,  # noqa: PLR2004
+        validate=lambda x: x == 1.0,
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },
