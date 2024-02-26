@@ -43,13 +43,13 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 :::
 
 <details>
-  <summary>Full example code</summary>
-  <p>
+<summary>Full example code</summary>
+<p>
 
-  ```python title="Python code" name="core/expectation_suites/_examples/create_an_expectation_suite.py full example code"
-  ```
+```python title="Python code" name="core/expectation_suites/_examples/create_an_expectation_suite.py full example code"
+```
 
-  </p>
+</p>
 </details>
 
 ## Get an existing Expectation Suite
