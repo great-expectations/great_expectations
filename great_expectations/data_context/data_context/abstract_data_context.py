@@ -1460,8 +1460,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            id: The GE Cloud ID to use in generating this checkpoint.
-            expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            id: The ID to use in generating this checkpoint.
+            expectation_suite_id: The expectation suite ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
             validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.

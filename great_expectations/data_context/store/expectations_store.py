@@ -113,6 +113,9 @@ class ExpectationsStore(Store):
         suite_dict: Dict = suite_data["attributes"]["suite"]
         suite_dict["id"] = ge_cloud_suite_id
 
+        # Temporary fork to account for pre-V1 configs
+        suite_dict.pop("ge_cloud_id", None)
+
         return suite_dict
 
     def add_expectation(
