@@ -17,6 +17,7 @@
 @import "alerts.scss";
 @import "pagination.scss";
 @import "overview_pages";
+@import "sass_variables";
 
 /* You can override the default Infima variables here. */
 :root {
@@ -99,8 +100,14 @@
       --link-hover-color: #A03E0A;
 }
 
+.markdown a,
 p > a {
+    color: var(--ifm-color-primary);
     text-decoration: underline;
+
+  &:hover {
+    color: var(--link-hover-color);
+  }
 }
 
 h3 {
@@ -133,7 +140,7 @@ h3 {
     padding: 3px 0;
 }
 
-@media (max-width: 996px) {
+@media (max-width: $mobile-breakpoint) {
     .footer__links {
         display: block !important;
     }
@@ -251,7 +258,7 @@ table.borderless tr:nth-child(2n) {
   visibility: visible;
 }
 
-@media (max-width: 996px) {
+@media (max-width: $mobile-breakpoint) {
     .main-wrapper {
         overflow: hidden;
     }

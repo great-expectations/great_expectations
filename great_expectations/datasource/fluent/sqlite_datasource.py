@@ -18,12 +18,12 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
-    Partitioner,
-    SQLDatasource,
-    _PartitionerOneColumnOneParam,
+    QueryAsset as SqlQueryAsset,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    QueryAsset as SqlQueryAsset,
+    SQLDatasource,
+    SqlPartitioner,
+    _PartitionerOneColumnOneParam,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset as SqlTableAsset,
@@ -46,39 +46,6 @@ if TYPE_CHECKING:
 #    sql_datasource.TableAsset and sql_datasource.QueryAsset.
 #
 # See SqliteDatasource, SqliteTableAsset, and SqliteQueryAsset below.
-
-
-class PartitionerHashedColumn(_PartitionerOneColumnOneParam):
-    """Partition on hash value of a column.
-
-    Args:
-        hash_digits: The number of digits to truncate the hash to.
-        method_name: Literal["partition_on_hashed_column"]
-    """
-
-    # hash digits is the length of the hash. The md5 of the column is truncated to this length.
-    hash_digits: int
-    column_name: str
-    method_name: Literal["partition_on_hashed_column"] = "partition_on_hashed_column"
-
-    @property
-    @override
-    def param_names(self) -> List[str]:
-        return ["hash"]
-
-    @override
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
-        return {"column_name": self.column_name, "hash_digits": self.hash_digits}
-
-    @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
-        if "hash" not in options:
-            raise ValueError(
-                "'hash' must be specified in the batch request options to create a batch identifier"
-            )
-        return {self.column_name: options["hash"]}
 
 
 class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
@@ -133,31 +100,10 @@ class SqliteDsn(pydantic.AnyUrl):
     host_required = False
 
 
-SqlitePartitioner = Union[
-    Partitioner, PartitionerHashedColumn, PartitionerConvertedDateTime
-]
+SqlitePartitioner = Union[SqlPartitioner, PartitionerConvertedDateTime]
 
 
 class _SQLiteAssetMixin:
-    @public_api
-    def add_partitioner_hashed_column(
-        self: Self, column_name: str, hash_digits: int
-    ) -> Self:
-        """Associates a hashed column partitioner with this sqlite data asset.
-        Args:
-            column_name: The column name of the date column where year and month will be parsed out.
-            hash_digits: Number of digits to truncate output of hashing function (to limit length of hashed result).
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            PartitionerHashedColumn(
-                method_name="partition_on_hashed_column",
-                column_name=column_name,
-                hash_digits=hash_digits,
-            )
-        )
-
     @public_api
     def add_partitioner_converted_datetime(
         self: Self, column_name: str, date_format_string: str

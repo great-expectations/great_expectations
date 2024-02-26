@@ -76,33 +76,13 @@ jobs:
       - name: Marker-coverage-check
         run: invoke marker-coverage
 
-  docs-changes:
-    # check whether docs were changed
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-    outputs:
-      docs: ${{ steps.filter.outputs.docs }}
-    steps:
-    - name: Checkout source code
-      uses: actions/checkout@v3
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          docs:
-            - 'docs/**'
-            - 'tests/integration/docusaurus/**'
-            - 'tests/integration/fixtures/**'
-            - 'tests/test_sets/**'
-
   docs-snippets:
-    needs: [unit-tests, docs-changes, doc-checks, ci-is-on-main-repo]
+    needs: [unit-tests, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true' && github.base_ref == 'develop') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
+      (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
+      github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -243,11 +223,12 @@ jobs:
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
   docs-build:
-    needs: [doc-checks, docs-changes]
-    # run on non-draft PRs with docs changes
+    needs: [doc-checks]
+    # run on non-draft PRs
     if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true' && github.base_ref == 'develop') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.'))
+      (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
+      github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -263,6 +244,7 @@ jobs:
       - name: Build docs
         env:
           NODE_OPTIONS: --max_old_space_size=4096
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   cloud-tests:

@@ -4,6 +4,7 @@ hide_title: true
 sidebar_label: "Amazon Web Services (AWS)"
 description: "Integrate Great Expectations with AWS"
 id: aws_lp
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

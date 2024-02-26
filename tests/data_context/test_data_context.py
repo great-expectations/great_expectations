@@ -68,46 +68,6 @@ yaml = YAMLHandler()
 parameterized_expectation_suite_name = "my_dag_node.default"
 
 
-@pytest.fixture(scope="function")
-def titanic_multibatch_data_context(
-    tmp_path,
-) -> FileDataContext:
-    """
-    Based on titanic_data_context, but with 2 identical batches of
-    data asset "titanic"
-    """
-    project_path = tmp_path / "titanic_data_context"
-    project_path.mkdir()
-    project_path = str(project_path)
-    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
-    os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
-    )
-    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
-    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
-    shutil.copy(
-        file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
-        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
-    )
-    shutil.copy(
-        file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1911.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1912.csv"
-            )
-        ),
-    )
-    return get_context(context_root_dir=context_path)
-
-
 @pytest.fixture
 def data_context_with_bad_datasource(tmp_path_factory):
     """
@@ -543,7 +503,6 @@ def test_data_context_updates_expectation_suite_names(
         loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
         loaded_suite = ExpectationSuite(
             **loaded_suite_dict,
-            data_context=data_context_parameterized_expectation_suite,
         )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
@@ -961,38 +920,6 @@ def test_scaffold_directories(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_build_batch_kwargs(titanic_multibatch_data_context):
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1912",
-    )
-    assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
-
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1911",
-    )
-    assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
-
-    paths = []
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
-    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
-
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
-    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
-
-    assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
-
-
-@pytest.mark.filesystem
 def test_load_config_variables_property(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):
@@ -1127,8 +1054,8 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(gx_exceptions.CheckpointNotFoundError):
-        context.get_checkpoint("not_a_checkpoint")
+    with pytest.raises(gx_exceptions.DataContextError):
+        context.checkpoints.get("not_a_checkpoint")
 
 
 @pytest.mark.filesystem
@@ -1146,14 +1073,14 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError):
-        context.get_checkpoint("my_checkpoint")
+    with pytest.raises(gx_exceptions.InvalidBaseYamlConfigError):
+        context.checkpoints.get("my_checkpoint")
 
 
 @pytest.mark.unit
 def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
-    obs = context.get_checkpoint("my_checkpoint")
+    obs = context.checkpoints.get("my_checkpoint")
     assert isinstance(obs, Checkpoint)
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
@@ -1211,7 +1138,7 @@ def test_run_checkpoint_new_style(
     )
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
 
-    checkpoint = context.get_checkpoint(checkpoint_config.name)
+    checkpoint = context.checkpoints.get(checkpoint_config.name)
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
@@ -1281,9 +1208,7 @@ data_connectors:
         batch_identifiers={
             "alphanumeric": "some_file",
         },
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
@@ -1640,9 +1565,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     context.add_expectation_suite(expectation_suite=expectation_suite)
 
     # Without include_rendered_content set, all legacy rendered_content was None.
-    expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    expectation_suite = context.suites.get(name=expectation_suite_name)
     assert not any(
         expectation_configuration.rendered_content
         for expectation_configuration in expectation_suite.expectation_configurations
@@ -1650,9 +1573,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
 
     # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
     context.variables.include_rendered_content.expectation_suite = True
-    expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    expectation_suite = context.suites.get(name=expectation_suite_name)
     for expectation_configuration in expectation_suite.expectation_configurations:
         assert all(
             isinstance(rendered_content_block, RenderedAtomicContent)
@@ -1671,9 +1592,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         ],
     )
     context.update_expectation_suite(expectation_suite=expectation_suite)
-    expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    expectation_suite = context.suites.get(name=expectation_suite_name)
 
     expected_rendered_content: List[RenderedAtomicContent] = [
         RenderedAtomicContent(

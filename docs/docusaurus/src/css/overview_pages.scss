@@ -38,14 +38,24 @@
   max-width: 40rem;
 }
 
-.generated-index-page header {
-  @include overview-card-container;
-
-  h1 {
-    @include overview-card-title;
+.generated-index-page {
+  .theme-doc-breadcrumbs {
+    display: none;
   }
 
-  p {
-    @include overview-card-description;
+  & > div {
+    max-width: unset !important;
+  }
+
+  header {
+    @include overview-card-container;
+
+    h1 {
+      @include overview-card-title;
+    }
+
+    p {
+      @include overview-card-description;
+    }
   }
 }

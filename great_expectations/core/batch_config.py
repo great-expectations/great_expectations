@@ -41,7 +41,9 @@ class BatchConfig(pydantic.BaseModel):
         self, batch_request_options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         """Build a BatchRequest from the asset and batch request options."""
-        return self.data_asset.build_batch_request(options=batch_request_options)
+        return self.data_asset.build_batch_request(
+            options=batch_request_options, partitioner=self.partitioner
+        )
 
     def save(self) -> None:
         self.data_asset._save_batch_config(self)

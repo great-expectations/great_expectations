@@ -186,7 +186,7 @@ class ValidationResultsPageRenderer(Renderer):
         columns = defaultdict(list)
         try:
             suite_meta = (
-                self._data_context.get_expectation_suite(expectation_suite_name).meta
+                self._data_context.suites.get(expectation_suite_name).meta
                 if self._data_context is not None
                 else None
             )

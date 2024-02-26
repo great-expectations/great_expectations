@@ -4,6 +4,7 @@ title: 'Connect to a Data Source'
 hide_title: true
 id: connect_to_data_lp
 description: Connect to data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

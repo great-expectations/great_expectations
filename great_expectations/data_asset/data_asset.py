@@ -330,9 +330,7 @@ class DataAsset:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self._data_context
-                )
+                expectation_suite = ExpectationSuite(**expectation_suite_dict)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
 
@@ -356,7 +354,6 @@ class DataAsset:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
             )
 
         self._expectation_suite.data_asset_type = self._data_asset_type
@@ -712,9 +709,7 @@ class DataAsset:
                         expectation_suite_dict: dict = expectationSuiteSchema.loads(
                             infile.read()
                         )
-                        expectation_suite = ExpectationSuite(
-                            **expectation_suite_dict, data_context=self._data_context
-                        )
+                        expectation_suite = ExpectationSuite(**expectation_suite_dict)
                 except ValidationError:
                     raise
                 except OSError:
@@ -723,9 +718,7 @@ class DataAsset:
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=None
-                )
+                expectation_suite = ExpectationSuite(**expectation_suite_dict)
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "

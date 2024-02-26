@@ -57,7 +57,7 @@ def test_save_expectation_suite_with_datetime_objects(
         assert isinstance(batch, PandasDataset)
 
         # Check that we can load the saved expectation suite
-        reloaded_expectation_suite = context.get_expectation_suite("test_suite")
+        reloaded_expectation_suite = context.suites.get("test_suite")
         assert isinstance(reloaded_expectation_suite, ExpectationSuite)
 
         # Run validation via the action_list_operator

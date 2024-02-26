@@ -16,7 +16,7 @@ This guide will help you trigger emails as an <TechnicalTag tag="action" text="A
 
 Open `uncommitted/config_variables.yml` file and add the following variables by adding the following lines:
 
-```yaml
+```yaml title="YAML"
 smtp_address: [address of the smtp server]
 smtp_port: [port used by the smtp server]
 sender_login: [login used to send the email]
@@ -29,7 +29,7 @@ receiver_emails: [addresses you want to send the email to]  # each address must 
 
 Locate the relevant checkpoint that you want to set up an email trigger for. Open the checkpoint's configuration file that is located at `great_expectations/checkpoints/` (for example, `great_expectations/checkpoints/checkpoint_01.yml`) and add an email action to the `action_list`. Follow the snippet below to set up the detials of your email trigger.
 
-```yaml
+```yaml title="YAML"
 action_list:
   - name: send_email_on_validation_result # name can be set to any value
     action:
@@ -67,7 +67,7 @@ If your `great_expectations.yml` contains multiple configurations for Data Docs 
 
 The following example will configure the email to include links <TechnicalTag tag="data_docs" text="Data Docs" /> at local_site and s3_site.
 
-```yaml
+```yaml title="YAML"
 # Example data_docs_sites configuration in `great_expectations.yml`
 data_docs_sites:
   local_site:
@@ -88,7 +88,7 @@ data_docs_sites:
       show_cta_footer: true
 ```
 
-```yaml
+```yaml title="YAML"
 # Example Checkpoint configuration
 action_list:
   - name: send_email_on_validation_result # name can be set to any value

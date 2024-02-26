@@ -4,6 +4,7 @@ title: 'Manage Checkpoints'
 hide_title: true
 id: checkpoint_lp
 description: Add validation data, create and configure Checkpoints, and pass in-mameory DataFrames.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

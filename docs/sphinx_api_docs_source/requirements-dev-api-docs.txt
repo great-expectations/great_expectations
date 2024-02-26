@@ -2,3 +2,9 @@ docstring-parser==0.15
 myst-parser
 pydata-sphinx-theme==0.11.0  # Pinned to keep the css styling consistent.
 sphinx~=4.5.0
+# Need to pin some sphinx extensions to avoid breaking changes. (https://stackoverflow.com/questions/77848565/sphinxcontrib-applehelp-breaking-sphinx-builds-with-sphinx-version-less-than-5-0)
+sphinxcontrib-applehelp==1.0.4
+sphinxcontrib-devhelp==1.0.2
+sphinxcontrib-htmlhelp==2.0.1
+sphinxcontrib-qthelp==1.0.3
+sphinxcontrib-serializinghtml==1.1.5

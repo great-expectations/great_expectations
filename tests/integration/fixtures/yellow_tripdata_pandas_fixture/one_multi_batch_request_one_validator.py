@@ -9,7 +9,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 context = gx.get_context()
-suite = context.get_expectation_suite("yellow_tripdata_validations")
+suite = context.suites.get("yellow_tripdata_validations")
 
 # This BatchRequest will retrieve all twelve batches from 2019
 multi_batch_request = BatchRequest(

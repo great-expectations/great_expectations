@@ -1518,12 +1518,6 @@ class GXCloudConfig(DictDot):
 
 
 class DataContextConfigSchema(Schema):
-    batch_configs = fields.Dict(
-        keys=fields.Str(),
-        required=False,
-        allow_none=True,
-        load_only=True,
-    )
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
@@ -2276,7 +2270,6 @@ class DataContextConfig(BaseYamlConfig):
         - https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/
 
     Args:
-        batch_configs: (Optional[Dict]): a dictionary of batch_config dicts.
         config_version (Optional[float]): config version of this DataContext.
         datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
             DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
@@ -2290,8 +2283,6 @@ class DataContextConfig(BaseYamlConfig):
         validation_operators: list of validation operators configured by this DataContext.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
-        notebooks (Optional[NotebookConfig]): Configurations for Jupyter Notebooks associated with DataContext, such as
-            the `suite_edit` Notebook.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
         anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
             anonymous usage statistics for GX.
@@ -2308,9 +2299,8 @@ class DataContextConfig(BaseYamlConfig):
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
-        batch_configs: Optional[Dict] = None,
         config_version: Optional[float] = None,
         datasources: Optional[
             Union[
@@ -2327,7 +2317,6 @@ class DataContextConfig(BaseYamlConfig):
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
-        notebooks: Optional[Any] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
@@ -2337,9 +2326,6 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
-        if notebooks:
-            warnings.warn("The `notebooks` parameter no longer supported.", UserWarning)
-
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
@@ -2367,19 +2353,15 @@ class DataContextConfig(BaseYamlConfig):
         self._config_version = config_version
         if datasources is None:
             datasources = {}
-        self.batch_configs = batch_configs or {}
         self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        if checkpoint_store_name is not None:
-            self.checkpoint_store_name = checkpoint_store_name
-        if profiler_store_name is not None:
-            self.profiler_store_name = profiler_store_name
+        self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
-        if validation_operators is not None:
-            self.validation_operators = validation_operators
+        self.validation_operators = validation_operators
         self.stores = stores or {}
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
@@ -2915,8 +2897,10 @@ class CheckpointConfig(BaseYamlConfig):
                 validation_dict=substituted_validation_dict,
                 batch_request_required=False,
             )
-            validation_batch_request: BatchRequestBase = substituted_validation_dict.get(  # type: ignore[assignment]
-                "batch_request"
+            validation_batch_request: BatchRequestBase = (
+                substituted_validation_dict.get(  # type: ignore[assignment]
+                    "batch_request"
+                )
             )
             validation_dict["batch_request"] = validation_batch_request
             validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
@@ -2925,8 +2909,10 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict[
                 "expectation_suite_name"
             ] = validation_expectation_suite_name
-            validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(  # type: ignore[assignment]
-                "expectation_suite_ge_cloud_id"
+            validation_expectation_suite_ge_cloud_id: str = (
+                substituted_validation_dict.get(  # type: ignore[assignment]
+                    "expectation_suite_ge_cloud_id"
+                )
             )
             validation_dict[
                 "expectation_suite_ge_cloud_id"

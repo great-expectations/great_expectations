@@ -33,7 +33,7 @@ To use an SQL Database such as Postgres, add the following fields and values:
 
 The following is an example of how the `MetricStore` configuration appears in `great_expectations.yml`:
 
-```yaml
+```YAML title="YAML"
 stores:
     #  ...
     metric_store:  # You can choose any name as the key for your metric store
@@ -65,14 +65,14 @@ When a `MetricStore` is available, add a `StoreMetricsAction` validation <Techni
   
 Add the following entry to `great_expectations.yml` to generate <TechnicalTag tag="validation_result" text="Validation Result" /> statistics:
 
-```yaml
+```YAML title="YAML"
   expectation_suite_name:
     statistics.<statistic name>
 ```
 
 Add the following entry to `great_expectations.yml` to generate values from a specific <TechnicalTag tag="expectation" text="Expectation" /> `result` field:
 
-```yaml
+```YAML title="YAML"
   expectation_suite_name:
     - column:
       <column name>:
@@ -113,7 +113,7 @@ Run the following command to run your Checkpoint and test `StoreMetricsAction`:
 
 <!--A snippet is required for this code block.-->
 
-```python
+```python title="Python"
 import great_expectations as gx
 context = gx.get_context()
 checkpoint_name = "your checkpoint name here"

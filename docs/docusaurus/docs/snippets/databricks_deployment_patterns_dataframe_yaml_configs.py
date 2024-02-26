@@ -156,7 +156,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 # ASSERTIONS vvvvv vvvvv
 assert context.list_expectation_suite_names() == [expectation_suite_name]
-suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+suite = context.suites.get(name=expectation_suite_name)
 assert len(suite.expectations) == 2
 # ASSERTIONS ^^^^^ ^^^^^
 
@@ -177,7 +177,7 @@ context.add_or_update_checkpoint(**yaml.load(my_checkpoint_config))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py run checkpoint">
-checkpoint = context.get_checkpoint(my_checkpoint_name)
+checkpoint = context.checkpoints.get(my_checkpoint_name)
 checkpoint_result = checkpoint.run(
     validations=[
         {

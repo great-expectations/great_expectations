@@ -1347,7 +1347,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     )
     assert sorted(inline_store_backend.list_keys()) == [
         ("anonymous_usage_statistics",),
-        ("batch_configs",),
         ("checkpoint_store_name",),
         ("concurrency",),
         ("config_variables_file_path",),
@@ -1359,8 +1358,10 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("fluent_datasources",),
         ("include_rendered_content",),
         ("plugins_directory",),
+        ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
+        ("validation_operators",),
         ("validations_store_name",),
     ]
 
