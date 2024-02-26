@@ -428,10 +428,13 @@ class UserConfigurableProfiler:
                         f"{processed_column.get('type')}"
                     )
                 elif semantic_type == "numeric":
-                    assert processed_column.get("type") in (
-                        "INT",
-                        "FLOAT",
-                        "NUMERIC",
+                    assert (
+                        processed_column.get("type")
+                        in (
+                            "INT",
+                            "FLOAT",
+                            "NUMERIC",
+                        )
                     ), f"""Column {column_name} must be an int or a float but appears to be \
 {processed_column.get('type')}"""
                 elif semantic_type in ("STRING", "VALUE_SET"):

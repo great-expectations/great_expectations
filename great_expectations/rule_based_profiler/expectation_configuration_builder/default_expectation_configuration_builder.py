@@ -71,11 +71,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = ExpectationConfigurationBuilder.exclude_field_names | {
-        "kwargs",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        ExpectationConfigurationBuilder.exclude_field_names
+        | {
+            "kwargs",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,

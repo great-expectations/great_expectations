@@ -792,7 +792,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_chart_layer_title(
-        layer: Union[alt.Chart, alt.LayerChart]
+        layer: Union[alt.Chart, alt.LayerChart],
     ) -> Optional[str]:
         """Recursively searches through the chart layers for a title and returns one if it exists."""
         chart_title: Optional[str] = None
@@ -2671,9 +2671,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             expectation_kwargs_tooltip.append(
                 expectation_kwarg_plot_component.generate_tooltip(),
             )
-            assert (
-                expectation_kwarg_plot_component.name
-            ), f"Expectation kwargs name must be set: {expectation_kwarg_plot_component}"
+            assert expectation_kwarg_plot_component.name, f"Expectation kwargs name must be set: {expectation_kwarg_plot_component}"
             expectation_kwargs_initial_dropdown_state.append(
                 expectation_kwarg_plot_component.name,
             )

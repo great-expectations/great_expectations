@@ -1443,9 +1443,7 @@ def test_get_expectations_by_expectation_type(
     table_exp2,
     table_exp3,
 ):
-    obs = (
-        suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()
-    )
+    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()
     assert obs == [
         table_exp1,
         table_exp2,
@@ -1470,9 +1468,7 @@ def test_get_expectations_by_domain_type(
     table_exp2,
     table_exp3,
 ):
-    obs = (
-        suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_domain_type()
-    )
+    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_domain_type()
     assert list(itertools.chain.from_iterable(obs.values())) == [
         table_exp1,
         table_exp2,

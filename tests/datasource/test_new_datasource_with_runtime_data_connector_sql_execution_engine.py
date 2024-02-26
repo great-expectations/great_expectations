@@ -69,9 +69,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     }
     available_data_asset_names: Dict[
         List[str]
-    ] = (
-        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_available_data_asset_names()
-    )
+    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_available_data_asset_names()
     assert available_data_asset_names == expected_available_data_asset_names
 
 

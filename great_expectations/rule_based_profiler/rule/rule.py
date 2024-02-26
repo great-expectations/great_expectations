@@ -172,7 +172,7 @@ class Rule(SerializableDictDot):
 
             expectation_configuration_builders: List[
                 ExpectationConfigurationBuilder
-            ] = (self.expectation_configuration_builders or [])
+            ] = self.expectation_configuration_builders or []
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
 

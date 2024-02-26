@@ -195,7 +195,9 @@ class PandasExecutionEngine(ExecutionEngine):
 
     @override
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]  # type: ignore[override]
+        self,
+        batch_id: str,
+        batch_data: Union[PandasBatchData, pd.DataFrame],  # type: ignore[override]
     ) -> None:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
@@ -508,9 +510,7 @@ not {batch_spec.__class__.__name__}"""
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
-        return (
-            {}
-        )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
+        return {}  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
     @public_api
     @override

@@ -208,9 +208,7 @@ class TestMetaDatasource:
             context_sources_cleanup, expected_method_name, None
         )
 
-        assert (
-            ds_factory_method_final
-        ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
+        assert ds_factory_method_final, f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
     def test_registered_sources_factory_method_has_correct_signature(
         self, context_sources_cleanup: _SourceFactories
@@ -415,7 +413,7 @@ def assert_fluent_datasource_content(
 
 @pytest.fixture
 def context_with_fluent_datasource(
-    context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]
+    context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path],
 ) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
     context, config_file_path, data_dir = context_config_data
     assert 0 == len(context.datasources)

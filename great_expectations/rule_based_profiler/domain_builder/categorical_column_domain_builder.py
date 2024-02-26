@@ -48,11 +48,12 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses column cardinality to identify domains.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = ColumnDomainBuilder.exclude_field_names | {
-        "cardinality_checker",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        ColumnDomainBuilder.exclude_field_names
+        | {
+            "cardinality_checker",
+        }
+    )
     cardinality_limit_modes: Type[CardinalityLimitMode] = CardinalityLimitMode
 
     def __init__(  # noqa: PLR0913
@@ -286,8 +287,10 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
             parameters=None,
         )
-        allowed_semantic_types_passthrough = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[assignment,union-attr] # could be None
-            semantic_types=allowed_semantic_types_passthrough
+        allowed_semantic_types_passthrough = (
+            self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[assignment,union-attr] # could be None
+                semantic_types=allowed_semantic_types_passthrough
+            )
         )
 
         column_name: str

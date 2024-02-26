@@ -626,7 +626,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         if name := self.variables.checkpoint_store_name:
             return name
 
-        if CheckpointStore.default_checkpoints_exist(directory_path=self.root_directory):  # type: ignore[arg-type]
+        if CheckpointStore.default_checkpoints_exist(
+            directory_path=self.root_directory
+        ):  # type: ignore[arg-type]
             return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
 
         return None
@@ -1657,9 +1659,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list = action_list or self._determine_default_action_list()
 
         if not checkpoint:
-            assert (
-                name
-            ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
+            assert name, "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
             checkpoint = Checkpoint.construct_from_config_args(
                 data_context=self,
                 checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
@@ -1709,7 +1709,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             A list of suite names (sorted in alphabetic order).
         """
         sorted_expectation_suite_names = [
-            i.expectation_suite_name for i in self.list_expectation_suites()  # type: ignore[union-attr]
+            i.expectation_suite_name
+            for i in self.list_expectation_suites()  # type: ignore[union-attr]
         ]
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
@@ -3131,9 +3132,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
-                    global_data_context_id
-                )
+                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = global_data_context_id
             else:
                 validation_errors.update(data_context_id_errors)
 
@@ -3149,9 +3148,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.debug(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
-                    global_usage_statistics_url
-                )
+                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = global_usage_statistics_url
             else:
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
@@ -3741,9 +3738,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
         if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_validation_result_include_rendered_content()
-            )
+            include_rendered_content = self._determine_if_expectation_validation_result_include_rendered_content()
 
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -4125,11 +4120,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         config_variables_filepath = os.path.join(  # noqa: PTH118
-            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
+            self.root_directory,
+            config_variables_filepath,  # type: ignore[arg-type]
         )
 
         os.makedirs(  # noqa: PTH103
-            os.path.dirname(config_variables_filepath), exist_ok=True  # noqa: PTH120
+            os.path.dirname(config_variables_filepath),
+            exist_ok=True,  # noqa: PTH120
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(

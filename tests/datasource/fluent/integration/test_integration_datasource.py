@@ -450,7 +450,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
 def test_simple_checkpoint_run(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ]
+    ],
 ):
     context, _datasource, _data_asset, batch_request = datasource_test_data
     expectation_suite_name = "my_expectation_suite"
@@ -568,7 +568,7 @@ def test_asset_specified_metadata(
 def test_batch_request_error_messages(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ]
+    ],
 ) -> None:
     _, _, _, batch_request = datasource_test_data
     # DataAsset.build_batch_request() infers datasource_name and data_asset_name

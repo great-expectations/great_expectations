@@ -672,7 +672,9 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         return table_name
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference, data_asset_name: Optional[str] = None  #: Any,
+        self,
+        data_reference,
+        data_asset_name: Optional[str] = None,  #: Any,
     ) -> Optional[List[BatchDefinition]]:
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
         # allowing us to invoke `IDDict(data_reference)`

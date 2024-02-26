@@ -860,16 +860,20 @@ def gx_cloud_api_fake_ctx(
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
             get_expectation_suite_by_id_cb,
         )
-        resp_mocker.add_callback(
-            responses.POST,
-            f"{org_url_base}/expectation-suites",
-            post_expectation_suites_cb,
-        ),
-        resp_mocker.add_callback(
-            responses.PUT,
-            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
-            put_expectation_suites_cb,
-        ),
+        (
+            resp_mocker.add_callback(
+                responses.POST,
+                f"{org_url_base}/expectation-suites",
+                post_expectation_suites_cb,
+            ),
+        )
+        (
+            resp_mocker.add_callback(
+                responses.PUT,
+                f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+                put_expectation_suites_cb,
+            ),
+        )
         resp_mocker.add_callback(
             responses.DELETE,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",

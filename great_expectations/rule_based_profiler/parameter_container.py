@@ -256,7 +256,7 @@ class ParameterContainer(SerializableDictDot):
 
 
 def deep_convert_properties_iterable_to_parameter_node(
-    source: Union[T, dict]
+    source: Union[T, dict],
 ) -> Union[T, ParameterNode]:
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_parameter_node(
@@ -318,7 +318,7 @@ def convert_parameter_node_to_dictionary(
 
 
 def build_parameter_container_for_variables(
-    variables_configs: Dict[str, Any]
+    variables_configs: Dict[str, Any],
 ) -> ParameterContainer:
     """
     Build a ParameterContainer for all of the profiler config variables passed as key value pairs

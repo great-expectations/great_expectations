@@ -286,9 +286,7 @@ def test_pandas_execution_engine_get_available_data_asset_names(
     }
     available_data_asset_names: Dict[
         str, List[str]
-    ] = (
-        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_available_data_asset_names()
-    )
+    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_available_data_asset_names()
     assert available_data_asset_names == expected_available_data_asset_names
 
 

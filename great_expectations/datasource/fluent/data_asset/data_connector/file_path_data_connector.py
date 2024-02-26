@@ -308,7 +308,7 @@ class FilePathDataConnector(DataConnector):
         """
 
         def _matching_criterion(
-            batch_definition_list: Union[List[BatchDefinition], None]
+            batch_definition_list: Union[List[BatchDefinition], None],
         ) -> bool:
             return (
                 (batch_definition_list is not None)

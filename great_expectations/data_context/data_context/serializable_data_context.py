@@ -225,9 +225,7 @@ class SerializableDataContext(AbstractDataContext):
         uncommitted_dir = gx_dir / cls.GX_UNCOMMITTED_DIR
         if pathlib.Path.is_file(uncommitted_dir.joinpath(cls.GX_CONFIG_VARIABLES)):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
-    - No action was taken.""".format(
-                uncommitted_dir
-            )
+    - No action was taken.""".format(uncommitted_dir)
             warnings.warn(message)
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)

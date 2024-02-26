@@ -39,17 +39,18 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute histogram using specified metric for one Batch of data.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
-        "column_partition_metric_single_batch_parameter_builder_config",
-        "metric_name",
-        "metric_domain_kwargs",
-        "metric_value_kwargs",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricSingleBatchParameterBuilder.exclude_field_names
+        | {
+            "column_partition_metric_single_batch_parameter_builder_config",
+            "metric_name",
+            "metric_domain_kwargs",
+            "metric_value_kwargs",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,

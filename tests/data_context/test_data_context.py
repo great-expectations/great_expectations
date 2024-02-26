@@ -926,10 +926,12 @@ def test_load_config_variables_property(
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(  # noqa: PTH103
-        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+        os.path.join(base_path, "uncommitted"),
+        exist_ok=True,  # noqa: PTH118
     )
     with open(
-        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"),
+        "w",  # noqa: PTH118
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
@@ -1024,7 +1026,8 @@ def test_list_checkpoints_on_context_with_two_checkpoints(
     shutil.copy(
         checkpoints_file,
         os.path.join(  # noqa: PTH118
-            os.path.dirname(checkpoints_file), "another.yml"  # noqa: PTH120
+            os.path.dirname(checkpoints_file),
+            "another.yml",  # noqa: PTH120
         ),
     )
     assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}

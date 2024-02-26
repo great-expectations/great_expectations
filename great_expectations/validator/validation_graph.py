@@ -195,7 +195,10 @@ class ValidationGraph:
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
-    ) -> Tuple[Dict[_MetricKey, MetricValue], _AbortedMetricsInfoDict,]:
+    ) -> Tuple[
+        Dict[_MetricKey, MetricValue],
+        _AbortedMetricsInfoDict,
+    ]:
         resolved_metrics: Dict[_MetricKey, MetricValue] = {}
 
         # updates graph with aborted metrics
@@ -258,7 +261,11 @@ class ValidationGraph:
             computable_metrics = set()
 
             for metric in ready_metrics:
-                if metric.id in failed_metric_info and failed_metric_info[metric.id]["num_failures"] >= MAX_METRIC_COMPUTATION_RETRIES:  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
+                if (
+                    metric.id in failed_metric_info
+                    and failed_metric_info[metric.id]["num_failures"]
+                    >= MAX_METRIC_COMPUTATION_RETRIES
+                ):  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
                     aborted_metrics_info[metric.id] = failed_metric_info[metric.id]
                 else:
                     computable_metrics.add(metric)

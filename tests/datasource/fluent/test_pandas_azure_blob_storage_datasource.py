@@ -70,7 +70,7 @@ class MockBlobServiceClient:
 
 
 def _build_pandas_abs_datasource(
-    azure_options: Dict[str, Any] | None = None
+    azure_options: Dict[str, Any] | None = None,
 ) -> PandasAzureBlobStorageDatasource:
     azure_client: azure.BlobServiceClient = cast(
         azure.BlobServiceClient, MockBlobServiceClient()

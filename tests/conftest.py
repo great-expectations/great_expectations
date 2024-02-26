@@ -1024,10 +1024,12 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),
+        exist_ok=True,  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
@@ -1059,7 +1061,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1069,7 +1072,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1079,7 +1083,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1089,7 +1094,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1571,7 +1577,8 @@ def deterministic_asset_data_connector_context(
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -1654,7 +1661,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -1671,7 +1679,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),
+        exist_ok=True,  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
@@ -1689,7 +1698,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1699,7 +1709,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1709,7 +1720,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1719,7 +1731,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -2274,10 +2287,12 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2303,10 +2318,12 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2332,10 +2349,12 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2363,10 +2382,12 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2394,10 +2415,12 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2425,10 +2448,12 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2613,7 +2638,8 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),
+        exist_ok=True,  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
@@ -2660,7 +2686,8 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),
+        exist_ok=True,  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
@@ -2707,7 +2734,8 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         os.path.join(asset_config_path, "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),
+        exist_ok=True,  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
@@ -2831,11 +2859,13 @@ def filesystem_csv(tmp_path_factory):
 
     os.makedirs(os.path.join(base_dir, "f3"), exist_ok=True)  # noqa: PTH118, PTH103
     with open(
-        os.path.join(base_dir, "f3", "f3_20190101.csv"), "w"  # noqa: PTH118
+        os.path.join(base_dir, "f3", "f3_20190101.csv"),
+        "w",  # noqa: PTH118
     ) as outfile:
         outfile.writelines(["a,b,c\n"])
     with open(
-        os.path.join(base_dir, "f3", "f3_20190102.csv"), "w"  # noqa: PTH118
+        os.path.join(base_dir, "f3", "f3_20190102.csv"),
+        "w",  # noqa: PTH118
     ) as outfile:
         outfile.writelines(["a,b,c\n"])
 
@@ -3533,9 +3563,7 @@ def empty_data_context_in_cloud_mode(
             context_root_dir=project_path_name,
         )
 
-    context._datasources = (
-        {}
-    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    context._datasources = {}  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
@@ -7319,7 +7347,8 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -7400,7 +7429,8 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -7512,15 +7542,9 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         "bobster_columnar_table_multi_batch_bootstrap_estimator"
     )
 
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
-        5000
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
-        1.0e3
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
-        3.00
-    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = 5000
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = 1.0e3
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = 3.00
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
         float(
@@ -7571,7 +7595,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -7759,7 +7784,8 @@ def quentin_columnar_table_multi_batch_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103

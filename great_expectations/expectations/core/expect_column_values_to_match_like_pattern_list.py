@@ -132,8 +132,8 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                 len(configuration.kwargs.get("like_pattern_list")) > 0
             ), "At least one like_pattern must be supplied in the like_pattern_list."
             if isinstance(configuration.kwargs.get("like_pattern_list"), dict):
-                assert "$PARAMETER" in configuration.kwargs.get(
-                    "like_pattern_list"
+                assert (
+                    "$PARAMETER" in configuration.kwargs.get("like_pattern_list")
                 ), 'Evaluation Parameter dict for like_pattern_list kwarg must have "$PARAMETER" key.'
 
         except AssertionError as e:
@@ -175,7 +175,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
         template_str = "Values must match the following like patterns: " + values_string
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, no_scientific=True
             )

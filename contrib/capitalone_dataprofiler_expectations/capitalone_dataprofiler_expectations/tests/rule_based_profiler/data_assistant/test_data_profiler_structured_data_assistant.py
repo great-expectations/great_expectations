@@ -168,9 +168,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     for (
         domain,
         parameter_values_for_fully_qualified_parameter_names,
-    ) in (
-        bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
-    ):
+    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
         if domain.is_superset(other=domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
@@ -180,9 +178,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     for (
         domain,
         parameter_values_for_fully_qualified_parameter_names,
-    ) in (
-        bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
-    ):
+    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
     assert (
         num_metrics == 50

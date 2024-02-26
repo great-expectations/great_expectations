@@ -90,7 +90,7 @@ def build_batch_filter(
                 ]
             ],
         ]
-    ] = None
+    ] = None,
 ):
     if not data_connector_query_dict:
         return BatchFilter(

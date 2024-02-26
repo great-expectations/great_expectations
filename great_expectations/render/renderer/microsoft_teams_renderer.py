@@ -117,9 +117,7 @@ class MicrosoftTeamsRenderer(Renderer):
                 )
                 validation_result_elements.append(data_asset_name_element)
 
-                expectation_suite_name = (
-                    validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name
-                )
+                expectation_suite_name = validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name
                 expectation_suite_name_element = self._render_validation_result_element(
                     key="Expectation suite name", value=expectation_suite_name
                 )

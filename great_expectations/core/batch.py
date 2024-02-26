@@ -911,7 +911,7 @@ def materialize_batch_request(
     batch_request: BatchRequestBase | dict | None = None,
 ) -> FluentBatchRequest | BatchRequestBase | None:
     def _is_fluent_batch_request(
-        args: dict[str, Any] | BlockConfigBatchRequestTypedDict
+        args: dict[str, Any] | BlockConfigBatchRequestTypedDict,
     ) -> bool:
         from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 
@@ -1385,6 +1385,4 @@ if pyspark.DataFrame:  # type: ignore[truthy-function] # False if NotImported
     ]
 else:
     BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
-    BatchDataUnion = Union[  # type: ignore[misc] # Cannot assign multiple types
-        BatchData, pd.DataFrame
-    ]
+    BatchDataUnion = Union[BatchData, pd.DataFrame]  # type: ignore[misc] # Cannot assign multiple types

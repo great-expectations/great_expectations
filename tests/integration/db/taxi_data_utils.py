@@ -203,8 +203,8 @@ def _execute_taxi_partitioning_test_cases(
                     "Missing test_column_names or test_column_names attribute."
                 )
 
-        assert set(batch_definition_list) == set(
-            expected_batch_definition_list
+        assert (
+            set(batch_definition_list) == set(expected_batch_definition_list)
         ), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"
 
         # 4. Check that loaded data is as expected

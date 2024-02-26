@@ -473,7 +473,11 @@ class CloudDataContext(SerializableDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GX Cloud ids is returned instead.
         """
-        return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
+        return [
+            suite_key.resource_name
+            for suite_key in self.list_expectation_suites()
+            if suite_key.resource_name
+        ]  # type: ignore[union-attr]
 
     @property
     def ge_cloud_config(self) -> GXCloudConfig:
@@ -600,7 +604,9 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
-        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(
+            key, expectation_suite, **kwargs
+        )  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.id = response.id
 
@@ -920,9 +926,7 @@ class CloudDataContext(SerializableDataContext):
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
         url = result.validation_result_url
-        assert (
-            url
-        ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
+        assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
         self._open_url_in_browser(url)
 
     @override

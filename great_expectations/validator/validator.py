@@ -420,8 +420,7 @@ class Validator:
         # )
 
         combined_dir = (
-            validator_attrs
-            | class_expectation_impls
+            validator_attrs | class_expectation_impls
             # | execution_engine_expectation_impls
         )
 

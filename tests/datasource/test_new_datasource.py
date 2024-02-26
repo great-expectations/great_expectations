@@ -608,9 +608,9 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[  # noqa: F841
-        Batch
-    ] = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(  # noqa: F841
+        batch_request=batch_request
+    )
 
     expected_data_asset_names: dict = {
         "test_runtime_data_connector": [data_asset_name],

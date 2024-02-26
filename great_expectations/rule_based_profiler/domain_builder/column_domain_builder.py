@@ -363,8 +363,10 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        include_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
-            semantic_types=include_semantic_types
+        include_semantic_types = (
+            self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+                semantic_types=include_semantic_types
+            )
         )
 
         if include_semantic_types:
@@ -386,8 +388,10 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        exclude_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
-            semantic_types=exclude_semantic_types
+        exclude_semantic_types = (
+            self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+                semantic_types=exclude_semantic_types
+            )
         )
 
         if exclude_semantic_types:

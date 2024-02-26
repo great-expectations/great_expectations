@@ -160,8 +160,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     or float(configuration.kwargs.get("min_value")).is_integer()
                 ), "min_value and max_value must be integers"
                 if isinstance(configuration.kwargs.get("min_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "min_value"
+                    assert (
+                        "$PARAMETER" in configuration.kwargs.get("min_value")
                     ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
 
             if configuration.kwargs.get("max_value"):
@@ -170,8 +170,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     or float(configuration.kwargs.get("max_value")).is_integer()
                 ), "min_value and max_value must be integers"
                 if isinstance(configuration.kwargs.get("max_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "max_value"
+                    assert (
+                        "$PARAMETER" in configuration.kwargs.get("max_value")
                     ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -208,7 +208,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -277,7 +277,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, no_scientific=True
                 )

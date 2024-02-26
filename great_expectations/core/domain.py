@@ -215,7 +215,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
 
 def deep_convert_properties_iterable_to_domain_kwargs(
-    source: Union[T, dict]
+    source: Union[T, dict],
 ) -> Union[T, DomainKwargs]:
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_domain_kwargs(

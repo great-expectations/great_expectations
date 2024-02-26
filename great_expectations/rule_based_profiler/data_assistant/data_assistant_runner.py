@@ -329,9 +329,7 @@ class DataAssistantRunner:
         parameter: Parameter | None  #  "Parameter" signature component containing one argument/directive of "DomainBuilder" of "Rule"
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
-            assert (
-                domain_builder
-            ), "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
+            assert domain_builder, "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
             domain_builder_attributes = self._get_rule_domain_type_attributes(rule=rule)
             for key in domain_builder_attributes:
                 """
