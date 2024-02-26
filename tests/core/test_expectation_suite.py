@@ -94,7 +94,6 @@ class TestInit:
 
         assert suite.expectation_suite_name == fake_expectation_suite_name
         assert suite.expectations == []
-        assert suite.evaluation_parameters == {}
         assert suite.data_asset_type is None
         assert suite.execution_engine_type is None
         assert suite.meta == default_meta
@@ -109,7 +108,6 @@ class TestInit:
         class DummyExecutionEngine:
             pass
 
-        test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
         test_data_asset_type = "test_data_asset_type"
         dummy_execution_engine_type = type(DummyExecutionEngine())
         default_meta = {"great_expectations_version": ge_version}
@@ -120,7 +118,6 @@ class TestInit:
         suite = ExpectationSuite(
             expectation_suite_name=fake_expectation_suite_name,
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
-            evaluation_parameters=test_evaluation_parameters,
             data_asset_type=test_data_asset_type,
             execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
             meta=test_meta,
@@ -130,7 +127,6 @@ class TestInit:
         assert suite.expectation_configurations == [
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
-        assert suite.evaluation_parameters == test_evaluation_parameters
         assert suite.data_asset_type == test_data_asset_type
         assert suite.execution_engine_type == dummy_execution_engine_type
         assert suite.meta == test_meta
