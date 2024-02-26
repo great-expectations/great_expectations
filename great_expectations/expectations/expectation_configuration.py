@@ -115,11 +115,6 @@ class KWargDetailsDict(TypedDict):
     message="Used to include rendered content dictionary in expectation configuration.",
 )
 @new_argument(
-    argument_name="id",
-    version="0.13.36",
-    message="Used in GX Cloud deployments.",
-)
-@new_argument(
     argument_name="expectation_context",
     version="0.13.44",
     message="Used to support column descriptions in GX Cloud.",

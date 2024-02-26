@@ -27,7 +27,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import (
     deprecated_argument,
-    new_argument,
     public_api,
 )
 from great_expectations.analytics.anonymizer import anonymize
@@ -70,11 +69,6 @@ logger = logging.getLogger(__name__)
 
 @public_api
 @deprecated_argument(argument_name="data_asset_type", version="0.14.0")
-@new_argument(
-    argument_name="id",
-    version="0.13.33",
-    message="Used in GX Cloud deployments.",
-)
 class ExpectationSuite(SerializableDictDot):
     """Set-like collection of Expectations.
 
@@ -508,11 +502,6 @@ class ExpectationSuite(SerializableDictDot):
         return sorted(citations, key=lambda x: x["citation_date"])
 
     @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.13.33",
-        message="Used in cloud deployments.",
-    )
     def remove_expectation(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,

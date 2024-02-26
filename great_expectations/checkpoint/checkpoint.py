@@ -14,8 +14,6 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    deprecated_argument,
-    new_argument,
     public_api,
 )
 from great_expectations.checkpoint.configurator import (
@@ -111,11 +109,6 @@ class BaseCheckpoint(ConfigPeer):
         self._validator: Validator | None = None
 
     @public_api
-    @new_argument(
-        argument_name="expectation_suite_id",
-        version="0.13.33",
-        message="Used in cloud deployments.",
-    )
     def run(  # noqa: C901, PLR0913, PLR0915
         self,
         expectation_suite_name: str | None = None,
@@ -520,16 +513,6 @@ class BaseCheckpoint(ConfigPeer):
 
 
 @public_api
-@deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
-@deprecated_argument(argument_name="batches", version="0.14.0")
-@new_argument(
-    argument_name="id", version="0.13.33", message="Used in cloud deployments."
-)
-@new_argument(
-    argument_name="expectation_suite_id",
-    version="0.13.33",
-    message="Used in cloud deployments.",
-)
 class Checkpoint(BaseCheckpoint):
     """A checkpoint is the primary means for validating data in a production deployment of Great Expectations.
 
@@ -550,8 +533,6 @@ class Checkpoint(BaseCheckpoint):
         runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
             (e.g. `result_format`).
         validations: Validations to be executed as part of checkpoint.
-        validation_operator_name: List of validation Operators configured by the Checkpoint.
-        batches: List of Batches for validation by Checkpoint.
         id: Great Expectations Cloud id for this Checkpoint.
         expectation_suite_id: Great Expectations Cloud id associated with Expectation Suite.
         default_validation_id:  Default value used by Checkpoint if no Validations are configured.

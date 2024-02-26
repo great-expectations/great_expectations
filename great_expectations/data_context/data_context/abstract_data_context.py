@@ -1463,8 +1463,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
-            id: The ID to use in generating this checkpoint (preferred over `id`).
-            expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_id`).
             validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
@@ -2430,11 +2428,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `id`",
-    )
     def delete_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
