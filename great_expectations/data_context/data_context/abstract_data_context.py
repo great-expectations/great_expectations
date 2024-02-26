@@ -35,7 +35,6 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    deprecated_argument,
     deprecated_method_or_class,
     new_argument,
     new_method_or_class,
@@ -1387,11 +1386,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
-        ge_cloud_id: str | None = ...,
-        expectation_suite_ge_cloud_id: str | None = ...,
-        default_validation_id: str | None = ...,
         id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        default_validation_id: str | None = ...,
         validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
@@ -1412,11 +1409,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
-        ge_cloud_id: None = ...,
-        expectation_suite_ge_cloud_id: None = ...,
-        default_validation_id: None = ...,
         id: None = ...,
         expectation_suite_id: None = ...,
+        default_validation_id: None = ...,
         validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
@@ -1427,16 +1422,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
-    @new_argument(
-        argument_name="expectation_suite_id",
-        version="0.15.48",
-        message="To be used in place of `expectation_suite_ge_cloud_id`",
-    )
     @new_argument(
         argument_name="checkpoint",
         version="0.15.48",
@@ -1456,11 +1441,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
-        ge_cloud_id: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
-        default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
         validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
@@ -1477,11 +1460,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
-            ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
-            expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            id: The ID to use in generating this checkpoint.
+            expectation_suite_id: The expectation suite ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
-            id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
-            expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
             validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
@@ -1489,14 +1470,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             The Checkpoint object created.
         """
         from great_expectations.checkpoint import Checkpoint
-
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
-            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
-        )
-        del ge_cloud_id
-        del expectation_suite_ge_cloud_id
 
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
@@ -1562,7 +1535,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         expectation_suite_id: str | None = ...,
-        expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
         validator: Validator | None = ...,
         checkpoint: None = ...,
@@ -1585,7 +1557,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         expectation_suite_id: None = ...,
-        expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
         validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
@@ -1614,7 +1585,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         expectation_suite_id: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
@@ -1631,7 +1601,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
-            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             default_validation_id: The default validation ID to use in generating this checkpoint.
             validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
@@ -1640,10 +1609,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
         from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
-            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
-        )
 
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
@@ -1710,8 +1675,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 evaluation_parameters=evaluation_parameters,
                 runtime_configuration=runtime_configuration,
                 validations=validations,
-                ge_cloud_id=id,
-                expectation_suite_ge_cloud_id=expectation_suite_id,
+                id=id,
+                expectation_suite_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
                 validator=validator,
             )
@@ -1790,13 +1755,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id: Optional[str] = None,
         batch_spec_passthrough: Optional[dict] = None,
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
         include_rendered_content: Optional[bool] = None,
-        expectation_suite_id: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """Retrieve a Validator with a batch list and an `ExpectationSuite`.
@@ -1834,7 +1798,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             partitioner_method: The method used to partition the Data Asset into Batches
             partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
-            expectation_suite_ge_cloud_id: The identifier of the ExpectationSuite to retrieve from the DataContext
+            expectation_suite_id: The identifier of the ExpectationSuite to retrieve from the DataContext
                 (can be used in place of `expectation_suite_name`)
             expectation_suite_name: The name of the ExpectationSuite to retrieve from the DataContext
             expectation_suite: The ExpectationSuite to use with the validator
@@ -1853,12 +1817,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`), or if the `ExpectationSuite` cannot be created or
                 retrieved using either the provided name or identifier
         """
-        # <GX_RENAME>
-        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
-            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
-        )
-        del expectation_suite_ge_cloud_id
-
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
                 include_rendered_content=include_rendered_content
@@ -1886,7 +1844,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if expectation_suite_id is not None:
             expectation_suite = self.get_expectation_suite(
                 include_rendered_content=include_rendered_content,
-                ge_cloud_id=expectation_suite_id,
+                id=expectation_suite_id,
             )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(
@@ -2304,7 +2262,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                ge_cloud_id=id,
+                id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
                 data_asset_type=data_asset_type,
@@ -2361,7 +2319,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Like `update_expectation_suite` but without the usage statistics logging.
         """
         name = expectation_suite.expectation_suite_name
-        id = expectation_suite.ge_cloud_id
+        id = expectation_suite.id
         key = self._determine_key_for_suite_update(name=name, id=id)
         self.expectations_store.update(key=key, value=expectation_suite)
         return expectation_suite
@@ -2449,7 +2407,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
-                ge_cloud_id=id,
+                id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
                 data_asset_type=data_asset_type,
@@ -2466,27 +2424,20 @@ class AbstractDataContext(ConfigPeer, ABC):
             return self._add_expectation_suite(expectation_suite=expectation_suite)
 
         # The suite object must have an ID in order to request a PUT to GX Cloud.
-        expectation_suite.ge_cloud_id = existing.ge_cloud_id
+        expectation_suite.id = existing.id
         return self._update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
     def delete_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
-        ge_cloud_id: str | None = None,
         id: str | None = None,
     ) -> None:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
             expectation_suite_name: The name of the expectation suite to delete
-            ge_cloud_id: The identifier of the expectation suite to delete
-            id: The identifier of the expectation suite to delete (preferred over `ge_cloud_id`)
+            id: The identifier of the expectation suite to delete
 
         Returns:
             True for Success and False for Failure.
@@ -2499,12 +2450,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.expectations_store.remove_key(key)
 
     @public_api
-    @deprecated_argument(argument_name="ge_cloud_id", version="0.15.45")
     def get_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
         include_rendered_content: bool | None = None,
-        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name.
 
@@ -2512,7 +2462,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite (unused)
+            id (str): The GX Cloud ID for the Expectation Suite (unused)
 
         Returns:
             An existing ExpectationSuite
@@ -2520,10 +2470,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: There is no expectation suite with the name provided
         """
-        if ge_cloud_id is not None:
+        if id is not None:
             # deprecated-v0.15.45
             warnings.warn(
-                "ge_cloud_id is deprecated as of v0.15.45 and will be removed in v0.16. Please use"
+                "id is deprecated as of v0.15.45 and will be removed in v0.16. Please use"
                 "expectation_suite_name instead",
                 DeprecationWarning,
             )
@@ -4225,14 +4175,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.fluent_config.update_datasources(datasources=fluent_datasources)
 
         return self.fluent_config.get_datasources_as_dict()
-
-    @staticmethod
-    def _resolve_id_and_ge_cloud_id(
-        id: str | None, ge_cloud_id: str | None
-    ) -> str | None:
-        if id and ge_cloud_id:
-            raise ValueError("Please only pass in either id or ge_cloud_id (not both)")
-        return id or ge_cloud_id
 
     @staticmethod
     def _validate_expectation_suite_xor_expectation_suite_name(

@@ -1278,7 +1278,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             notes=notes,
-            ge_cloud_id=id,
+            id=id,
             rendered_content=rendered_content,
         )
 
