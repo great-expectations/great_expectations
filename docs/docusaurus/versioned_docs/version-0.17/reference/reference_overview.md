@@ -3,6 +3,7 @@ sidebar_label: 'Reference'
 title: 'Reference'
 id: reference_overview
 description: Supplemental information that will help you get the most out of Great Expectations.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

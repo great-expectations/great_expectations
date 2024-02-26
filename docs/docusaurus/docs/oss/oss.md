@@ -7,6 +7,7 @@ pagination_next: null
 pagination_prev: null
 slug: '/oss/'
 displayed_sidebar: gx_oss
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

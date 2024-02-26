@@ -201,10 +201,8 @@ def get_substituted_validation_dict(
         ),
         "expectation_suite_name": validation_dict.get("expectation_suite_name")
         or substituted_runtime_config.get("expectation_suite_name"),
-        "expectation_suite_ge_cloud_id": validation_dict.get(
-            "expectation_suite_ge_cloud_id"
-        )
-        or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
+        "expectation_suite_id": validation_dict.get("expectation_suite_id")
+        or substituted_runtime_config.get("expectation_suite_id"),
         "action_list": get_updated_action_list(
             base_action_list=substituted_runtime_config.get("action_list", []),
             other_action_list=validation_dict.get("action_list", {}),
@@ -282,10 +280,8 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
     # replace
     if runtime_kwargs.get("expectation_suite_name") is not None:
         dest_config["expectation_suite_name"] = runtime_kwargs["expectation_suite_name"]
-    if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
-        dest_config["expectation_suite_ge_cloud_id"] = runtime_kwargs[
-            "expectation_suite_ge_cloud_id"
-        ]
+    if runtime_kwargs.get("expectation_suite_id") is not None:
+        dest_config["expectation_suite_id"] = runtime_kwargs["expectation_suite_id"]
     # update
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}

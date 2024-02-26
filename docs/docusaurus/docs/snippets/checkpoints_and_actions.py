@@ -60,7 +60,7 @@ context.add_or_update_checkpoint(
 )
 assert context.list_checkpoints() == ["test_checkpoint"]
 
-checkpoint = context.get_checkpoint("test_checkpoint")
+checkpoint = context.checkpoints.get("test_checkpoint")
 results = checkpoint.run()
 assert results.success is True
 run_id_type = type(results.run_id)
@@ -173,7 +173,7 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint">
-checkpoint = context.get_checkpoint("my_checkpoint")
+checkpoint = context.checkpoints.get("my_checkpoint")
 results = checkpoint.run()
 # </snippet>
 assert results.success is True
@@ -234,7 +234,7 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_2">
-checkpoint = context.get_checkpoint("my_checkpoint")
+checkpoint = context.checkpoints.get("my_checkpoint")
 results = checkpoint.run()
 # </snippet>
 assert results.success is True
@@ -302,7 +302,7 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_3">
-checkpoint = context.get_checkpoint("my_base_checkpoint")
+checkpoint = context.checkpoints.get("my_base_checkpoint")
 results = checkpoint.run(
     validations=[
         {
@@ -391,7 +391,7 @@ context.add_or_update_checkpoint(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints_and_actions.py run_checkpoint_4">
-checkpoint = context.get_checkpoint("my_checkpoint")
+checkpoint = context.checkpoints.get("my_checkpoint")
 results = checkpoint.run()
 # </snippet>
 assert results.success is True
@@ -468,7 +468,7 @@ checkpoint_example = equivalent_using_checkpoint.replace(
 context.add_or_update_checkpoint(**yaml.load(equivalent_using_checkpoint))
 context.add_or_update_checkpoint(**yaml.load(checkpoint_example))
 
-checkpoint = context.get_checkpoint("my_checkpoint")
+checkpoint = context.checkpoints.get("my_checkpoint")
 results = checkpoint.run()
 
 assert results.success is True

@@ -42,7 +42,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
         submit_event(
             event=ExpectationSuiteCreatedEvent(
-                expectation_suite_id=suite.ge_cloud_id,
+                expectation_suite_id=suite.id,
             )
         )
 
@@ -59,7 +59,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         Raises:
             DataContextError if ExpectationSuite doesn't exist
         """
-        key = self._store.get_key(name=suite.name, id=suite.ge_cloud_id)
+        key = self._store.get_key(name=suite.name, id=suite.id)
         if not self._store.has_key(key=key):
             raise DataContextError(
                 f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
@@ -68,7 +68,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
         submit_event(
             event=ExpectationSuiteDeletedEvent(
-                expectation_suite_id=suite.ge_cloud_id,
+                expectation_suite_id=suite.id,
             )
         )
 
