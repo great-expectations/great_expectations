@@ -725,7 +725,7 @@ class Expectation(metaclass=MetaExpectation):
         assert result, "Must provide a result object."
         success: Optional[bool] = result.success
         result_dict: dict = result.result
-        exception: dict = {
+        exception = {
             "raised_exception": False,
             "exception_message": "",
             "exception_traceback": "",
@@ -743,6 +743,7 @@ class Expectation(metaclass=MetaExpectation):
                 exception["raised_exception"] = v["raised_exception"]
                 exception["exception_message"] = v["exception_message"]
                 exception["exception_traceback"] = v["exception_traceback"]
+                # This only pulls the first exception message and traceback from a list of exceptions to render in the data docs.
                 break
 
         if exception["raised_exception"]:

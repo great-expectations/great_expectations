@@ -214,7 +214,7 @@ class ValidationGraph:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
-    ) -> Dict[_MetricKey, Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],]:
+    ) -> _AbortedMetricsInfoDict:
         if metrics is None:
             metrics = {}
 
@@ -226,10 +226,7 @@ class ValidationGraph:
         else:
             catch_exceptions = False
 
-        failed_metric_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
-        ] = {}
+        failed_metric_info: _AbortedMetricsInfoDict = {}
         aborted_metrics_info: _AbortedMetricsInfoDict = {}
 
         ready_metrics: Set[MetricConfiguration]
@@ -417,9 +414,7 @@ class ExpectationValidationGraph:
 
     def _filter_metric_info_in_graph(
         self,
-        metric_info: Dict[
-            _MetricKey, Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]
-        ],
+        metric_info: _AbortedMetricsInfoDict,
     ) -> Dict[_MetricKey, Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]]:
         graph_metric_ids: List[_MetricKey] = []
         edge: MetricEdge
