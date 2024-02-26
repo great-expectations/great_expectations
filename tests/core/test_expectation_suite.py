@@ -1003,9 +1003,6 @@ class TestEqDunder:
                 ),
             ),
             pytest.param("expectations", []),
-            pytest.param(
-                "evaluation_parameters", {"different": "evaluation_parameters"}
-            ),
             pytest.param("data_asset_type", "different_data_asset_type"),
             pytest.param(
                 "execution_engine_type",
