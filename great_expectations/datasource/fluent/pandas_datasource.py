@@ -120,6 +120,10 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         return tuple()
 
     @override
+    def get_batch_request_options_keys(self, partitioner):
+        return tuple()
+
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
