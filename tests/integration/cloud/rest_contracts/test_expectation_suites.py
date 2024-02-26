@@ -147,7 +147,7 @@ def test_get_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.get_expectation_suite(ge_cloud_id=GET_EXPECTATION_SUITE_ID)
+        cloud_data_context.get_expectation_suite(id=GET_EXPECTATION_SUITE_ID)
 
 
 @pytest.mark.cloud
@@ -178,7 +178,7 @@ def test_get_non_existent_expectation_suite(
     with pact_test:
         with pytest.raises(DataContextError):
             cloud_data_context.get_expectation_suite(
-                ge_cloud_id=NON_EXISTENT_EXPECTATION_SUITE_ID
+                id=NON_EXISTENT_EXPECTATION_SUITE_ID
             )
 
 
