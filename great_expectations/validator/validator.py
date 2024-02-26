@@ -1357,6 +1357,9 @@ class Validator:
             ValidationError: If `expectation_suite` is a string, the file it points to must be valid JSON.
 
         """
+        if evaluation_parameters is None:
+            evaluation_parameters = {}
+
         # noinspection PyUnusedLocal
         try:
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -1405,30 +1408,9 @@ class Validator:
                 )
                 return ExpectationValidationResult(success=False)
 
-            # Evaluation parameter priority is
-            # 1. from provided parameters
-            # 2. from expectation configuration
-            # 3. from data context
-            # So, we load them in reverse order
-
-            if data_context is not None:
-                runtime_evaluation_parameters = (
-                    data_context.evaluation_parameter_store.get_bind_params(run_id)
-                )
-            else:
-                runtime_evaluation_parameters = {}
-
-            if expectation_suite.evaluation_parameters:
-                runtime_evaluation_parameters.update(
-                    expectation_suite.evaluation_parameters
-                )
-
-            if evaluation_parameters is not None:
-                runtime_evaluation_parameters.update(evaluation_parameters)
-
             # Convert evaluation parameters to be json-serializable
             runtime_evaluation_parameters = recursively_convert_to_json_serializable(
-                runtime_evaluation_parameters
+                evaluation_parameters
             )
 
             # Warn if our version is different from the version in the configuration
