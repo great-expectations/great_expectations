@@ -11,7 +11,6 @@ from typing import (
     Set,
     Tuple,
     Union,
-    cast,
 )
 
 from tqdm.auto import tqdm
@@ -30,7 +29,10 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.validator.computed_metric import MetricValue
-    from great_expectations.validator.metrics_calculator import _MetricKey
+    from great_expectations.validator.metrics_calculator import (
+        _AbortedMetricsInfoDict,
+        _MetricKey,
+    )
 
 __all__ = [
     "ExpectationValidationGraph",
@@ -193,20 +195,11 @@ class ValidationGraph:
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
-    ) -> Tuple[
-        Dict[_MetricKey, MetricValue],
-        Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
-    ]:
+    ) -> Tuple[Dict[_MetricKey, MetricValue], _AbortedMetricsInfoDict,]:
         resolved_metrics: Dict[_MetricKey, MetricValue] = {}
 
         # updates graph with aborted metrics
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = self._resolve(
+        aborted_metrics_info: _AbortedMetricsInfoDict = self._resolve(
             metrics=resolved_metrics,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -221,10 +214,7 @@ class ValidationGraph:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
-    ) -> Dict[
-        _MetricKey,
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-    ]:
+    ) -> _AbortedMetricsInfoDict:
         if metrics is None:
             metrics = {}
 
@@ -236,14 +226,8 @@ class ValidationGraph:
         else:
             catch_exceptions = False
 
-        failed_metric_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = {}
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = {}
+        failed_metric_info: _AbortedMetricsInfoDict = {}
+        aborted_metrics_info: _AbortedMetricsInfoDict = {}
 
         ready_metrics: Set[MetricConfiguration]
         needed_metrics: Set[MetricConfiguration]
@@ -301,16 +285,19 @@ class ValidationGraph:
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
                             failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
-                            failed_metric_info[failed_metric.id]["exception_info"].add(exception_info)  # type: ignore[union-attr]  # Incorrect flagging of 'Item "MetricConfiguration" of "Union[MetricConfiguration, Set[ExceptionInfo], int]" has no attribute "add" and Item "int" of "Union[MetricConfiguration, Set[ExceptionInfo], int]" has no attribute "add"' in deep "Union" structure.
+                            failed_metric_info[failed_metric.id][
+                                "exception_info"
+                            ] = exception_info
                         else:
                             failed_metric_info[failed_metric.id] = {}
                             failed_metric_info[failed_metric.id][
                                 "metric_configuration"
                             ] = failed_metric
                             failed_metric_info[failed_metric.id]["num_failures"] = 1
-                            failed_metric_info[failed_metric.id]["exception_info"] = {
-                                exception_info
-                            }
+                            failed_metric_info[failed_metric.id][
+                                "exception_info"
+                            ] = exception_info
+
                 else:
                     raise err
             except Exception as e:
@@ -409,33 +396,23 @@ class ExpectationValidationGraph:
 
     def get_exception_info(
         self,
-        metric_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
-    ) -> Set[ExceptionInfo]:
+        metric_info: _AbortedMetricsInfoDict,
+    ) -> Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
-        metric_exception_info: Set[ExceptionInfo] = set()
+        metric_exception_info: Dict[
+            str, Union[MetricConfiguration, ExceptionInfo, int]
+        ] = {}
         metric_id: _MetricKey
-        metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
-        for metric_id, metric_info_item in metric_info.items():  # type: ignore[assignment]  # Incorrect flagging of 'Incompatible types in assignment (expression has type "Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]", variable has type "Union[MetricConfiguration, Set[ExceptionInfo], int]")' in deep "Union" structure.
-            # noinspection PyUnresolvedReferences
-            metric_exception_info.update(
-                cast(Set[ExceptionInfo], metric_info_item["exception_info"])  # type: ignore[index]  # Incorrect flagging of 'Value of type "Union[MetricConfiguration, Set[ExceptionInfo], int]" is not indexable' in deep "Union" structure.
-            )
+        metric_info_item: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]
+        for metric_id, metric_info_item in metric_info.items():
+            metric_exception_info[str(metric_id)] = metric_info_item["exception_info"]
 
         return metric_exception_info
 
     def _filter_metric_info_in_graph(
         self,
-        metric_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
-    ) -> Dict[
-        _MetricKey,
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-    ]:
+        metric_info: _AbortedMetricsInfoDict,
+    ) -> _AbortedMetricsInfoDict:
         graph_metric_ids: List[_MetricKey] = []
         edge: MetricEdge
         vertex: MetricConfiguration

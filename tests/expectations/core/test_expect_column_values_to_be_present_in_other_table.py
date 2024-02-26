@@ -144,11 +144,16 @@ def test_configuration_invalid_column_name(sqlite_context):
     )
 
     with pytest.raises(gx_exceptions.MetricResolutionError):
-        validator.expect_column_values_to_be_present_in_other_table(
+        res = validator.expect_column_values_to_be_present_in_other_table(
             foreign_key_column="I_DONT_EXIST",
             foreign_table="CUSTOMER_TABLE",
             foreign_table_key_column="CUSTOMER_ID",
         )
+
+        assert res.success is False
+        for k, v in res["exception_info"].items():
+            assert v["raised_exception"] is True
+            assert "no such column: a.I_DONT_EXIST" in v["exception_message"]
 
 
 @pytest.mark.unit
