@@ -4,6 +4,10 @@
 Changelog
 #########
 
+0.18.10
+-----------------
+* [BUGFIX] - Prevent duplicate Expectations in Validation Results ([#9533](https://github.com/great-expectations/great_expectations/pull/9533))
+
 0.18.9
 -----------------
 * [BUGFIX] Re-enable GCS Docs Integration test ([#9237](https://github.com/great-expectations/great_expectations/pull/9237))
