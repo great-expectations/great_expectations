@@ -114,13 +114,8 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     def test_connection(self) -> None:
         ...
 
-    @property
     @override
-    def batch_request_options(self) -> tuple[str, ...]:
-        return tuple()
-
-    @override
-    def get_batch_request_options_keys(self, partitioner):
+    def get_batch_request_options_keys(self, partitioner: Optional[Partitioner] = None):
         return tuple()
 
     @override

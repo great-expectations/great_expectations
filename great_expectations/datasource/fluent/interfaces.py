@@ -208,28 +208,8 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
-    # Abstract Methods
-    @property
-    def batch_request_options(self) -> tuple[str, ...]:
-        """The potential keys for BatchRequestOptions.
-
-        Example:
-        ```python
-        >>> print(asset.batch_request_options)
-        ("day", "month", "year")
-        >>> options = {"year": "2023"}
-        >>> batch_request = asset.build_batch_request(options=options)
-        ```
-
-        Returns:
-            A tuple of keys that can be used in a BatchRequestOptions dictionary.
-        """
-        raise NotImplementedError(
-            """One needs to implement "batch_request_options" on a DataAsset subclass."""
-        )
-
     def get_batch_request_options_keys(
-        self, partitioner: Optional[Partitioner]
+        self, partitioner: Optional[Partitioner] = None
     ) -> tuple[str, ...]:
         raise NotImplementedError(
             """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
@@ -246,7 +226,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling batch_request_options.
+                calling get_batch_request_options_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.

@@ -54,7 +54,7 @@ my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
 print(my_asset.batch_request_options)
 # </snippet>
 
-assert my_asset.batch_request_options == ("year", "month", "path")
+assert my_asset.get_batch_request_options_keys() == ("year", "month", "path")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">

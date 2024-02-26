@@ -176,33 +176,6 @@ class _FilePathDataAsset(DataAsset):
             )
         return PartitionerClass(**abstract_partitioner.dict())
 
-    @property
-    @override
-    def batch_request_options(
-        self,
-    ) -> tuple[str, ...]:
-        """The potential keys for BatchRequestOptions.
-
-        Example:
-        ```python
-        >>> print(asset.batch_request_options)
-        ("day", "month", "year", "path")
-        >>> options = {"year": "2023"}
-        >>> batch_request = asset.build_batch_request(options=options)
-        ```
-
-        Returns:
-            A tuple of keys that can be used in a BatchRequestOptions dictionary.
-        """
-        partitioner_options: tuple[str, ...] = tuple()
-        if self.partitioner:
-            partitioner_options = tuple(self.partitioner.param_names)
-        return (
-            tuple(self._all_group_names)
-            + (FILE_PATH_BATCH_SPEC_KEY,)
-            + partitioner_options
-        )
-
     @override
     def get_batch_request_options_keys(
         self, partitioner: Optional[Partitioner]
@@ -228,7 +201,7 @@ class _FilePathDataAsset(DataAsset):
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling batch_request_options.
+                calling get_batch_request_options_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.

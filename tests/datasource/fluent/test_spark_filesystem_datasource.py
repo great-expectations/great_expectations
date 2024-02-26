@@ -722,7 +722,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -740,7 +740,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == ("year", "month", "path")
 
 
@@ -754,7 +754,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == ("batch_request_param_1", "month", "path")
 
 
@@ -1173,7 +1173,7 @@ class TestPartitionerDirectoryAsset:
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_request_options(
         self, directory_asset_with_column_value_partitioner: DirectoryCSVAsset
     ):
-        assert directory_asset_with_column_value_partitioner.batch_request_options == (
+        assert directory_asset_with_column_value_partitioner.get_batch_request_options_keys() == (
             "path",
             "passenger_count",
         )
@@ -1295,11 +1295,14 @@ class TestPartitionerFileAsset:
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_batch_request_options(
         self, file_asset_with_column_value_partitioner: CSVAsset
     ):
-        assert file_asset_with_column_value_partitioner.batch_request_options == (
-            "year",
-            "month",
-            "path",
-            "passenger_count",
+        assert (
+            file_asset_with_column_value_partitioner.get_batch_request_options_keys()
+            == (
+                "year",
+                "month",
+                "path",
+                "passenger_count",
+            )
         )
 
     @pytest.mark.unit
