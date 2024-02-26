@@ -16,12 +16,16 @@ from typing import (
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import (
+    PartitionerConvertedDatetime,
+)
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
+    SqlitePartitionerConvertedDateTime,
     SqlPartitioner,
     _PartitionerOneColumnOneParam,
 )
@@ -116,7 +120,7 @@ class _SQLiteAssetMixin:
             This sql asset so we can use this method fluently.
         """
         return self._add_partitioner(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            PartitionerConvertedDateTime(
+            SqlitePartitionerConvertedDateTime(
                 method_name="partition_on_converted_datetime",
                 column_name=column_name,
                 date_format_string=date_format_string,
@@ -125,11 +129,29 @@ class _SQLiteAssetMixin:
 
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
+    # TODO: remove SQLiteAssetMixin
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the Sqlite specific partitioner
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
+
     type: Literal["table"] = "table"
     partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
+    # TODO: remove SQLiteAssetMixin
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the  Sqlite specific partitioner
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
+
     type: Literal["query"] = "query"
     partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 

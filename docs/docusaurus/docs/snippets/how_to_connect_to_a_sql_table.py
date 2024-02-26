@@ -8,6 +8,7 @@ import pathlib
 import warnings
 
 import great_expectations as gx
+from great_expectations.core.partitioners import PartitionerColumnValue
 from great_expectations.datasource.fluent import GxDatasourceWarning
 
 sqlite_database_path = str(
@@ -76,11 +77,14 @@ assert set(batches[0].columns()) == {
 }
 
 # <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py add_vendor_id_splitter">
-table_asset.add_partitioner_column_value("vendor_id")
+partitioner = PartitionerColumnValue(column_name="vendor_id")
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request">
-my_batch_request = my_asset.build_batch_request({"vendor_id": 1})
+my_batch_request = my_asset.build_batch_request(
+    options={"vendor_id": 1},
+    partitioner=partitioner,
+)
 # </snippet>
 
 batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
