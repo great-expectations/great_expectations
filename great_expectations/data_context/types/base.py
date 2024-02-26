@@ -2473,12 +2473,12 @@ class CheckpointValidationConfig(AbstractConfig):
         self,
         id: str | None = None,
         expectation_suite_name: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
+        expectation_suite_id: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         **kwargs,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
-        self.expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self.expectation_suite_id = expectation_suite_id
         self.batch_request = batch_request
         super().__init__(id=id)
 
@@ -2540,8 +2540,8 @@ class CheckpointConfigSchema(Schema):
             "profilers",
             # Next fields are used by configurators
             "site_names",
-            "ge_cloud_id",
-            "expectation_suite_ge_cloud_id",
+            "id",
+            "expectation_suite_id",
         )
         ordered = True
 
@@ -2550,10 +2550,10 @@ class CheckpointConfigSchema(Schema):
         "default_validation_id",
     ]
 
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
-    expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    expectation_suite_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
     action_list = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
@@ -2629,8 +2629,8 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: The validation operator name
         batches: An optional list of batches
         commented_map: The commented map
-        ge_cloud_id: Your GE Cloud ID
-        expectation_suite_ge_cloud_id: Your expectation suite
+        id: Your GE Cloud ID
+        expectation_suite_id: Your expectation suite
     """
 
     def __init__(  # noqa: PLR0913
@@ -2644,19 +2644,19 @@ class CheckpointConfig(BaseYamlConfig):
         validations: Optional[List[CheckpointValidationConfig]] = None,
         default_validation_id: Optional[str] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
+        expectation_suite_id: Optional[str] = None,
     ) -> None:
         self._name = name
         self._expectation_suite_name = expectation_suite_name
-        self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self._expectation_suite_id = expectation_suite_id
         self._batch_request = batch_request or {}
         self._action_list = action_list or []
         self._evaluation_parameters = evaluation_parameters or {}
         self._runtime_configuration = runtime_configuration or {}
         self._validations = validations or []
         self._default_validation_id = default_validation_id
-        self._ge_cloud_id = ge_cloud_id
+        self._id = id
 
         super().__init__(commented_map=commented_map)
 
@@ -2670,20 +2670,20 @@ class CheckpointConfig(BaseYamlConfig):
         return CheckpointConfigSchema
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
-        return self._ge_cloud_id
+    def id(self) -> Optional[str]:
+        return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value: str) -> None:
-        self._ge_cloud_id = value
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
 
     @property
-    def expectation_suite_ge_cloud_id(self) -> Optional[str]:
-        return self._expectation_suite_ge_cloud_id
+    def expectation_suite_id(self) -> Optional[str]:
+        return self._expectation_suite_id
 
-    @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: str) -> None:
-        self._expectation_suite_ge_cloud_id = value
+    @expectation_suite_id.setter
+    def expectation_suite_id(self, value: str) -> None:
+        self._expectation_suite_id = value
 
     @property
     def name(self) -> str:
@@ -2833,7 +2833,7 @@ class CheckpointConfig(BaseYamlConfig):
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id: Optional[str] = None,
     ) -> dict:
         """
         This method reconciles the Checkpoint configuration (e.g., obtained from the Checkpoint store) with dynamically
@@ -2872,7 +2872,7 @@ class CheckpointConfig(BaseYamlConfig):
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "expectation_suite_id": expectation_suite_id,
         }
         substituted_runtime_config: dict = checkpoint.get_substituted_config(
             runtime_kwargs=runtime_kwargs
@@ -2909,14 +2909,12 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict[
                 "expectation_suite_name"
             ] = validation_expectation_suite_name
-            validation_expectation_suite_ge_cloud_id: str = (
+            validation_expectation_suite_id: str = (
                 substituted_validation_dict.get(  # type: ignore[assignment]
-                    "expectation_suite_ge_cloud_id"
+                    "expectation_suite_id"
                 )
             )
-            validation_dict[
-                "expectation_suite_ge_cloud_id"
-            ] = validation_expectation_suite_ge_cloud_id
+            validation_dict["expectation_suite_id"] = validation_expectation_suite_id
             validation_action_list: list = substituted_validation_dict.get(  # type: ignore[assignment]
                 "action_list"
             )

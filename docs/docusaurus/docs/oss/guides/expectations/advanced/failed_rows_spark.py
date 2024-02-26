@@ -33,7 +33,7 @@ data_asset = context.sources.add_spark_filesystem(
 
 # get checkpoint
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get checkpoint">
-my_checkpoint = context.get_checkpoint("my_checkpoint")
+my_checkpoint = context.checkpoints.get("my_checkpoint")
 # </snippet>
 
 # Example 1 - No unexpected_index_column_names. This is the default.

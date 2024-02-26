@@ -3,6 +3,7 @@ sidebar_label: 'Connect GX Cloud'
 title: 'Connect GX Cloud'
 hide_title: true
 description: Connect GX Cloud to your deployment environment.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

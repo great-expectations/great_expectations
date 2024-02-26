@@ -3,6 +3,7 @@ sidebar_label: 'Create Expectations'
 title: 'Create Expectations'
 id: expectations_lp
 description: Create and manage Expectations and Expectation Suites.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

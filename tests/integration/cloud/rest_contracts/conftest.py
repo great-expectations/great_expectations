@@ -116,7 +116,8 @@ def pact_test(request) -> pact.Pact:
     publish_to_broker: bool
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
-        publish_to_broker = True
+        # do not publish to broker on develop until we have integrated the 1.0 API with GX Cloud
+        publish_to_broker = False
     elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
         publish_to_broker = False

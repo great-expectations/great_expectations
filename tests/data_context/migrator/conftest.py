@@ -221,9 +221,9 @@ def serialized_configuration_bundle() -> dict:
                 "action_list": [],
                 "batch_request": {},
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": None,
-                "ge_cloud_id": None,
+                "id": None,
                 "runtime_configuration": {},
                 "validations": [],
             }
@@ -263,7 +263,7 @@ def serialized_configuration_bundle() -> dict:
                 "data_asset_type": None,
                 "expectation_suite_name": "my_suite",
                 "expectations": [],
-                "ge_cloud_id": None,
+                "id": None,
             }
         ],
         "validation_results": {

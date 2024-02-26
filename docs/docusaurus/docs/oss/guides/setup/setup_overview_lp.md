@@ -4,6 +4,7 @@ title: 'Configure your Great Expectations environment'
 hide_title: true
 id: setup_overview_lp
 description: Configure GX in your specific environment.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

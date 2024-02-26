@@ -255,7 +255,7 @@ def test_checkpoint_with_validator_workflow(
     checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
 
     actual_validations = [v.to_dict() for v in checkpoint.validations]
-    actual_validations[0].pop("expectation_suite_ge_cloud_id", None)
+    actual_validations[0].pop("expectation_suite_id", None)
 
     assert actual_validations == [
         {
