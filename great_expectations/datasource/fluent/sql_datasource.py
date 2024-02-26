@@ -532,7 +532,8 @@ class _SQLAsset(DataAsset):
 
     @override
     def get_batch_request_options_keys(
-        self, partitioner: Optional[Partitioner]
+        self,
+        partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: Tuple[str, ...] = tuple()
         if partitioner:
