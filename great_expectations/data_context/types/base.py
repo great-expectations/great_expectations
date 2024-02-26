@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import datetime
 import enum
 import itertools
 import json
@@ -44,9 +43,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
@@ -56,12 +53,11 @@ if TYPE_CHECKING:
     from io import TextIOWrapper
 
     from great_expectations.alias_types import JSONValues, PathStr
-    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.core.batch import BatchRequestBase
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
     )
-    from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -2753,112 +2749,6 @@ class CheckpointConfig(BaseYamlConfig):
         refactoring infeasible at the present time.
         """
         return self.__repr__()
-
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
-    @staticmethod
-    def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
-        checkpoint: Checkpoint,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[
-            Union[List[dict], List[CheckpointValidationConfig]]
-        ] = None,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_id: Optional[str] = None,
-    ) -> dict:
-        """
-        This method reconciles the Checkpoint configuration (e.g., obtained from the Checkpoint store) with dynamically
-        supplied arguments in order to obtain that Checkpoint specification that is ready for running validation on it.
-        This procedure is necessecitated by the fact that the Checkpoint configuration is hierarchical in its form,
-        which was established for the purposes of making the specification of different Checkpoint capabilities easy.
-        In particular, entities, such as BatchRequest, expectation_suite_name, and action_list, can be specified at the
-        top Checkpoint level with the suitable ovverrides provided at lower levels (e.g., in the validations section).
-        Reconciling and normalizing the Checkpoint configuration is essential for usage statistics, because the exact
-        values of the entities in their formally validated form (e.g., BatchRequest) is the required level of detail.
-        """
-        assert not (run_id and run_name) and not (
-            run_id and run_time
-        ), "Please provide either a run_id or run_name and/or run_time."
-
-        run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
-        runtime_configuration = runtime_configuration or {}
-
-        from great_expectations.checkpoint.util import (
-            get_substituted_validation_dict,
-            get_validations_with_batch_request_as_dict,
-            validate_validation_dict,
-        )
-
-        batch_request = get_batch_request_as_dict(batch_request=batch_request)
-
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
-
-        runtime_kwargs: dict = {
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "validator": validator,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "expectation_suite_id": expectation_suite_id,
-        }
-        substituted_runtime_config: dict = checkpoint.get_substituted_config(
-            runtime_kwargs=runtime_kwargs
-        )
-        validations = substituted_runtime_config.get("validations") or []
-        batch_request = substituted_runtime_config.get("batch_request")
-        if len(validations) == 0 and not batch_request:
-            raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
-            )
-
-        run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
-
-        validation_dict: CheckpointValidationConfig
-
-        for validation_dict in validations:  # type: ignore[assignment]
-            substituted_validation_dict: dict = get_substituted_validation_dict(
-                substituted_runtime_config=substituted_runtime_config,
-                validation_dict=validation_dict,
-            )
-            validate_validation_dict(
-                validation_dict=substituted_validation_dict,
-                batch_request_required=False,
-            )
-            validation_batch_request: BatchRequestBase = (
-                substituted_validation_dict.get(  # type: ignore[assignment]
-                    "batch_request"
-                )
-            )
-            validation_dict["batch_request"] = validation_batch_request
-            validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
-                "expectation_suite_name"
-            )
-            validation_dict[
-                "expectation_suite_name"
-            ] = validation_expectation_suite_name
-            validation_expectation_suite_id: str = (
-                substituted_validation_dict.get(  # type: ignore[assignment]
-                    "expectation_suite_id"
-                )
-            )
-            validation_dict["expectation_suite_id"] = validation_expectation_suite_id
-            validation_action_list: list = substituted_validation_dict.get(  # type: ignore[assignment]
-                "action_list"
-            )
-            validation_dict["action_list"] = validation_action_list
-
-        return substituted_runtime_config
 
 
 dataContextConfigSchema = DataContextConfigSchema()
