@@ -76,8 +76,6 @@ if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.data_context import AbstractDataContext
-    from great_expectations.datasource.fluent import BatchRequestOptions
     from great_expectations.datasource.fluent import BatchRequestOptions
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
