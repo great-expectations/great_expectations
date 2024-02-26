@@ -4,7 +4,6 @@ import copy
 import logging
 import pathlib
 from contextlib import contextmanager
-from pprint import pformat as pf
 from pprint import pprint
 from typing import (
     TYPE_CHECKING,
@@ -1182,20 +1181,21 @@ def test_adding_partitioner_persists_results(
     ).resolve(strict=True)
 
     empty_data_context.sources.add_postgres(
-        "my_datasource",
+        name="my_datasource",
         connection_string="postgresql://postgres:@localhost/not_a_real_db",
     ).add_query_asset(
         name="my_asset", query="select * from table", order_by=["year"]
-    ).add_partitioner_year(
-        column_name="my_col"
+    ).add_batch_config(
+        name="my_batch_config", partitioner=PartitionerYear(column_name="my_col")
     )
 
     final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
         gx_yaml.read_text(),
     )["fluent_datasources"]
-    print(f"final_yaml:\n{pf(final_yaml, depth=5)}")
 
-    assert final_yaml["my_datasource"]["assets"]["my_asset"]["partitioner"]
+    assert final_yaml["my_datasource"]["assets"]["my_asset"]["batch_configs"][0][
+        "partitioner"
+    ]
 
 
 @pytest.mark.postgresql
