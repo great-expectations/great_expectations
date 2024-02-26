@@ -98,7 +98,7 @@ class TestInit:
         assert suite.data_asset_type is None
         assert suite.execution_engine_type is None
         assert suite.meta == default_meta
-        assert suite.id is None
+        assert suite.ge_cloud_id is None
 
     @pytest.mark.unit
     def test_expectation_suite_init_overrides(
@@ -124,7 +124,7 @@ class TestInit:
             data_asset_type=test_data_asset_type,
             execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
             meta=test_meta,
-            id=test_id,
+            ge_cloud_id=test_id,
         )
         assert suite.expectation_suite_name == fake_expectation_suite_name
         assert suite.expectation_configurations == [
@@ -134,7 +134,7 @@ class TestInit:
         assert suite.data_asset_type == test_data_asset_type
         assert suite.execution_engine_type == dummy_execution_engine_type
         assert suite.meta == test_meta
-        assert suite.id == test_id
+        assert suite.ge_cloud_id == test_id
 
     @pytest.mark.unit
     def test_expectation_suite_init_overrides_expectations_dict_and_obj(
@@ -408,11 +408,13 @@ class TestCRUDMethods:
         suite_name = "test-suite"
         suite = ExpectationSuite(suite_name)
         suite = context.suites.add(suite)
-        uuid_to_test = suite.id
+        uuid_to_test = suite.ge_cloud_id
         try:
             UUID(uuid_to_test)
         except TypeError:
-            pytest.fail(f"Expected UUID in ExpectationSuite.id, found {uuid_to_test}")
+            pytest.fail(
+                f"Expected UUID in ExpectationSuite.ge_cloud_id, found {uuid_to_test}"
+            )
         expectation.id = None
         suite.add_expectation(expectation)
         expectation = copy(expectation)
@@ -425,7 +427,7 @@ class TestCRUDMethods:
                 UUID(uuid_to_test)
             except TypeError:
                 pytest.fail(
-                    f"Expected UUID in ExpectationConfiguration.id, found {uuid_to_test}"
+                    f"Expected UUID in ExpectationConfiguration.ge_cloud_id, found {uuid_to_test}"
                 )
 
     @pytest.mark.unit
@@ -917,7 +919,7 @@ class TestIsEquivalentTo:
         different_but_equivalent_suite.expectation_suite_name = "different_name"
         different_but_equivalent_suite.meta = {"notes": "Different meta."}
         different_but_equivalent_suite.data_asset_type = "different_data_asset_type"
-        different_but_equivalent_suite.id = "different_id"
+        different_but_equivalent_suite.ge_cloud_id = "different_id"
 
         assert suite_with_single_expectation.isEquivalentTo(
             different_but_equivalent_suite
@@ -1022,12 +1024,12 @@ class TestEqDunder:
             ),
             pytest.param("meta", {"notes": "Different meta."}),
             pytest.param(
-                "id",
+                "ge_cloud_id",
                 "different_id",
                 marks=pytest.mark.xfail(
                     strict=True,
                     raises=AssertionError,
-                    reason="Currently id is not considered in ExpectationSuite equality",
+                    reason="Currently ge_cloud_id is not considered in ExpectationSuite equality",
                 ),
             ),
         ],

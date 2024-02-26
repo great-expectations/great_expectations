@@ -281,8 +281,8 @@ def test_set(
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),
-                                ("id", None),
-                                ("expectation_suite_id", None),
+                                ("ge_cloud_id", None),
+                                ("expectation_suite_ge_cloud_id", None),
                             ]
                         ),
                     },

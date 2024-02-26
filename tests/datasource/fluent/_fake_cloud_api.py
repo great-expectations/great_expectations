@@ -548,11 +548,11 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     else:
         suite_id = FAKE_EXPECTATION_SUITE_ID
         payload["data"]["id"] = suite_id
-        payload["data"]["attributes"]["suite"]["id"] = suite_id
+        payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
         for expectation_configuration in payload["data"]["attributes"]["suite"][
             "expectations"
         ]:
-            expectation_configuration["id"] = str(uuid.uuid4())
+            expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
@@ -598,13 +598,13 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         )
     else:
         payload["data"]["id"] = suite_id
-        payload["data"]["attributes"]["suite"]["id"] = suite_id
+        payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
         for expectation_configuration in payload["data"]["attributes"]["suite"][
             "expectations"
         ]:
             # add IDs to new expectations
-            if not expectation_configuration.get("id"):
-                expectation_configuration["id"] = str(uuid.uuid4())
+            if not expectation_configuration.get("ge_cloud_id"):
+                expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))

@@ -49,8 +49,8 @@ def checkpoint(
                     "expectation_suite_name": "test_suite",
                 }
             ],
-            "id": None,
-            "expectation_suite_id": None,
+            "ge_cloud_id": None,
+            "expectation_suite_ge_cloud_id": None,
         },
     )
 

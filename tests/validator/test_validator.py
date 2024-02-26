@@ -291,7 +291,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     actual = validator.convert_to_checkpoint_validations_list()
     expected_config = CheckpointValidationConfig(
         expectation_suite_name="validating_taxi_data",
-        expectation_suite_id=ANY,
+        expectation_suite_ge_cloud_id=ANY,
         batch_request={
             "datasource_name": "taxi_pandas",
             "data_connector_name": "monthly",
@@ -325,7 +325,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             )
         ],
         meta={"notes": "This is an expectation suite."},
@@ -356,7 +356,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
-def test_ge_cloud_validator_updates_self_suite_with_ids_on_save(
+def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
     mock_expectation_store_update,
     mock_context_get_suite,
@@ -377,13 +377,13 @@ def test_ge_cloud_validator_updates_self_suite_with_ids_on_save(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
                 meta={"notes": "This is an expectation."},
-                id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             ),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
                 meta={"notes": "This is an expectation."},
-                id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
+                ge_cloud_id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
             ),
         ],
         meta={"notes": "This is an expectation suite."},

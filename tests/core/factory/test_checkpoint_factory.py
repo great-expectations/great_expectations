@@ -20,7 +20,7 @@ def checkpoint_dict():
                 "name": None,
                 "id": None,
                 "expectation_checkpoint_name": "taxi.demo_pass",
-                "expectation_checkpoint_id": None,
+                "expectation_checkpoint_ge_cloud_id": None,
                 "batch_request": None,
             },
         ],

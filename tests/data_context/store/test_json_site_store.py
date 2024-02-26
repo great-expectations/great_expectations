@@ -19,7 +19,7 @@ def test_gx_cloud_response_json_to_object_dict():
 
     actual = JsonSiteStore.gx_cloud_response_json_to_object_dict(response_json)
     expected = {
-        "id": "683df05f-efec-48d4-a45a-02e8318043b8",
+        "ge_cloud_id": "683df05f-efec-48d4-a45a-02e8318043b8",
         "sections": [],
         "data_asset_name": "my_asset",
     }

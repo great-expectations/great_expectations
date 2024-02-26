@@ -243,7 +243,7 @@ def test_checkpoint_store(empty_data_context):
             },
             {
                 "expectation_suite_name": "oss_test_expectation_suite",
-                "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",
                 "validations": [
                     {"expectation_suite_name": "taxi.demo_pass"},
@@ -288,7 +288,7 @@ def test_checkpoint_store(empty_data_context):
             },
             {
                 "expectation_suite_name": "oss_test_expectation_suite",
-                "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",
                 "validations": [
                     {"expectation_suite_name": "taxi.demo_pass"},

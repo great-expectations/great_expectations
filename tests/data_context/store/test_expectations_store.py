@@ -202,7 +202,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
             },
             {
                 "expectation_suite_name": "my_suite",
-                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "ge_cloud_id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
             },
             None,
             id="single_config",
@@ -223,7 +223,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
             },
             {
                 "expectation_suite_name": "my_suite",
-                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "ge_cloud_id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
             },
             None,
             id="single_config_in_list",
@@ -245,7 +245,9 @@ def test_gx_cloud_response_json_to_object_dict(
 def test_get_key_in_non_cloud_mode(empty_data_context):
     name = "test-name"
     suite = ExpectationSuite(expectation_suite_name=name)
-    key = empty_data_context.expectations_store.get_key(name=suite.name, id=suite.id)
+    key = empty_data_context.expectations_store.get_key(
+        name=suite.name, id=suite.ge_cloud_id
+    )
     assert isinstance(key, ExpectationSuiteIdentifier)
     assert key.expectation_suite_name == name
 
@@ -255,7 +257,9 @@ def test_get_key_in_cloud_mode(empty_data_context_in_cloud_mode):
     cloud_data_context = empty_data_context_in_cloud_mode
     name = "test-name"
     suite = ExpectationSuite(expectation_suite_name=name)
-    key = cloud_data_context.expectations_store.get_key(name=suite.name, id=suite.id)
+    key = cloud_data_context.expectations_store.get_key(
+        name=suite.name, id=suite.ge_cloud_id
+    )
     assert isinstance(key, GXCloudIdentifier)
     assert key.resource_name == name
 
@@ -286,7 +290,9 @@ def _test_add_expectation_success(context):
     # Act
     store.add_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
+    updated_suite_dict = store.get(
+        key=store.get_key(name=suite.name, id=suite.ge_cloud_id)
+    )
     updated_suite = ExpectationSuite(**updated_suite_dict)
     added_expectation = updated_suite.expectations[0]
     assert UUID(added_expectation.id)
@@ -323,7 +329,9 @@ def _test_add_expectation_disregards_provided_id(context):
     # Act
     store.add_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
+    updated_suite_dict = store.get(
+        key=store.get_key(name=suite.name, id=suite.ge_cloud_id)
+    )
     updated_suite = ExpectationSuite(**updated_suite_dict)
     added_expectation = updated_suite.expectations[0]
     assert UUID(added_expectation.id)
@@ -360,7 +368,9 @@ def _test_update_expectation_success(context):
     expectation.column = updated_column_name
     store.update_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
+    updated_suite_dict = store.get(
+        key=store.get_key(name=suite.name, id=suite.ge_cloud_id)
+    )
     updated_suite = ExpectationSuite(**updated_suite_dict)
     updated_expectation = updated_suite.expectations[0]
     assert updated_expectation.id == expectation.id
@@ -403,7 +413,9 @@ def _test_update_expectation_raises_error_for_missing_expectation(context):
     ):
         store.update_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
+    updated_suite_dict = store.get(
+        key=store.get_key(name=suite.name, id=suite.ge_cloud_id)
+    )
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
 
@@ -436,7 +448,9 @@ def _test_delete_expectation_success(context):
     expectation = suite.expectations[0]
     store.delete_expectation(suite=suite, expectation=expectation)
     # Assert
-    updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
+    updated_suite_dict = store.get(
+        key=store.get_key(name=suite.name, id=suite.ge_cloud_id)
+    )
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert len(updated_suite.expectations) == 0
 
@@ -483,7 +497,9 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     ):
         store.delete_expectation(suite=suite, expectation=nonexistent_expectation)
     # Assert
-    updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
+    updated_suite_dict = store.get(
+        key=store.get_key(name=suite.name, id=suite.ge_cloud_id)
+    )
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
     assert len(updated_suite.expectations) == 1

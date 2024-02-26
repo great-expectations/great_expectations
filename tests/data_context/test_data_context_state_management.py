@@ -882,14 +882,14 @@ def test_add_or_update_checkpoint_adds_successfully(
                         "name": None,
                         "id": None,
                         "expectation_suite_name": "taxi.demo_pass",
-                        "expectation_suite_id": None,
+                        "expectation_suite_ge_cloud_id": None,
                         "batch_request": None,
                     },
                     {
                         "name": None,
                         "id": None,
                         "expectation_suite_name": None,
-                        "expectation_suite_id": None,
+                        "expectation_suite_ge_cloud_id": None,
                         "batch_request": {
                             "datasource_name": "oss_test_datasource",
                             "data_connector_name": "oss_test_data_connector",
@@ -911,14 +911,14 @@ def test_add_or_update_checkpoint_adds_successfully(
                             "name": None,
                             "id": None,
                             "expectation_suite_name": "taxi.demo_pass",
-                            "expectation_suite_id": None,
+                            "expectation_suite_ge_cloud_id": None,
                             "batch_request": None,
                         },
                         {
                             "name": None,
                             "id": None,
                             "expectation_suite_name": None,
-                            "expectation_suite_id": None,
+                            "expectation_suite_ge_cloud_id": None,
                             "batch_request": {
                                 "datasource_name": "oss_test_datasource",
                                 "data_connector_name": "oss_test_data_connector",

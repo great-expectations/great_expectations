@@ -356,7 +356,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
                         "max_value": 5,
                     },
                     meta={"substituted_parameters": {"min_value": 1, "max_value": 5}},
-                    id=None,
+                    ge_cloud_id=None,
                 ),
                 meta={},
                 exception_info={
@@ -404,7 +404,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
                             "max_value": "2022-12-06T00:00:00",
                         }
                     },
-                    id=None,
+                    ge_cloud_id=None,
                 ),
                 meta={},
                 exception_info={

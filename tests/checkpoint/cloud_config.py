@@ -264,8 +264,9 @@ def _checkpoint_config(data_file_name, with_slack):
                     "batch_request": {},
                     "default_validation_id": "51c303bd-2396-4f04-b567-79f746b09173",
                     "evaluation_parameters": {},
-                    "expectation_suite_id": None,
+                    "expectation_suite_ge_cloud_id": None,
                     "expectation_suite_name": None,
+                    "ge_cloud_id": None,
                     "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",
                     "name": "my_checkpoint",
                     "runtime_configuration": {},
@@ -277,7 +278,7 @@ def _checkpoint_config(data_file_name, with_slack):
                                 "data_connector_query": {"index": -1},
                                 "datasource_name": "taxi_datasource",
                             },
-                            "expectation_suite_id": "d1ff9854-ac5f-45ae-9c88-c3f4323432c1",
+                            "expectation_suite_ge_cloud_id": "d1ff9854-ac5f-45ae-9c88-c3f4323432c1",
                             "expectation_suite_name": "taxi_demo_suite",
                             "id": "2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
                         }
@@ -307,12 +308,12 @@ def _expectation_suite():
                     "expectations": [
                         {
                             "expectation_type": "expect_column_to_exist",
-                            "id": "0571b111-a1d0-4f1a-9c83-6704887de635",
+                            "ge_cloud_id": "0571b111-a1d0-4f1a-9c83-6704887de635",
                             "kwargs": {"column": "passenger_count"},
                             "meta": {},
                         }
                     ],
-                    "id": "1212e79d-f751-4c6e-921d-26de2b1db174",
+                    "ge_cloud_id": "1212e79d-f751-4c6e-921d-26de2b1db174",
                     "meta": {"great_expectations_version": "0.15.43"},
                 },
             },
