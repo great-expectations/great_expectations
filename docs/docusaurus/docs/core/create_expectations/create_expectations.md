@@ -1,7 +1,5 @@
 ---
-sidebar_label: 'Create and manage Expectations and Expectation Suites'
 title: 'Create and manage Expectations and Expectation Suites'
-id: create_manage_expectations_lp
 description: Create and manage Expectations and Expectation Suites.
 ---
 

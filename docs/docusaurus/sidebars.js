@@ -248,6 +248,321 @@ module.exports = {
           ]
         },
       ],
+  gx_core: [
+    {
+      type: 'doc',
+      id: 'core/introduction/about_gx',
+      label: 'About GX'
+    },
+    {
+      type: 'doc',
+      id: 'core/introduction/try_gx',
+      label: '🚧 Try GX'
+    },
+    {
+      type: 'category',
+      label: 'Installation and setup',
+      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
+      items: [
+        {
+          type: 'doc',
+          id: 'core/installation_and_setup/set_up_a_python_environment',
+          label: 'Set up a Python environment'
+        },
+        {
+          type: 'doc',
+          id: 'core/installation_and_setup/install_gx',
+          label: 'Install Gx 1.0'
+        },
+        {
+          type: 'category',
+          label: 'Install additional dependencies',
+          link: {type: 'doc', id: 'core/installation_and_setup/additional_dependencies/additional_dependencies'},
+          items: [
+            {
+              type: 'doc',
+              id: 'core/installation_and_setup/additional_dependencies/amazon_s3',
+              label: '🚧 Amazon S3'
+            },
+            {
+              type: 'doc',
+              id: 'core/installation_and_setup/additional_dependencies/azure_blob_storage',
+              label: '🚧 Azure Blob Storage'
+            },
+            {
+              type: 'doc',
+              id: 'core/installation_and_setup/additional_dependencies/databricks',
+              label: '🚧 Databricks'
+            },
+            {
+              type: 'doc',
+              id: 'core/installation_and_setup/additional_dependencies/google_cloud_storage',
+              label: '🚧 Google Cloud Storage'
+            },
+            {
+              type: 'doc',
+              id: 'core/installation_and_setup/additional_dependencies/sql_data_sources',
+              label: '🚧 SQL Data Sources'
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Data Contexts',
+          link: {type: 'doc', id: 'core/installation_and_setup/manage_data_contexts'},
+          items: [
+
+          ]
+        },
+        {
+          type: 'doc',
+          id: 'core/installation_and_setup/manage_credentials',
+          label: '🚧 Manage credentials'
+        },
+        {
+          type: 'doc',
+          id: 'core/installation_and_setup/manage_metadata_stores',
+          label: '🚧 Manage Metadata Stores'
+        },
+        {
+          type: 'doc',
+          id: 'core/installation_and_setup/manage_data_docs',
+          label: '🚧 Manage Data Docs'
+        },
+      ]
+    },
+    {
+      type: 'category',
+      label: '🚧 Manage and access data',
+      link: {type: 'doc', id: 'core/connect_to_data/connect_to_data'},
+      items: [
+        {
+          type: 'category',
+          label: '🚧 Manage Data Sources',
+          link: {type: 'doc', id: 'core/connect_to_data/manage_data_sources/manage_data_sources'},
+          items: [
+            <!-- The "Connect to" ToC items should point to pages similar to the OSS pages, with tabs for each option. -->
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 Connect to file system data'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Connect to in memory data'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/sql/sql',
+              label: '🚧 Connect to a SQL database'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 List available Data Sources'
+            },
+            <!-- These three can be links to sections on a "Manage Data Sources" page. -->
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Get an existing Data Source'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/sql/sql',
+              label: '🚧 Delete a Data Source'
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: '🚧 Manage Data Assets',
+          link: {type: 'doc', id: 'core/connect_to_data/manage_data_sources/manage_data_sources'},
+          items: [
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 Add file Data Assets'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Add in-memory Data Assets'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Add SQL Data Assets'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 Add a Partitioner to a Data Asset'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 List all Data Assets in a Data Source'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 Get an existing Data Asset'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 Delete a Data Asset'
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: '🚧 Manage Batch Requests',
+          link: {type: 'doc', id: 'core/connect_to_data/manage_data_sources/manage_data_sources'},
+          items: [
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 Retrieve all Batches from a Data Asset'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Retrieve specific Batches from a Data Asset'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 Iterate retrieved Batches'
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: '🚧 Manage Batches',
+          link: {type: 'doc', id: 'core/connect_to_data/manage_data_sources/manage_data_sources'},
+          items: [
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/file_system/file_system',
+              label: '🚧 View a sample of the data in a Batch'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Validate a Batch against an Expectation'
+            },
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Validate a Batch against an Expectation Suite'
+            },
+            <!--TODO: Validation is being moved into the Batch object, are there other API changes? -->
+            {
+              type: 'doc',
+              id: 'core/connect_to_data/manage_data_sources/in_memory/in_memory',
+              label: '🚧 Get the Batch Request for a given Batch'
+            },
+          ]
+        },
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Create Expectations',
+      link: { type: 'doc', id: 'core/create_expectations/create_expectations' },
+      items: [
+        // 'oss/guides/expectations/create_expectations_overview',
+        {
+          type: 'category',
+          label: 'Manage Expectations',
+          link: { type: 'doc', id: 'core/create_expectations/expectations/manage_expectations' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create an Expectation',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#create-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Test an Expectation',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#test-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Modify an Expectation',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#modify-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Customize an Expectation Class',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#customize-an-expectation-class',
+            },
+          ]
+        },
+      {
+          type: 'category',
+          label: 'Manage Expectation Suites',
+          link: { type: 'doc', id: 'core/create_expectations/expectation_suites/manage_expectation_suites' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create an Expectation Suite',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Get an existing Expectation Suite',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation Suite',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Add Expectations',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#add-expectations-to-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Get an Expectation',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#get-an-expectation-from-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Edit a single Expectation',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#edit-a-single-expectation-in-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Edit multiple Expectations',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#edit-multiple-expectations-in-an-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-from-an-expectation-suite',
+            },
+          ]
+        },
+        // {
+        //   type: 'category',
+        //   label: 'Data Assistants',
+        //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
+        //   items: [
+        //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
+        //   ]
+        // },
+      ]
+    },
+    <!--TODO: Validate Data -->
+      <!-- TODO: Manage Validators -->
+      <!-- TODO: Manage Checkpoints -->
+  ],
   gx_oss: [
         // {type: 'doc', id: 'oss/intro', label: 'About GX OSS'},
         // {
@@ -304,101 +619,6 @@ module.exports = {
                 'oss/guides/connecting_to_your_data/fluent/database/sql_data_assets',
               ]
             },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Create Expectations',
-          link: { type: 'doc', id: 'core/create_manage_expectations_lp' },
-          items: [
-            // 'oss/guides/expectations/create_expectations_overview',
-            {
-              type: 'category',
-              label: 'Manage Expectations',
-              link: { type: 'doc', id: 'core/expectations/manage_expectations' },
-              items: [
-                {
-                  type: 'link',
-                  label: 'Create an Expectation',
-                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#create-an-expectation',
-                },
-                {
-                  type: 'link',
-                  label: 'Test an Expectation',
-                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#test-an-expectation',
-                },
-                {
-                  type: 'link',
-                  label: 'Modify an Expectation',
-                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#modify-an-expectation',
-                },
-                {
-                  type: 'link',
-                  label: 'Customize an Expectation Class',
-                  href: '/docs/1.0-prerelease/core/expectations/manage_expectations#customize-an-expectation-class',
-                },
-              ]
-            },
-          {
-              type: 'category',
-              label: 'Manage Expectation Suites',
-              link: { type: 'doc', id: 'core/expectation_suites/manage_expectation_suites' },
-              items: [
-                {
-                  type: 'link',
-                  label: 'Create an Expectation Suite',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
-                },
-                {
-                  type: 'link',
-                  label: 'Get an existing Expectation Suite',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
-                },
-                {
-                  type: 'link',
-                  label: 'Modify an Expectation Suite',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#modify-an-expectation-suite',
-                },
-                {
-                  type: 'link',
-                  label: 'Delete an Expectation Suite',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
-                },
-                {
-                  type: 'link',
-                  label: 'Add Expectations',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#add-expectations',
-                },
-                {
-                  type: 'link',
-                  label: 'Get an Expectation',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#get-an-expectation',
-                },
-                {
-                  type: 'link',
-                  label: 'Edit a single Expectation',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#edit-a-single-expectation',
-                },
-                {
-                  type: 'link',
-                  label: 'Edit multiple Expectations',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#edit-multiple-expectations',
-                },
-                {
-                  type: 'link',
-                  label: 'Delete an Expectation',
-                  href: '/docs/1.0-prerelease/core/expectation_suites/manage_expectation_suites#delete-an-expectation',
-                },
-              ]
-            },
-            // {
-            //   type: 'category',
-            //   label: 'Data Assistants',
-            //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
-            //   items: [
-            //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-            //   ]
-            // },
           ]
         },
         // {
