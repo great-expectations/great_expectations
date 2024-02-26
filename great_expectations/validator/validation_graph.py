@@ -412,7 +412,7 @@ class ExpectationValidationGraph:
     def _filter_metric_info_in_graph(
         self,
         metric_info: _AbortedMetricsInfoDict,
-    ) -> Dict[_MetricKey, Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]]:
+    ) -> _AbortedMetricsInfoDict:
         graph_metric_ids: List[_MetricKey] = []
         edge: MetricEdge
         vertex: MetricConfiguration
