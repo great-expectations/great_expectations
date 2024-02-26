@@ -14,5 +14,5 @@ action_list:
 evaluation_parameters: {}
 runtime_configuration: {}
 validations: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
+id:
+expectation_suite_id:

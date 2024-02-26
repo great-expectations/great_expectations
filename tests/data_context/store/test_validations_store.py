@@ -327,7 +327,7 @@ def test_gx_cloud_response_json_to_object_dict() -> None:
     }
 
     expected = validation_config
-    expected["ge_cloud_id"] = validation_id
+    expected["id"] = validation_id
 
     actual = ValidationsStore.gx_cloud_response_json_to_object_dict(response_json)
 

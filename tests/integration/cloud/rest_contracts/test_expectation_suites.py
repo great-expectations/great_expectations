@@ -29,7 +29,7 @@ POST_EXPECTATION_SUITE_MIN_REQUEST_BODY: Final[PactBody] = {
         "type": "expectation_suite",
         "attributes": {
             "suite": {
-                "ge_cloud_id": None,
+                "id": None,
                 "meta": {"great_expectations_version": "0.13.23"},
                 "expectations": [
                     {
@@ -56,12 +56,12 @@ POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "expectations": [
                     {
                         "expectation_type": "expect_table_row_count_to_be_between",
-                        "ge_cloud_id": pact.Format().uuid,
+                        "id": pact.Format().uuid,
                         "kwargs": {"max_value": 3, "min_value": 1},
                         "meta": {},
                     }
                 ],
-                "ge_cloud_id": pact.Format().uuid,
+                "id": pact.Format().uuid,
                 "meta": {"great_expectations_version": "0.13.23"},
             },
         },
@@ -80,7 +80,7 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "expectations": [
                     {
                         "expectation_type": "expect_column_values_to_be_between",
-                        "ge_cloud_id": pact.Format().uuid,
+                        "id": pact.Format().uuid,
                         "kwargs": {
                             "column": "passenger_count",
                             "max_value": 5,
@@ -90,7 +90,7 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
                         "meta": {},
                     }
                 ],
-                "ge_cloud_id": GET_EXPECTATION_SUITE_ID,
+                "id": GET_EXPECTATION_SUITE_ID,
                 "meta": {"great_expectations_version": "0.18.3"},
             },
         },
@@ -107,7 +107,7 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                 "suite": {
                     "expectation_suite_name": pact.Like("raw_health.critical_1a"),
-                    "ge_cloud_id": pact.Format().uuid,
+                    "id": pact.Format().uuid,
                     "meta": {"great_expectations_version": pact.Like("0.13.23")},
                 },
             },
