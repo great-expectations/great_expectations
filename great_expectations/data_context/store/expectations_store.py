@@ -210,9 +210,14 @@ class ExpectationsStore(Store):
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
-                cloud_suite = ExpectationSuite(
-                    **result.response["data"]["attributes"]["suite"]
-                )
+
+                suite_kwargs = result.response["data"]["attributes"]["suite"]
+
+                # Temporary fork to account for pre-V1 configs
+                if "ge_cloud_id" in suite_kwargs and "id" not in suite_kwargs:
+                    suite_kwargs["id"] = suite_kwargs.pop("ge_cloud_id")
+
+                cloud_suite = ExpectationSuite(**suite_kwargs)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,
