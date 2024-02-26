@@ -16,7 +16,6 @@ import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.async_executor import patch_https_connection_pool
 from tests.performance import taxi_benchmark_util
 
 pytestmark = pytest.mark.performance
@@ -56,8 +55,6 @@ def test_taxi_trips_benchmark(
     comparable because of the data change).
     """
     _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
-
-    _optionally_patch_connection_pool(pytestconfig)
 
     html_dir = (
         os.environ.get("GE_BENCHMARK_HTML_DIRECTORY", tmpdir.strpath)
@@ -176,20 +173,6 @@ def _skip_if_bigquery_performance_tests_not_enabled(
         pytest.skip(
             "This test requires --bigquery and --performance-tests flags to run."
         )
-
-
-def _optionally_patch_connection_pool(pytestconfig: _pytest.config.Config):
-    """Increase the connection pool size if we can, to avoid connection pool exhaustion."""
-    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
-    if not gcp_project:
-        raise ValueError(
-            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
-        )
-
-    patch_https_connection_pool(
-        concurrency_config=taxi_benchmark_util.concurrency_config(),
-        google_cloud_project=gcp_project,
-    )
 
 
 if __name__ == "__main__":

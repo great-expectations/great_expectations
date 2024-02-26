@@ -65,7 +65,6 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
     ExecutionEngineError,
@@ -285,7 +284,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         url (string): If neither the engines, the credentials, nor the connection_string have been provided, a \
             URL can be used to access the data. This will be overridden by all other configuration options if \
             any are provided.
-        concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
         kwargs (dict): These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
 
     For example:
@@ -305,7 +303,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         url: Optional[str] = None,
         batch_data_dict: Optional[dict] = None,
         create_temp_table: bool = True,
-        concurrency: Optional[ConcurrencyConfig] = None,
         # kwargs will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
         **kwargs,
     ) -> None:
@@ -338,13 +335,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             self.engine = engine
         else:
-            if data_context is None or data_context.concurrency is None:
-                concurrency = ConcurrencyConfig()
-            else:
-                concurrency = data_context.concurrency
-
-            concurrency.add_sqlalchemy_create_engine_parameters(kwargs)  # type: ignore[union-attr]
-
             self._setup_engine(
                 kwargs=kwargs,
                 connection_string=connection_string,
