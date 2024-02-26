@@ -217,8 +217,8 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
             params={"name": checkpoint_config["name"]},
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -274,8 +274,8 @@ def test_cloud_backed_data_context_add_checkpoint(
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -331,8 +331,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -389,8 +389,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -428,11 +428,11 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config_with_ids)
 
         # Round trip through schema to mimic updates made during store serialization process
-        ge_cloud_id = checkpoint_config_with_ids.pop("id")
+        id = checkpoint_config_with_ids.pop("id")
         expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(ge_cloud_id=ge_cloud_id, **checkpoint_config_with_ids)
+            CheckpointConfig(id=id, **checkpoint_config_with_ids)
         )
-        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
+        expected_checkpoint_config["id"] = checkpoint_id
 
         mock_put.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -449,8 +449,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -541,11 +541,11 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
         autospec=True,
         side_effect=mocked_get_response,
     ):
-        ge_cloud_id = checkpoint_config_with_ids.pop("id")
+        id = checkpoint_config_with_ids.pop("id")
         checkpoint = context.update_checkpoint(
             Checkpoint.instantiate_from_config_with_runtime_args(
                 checkpoint_config=CheckpointConfig(
-                    ge_cloud_id=ge_cloud_id,
+                    id=id,
                     **checkpoint_config_with_ids,
                 ),
                 data_context=context,
@@ -555,9 +555,9 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
 
         # Round trip through schema to mimic updates made during store serialization process
         expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(ge_cloud_id=ge_cloud_id, **checkpoint_config_with_ids)
+            CheckpointConfig(id=id, **checkpoint_config_with_ids)
         )
-        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
+        expected_checkpoint_config["id"] = checkpoint_id
 
         mock_put.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -574,8 +574,8 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
