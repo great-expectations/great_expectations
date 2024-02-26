@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Optional, Union
 
+import marshmallow
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
@@ -112,6 +113,10 @@ class ConfigurationStore(Store):
         except gx_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
+        except marshmallow.ValidationError as e:
+            raise gx_exceptions.InvalidBaseYamlConfigError(
+                f"Deserialized configuration failed validation: {e}"
+            )
 
     @property
     def overwrite_existing(self) -> bool:

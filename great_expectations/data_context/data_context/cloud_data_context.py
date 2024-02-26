@@ -592,7 +592,7 @@ class CloudDataContext(SerializableDataContext):
                         name: str = cloud_identifier_tuple[2]
                         if name == expectation_suite_name:
                             cloud_id = cloud_identifier_tuple[1]
-                            expectation_suite.ge_cloud_id = cloud_id
+                            expectation_suite.id = cloud_id
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
@@ -602,7 +602,7 @@ class CloudDataContext(SerializableDataContext):
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.id
+            expectation_suite.id = response.id
 
         return expectation_suite
 
@@ -610,7 +610,6 @@ class CloudDataContext(SerializableDataContext):
     def delete_expectation_suite(
         self,
         expectation_suite_name: str = ...,
-        ge_cloud_id: None = ...,
         id: None = ...,
     ) -> bool:
         ...
@@ -619,17 +618,15 @@ class CloudDataContext(SerializableDataContext):
     def delete_expectation_suite(
         self,
         expectation_suite_name: None = ...,
-        ge_cloud_id: str = ...,
-        id: None = ...,
-    ) -> bool:
-        ...
-
-    @overload
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: None = ...,
-        ge_cloud_id: None = ...,
         id: str = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        id: None = ...,
     ) -> bool:
         ...
 
@@ -638,7 +635,6 @@ class CloudDataContext(SerializableDataContext):
     def delete_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
-        ge_cloud_id: str | None = None,
         id: str | None = None,
     ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
@@ -649,10 +645,6 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             True for Success and False for Failure.
         """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        del ge_cloud_id
-
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
@@ -666,14 +658,14 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: Optional[str] = None,
         include_rendered_content: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
+            id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -681,14 +673,12 @@ class CloudDataContext(SerializableDataContext):
         Raises:
             DataContextError: There is no expectation suite with the name provided
         """
-        if ge_cloud_id is None and expectation_suite_name is None:
-            raise ValueError(
-                "ge_cloud_id and expectation_suite_name cannot both be None"
-            )
+        if id is None and expectation_suite_name is None:
+            raise ValueError("id and expectation_suite_name cannot both be None")
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=ge_cloud_id,
+            id=id,
             resource_name=expectation_suite_name,
         )
 
@@ -721,7 +711,7 @@ class CloudDataContext(SerializableDataContext):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        id = expectation_suite.ge_cloud_id
+        id = expectation_suite.id
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
@@ -742,16 +732,16 @@ class CloudDataContext(SerializableDataContext):
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.id
+            expectation_suite.id = response.id
 
     def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
-        ge_cloud_id = key.id
-        if ge_cloud_id:
+        id = key.id
+        if id:
             if self.expectations_store.has_key(key):
                 raise gx_exceptions.DataContextError(
-                    f"expectation_suite with GX Cloud ID {ge_cloud_id} already exists. "
+                    f"expectation_suite with GX Cloud ID {id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
                 )
 
@@ -773,25 +763,15 @@ class CloudDataContext(SerializableDataContext):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        ge_cloud_id: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
-        default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
         validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
-            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
-        )
-        del ge_cloud_id
-        del expectation_suite_ge_cloud_id
-
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
@@ -902,8 +882,8 @@ class CloudDataContext(SerializableDataContext):
         **kwargs,
     ) -> ExpectationSuite:
         cloud_id: str | None
-        if expectation_suite.ge_cloud_id:
-            cloud_id = expectation_suite.ge_cloud_id
+        if expectation_suite.id:
+            cloud_id = expectation_suite.id
         else:
             cloud_id = None
 
@@ -921,7 +901,7 @@ class CloudDataContext(SerializableDataContext):
 
         response = persistence_fn(key=key, value=expectation_suite, **kwargs)
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.id
+            expectation_suite.id = response.id
 
         return expectation_suite
 

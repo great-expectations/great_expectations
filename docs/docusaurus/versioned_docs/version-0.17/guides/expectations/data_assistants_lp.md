@@ -3,6 +3,7 @@ sidebar_label: 'Data Assistants'
 title: 'Data Assistants'
 id: data_assistants_lp
 description: Use the Onboarding Data Assistant to create Expectation Suites.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

@@ -148,11 +148,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._catch_exceptions = catch_exceptions
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def id(self) -> Optional[str]:
         return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, id: str) -> None:
+    @id.setter
+    def id(self, id: str) -> None:
         self._id = id
 
     def _init_profiler_rules(
@@ -1273,7 +1273,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ) from e
 
         if isinstance(response, GXCloudResourceRef):
-            new_profiler.ge_cloud_id = response.id
+            new_profiler.id = response.id
 
         return new_profiler
 

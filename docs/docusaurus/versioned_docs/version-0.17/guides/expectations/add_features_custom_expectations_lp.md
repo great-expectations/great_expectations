@@ -3,6 +3,7 @@ sidebar_label: 'Add features to Custom Expectations'
 title: 'Add features to Custom Expectations'
 id: add_features_custom_expectations_lp
 description: Add additional functionality to your Custom Expectations.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

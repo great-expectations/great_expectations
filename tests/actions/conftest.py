@@ -137,7 +137,7 @@ def validation_result_suite_with_ge_cloud_id(validation_result_suite_ge_cloud_id
             "expectation_suite_name": "asset.default",
             "run_id": "test_100",
         },
-        ge_cloud_id=validation_result_suite_ge_cloud_id,
+        id=validation_result_suite_ge_cloud_id,
     )
 
 

@@ -4,6 +4,7 @@ title: 'Data Assistants'
 hide_title: true
 id: data_assistants_lp
 description: Use the Missingness Data Assistant to create Expectation Suites.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

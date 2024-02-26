@@ -3,6 +3,7 @@ sidebar_label: 'Manage Data Assets'
 title: 'Manage Data Assets'
 id: manage_data_assets_lp
 description: Request data from a Data Source and organize Batches in file-based and SQL Data Assets.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
