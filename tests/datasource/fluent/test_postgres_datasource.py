@@ -1193,9 +1193,9 @@ def test_adding_partitioner_persists_results(
         gx_yaml.read_text(),
     )["fluent_datasources"]
 
-    assert final_yaml["my_datasource"]["assets"]["my_asset"]["batch_configs"][0][
-        "partitioner"
-    ]
+    assert final_yaml["my_datasource"]["assets"]["my_asset"]["batch_configs"][
+        "my_batch_config"
+    ]["partitioner"]
 
 
 @pytest.mark.postgresql

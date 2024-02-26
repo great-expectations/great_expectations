@@ -284,11 +284,13 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_config = BatchConfig(name=name, partitioner=partitioner)
         batch_config.set_data_asset(self)
         self.batch_configs.append(batch_config)
+        self.update_batch_config_field_set()
         if self.datasource.data_context:
             try:
                 batch_config = self.datasource.add_batch_config(batch_config)
             except Exception:
                 self.batch_configs.remove(batch_config)
+                self.update_batch_config_field_set()
                 raise
         self.update_batch_config_field_set()
         return batch_config
