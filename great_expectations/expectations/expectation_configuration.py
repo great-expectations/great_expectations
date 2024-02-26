@@ -115,7 +115,7 @@ class KWargDetailsDict(TypedDict):
     message="Used to include rendered content dictionary in expectation configuration.",
 )
 @new_argument(
-    argument_name="ge_cloud_id",
+    argument_name="id",
     version="0.13.36",
     message="Used in GX Cloud deployments.",
 )
@@ -132,7 +132,7 @@ class ExpectationConfiguration(SerializableDictDot):
         kwargs: The keyword arguments to pass to the expectation class.
         meta: A dictionary of metadata to attach to the expectation.
         success_on_last_run: Whether the expectation succeeded on the last run.
-        ge_cloud_id: The corresponding GX Cloud ID for the expectation.
+        id: The corresponding GX Cloud ID for the expectation.
         expectation_context: The context for the expectation.
         rendered_content: Rendered content for the expectation.
     Raises:
@@ -154,7 +154,7 @@ class ExpectationConfiguration(SerializableDictDot):
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
         success_on_last_run: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
         rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
@@ -177,7 +177,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self.meta = meta
         self.notes = notes
         self.success_on_last_run = success_on_last_run
-        self._ge_cloud_id = ge_cloud_id
+        self._id = id
         self._expectation_context = expectation_context
         self._rendered_content = rendered_content
 
@@ -212,12 +212,12 @@ class ExpectationConfiguration(SerializableDictDot):
         return raw_config
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
-        return self._ge_cloud_id
+    def id(self) -> Optional[str]:
+        return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value: str) -> None:
-        self._ge_cloud_id = value
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
 
     @property
     def expectation_context(self) -> Optional[ExpectationContext]:
@@ -546,7 +546,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(
-            id=self.ge_cloud_id,
+            id=self.id,
             meta=self.meta,
             notes=self.notes,
             rendered_content=self.rendered_content,
@@ -598,7 +598,7 @@ class ExpectationConfigurationSchema(Schema):
         required=False,
         allow_none=True,
     )
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema,
         required=False,
@@ -613,7 +613,7 @@ class ExpectationConfigurationSchema(Schema):
     )
 
     REMOVE_KEYS_IF_NONE = [
-        "ge_cloud_id",
+        "id",
         "expectation_context",
         "rendered_content",
         "notes",
@@ -639,7 +639,7 @@ class ExpectationConfigurationSchema(Schema):
         """
         Utilize UUID for data validation but convert to string before usage in business logic
         """
-        attr = "ge_cloud_id"
+        attr = "id"
         uuid_val = data.get(attr)
         if uuid_val:
             data[attr] = str(uuid_val)

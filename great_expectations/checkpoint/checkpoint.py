@@ -112,7 +112,7 @@ class BaseCheckpoint(ConfigPeer):
 
     @public_api
     @new_argument(
-        argument_name="expectation_suite_ge_cloud_id",
+        argument_name="expectation_suite_id",
         version="0.13.33",
         message="Used in cloud deployments.",
     )
@@ -129,7 +129,7 @@ class BaseCheckpoint(ConfigPeer):
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | dict | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
+        expectation_suite_id: str | None = None,
     ) -> CheckpointResult:
         """Validate against current Checkpoint.
 
@@ -148,7 +148,7 @@ class BaseCheckpoint(ConfigPeer):
             run_name: The run_name for the validation; if None, a default value will be used.
             run_time: The date/time of the run.
             result_format: One of several supported formatting directives for expectation validation results
-            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            expectation_suite_id: Great Expectations Cloud id for the expectation suite
 
         Raises:
             InvalidCheckpointConfigError: If `run_id` is provided with `run_name` or `run_time`.
@@ -222,7 +222,7 @@ class BaseCheckpoint(ConfigPeer):
             "evaluation_parameters": evaluation_parameters or {},
             "runtime_configuration": runtime_configuration or {},
             "validations": validations or [],
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "expectation_suite_id": expectation_suite_id,
         }
 
         substituted_runtime_config: dict = self.get_substituted_config(
@@ -292,7 +292,7 @@ class BaseCheckpoint(ConfigPeer):
                     validation_result = run_result.get("validation_result")  # type: ignore[assignment] # could be dict
                     if validation_result:
                         meta = validation_result.meta  # type: ignore[assignment] # could be dict
-                        id = self.ge_cloud_id
+                        id = self.id
                         meta["checkpoint_id"] = id
                     # TODO: We only currently support 1 validation_result_url per checkpoint and use the first one we
                     #       encounter. Since checkpoints can have more than 1 validation result, we will need to update
@@ -384,8 +384,8 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_name: str | None = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
-            expectation_suite_ge_cloud_id: str | None = substituted_validation_dict.get(
-                "expectation_suite_ge_cloud_id"
+            expectation_suite_id: str | None = substituted_validation_dict.get(
+                "expectation_suite_id"
             )
             include_rendered_content: bool | None = substituted_validation_dict.get(
                 "include_rendered_content"
@@ -400,8 +400,8 @@ class BaseCheckpoint(ConfigPeer):
                 expectation_suite_name=expectation_suite_name
                 if not self._using_cloud_context
                 else None,
-                expectation_suite_ge_cloud_id=(
-                    expectation_suite_ge_cloud_id if self._using_cloud_context else None
+                expectation_suite_id=(
+                    expectation_suite_id if self._using_cloud_context else None
                 ),
                 include_rendered_content=include_rendered_content,
             )
@@ -435,7 +435,7 @@ class BaseCheckpoint(ConfigPeer):
             if self._using_cloud_context:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
-                    id=self.ge_cloud_id,
+                    id=self.id,
                 )
 
             operator_run_kwargs = {}
@@ -494,9 +494,9 @@ class BaseCheckpoint(ConfigPeer):
             return []
 
     @property
-    def ge_cloud_id(self) -> str | None:
+    def id(self) -> str | None:
         try:
-            return self.config.ge_cloud_id
+            return self.config.id
         except AttributeError:
             return None
 
@@ -523,10 +523,10 @@ class BaseCheckpoint(ConfigPeer):
 @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
 @deprecated_argument(argument_name="batches", version="0.14.0")
 @new_argument(
-    argument_name="ge_cloud_id", version="0.13.33", message="Used in cloud deployments."
+    argument_name="id", version="0.13.33", message="Used in cloud deployments."
 )
 @new_argument(
-    argument_name="expectation_suite_ge_cloud_id",
+    argument_name="expectation_suite_id",
     version="0.13.33",
     message="Used in cloud deployments.",
 )
@@ -552,8 +552,8 @@ class Checkpoint(BaseCheckpoint):
         validations: Validations to be executed as part of checkpoint.
         validation_operator_name: List of validation Operators configured by the Checkpoint.
         batches: List of Batches for validation by Checkpoint.
-        ge_cloud_id: Great Expectations Cloud id for this Checkpoint.
-        expectation_suite_ge_cloud_id: Great Expectations Cloud id associated with Expectation Suite.
+        id: Great Expectations Cloud id for this Checkpoint.
+        expectation_suite_id: Great Expectations Cloud id associated with Expectation Suite.
         default_validation_id:  Default value used by Checkpoint if no Validations are configured.
 
     Raises:
@@ -592,8 +592,8 @@ class Checkpoint(BaseCheckpoint):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        ge_cloud_id: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
+        id: str | None = None,
+        expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
     ) -> None:
         validations = convert_validations_list_to_checkpoint_validation_configs(
@@ -646,8 +646,8 @@ constructor arguments.
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            id=id,
+            expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
         )
         super().__init__(
@@ -673,8 +673,8 @@ constructor arguments.
         validations: Optional[
             Union[list[dict], list[CheckpointValidationConfig]]
         ] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
+        expectation_suite_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
         validator: Validator | None = None,
     ) -> Checkpoint:
@@ -713,8 +713,8 @@ constructor arguments.
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
-            "ge_cloud_id": ge_cloud_id,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "id": id,
+            "expectation_suite_id": expectation_suite_id,
             "default_validation_id": default_validation_id,
         }
 

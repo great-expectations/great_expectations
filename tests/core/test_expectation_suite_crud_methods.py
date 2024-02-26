@@ -148,13 +148,13 @@ def single_expectation_suite(exp1) -> ExpectationSuite:
 
 
 @pytest.fixture
-def single_expectation_suite_with_expectation_ge_cloud_id(exp1) -> ExpectationSuite:
-    exp1_with_ge_cloud_id = deepcopy(exp1)
-    exp1_with_ge_cloud_id.ge_cloud_id = "0faf94a9-f53a-41fb-8e94-32f218d4a774"
+def single_expectation_suite_with_expectation_id(exp1) -> ExpectationSuite:
+    exp1_with_id = deepcopy(exp1)
+    exp1_with_id.id = "0faf94a9-f53a-41fb-8e94-32f218d4a774"
 
     return ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[exp1_with_ge_cloud_id],
+        expectations=[exp1_with_id],
         meta={"notes": "This is an expectation suite."},
     )
 
@@ -232,14 +232,14 @@ def suite_with_column_pair_and_table_expectations(
 
 
 @pytest.fixture
-def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3) -> ExpectationSuite:
+def ge_cloud_suite(id, exp1, exp2, exp3) -> ExpectationSuite:
     for exp in (exp1, exp2, exp3):
-        exp.ge_cloud_id = ge_cloud_id
+        exp.id = id
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2, exp3],
         meta={"notes": "This is an expectation suite."},
-        ge_cloud_id=ge_cloud_id,
+        id=id,
     )
 
 
@@ -277,25 +277,21 @@ def test_find_expectation_indexes(
 
 
 @pytest.mark.cloud
-def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_id):
+def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, id):
     # All expectations in `ge_cloud_suite` have our desired id
-    res = ge_cloud_suite.find_expectation_indexes(ge_cloud_id=ge_cloud_id)
+    res = ge_cloud_suite.find_expectation_indexes(id=id)
     assert res == [0, 1, 2]
 
-    # Wrong `ge_cloud_id` will fail to match with any expectations
-    res = ge_cloud_suite.find_expectation_indexes(ge_cloud_id="my_fake_id")
+    # Wrong `id` will fail to match with any expectations
+    res = ge_cloud_suite.find_expectation_indexes(id="my_fake_id")
     assert res == []
 
 
 @pytest.mark.cloud
 def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
-        ge_cloud_suite.find_expectation_indexes(
-            expectation_configuration=None, ge_cloud_id=None
-        )
-    assert (
-        str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
-    )
+        ge_cloud_suite.find_expectation_indexes(expectation_configuration=None, id=None)
+    assert str(err.value) == "Must provide either expectation_configuration or id"
 
 
 @pytest.mark.cloud
@@ -310,12 +306,8 @@ def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suit
 @pytest.mark.cloud
 def test_find_expectations_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
-        ge_cloud_suite.find_expectations(
-            expectation_configuration=None, ge_cloud_id=None
-        )
-    assert (
-        str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
-    )
+        ge_cloud_suite.find_expectations(expectation_configuration=None, id=None)
+    assert str(err.value) == "Must provide either expectation_configuration or id"
 
 
 @pytest.mark.filesystem
@@ -360,11 +352,9 @@ def test_remove_expectation(
 def test_remove_expectation_without_necessary_args(single_expectation_suite):
     with pytest.raises(TypeError) as err:
         single_expectation_suite.remove_expectation(
-            expectation_configuration=None, ge_cloud_id=None
+            expectation_configuration=None, id=None
         )
-    assert (
-        str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
-    )
+    assert str(err.value) == "Must provide either expectation_configuration or id"
 
 
 @pytest.mark.filesystem
@@ -444,16 +434,16 @@ def test_add_expectation(
 
 
 @pytest.mark.cloud
-def test_add_expectation_with_ge_cloud_id(
-    single_expectation_suite_with_expectation_ge_cloud_id,
+def test_add_expectation_with_id(
+    single_expectation_suite_with_expectation_id,
 ):
     """
-    This test ensures that expectation does not lose ge_cloud_id attribute when updated
+    This test ensures that expectation does not lose id attribute when updated
     """
-    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-        0
-    ].ge_cloud_id
-    # updated expectation does not have ge_cloud_id
+    expectation_id = (
+        single_expectation_suite_with_expectation_id.expectation_configurations[0].id
+    )
+    # updated expectation does not have id
     updated_expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -463,21 +453,17 @@ def test_add_expectation_with_ge_cloud_id(
         },
         meta={"notes": "This is an expectation."},
     )
-    single_expectation_suite_with_expectation_ge_cloud_id.add_expectation_configuration(
+    single_expectation_suite_with_expectation_id.add_expectation_configuration(
         updated_expectation, overwrite_existing=True
     )
     assert (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-            0
-        ].ge_cloud_id
-        == expectation_ge_cloud_id
+        single_expectation_suite_with_expectation_id.expectation_configurations[0].id
+        == expectation_id
     )
     # make sure expectation config was actually updated
-    assert single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
+    assert single_expectation_suite_with_expectation_id.expectation_configurations[
         0
-    ].kwargs[
-        "value_set"
-    ] == [
+    ].kwargs["value_set"] == [
         11,
         22,
         33,

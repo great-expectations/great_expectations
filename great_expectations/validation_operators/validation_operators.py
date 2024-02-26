@@ -391,7 +391,7 @@ class ActionListValidationOperator(ValidationOperator):
                 if self._using_cloud_context:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                        id=batch._expectation_suite.ge_cloud_id,
+                        id=batch._expectation_suite.id,
                     )
                     validation_result_id = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.VALIDATION_RESULT
