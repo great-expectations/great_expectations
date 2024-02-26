@@ -3733,9 +3733,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             except ValidationError as e:
                 # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
                 # we should ignore that instead of breaking all checkpoints in the entire context
-                logger.info(
+                warnings.warn(
                     f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
-                    f"because it failed to load with message: {e}"
+                    f"because it failed to load with message: {e}",
+                    UserWarning,
                 )
                 continue
             if not expectation_suite_dict:
