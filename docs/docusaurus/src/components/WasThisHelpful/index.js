@@ -42,7 +42,8 @@ export default function WasThisHelpful(){
         setIsOpen(false)
     }
 
-    const sendReview = () => {
+    const sendReview = (e) => {
+        e.preventDefault(e);
         posthog.capture("survey sent", {
             $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
             $survey_response: formData.name,
@@ -69,7 +70,7 @@ export default function WasThisHelpful(){
                 <div className={styles.overlay} onClick={dismissFeedbackModal}/>
                 <div className={styles.modal}>
                     <div className={styles.modalHeader}>
-                        <h5 className={styles.modalHeaderTitle}>Tell Us More</h5>
+                        <h5 className={styles.modalHeaderTitle}>Tell us more</h5>
                         <img src={closeImg} className={styles.modalHeaderCloseButton}
                              alt="Close icon" onClick={() => setIsOpen(false)}/>
                     </div>
@@ -93,7 +94,7 @@ export default function WasThisHelpful(){
                                 />
                             </div>
                             <div className={styles.modalTextContainer}>
-                                <label className={styles.modalTextLabel}>Work Email*</label>
+                                <label className={styles.modalTextLabel}>Email</label>
                                 <input
                                     type="email"
                                     name="workEmail"
@@ -105,12 +106,13 @@ export default function WasThisHelpful(){
                             </div>
                         </div>
                         <div className={styles.modalTextContainer}>
-                            <label className={styles.modalTextLabel}>Tell Us More</label>
+                            <label className={styles.modalTextLabel}>Tell us more*</label>
                             <textarea
                                 name="description"
                                 value={formData.description}
                                 className={styles.modalTextInput + ' ' + styles.modalTextareaInput}
                                 onChange={handleChange}
+                                required
                                 placeholder="Provide as much detail as possible about the issue you
                                 experienced or where improvement is needed. Detailed feedback helps
                                 us better identify the problem and determine a solution."

@@ -160,6 +160,10 @@
     min-height: 10rem;
 }
 
+.modalTextareaInput:invalid:focus {
+    border: 2px solid navy;
+}
+
 .modalTextInput:active, .modalTextInput:focus, .modalTextInput:hover {
     border: 1px solid var(--ifm-color-primary);
 }
