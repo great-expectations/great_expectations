@@ -65,7 +65,6 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
 
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
@@ -452,7 +451,3 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
         )
-
-    def _add_partitioner(self: Self, partitioner: SparkPartitioner) -> Self:
-        self.partitioner = partitioner
-        return self
