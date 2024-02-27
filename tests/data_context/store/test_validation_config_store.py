@@ -84,29 +84,31 @@ def test_add_cloud(
     mock_put.assert_called_once_with(
         mock.ANY,
         f"https://api.greatexpectations.io/organizations/12345678-1234-5678-1234-567812345678/validation-configs/{id}",
-        # json={"data": {
-        #     "type": "validation_config",
-        #     "attributes": {
-        #         "organization_id": "12345678-1234-5678-1234-567812345678",
-        #         "validation_config": {
-        #             "name": name,
-        #             "data": {
-        #                 "id": None,
-        #                 "name": "my_batch_config",
-        #                 "partitioner": None,
-        #             },
-        #             "suite": {
-        #                 "expectation_suite_name": "my_suite",
-        #                 "id": None,
-        #                 "expectations": [],
-        #                 "data_asset_type": None,
-        #                 "meta": mock.ANY,
-        #                 "notes": None,
-        #             },
-        #         },
-        #         "id": id,
-        #     }
-        # }}
+        json={
+            "data": {
+                "type": "validation_config",
+                "id": id,
+                "attributes": {
+                    "organization_id": "12345678-1234-5678-1234-567812345678",
+                    "validation_config": {
+                        "name": name,
+                        "data": {
+                            "id": None,
+                            "name": "my_batch_config",
+                            "partitioner": None,
+                        },
+                        "suite": {
+                            "expectation_suite_name": "my_suite",
+                            "id": None,
+                            "expectations": [],
+                            "data_asset_type": None,
+                            "meta": mock.ANY,
+                            "notes": None,
+                        },
+                    },
+                },
+            }
+        },
     )
 
 

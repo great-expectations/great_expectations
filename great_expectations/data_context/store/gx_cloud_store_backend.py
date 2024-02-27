@@ -297,6 +297,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # resource for others. Since we route all update calls through this single
         # method, we need to handle both cases.
 
+        print("CHETAN", value, type(value.get("suite")))
+
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]

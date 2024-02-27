@@ -39,6 +39,11 @@ class ValidationConfigStore(Store):
 
     @override
     def serialize(self, value):
+        if self.cloud_mode:
+            data = value.dict()
+            data["suite"] = data["suite"].to_json_dict()
+            return data
+
         return value.json()
 
     @override
