@@ -39,6 +39,3 @@ class ValidationConfig(BaseModel):
     @public_api
     def run(self):
         raise NotImplementedError
-
-
-ValidationConfig.update_forward_refs()
