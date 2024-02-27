@@ -21,6 +21,7 @@ DB_PATH: Final[str] = file_relative_path(
 
 @pytest.fixture
 def referential_integrity_db(sa):
+    """Create a sqlite database with 3 tables: order_table_1, order_table_2, and customer_table. We only run this once to create the database."""
     sqlite_engine = sa.create_engine(f"sqlite:///{DB_PATH}")
     order_table_1 = pd.DataFrame(
         {
@@ -65,9 +66,7 @@ def referential_integrity_db(sa):
 
 
 @pytest.fixture()
-def sqlite_context(
-    in_memory_runtime_context, referential_integrity_db
-) -> SqliteDatasource:
+def sqlite_context(in_memory_runtime_context) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
     context.sources.add_sqlite(
