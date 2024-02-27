@@ -20,7 +20,7 @@ You will almost always instantiate a Data Context as the first step when using G
 ## Prerequisites
 
 - [A valid Python environment](./set_up_a_python_environment.mdx).
-- [The Great Expectations library installed](./install_gx.md).
+- [The Great Expectations Python library installed](./install_gx.md).
 
 ## Quickstart with a Data Context
 
@@ -106,12 +106,16 @@ When you [create an Ephemeral Data Context](/core/installation_and_setup/manage_
 
 </Tabs>
 
-## View the full configuration details of a Data Context
+## Export an Ephemeral Data Context to a new File Data Context
 
-<InProgress/>
+  <InProgress/>
+
+## View the full configuration of a data context
+
+  <InProgress/>
 
 ## Next steps
-- [Configure credentials](/core/installation_and_setup//manage_credentials.md)
+- [Configure credentials](/core/installation_and_setup/manage_credentials.md)
 - [(Optional) Configure Stores](/core/installation_and_setup//manage_metadata_stores.md)
 - [(Optional) Configure Data Docs](/core/installation_and_setup//manage_metadata_stores.md)
 - [Connect to data](/core/connect_to_data/connect_to_data.md)

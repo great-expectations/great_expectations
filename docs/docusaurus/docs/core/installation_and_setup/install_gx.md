@@ -3,8 +3,12 @@ title: Install Great Expectations 1.0
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
+import ReleaseVersionBox from '../../components/versions/_gx_version_code_box.mdx'
 
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
+
+import AwsS3Support from './additional_dependencies/amazon_s3.md'
+
 import InProgress from '../_core_components/_in_progress.md';
 
 Greate Expectations (GX) is the leading tool for validating and documenting your data. GX 1.0 is the open source Python library that supports this tool.
@@ -19,8 +23,6 @@ Greate Expectations (GX) is the leading tool for validating and documenting your
 <Tabs queryString="install-location" groupId="install-location" defaultValue='local' values={[{label: 'Local', value:'local'}, {label: 'EMR Spark notebook', value:'spark-notebook'}]}>
 
   <TabItem value="local" label="Local">
-
-<InProgress/>
 
 1. (Optional) Activate your virtual environment.
 
@@ -42,7 +44,15 @@ Greate Expectations (GX) is the leading tool for validating and documenting your
   pip install great_expectations
   ```
 
-4. Verify your GX installation:
+4. Verify that GX installed successfully with the CLI command:
+
+  ```bash title="Terminal input"
+  great_expectations --version
+  ```
+
+  The output you receive if GX was successfully installed will be:
+
+  <ReleaseVersionBox/>
 
 
   </TabItem>
@@ -54,6 +64,7 @@ Greate Expectations (GX) is the leading tool for validating and documenting your
   </TabItem>
 
 </Tabs>
+
 
 ## Next steps
 - [Install additional dependencies](/core/installation_and_setup/additional_dependencies/additional_dependencies.md)

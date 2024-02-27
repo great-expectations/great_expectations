@@ -1,3 +1,0 @@
----
-title: Connect to data
----

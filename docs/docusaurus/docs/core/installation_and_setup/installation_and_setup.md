@@ -1,23 +1,31 @@
 ---
 title: 'Installation and setup'
+hide_feedback_survey: true
+hide_title: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
 import GxData from '../../components/_data.jsx';
 
 import AdditionalDependencies from './additional_dependencies/additional_dependencies.md'
 
-import InProgress from '../_core_components/_in_progress.md'
 
-<p class="DocItem__header-description">Set up your deployment environment with Python, the Great Expectations (GX) Python library, and any additional dependencies or credentials you will need to work in a given deployment environment or with a particular data source format.</p>
+<OverviewCard title={frontMatter.title}>
+
+  Set up your deployment environment with Python, the Great Expectations (GX) Python library, and any additional dependencies or credentials you will need to work in a given deployment environment or with a particular data source format.
+
+</OverviewCard>
+
 
 ## Basic installation
 
 <p>At a minimum, using Great Expectations in Python scripts requires an installation of Python (version {GxData.min_python} to {GxData.max_python}) that includes the Great Expectations library.</p>
 
 <LinkCardGrid>
+
   <LinkCard 
     topIcon 
     label="Set up a Python environment"
@@ -32,6 +40,7 @@ import InProgress from '../_core_components/_in_progress.md'
     to="/core/installation_and_setup/install_gx" 
     icon="/img/expectation_icon.svg" 
   />
+
 </LinkCardGrid>
 
 ## Install additional dependencies
@@ -41,6 +50,7 @@ import InProgress from '../_core_components/_in_progress.md'
 ## Manage a GX project
 
 <LinkCardGrid>
+
   <LinkCard 
     topIcon 
     label="Manage Data Contexts"
@@ -69,4 +79,5 @@ import InProgress from '../_core_components/_in_progress.md'
     to="/core/installation_and_setup/manage_data_docs" 
     icon="/img/expectation_icon.svg" 
   />
+
 </LinkCardGrid>

@@ -1,11 +1,17 @@
 ---
 title: Install additional dependencies
+hide_feedback_survey: true
+hide_title: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
+<OverviewCard title={frontMatter.title}>
 Some environments and Data Sources utilize additional Python libraries or third party utilities that are not included in the base installation of Great Expectations (GX).  If your use cases involve any of the following, follow the corresponding guidance to install the necessary dependencies.
+</OverviewCard>
+
 
 
 <LinkCardGrid>
