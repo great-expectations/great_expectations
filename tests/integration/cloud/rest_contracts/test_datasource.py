@@ -37,11 +37,9 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
             "id": pact.Format().uuid,
             "type": "pandas",
             "attributes": {
-                "datasource_config": pact.Like(
-                    {
-                        "assets": pact.Like([]),
-                    }
-                ),
+                # pact doesn't test optional attributes like an empty "assets" list
+                # this is the minimum response. https://docs.pact.io/faq#why-is-there-no-support-for-specifying-optional-attributes
+                "datasource_config": pact.Like({}),
             },
         },
     )
