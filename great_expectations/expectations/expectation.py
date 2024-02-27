@@ -615,7 +615,15 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedStringTemplateContent:
         assert result, "Must provide a result object."
-        if result.exception_info["raised_exception"]:
+        raised_exception: bool = False
+        if "raised_exception" in result.exception_info:
+            raised_exception = result.exception_info["raised_exception"]
+        else:
+            for k, v in result.exception_info.items():
+                # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                raised_exception = v["raised_exception"]
+        if raised_exception:
             return RenderedStringTemplateContent(
                 **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
@@ -695,8 +703,28 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         assert result, "Must provide a result object."
         success: Optional[bool] = result.success
         result_dict: dict = result.result
+        exception = {
+            "raised_exception": False,
+            "exception_message": "",
+            "exception_traceback": "",
+        }
+        if "raised_exception" in result.exception_info:
+            exception["raised_exception"] = result.exception_info["raised_exception"]
+            exception["exception_message"] = result.exception_info["exception_message"]
+            exception["exception_traceback"] = result.exception_info[
+                "exception_traceback"
+            ]
+        else:
+            for k, v in result.exception_info.items():
+                # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                exception["raised_exception"] = v["raised_exception"]
+                exception["exception_message"] = v["exception_message"]
+                exception["exception_traceback"] = v["exception_traceback"]
+                # This only pulls the first exception message and traceback from a list of exceptions to render in the data docs.
+                break
 
-        if result.exception_info["raised_exception"]:
+        if exception["raised_exception"]:
             exception_message_template_str = (
                 "\n\n$expectation_type raised an exception:\n$exception_message"
             )
@@ -713,9 +741,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                         "template": exception_message_template_str,
                         "params": {
                             "expectation_type": expectation_type,
-                            "exception_message": result.exception_info[
-                                "exception_message"
-                            ],
+                            "exception_message": exception["exception_message"],
                         },
                         "tag": "strong",
                         "styling": {
@@ -739,9 +765,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                             **{  # type: ignore[arg-type]
                                 "content_block_type": "string_template",
                                 "string_template": {
-                                    "template": result.exception_info[
-                                        "exception_traceback"
-                                    ],
+                                    "template": exception["exception_traceback"],
                                     "tag": "code",
                                 },
                             }
@@ -1255,7 +1279,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             notes=notes,
-            ge_cloud_id=id,
+            id=id,
             rendered_content=rendered_content,
         )
 

@@ -1575,7 +1575,6 @@ def test_data_context_config_defaults():
             "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics",
         },
         "checkpoint_store_name": None,
-        "concurrency": None,
         "config_variables_file_path": None,
         "config_version": 3,
         "data_docs_sites": None,

@@ -4,7 +4,7 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
 
 import pandas as pd
 import pytest
@@ -19,6 +19,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.data_context import get_context
@@ -36,6 +37,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -289,7 +291,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     actual = validator.convert_to_checkpoint_validations_list()
     expected_config = CheckpointValidationConfig(
         expectation_suite_name="validating_taxi_data",
-        expectation_suite_ge_cloud_id=ANY,
+        expectation_suite_id=ANY,
         batch_request={
             "datasource_name": "taxi_pandas",
             "data_connector_name": "monthly",
@@ -323,7 +325,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
+                id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             )
         ],
         meta={"notes": "This is an expectation suite."},
@@ -375,13 +377,13 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
+                id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             ),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
+                id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
             ),
         ],
         meta={"notes": "This is an expectation suite."},
@@ -1076,6 +1078,54 @@ def test_validator_include_rendered_content_diagnostic(
     )
 
 
+@pytest.mark.parametrize(
+    "value_set, expected",
+    [
+        (list(range(2)), False),  # value set won't pass for the actual data
+        (list(range(5)), True),  # value set will pass for the actual data
+    ],
+)
+@pytest.mark.big
+def test_validator_validate_substitutes_evaluation_parameters(
+    value_set: list[int],
+    expected: bool,
+):
+    """Integration test to ensure evaluation parameters are respected when validating.
+    The setup here is to provide very simple data, and a variety of evaluation_parameter inputs,
+    just checking for result.success as a proxy for the evaluation_parameter being respected.
+    """
+
+    # Arrange
+    context = get_context(mode="ephemeral")
+    suite_name = "my_suite"
+    column_name = "my_column"
+    datasource = context.sources.add_pandas(name="my_datasource")
+    asset = datasource.add_dataframe_asset(
+        "my_asset", dataframe=pd.DataFrame({column_name: [0, 1, 2, 3, 4]})
+    )
+    suite = context.suites.add(ExpectationSuite(suite_name))
+    suite.add_expectation(
+        gxe.ExpectColumnDistinctValuesToBeInSet(
+            column=column_name, value_set={"$PARAMETER": "value_set"}
+        )
+    )
+    validator = context.get_validator(
+        batch_request=asset.build_batch_request(),
+        expectation_suite_name=suite_name,
+    )
+
+    # Act
+    result = validator.validate(evaluation_parameters={"value_set": value_set})
+    assert isinstance(result, ExpectationSuiteValidationResult)
+    evaluation_parameters_used = result.results[0]["expectation_config"]["kwargs"][
+        "value_set"
+    ]
+
+    # Assert
+    assert evaluation_parameters_used == value_set
+    assert result.success == expected
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
@@ -1589,3 +1639,69 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
             exception_info=None,
         ),
     ]
+
+
+@pytest.mark.unit
+def test_validator_with_exception_info_in_result():
+    get_context()
+    validator = Validator(execution_engine=PandasExecutionEngine())
+
+    mock_resolved_metrics = []
+
+    metric_id = (
+        "table.column_types",
+        "a351bbf72b281f0b7a62dbbf3599ce5c",
+        "include_nested=True",
+    )
+    exception_message = "Danger Will Robinson! Danger!"
+    exception_traceback = 'Traceback (most recent call last):\n File "lostinspace.py", line 42, in <module>\n    raise Exception("Danger Will Robinson! Danger!")\nException: Danger Will Robinson! Danger!'
+
+    mock_aborted_metrics_info = {
+        metric_id: {
+            "exception_info": ExceptionInfo(
+                exception_traceback=exception_traceback,
+                exception_message=exception_message,
+            ),
+        }
+    }
+
+    with patch.object(
+        validator._metrics_calculator,
+        "resolve_validation_graph",
+        return_value=(mock_resolved_metrics, mock_aborted_metrics_info),
+    ):
+        result = validator.graph_validate(
+            configurations=[
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_unique",
+                    kwargs={
+                        "column": "animals",
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_set",
+                    kwargs={
+                        "column": "animals",
+                        "value_set": ["cat", "fish", "dog"],
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_not_be_null",
+                    kwargs={
+                        "column": "animals",
+                    },
+                ),
+            ],
+            runtime_configuration={"result_format": "COMPLETE"},
+        )
+        assert len(result) == 3  # One to one mapping of Expectations to results
+        for evr in result:
+            assert evr.exception_info is not None
+            assert (
+                evr.exception_info[str(metric_id)].exception_traceback
+                == exception_traceback
+            )
+            assert (
+                evr.exception_info[str(metric_id)].exception_message
+                == exception_message
+            )

@@ -1348,7 +1348,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     assert sorted(inline_store_backend.list_keys()) == [
         ("anonymous_usage_statistics",),
         ("checkpoint_store_name",),
-        ("concurrency",),
         ("config_variables_file_path",),
         ("config_version",),
         ("data_docs_sites",),

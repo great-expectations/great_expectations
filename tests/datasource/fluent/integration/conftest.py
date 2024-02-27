@@ -12,6 +12,7 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
@@ -132,15 +133,14 @@ def sql_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
-    asset = (
-        datasource.add_table_asset(
-            name="my_asset",
-            table_name="yellow_tripdata_sample_2019_01",
-        )
-        .add_partitioner_year_and_month(column_name="pickup_datetime")
-        .add_sorters(["year", "month"])
+    asset = datasource.add_table_asset(
+        name="my_asset",
+        table_name="yellow_tripdata_sample_2019_01",
+    ).add_sorters(["year", "month"])
+    batch_request = asset.build_batch_request(
+        options={"year": 2019, "month": 1},
+        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
     )
-    batch_request = asset.build_batch_request({"year": 2019, "month": 1})
     return context, datasource, asset, batch_request
 
 
@@ -213,15 +213,14 @@ def multibatch_sql_data(
     datasource = sqlite_datasource(
         context, "yellow_tripdata_sample_2020_all_months_combined.db"
     )
-    asset = (
-        datasource.add_table_asset(
-            name="my_asset",
-            table_name="yellow_tripdata_sample_2020",
-        )
-        .add_partitioner_year_and_month(column_name="pickup_datetime")
-        .add_sorters(["year", "month"])
+    asset = datasource.add_table_asset(
+        name="my_asset",
+        table_name="yellow_tripdata_sample_2020",
+    ).add_sorters(["year", "month"])
+    batch_request = asset.build_batch_request(
+        options={"year": 2020},
+        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
     )
-    batch_request = asset.build_batch_request({"year": 2020})
     return context, datasource, asset, batch_request
 
 

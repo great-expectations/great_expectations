@@ -3121,8 +3121,7 @@ def fds_data_context(
     datasource.add_query_asset(
         name="trip_asset_partition_by_event_type",
         query="SELECT * FROM table_partitioned_by_date_column__A",
-    ).add_partitioner_column_value("event_type")
-
+    )
     return context
 
 

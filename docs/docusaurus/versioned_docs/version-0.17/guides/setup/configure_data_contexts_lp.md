@@ -3,6 +3,7 @@ sidebar_label: 'Configure Data Contexts'
 title: 'Configure Data Contexts'
 id: configure_data_contexts_lp
 description: Instantiate and convert a Data Context.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

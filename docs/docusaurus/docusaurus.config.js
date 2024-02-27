@@ -3,6 +3,8 @@
 const remarkNamedSnippets = require('./scripts/remark-named-snippets/index');
 const remarkCodeImport = require('remark-code-import');
 
+require('dotenv').config()
+
 module.exports = {
   title: 'Great Expectations',
   tagline: 'Always know what to expect from your data.',
@@ -21,6 +23,15 @@ module.exports = {
       require.resolve('docusaurus-gtm-plugin'),
       {
         id: 'GTM-K63L45F', // GTM Container ID
+      },
+    ],
+    [
+      'posthog-docusaurus',
+      {
+        apiKey: process.env.POSTHOG_API_KEY,
+        enableInDevelopment: true
+        // for more information on how to set up this value go to
+        // https://greatexpectations.atlassian.net/wiki/spaces/DVRL/pages/956334083/Manage+the+feedback+survey
       },
     ],
   ],
@@ -99,8 +110,8 @@ module.exports = {
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: 'https://legacy.016.docs.greatexpectations.io',
-              label: '0.16.x and earlier',
+              to: 'https://legacy.017.docs.greatexpectations.io',
+              label: '0.17.x and earlier',
             },
           ],
           dropdownActiveClassDisabled: true,
@@ -270,10 +281,6 @@ module.exports = {
             ['0.18']: {
               label: '0.18.9',
               path: '',
-            },
-            ['0.17']: {
-              label: '0.17.23',
-              path: '0.17.23',
             },
           },
           admonitions: {

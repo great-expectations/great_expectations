@@ -7,6 +7,7 @@ description: Supplemental information that will help you get the most out of Gre
 slug: '/reference/learn/'
 displayed_sidebar: 'learn'
 hide_table_of_contents: true
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

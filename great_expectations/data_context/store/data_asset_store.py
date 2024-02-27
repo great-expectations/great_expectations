@@ -115,8 +115,8 @@ class DataAssetStore(Store):
                     f"GX Cloud returned {len(data)} DataAssets but expected 1"
                 )
             data = data[0]
-        data_asset_ge_cloud_id: str = data["id"]
+        data_asset_id: str = data["id"]
         data_asset_config_dict: dict = data["attributes"]["data_asset_config"]
-        data_asset_config_dict["id"] = data_asset_ge_cloud_id
+        data_asset_config_dict["id"] = data_asset_id
 
         return data_asset_config_dict

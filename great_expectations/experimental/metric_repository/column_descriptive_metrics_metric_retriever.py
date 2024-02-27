@@ -16,6 +16,7 @@ from great_expectations.experimental.metric_repository.metrics import (
     TableMetric,
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -409,15 +410,13 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             value = computed_metrics[metric_lookup_key]
         elif metric_lookup_key in aborted_metrics:
             exception = aborted_metrics[metric_lookup_key]
-            # Note: Only retrieving the first exception if there are multiple exceptions.
             exception_info = exception["exception_info"]
-            assert isinstance(exception_info, set)  # Type narrowing for mypy
-            first_exception = list(exception_info)[0]
             exception_type = "Unknown"  # Note: we currently only capture the message and traceback, not the type
-            exception_message = first_exception.exception_message
-            metric_exception = MetricException(
-                type=exception_type, message=exception_message
-            )
+            if isinstance(exception_info, ExceptionInfo):
+                exception_message = exception_info.exception_message
+                metric_exception = MetricException(
+                    type=exception_type, message=exception_message
+                )
         else:
             metric_exception = MetricException(
                 type="Not found",
