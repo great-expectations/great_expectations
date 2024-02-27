@@ -1221,8 +1221,16 @@ class TestPartitionerDirectoryAsset:
         )
         post_partitioner_batch_data = post_partitioner_batch_list[0].data
 
-        assert post_partitioner_batch_data.dataframe.count() == expected_num_records_directory_asset_no_partitioner_2020_passenger_count_2  # type: ignore[attr-defined]
-        assert post_partitioner_batch_data.dataframe.filter(F.col("passenger_count") != 2).count() == 0  # type: ignore[attr-defined]
+        assert (
+            post_partitioner_batch_data.dataframe.count()
+            == expected_num_records_directory_asset_no_partitioner_2020_passenger_count_2
+        )
+        assert (
+            post_partitioner_batch_data.dataframe.filter(
+                F.col("passenger_count") != 2
+            ).count()
+            == 0
+        )
 
 
 @pytest.fixture
@@ -1348,11 +1356,15 @@ class TestPartitionerFileAsset:
         post_partitioner_batch_data = post_partitioner_batch_list[0].data
 
         assert (
-            post_partitioner_batch_data.dataframe.filter(F.col("passenger_count") == 2).count()  # type: ignore[attr-defined]
+            post_partitioner_batch_data.dataframe.filter(
+                F.col("passenger_count") == 2
+            ).count()
             == expected_num_records_file_asset_no_partitioner_2020_10_passenger_count_2
         )
         assert (
-            post_partitioner_batch_data.dataframe.filter(F.col("passenger_count") != 2).count()  # type: ignore[attr-defined]
+            post_partitioner_batch_data.dataframe.filter(
+                F.col("passenger_count") != 2
+            ).count()
             == 0
         )
 
