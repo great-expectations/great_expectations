@@ -1,7 +1,7 @@
 const codeBlockTheme = {
     plain: {
         color: "#9CDCFE",
-        backgroundColor: "#292F43"
+        backgroundColor: "#373F58"
     },
     styles: [{
         types: ["prolog"],
