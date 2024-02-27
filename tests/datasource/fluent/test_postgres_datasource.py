@@ -534,43 +534,43 @@ def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
 @pytest.mark.postgresql
 @pytest.mark.parametrize(
     [
-        "add_partitioner",
+        "PartitionerClass",
         "add_partitioner_kwargs",
         "batch_request_args",
     ],
     [
         # These bad parameters do not occur in the batch request params
-        ("add_partitioner_year", {"column_name": "my_col"}, ("bad", None, None)),
-        ("add_partitioner_year", {"column_name": "my_col"}, (None, "bad", None)),
-        ("add_partitioner_year", {"column_name": "my_col"}, ("bad", "bad", None)),
+        (PartitionerYear, {"column_name": "my_col"}, ("bad", None, None)),
+        (PartitionerYear, {"column_name": "my_col"}, (None, "bad", None)),
+        (PartitionerYear, {"column_name": "my_col"}, ("bad", "bad", None)),
         # These bad parameters are request option parameters which depend on the partitioner.
         (
-            "add_partitioner_year",
+            PartitionerYear,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            "add_partitioner_year_and_month",
+            PartitionerYearAndMonth,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            "add_partitioner_year_and_month_and_day",
+            PartitionerYearAndMonthAndDay,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            "add_partitioner_datetime_part",
+            PartitionerDatetimePart,
             {"column_name": "my_col", "datetime_parts": ["year"]},
             (None, None, {"bad": None}),
         ),
         (
-            "add_partitioner_column_value",
+            PartitionerColumnValue,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            "add_partitioner_divided_integer",
+            PartitionerDividedInteger,
             {"column_name": "my_col", "divisor": 3},
             (None, None, {"bad": None}),
         ),
@@ -578,7 +578,7 @@ def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
 )
 def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     create_source: CreateSourceFixture,
-    add_partitioner,
+    PartitionerClass,
     add_partitioner_kwargs,
     batch_request_args,
 ):
@@ -591,13 +591,14 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         asset = source.add_query_asset(
             name="query_asset", query="SELECT * FROM my_table"
         )
-        getattr(asset, add_partitioner)(**add_partitioner_kwargs)
+        partitioner = PartitionerClass(**add_partitioner_kwargs)
 
         src, ast, op = batch_request_args
         batch_request = BatchRequest(
             datasource_name=src or source.name,
             data_asset_name=ast or asset.name,
             options=op or {},
+            partitioner=partitioner,
         )
         with pytest.raises(
             (
@@ -1577,7 +1578,6 @@ def test_add_postgres_table_asset_with_batch_metadata(
     empty_data_context.config_variables.update(my_config_variables)
 
     monkeypatch.setattr(TableAsset, "test_connection", lambda _: None)
-    monkeypatch.setattr(TableAsset, "test_partitioner_connection", lambda _: None)
     years = [2021, 2022]
     asset_specified_metadata = {
         "pipeline_name": "my_pipeline",
