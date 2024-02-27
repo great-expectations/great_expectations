@@ -1059,7 +1059,7 @@ def get_or_create_expectation_suite(
                 logger.info(f'Created ExpectationSuite "{expectation_suite.name}".')
         else:
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
             )
 
     return expectation_suite
