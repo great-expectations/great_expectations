@@ -56,7 +56,7 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 
 
 @pytest.mark.cloud
-def test_get_expectation_suite(
+def test_get_data_source_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
     gx_cloud_session: Session,
