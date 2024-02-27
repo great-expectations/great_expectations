@@ -629,7 +629,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def validation_config_store_name(self) -> str:
         return DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value
 
-    def validaiton_config_store(self) -> ValidationConfigStore:
+    def validation_config_store(self) -> ValidationConfigStore:
         return self.stores[self.validation_config_store_name]
 
     @property
