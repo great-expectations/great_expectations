@@ -1,17 +1,18 @@
 from __future__ import annotations
 
-import pathlib
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Final
 
 import pact
 import pytest
 
+from great_expectations.data_context import CloudDataContext
 from tests.integration.cloud.rest_contracts.conftest import (
     EXISTING_ORGANIZATION_ID,
-    ContractInteraction,
 )
 
 if TYPE_CHECKING:
+    from requests import Session
+
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
 
@@ -31,15 +32,23 @@ POST_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     )
 }
 
+GET_DATASOURCE_NAME: Final[str] = "david_datasource"
+
 GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": pact.Like(
         {
             "id": pact.Format().uuid,
-            "type": "pandas",
+            "type": "datasource",
             "attributes": {
                 # pact doesn't test optional attributes like an empty "assets" list
                 # this is the minimum response. https://docs.pact.io/faq#why-is-there-no-support-for-specifying-optional-attributes
-                "datasource_config": pact.Like({}),
+                "datasource_config": pact.Like(
+                    {
+                        "id": pact.Format().uuid,
+                        "name": GET_DATASOURCE_NAME,
+                        "type": "pandas",
+                    }
+                ),
             },
         },
     )
@@ -47,40 +56,31 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        # ContractInteraction(
-        #     method="POST",
-        #     request_path=pathlib.Path(
-        #         "/",
-        #         "organizations",
-        #         EXISTING_ORGANIZATION_ID,
-        #         "datasources",
-        #     ),
-        #     upon_receiving="a request to add a Data Source",
-        #     given="the Data Source does not exist",
-        #     response_status=200,
-        #     response_body=POST_DATASOURCE_MIN_RESPONSE_BODY,
-        # ),
-        ContractInteraction(
-            method="GET",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "datasources",
-                EXISTING_DATASOURCE_ID,
-            ),
-            upon_receiving="a request to get a Data Source",
-            given="the Data Source exists",
-            response_status=200,
-            response_body=GET_DATASOURCE_MIN_RESPONSE_BODY,
-        ),
-    ],
-)
-def test_datasource(
-    contract_interaction: ContractInteraction,
-    run_rest_api_pact_test: Callable[[ContractInteraction], None],
+def test_get_expectation_suite(
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
+    gx_cloud_session: Session,
 ) -> None:
-    run_rest_api_pact_test(contract_interaction)
+    provider_state = "the Data Source exists"
+    scenario = "a request to get a Data Source"
+    method = "GET"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/datasources/{EXISTING_DATASOURCE_ID}"
+    status = 200
+    response_body = GET_DATASOURCE_MIN_RESPONSE_BODY
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+            headers=dict(gx_cloud_session.headers),
+        )
+        .will_respond_with(
+            status=status,
+            body=response_body,
+        )
+    )
+
+    with pact_test:
+        cloud_data_context.get_datasource(datasource_name=GET_DATASOURCE_NAME)
