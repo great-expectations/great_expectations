@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import datetime
 import enum
 import itertools
 import json
@@ -17,7 +16,6 @@ from typing import (
     Dict,
     List,
     Mapping,
-    MutableMapping,
     Optional,
     Sequence,
     Set,
@@ -45,9 +43,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
@@ -57,12 +53,11 @@ if TYPE_CHECKING:
     from io import TextIOWrapper
 
     from great_expectations.alias_types import JSONValues, PathStr
-    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.core.batch import BatchRequestBase
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
     )
-    from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -1434,57 +1429,6 @@ class IncludeRenderedContentConfigSchema(Schema):
     expectation_validation_result = fields.Boolean(default=False)
 
 
-class ConcurrencyConfig(DictDot):
-    """WARNING: This class is experimental."""
-
-    def __init__(self, enabled: bool = False) -> None:
-        """Initialize a concurrency configuration to control multithreaded execution.
-
-        Args:
-            enabled: Whether or not multithreading is enabled.
-        """
-        self._enabled = enabled
-
-    @property
-    def enabled(self):
-        """Whether or not multithreading is enabled."""
-        return self._enabled
-
-    @property
-    def max_database_query_concurrency(self) -> int:
-        """Max number of concurrent database queries to execute with mulithreading."""
-        # BigQuery has a limit of 100 for "Concurrent rate limit for interactive queries" as described at
-        # (https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
-        # databases and/or be manually user configurable.
-        return 100
-
-    def add_sqlalchemy_create_engine_parameters(
-        self, parameters: MutableMapping[str, Any]
-    ):
-        """Update SqlAlchemy parameters to prevent concurrency errors (e.g. http://sqlalche.me/e/14/3o7r) and
-        bottlenecks.
-
-        Args:
-            parameters: SqlAlchemy create_engine parameters to which we add concurrency appropriate parameters. If the
-                concurrency parameters are already set, those parameters are left unchanged.
-        """
-        if not self._enabled:
-            return
-
-        if "pool_size" not in parameters:
-            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.pool_size
-            parameters["pool_size"] = 0
-        if "max_overflow" not in parameters:
-            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.max_overflow
-            parameters["max_overflow"] = -1
-
-
-class ConcurrencyConfigSchema(Schema):
-    """WARNING: This class is experimental."""
-
-    enabled = fields.Boolean(default=False)
-
-
 class GXCloudConfig(DictDot):
     def __init__(
         self,
@@ -1555,14 +1499,10 @@ class DataContextConfigSchema(Schema):
     include_rendered_content = fields.Nested(
         IncludeRenderedContentConfigSchema, required=False, allow_none=True
     )
-    concurrency = fields.Nested(
-        ConcurrencyConfigSchema, required=False, allow_none=True
-    )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
     REMOVE_KEYS_IF_NONE = [
-        "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
         "include_rendered_content",  # 0.15.19,
         "fluent_datasources",
@@ -2291,15 +2231,13 @@ class DataContextConfig(BaseYamlConfig):
             and you may be able to specify fewer parameters.
         commented_map (Optional[CommentedMap]): the CommentedMap associated with DataContext configuration. Used when
             instantiating with yml file.
-        concurrency (Optional[Union[ConcurrencyConfig, Dict]]): if enabled, Checkpoints associated with the DataContext
-            can run validations in parallel with multithreading.
         progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
             profilers, or metrics calculations.
         include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: PLR0912, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2322,7 +2260,6 @@ class DataContextConfig(BaseYamlConfig):
         anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
-        concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
@@ -2372,9 +2309,6 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
-        if isinstance(concurrency, dict):
-            concurrency = ConcurrencyConfig(**concurrency)
-        self.concurrency = concurrency
         self.progress_bars = progress_bars
         if include_rendered_content is None:
             include_rendered_content = IncludeRenderedContentConfig()
@@ -2816,112 +2750,6 @@ class CheckpointConfig(BaseYamlConfig):
         """
         return self.__repr__()
 
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
-    @staticmethod
-    def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
-        checkpoint: Checkpoint,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[
-            Union[List[dict], List[CheckpointValidationConfig]]
-        ] = None,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_id: Optional[str] = None,
-    ) -> dict:
-        """
-        This method reconciles the Checkpoint configuration (e.g., obtained from the Checkpoint store) with dynamically
-        supplied arguments in order to obtain that Checkpoint specification that is ready for running validation on it.
-        This procedure is necessecitated by the fact that the Checkpoint configuration is hierarchical in its form,
-        which was established for the purposes of making the specification of different Checkpoint capabilities easy.
-        In particular, entities, such as BatchRequest, expectation_suite_name, and action_list, can be specified at the
-        top Checkpoint level with the suitable ovverrides provided at lower levels (e.g., in the validations section).
-        Reconciling and normalizing the Checkpoint configuration is essential for usage statistics, because the exact
-        values of the entities in their formally validated form (e.g., BatchRequest) is the required level of detail.
-        """
-        assert not (run_id and run_name) and not (
-            run_id and run_time
-        ), "Please provide either a run_id or run_name and/or run_time."
-
-        run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
-        runtime_configuration = runtime_configuration or {}
-
-        from great_expectations.checkpoint.util import (
-            get_substituted_validation_dict,
-            get_validations_with_batch_request_as_dict,
-            validate_validation_dict,
-        )
-
-        batch_request = get_batch_request_as_dict(batch_request=batch_request)
-
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
-
-        runtime_kwargs: dict = {
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "validator": validator,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "expectation_suite_id": expectation_suite_id,
-        }
-        substituted_runtime_config: dict = checkpoint.get_substituted_config(
-            runtime_kwargs=runtime_kwargs
-        )
-        validations = substituted_runtime_config.get("validations") or []
-        batch_request = substituted_runtime_config.get("batch_request")
-        if len(validations) == 0 and not batch_request:
-            raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
-            )
-
-        run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
-
-        validation_dict: CheckpointValidationConfig
-
-        for validation_dict in validations:  # type: ignore[assignment]
-            substituted_validation_dict: dict = get_substituted_validation_dict(
-                substituted_runtime_config=substituted_runtime_config,
-                validation_dict=validation_dict,
-            )
-            validate_validation_dict(
-                validation_dict=substituted_validation_dict,
-                batch_request_required=False,
-            )
-            validation_batch_request: BatchRequestBase = (
-                substituted_validation_dict.get(  # type: ignore[assignment]
-                    "batch_request"
-                )
-            )
-            validation_dict["batch_request"] = validation_batch_request
-            validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
-                "expectation_suite_name"
-            )
-            validation_dict[
-                "expectation_suite_name"
-            ] = validation_expectation_suite_name
-            validation_expectation_suite_id: str = (
-                substituted_validation_dict.get(  # type: ignore[assignment]
-                    "expectation_suite_id"
-                )
-            )
-            validation_dict["expectation_suite_id"] = validation_expectation_suite_id
-            validation_action_list: list = substituted_validation_dict.get(  # type: ignore[assignment]
-                "action_list"
-            )
-            validation_dict["action_list"] = validation_action_list
-
-        return substituted_runtime_config
-
 
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
@@ -2932,5 +2760,4 @@ sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
-concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

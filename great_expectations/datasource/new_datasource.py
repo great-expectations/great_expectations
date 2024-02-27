@@ -17,7 +17,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 
 if TYPE_CHECKING:
     from great_expectations.core.batch_spec import PathBatchSpec
-    from great_expectations.data_context.types.base import ConcurrencyConfig
     from great_expectations.datasource.data_connector import DataConnector
     from great_expectations.execution_engine import ExecutionEngine
 
@@ -33,18 +32,16 @@ class BaseDatasource:
         name: the name for the datasource
         execution_engine: the type of compute engine to produce
         data_context_root_directory: Installation directory path (if installed on a filesystem).
-        concurrency: Concurrency config used to configure the execution engine.
         id: Identifier specific to this datasource.
     """
 
     recognized_batch_parameters: set = {"limit"}
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         name: str,
         execution_engine: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
-        concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -54,7 +51,6 @@ class BaseDatasource:
             name: the name for the datasource
             execution_engine (ClassConfig): the type of compute engine to produce
             data_context_root_directory: Installation directory path (if installed on a filesystem).
-            concurrency: Concurrency config used to configure the execution engine.
             id: Identifier specific to this datasource.
         """
         self._name = name
@@ -69,7 +65,7 @@ class BaseDatasource:
         try:
             self._execution_engine = instantiate_class_from_config(
                 config=execution_engine,
-                runtime_environment={"concurrency": concurrency},
+                runtime_environment={},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
         except Exception as e:
@@ -409,7 +405,6 @@ class Datasource(BaseDatasource):
         execution_engine: the type of compute engine to produce
         data_connectors: DataConnectors to add to the datasource
         data_context_root_directory: Installation directory path (if installed on a filesystem).
-        concurrency: Concurrency config used to configure the execution engine.
         id: Identifier specific to this datasource.
     """
 
@@ -421,7 +416,6 @@ class Datasource(BaseDatasource):
         execution_engine: Optional[dict] = None,
         data_connectors: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
-        concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -432,7 +426,6 @@ class Datasource(BaseDatasource):
             execution_engine (ClassConfig): the type of compute engine to produce
             data_connectors: DataConnectors to add to the datasource
             data_context_root_directory: Installation directory path (if installed on a filesystem).
-            concurrency: Concurrency config used to configure the execution engine.
             id: Identifier specific to this datasource.
         """
         self._name = name
@@ -441,7 +434,6 @@ class Datasource(BaseDatasource):
             name=name,
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
-            concurrency=concurrency,
             id=id,
         )
 

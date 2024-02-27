@@ -100,7 +100,6 @@ def _cloud_config(data_dir):
             "enabled": True,
         },
         "checkpoint_store_name": "default_checkpoint_store",
-        "concurrency": {"enabled": False},
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},
