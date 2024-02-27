@@ -10,7 +10,6 @@ function titleBasedIcon () {
 
     return function transformer (tree, file) {
         const codes = []
-        const promises = []
 
         // Walk the AST of the markdown file and filter for code snippets
         visit(tree, 'code', (node, index, parent) => {
@@ -37,10 +36,6 @@ function titleBasedIcon () {
                     className: className
                 }
             }
-        }
-
-        if (promises.length) {
-            return Promise.all(promises)
         }
     }
 }
