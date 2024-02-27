@@ -23,7 +23,7 @@ This will happen if the `CamelCaseName` (Expectation class name) and `snake_case
 
 ### Newly merged Expectation is missing from the staging Expectation Gallery
 
-> <https://staging-great-expectations.netlify.app/expectations>
+> https://staging-great-expectations.netlify.app/expectations
 
 If you have [manually triggered the expectation_gallery pipeline](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#manually-triggered-pipeline) or the [morning cron job against develop](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#the-build_gallerypy-script-in-ci) has completed, visit <https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=14>, click the "run" in question, click the `build_gallery_staging` stage, then click `Show gallery tracebacks`. If there is no traceback for your Expectation, [re-deploy the staging site on Netlify](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#re-deploy-the-staging-site).
 
@@ -31,6 +31,6 @@ If there is a traceback for your Expectation, try to resolve it in your current 
 
 ### The production Expectation Gallery is out of date
 
-> <https://greatexpectations.io/expectations>
+> https://greatexpectations.io/expectations
 
 You must [manually promote staging to prod](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#manually-promote-staging-to-prod).
