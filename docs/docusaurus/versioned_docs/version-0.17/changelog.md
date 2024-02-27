@@ -1416,7 +1416,7 @@ title: Changelog
 * [FEATURE] Experimental `Datasource` and `DataAsset` connection testing ([#6844](https://github.com/great-expectations/great_expectations/pull/6844))
 * [FEATURE] Implement Experimental SparkDatasource with CSVDataAsset ([#6981](https://github.com/great-expectations/great_expectations/pull/6981))
 * [FEATURE] Place FilesystemDataAsset into separate module (its functionality is used by both PandasDatasource and SparkDatasource) ([#7025](https://github.com/great-expectations/great_expectations/pull/7025))
-* [BUGFIX] Snowflake/Oracle/DB2 <--> SQLAlchemy table and column names case insensitivity representation ([#6951](https://github.com/great-expectations/great_expectations/pull/6951))
+* [BUGFIX] Snowflake/Oracle/DB2 SQLAlchemy table and column names case insensitivity representation ([#6951](https://github.com/great-expectations/great_expectations/pull/6951))
 * [BUGFIX] try except import of pandas types ([#6983](https://github.com/great-expectations/great_expectations/pull/6983))
 * [BUGFIX] fix jsonschema - altair conflict ([#6984](https://github.com/great-expectations/great_expectations/pull/6984))
 * [BUGFIX] Temporarily disable items with issues rendering ([#6997](https://github.com/great-expectations/great_expectations/pull/6997))
