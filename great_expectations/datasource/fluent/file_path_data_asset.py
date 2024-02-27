@@ -458,21 +458,6 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         return self
 
     @public_api
-    def add_partitioner_column_value(self: Self, column_name: str) -> Self:
-        """Associates a column value partitioner with this asset.
-        Args:
-            column_name: A column name of the column to partition on.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerColumnValue(
-                method_name="partition_on_column_value",
-                column_name=column_name,
-            )
-        )
-
-    @public_api
     def add_partitioner_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
