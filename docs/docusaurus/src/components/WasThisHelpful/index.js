@@ -74,7 +74,7 @@ export default function WasThisHelpful(){
                     <div className={styles.modalHeader}>
                         <h5 className={styles.modalHeaderTitle}>Tell us more</h5>
                         <img src={closeImg} className={styles.modalHeaderCloseButton}
-                             alt="Close icon" onClick={() => setIsOpen(false)}/>
+                             alt="Close icon" onClick={dismissFeedbackModal}/>
                     </div>
 
                     <form onSubmit={sendReview} className={styles.modalContent}>
