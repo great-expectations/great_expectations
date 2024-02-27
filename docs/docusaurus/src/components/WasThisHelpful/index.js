@@ -11,7 +11,7 @@ export default function WasThisHelpful(){
 
     const [formData, setFormData] = useState({
         name: '',
-        workEmail: '',
+        email: '',
         description: '',
     });
 
@@ -48,7 +48,7 @@ export default function WasThisHelpful(){
             posthog.capture("survey sent", {
                 $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
                 $survey_response: formData.name,
-                $survey_response_1: formData.workEmail,
+                $survey_response_1: formData.email,
                 $survey_response_2: formData.description,
                 $survey_response_3: pathname
             })
@@ -60,13 +60,13 @@ export default function WasThisHelpful(){
 
     return <>
             <hr className={styles.feedbackDivider}/>
-            <div className={styles.feedbackCard}>
+            <section className={styles.feedbackCard}>
                 <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
-                <section className={styles.feedbackCardActions}>
+                <div className={styles.feedbackCardActions}>
                     <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
                     <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={handleNegativeFeedbackReaction}>No</button>
-                </section>
-            </div>
+                </div>
+            </section>
 
             {isOpen && <>
                 <div className={styles.overlay} onClick={dismissFeedbackModal}/>
@@ -99,9 +99,9 @@ export default function WasThisHelpful(){
                                 <label className={styles.modalTextLabel}>Email</label>
                                 <input
                                     type="email"
-                                    name="workEmail"
+                                    name="email"
                                     className={styles.modalTextInput}
-                                    value={formData.workEmail}
+                                    value={formData.email}
                                     onChange={handleChange}
                                     placeholder="your_email@domain.com"
                                 />
