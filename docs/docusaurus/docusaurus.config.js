@@ -2,6 +2,7 @@
 
 const remarkNamedSnippets = require('./scripts/remark-named-snippets/index');
 const remarkCodeImport = require('remark-code-import');
+const titleBasedIcon = require('./scripts/title-based-icon/index');
 
 require('dotenv').config()
 
@@ -271,7 +272,7 @@ module.exports = {
           includeCurrentVersion: true,
           sidebarPath: require.resolve('./sidebars.js'),
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
-          remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
+          remarkPlugins: [remarkNamedSnippets, remarkCodeImport, titleBasedIcon],
           // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
             current: {
