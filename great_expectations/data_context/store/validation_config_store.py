@@ -13,18 +13,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 class ValidationConfigStore(Store):
     _key_class = StringKey
 
-    def __init__(
-        self,
-        store_name: str,
-        store_backend: dict | None = None,
-        runtime_environment: dict | None = None,
-    ) -> None:
-        super().__init__(
-            store_name=store_name,
-            store_backend=store_backend,
-            runtime_environment=runtime_environment,
-        )
-
     def get_key(
         self, name: str, id: str | None = None
     ) -> GXCloudIdentifier | StringKey:
