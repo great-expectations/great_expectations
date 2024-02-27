@@ -8,11 +8,8 @@ import CodeBlock from '@theme/CodeBlock';
 
 <dl class="py class">
 <dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.data_context.</span></span><span class="sig-name descname"><span class="pre">AbstractDataContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runtime_environment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext" title="Permalink to this definition">#</a>
-</dt>
-
-<dd>
-<p>Base class for all Data Contexts that contains shared functionality.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.data_context.</span></span><span class="sig-name descname"><span class="pre">AbstractDataContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runtime_environment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext" title="Permalink to this definition">#</a></dt>
+<dd><p>Base class for all Data Contexts that contains shared functionality.</p>
 <p>The class encapsulates most store / core components and convenience methods used to access them, meaning the
 majority of Data Context functionality lives here.</p>
 <p>One of the primary responsibilities of the DataContext is managing CRUD operations for core GX objects:</p>
@@ -84,16 +81,13 @@ majority of Data Context functionality lives here.</p>
 <p>Add a Checkpoint to the DataContext.</p>
 <dl class="simple">
 <dt>-Relevant Documentation Links
--
-</dt>
-<dd><ul class="simple">
+-</dt><dd><ul class="simple">
 <li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/terms/checkpoint/">Checkpoint</a></p></li>
 </ul>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name to give the checkpoint.</p></li>
 <li><p><strong>config_version</strong> – The config version of this checkpoint.</p></li>
@@ -138,7 +132,6 @@ majority of Data Context functionality lives here.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>The Checkpoint object created.</p>
 </dd>
 </dl>
@@ -155,7 +148,6 @@ majority of Data Context functionality lives here.</p>
 <p>Example site config dicts can be found in our "Host and share Data Docs" guides.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>site_name</strong> – New site name to add.</p></li>
 <li><p><strong>site_config</strong> – Config dict for the new site.</p></li>
@@ -174,16 +166,13 @@ majority of Data Context functionality lives here.</p>
 <p>Add a new Datasource to the data context, with configuration provided as kwargs.</p>
 <dl class="simple">
 <dt>Relevant Documentation Links
-
-</dt>
-<dd><ul class="simple">
+</dt><dd><ul class="simple">
 <li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/terms/datasource">Datasource</a></p></li>
 </ul>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – the name of the new Datasource to add</p></li>
 <li><p><strong>initialize</strong> – if False, add the Datasource to the config, but do not
@@ -202,7 +191,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>Datasource instance added.</p>
 </dd>
 </dl>
@@ -210,13 +198,9 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 <dl class="py method">
 <dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.add_expectation_suite">
 <span class="sig-name descname"><span class="pre">add_expectation_suite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationConfiguration_class#great_expectations.core.ExpectationConfiguration" title="great_expectations.core.ExpectationConfiguration"><span class="pre">ExpectationConfiguration</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/execution_engine/ExecutionEngine_class#great_expectations.execution_engine.ExecutionEngine" title="great_expectations.execution_engine.ExecutionEngine"><span class="pre">ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.add_expectation_suite" title="Permalink to this definition">#</a></dt>
-
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">add_expectation_suite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationConfiguration_class#great_expectations.core.ExpectationConfiguration" title="great_expectations.core.ExpectationConfiguration"><span class="pre">ExpectationConfiguration</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/execution_engine/ExecutionEngine_class#great_expectations.execution_engine.ExecutionEngine" title="great_expectations.execution_engine.ExecutionEngine"><span class="pre">ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span></span>
-</dt>
-
-<dd>
-<p>Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.</p>
+<span class="sig-name descname"><span class="pre">add_expectation_suite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationConfiguration_class#great_expectations.core.ExpectationConfiguration" title="great_expectations.core.ExpectationConfiguration"><span class="pre">ExpectationConfiguration</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/execution_engine/ExecutionEngine_class#great_expectations.execution_engine.ExecutionEngine" title="great_expectations.execution_engine.ExecutionEngine"><span class="pre">ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span></span></dt>
+<dd><p>Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 0.15.48.</span></p>
 </div>
@@ -241,7 +225,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expectation_suite_name</strong> – The name of the suite to create.</p></li>
 <li><p><strong>id</strong> – Identifier to associate with this suite.</p></li>
@@ -279,7 +262,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name to give the checkpoint.</p></li>
 <li><p><strong>id</strong> – The ID to associate with this checkpoint.</p></li>
@@ -310,7 +292,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>A new Checkpoint or an updated once (depending on whether or not it existed before this method call).</p>
 </dd>
 </dl>
@@ -330,7 +311,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 <p>it already exists or not. The configuration is provided as kwargs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name of the Datasource to add or update.</p></li>
 <li><p><strong>datasource</strong> – an existing Datasource you wish to persist.</p></li>
@@ -338,7 +318,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>The Datasource added or updated by the input <cite>kwargs</cite>.</p>
 </dd>
 </dl>
@@ -346,19 +325,14 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 <dl class="py method">
 <dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.add_or_update_expectation_suite">
 <span class="sig-name descname"><span class="pre">add_or_update_expectation_suite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationConfiguration_class#great_expectations.core.ExpectationConfiguration" title="great_expectations.core.ExpectationConfiguration"><span class="pre">ExpectationConfiguration</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/execution_engine/ExecutionEngine_class#great_expectations.execution_engine.ExecutionEngine" title="great_expectations.execution_engine.ExecutionEngine"><span class="pre">ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.add_or_update_expectation_suite" title="Permalink to this definition">#</a></dt>
-
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">add_or_update_expectation_suite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationConfiguration_class#great_expectations.core.ExpectationConfiguration" title="great_expectations.core.ExpectationConfiguration"><span class="pre">ExpectationConfiguration</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/execution_engine/ExecutionEngine_class#great_expectations.execution_engine.ExecutionEngine" title="great_expectations.execution_engine.ExecutionEngine"><span class="pre">ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span></span>
-</dt>
-
-<dd>
-<p>Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.</p>
+<span class="sig-name descname"><span class="pre">add_or_update_expectation_suite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationConfiguration_class#great_expectations.core.ExpectationConfiguration" title="great_expectations.core.ExpectationConfiguration"><span class="pre">ExpectationConfiguration</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/execution_engine/ExecutionEngine_class#great_expectations.execution_engine.ExecutionEngine" title="great_expectations.execution_engine.ExecutionEngine"><span class="pre">ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/core/ExpectationSuite_class#great_expectations.core.ExpectationSuite" title="great_expectations.core.expectation_suite.ExpectationSuite"><span class="pre">great_expectations.core.expectation_suite.ExpectationSuite</span></a></span></span></dt>
+<dd><p>Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 0.15.48.</span></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expectation_suite_name</strong> – The name of the suite to create or replace.</p></li>
 <li><p><strong>id</strong> – Identifier to associate with this suite (ignored if updating existing suite).</p></li>
@@ -371,7 +345,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>The persisted <cite>ExpectationSuite</cite>.</p>
 </dd>
 </dl>
@@ -391,7 +364,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>The instantiated Store.</p>
 </dd>
 </dl>
@@ -411,7 +383,6 @@ initialize it, for example if a user needs to debug database connectivity.</p></
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>site_names</strong> – if specified, build data docs only for these sites, otherwise,
 build all the sites specified in the context's config</p></li>
@@ -428,12 +399,10 @@ these sites.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>A dictionary with the names of the updated data documentation sites as keys and the location info
 of their index.html files as values</p>
 </dd>
 <dt class="field-odd">Raises</dt>
-
 <dd class="field-odd"><p><strong>ClassInstantiationError</strong> – Site config in your Data Context config is not valid.</p>
 </dd>
 </dl>
@@ -464,7 +433,6 @@ batch = context.get_batch_list(
 validator.expect_column_values_to_be_in_set("c1", [4,5,6])`}</CodeBlock></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expectation_suite_name</strong> – The name of the suite to create.</p></li>
 <li><p><strong>overwrite_existing</strong> – Whether to overwrite if a suite with the given name already exists.</p></li>
@@ -504,7 +472,6 @@ validator.expect_column_values_to_be_in_set("c1", [4,5,6])`}</CodeBlock></p>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-
 <dd class="field-even"><p><strong>CheckpointNotFoundError</strong> – If the requested Checkpoint does not exist.</p>
 </dd>
 </dl>
@@ -520,7 +487,6 @@ validator.expect_column_values_to_be_in_set("c1", [4,5,6])`}</CodeBlock></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><p><strong>site_name</strong> – Site name to delete.</p>
 </dd>
 </dl>
@@ -536,7 +502,6 @@ This can be overridden to only impact the Datasource cache through the deprecate
 <cite>save_changes</cite> argument.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>datasource_name</strong> – The name of the target datasource.</p></li>
 <li><p><strong>save_changes</strong> – <p>Should this change be persisted by the DatasourceStore?</p>
@@ -547,7 +512,6 @@ This can be overridden to only impact the Datasource cache through the deprecate
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-
 <dd class="field-even"><p><strong>ValueError</strong> – The <cite>datasource_name</cite> isn't provided or cannot be found.</p>
 </dd>
 </dl>
@@ -572,7 +536,6 @@ This can be overridden to only impact the Datasource cache through the deprecate
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>True for Success and False for Failure.</p>
 </dd>
 </dl>
@@ -638,7 +601,6 @@ Instead, this method is intended to help the user pick the right parameters</p>
 <p>This method attempts to return any number of batches, including an empty list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>datasource_name</strong> – The name of the Datasource that defines the Data Asset to retrieve the batch for</p></li>
 <li><p><strong>data_connector_name</strong> – The Data Connector within the datasource for the Data Asset</p></li>
@@ -776,7 +738,6 @@ ExpectationConfiguration.</p></li>
 an <cite>ExpectationSuite</cite> used to validate the Batches in the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>datasource_name</strong> – The name of the Datasource that defines the Data Asset to retrieve the batch for</p></li>
 <li><p><strong>data_connector_name</strong> – The Data Connector within the datasource for the Data Asset</p></li>
@@ -927,7 +888,6 @@ numbers retrieve from the end of the list (ex: <cite>-1</cite> retrieves the las
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>CheckpointResult</p>
 </dd>
 </dl>
@@ -943,7 +903,6 @@ numbers retrieve from the end of the list (ex: <cite>-1</cite> retrieves the las
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expectation_suite</strong> – The ExpectationSuite to save.</p></li>
 <li><p><strong>expectation_suite_name</strong> – The name of this ExpectationSuite. If no name is provided, the name will be read
@@ -985,7 +944,6 @@ Expectations) are the only ones you'll need.</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>yaml_config</strong> – A string containing the yaml config to be tested</p></li>
 <li><p><strong>name</strong> – Optional name of the component to instantiate</p></li>
@@ -1001,7 +959,6 @@ the need to scroll up and down a lot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>The instantiated component (e.g. a Datasource)
 OR
 a json object containing metadata from the component's self_check method.
@@ -1045,7 +1002,6 @@ The returned object is determined by return_mode.</p>
 <p>Example site config dicts can be found in our "Host and share Data Docs" guides.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>site_name</strong> – Site name to update.</p></li>
 <li><p><strong>site_config</strong> – Config dict that replaces the existing.</p></li>
@@ -1068,7 +1024,6 @@ The returned object is determined by return_mode.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p>The updated Datasource.</p>
 </dd>
 </dl>
@@ -1113,14 +1068,12 @@ The returned object is determined by return_mode.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.view_validation_result">
 <span class="sig-name descname"><span class="pre">view_validation_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="https://docs.greatexpectations.io/docs/0.17.23/reference/api/checkpoint/types/checkpoint_result/CheckpointResult_class#great_expectations.checkpoint.types.checkpoint_result.CheckpointResult" title="great_expectations.checkpoint.types.checkpoint_result.CheckpointResult"><span class="pre">CheckpointResult</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.view_validation_result" title="Permalink to this definition">#</a></dt>
-
 <dd><div class="versionadded">
 <p><span class="versionmodified added">New in version 0.16.15.</span></p>
 </div>
 <p>Opens a validation result in a browser.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><p><strong>result</strong> – The result of a Checkpoint run.</p>
 </dd>
 </dl>

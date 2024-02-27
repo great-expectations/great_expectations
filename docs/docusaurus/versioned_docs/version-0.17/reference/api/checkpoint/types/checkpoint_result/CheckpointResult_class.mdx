@@ -36,7 +36,6 @@ might have an extra key named "expectation_suite_severity_level" to indicate if 
 }`}</CodeBlock></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>run_id</strong> – An instance of the RunIdentifier class.</p></li>
 <li><p><strong>run_results</strong> – A Dict with ValidationResultIdentifier keys and Dict values, which contains at minimum a <cite>validation_result</cite> key and an <cite>action_results</cite> key.</p></li>
@@ -95,7 +94,6 @@ Valid options are "validation_result_identifier", "expectation_suite_name",
 value will cause this method to silently fail, and return None.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-
 <dd class="field-even"><p><p>A list of ExpectationSuiteValidationResult, when group_by=None
 A dict of ValidationResultIdentifier keys and ExpectationValidationResults</p>
 <blockquote>
