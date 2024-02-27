@@ -458,25 +458,6 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         return self
 
     @public_api
-    def add_partitioner_datetime_part(
-        self: Self, column_name: str, datetime_parts: List[str]
-    ) -> Self:
-        """Associates a datetime part partitioner with this asset.
-        Args:
-            column_name: Name of the date column where parts will be parsed out.
-            datetime_parts: A list of datetime parts to partition on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerDatetimePart(
-                method_name="partition_on_date_parts",
-                column_name=column_name,
-                datetime_parts=datetime_parts,
-            )
-        )
-
-    @public_api
     def add_partitioner_column_value(self: Self, column_name: str) -> Self:
         """Associates a column value partitioner with this asset.
         Args:
