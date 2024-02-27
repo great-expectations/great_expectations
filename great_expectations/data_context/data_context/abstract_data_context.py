@@ -148,6 +148,9 @@ if TYPE_CHECKING:
         DataDocsSiteConfigTypedDict,
         StoreConfigTypedDict,
     )
+    from great_expectations.data_context.store.validation_config_store import (
+        ValidationConfigStore,
+    )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -331,8 +334,13 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
-        # TODO: Update to follow existing pattern once new ValidationConfigStore is implemented
         self._validations: ValidationFactory | None = None
+        if validation_config_store := self.stores.get(
+            self.validation_config_store_name
+        ):
+            self._validations = ValidationFactory(
+                store=validation_config_store,
+            )
 
     def _init_analytics(self) -> None:
         init_analytics(
@@ -616,6 +624,13 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
+
+    @property
+    def validation_config_store_name(self) -> str:
+        return DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value
+
+    def validaiton_config_store(self) -> ValidationConfigStore:
+        return self.stores[self.validation_config_store_name]
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:

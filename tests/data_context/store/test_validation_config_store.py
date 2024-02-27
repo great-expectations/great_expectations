@@ -114,7 +114,7 @@ def test_add_cloud(
 
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
-def test_get_key(request, store_fixture: str, validation_config: ValidationConfig):
+def test_get_key(request, store_fixture: str):
     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
 
     name = "my_validation"
