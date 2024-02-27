@@ -42,8 +42,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 :::
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/create_an_expectation_suite.py full example code"
@@ -69,8 +68,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python title="Python code" name="core/expectation_suites/_examples/get_an_expectation_suite.py create Expectation Suite"
   ```
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/get_an_expectation_suite.py full example code"
@@ -101,8 +99,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_suite.py delete Expectation Suite"
   ```
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_suite.py full example code"
@@ -149,8 +146,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   
   :::
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py full example code"
@@ -181,8 +177,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python title="Python code" name="core/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py retrieve expectation"
   ```
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py full example code"
@@ -224,8 +219,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   You can [test changes to an Expectation](/core/expectations/manage_expectations.md#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
   :::
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/edit_a_single_expectation.py full example code"
@@ -258,8 +252,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python title="Python code" name="core/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py save Expectation Suite"
   ```
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py full example code"
@@ -295,8 +288,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py delete the Expectation"
   ```
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py full example code"

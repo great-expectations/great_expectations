@@ -5,7 +5,7 @@ Managing the Expectation Gallery Site
 
 This should only need to be done if there are new Expectations merged in or if the content in the Expectation details pages changes (i.e. reformatting Expectation docstrings like [PR 6340](https://github.com/great-expectations/great_expectations/pull/6340), [PR 6423](https://github.com/great-expectations/great_expectations/pull/6423), [PR 6577](https://github.com/great-expectations/great_expectations/pull/6577), and [PR 8353](https://github.com/great-expectations/great_expectations/pull/8353)).
 
-- Visit https://app.netlify.com/sites/staging-great-expectations/deploys while logged into Netlify
+- Visit <https://app.netlify.com/sites/staging-great-expectations/deploys> while logged into Netlify
     - Click the "Trigger deploy" button
 
 ## Manually promote staging to prod

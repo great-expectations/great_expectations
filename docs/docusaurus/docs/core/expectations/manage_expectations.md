@@ -27,8 +27,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
   The specific parameters you provide when initializing an Expectation are determined by the Expectation class.  You can view available Expectations and the parameters they take in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="tests/integration/docusaurus/core/expectations/create_an_expectation.py full example code"
@@ -100,8 +99,7 @@ validation_result = batch.validate(expectation)
 
   :::
 
-<details>
-<summary>Full example code</summary>
+<details><summary>Full example code</summary>
 <p>
 
 ```python title="Python code" name="core/expectations/_examples/edit_an_expectation.py full example code

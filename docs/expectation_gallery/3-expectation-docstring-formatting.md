@@ -63,7 +63,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     """
 ```
 
-> See: https://greatexpectations.io/expectations/expect_column_max_to_be_between
+> See: <https://greatexpectations.io/expectations/expect_column_max_to_be_between>
 
 ## Docstring rules
 
