@@ -1752,6 +1752,7 @@ class BaseStoreBackendDefaults(DictDot):
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
+        validation_config_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
         validation_operators: Optional[dict] = None,
         stores: Optional[dict] = None,
@@ -1762,6 +1763,7 @@ class BaseStoreBackendDefaults(DictDot):
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
+        self.validation_config_store_name = validation_config_store_name
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
@@ -1926,6 +1928,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.profiler_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
+            self.stores[self.validation_config_store_name]["store_backend"][  # type: ignore[index]
+                "root_directory"
+            ] = root_directory
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
@@ -1969,6 +1974,12 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
             },
             self.profiler_store_name: {
                 "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+            self.validation_config_store_name: {
+                "class_name": "ValidationConfigStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 },
