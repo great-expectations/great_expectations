@@ -42,7 +42,7 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
     checkpoint_config = {
         "name": checkpoint_name,
         "validations": [{
-            "expectation_suite_name": expectation_suite.expectation_suite_name,
+            "expectation_suite_name": expectation_suite.name,
             "expectation_suite_id": expectation_suite.id,
             "batch_request": {
                 "datasource_name": "<data_source_name>",

@@ -236,7 +236,7 @@ class UserConfigurableProfiler:
             # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
-                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]
+                self.profile_dataset._expectation_suite.name  # type: ignore[union-attr]
             )
             self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]
                 expectation_suite_name=suite_name

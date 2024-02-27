@@ -71,7 +71,7 @@ class ExpectationsStore(Store):
                     "table_name", "ge_expectations_store"
                 )
                 store_backend["key_columns"] = store_backend.get(
-                    "key_columns", ["expectation_suite_name"]
+                    "key_columns", ["name"]
                 )
 
         super().__init__(
@@ -99,13 +99,13 @@ class ExpectationsStore(Store):
         deserialization into a GX object
         """
         suite_data: Dict
-        # if only the expectation_suite_name is passed, a list will be returned
+        # if only the name is passed, a list will be returned
         if isinstance(response_json["data"], list):
             if len(response_json["data"]) == 1:
                 suite_data = response_json["data"][0]
             else:
                 raise ValueError(
-                    "More than one Expectation Suite was found with the expectation_suite_name."
+                    "More than one Expectation Suite was found with the name."
                 )
         else:
             suite_data = response_json["data"]
@@ -228,7 +228,7 @@ class ExpectationsStore(Store):
             return result
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
-                f"An ExpectationSuite named {value.expectation_suite_name} already exists."
+                f"An ExpectationSuite named {value.name} already exists."
             )
 
     def _update(self, key, value, **kwargs):
@@ -254,7 +254,7 @@ class ExpectationsStore(Store):
         except gx_exceptions.StoreBackendError as exc:
             # todo: this generic error clobbers more informative errors coming from the store
             raise gx_exceptions.ExpectationSuiteError(
-                f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
+                f"Could not find an existing ExpectationSuite named {value.name}."
             ) from exc
 
     def _add_ids_on_create(self, suite: ExpectationSuite) -> ExpectationSuite:

@@ -123,7 +123,7 @@ def test_run_validation_operator_raises_error_if_no_matching_validation_operator
 def test_validation_operator_evaluation_parameters(
     validation_operators_data_context, parameterized_expectation_suite
 ):
-    parameterized_expectation_suite.expectation_suite_name = "param_suite"
+    parameterized_expectation_suite.name = "param_suite"
     validation_operators_data_context.add_expectation_suite(
         expectation_suite=parameterized_expectation_suite
     )
@@ -144,7 +144,7 @@ def test_validation_operator_evaluation_parameters(
     )
     assert res["success"] is True
 
-    parameterized_expectation_suite.expectation_suite_name = "param_suite.failure"
+    parameterized_expectation_suite.name = "param_suite.failure"
     validation_operators_data_context.add_expectation_suite(
         expectation_suite=parameterized_expectation_suite
     )

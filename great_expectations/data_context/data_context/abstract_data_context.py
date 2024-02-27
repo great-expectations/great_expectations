@@ -454,10 +454,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> None:
         if expectation_suite_name is None:
             key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite.expectation_suite_name
+                expectation_suite_name=expectation_suite.name
             )
         else:
-            expectation_suite.expectation_suite_name = expectation_suite_name
+            expectation_suite.name = expectation_suite_name
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
@@ -2256,7 +2256,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ), "expectation_suite_name must be specified."
 
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2277,9 +2277,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         overwrite_existing: bool,
         **kwargs,
     ) -> ExpectationSuite:
-        key = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite.expectation_suite_name
-        )
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite.name)
 
         persistence_fn: Callable
         if overwrite_existing:
@@ -2313,7 +2311,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         Like `update_expectation_suite` but without the usage statistics logging.
         """
-        name = expectation_suite.expectation_suite_name
+        name = expectation_suite.name
         id = expectation_suite.id
         key = self._determine_key_for_suite_update(name=name, id=id)
         self.expectations_store.update(key=key, value=expectation_suite)
@@ -2401,7 +2399,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ), "expectation_suite_name must be specified."
 
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,

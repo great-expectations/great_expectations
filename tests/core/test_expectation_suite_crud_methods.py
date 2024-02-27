@@ -15,7 +15,7 @@ from great_expectations.expectations.expectation_configuration import (
 @pytest.fixture
 def empty_suite() -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
     )
@@ -24,7 +24,7 @@ def empty_suite() -> ExpectationSuite:
 @pytest.fixture
 def baseline_suite(exp1, exp2) -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[exp1, exp2],
         meta={"notes": "This is an expectation suite."},
     )
@@ -141,7 +141,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
 @pytest.fixture
 def single_expectation_suite(exp1) -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[exp1],
         meta={"notes": "This is an expectation suite."},
     )
@@ -153,7 +153,7 @@ def single_expectation_suite_with_expectation_ge_cloud_id(exp1) -> ExpectationSu
     exp1_with_ge_cloud_id.id = "0faf94a9-f53a-41fb-8e94-32f218d4a774"
 
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[exp1_with_ge_cloud_id],
         meta={"notes": "This is an expectation suite."},
     )
@@ -162,7 +162,7 @@ def single_expectation_suite_with_expectation_ge_cloud_id(exp1) -> ExpectationSu
 @pytest.fixture
 def different_suite(exp1, exp4) -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[exp1, exp4],
         meta={"notes": "This is an expectation suite."},
     )
@@ -171,7 +171,7 @@ def different_suite(exp1, exp4) -> ExpectationSuite:
 @pytest.fixture
 def domain_success_runtime_suite(exp1, exp2, exp3, exp4, exp5) -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[exp1, exp2, exp3, exp4, exp5],
         meta={"notes": "This is an expectation suite."},
     )
@@ -189,7 +189,7 @@ def suite_with_table_and_column_expectations(
     table_exp3,
 ) -> ExpectationSuite:
     suite = ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[
             exp1,
             exp2,
@@ -213,7 +213,7 @@ def suite_with_column_pair_and_table_expectations(
     column_pair_expectation,
 ) -> ExpectationSuite:
     suite = ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[
             column_pair_expectation,
             table_exp1,
@@ -236,7 +236,7 @@ def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3) -> ExpectationSuite:
     for exp in (exp1, exp2, exp3):
         exp.id = ge_cloud_id
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[exp1, exp2, exp3],
         meta={"notes": "This is an expectation suite."},
         id=ge_cloud_id,
