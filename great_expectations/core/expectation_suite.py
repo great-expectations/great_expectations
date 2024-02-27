@@ -1207,4 +1207,4 @@ class ExpectationSuiteSchema(Schema):
         return data
 
 
-expectationSuiteSchema = ExpectationSuiteSchema()
+expectationSuiteSchema: ExpectationSuiteSchema = ExpectationSuiteSchema()
