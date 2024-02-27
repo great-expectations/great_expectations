@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
@@ -9,7 +10,9 @@ from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ValidationConfigStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from tests.datasource.fluent._fake_cloud_api import CloudDetails
+
+if TYPE_CHECKING:
+    from tests.datasource.fluent._fake_cloud_api import CloudDetails
 
 
 @pytest.fixture
@@ -82,7 +85,7 @@ def test_add_cloud(
         store.add(key=key, value=validation_config)
 
     mock_put.assert_called_once_with(
-        mock.ANY,
+        mock.ANY,  # requests Session
         f"https://api.greatexpectations.io/organizations/12345678-1234-5678-1234-567812345678/validation-configs/{id}",
         json={
             "data": {
@@ -102,7 +105,7 @@ def test_add_cloud(
                             "id": None,
                             "expectations": [],
                             "data_asset_type": None,
-                            "meta": mock.ANY,
+                            "meta": mock.ANY,  # GX version information
                             "notes": None,
                         },
                     },
