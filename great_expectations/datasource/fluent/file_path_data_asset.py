@@ -65,7 +65,6 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 )
 
 if TYPE_CHECKING:
-
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
