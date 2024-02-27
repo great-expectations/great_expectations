@@ -37,9 +37,11 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
             "id": pact.Format().uuid,
             "type": "pandas",
             "attributes": {
-                "datasource_config": {
-                    "assets": pact.EachLike({}),
-                },
+                "datasource_config": pact.Like(
+                    {
+                        "assets": pact.Like([]),
+                    }
+                ),
             },
         },
     )
