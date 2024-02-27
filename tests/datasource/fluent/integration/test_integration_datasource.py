@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.compatibility import pydantic
@@ -39,6 +40,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     TestConnectionError,
 )
+from great_expectations.validator.v1_validator import ResultFormat, Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
@@ -130,6 +132,32 @@ class TestQueryAssets:
             column="passenger_count",
             value_set=[passenger_count_value],
             result_format={"result_format": "BOOLEAN_ONLY"},
+        )
+        assert result.success
+
+    def test_success_with_partitioners_from_batch_configs(self, empty_data_context):
+        context = empty_data_context
+        datasource = sqlite_datasource(context, "yellow_tripdata.db")
+        passenger_count_value = 5
+        asset = datasource.add_query_asset(
+            name="query_asset",
+            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
+        ).add_sorters(["year"])
+        batch_config = asset.add_batch_config(
+            name="whatevs",
+            partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+        )
+        validator = Validator(
+            context,
+            batch_config=batch_config,
+            batch_request_options={"year": 2019},
+            result_format=ResultFormat.BOOLEAN_ONLY,
+        )
+        result = validator.validate_expectation(
+            gxe.ExpectColumnDistinctValuesToEqualSet(
+                column="passenger_count",
+                value_set=[passenger_count_value],
+            )
         )
         assert result.success
 
