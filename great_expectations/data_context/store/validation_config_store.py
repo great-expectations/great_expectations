@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.data_context_key import DataContextKey, StringKey
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
@@ -30,7 +30,7 @@ class ValidationConfigStore(Store):
         """Given a name and optional ID, build the correct key for use in the ValidationConfigStore."""
         if self.cloud_mode:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                resource_type=GXCloudRESTResource.VALIDATION_CONFIG,
                 id=id,
                 resource_name=name,
             )
@@ -38,10 +38,9 @@ class ValidationConfigStore(Store):
             key = StringKey(key=name)
         return key
 
-    def _add(self, key: StringKey, value: ValidationConfig, **kwargs) -> None:
+    def _add(self, key: DataContextKey, value: ValidationConfig, **kwargs) -> None:
         return super()._add(key=key, value=value.json(), **kwargs)
 
-    def get(self, key: StringKey) -> ValidationConfig:
+    def get(self, key: DataContextKey) -> ValidationConfig:
         validation_json_str = super().get(key)
-        # validation_dict = json.loads(validation_json_str)
         return ValidationConfig.parse_raw(validation_json_str)
