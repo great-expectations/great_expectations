@@ -157,7 +157,7 @@ def test_suite_factory_add_success_filesystem(empty_data_context):
     _test_suite_factory_add_success(empty_data_context)
 
 
-@pytest.mark.filesystem
+@pytest.mark.cloud
 def test_suite_factory_add_success_cloud(empty_cloud_context_fluent):
     _test_suite_factory_add_success(empty_cloud_context_fluent)
 
