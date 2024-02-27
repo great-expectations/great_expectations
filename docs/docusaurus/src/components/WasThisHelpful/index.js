@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import styles from './styles.module.css';
+import styles from './styles.module.scss';
 import {useLocation} from "@docusaurus/router";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
@@ -16,11 +16,11 @@ export default function WasThisHelpful(){
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value } = e.target
         setFormData((prevData) => ({
             ...prevData,
             [name]: value,
-        }));
+        }))
     };
 
     const handleFeedbackReaction = (eventName) => {
@@ -43,15 +43,17 @@ export default function WasThisHelpful(){
     }
 
     const sendReview = (e) => {
-        e.preventDefault(e);
-        posthog.capture("survey sent", {
-            $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
-            $survey_response: formData.name,
-            $survey_response_1: formData.workEmail,
-            $survey_response_2: formData.description,
-            $survey_response_3: pathname
-        })
-        setIsOpen(false)
+        e.preventDefault()
+        if(formData.description){
+            posthog.capture("survey sent", {
+                $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
+                $survey_response: formData.name,
+                $survey_response_1: formData.workEmail,
+                $survey_response_2: formData.description,
+                $survey_response_3: pathname
+            })
+            setIsOpen(false)
+        }
     }
 
     const closeImg = useBaseUrl(`img/close_icon.svg`);
@@ -75,7 +77,7 @@ export default function WasThisHelpful(){
                              alt="Close icon" onClick={() => setIsOpen(false)}/>
                     </div>
 
-                    <div className={styles.modalContent}>
+                    <form onSubmit={sendReview} className={styles.modalContent}>
 
                         Your opinion matters. Share your feedback here to help us improve
                         the quality of our documentation and ensure a better user experience.
@@ -118,8 +120,8 @@ export default function WasThisHelpful(){
                                 us better identify the problem and determine a solution."
                             />
                         </div>
-                        <button className={styles.submitButton} onClick={sendReview}> Submit</button>
-                    </div>
+                        <input type="submit" className={formData.description ? styles.submitButton : styles.inactiveSubmitButton} value="Submit"/>
+                    </form>
                 </div>
             </>}
     </>
