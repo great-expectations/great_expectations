@@ -456,20 +456,3 @@ to use as its "include" directive for File-Path style DataAsset processing."""
     def _add_partitioner(self: Self, partitioner: SparkPartitioner) -> Self:
         self.partitioner = partitioner
         return self
-
-    @public_api
-    def add_partitioner_multi_column_values(
-        self: Self, column_names: list[str]
-    ) -> Self:
-        """Associates a multi-column value partitioner with this asset.
-        Args:
-            column_names: A list of column names to partition on.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerMultiColumnValue(
-                column_names=column_names,
-                method_name="partition_on_multi_column_values",
-            )
-        )
