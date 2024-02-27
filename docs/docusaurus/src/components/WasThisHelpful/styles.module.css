@@ -83,7 +83,8 @@
     border-radius: 10px;
     box-shadow: 0 3px 6px -1px rgb(0,0,0,0.1);
     color: var(--white);
-
+    display: flex;
+    flex-direction: column;
     left: 50%;
     position: fixed;
     top: 50%;
@@ -120,8 +121,10 @@
     padding: 1rem 2rem;
     color: var(--ifm-font-color-base);
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 1.5rem;
+    overflow-y: auto;
 }
 
 .textInputs{
@@ -187,5 +190,12 @@
 @media (max-width: 960px) {
     .centered {
         max-height: 100vh;
+    }
+}
+
+@media (max-width: 576px) {
+    .modal {
+        height: 100%;
+        max-height: unset;
     }
 }
