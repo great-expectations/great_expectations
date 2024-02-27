@@ -458,24 +458,6 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         return self
 
     @public_api
-    def add_partitioner_year_and_month_and_day(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year, month, day partitioner with this asset.
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerYearAndMonthAndDay(
-                method_name="partition_on_year_and_month_and_day",
-                column_name=column_name,
-            )
-        )
-
-    @public_api
     def add_partitioner_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
