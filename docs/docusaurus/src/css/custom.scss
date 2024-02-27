@@ -104,16 +104,6 @@
       --link-hover-color: #A03E0A;
 }
 
-.theme-code-block {
-  position: relative;
-
-  &:hover {
-    .codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module + div button {
-      opacity: 1;
-    }
-  }
-}
-
 .markdown a,
 p > a {
     color: var(--ifm-color-primary);

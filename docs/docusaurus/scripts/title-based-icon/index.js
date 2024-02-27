@@ -19,9 +19,6 @@ function titleBasedIcon () {
 
         for (const [node] of codes) {
             const meta = node.meta || ''
-            // if (!meta) {
-            //     continue
-            // }
 
             let className = 'with-file-icon'
 
