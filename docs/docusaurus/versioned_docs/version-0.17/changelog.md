@@ -2274,7 +2274,7 @@ title: Changelog
 * [MAINTENANCE] Mark miscellaneous tests with `@pytest.mark.unit` ([#5846](https://github.com/great-expectations/great_expectations/pull/5846))
 * [MAINTENANCE] `datasource`, `data_context`, `core` typing, lint fixes ([#5824](https://github.com/great-expectations/great_expectations/pull/5824))
 * [MAINTENANCE] add --ignore-suppress and --ignore-only-for to build_gallery.py with bugfixes ([#5802](https://github.com/great-expectations/great_expectations/pull/5802))
-* [MAINTENANCE] Remove pyparsing pin for <3.0 ([#5849](https://github.com/great-expectations/great_expectations/pull/5849))
+* [MAINTENANCE] Remove pyparsing pin for 3.0 ([#5849](https://github.com/great-expectations/great_expectations/pull/5849))
 * [MAINTENANCE] Finer type exclude ([#5848](https://github.com/great-expectations/great_expectations/pull/5848))
 * [MAINTENANCE] use `id` instead `id_`  ([#5775](https://github.com/great-expectations/great_expectations/pull/5775))
 * [MAINTENANCE] Add data connector names in datasource config ([#5778](https://github.com/great-expectations/great_expectations/pull/5778))

@@ -12,7 +12,7 @@ This should only need to be done if there are new Expectations merged in or if t
 
 **Staging changes will never go to prod without doing this!**
 
-The staging S3 file will get copied to prod at <https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json> and the Algolia indicies for the prod site are updated by the `manual_staging_json_to_prod` CI pipeline, which is **only manually triggered**. You can re-deploy the prod site through Netlify.
+The staging S3 file will get copied to prod at https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json and the Algolia indicies for the prod site are updated by the `manual_staging_json_to_prod` CI pipeline, which is **only manually triggered**. You can re-deploy the prod site through Netlify.
 
 - Make sure everything looks OK in staging <https://staging-great-expectations.netlify.app/expectations>
     - Check total number of Expectations
