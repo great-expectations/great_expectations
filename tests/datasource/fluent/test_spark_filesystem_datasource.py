@@ -1374,20 +1374,14 @@ class TestPartitionerFileAsset:
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_gets_one_batch(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
-        asset_with_conflicting_partitioner = (
-            file_asset_with_no_partitioner.add_partitioner_year_and_month(
-                column_name="pickup_datetime"
-            )
+        asset = file_asset_with_no_partitioner
+        partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+
+        post_partitioner_batch_request = asset.build_batch_request(
+            options={"year": "2020", "month": "11"}, partitioner=partitioner
         )
-        post_partitioner_batch_request = (
-            asset_with_conflicting_partitioner.build_batch_request(
-                {"year": "2020", "month": "11"}
-            )
-        )
-        post_partitioner_batches = (
-            asset_with_conflicting_partitioner.get_batch_list_from_batch_request(
-                post_partitioner_batch_request
-            )
+        post_partitioner_batches = asset.get_batch_list_from_batch_request(
+            post_partitioner_batch_request
         )
         post_partitioner_expected_num_batches = 1
         assert len(post_partitioner_batches) == post_partitioner_expected_num_batches
@@ -1398,20 +1392,14 @@ class TestPartitionerFileAsset:
         file_asset_with_no_partitioner: CSVAsset,
         expected_num_records_file_asset_no_partitioner_2020_10: int,
     ):
-        asset_with_conflicting_partitioner = (
-            file_asset_with_no_partitioner.add_partitioner_year_and_month(
-                column_name="pickup_datetime"
-            )
+        asset = file_asset_with_no_partitioner
+        partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+
+        post_partitioner_batch_request = asset.build_batch_request(
+            options={"year": "2020", "month": "11"}, partitioner=partitioner
         )
-        post_partitioner_batch_request = (
-            asset_with_conflicting_partitioner.build_batch_request(
-                {"year": "2020", "month": "11"}
-            )
-        )
-        post_partitioner_batches = (
-            asset_with_conflicting_partitioner.get_batch_list_from_batch_request(
-                post_partitioner_batch_request
-            )
+        post_partitioner_batches = asset.get_batch_list_from_batch_request(
+            post_partitioner_batch_request
         )
         post_partitioner_batch_data = post_partitioner_batches[0].data
 
