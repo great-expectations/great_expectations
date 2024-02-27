@@ -296,7 +296,7 @@ class Validator:
     def expectation_suite(self, value: ExpectationSuite) -> None:
         self._initialize_expectations(
             expectation_suite=value,
-            expectation_suite_name=value.expectation_suite_name,
+            expectation_suite_name=value.name,
         )
 
     @property

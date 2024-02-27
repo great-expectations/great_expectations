@@ -239,7 +239,7 @@ class UserConfigurableProfiler:
                 self.profile_dataset._expectation_suite.name  # type: ignore[union-attr]
             )
             self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]
-                expectation_suite_name=suite_name
+                name=suite_name
             )
 
         if self.semantic_types_dict:

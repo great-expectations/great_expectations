@@ -570,9 +570,7 @@ class CloudDataContext(SerializableDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("overwrite_existing must be of type bool.")
 
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
-        )
+        expectation_suite = ExpectationSuite(name=expectation_suite_name)
 
         existing_suite_names = self.list_expectation_suite_names()
         cloud_id: Optional[str] = None
