@@ -462,6 +462,10 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         "root_directory"
     ] = test_root_directory
 
+    desired_config["stores"]["validation_config_store"]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
+
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
         properties=data_context_config_schema.dump(data_context_config),
@@ -1541,6 +1545,10 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
             },
             "validations_store": {
                 "class_name": "ValidationsStore",
+                "store_backend": {"class_name": "InMemoryStoreBackend"},
+            },
+            "validation_config_store": {
+                "class_name": "ValidationConfigStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
         },
