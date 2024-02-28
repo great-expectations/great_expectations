@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Union
+
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import BaseModel, validator
 from great_expectations.core.batch_config import BatchConfig  # noqa: TCH001
@@ -29,6 +31,7 @@ class ValidationConfig(BaseModel):
     name: str
     data: BatchConfig  # TODO: Should support a union of Asset | BatchConfig
     suite: ExpectationSuite
+    id: Union[str, None] = None
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v):
