@@ -12,6 +12,7 @@ import pandas as pd
 import pytest
 import requests
 
+from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.constants import (
@@ -90,6 +91,31 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     print(pf(yaml_dict, depth=2))
     assert datasource_name in yaml_dict["fluent_datasources"]
     assert datasource_name not in yaml_dict["datasources"]
+
+
+@pytest.mark.cloud
+def test_partitioners_are_persisted_on_creation(
+    empty_cloud_context_fluent: CloudDataContext,
+    cloud_api_fake_db: FakeDBTypedDict,
+    db_file: pathlib.Path,
+):
+    context = empty_cloud_context_fluent
+
+    datasource_name = "save_ds_partitioners_test"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
+    my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
+    my_asset.test_connection()
+    partitioner = PartitionerYear(column_name="date")
+    my_asset.add_batch_config(name="cloud partitioner test", partitioner=partitioner)
+
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
+        "attributes"
+    ]["datasource_config"]
+
+    # partitioners should be present
+    assert datasource_config["assets"][0]["batch_configs"][0]["partitioner"]
 
 
 @pytest.mark.filesystem
