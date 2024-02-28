@@ -50,6 +50,13 @@
                 }
             ]
         },
+        "sorters": {
+            "title": "Sorters",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
         "batch_slice": {
             "title": "Batch Slice",
             "anyOf": [
@@ -316,6 +323,24 @@
             "required": [
                 "column_name",
                 "date_format_string"
+            ]
+        },
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
             ]
         }
     }
