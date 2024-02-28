@@ -517,16 +517,23 @@ def test_catch_bad_top_level_config(
                 "name": "unknown partitioner",
                 "type": "table",
                 "table_name": "pool",
-                "partitioner": {
-                    "method_name": "not_a_valid_method_name",
-                    "column_name": "foo",
-                },
+                "batch_configs": [
+                    {
+                        "name": "unknown_partitioner_batch_config",
+                        "partitioner": {
+                            "method_name": "not_a_valid_method_name",
+                            "column_name": "foo",
+                        },
+                    }
+                ],
             },
             (
                 _FLUENT_DATASOURCES_KEY,
                 "assets",
                 0,
                 "TableAsset",
+                "batch_configs",
+                0,
                 "partitioner",
                 "method_name",
             ),
