@@ -40,7 +40,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     TestConnectionError,
 )
-from great_expectations.validator.v1_validator import ResultFormat, Validator
+from great_expectations.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
@@ -135,13 +135,34 @@ class TestQueryAssets:
         )
         assert result.success
 
-    def test_success_with_partitioners_from_batch_configs(self, empty_data_context):
+        # verify our query filtering still works
+        result = validator.expect_table_row_count_to_equal(
+            column="passenger_count",
+            value_set=[passenger_count_value],
+            result_format={"result_format": "BOOLEAN_ONLY"},
+        )
+        assert result.success
+
+    @pytest.mark.parametrize(
+        ["month", "expected"],
+        [
+            # Expected values here were obtained by running the expectations.
+            # Mostly just parameterizing the test to ensure the Batch Config's partitioner is actually used.
+            (1, 364),
+            (2, 342),
+        ],
+    )
+    def test_success_with_partitioners_from_batch_configs(
+        self, empty_data_context, month: int, expected: int
+    ):
         context = empty_data_context
-        datasource = sqlite_datasource(context, "yellow_tripdata.db")
+        datasource = sqlite_datasource(
+            context, "yellow_tripdata_sample_2020_all_months_combined.db"
+        )
         passenger_count_value = 5
         asset = datasource.add_query_asset(
             name="query_asset",
-            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
+            query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",
         ).add_sorters(["year"])
         batch_config = asset.add_batch_config(
             name="whatevs",
@@ -150,14 +171,10 @@ class TestQueryAssets:
         validator = Validator(
             context,
             batch_config=batch_config,
-            batch_request_options={"year": 2019},
-            result_format=ResultFormat.BOOLEAN_ONLY,
+            batch_request_options={"year": 2020, "month": month},
         )
         result = validator.validate_expectation(
-            gxe.ExpectColumnDistinctValuesToEqualSet(
-                column="passenger_count",
-                value_set=[passenger_count_value],
-            )
+            gxe.ExpectTableRowCountToEqual(value=expected)
         )
         assert result.success
 
