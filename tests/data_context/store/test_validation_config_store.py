@@ -97,6 +97,7 @@ def test_add_cloud(
                     "organization_id": "12345678-1234-5678-1234-567812345678",
                     "validation_config": {
                         "name": name,
+                        "id": None,
                         "data": {
                             "id": None,
                             "name": "my_batch_config",
