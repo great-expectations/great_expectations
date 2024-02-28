@@ -26,7 +26,7 @@ class BatchConfig(pydantic.BaseModel):
     id: Optional[str] = None
     name: str
     partitioner: Optional[Partitioner] = None
-    sorters: List[Sorter]
+    sorters: List[Sorter] = pydantic.Field(default_factory=list)
 
     # private attributes that must be set immediately after instantiation
     _data_asset: DataAsset = pydantic.PrivateAttr()
