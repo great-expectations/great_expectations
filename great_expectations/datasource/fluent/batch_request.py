@@ -6,6 +6,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    List,
     Mapping,
     Optional,
     Union,
@@ -22,8 +23,9 @@ from great_expectations.compatibility.pydantic import (
 # default_ref_template
 from great_expectations.compatibility.typing_extensions import override
 
-# moving this import into TYPE_CHECKING requires forward refs to be updated.
+# moving these imports into TYPE_CHECKING requires forward refs to be updated.
 from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
+from great_expectations.core.sorters import Sorter  # noqa: TCH001
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
@@ -84,6 +86,7 @@ class BatchRequest(pydantic.BaseModel):
         ),
     )
     partitioner: Optional[Partitioner] = None
+    sorters: List[Sorter] = Field(default_factory=list)
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )
