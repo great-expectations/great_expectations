@@ -32,6 +32,7 @@ div.theme-code-block {
     text-transform: capitalize;
 
     &::before {
+      background: url('/img/file-solid.svg') 0 50% no-repeat;
       content: '';
       display: inline-block;
       height: 1em;
@@ -64,11 +65,7 @@ div.theme-code-block {
     }
   }
 
-  &.with-file-icon > div:not(:only-child):first-child::before {
-    background: url('/img/file-solid.svg') 0 50% no-repeat;
-  }
-
-  &.with-terminal-output-icon div:not(:only-child):first-child::before{
+  &.language-bash div:not(:only-child):first-child::before{
     background: url('/img/terminal-input-icon.svg') 0 50% no-repeat;
     width: 1.25em;
   }
