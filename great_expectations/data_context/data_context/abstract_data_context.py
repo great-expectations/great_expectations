@@ -621,6 +621,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
 
+    @property
     def validation_config_store(self) -> ValidationConfigStore:
         # Purposely not exposing validation_config_store_name as a user-configurable property
         return self.stores[
