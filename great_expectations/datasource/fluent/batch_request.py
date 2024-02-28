@@ -57,7 +57,7 @@ class BatchRequest(pydantic.BaseModel):
         data_asset_name: The name of the Data Asset used to connect to the data.
         options: A dict that can be used to filter the batch groups associated with the Data Asset.
             The dict structure depends on the asset type. The available keys for dict can be obtained by
-            calling DataAsset.batch_request_options.
+            calling DataAsset.get_batch_request_options_keys(...).
         batch_slice: A python slice that can be used to filter the sorted batches by index.
             e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
