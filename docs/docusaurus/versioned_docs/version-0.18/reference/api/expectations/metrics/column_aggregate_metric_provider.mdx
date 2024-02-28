@@ -8,8 +8,10 @@ sidebar_label: column_aggregate_metric_provider.py
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.column_aggregate_metric_provider.</span></span><span class="sig-name descname"><span class="pre">ColumnAggregateMetricProvider</span></span></dt>
-<dd><p>Base class for all Column Aggregate Metrics,
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.column_aggregate_metric_provider.</span></span><span class="sig-name descname"><span class="pre">ColumnAggregateMetricProvider</span></span>
+</dt>
+<dd>
+<p>Base class for all Column Aggregate Metrics,
 which define metrics to be calculated in aggregate from a given column.</p>
 <p>An example of this is <cite>column.mean</cite>,
 which returns the mean of a given column.</p>
@@ -27,7 +29,8 @@ a great_expectations installation.</p></li>
 have correct values that may simply be inherited by Metric classes.</p>
 <dl class="simple">
 <dt>-Relevant Documentation Links
--</dt><dd><ul class="simple">
+-</dt>
+<dd><ul class="simple">
 <li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations">How To Create Custom Column Aggregate Expectations</a></p></li>
 </ul>
 </dd>
@@ -35,8 +38,10 @@ have correct values that may simply be inherited by Metric classes.</p>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.column_aggregate_metric_provider.</span></span><span class="sig-name descname"><span class="pre">column_aggregate_partial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../execution_engine/ExecutionEngine_class" title="great_expectations.execution_engine.execution_engine.ExecutionEngine"><span class="pre">great_expectations.execution_engine.execution_engine.ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Provides engine-specific support for authoring a metric_fn with a simplified signature.</p>
+<span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.column_aggregate_metric_provider.</span></span><span class="sig-name descname"><span class="pre">column_aggregate_partial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../execution_engine/ExecutionEngine_class" title="great_expectations.execution_engine.execution_engine.ExecutionEngine"><span class="pre">great_expectations.execution_engine.execution_engine.ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span>
+</dt>
+<dd>
+<p>Provides engine-specific support for authoring a metric_fn with a simplified signature.</p>
 <p>A column_aggregate_partial must provide an aggregate function; it will be executed with the specified engine
 to provide a value for validation.</p>
 <p>A metric function that is decorated as a column_aggregate_partial will be called with the engine-specific column
@@ -51,14 +56,17 @@ type and any value_kwargs associated with the Metric for which the provider func
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An annotated metric_function which will be called with a simplified signature.</p>
+<dd class="field-even">
+<p>An annotated metric_function which will be called with a simplified signature.</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.column_aggregate_metric_provider.</span></span><span class="sig-name descname"><span class="pre">column_aggregate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../execution_engine/ExecutionEngine_class" title="great_expectations.execution_engine.execution_engine.ExecutionEngine"><span class="pre">great_expectations.execution_engine.execution_engine.ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Provides Pandas support for authoring a metric_fn with a simplified signature.</p>
+<span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.column_aggregate_metric_provider.</span></span><span class="sig-name descname"><span class="pre">column_aggregate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../execution_engine/ExecutionEngine_class" title="great_expectations.execution_engine.execution_engine.ExecutionEngine"><span class="pre">great_expectations.execution_engine.execution_engine.ExecutionEngine</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span>
+</dt>
+<dd>
+<p>Provides Pandas support for authoring a metric_fn with a simplified signature.</p>
 <p>A column_aggregate_value must provide an aggregate function; it will be executed by Pandas
 to provide a value for validation.</p>
 <p>A metric function that is decorated as a column_aggregate_partial will be called with a specified Pandas column
@@ -71,7 +79,8 @@ and any value_kwargs associated with the Metric for which the provider function 
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An annotated metric_function which will be called with a simplified signature.</p>
+<dd class="field-even">
+<p>An annotated metric_function which will be called with a simplified signature.</p>
 </dd>
 </dl>
 </dd></dl>
