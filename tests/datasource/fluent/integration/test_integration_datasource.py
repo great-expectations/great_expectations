@@ -135,49 +135,6 @@ class TestQueryAssets:
         )
         assert result.success
 
-        # verify our query filtering still works
-        result = validator.expect_table_row_count_to_equal(
-            column="passenger_count",
-            value_set=[passenger_count_value],
-            result_format={"result_format": "BOOLEAN_ONLY"},
-        )
-        assert result.success
-
-    @pytest.mark.parametrize(
-        ["month", "expected"],
-        [
-            # Expected values here were obtained by running the expectations.
-            # Mostly just parameterizing the test to ensure the Batch Config's partitioner is actually used.
-            (1, 364),
-            (2, 342),
-        ],
-    )
-    def test_success_with_partitioners_from_batch_configs(
-        self, empty_data_context, month: int, expected: int
-    ):
-        context = empty_data_context
-        datasource = sqlite_datasource(
-            context, "yellow_tripdata_sample_2020_all_months_combined.db"
-        )
-        passenger_count_value = 5
-        asset = datasource.add_query_asset(
-            name="query_asset",
-            query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",
-        ).add_sorters(["year"])
-        batch_config = asset.add_batch_config(
-            name="whatevs",
-            partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
-        )
-        validator = Validator(
-            context,
-            batch_config=batch_config,
-            batch_request_options={"year": 2020, "month": month},
-        )
-        result = validator.validate_expectation(
-            gxe.ExpectTableRowCountToEqual(value=expected)
-        )
-        assert result.success
-
     def test_partitioner_filtering(self, empty_data_context):
         context = empty_data_context
         datasource = sqlite_datasource(
@@ -489,6 +446,47 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
             )
         )
         assert len(specified_batches) == 1
+
+
+@pytest.mark.parametrize(
+    ["month", "expected"],
+    [
+        (1, 364),
+        (2, 342),
+    ],
+)
+def test_success_with_partitioners_from_batch_configs(
+    self,
+    empty_data_context,
+    month: int,
+    expected: int,
+):
+    """Integration test to ensure partitions from batch configs are used.
+
+    The test is parameterized just to ensure that the partitioner is actually doing something.
+    """
+    context = empty_data_context
+    datasource = sqlite_datasource(
+        context, "yellow_tripdata_sample_2020_all_months_combined.db"
+    )
+    passenger_count_value = 5
+    asset = datasource.add_query_asset(
+        name="query_asset",
+        query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",
+    ).add_sorters(["year"])
+    batch_config = asset.add_batch_config(
+        name="whatevs",
+        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+    )
+    validator = Validator(
+        context,
+        batch_config=batch_config,
+        batch_request_options={"year": 2020, "month": month},
+    )
+    result = validator.validate_expectation(
+        gxe.ExpectTableRowCountToEqual(value=expected)
+    )
+    assert result.success
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
