@@ -35,7 +35,6 @@ from great_expectations.datasource.fluent.sql_datasource import (
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    from typing_extensions import Self
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -107,30 +106,7 @@ class SqliteDsn(pydantic.AnyUrl):
 SqlitePartitioner = Union[SqlPartitioner, PartitionerConvertedDateTime]
 
 
-class _SQLiteAssetMixin:
-    @public_api
-    def add_partitioner_converted_datetime(
-        self: Self, column_name: str, date_format_string: str
-    ) -> Self:
-        """Associates a converted datetime partitioner with this sqlite data asset.
-        Args:
-            column_name: The column name of the date column where year and month will be parsed out.
-            date_format_string: Format for converting string representation of datetime to actual datetime object.
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            SqlitePartitionerConvertedDateTime(
-                method_name="partition_on_converted_datetime",
-                column_name=column_name,
-                date_format_string=date_format_string,
-            )
-        )
-
-
-class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
-    # TODO: remove SQLiteAssetMixin
-
+class SqliteTableAsset(SqlTableAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the Sqlite specific partitioner
@@ -142,9 +118,7 @@ class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
     partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
 
-class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
-    # TODO: remove SQLiteAssetMixin
-
+class SqliteQueryAsset(SqlQueryAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the  Sqlite specific partitioner
