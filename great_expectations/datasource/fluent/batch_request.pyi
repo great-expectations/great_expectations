@@ -1,10 +1,11 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from typing_extensions import TypeAlias
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import StrictStr
 from great_expectations.core.partitioners import Partitioner
+from great_expectations.core.sorters import Sorter
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 
 BatchRequestOptions: TypeAlias = Dict[StrictStr, Any]
@@ -22,6 +23,7 @@ class BatchRequest(pydantic.BaseModel):
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        sorters: Optional[List[Sorter]] = None,
     ) -> None: ...
     @property
     def batch_slice(self) -> slice: ...

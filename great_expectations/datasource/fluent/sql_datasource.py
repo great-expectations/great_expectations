@@ -676,6 +676,7 @@ class _SQLAsset(DataAsset):
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        sorters: Optional[List[Sorter]] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -704,12 +705,16 @@ class _SQLAsset(DataAsset):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
 
+        if not sorters:
+            sorters = []
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            sorters=sorters,
         )
 
     @override
