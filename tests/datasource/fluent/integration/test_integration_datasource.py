@@ -455,8 +455,8 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
         (2, 342),
     ],
 )
+@pytest.mark.sqlite
 def test_success_with_partitioners_from_batch_configs(
-    self,
     empty_data_context,
     month: int,
     expected: int,
