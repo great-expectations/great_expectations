@@ -1,6 +1,6 @@
 const codeBlockTheme = {
     plain: {
-        color: "#9CDCFE",
+        color: "#D8D8D8",
         backgroundColor: "#373F58"
     },
     styles: [{
@@ -11,17 +11,17 @@ const codeBlockTheme = {
     }, {
         types: ["comment"],
         style: {
-            color: "rgb(106, 153, 85)"
+            color: "#B6C647"
         }
     }, {
         types: ["builtin", "changed", "keyword", "interpolation-punctuation"],
         style: {
-            color: "rgb(86, 156, 214)"
+            color: "#F3C62D"
         }
     }, {
         types: ["number", "inserted"],
         style: {
-            color: "rgb(181, 206, 168)"
+            color: "#FD9BC1"
         }
     }, {
         types: ["constant"],
@@ -36,7 +36,7 @@ const codeBlockTheme = {
     }, {
         types: ["deleted", "string", "attr-value", "template-punctuation"],
         style: {
-            color: "rgb(206, 145, 120)"
+            color: "#CE9178"
         }
     }, {
         types: ["selector"],
@@ -59,7 +59,7 @@ const codeBlockTheme = {
     }, {
         types: ["punctuation", "operator"],
         style: {
-            color: "rgb(212, 212, 212)"
+            color: "#E1C2FA"
         }
     }, {
         // Fix punctuation color for HTML
@@ -71,7 +71,7 @@ const codeBlockTheme = {
     }, {
         types: ["function"],
         style: {
-            color: "rgb(220, 220, 170)"
+            color: "#E1C2FA"
         }
     }, {
         types: ["class-name"],

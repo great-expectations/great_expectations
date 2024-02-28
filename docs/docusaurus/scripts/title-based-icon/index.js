@@ -4,7 +4,6 @@ It adds a file icon by default, unless the title contains the word "output",
 in which case an output terminal icon will be used.
 */
 const visit = require('unist-util-visit')
-const path = require('path')
 
 function titleBasedIcon () {
 
