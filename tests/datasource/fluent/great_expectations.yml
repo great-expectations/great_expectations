@@ -42,14 +42,16 @@ fluent_datasources:
         id: 3bb1ce41-7923-4126-a4f2-1366d0addbd9
         type: table
         table_name: yellow_tripdata_sample_2019_01
-        partitioner:
-            column_name: pickup_datetime
-            method_name: partition_on_year_and_month
+        batch_configs:
+          my_batch_config:
+            name: with_partitioner
+            partitioner:
+                column_name: pickup_datetime
+                method_name: partition_on_year_and_month
         order_by:
             - key: year
             - key: month
-        batch_configs:
-          my_batch_config: {}
+
   sqlite_taxi:
     type: sqlite
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
