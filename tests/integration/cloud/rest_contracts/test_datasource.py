@@ -46,6 +46,7 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 }
 
 
+@pytest.mark.cloud
 @pytest.mark.parametrize(
     "contract_interaction",
     [
