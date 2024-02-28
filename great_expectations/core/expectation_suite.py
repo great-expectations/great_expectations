@@ -74,7 +74,6 @@ class ExpectationSuite(SerializableDictDot):
 
     Args:
         name: Name of the Expectation Suite
-        expectation_suite_name (deprecated): Name of the Expectation Suite.
         expectations: Expectation Configurations to associate with this Expectation Suite.
         evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
         data_asset_type: Type of data asset to associate with this suite.
@@ -95,16 +94,10 @@ class ExpectationSuite(SerializableDictDot):
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
         id: Optional[str] = None,
-        expectation_suite_name: Optional[
-            str
-        ] = None,  # for backwards compatibility - remove
     ) -> None:
-        if name:
-            assert isinstance(name, str), "Name is a required field."
-            self.name = name
-        else:
-            assert isinstance(expectation_suite_name, str), "Name is a required field."
-            self.name = expectation_suite_name
+        if not name or not isinstance(name, str):
+            raise ValueError("name must be provided as a non-empty string")
+        self.name = name
         self.id = id
 
         self.expectations = [
@@ -131,14 +124,6 @@ class ExpectationSuite(SerializableDictDot):
         from great_expectations import project_manager
 
         self._store = project_manager.get_expectations_store()
-
-    @property
-    def expectation_suite_name(self) -> str:
-        return self.name
-
-    @expectation_suite_name.setter
-    def expectation_suite_name(self, value) -> None:
-        self.name = value
 
     @property
     def evaluation_parameter_options(self) -> tuple[str, ...]:
@@ -361,7 +346,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         ExpectationSuite equivalence relies only on expectations and evaluation parameters. It does not include:
         - data_asset_name
-        - expectation_suite_name
+        - name
         - meta
         - data_asset_type
         """
@@ -399,7 +384,7 @@ class ExpectationSuite(SerializableDictDot):
             return NotImplemented
         return all(
             (
-                self.expectation_suite_name == other.expectation_suite_name,
+                self.name == other.name,
                 self.expectations == other.expectations,
                 self.evaluation_parameters == other.evaluation_parameters,
                 self.data_asset_type == other.data_asset_type,

@@ -679,7 +679,7 @@ class ExpectationSuitePageRenderer(Renderer):
             columns,
             ordered_columns,
         ) = expectations.get_grouped_and_ordered_expectations_by_column()
-        expectation_suite_name = expectations.expectation_suite_name
+        expectation_suite_name = expectations.name
 
         overview_content_blocks = [
             self._render_expectation_suite_header(),
@@ -764,7 +764,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     @classmethod
     def _render_expectation_suite_info(cls, expectations):
-        expectation_suite_name = expectations.expectation_suite_name
+        expectation_suite_name = expectations.name
         # TODO: Deprecate "great_expectations.__version__"
         ge_version = expectations.meta.get(
             "great_expectations_version"

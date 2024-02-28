@@ -66,7 +66,7 @@ class DataAsset:
         interactive_evaluation = kwargs.pop("interactive_evaluation", True)
         profiler = kwargs.pop("profiler", None)
         expectation_suite = kwargs.pop("expectation_suite", None)
-        expectation_suite_name = kwargs.pop("expectation_suite_name", None)
+        name = kwargs.pop("name", None)
         data_context = kwargs.pop("data_context", None)
         batch_kwargs = kwargs.pop(
             "batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1()))
@@ -79,7 +79,7 @@ class DataAsset:
         self._data_context = data_context
         self._initialize_expectations(
             expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
+            name=name,
         )
         self._batch_kwargs = BatchKwargs(batch_kwargs)
         self._batch_markers = batch_markers
@@ -301,7 +301,7 @@ class DataAsset:
     def _initialize_expectations(
         self,
         expectation_suite: Union[Dict, ExpectationSuite, None] = None,
-        expectation_suite_name: Optional[str] = None,
+        name: Optional[str] = None,
     ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -319,8 +319,8 @@ class DataAsset:
                 If None, creates default `_expectation_suite` with an empty list of expectations and \
                 key value `data_asset_name` as `data_asset_name`.
 
-            expectation_suite_name (string): \
-                The name to assign to the `expectation_suite.expectation_suite_name`
+            name (string): \
+                The name to assign to the `expectation_suite.name`
 
         Returns:
             None
@@ -336,24 +336,21 @@ class DataAsset:
 
             self._expectation_suite = expectation_suite
 
-            if expectation_suite_name is not None:
-                if (
-                    self._expectation_suite.expectation_suite_name
-                    != expectation_suite_name
-                ):
+            if name is not None:
+                if self._expectation_suite.name != name:
                     logger.warning(
-                        "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
-                            n2=expectation_suite_name,
+                        "Overriding existing name {n1} with new name {n2}".format(
+                            n1=self._expectation_suite.name,
+                            n2=name,
                         )
                     )
-                self._expectation_suite.expectation_suite_name = expectation_suite_name
+                self._expectation_suite.name = name
 
         else:
-            if expectation_suite_name is None:
-                expectation_suite_name = "default"
+            if name is None:
+                name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=name,
             )
 
         self._expectation_suite.data_asset_type = self._data_asset_type
@@ -844,13 +841,13 @@ class DataAsset:
                         abbrev_results.append(exp)
                 results = abbrev_results
 
-            expectation_suite_name = expectation_suite.expectation_suite_name
+            name = expectation_suite.name
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
 
             meta = {
                 "great_expectations_version": ge_version,
-                "expectation_suite_name": expectation_suite_name,
+                "name": name,
                 "run_id": run_id,
                 "batch_kwargs": self.batch_kwargs,
                 "batch_markers": self.batch_markers,
@@ -929,14 +926,14 @@ class DataAsset:
         )
 
     @property
-    def expectation_suite_name(self):
+    def name(self):
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.expectation_suite_name
+        return self._expectation_suite.name
 
-    @expectation_suite_name.setter
-    def expectation_suite_name(self, expectation_suite_name) -> None:
+    @name.setter
+    def name(self, name) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.expectation_suite_name = expectation_suite_name
+        self._expectation_suite.name = name
 
     ###
     #

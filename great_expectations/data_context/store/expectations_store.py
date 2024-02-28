@@ -207,7 +207,7 @@ class ExpectationsStore(Store):
     def _add(self, key, value, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
-            value = self._add_ids_on_create(value)
+            value: ExpectationSuite = self._add_ids_on_create(value)
         try:
             result = super()._add(key=key, value=value, **kwargs)
             if self.cloud_mode:
@@ -228,7 +228,7 @@ class ExpectationsStore(Store):
             return result
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
-                f"An ExpectationSuite named {value.expectation_suite_name} already exists."
+                f"An ExpectationSuite named {value.name} already exists."
             )
 
     def _update(self, key, value, **kwargs):
@@ -347,5 +347,5 @@ class ExpectationsStore(Store):
                 resource_name=name,
             )
         else:
-            key = ExpectationSuiteIdentifier(expectation_suite_name=name)
+            key = ExpectationSuiteIdentifier(name=name)
         return key
