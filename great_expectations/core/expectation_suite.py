@@ -1119,7 +1119,7 @@ class ExpectationSuite(SerializableDictDot):
 
 
 class ExpectationSuiteSchema(Schema):
-    expectation_suite_name = fields.Str()
+    name = fields.Str()
     id = fields.UUID(required=False, allow_none=True)
     expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
     evaluation_parameters = fields.Dict(allow_none=True)

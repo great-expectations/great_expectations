@@ -645,7 +645,7 @@ def spark_session_v012(test_backends):
 @pytest.fixture
 def basic_expectation_suite():
     expectation_suite = ExpectationSuite(
-        expectation_suite_name="default",
+        name="default",
         meta={},
         expectations=[
             ExpectationConfiguration(
@@ -2528,7 +2528,7 @@ def titanic_sqlite_db_connection_string(sa):
 def titanic_expectation_suite(empty_data_context_stats_enabled):
     data_context = empty_data_context_stats_enabled
     return ExpectationSuite(
-        expectation_suite_name="Titanic.warning",
+        name="Titanic.warning",
         meta={},
         data_asset_type="Dataset",
         expectations=[
@@ -3998,9 +3998,7 @@ def alice_columnar_table_single_batch():
     )
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
-    expected_expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name
-    )
+    expected_expectation_suite = ExpectationSuite(name=expectation_suite_name)
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being

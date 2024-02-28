@@ -984,7 +984,7 @@ def test_TupleGCSStoreBackend_base_public_path():
 
     run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
     key = ValidationResultIdentifier(
-        ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+        ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
         "my_batch_id",
     )
@@ -1107,7 +1107,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 
     run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
     key = ValidationResultIdentifier(
-        ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+        ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
         "my_batch_id",
     )

@@ -95,11 +95,11 @@ checkpoint = context.add_or_update_checkpoint(
     validations=[
         {
             "batch_request": upstream_batch_request,
-            "expectation_suite_name": upstream_validator.expectation_suite_name,
+            "expectation_suite_name": upstream_validator.name,
         },
         {
             "batch_request": downstream_batch_request,
-            "expectation_suite_name": downstream_validator.expectation_suite_name,
+            "expectation_suite_name": downstream_validator.name,
         },
     ],
 )

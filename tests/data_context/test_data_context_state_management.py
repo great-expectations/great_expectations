@@ -543,7 +543,7 @@ def test_add_expectation_suite_conflicting_args_failure(
     context = in_memory_data_context
     project_manager.set_project(context)
     if use_suite:
-        suite = ExpectationSuite(expectation_suite_name="default")
+        suite = ExpectationSuite(name="default")
     else:
         suite = None
 
@@ -562,7 +562,7 @@ def test_update_expectation_suite_failure(
     context = in_memory_data_context
 
     suite_name = "my_brand_new_suite"
-    suite = ExpectationSuite(expectation_suite_name=suite_name)
+    suite = ExpectationSuite(name=suite_name)
 
     with pytest.raises(gx_exceptions.ExpectationSuiteError) as e:
         _ = context.update_expectation_suite(suite)
@@ -704,7 +704,7 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
     project_manager.set_project(in_memory_data_context)
 
     if use_suite:
-        suite = ExpectationSuite(expectation_suite_name="default")
+        suite = ExpectationSuite(name="default")
     else:
         suite = None
     context = in_memory_data_context

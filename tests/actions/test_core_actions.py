@@ -83,7 +83,7 @@ def test_StoreAction():
     action.run(
         validation_result_suite_identifier=ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="default_expectations"
+                name="default_expectations"
             ),
             run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
@@ -110,7 +110,7 @@ def test_StoreAction():
     assert fake_in_memory_store.get(
         ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="default_expectations"
+                name="default_expectations"
             ),
             run_id=expected_run_id,
             batch_identifier="1234",

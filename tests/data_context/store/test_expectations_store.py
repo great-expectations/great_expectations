@@ -25,21 +25,21 @@ def test_expectations_store():
     ns_1 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.warning"))
     my_store.set(
         ns_1,
-        ExpectationSuite(expectation_suite_name="a.b.c.warning"),
+        ExpectationSuite(name="a.b.c.warning"),
     )
 
     ns_1_dict: dict = my_store.get(ns_1)
     ns_1_suite = ExpectationSuite(**ns_1_dict)
-    assert ns_1_suite == ExpectationSuite(expectation_suite_name="a.b.c.warning")
+    assert ns_1_suite == ExpectationSuite(name="a.b.c.warning")
 
     ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
     my_store.set(
         ns_2,
-        ExpectationSuite(expectation_suite_name="a.b.c.failure"),
+        ExpectationSuite(name="a.b.c.failure"),
     )
     ns_2_dict: dict = my_store.get(ns_2)
     ns_2_suite = ExpectationSuite(**ns_2_dict)
-    assert ns_2_suite == ExpectationSuite(expectation_suite_name="a.b.c.failure")
+    assert ns_2_suite == ExpectationSuite(name="a.b.c.failure")
 
     assert set(my_store.list_keys()) == {
         ns_1,
@@ -98,7 +98,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
     ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
     my_store.set(
         ns_2,
-        ExpectationSuite(expectation_suite_name="a.b.c.failure"),
+        ExpectationSuite(name="a.b.c.failure"),
     )
     ns_2_dict: dict = my_store.get(ns_2)
     ns_2_suite = ExpectationSuite(**ns_2_dict)
@@ -244,7 +244,7 @@ def test_gx_cloud_response_json_to_object_dict(
 @pytest.mark.unit
 def test_get_key_in_non_cloud_mode(empty_data_context):
     name = "test-name"
-    suite = ExpectationSuite(expectation_suite_name=name)
+    suite = ExpectationSuite(name=name)
     key = empty_data_context.expectations_store.get_key(name=suite.name, id=suite.id)
     assert isinstance(key, ExpectationSuiteIdentifier)
     assert key.expectation_suite_name == name
@@ -254,7 +254,7 @@ def test_get_key_in_non_cloud_mode(empty_data_context):
 def test_get_key_in_cloud_mode(empty_data_context_in_cloud_mode):
     cloud_data_context = empty_data_context_in_cloud_mode
     name = "test-name"
-    suite = ExpectationSuite(expectation_suite_name=name)
+    suite = ExpectationSuite(name=name)
     key = cloud_data_context.expectations_store.get_key(name=suite.name, id=suite.id)
     assert isinstance(key, GXCloudIdentifier)
     assert key.resource_name == name
