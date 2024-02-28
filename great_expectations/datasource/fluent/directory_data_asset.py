@@ -41,7 +41,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
         Returns:
             List of batch definitions, in the case of a _DirectoryDataAssetMixin the list contains a single item.
         """
-        if self.partitioner:
+        if batch_request.partitioner:
             # Currently non-sql asset partitioners do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
             batch_identifiers = batch_request.options
