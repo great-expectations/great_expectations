@@ -1590,7 +1590,7 @@ def test_data_context_config_defaults():
         "plugins_directory": None,
         "profiler_store_name": None,
         "progress_bars": None,
-        "stores": {},
+        "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
         "validation_operators": None,
         "validations_store_name": None,
     }

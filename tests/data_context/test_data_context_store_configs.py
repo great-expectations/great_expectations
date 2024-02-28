@@ -74,7 +74,7 @@ def test_create(tmp_path_factory):
 
 @pytest.mark.filesystem
 def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 2
+    assert len(totally_empty_data_context.stores.keys()) == 5
 
     totally_empty_data_context.add_store(
         "my_new_store",
@@ -84,7 +84,7 @@ def test_add_store(totally_empty_data_context):
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 3
+    assert len(totally_empty_data_context.stores.keys()) == 6
 
 
 @pytest.mark.filesystem

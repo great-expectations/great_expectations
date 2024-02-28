@@ -457,6 +457,9 @@ def test_data_context_variables_save_config(
                     "module_name": "great_expectations.data_context.store",
                     "class_name": "EvaluationParameterStore",
                 },
+                "checkpoint_store": {"class_name": "CheckpointStore"},
+                "profiler_store": {"class_name": "ProfilerStore"},
+                "validations_store": {"class_name": "ValidationsStore"},
             },
             "include_rendered_content": {
                 "expectation_suite": False,
