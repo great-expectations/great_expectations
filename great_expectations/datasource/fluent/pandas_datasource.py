@@ -69,10 +69,10 @@ if TYPE_CHECKING:
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
+    from great_expectations.core.sorters import Sorter
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
-
 
 logger = logging.getLogger(__name__)
 
@@ -182,6 +182,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        sorters: Optional[List[Sorter]] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -208,11 +209,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             raise ValueError(
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
+        if not sorters:
+            sorters = []
 
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
+            sorters=sorters,
         )
 
     @override
@@ -404,12 +408,13 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(  # type: ignore[override]
+    def build_batch_request(  # type: ignore[override]  # noqa PLR0913
         self,
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        sorters: Optional[List[Sorter]] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -437,6 +442,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             raise ValueError(
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
+        if not sorters:
+            sorters = []
 
         if dataframe is None:
             df = self.dataframe
@@ -450,7 +457,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
 
         self.dataframe = df
 
-        return super().build_batch_request()
+        return super().build_batch_request(sorters=sorters)
 
     @override
     def get_batch_list_from_batch_request(

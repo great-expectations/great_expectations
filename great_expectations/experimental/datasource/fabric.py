@@ -136,17 +136,23 @@ class _PowerBIAsset(DataAsset):
         return batch_list
 
     @override
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(
+        self,
+        sorters: Optional[List[Sorter]] = None,
+    ) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if not sorters:
+            sorters = []
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
+            sorters=sorters,
         )
 
     @override

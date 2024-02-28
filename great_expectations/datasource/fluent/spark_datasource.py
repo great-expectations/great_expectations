@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
     from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.sorters import Sorter
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
@@ -214,12 +215,13 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(  # type: ignore[override]
+    def build_batch_request(  # type: ignore[override] # noqa [PLR0913]
         self,
         dataframe: Optional[_SparkDataFrameT] = None,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        sorters: Optional[List[Sorter]] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -248,6 +250,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
+        if not sorters:
+            sorters = []
+
         if dataframe is None:
             df = self.dataframe
         else:
@@ -264,6 +269,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
+            sorters=sorters,
         )
 
     @override

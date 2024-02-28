@@ -68,6 +68,7 @@ if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.sorters import Sorter
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -193,6 +194,7 @@ class _FilePathDataAsset(DataAsset):
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        sorters: Optional[List[Sorter]] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -213,6 +215,8 @@ class _FilePathDataAsset(DataAsset):
             applies to every "Datasource" type and any "ExecutionEngine" that is capable of loading data from files on
             local and/or cloud/networked filesystems (currently, Pandas and Spark backends work with files).
         """
+        if not sorters:
+            sorters = []
         if options:
             for option, value in options.items():
                 if (
@@ -245,6 +249,7 @@ class _FilePathDataAsset(DataAsset):
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            sorters=sorters,
         )
 
     @override
