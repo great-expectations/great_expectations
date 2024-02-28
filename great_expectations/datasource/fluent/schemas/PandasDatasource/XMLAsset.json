@@ -426,6 +426,13 @@
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
                         }
                     ]
+                },
+                "sorters": {
+                    "title": "Sorters",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
                 }
             },
             "required": [
