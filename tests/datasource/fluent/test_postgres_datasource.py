@@ -892,7 +892,6 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.partitioner = year_month_partitioner(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_json = source.json(indent=4, sort_keys=True)
         print(source_json)
@@ -912,7 +911,6 @@ def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.partitioner = year_month_partitioner(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_str = source.__str__()
         assert "order_by:" in source_str

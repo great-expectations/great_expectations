@@ -499,7 +499,6 @@ class _SQLAsset(DataAsset):
 
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
-    partitioner: Optional[SqlPartitioner] = None
     name: str
     _partitioner_implementation_map: Dict[
         Type[Partitioner], Optional[Type[SqlPartitioner]]

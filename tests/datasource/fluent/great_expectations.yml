@@ -13,9 +13,12 @@ fluent_datasources:
         id: 3cde7b60-5eb5-4612-90ea-88a65ffb5e62
         type: table
         table_name: another_table
-        partitioner:
-          method_name: partition_on_year_and_month
-          column_name: my_column
+        batch_configs:
+          with_partitioner:
+            name: with_partitioner
+            partitioner:
+              method_name: partition_on_year_and_month
+              column_name: my_column
       with_sorters:
         id: ddd94d36-1443-4298-b0bf-d2d7918c8f66
         type: table

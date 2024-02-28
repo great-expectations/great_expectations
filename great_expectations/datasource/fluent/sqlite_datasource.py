@@ -26,7 +26,6 @@ from great_expectations.datasource.fluent.sql_datasource import (
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
     SqlitePartitionerConvertedDateTime,
-    SqlPartitioner,
     _PartitionerOneColumnOneParam,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
@@ -103,9 +102,6 @@ class SqliteDsn(pydantic.AnyUrl):
     host_required = False
 
 
-SqlitePartitioner = Union[SqlPartitioner, PartitionerConvertedDateTime]
-
-
 class SqliteTableAsset(SqlTableAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -115,7 +111,6 @@ class SqliteTableAsset(SqlTableAsset):
         ] = SqlitePartitionerConvertedDateTime
 
     type: Literal["table"] = "table"
-    partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(SqlQueryAsset):
@@ -127,7 +122,6 @@ class SqliteQueryAsset(SqlQueryAsset):
         ] = SqlitePartitionerConvertedDateTime
 
     type: Literal["query"] = "query"
-    partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
 
 @public_api

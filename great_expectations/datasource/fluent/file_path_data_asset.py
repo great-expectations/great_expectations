@@ -104,7 +104,6 @@ class _FilePathDataAsset(DataAsset):
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )
-    partitioner: Optional[SparkPartitioner] = None
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
