@@ -3,6 +3,7 @@ from logging import Logger
 from typing import Any, ClassVar, Literal, Optional, Type
 
 from great_expectations.compatibility import azure
+from great_expectations.core.sorters import SortersDefinition
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
@@ -12,7 +13,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     BatchMetadata,
-    SortersDefinition,
 )
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,

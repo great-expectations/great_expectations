@@ -60,8 +60,6 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     GxDatasourceWarning,
-    Sorter,
-    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -76,6 +74,7 @@ if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.core.sorters import Sorter, SortersDefinition
     from great_expectations.datasource.fluent import BatchRequestOptions
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,

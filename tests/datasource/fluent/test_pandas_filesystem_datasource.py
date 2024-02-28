@@ -30,11 +30,11 @@ from great_expectations.datasource.fluent.sources import _get_field_details
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.core.sorters import SortersDefinition
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
-        SortersDefinition,
     )
 
 logger = logging.getLogger(__file__)

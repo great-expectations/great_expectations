@@ -17,6 +17,7 @@ from botocore.client import BaseClient as BaseClient
 
 from great_expectations._docs_decorators import public_api as public_api
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.sorters import SortersDefinition as SortersDefinition
 from great_expectations.core.util import S3Url as S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
@@ -34,9 +35,6 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
     StorageOptions,
 )
 from great_expectations.datasource.fluent.interfaces import BatchMetadata
-from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition as SortersDefinition,
-)
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
 )

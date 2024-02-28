@@ -5,11 +5,11 @@ import pathlib
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
-    Sorter,
     BatchMetadata,
     GxDatasourceWarning,
     TestConnectionError,
 )
+from great_expectations.core.sorters import Sorter
 
 # Now that DataAsset has both been defined, we need to
 # provide it to the BatchConfig pydantic model.

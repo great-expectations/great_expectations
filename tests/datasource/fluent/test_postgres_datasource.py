@@ -35,6 +35,7 @@ from great_expectations.core.partitioners import (
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
 )
+from great_expectations.core.sorters import Sorter
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -44,7 +45,6 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    Sorter,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.postgres_datasource import (

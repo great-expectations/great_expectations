@@ -27,13 +27,13 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import FabricBatchSpec
+from great_expectations.core.sorters import Sorter
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
-    Sorter,
     TestConnectionError,
 )
 

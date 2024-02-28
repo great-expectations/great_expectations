@@ -37,10 +37,10 @@ from great_expectations.compatibility.pydantic import (
     StrictInt,
     validate_arguments,
 )
-from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
+from great_expectations.core.sorters import Sorter, SortersDefinition
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import pandas as pd
-    from typing_extensions import Self, TypeAlias, TypeGuard
+    from typing_extensions import Self, TypeAlias
 
     from great_expectations.core.partitioners import Partitioner
 
@@ -110,64 +110,6 @@ class GxSerializationWarning(GxDatasourceWarning):
 
 
 BatchMetadata: TypeAlias = Dict[str, Any]
-
-
-@pydantic_dc.dataclass(frozen=True)
-class Sorter:
-    key: str
-    reverse: bool = False
-
-
-SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
-
-
-def _is_sorter_list(
-    sorters: SortersDefinition,
-) -> TypeGuard[list[Sorter]]:
-    if len(sorters) == 0 or isinstance(sorters[0], Sorter):
-        return True
-    return False
-
-
-def _is_str_sorter_list(sorters: SortersDefinition) -> TypeGuard[list[str]]:
-    if len(sorters) > 0 and isinstance(sorters[0], str):
-        return True
-    return False
-
-
-def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
-    if _is_sorter_list(sorters):
-        return sorters
-
-    # mypy doesn't successfully type-narrow sorters to a list[str] here, so we use
-    # another TypeGuard. We could cast instead which may be slightly faster.
-    sring_valued_sorter: str
-    if _is_str_sorter_list(sorters):
-        return [
-            _sorter_from_str(sring_valued_sorter) for sring_valued_sorter in sorters
-        ]
-
-    # This should never be reached because of static typing but is necessary because
-    # mypy doesn't know of the if conditions must evaluate to True.
-    raise ValueError(f"sorters is a not a SortersDefinition but is a {type(sorters)}")
-
-
-def _sorter_from_str(sort_key: str) -> Sorter:
-    """Convert a list of strings to Sorter objects
-
-    Args:
-        sort_key: A batch metadata key which will be used to sort batches on a data asset.
-                  This can be prefixed with a + or - to indicate increasing or decreasing
-                  sorting.  If not specified, defaults to increasing order.
-    """
-    if sort_key[0] == "-":
-        return Sorter(key=sort_key[1:], reverse=True)
-
-    if sort_key[0] == "+":
-        return Sorter(key=sort_key[1:], reverse=False)
-
-    return Sorter(key=sort_key, reverse=False)
-
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
 _DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
@@ -400,7 +342,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         """
         # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
         # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by = _sorter_from_list(sorters)
+        self.order_by = Sorter.sorter_from_list(sorters)
         return self
 
     def sort_batches(self, batch_list: List[Batch]) -> None:
@@ -773,7 +715,7 @@ class Datasource(
                         raise ValueError(
                             '"order_by" list cannot contain an empty string'
                         )
-                    order_by_sorters.append(_sorter_from_str(sorter))
+                    order_by_sorters.append(Sorter.sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
                     reverse: Optional[Any] = sorter.get("reverse")

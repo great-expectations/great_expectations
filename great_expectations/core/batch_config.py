@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations.compatibility import pydantic
 
-# if we move this import into the TYPE_CHECKING block, we need to provide the
+# if we move these imports into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
 from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
+from great_expectations.core.sorters import Sorter  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
@@ -25,6 +26,7 @@ class BatchConfig(pydantic.BaseModel):
     id: Optional[str] = None
     name: str
     partitioner: Optional[Partitioner] = None
+    sorters: List[Sorter]
 
     # private attributes that must be set immediately after instantiation
     _data_asset: DataAsset = pydantic.PrivateAttr()
