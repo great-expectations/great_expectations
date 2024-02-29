@@ -2390,11 +2390,17 @@ class DataContextConfig(BaseYamlConfig):
         super().__init__(commented_map=commented_map)
 
     def _init_stores(self, store_configs: dict | None) -> dict:
+        # If missing all, use all defaults
         if not store_configs:
             return DataContextConfigDefaults.DEFAULT_STORES.value
 
+        # If missing individual stores, just add what is missing
         configured_stores = {config["class_name"] for config in store_configs.values()}
         for name, config in DataContextConfigDefaults.DEFAULT_STORES.value.items():
+            if not isinstance(config, dict):
+                raise ValueError(
+                    "Store defaults must be a mapping of default names to default dictionary configurations."
+                )
             if config["class_name"] not in configured_stores:
                 store_configs[name] = config
 
