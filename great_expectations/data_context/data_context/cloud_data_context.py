@@ -271,6 +271,7 @@ class CloudDataContext(SerializableDataContext):
     def _prepare_v1_config(cls, config: dict) -> dict:
         # Both notebooks and concurrency are no longer top-level keys in V1
         config.pop("notebooks", None)
+        config.pop("concurrency", None)
 
         # FluentDatasources are nested under the "datasources" key and need to be separated
         # to prevent downstream issues
