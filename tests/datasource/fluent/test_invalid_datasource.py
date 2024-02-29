@@ -102,15 +102,11 @@ class InvalidDSFactory(Protocol):
 @pytest.fixture
 def invalid_datasource_factory() -> InvalidDSFactory:
     def _invalid_ds_fct(config: dict) -> InvalidDatasource:
-        ds_type: type[Datasource] = _SourceFactories.type_lookup[config["type"]]
         try:
+            ds_type: type[Datasource] = _SourceFactories.type_lookup[config["type"]]
             ds_type(**config)
-        except pydantic.ValidationError as config_error:
+        except (pydantic.ValidationError, LookupError) as config_error:
             return InvalidDatasource(**config, config_error=config_error)
-        except KeyError as ke:
-            raise ValueError(
-                f"Asset TypeLookup failure instead of pydantic config error: {config!r}"
-            ) from ke
         raise ValueError("The Datasource was valid")
 
     return _invalid_ds_fct
@@ -153,6 +149,24 @@ def invalid_datasource_factory() -> InvalidDSFactory:
                 ],
             },
             id="extra field",
+        ),
+        pytest.param(
+            {
+                "name": "my pandas",
+                "type": "pandas_filesystem",
+                "assets": [
+                    {"name": "my_asset", "type": "csv"},
+                    {"name": "invalid_asset_type", "type": "whoops"},
+                ],
+            },
+            id="pandas asset lookup error",
+        ),
+        pytest.param(
+            {
+                "name": "who knows",
+                "type": "whoops",
+            },
+            id="datasource type lookup error",
         ),
     ],
 )
