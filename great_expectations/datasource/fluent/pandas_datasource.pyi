@@ -81,7 +81,7 @@ class _PandasDataAsset(DataAsset):
         options: Optional[BatchRequestOptions] = ...,
         batch_slice: Optional[BatchSlice] = ...,
         partitioner: Optional[Partitioner] = ...,
-        sorter: Optional[Sorter] = ...,
+        sorter: Optional[List[Sorter]] = ...,
     ) -> BatchRequest: ...
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...

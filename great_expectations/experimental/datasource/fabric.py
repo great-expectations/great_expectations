@@ -27,8 +27,10 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import FabricBatchSpec
+from great_expectations.core.partitioners import Partitioner
 from great_expectations.core.sorters import Sorter
-from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
@@ -138,21 +140,32 @@ class _PowerBIAsset(DataAsset):
     @override
     def build_batch_request(
         self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
         sorters: Optional[List[Sorter]] = None,
-    ) -> BatchRequest:  # type: ignore[override]
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if not options:
+            options = {}
         if not sorters:
             sorters = []
+        if partitioner is not None:
+            raise ValueError(
+                "partitioner is not currently supported and must be None for this DataAsset."
+            )
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
-            options={},
+            batch_slice=batch_slice,
+            options=options,
             sorters=sorters,
+            partitioner=None,
         )
 
     @override
