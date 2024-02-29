@@ -56,15 +56,15 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                     "class_name": "TupleFilesystemStoreBackend",
                 },
             },
-        },
-        "profiler_store": {
-            "class_name": "ProfilerStore",
-        },
-        "validation_config_store": {
-            "class_name": "ValidationConfigStore",
-        },
-        "validations_store": {
-            "class_name": "ValidationsStore",
+            "profiler_store": {
+                "class_name": "ProfilerStore",
+            },
+            "validation_config_store": {
+                "class_name": "ValidationConfigStore",
+            },
+            "validations_store": {
+                "class_name": "ValidationsStore",
+            },
         },
     }
 
