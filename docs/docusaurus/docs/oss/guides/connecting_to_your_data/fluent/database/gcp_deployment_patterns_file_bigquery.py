@@ -124,6 +124,7 @@ pop_stores = [
     "expectations_store",
     "expectations_GCS_store",
     "profiler_store",
+    "validation_config_store",
 ]
 for store in pop_stores:
     stores.pop(store)
