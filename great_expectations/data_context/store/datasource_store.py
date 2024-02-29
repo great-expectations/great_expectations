@@ -132,6 +132,7 @@ class DatasourceStore(Store):
                         " Check `my_datasource.config_error` attribute for more details.",
                         GxInvalidDatasourceWarning,
                     )
+                    # Any fields that are not part of the schema are ignored
                     return InvalidDatasource(config_error=config_error, **value)
             return self._schema.load(value)
         else:
