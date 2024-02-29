@@ -15,17 +15,23 @@
 
 ## About GX OSS
 
-With GX OSS, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are unit tests for your data. Not only that, but GX OSS also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use GX OSS to:
+GX OSS is a data quality platform designed by and for data engineers. It helps you surface issues quickly and clearly while also making it easier to collaborate with nontechnical stakeholders.
 
-- Test data they ingest from other teams or vendors and ensure its validity.
-- Validate data they transform as a step in their data pipeline to ensure the correctness of transformations.
-- Prevent data quality issues from slipping into data products.
+Its powerful technical tools start with Expectations: expressive and extensible unit tests for your data. As you create and run tests, your test definitions and results are automatically rendered in human-readable plain-language Data Docs. 
+
+Expectations and Data Docs create verifiability and clarity throughout your data quality process. That means you can spend less time translating your work for others, and more time achieving real mutual understanding across your entire organization.
+
+Data science and data engineering teams use GX OSS to:
+
+- Validate data they ingest from other teams or vendors.
+- Test data for correctness post-transfomation.
+- Proactively prevent low-quality data from moving downstream and becoming visible in data products and applications.
 - Streamline knowledge capture from subject-matter experts and make implicit knowledge explicit.
 - Develop rich, shared documentation of their data.
 
-To learn more about how data teams are using GX OSS, see [Case studies from Great Expectations](https://greatexpectations.io/case-studies/).
+Learn more about how data teams are using GX OSS in [case studies from Great Expectations](https://greatexpectations.io/case-studies/).
 
-See [Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to our pipeline data quality testing philosophy.
+See [Down with pipeline debt](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to our pipeline data quality testing philosophy.
 
 ## Our upcoming 1.0 release
 
