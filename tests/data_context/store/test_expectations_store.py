@@ -247,7 +247,7 @@ def test_get_key_in_non_cloud_mode(empty_data_context):
     suite = ExpectationSuite(name=name)
     key = empty_data_context.expectations_store.get_key(name=suite.name, id=suite.id)
     assert isinstance(key, ExpectationSuiteIdentifier)
-    assert key.expectation_suite_name == name
+    assert key.name == name
 
 
 @pytest.mark.unit

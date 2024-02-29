@@ -497,7 +497,7 @@ def test_add_expectation_suite_success(
                 kwargs={"column": "x", "value_set": [1, 2, 4]},
             ),
         ],
-        expectation_suite_name="default",
+        name="default",
         meta={"great_expectations_version": "0.15.44"},
     )
 
@@ -595,7 +595,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
     kwargs_lookup = [
         # can't instantiate Suite in parameters since it requires a data context
         {
-            "expectation_suite_name": "default",
+            "name": "default",
             "expectations": [
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_set",
@@ -612,7 +612,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
                         kwargs={"column": "x", "value_set": [1, 2, 4]},
                     ),
                 ],
-                expectation_suite_name="default",
+                name="default",
                 meta={"great_expectations_version": "0.15.44"},
             ),
         },
