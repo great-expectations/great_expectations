@@ -58,6 +58,7 @@ class TestPublicMethodsAreOverridden:
 
     @pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
     def test_datasource_methods(self, base_ds_method_name: str):
+        """Ensure that InvalidDatasource overrides the applicable Datasource methods."""
         print(
             f"InvalidDatasource.__dict__ attributes\n{pf(InvalidDatasource.__dict__)}"
         )
@@ -68,6 +69,7 @@ class TestPublicMethodsAreOverridden:
 
     @pytest.mark.parametrize("base_ds_method_name", DATA_ASSET_PUBLIC_METHODS)
     def test_data_asset(self, base_ds_method_name: str):
+        """Ensure that InvalidAsset overrides the applicable DataAsset methods."""
         print(f"InvalidAsset.__dict__ attributes\n{pf(InvalidAsset.__dict__)}")
         invalid_da_public_attributes = [
             m for m in InvalidAsset.__dict__.keys() if not m.startswith("_")

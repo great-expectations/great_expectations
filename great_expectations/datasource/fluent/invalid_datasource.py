@@ -16,6 +16,7 @@ from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTy
 
 if TYPE_CHECKING:
     from great_expectations.core.batch_config import BatchConfig
+    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.datasource.fluent.interfaces import Batch
 
@@ -84,6 +85,12 @@ class InvalidAsset(DataAsset):
 
     @override
     def sort_batches(self, batch_list: List[Batch]) -> None:
+        self._raise_type_error()
+
+    @override
+    def get_batch_request_options_keys(
+        self, partitioner: Partitioner | None = None
+    ) -> NoReturn:
         self._raise_type_error()
 
 
