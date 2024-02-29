@@ -342,7 +342,6 @@ def test_cloud_context_delete_datasource(
         pytest.param(
             {"type": "not_a_real_datasource_type", "foo": "bar"},
             id="invalid_type",
-            marks=pytest.mark.skip(reason="Not implemented"),
         ),
         pytest.param(
             {"type": "postgres", "connection_string": "postmalone+pyscopg2://"},

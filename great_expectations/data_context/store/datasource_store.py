@@ -121,16 +121,22 @@ class DatasourceStore(Store):
             return value
         elif isinstance(value, dict):
             # presence of a 'type' field means it's a fluent datasource
-            type_ = value.get("type")
+            type_: str | None = value.get("type")
             if type_:
-                datasource_model = _SourceFactories.type_lookup.get(type_)
-                if not datasource_model:
-                    raise LookupError(f"Unknown Datasource 'type': '{type_}'")
                 try:
+                    datasource_model = _SourceFactories.type_lookup[type_]
                     return datasource_model(**value)
+                except LookupError as lookup_error:
+                    warnings.warn(
+                        f"Datasource {value.get('name', '')} is invalid due to and unknown type: {type_}."
+                        " Check `my_datasource.config_error` attribute for more details.",
+                        GxInvalidDatasourceWarning,
+                    )
+                    return InvalidDatasource(config_error=lookup_error, **value)
                 except PydanticValidationError as config_error:
                     warnings.warn(
-                        f"Datasource {value.get('name', '')} configuration is invalid. Check `my_datasource.config_error` attribute for more details.",
+                        f"Datasource {value.get('name', '')} configuration is invalid."
+                        " Check `my_datasource.config_error` attribute for more details.",
                         GxInvalidDatasourceWarning,
                     )
                     return InvalidDatasource(config_error=config_error, **value)

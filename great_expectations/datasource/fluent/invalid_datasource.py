@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, ClassVar, List, NoReturn, Type, overload
+from typing import TYPE_CHECKING, Any, ClassVar, List, NoReturn, Type, Union, overload
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
@@ -127,7 +127,7 @@ class InvalidDatasource(Datasource):
     _type_lookup: ClassVar[TypeLookup] = InvalidAssetTypeLookup()
 
     type: str = "invalid"
-    config_error: pydantic.ValidationError = Field(
+    config_error: Union[pydantic.ValidationError, LookupError] = Field(
         ..., description="The error that caused the Datasource to be invalid."
     )
     assets: List[InvalidAsset] = []
@@ -137,6 +137,7 @@ class InvalidDatasource(Datasource):
         arbitrary_types_allowed = True
         json_encoders = {
             pydantic.ValidationError: lambda v: v.errors(),
+            LookupError: lambda v: repr(v),
         }
 
     @override
