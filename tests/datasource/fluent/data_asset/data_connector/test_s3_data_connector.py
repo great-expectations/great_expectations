@@ -970,7 +970,7 @@ def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
     )
     context.validations_store_name = "validations_S3_store"
     context.expectations_store_name = "expectations_S3_store"
-    assert len(context.stores) == 7
+    assert len(context.stores) == 8
     assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
 
     datasource = context.sources.add_or_update_pandas_s3(
@@ -1053,7 +1053,7 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
     )
     context.validations_store_name = "validations_S3_store"
     context.expectations_store_name = "expectations_S3_store"
-    assert len(context.stores) == 7
+    assert len(context.stores) == 8
     assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
 
     datasource = context.sources.add_or_update_pandas_s3(
