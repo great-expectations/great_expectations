@@ -63,19 +63,19 @@ export default function WasThisHelpful(){
             <section className={styles.feedbackCard}>
                 <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
                 <div className={styles.feedbackCardActions}>
-                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
-                    <button className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={handleNegativeFeedbackReaction}>No</button>
+                    <button disabled={feedbackSent} className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
+                    <button disabled={feedbackSent} className={feedbackSent ? styles.inactiveFeedbackButton : styles.feedbackButton} onClick={handleNegativeFeedbackReaction}>No</button>
                 </div>
             </section>
 
             {isOpen && <>
                 <div className={styles.overlay} onClick={dismissFeedbackModal}/>
-                <div className={styles.modal}>
-                    <div className={styles.modalHeader}>
+                <section className={styles.modal}>
+                    <section className={styles.modalHeader}>
                         <h5 className={styles.modalHeaderTitle}>Tell us more</h5>
                         <img src={closeImg} className={styles.modalHeaderCloseButton}
                              alt="Close icon" onClick={dismissFeedbackModal}/>
-                    </div>
+                    </section>
 
                     <form onSubmit={sendReview} className={styles.modalContent}>
 
@@ -120,9 +120,9 @@ export default function WasThisHelpful(){
                                 us better identify the problem and determine a solution."
                             />
                         </div>
-                        <input type="submit" className={formData.description ? styles.submitButton : styles.inactiveSubmitButton} value="Submit"/>
+                        <input type="submit" className={styles.submitButton + ' ' + (formData.description ? styles.submitButtonActive : styles.submitButtonInactive)} value="Submit"/>
                     </form>
-                </div>
+                </section>
             </>}
     </>
 }
