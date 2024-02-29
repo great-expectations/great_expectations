@@ -595,7 +595,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
     kwargs_lookup = [
         # can't instantiate Suite in parameters since it requires a data context
         {
-            "name": "default",
+            "expectation_suite_name": "default",
             "expectations": [
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_set",
@@ -631,7 +631,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
 
     suite = context.add_or_update_expectation_suite(**kwargs)
 
-    assert suite.expectation_suite_name == expectation_suite_name
+    assert suite.name == expectation_suite_name
     assert suite.expectation_configurations == expectations
     assert suite.meta == meta
     assert context.expectations_store.save_count == 1
