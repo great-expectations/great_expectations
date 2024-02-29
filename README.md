@@ -17,7 +17,7 @@
 
 GX OSS is a data quality platform designed by and for data engineers. It helps you surface issues quickly and clearly while also making it easier to collaborate with nontechnical stakeholders.
 
-Its powerful technical tools start with Expectations: expressive and extensible unit tests for your data. As you create and run tests, your test definitions and results are automatically rendered in human-readable plain-language Data Docs. 
+Its powerful technical tools start with Expectations: expressive and extensible unit tests for your data. As you create and run tests, your test definitions and results are automatically rendered in human-readable plain-language Data Docs.
 
 Expectations and Data Docs create verifiability and clarity throughout your data quality process. That means you can spend less time translating your work for others, and more time achieving real mutual understanding across your entire organization.
 
