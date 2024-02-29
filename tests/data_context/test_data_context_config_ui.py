@@ -221,6 +221,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
                 "prefix": "validations",
             },
         },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "validation_configs",
+            },
+        },
         "checkpoint_S3_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
@@ -348,6 +356,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "bucket": "custom_validations_store_bucket_name",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "custom_validations_store_prefix",
+            },
+        },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "bucket": "custom_default_bucket_name",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "validation_configs",
             },
         },
         "custom_checkpoint_S3_store_name": {
@@ -589,6 +605,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
                 "prefix": "validations",
             },
         },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "project": "my_default_project",
+                "class_name": "TupleGCSStoreBackend",
+                "prefix": "validation_configs",
+            },
+        },
         "checkpoint_GCS_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
@@ -729,6 +754,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_validations_store_prefix",
             },
         },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "bucket": "custom_default_bucket_name",
+                "class_name": "TupleGCSStoreBackend",
+                "prefix": "validation_configs",
+                "project": "custom_default_project_name",
+            },
+        },
         "custom_checkpoint_GCS_store_name": {
             "class_name": "CheckpointStore",
             "store_backend": {
@@ -859,6 +893,20 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                     "username": "ge_tutorials",
                     "password": "ge_tutorials",
                     "database": "ge_tutorials",
+                },
+            },
+        },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "class_name": "DatabaseStoreBackend",
+                "credentials": {
+                    "database": "ge_tutorials",
+                    "drivername": "postgresql",
+                    "host": "localhost",
+                    "password": "ge_tutorials",
+                    "port": "65432",
+                    "username": "ge_tutorials",
                 },
             },
         },
@@ -1040,6 +1088,20 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                     "password": "custom_validations_store_password",
                     "port": "custom_validations_store_port",
                     "username": "custom_validations_store_username",
+                },
+            },
+        },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "class_name": "DatabaseStoreBackend",
+                "credentials": {
+                    "database": "ge_tutorials",
+                    "drivername": "postgresql",
+                    "host": "localhost",
+                    "password": "ge_tutorials",
+                    "port": "65432",
+                    "username": "ge_tutorials",
                 },
             },
         },
@@ -1287,6 +1349,13 @@ def test_override_general_defaults(
                 "prefix": "REPLACE_ME",
             },
         },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "base_directory": "validation_configs/",
+                "class_name": "TupleFilesystemStoreBackend",
+            },
+        },
         "checkpoint_S3_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
@@ -1431,6 +1500,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "validations",
+            },
+        },
+        "validation_config_store": {
+            "class_name": "ValidationConfigStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "validation_configs",
             },
         },
         "checkpoint_S3_store": {
@@ -1598,7 +1675,7 @@ def test_data_context_config_defaults():
         "plugins_directory": None,
         "profiler_store_name": None,
         "progress_bars": None,
-        "stores": {},
+        "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
         "validation_operators": None,
         "validations_store_name": None,
     }
