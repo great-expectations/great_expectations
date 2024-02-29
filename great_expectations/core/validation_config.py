@@ -37,7 +37,11 @@ class ValidationConfig(BaseModel):
     def _validate_suite(cls, v):
         if isinstance(v, dict):
             return ExpectationSuite(**expectationSuiteSchema.load(v))
-        return v
+        elif isinstance(v, ExpectationSuite):
+            return v
+        raise ValueError(
+            "Suite must be a dictionary (if being deserialized) or an ExpectationSuite object."
+        )
 
     @public_api
     def run(self):
