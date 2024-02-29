@@ -196,3 +196,27 @@ def test_validate_expectation_suite(
         "unsuccessful_expectations": 1,
         "success_percent": 50.0,
     }
+
+
+@pytest.mark.parametrize(
+    ["parameter", "expected"],
+    [
+        (["start", "stop", "continue"], True),
+        (["start", "stop"], False),
+    ],
+)
+@pytest.mark.unit
+def test_validate_expectation_suite_evaluation_parameters(
+    validator: Validator,
+    parameter: list[str],
+    expected: bool,
+):
+    suite = ExpectationSuite("test_suite")
+    expectation = gxe.ExpectColumnValuesToBeInSet(
+        column="event_type",
+        value_set={"$PARAMETER": "my_parameter"},
+    )
+    suite.add_expectation_configuration(expectation.configuration)
+    result = validator.validate_expectation_suite(suite, {"my_parameter": parameter})
+
+    assert result.success == expected
