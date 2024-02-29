@@ -1681,48 +1681,54 @@ class DataContextConfigDefaults(enum.Enum):
             "action_list": DEFAULT_ACTION_LIST,
         }
     }
-    DEFAULT_STORES = {
-        DEFAULT_EXPECTATIONS_STORE_NAME: {
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
-        },
-        DEFAULT_VALIDATIONS_STORE_NAME: {
-            "class_name": "ValidationsStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
-        },
-        DEFAULT_VALIDATION_CONFIG_STORE_NAME: {
-            "class_name": "ValidationConfigStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
-        },
-        DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
-            "class_name": "EvaluationParameterStore"
-        },
-        DEFAULT_CHECKPOINT_STORE_NAME: {
-            "class_name": "CheckpointStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "suppress_store_backend_id": True,
-                "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
-        },
-        DEFAULT_PROFILER_STORE_NAME: {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "suppress_store_backend_id": True,
-                "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
+
+    DEFAULT_EXPECTATIONS_STORE = {
+        "class_name": "ExpectationsStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
         },
     }
+    DEFAULT_VALIDATIONS_STORE = {
+        "class_name": "ValidationsStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_VALIDATION_CONFIG_STORE = {
+        "class_name": "ValidationConfigStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_EVALUATION_PARAMETER_STORE = {"class_name": "EvaluationParameterStore"}
+    DEFAULT_CHECKPOINT_STORE = {
+        "class_name": "CheckpointStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "suppress_store_backend_id": True,
+            "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_PROFILER_STORE = {
+        "class_name": "ProfilerStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "suppress_store_backend_id": True,
+            "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_STORES = {
+        DEFAULT_EXPECTATIONS_STORE_NAME: DEFAULT_EXPECTATIONS_STORE,
+        DEFAULT_VALIDATIONS_STORE_NAME: DEFAULT_VALIDATIONS_STORE,
+        DEFAULT_VALIDATION_CONFIG_STORE_NAME: DEFAULT_VALIDATION_CONFIG_STORE,
+        DEFAULT_EVALUATION_PARAMETER_STORE_NAME: DEFAULT_EVALUATION_PARAMETER_STORE,
+        DEFAULT_CHECKPOINT_STORE_NAME: DEFAULT_CHECKPOINT_STORE,
+        DEFAULT_PROFILER_STORE_NAME: DEFAULT_PROFILER_STORE,
+    }
+
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
             "class_name": "SiteBuilder",
@@ -2323,7 +2329,7 @@ class DataContextConfig(BaseYamlConfig):
         self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
         self.validation_operators = validation_operators
-        self.stores = stores or {}
+        self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
@@ -2343,6 +2349,17 @@ class DataContextConfig(BaseYamlConfig):
         self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
+
+    def _init_stores(self, store_configs: dict | None) -> dict:
+        if not store_configs:
+            return DataContextConfigDefaults.DEFAULT_STORES.value
+
+        configured_stores = {config["class_name"] for config in store_configs.values()}
+        for name, config in DataContextConfigDefaults.DEFAULT_STORES.value.items():
+            if config["class_name"] not in configured_stores:
+                store_configs[name] = config
+
+        return store_configs
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
