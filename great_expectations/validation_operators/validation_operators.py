@@ -375,7 +375,7 @@ class ActionListValidationOperator(ValidationOperator):
                 )
             else:
                 expectation_suite_identifier = ExpectationSuiteIdentifier(
-                    expectation_suite_name=batch._expectation_suite.name
+                    name=batch._expectation_suite.name
                 )
                 validation_result_id = ValidationResultIdentifier(
                     batch_identifier=batch_identifier,
