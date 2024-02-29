@@ -189,7 +189,7 @@ def test_expectation_suite_validation_result_returns_expected_shape():
                         **{
                             "meta": {},
                             "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
-                            "ge_cloud_id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
+                            "id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
                             "kwargs": {
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
                                 "mostly": 0.95,
@@ -222,7 +222,7 @@ def test_expectation_suite_validation_result_returns_expected_shape():
                     "expectation_config": ExpectationConfiguration(
                         **{
                             "meta": {},
-                            "ge_cloud_id": "19c0e80c-d676-4b01-a4a3-2a568552d368",
+                            "id": "19c0e80c-d676-4b01-a4a3-2a568552d368",
                             "kwargs": {
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
                                 "column": "trip_distance",

@@ -947,19 +947,19 @@ class StoreValidationResultAction(ValidationAction):
                 )
             )
 
-        checkpoint_ge_cloud_id = None
+        checkpoint_id = None
         if self._using_cloud_context and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.id
+            checkpoint_id = checkpoint_identifier.id
 
-        expectation_suite_ge_cloud_id = None
+        expectation_suite_id = None
         if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = expectation_suite_identifier.id
+            expectation_suite_id = expectation_suite_identifier.id
 
         return self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
-            checkpoint_id=checkpoint_ge_cloud_id,
-            expectation_suite_id=expectation_suite_ge_cloud_id,
+            checkpoint_id=checkpoint_id,
+            expectation_suite_id=expectation_suite_id,
         )
 
     def _run_cloud_post_process_resource_ref(
@@ -970,9 +970,9 @@ class StoreValidationResultAction(ValidationAction):
         ],
     ):
         store_set_return_value: GXCloudResourceRef
-        new_ge_cloud_id = gx_cloud_resource_ref.id
+        new_id = gx_cloud_resource_ref.id
         # ValidationResultIdentifier has no `.id`
-        validation_result_suite_identifier.id = new_ge_cloud_id  # type: ignore[union-attr]
+        validation_result_suite_identifier.id = new_id  # type: ignore[union-attr]
         return gx_cloud_resource_ref
 
 

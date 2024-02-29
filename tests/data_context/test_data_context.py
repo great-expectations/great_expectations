@@ -835,6 +835,7 @@ gx/
         data_docs/
         validations/
             .ge_store_backend_id
+    validation_configs/
 """
     )
 
@@ -862,6 +863,7 @@ gx/
         data_docs/
         validations/
             .ge_store_backend_id
+    validation_configs/
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
@@ -963,6 +965,7 @@ def test_scaffold_directories(tmp_path_factory):
         "expectations",
         ".gitignore",
         "uncommitted",
+        "validation_configs",
     }
     assert set(
         os.listdir(os.path.join(empty_directory, "uncommitted"))  # noqa: PTH118

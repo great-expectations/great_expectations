@@ -7,6 +7,7 @@ import pytest
 import great_expectations.expectations as gxe
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.partitioners import PartitionerColumnValue
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -75,7 +76,8 @@ def batch_config(
 def batch_config_with_event_type_partitioner(
     fds_data_asset_with_event_type_partitioner: DataAsset,
 ) -> BatchConfig:
-    batch_config = BatchConfig(name="test_batch_config")
+    partitioner = PartitionerColumnValue(column_name="event_type")
+    batch_config = BatchConfig(name="test_batch_config", partitioner=partitioner)
     batch_config.set_data_asset(fds_data_asset_with_event_type_partitioner)
     return batch_config
 
