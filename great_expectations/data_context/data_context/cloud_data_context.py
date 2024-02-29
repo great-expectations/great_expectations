@@ -266,6 +266,7 @@ class CloudDataContext(SerializableDataContext):
         )
         config = response.json()
         config.pop("notebooks", None)
+        config.pop("concurrency", None)
         config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
