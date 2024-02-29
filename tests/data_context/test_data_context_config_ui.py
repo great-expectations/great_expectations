@@ -1351,10 +1351,6 @@ def test_override_general_defaults(
         },
         "validation_config_store": {
             "class_name": "ValidationConfigStore",
-            "store_backend": {
-                "base_directory": "validation_configs/",
-                "class_name": "TupleFilesystemStoreBackend",
-            },
         },
         "checkpoint_S3_store": {
             "class_name": "CheckpointStore",
