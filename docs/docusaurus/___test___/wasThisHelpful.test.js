@@ -34,38 +34,26 @@ describe('"Was this Helpful?" section', () => {
     });
 
     test("Buttons should be disabled when 'No' button has been clicked", async () => {
-        render(
-            <WasThisHelpful/>
-        );
-        await userEvent.click(screen.getByText('No'));
+        await selectingNoInWasThisHelpful();
 
         expect(screen.getByText('Yes')).toBeDisabled();
         expect(screen.getByText('No')).toBeDisabled();
     });
 
     test("Feedback Modal should pop-up when 'No' button has been clicked", async () => {
-        render(
-            <WasThisHelpful/>
-        );
-        await userEvent.click(screen.getByText('No'));
+        await selectingNoInWasThisHelpful();
 
         expect(screen.getByTestId('feedback-modal')).toBeInTheDocument();
     });
 
     test("Submit button in Feedback Modal is disabled when description is blank", async () => {
-        render(
-            <WasThisHelpful/>
-        );
-        await userEvent.click(screen.getByText('No'));
+        await selectingNoInWasThisHelpful();
 
         expect(screen.getByText("Submit")).toBeDisabled();
     });
 
     test("Submit button in Feedback Modal is enabled when description input is filled", async () => {
-        render(
-            <WasThisHelpful/>
-        );
-        await userEvent.click(screen.getByText('No'));
+        await selectingNoInWasThisHelpful();
 
         const descriptionBox = screen.getByTestId('description-textbox');
 
@@ -75,10 +63,7 @@ describe('"Was this Helpful?" section', () => {
     });
 
     test("", async () => {
-        render(
-            <WasThisHelpful/>
-        );
-        await userEvent.click(screen.getByText('No'));
+        await selectingNoInWasThisHelpful();
 
         const descriptionBox = screen.getByTestId('description-textbox');
 
@@ -86,5 +71,12 @@ describe('"Was this Helpful?" section', () => {
 
         expect(screen.getByText("Submit")).not.toBeDisabled();
     });
+
+    async function selectingNoInWasThisHelpful() {
+        render(
+            <WasThisHelpful/>
+        );
+        await userEvent.click(screen.getByText('No'));
+    }
 
 });
