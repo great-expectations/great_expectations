@@ -74,7 +74,7 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
 
         assert mock_update.call_args[0][1] == {
             "expectation_suite_name": "test_suite",
-            "ge_cloud_id": None,
+            "id": None,
             "data_asset_type": None,
             "expectations": [
                 {

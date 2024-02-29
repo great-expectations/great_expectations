@@ -1067,7 +1067,7 @@ class Validator:
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """Remove an ExpectationConfiguration from the ExpectationSuite associated with the Validator.
 
@@ -1078,13 +1078,13 @@ class Validator:
                 - 'success' to match based on all configuration parameters that influence whether an expectation succeeds on a given batch of data
                 - 'runtime' to match based on all configuration parameters.
             remove_multiple_matches: If True, will remove multiple matching expectations.
-            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+            id: Great Expectations Cloud id for an Expectation.
 
         Returns:
             The list of deleted ExpectationConfigurations.
 
         Raises:
-            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            TypeError: Must provide either expectation_configuration or id.
             ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
 
@@ -1092,7 +1092,7 @@ class Validator:
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             remove_multiple_matches=remove_multiple_matches,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
     def discard_failing_expectations(self) -> None:
@@ -1296,7 +1296,7 @@ class Validator:
             )
             if self.cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
-                    ge_cloud_id=expectation_suite.ge_cloud_id
+                    id=expectation_suite.id
                 )
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
@@ -1720,7 +1720,7 @@ class Validator:
         for batch in self.batch_cache.values():
             validation = CheckpointValidationConfig(
                 expectation_suite_name=self.expectation_suite_name,
-                expectation_suite_ge_cloud_id=self.expectation_suite.ge_cloud_id,
+                expectation_suite_id=self.expectation_suite.id,
                 batch_request=batch.batch_request,
             )
             validations.append(validation)

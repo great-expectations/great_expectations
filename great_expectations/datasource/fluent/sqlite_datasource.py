@@ -16,13 +16,16 @@ from typing import (
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import (
+    PartitionerConvertedDatetime,
+)
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
-    SqlPartitioner,
+    SqlitePartitionerConvertedDateTime,
     _PartitionerOneColumnOneParam,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
@@ -31,7 +34,6 @@ from great_expectations.datasource.fluent.sql_datasource import (
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    from typing_extensions import Self
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -100,38 +102,26 @@ class SqliteDsn(pydantic.AnyUrl):
     host_required = False
 
 
-SqlitePartitioner = Union[SqlPartitioner, PartitionerConvertedDateTime]
+class SqliteTableAsset(SqlTableAsset):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the Sqlite specific partitioner
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
 
-
-class _SQLiteAssetMixin:
-    @public_api
-    def add_partitioner_converted_datetime(
-        self: Self, column_name: str, date_format_string: str
-    ) -> Self:
-        """Associates a converted datetime partitioner with this sqlite data asset.
-        Args:
-            column_name: The column name of the date column where year and month will be parsed out.
-            date_format_string: Format for converting string representation of datetime to actual datetime object.
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_partitioner(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            PartitionerConvertedDateTime(
-                method_name="partition_on_converted_datetime",
-                column_name=column_name,
-                date_format_string=date_format_string,
-            )
-        )
-
-
-class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
     type: Literal["table"] = "table"
-    partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
 
-class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
+class SqliteQueryAsset(SqlQueryAsset):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the  Sqlite specific partitioner
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
+
     type: Literal["query"] = "query"
-    partitioner: Optional[SqlitePartitioner] = None  # type: ignore[assignment]  # override superclass type
 
 
 @public_api

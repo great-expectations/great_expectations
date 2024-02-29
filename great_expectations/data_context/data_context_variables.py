@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store import DataContextStore
     from great_expectations.data_context.types.base import (
         AnonymizedUsageStatisticsConfig,
-        ConcurrencyConfig,
         DataContextConfig,
         IncludeRenderedContentConfig,
         ProgressBarsConfig,
@@ -53,7 +52,6 @@ class DataContextVariableSchema(str, enum.Enum):
     DATA_DOCS_SITES = "data_docs_sites"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
     ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
-    CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
     INCLUDE_RENDERED_CONTENT = "include_rendered_content"
 
@@ -248,17 +246,6 @@ class DataContextVariables(ABC):
         self._set(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             anonymous_usage_statistics,
-        )
-
-    @property
-    def concurrency(self) -> Optional[ConcurrencyConfig]:
-        return self._get(DataContextVariableSchema.CONCURRENCY)
-
-    @concurrency.setter
-    def concurrency(self, concurrency: ConcurrencyConfig) -> None:
-        self._set(
-            DataContextVariableSchema.CONCURRENCY,
-            concurrency,
         )
 
     @property
