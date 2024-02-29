@@ -264,10 +264,20 @@ class CloudDataContext(SerializableDataContext):
         response = cls._request_cloud_backend(
             cloud_config=cloud_config, uri="data-context-configuration"
         )
-        config = response.json()
-        config.pop("notebooks", None)
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
+        config = cls._prepare_v1_config(config=response.json())
         return DataContextConfig(**config)
+
+    @classmethod
+    def _prepare_v1_config(cls, config: dict) -> dict:
+        # Both notebooks and concurrency are no longer top-level keys in V1
+        config.pop("notebooks", None)
+        config.pop("concurrency", None)
+
+        # FluentDatasources are nested under the "datasources" key and need to be separated
+        # to prevent downstream issues
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
+
+        return config
 
     @classmethod
     def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
