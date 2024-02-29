@@ -526,7 +526,6 @@ class Datasource(
         """
         logger.debug(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
-        # TODO: 2024-2-22 - (GG:kilo59) - raise a more informative error if the asset type is not found
         asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
         if asset_type is type(data_asset):
