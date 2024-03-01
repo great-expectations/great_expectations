@@ -44,6 +44,7 @@ if TYPE_CHECKING:
         ValidationsStore,
     )
     from great_expectations.data_context.types.base import DataContextConfig
+    from great_expectations.datasource.fluent.sources import _SourceFactories
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
@@ -115,6 +116,14 @@ class ProjectManager:
                 + "Please call `get_context()` first, then try your action again."
             )
         return self._project.evaluation_parameter_store
+
+    def get_sources(self) -> _SourceFactories:
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `get_context()` first, then try your action again."
+            )
+        return self._project.sources
 
     def _build_context(  # noqa: PLR0913
         self,
