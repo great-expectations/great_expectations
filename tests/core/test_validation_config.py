@@ -37,7 +37,7 @@ def ds_asset_batch_config_bundle(
 
 
 @pytest.fixture
-def suite():
+def suite() -> ExpectationSuite:
     suite_name = "my_suite"
     return ExpectationSuite(name=suite_name)
 
@@ -53,10 +53,17 @@ def suite():
         ),
         (None, None, None),
     ],
+    ids=["with_data_ids", "without_data_ids"],
 )
-@pytest.mark.parametrize("suite_id", ["9b35aa4d-7f01-420d-9d45-b45658e60afd", None])
 @pytest.mark.parametrize(
-    "validation_id", ["708bd8b9-1ae4-43e6-8dfc-42ec320aa3db", None]
+    "suite_id",
+    ["9b35aa4d-7f01-420d-9d45-b45658e60afd", None],
+    ids=["with_suite_id", "without_suite_id"],
+)
+@pytest.mark.parametrize(
+    "validation_id",
+    ["708bd8b9-1ae4-43e6-8dfc-42ec320aa3db", None],
+    ids=["with_validation_id", "without_validation_id"],
 )
 def test_validation_config_serialization(
     ds_id: str | None,
@@ -118,6 +125,7 @@ def test_validation_config_serialization(
     assert actual == expected
 
 
+@pytest.mark.unit
 def test_validation_config_deserialization(
     in_memory_runtime_context: EphemeralDataContext,
     ds_asset_batch_config_bundle: tuple[PandasDatasource, CSVAsset, BatchConfig],

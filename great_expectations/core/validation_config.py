@@ -2,8 +2,13 @@ from __future__ import annotations
 
 from typing import Union
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
-from great_expectations.compatibility.pydantic import BaseModel, validator
+from great_expectations.compatibility.pydantic import (
+    BaseModel,
+    ValidationError,
+    validator,
+)
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -33,16 +38,16 @@ def _encode_suite(suite: ExpectationSuite) -> _IdentifierBundle:
 
 
 def _encode_data(data: BatchConfig) -> _EncodedData:
-    parent = data.data_asset
-    grandparent = parent.datasource
+    asset = data.data_asset
+    ds = asset.datasource
     return _EncodedData(
         datasource=_IdentifierBundle(
-            name=grandparent.name,
-            id=grandparent.id,
+            name=ds.name,
+            id=ds.id,
         ),
         asset=_IdentifierBundle(
-            name=parent.name,
-            id=parent.id,
+            name=asset.name,
+            id=asset.id,
         ),
         batch_config=_IdentifierBundle(
             name=data.name,
@@ -65,6 +70,8 @@ class ValidationConfig(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+        # When serialized, the suite and data fields should be encoded as a set of identifiers.
+        # These will be used as foreign keys to retrieve the actual objects from the appropriate stores.
         json_encoders = {
             ExpectationSuite: lambda e: _encode_suite(e),
             BatchConfig: lambda b: _encode_data(b),
@@ -77,6 +84,7 @@ class ValidationConfig(BaseModel):
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
+        # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.
         if isinstance(v, dict):
             return cls._encode_suite(v)
         elif isinstance(v, ExpectationSuite):
@@ -87,6 +95,7 @@ class ValidationConfig(BaseModel):
 
     @validator("data", pre=True)
     def _validate_data(cls, v: dict | BatchConfig):
+        # Input will be a dict of identifiers if being deserialized or a rich type if being constructed by a user.
         if isinstance(v, dict):
             return cls._encode_data(v)
         elif isinstance(v, BatchConfig):
@@ -97,27 +106,52 @@ class ValidationConfig(BaseModel):
 
     @classmethod
     def _encode_suite(cls, suite_dict: dict) -> ExpectationSuite:
-        suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
+        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.
+        try:
+            suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
+        except ValidationError as e:
+            raise e  # TODO: Add context and re-raise
+
         name = suite_identifiers.name
         id = suite_identifiers.id
 
         expectation_store = project_manager.get_expectations_store()
         key = expectation_store.get_key(name=name, id=id)
-        config = expectation_store.get(key)
+
+        try:
+            config = expectation_store.get(key)
+        except gx_exceptions.InvalidKeyError as e:
+            raise e  # TODO: Add context and re-raise
 
         return ExpectationSuite(**expectationSuiteSchema.load(config))
 
     @classmethod
     def _encode_data(cls, data_dict: dict) -> BatchConfig:
-        data_identifiers = _EncodedData.parse_obj(data_dict)
+        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.
+        try:
+            data_identifiers = _EncodedData.parse_obj(data_dict)
+        except ValidationError as e:
+            raise e  # TODO: Add context and re-raise
+
         ds_name = data_identifiers.datasource.name
         asset_name = data_identifiers.asset.name
         batch_config_name = data_identifiers.batch_config.name
 
         datasource_dict = project_manager.get_datasources()
-        ds = datasource_dict[ds_name]
-        asset = ds.get_asset(asset_name)
-        batch_config = asset.get_batch_config(batch_config_name)
+        try:
+            ds = datasource_dict[ds_name]
+        except KeyError as e:
+            raise e  # TODO: Add context and re-raise
+
+        try:
+            asset = ds.get_asset(asset_name)
+        except LookupError as e:
+            raise e  # TODO: Add context and re-raise
+
+        try:
+            batch_config = asset.get_batch_config(batch_config_name)
+        except KeyError as e:
+            raise e  # TODO: Add context and re-raise
 
         return batch_config
 
