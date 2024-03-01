@@ -5339,7 +5339,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         "bobby_columnar_table_multi_batch_quantiles_estimator"
     )
     expected_expectation_suite_quantiles_estimator: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name_quantiles_estimator,
+        name=expectation_suite_name_quantiles_estimator,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
