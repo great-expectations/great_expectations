@@ -2401,9 +2401,13 @@ class DataContextConfig(BaseYamlConfig):
                 raise ValueError(
                     "Store defaults must be a mapping of default names to default dictionary configurations."
                 )
-            if config["class_name"] not in configured_stores:
+            class_name = config["class_name"]
+            if class_name not in configured_stores:
                 # Create ephemeral store config
-                store_configs[name] = {"class_name": config["class_name"]}
+                store_configs[name] = {"class_name": class_name}
+                warnings.warn(
+                    f"Missing store configuration for {class_name}; adding ephemeral default (which will not persist past this session)."
+                )
 
         return store_configs
 
