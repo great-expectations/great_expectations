@@ -59,7 +59,7 @@ def datasource_name(
         _ = context.get_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
 ) -> Iterator[ExpectationSuite]:
@@ -79,7 +79,7 @@ def expectation_suite(
         _ = context.suites.get(name=expectation_suite_name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def validator(
     context: CloudDataContext,
     batch_request: BatchRequest,
