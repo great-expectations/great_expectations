@@ -60,7 +60,11 @@ def validation_config() -> ValidationConfig:
 
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
-def test_add(request, store_fixture: str, validation_config: ValidationConfig):
+def test_add(
+    request: pytest.FixtureRequest,
+    store_fixture: str,
+    validation_config: ValidationConfig,
+):
     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
 
     key = StringKey(key="my_validation")
@@ -120,7 +124,7 @@ def test_add_cloud(
 
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
-def test_get_key(request, store_fixture: str):
+def test_get_key(request: pytest.FixtureRequest, store_fixture: str):
     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
 
     name = "my_validation"
