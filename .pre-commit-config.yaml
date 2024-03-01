@@ -32,6 +32,7 @@ repos:
     hooks:
       - id: prettier
         types_or: [yaml]
+        exclude: tests/data_context/fixtures/bad_yml
   # Github Actions Linter
   # Need to be able to inline ignore errors
   # https://github.com/rhysd/actionlint/issues/237
