@@ -145,8 +145,8 @@ module.exports = {
         },
         {
           type: 'doc',
-          label: 'API',
-          docId: 'reference/api_reference',
+          label: 'GX API',
+          docId: 'reference/api/index',
           position: 'right',
         },
         {
