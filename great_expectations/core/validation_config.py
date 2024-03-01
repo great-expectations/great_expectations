@@ -97,21 +97,25 @@ class ValidationConfig(BaseModel):
 
     @classmethod
     def _encode_suite(cls, suite_dict: dict) -> ExpectationSuite:
-        name = suite_dict["name"]
-        id = suite_dict["id"]
+        suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
+        name = suite_identifiers.name
+        id = suite_identifiers.id
+
         expectation_store = project_manager.get_expectations_store()
         key = expectation_store.get_key(name=name, id=id)
         config = expectation_store.get(key)
+
         return ExpectationSuite(**expectationSuiteSchema.load(config))
 
     @classmethod
     def _encode_data(cls, data_dict: dict) -> BatchConfig:
-        ds_name = data_dict["datasource"]["name"]
-        asset_name = data_dict["asset"]["name"]
-        batch_config_name = data_dict["batch_config"]["name"]
-        sources = project_manager.get_datasources()
+        data_identifiers = _EncodedData.parse_obj(data_dict)
+        ds_name = data_identifiers.datasource.name
+        asset_name = data_identifiers.asset.name
+        batch_config_name = data_identifiers.batch_config.name
 
-        ds = sources[ds_name]
+        datasource_dict = project_manager.get_datasources()
+        ds = datasource_dict[ds_name]
         asset = ds.get_asset(asset_name)
         batch_config = asset.get_batch_config(batch_config_name)
 
