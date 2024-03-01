@@ -339,7 +339,7 @@ class DataAsset:
             if expectation_suite_name is not None:
                 if self._expectation_suite.name != expectation_suite_name:
                     logger.warning(
-                        "Overriding existing name {n1} with new name {n2}".format(
+                        "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
                             n1=self._expectation_suite.name,
                             n2=expectation_suite_name,
                         )
