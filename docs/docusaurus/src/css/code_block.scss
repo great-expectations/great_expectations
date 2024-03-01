@@ -44,29 +44,29 @@ div.theme-code-block {
     & + div {
       position: static;
     }
-
-    // Button group
-    & + div > div {
-      top: calc(var(--ifm-pre-padding) / 2);
-
-      &:hover {
-        opacity: 0.75 !important;
-      }
-
-      button {
-        background: transparent;
-        border: none;
-        opacity: 0.75 !important;
-
-        svg path {
-          fill: var(--code-snippets-title-color);
-        }
-      }
-    }
   }
 
   &.language-bash div:not(:only-child):first-child::before{
     background: url('/img/terminal-input-icon.svg') 0 50% no-repeat;
     width: 1.25em;
+  }
+
+  // Button group
+  .prism-code + div:has(button) {
+    top: calc(var(--ifm-pre-padding) / 2);
+
+    &:hover {
+      opacity: 0.75 !important;
+    }
+
+    button {
+      background: transparent;
+      border: none;
+      opacity: 0.75 !important;
+
+      svg path {
+        fill: var(--code-snippets-title-color);
+      }
+    }
   }
 }
