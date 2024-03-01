@@ -26,6 +26,7 @@ from great_expectations.data_context.data_context_variables import (
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
     GXCloudConfig,
     IncludeRenderedContentConfig,
     ProgressBarsConfig,
@@ -51,19 +52,7 @@ def data_context_config_dict() -> dict:
         "checkpoint_store_name": "checkpoint_store",
         "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
-        "stores": {
-            "expectations_store": {
-                "class_name": "ExpectationsStore",
-                "store_backend": {
-                    "class_name": "TupleFilesystemStoreBackend",
-                    "base_directory": "expectations/",
-                },
-            },
-            "evaluation_parameter_store": {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "EvaluationParameterStore",
-            },
-        },
+        "stores": {},
         "data_docs_sites": {},
         "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
             enabled=True,
@@ -445,23 +434,7 @@ def test_data_context_variables_save_config(
             "config_version": 3.0,
             "data_docs_sites": {},
             "plugins_directory": "plugins/",
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
-                },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-                "checkpoint_store": {"class_name": "CheckpointStore"},
-                "profiler_store": {"class_name": "ProfilerStore"},
-                "validations_store": {"class_name": "ValidationsStore"},
-                "validation_config_store": {"class_name": "ValidationConfigStore"},
-            },
+            "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
             "include_rendered_content": {
                 "expectation_suite": False,
                 "expectation_validation_result": False,
