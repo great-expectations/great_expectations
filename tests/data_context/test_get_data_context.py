@@ -59,7 +59,6 @@ def test_base_context(clear_env_vars):
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "profiler_store": {"class_name": "ProfilerStore"},
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
             "validation_config_store": {"class_name": "ValidationConfigStore"},
@@ -95,8 +94,6 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
                 "class_name": "EvaluationParameterStore"
             },
             "new_validation_result_store": {"class_name": "ValidationsStore"},
-            "validation_config_store": {"class_name": "ValidationConfigStore"},
-            "new_profiler_store": {"class_name": "ProfilerStore"},
         },
         validations_store_name="new_validation_result_store",
         data_docs_sites={},
@@ -139,7 +136,12 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
         datasources={},
-        stores={},
+        stores={
+            "expectations_store": {"class_name": "ExpectationsStore"},
+            "checkpoint_store": {"class_name": "CheckpointStore"},
+            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "validation_result_store": {"class_name": "ValidationsStore"},
+        },
         validations_store_name="validation_result_store",
         data_docs_sites={},
         validation_operators={},
