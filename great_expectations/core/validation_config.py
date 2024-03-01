@@ -24,6 +24,7 @@ class ValidationConfig(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+        # ExpectationSuite requires custom serialization logic due to Marshmallow dep
         json_encoders = {
             ExpectationSuite: lambda v: expectationSuiteSchema.dump(v),
         }
@@ -35,6 +36,13 @@ class ValidationConfig(BaseModel):
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v):
+        """
+        Due to ExpectationSuite utilizing Marshmallow instead of Pydantic,
+        we need custom logic to handle deserialization.
+
+        The input suite will be a dict if deserialized or and an ExpectationSuite if constructed
+        directly by a user.
+        """
         if isinstance(v, dict):
             return ExpectationSuite(**expectationSuiteSchema.load(v))
         elif isinstance(v, ExpectationSuite):
