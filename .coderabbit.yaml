@@ -1,5 +1,5 @@
 # Only enables summaries for PRs. Disables auto-review
-language: "en"
+language: 'en'
 early_access: false
 reviews:
   request_changes_workflow: false
@@ -8,16 +8,16 @@ reviews:
   review_status: true
   collapse_walkthrough: false
   path_filters:
-    - "!**/.xml"
-    - "great_expectations/**"
+    - '!**/.xml'
+    - 'great_expectations/**'
   auto_review:
     enabled: false
     ignore_title_keywords:
-      - "WIP"
-      - "DO NOT MERGE"
+      - 'WIP'
+      - 'DO NOT MERGE'
     drafts: false
     base_branches:
-      - "develop"
-      - "feat/*"
+      - 'develop'
+      - 'feat/*'
 chat:
   auto_reply: true

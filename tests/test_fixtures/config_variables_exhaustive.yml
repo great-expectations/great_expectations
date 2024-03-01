@@ -11,9 +11,9 @@ j: great_expectations.datasource
 k:
   drivername: postgresql
   host: localhost
-  port: "5432"
+  port: '5432'
   username: postgres
-  password: ""
+  password: ''
   database: postgres
 l: plugins/
 m: evaluation_parameter_store

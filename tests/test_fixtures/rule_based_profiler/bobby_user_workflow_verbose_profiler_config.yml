@@ -82,8 +82,8 @@ rules:
         metric_domain_kwargs:
           column: pickup_datetime
         candidate_strings:
-          - "%Y-%m-%d %H:%M:%S"
-          - "%y-%m-%d"
+          - '%Y-%m-%d %H:%M:%S'
+          - '%y-%m-%d'
         threshold: 0.9
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_match_strftime_format
@@ -96,7 +96,7 @@ rules:
           notes:
             format: markdown
             content:
-              - "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+              - '### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder'
   rule_for_regex:
     domain_builder:
       class_name: ColumnDomainBuilder
@@ -125,7 +125,7 @@ rules:
           notes:
             format: markdown
             content:
-              - "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+              - '### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder'
   my_rule_for_very_few_cardinality:
     domain_builder:
       class_name: CategoricalColumnDomainBuilder

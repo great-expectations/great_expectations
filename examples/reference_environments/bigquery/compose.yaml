@@ -9,7 +9,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /tmp/creds.json
       BIGQUERY_CONNECTION_STRING: ${BIGQUERY_CONNECTION_STRING}
     ports:
-      - "8888:8888"
+      - '8888:8888'
     volumes:
       - ${GOOGLE_APPLICATION_CREDENTIALS}:/tmp/creds.json
       - gx_stores:/gx/gx_stores
@@ -25,7 +25,7 @@ services:
     networks:
       - dbnet
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - gx_stores:/gx/gx_stores:ro
 

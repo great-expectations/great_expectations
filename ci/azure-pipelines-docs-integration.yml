@@ -17,21 +17,21 @@ variables:
 stages:
   - stage: docusaurus_tests
     pool:
-      vmImage: "ubuntu-latest"
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: test_docs_aws_spark
         timeoutInMinutes: 30
         condition: and(or(eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
         variables:
-          python.version: "3.8"
-          spark.version: "3.3.2"
-          matching_aws_java_sdk_bundle_version: "1.11.1026"
+          python.version: '3.8'
+          spark.version: '3.3.2'
+          matching_aws_java_sdk_bundle_version: '1.11.1026'
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "$(python.version)"
-            displayName: "Use Python $(python.version)"
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
           - script: |
               pip install pyspark==$(spark.version)
             displayName: Install Pyspark $(spark.version)
@@ -48,10 +48,10 @@ stages:
             displayName: download the AWS JARs and move to pyspark's JAR directory.
           - script: |
               pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
-            displayName: "Install dependencies"
+            displayName: 'Install dependencies'
           - script: |
               pytest -v --docs-tests --aws --spark tests/integration/test_script_runner.py
-            displayName: "pytest"
+            displayName: 'pytest'
             env:
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
               AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
@@ -61,21 +61,21 @@ stages:
         timeoutInMinutes: 30
         condition: or(eq(variables.isDevelop, true), eq(variables.isManual, true))
         variables:
-          python.version: "3.8"
+          python.version: '3.8'
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "$(python.version)"
-            displayName: "Use Python $(python.version)"
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test, athena]" pytest-azurepipelines
-            displayName: "Install dependencies"
+            displayName: 'Install dependencies'
 
           - script: |
               pytest -v --docs-tests --athena tests/integration/test_script_runner.py
-            displayName: "pytest"
+            displayName: 'pytest'
             env:
               ATHENA_DB_NAME: $(ATHENA_DB_NAME)
               ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)

@@ -16,17 +16,17 @@ on:
       - ready_for_review
   schedule:
     # https://crontab.guru/every-3-hours
-    - cron: "0 */3 * * *"
+    - cron: '0 */3 * * *'
   workflow_dispatch: # allows manual triggering with branch picker
   push:
     # Semantic versioning syntax defined by PyPI: https://pythonpackaging.info/07-Package-Release.html#Versioning-your-code
     tags:
       # Stable release syntax
-      - "[0-9]+.[0-9]+.[0-9]+"
+      - '[0-9]+.[0-9]+.[0-9]+'
       # Prerelease syntax
-      - "[0-9]+.[0-9]+.[0-9]+a[0-9]+"
-      - "[0-9]+.[0-9]+.[0-9]+b[0-9]+"
-      - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
+      - '[0-9]+.[0-9]+.[0-9]+a[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+b[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+rc[0-9]+'
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
@@ -59,8 +59,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
+          python-version: '3.8'
+          cache: 'pip'
           cache-dependency-path: |
             requirements-types.txt
             reqs/requirements-dev-contrib.txt
@@ -95,7 +95,7 @@ jobs:
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
       GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
       GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
-      GOOGLE_APPLICATION_CREDENTIALS: "gcp-credentials.json"
+      GOOGLE_APPLICATION_CREDENTIALS: 'gcp-credentials.json'
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -151,8 +151,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
+          python-version: '3.8'
+          cache: 'pip'
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
       - name: Install dependencies
@@ -166,7 +166,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ['3.8', '3.9', '3.10', '3.11']
 
     runs-on: ${{ matrix.os }}
 
@@ -198,8 +198,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
+          python-version: '3.8'
+          cache: 'pip'
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
       - name: Install dependencies
@@ -236,8 +236,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
+          python-version: '3.8'
+          cache: 'pip'
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
@@ -276,7 +276,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: '3.8'
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
             setup.py
@@ -344,7 +344,7 @@ jobs:
           - snowflake
           - spark
           - trino
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
@@ -362,7 +362,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          cache: 'pip'
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
             setup.py
@@ -385,8 +385,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
+          python-version: '3.8'
+          cache: 'pip'
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
@@ -403,8 +403,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-          cache: "pip"
+          python-version: '3.9'
+          cache: 'pip'
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
@@ -421,8 +421,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-          cache: "pip"
+          python-version: '3.10'
+          cache: 'pip'
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
@@ -439,8 +439,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
-          cache: "pip"
+          python-version: '3.11'
+          cache: 'pip'
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py311-min-install.txt -r reqs/requirements-dev-test.txt
@@ -457,8 +457,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
+          python-version: '3.8'
+          cache: 'pip'
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/pydantic-v1-install.txt -r reqs/requirements-dev-test.txt
@@ -474,8 +474,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-          cache: "pip"
+          python-version: '3.8'
+          cache: 'pip'
           cache-dependency-path: requirements.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/airflow-min-install.txt
@@ -489,7 +489,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         exclude:
           - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
@@ -500,7 +500,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          cache: 'pip'
           cache-dependency-path: requirements.txt
       - name: Install Great Expectations with core deps only
         run: pip install .
@@ -538,7 +538,7 @@ jobs:
       - name: Set up Python 3.8
         uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: '3.8'
       - name: Update pip
         run: python -m pip install --upgrade pip
       - name: Install Twine and Wheel, and prepare packaging

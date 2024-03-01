@@ -10,7 +10,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_DB: gx_example_db
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "example_user", "-d", "gx_example_db"]
+      test: ['CMD', 'pg_isready', '-U', 'example_user', '-d', 'gx_example_db']
       interval: 5s
       retries: 5
       start_period: 5s
@@ -19,7 +19,7 @@ services:
     # ports section included to make sure the db is accessible outside the container.
     # Accessible at postgresql://example_user@localhost/gx_example_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
   jupyter:
     image: gx/postgres_example_jupyter
@@ -35,7 +35,7 @@ services:
     networks:
       - dbnet
     ports:
-      - "8888:8888"
+      - '8888:8888'
     volumes:
       - gx_stores:/gx/gx_stores
 
@@ -51,7 +51,7 @@ services:
     networks:
       - dbnet
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - gx_stores:/gx/gx_stores:ro
 
