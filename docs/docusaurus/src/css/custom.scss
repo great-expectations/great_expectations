@@ -9,6 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
+@import "sass_variables";
 @import "typography.scss";
 @import "left_navigation.scss";
 @import "navbar.scss";
@@ -17,8 +18,7 @@
 @import "alerts.scss";
 @import "pagination.scss";
 @import "overview_pages";
-@import "sass_variables";
-
+@import "breadcrumbs.scss";
 /* You can override the default Infima variables here. */
 :root {
     --ifm-font-color-base: #404041;
