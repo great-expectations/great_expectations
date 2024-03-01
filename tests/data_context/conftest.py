@@ -168,26 +168,7 @@ def basic_data_context_config():
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {},
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
-                },
-                "checkpoint_store": {
-                    "class_name": "CheckpointStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "checkpoints/",
-                    },
-                },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-            },
+            "stores": {},
             "data_docs_sites": {},
             "validation_operators": {
                 "default": {
@@ -328,26 +309,7 @@ def data_context_config_with_datasources(conn_string_password):
                     "module_name": "great_expectations.datasource",
                 },
             },
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
-                },
-                "checkpoint_store": {
-                    "class_name": "CheckpointStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "checkpoints/",
-                    },
-                },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-            },
+            "stores": {},
             "data_docs_sites": {},
             "validation_operators": {
                 "default": {
