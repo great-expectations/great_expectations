@@ -43,7 +43,7 @@ describe('"Was this Helpful?" section', () => {
     test("Feedback Modal should pop-up when 'No' button has been clicked", async () => {
         await selectingNoInWasThisHelpful();
 
-        expect(screen.getByTestId('feedback-modal')).toBeInTheDocument();
+        expect(screen.getByText('Tell us more')).toBeInTheDocument();
     });
 
     test("Submit button in Feedback Modal is disabled when description is blank", async () => {
@@ -52,24 +52,22 @@ describe('"Was this Helpful?" section', () => {
         expect(screen.getByText("Submit")).toBeDisabled();
     });
 
-    test("Submit button in Feedback Modal is enabled when description input is filled", async () => {
+    test("Submit button in Feedback Modal is enabled when required fields are filled", async () => {
         await selectingNoInWasThisHelpful();
 
-        const descriptionBox = screen.getByTestId('description-textbox');
-
-        await userEvent.type(descriptionBox,'I have a problem');
+        await completeRequiredFields();
 
         expect(screen.getByText("Submit")).not.toBeDisabled();
     });
 
-    test("", async () => {
+    test("After clicking the submit button, the Feedback modal disappears", async () => {
         await selectingNoInWasThisHelpful();
 
-        const descriptionBox = screen.getByTestId('description-textbox');
+        await completeRequiredFields();
 
-        await userEvent.type(descriptionBox,'I have a problem');
+        await userEvent.click(screen.getByText("Submit"));
 
-        expect(screen.getByText("Submit")).not.toBeDisabled();
+        expect(screen.queryByText('Tell us more')).not.toBeInTheDocument();
     });
 
     async function selectingNoInWasThisHelpful() {
@@ -77,6 +75,14 @@ describe('"Was this Helpful?" section', () => {
             <WasThisHelpful/>
         );
         await userEvent.click(screen.getByText('No'));
+    }
+
+    async function completeRequiredFields() {
+        const descriptionBox = screen.getByPlaceholderText('Provide as much detail as possible about the issue you ' +
+                                              'experienced or where improvement is needed. Detailed feedback helps ' +
+                                                          'us better identify the problem and determine a solution.');
+
+        await userEvent.type(descriptionBox, 'I have a problem');
     }
 
 });

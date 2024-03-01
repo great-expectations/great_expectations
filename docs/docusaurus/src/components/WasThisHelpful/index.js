@@ -70,7 +70,7 @@ export default function WasThisHelpful(){
 
             {isOpen && <>
                 <div className={styles.overlay} onClick={dismissFeedbackModal}/>
-                <section className={styles.modal} data-testid="feedback-modal">
+                <dialog className={styles.modal}>
                     <section className={styles.modalHeader}>
                         <h5 className={styles.modalHeaderTitle}>Tell us more</h5>
                         <img src={closeImg} className={styles.modalHeaderCloseButton}
@@ -115,7 +115,6 @@ export default function WasThisHelpful(){
                                 className={styles.modalTextInput + ' ' + styles.modalTextareaInput}
                                 onChange={handleChange}
                                 required
-                                data-testid="description-textbox"
                                 placeholder="Provide as much detail as possible about the issue you
                                 experienced or where improvement is needed. Detailed feedback helps
                                 us better identify the problem and determine a solution."
@@ -123,7 +122,7 @@ export default function WasThisHelpful(){
                         </div>
                         <input type="submit" disabled={!formData.description} className={styles.submitButton} value="Submit"/>
                     </form>
-                </section>
+                </dialog>
             </>}
     </>
 }

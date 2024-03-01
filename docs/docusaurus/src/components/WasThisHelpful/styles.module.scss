@@ -92,6 +92,8 @@
     top: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
+    padding: 0;
+    margin: 0;
     max-width: 700px;
     max-height: 80vh;
     z-index: calc(var(--ifm-z-index-fixed) + 2);
