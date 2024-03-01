@@ -38,33 +38,29 @@
 
 .feedbackButton {
     border-color: var(--ifm-color-primary);
-    background: none;
-    border: 1px solid var(--ifm-color-primary);
     border-radius: 50rem;
-    color: var(--ifm-color-primary);
-    cursor: pointer;
     font-size: var(--p-md-font-size);
     font-weight: var(--ifm-font-weight-semibold);
+    min-width: 4.5rem;
     padding: 0.25rem;
     text-align: center;
-    min-width: 4.5rem;
-}
 
-.feedbackButton:hover {
-    background: var(--orange-100);
-    color: var(--ifm-color-primary);
-}
+    &:enabled {
+        background: none;
+        border: 1px solid var(--ifm-color-primary);
+        color: var(--ifm-color-primary);
+        cursor: pointer;
 
-.inactiveFeedbackButton {
-    background: var(--gray-200);
-    border: 1px solid transparent;
-    border-radius: 50rem;
-    color: var(--gray-500);
-    font-size: var(--p-font-size);
-    font-weight: var(--ifm-font-weight-semibold);
-    padding: 0.25rem;
-    text-align: center;
-    min-width: 4.5rem;
+        &:hover {
+            background: var(--orange-100);
+        }
+    }
+
+    &:disabled {
+        background: var(--gray-200);
+        border: 1px solid transparent;
+        color: var(--gray-500);
+    }
 }
 
 /* CSS for the Feedback Modal */
