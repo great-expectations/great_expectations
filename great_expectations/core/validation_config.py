@@ -11,22 +11,32 @@ from great_expectations.core.expectation_suite import (
 from great_expectations.data_context.data_context.context_factory import project_manager
 
 
-def _encode_suite(suite: ExpectationSuite) -> str:
+def _encode_suite(suite: ExpectationSuite) -> dict:
     if not suite.id:
         expectation_store = project_manager.get_expectations_store()
-        expectation_store.add(suite)
+        key = expectation_store.get_key(name=suite.name, id=suite.id)
+        expectation_store.add(key=key, value=suite)
 
-    return suite.id
+    return {"name": suite.name, "id": suite.id}
 
 
-def _encode_data(data: BatchConfig) -> str:
-    if id := data.id:
-        return id
-
-    # ds = data.data_asset.datasource
-    # sources = project_manager.get_sources()
-
-    raise ValueError("TBD")
+def _encode_data(data: BatchConfig) -> dict:
+    parent = data.data_asset
+    grandparent = parent.datasource
+    return {
+        "datasource": {
+            "name": grandparent.name,
+            "id": grandparent.id,
+        },
+        "asset": {
+            "name": parent.name,
+            "id": parent.id,
+        },
+        "batch_config": {
+            "name": data.name,
+            "id": data.id,
+        },
+    }
 
 
 class ValidationConfig(BaseModel):
