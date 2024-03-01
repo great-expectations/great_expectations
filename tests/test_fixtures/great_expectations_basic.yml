@@ -38,23 +38,6 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-stores:
-  expectations_store:
-    class_name: ExpectationsStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: expectations/
-  checkpoint_store:
-    class_name: CheckpointStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: checkpoints/
-  evaluation_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
-  validations_store:
-    class_name: ValidationsStore
-
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
   default:
