@@ -6,9 +6,40 @@ from unittest import mock
 
 import pytest
 
-import great_expectations as gx
+from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
+from great_expectations.datasource.fluent.pandas_datasource import (
+    CSVAsset,
+    PandasDatasource,
+)
+
+
+@pytest.fixture
+def ds_asset_batch_config_bundle(
+    in_memory_runtime_context: EphemeralDataContext,
+) -> tuple[PandasDatasource, CSVAsset, BatchConfig]:
+    context = in_memory_runtime_context
+
+    ds_name = "my_ds"
+    ds = context.sources.add_pandas(ds_name)
+
+    asset_name = "my_asset"
+    asset = ds.add_csv_asset(asset_name, "data.csv")
+
+    batch_config_name = "my_batch_config"
+    batch_config = asset.add_batch_config(batch_config_name)
+
+    return ds, asset, batch_config
+
+
+@pytest.fixture
+def suite():
+    suite_name = "my_suite"
+    return ExpectationSuite(name=suite_name)
 
 
 @pytest.mark.unit
@@ -33,23 +64,15 @@ def test_validation_config_serialization(
     batch_config_id: str | None,
     suite_id: str | None,
     validation_id: str | None,
+    ds_asset_batch_config_bundle: tuple[PandasDatasource, CSVAsset, BatchConfig],
+    suite: ExpectationSuite,
 ):
-    context = gx.get_context(mode="ephemeral")
+    pandas_ds, csv_asset, batch_config = ds_asset_batch_config_bundle
 
-    ds_name = "my_ds"
-    ds = context.sources.add_pandas(ds_name)
-    ds.id = ds_id
-
-    asset_name = "my_asset"
-    asset = ds.add_csv_asset(asset_name, "data.csv")
-    asset.id = asset_id
-
-    batch_config_name = "my_batch_config"
-    batch_config = asset.add_batch_config(batch_config_name)
+    pandas_ds.id = ds_id
+    csv_asset.id = asset_id
     batch_config.id = batch_config_id
-
-    suite_name = "my_suite"
-    suite = ExpectationSuite(name=suite_name, id=suite_id)
+    suite.id = suite_id
 
     validation_name = "my_validation_config"
     validation_config = ValidationConfig(
@@ -64,20 +87,20 @@ def test_validation_config_serialization(
         "name": validation_name,
         "data": {
             "datasource": {
-                "name": ds_name,
+                "name": pandas_ds.name,
                 "id": ds_id,
             },
             "asset": {
-                "name": asset_name,
+                "name": csv_asset.name,
                 "id": asset_id,
             },
             "batch_config": {
-                "name": batch_config_name,
+                "name": batch_config.name,
                 "id": batch_config_id,
             },
         },
         "suite": {
-            "name": suite_name,
+            "name": suite.name,
             "id": suite_id,
         },
         "id": validation_id,
@@ -95,5 +118,41 @@ def test_validation_config_serialization(
     assert actual == expected
 
 
-def test_validation_config_deserializes_from_ids():
-    pass
+def test_validation_config_deserialization(
+    in_memory_runtime_context: EphemeralDataContext,
+    ds_asset_batch_config_bundle: tuple[PandasDatasource, CSVAsset, BatchConfig],
+    suite: ExpectationSuite,
+):
+    context = in_memory_runtime_context
+    pandas_ds, csv_asset, batch_config = ds_asset_batch_config_bundle
+
+    suite = context.suites.add(suite)
+
+    validation_name = "my_validation_config"
+    serialized_config = {
+        "name": validation_name,
+        "data": {
+            "datasource": {
+                "name": pandas_ds.name,
+                "id": None,
+            },
+            "asset": {
+                "name": csv_asset.name,
+                "id": None,
+            },
+            "batch_config": {
+                "name": batch_config.name,
+                "id": None,
+            },
+        },
+        "suite": {
+            "name": suite.name,
+            "id": suite.id,
+        },
+        "id": None,
+    }
+
+    validation_config = ValidationConfig.parse_obj(serialized_config)
+    assert validation_config.name == validation_name
+    assert validation_config.data == batch_config
+    assert validation_config.suite == suite

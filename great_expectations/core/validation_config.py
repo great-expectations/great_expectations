@@ -7,6 +7,7 @@ from great_expectations.compatibility.pydantic import BaseModel, validator
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
+    expectationSuiteSchema,
 )
 from great_expectations.data_context.data_context.context_factory import project_manager
 
@@ -64,19 +65,46 @@ class ValidationConfig(BaseModel):
     id: Union[str, None] = None
 
     @validator("suite", pre=True)
-    def _validate_suite(cls, v):
-        if isinstance(v, str):
-            return cls._get_suite_by_id(v)
+    def _validate_suite(cls, v: dict | ExpectationSuite):
+        if isinstance(v, dict):
+            return cls._encode_suite(v)
         elif isinstance(v, ExpectationSuite):
             return v
         raise ValueError(
             "Suite must be a dictionary (if being deserialized) or an ExpectationSuite object."
         )
 
+    @validator("data", pre=True)
+    def _validate_data(cls, v: dict | BatchConfig):
+        if isinstance(v, dict):
+            return cls._encode_data(v)
+        elif isinstance(v, BatchConfig):
+            return v
+        raise ValueError(
+            "Data must be a dictionary (if being deserialized) or a BatchConfig object."
+        )
+
     @classmethod
-    def _get_suite_by_id(cls, suite_id: str) -> ExpectationSuite:
+    def _encode_suite(cls, suite_dict: dict) -> ExpectationSuite:
+        name = suite_dict["name"]
+        id = suite_dict["id"]
         expectation_store = project_manager.get_expectations_store()
-        return expectation_store.get(suite_id)
+        key = expectation_store.get_key(name=name, id=id)
+        config = expectation_store.get(key)
+        return ExpectationSuite(**expectationSuiteSchema.load(config))
+
+    @classmethod
+    def _encode_data(cls, data_dict: dict) -> BatchConfig:
+        ds_name = data_dict["datasource"]["name"]
+        asset_name = data_dict["asset"]["name"]
+        batch_config_name = data_dict["batch_config"]["name"]
+        sources = project_manager.get_datasources()
+
+        ds = sources[ds_name]
+        asset = ds.get_asset(asset_name)
+        batch_config = asset.get_batch_config(batch_config_name)
+
+        return batch_config
 
     @public_api
     def run(self):

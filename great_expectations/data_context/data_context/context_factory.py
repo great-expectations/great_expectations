@@ -117,13 +117,13 @@ class ProjectManager:
             )
         return self._project.evaluation_parameter_store
 
-    def get_sources(self) -> _SourceFactories:
+    def get_datasources(self) -> _SourceFactories:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
                 + "Please call `get_context()` first, then try your action again."
             )
-        return self._project.sources
+        return self._project.datasources
 
     def _build_context(  # noqa: PLR0913
         self,
