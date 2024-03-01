@@ -1624,6 +1624,12 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
     )
+    DEFAULT_VALIDATION_CONFIG_STORE_NAME = "validation_config_store"
+    VALIDATION_CONFIGS_BASE_DIRECTORY = "validation_configs"
+    DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{VALIDATION_CONFIGS_BASE_DIRECTORY}/"
+    )
+
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         "evaluation_parameters/"
@@ -1675,41 +1681,54 @@ class DataContextConfigDefaults(enum.Enum):
             "action_list": DEFAULT_ACTION_LIST,
         }
     }
-    DEFAULT_STORES = {
-        DEFAULT_EXPECTATIONS_STORE_NAME: {
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
-        },
-        DEFAULT_VALIDATIONS_STORE_NAME: {
-            "class_name": "ValidationsStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
-        },
-        DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
-            "class_name": "EvaluationParameterStore"
-        },
-        DEFAULT_CHECKPOINT_STORE_NAME: {
-            "class_name": "CheckpointStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "suppress_store_backend_id": True,
-                "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
-        },
-        DEFAULT_PROFILER_STORE_NAME: {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "suppress_store_backend_id": True,
-                "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-            },
+
+    DEFAULT_EXPECTATIONS_STORE = {
+        "class_name": "ExpectationsStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
         },
     }
+    DEFAULT_VALIDATIONS_STORE = {
+        "class_name": "ValidationsStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_VALIDATION_CONFIG_STORE = {
+        "class_name": "ValidationConfigStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_EVALUATION_PARAMETER_STORE = {"class_name": "EvaluationParameterStore"}
+    DEFAULT_CHECKPOINT_STORE = {
+        "class_name": "CheckpointStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "suppress_store_backend_id": True,
+            "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_PROFILER_STORE = {
+        "class_name": "ProfilerStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "suppress_store_backend_id": True,
+            "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
+    DEFAULT_STORES = {
+        DEFAULT_EXPECTATIONS_STORE_NAME: DEFAULT_EXPECTATIONS_STORE,
+        DEFAULT_VALIDATIONS_STORE_NAME: DEFAULT_VALIDATIONS_STORE,
+        DEFAULT_VALIDATION_CONFIG_STORE_NAME: DEFAULT_VALIDATION_CONFIG_STORE,
+        DEFAULT_EVALUATION_PARAMETER_STORE_NAME: DEFAULT_EVALUATION_PARAMETER_STORE,
+        DEFAULT_CHECKPOINT_STORE_NAME: DEFAULT_CHECKPOINT_STORE,
+        DEFAULT_PROFILER_STORE_NAME: DEFAULT_PROFILER_STORE,
+    }
+
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
             "class_name": "SiteBuilder",
@@ -1749,6 +1768,9 @@ class BaseStoreBackendDefaults(DictDot):
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
+        self.validation_config_store_name = (
+            DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value
+        )
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
@@ -1791,11 +1813,13 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         default_bucket_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
         validations_store_bucket_name: Optional[str] = None,
+        validation_config_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
         profiler_store_bucket_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
+        validation_config_store_prefix: str = "validation_configs",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
         profiler_store_prefix: str = "profilers",
@@ -1813,6 +1837,8 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             expectations_store_bucket_name = default_bucket_name
         if validations_store_bucket_name is None:
             validations_store_bucket_name = default_bucket_name
+        if validation_config_store_bucket_name is None:
+            validation_config_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
@@ -1841,6 +1867,14 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "TupleS3StoreBackend",
                     "bucket": validations_store_bucket_name,
                     "prefix": validations_store_prefix,
+                },
+            },
+            self.validation_config_store_name: {
+                "class_name": "ValidationConfigStore",
+                "store_backend": {
+                    "class_name": "TupleS3StoreBackend",
+                    "bucket": validation_config_store_bucket_name,
+                    "prefix": validation_config_store_prefix,
                 },
             },
             evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
@@ -1913,6 +1947,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.profiler_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
+            self.stores[self.validation_config_store_name]["store_backend"][  # type: ignore[index]
+                "root_directory"
+            ] = root_directory
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
@@ -1956,6 +1993,12 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
             },
             self.profiler_store_name: {
                 "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+            self.validation_config_store_name: {
+                "class_name": "ValidationConfigStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 },
@@ -2006,16 +2049,19 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         default_project_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
         validations_store_bucket_name: Optional[str] = None,
+        validation_config_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
         profiler_store_bucket_name: Optional[str] = None,
         expectations_store_project_name: Optional[str] = None,
         validations_store_project_name: Optional[str] = None,
+        validation_config_store_project_name: Optional[str] = None,
         data_docs_project_name: Optional[str] = None,
         checkpoint_store_project_name: Optional[str] = None,
         profiler_store_project_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
+        validation_config_store_prefix: str = "validation_configs",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
         profiler_store_prefix: str = "profilers",
@@ -2033,6 +2079,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             expectations_store_bucket_name = default_bucket_name
         if validations_store_bucket_name is None:
             validations_store_bucket_name = default_bucket_name
+        if validation_config_store_bucket_name is None:
+            validation_config_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
@@ -2045,6 +2093,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             expectations_store_project_name = default_project_name
         if validations_store_project_name is None:
             validations_store_project_name = default_project_name
+        if validation_config_store_project_name is None:
+            validation_config_store_project_name = default_project_name
         if data_docs_project_name is None:
             data_docs_project_name = default_project_name
         if checkpoint_store_project_name is None:
@@ -2075,6 +2125,15 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "project": validations_store_project_name,
                     "bucket": validations_store_bucket_name,
                     "prefix": validations_store_prefix,
+                },
+            },
+            self.validation_config_store_name: {
+                "class_name": "ValidationConfigStore",
+                "store_backend": {
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": validation_config_store_project_name,
+                    "bucket": validation_config_store_bucket_name,
+                    "prefix": validation_config_store_prefix,
                 },
             },
             evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
@@ -2135,6 +2194,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         default_credentials: Optional[Dict] = None,
         expectations_store_credentials: Optional[Dict] = None,
         validations_store_credentials: Optional[Dict] = None,
+        validation_config_store_credentials: Optional[Dict] = None,
         checkpoint_store_credentials: Optional[Dict] = None,
         profiler_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
@@ -2151,6 +2211,8 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
             expectations_store_credentials = default_credentials
         if validations_store_credentials is None:
             validations_store_credentials = default_credentials
+        if validation_config_store_credentials is None:
+            validation_config_store_credentials = default_credentials
         if checkpoint_store_credentials is None:
             checkpoint_store_credentials = default_credentials
         if profiler_store_credentials is None:
@@ -2176,6 +2238,13 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
                     "credentials": validations_store_credentials,
+                },
+            },
+            self.validation_config_store_name: {
+                "class_name": "ValidationConfigStore",
+                "store_backend": {
+                    "class_name": "DatabaseStoreBackend",
+                    "credentials": validation_config_store_credentials,
                 },
             },
             evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
@@ -2299,7 +2368,7 @@ class DataContextConfig(BaseYamlConfig):
         self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
         self.validation_operators = validation_operators
-        self.stores = stores or {}
+        self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
@@ -2319,6 +2388,24 @@ class DataContextConfig(BaseYamlConfig):
         self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
+
+    def _init_stores(self, store_configs: dict | None) -> dict:
+        # If missing all, use all defaults
+        if not store_configs:
+            return DataContextConfigDefaults.DEFAULT_STORES.value
+
+        # If missing individual stores, just add what is missing
+        configured_stores = {config["class_name"] for config in store_configs.values()}
+        for name, config in DataContextConfigDefaults.DEFAULT_STORES.value.items():
+            if not isinstance(config, dict):
+                raise ValueError(
+                    "Store defaults must be a mapping of default names to default dictionary configurations."
+                )
+            if config["class_name"] not in configured_stores:
+                # Create ephemeral store config
+                store_configs[name] = {"class_name": config["class_name"]}
+
+        return store_configs
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
