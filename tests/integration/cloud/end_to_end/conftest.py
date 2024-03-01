@@ -59,7 +59,7 @@ def datasource_name(
         _ = context.get_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def expectation_suite(
     context: CloudDataContext,
 ) -> Iterator[ExpectationSuite]:
