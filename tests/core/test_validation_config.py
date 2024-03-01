@@ -126,7 +126,7 @@ def test_validation_config_serialization(
 
 
 @pytest.mark.unit
-def test_validation_config_deserialization(
+def test_validation_config_deserialization_success(
     in_memory_runtime_context: EphemeralDataContext,
     ds_asset_batch_config_bundle: tuple[PandasDatasource, CSVAsset, BatchConfig],
     suite: ExpectationSuite,
@@ -164,3 +164,162 @@ def test_validation_config_deserialization(
     assert validation_config.name == validation_name
     assert validation_config.data == batch_config
     assert validation_config.suite == suite
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "serialized_config",
+    [
+        pytest.param(
+            {
+                "name": "my_validation",
+                "data": {
+                    "asset": {
+                        "name": "my_asset",
+                        "id": None,
+                    },
+                    "batch_config": {
+                        "name": "my_batch_config",
+                        "id": None,
+                    },
+                },
+                "suite": {
+                    "name": "my_suite",
+                    "id": None,
+                },
+                "id": None,
+            },
+            id="bad_data_format",
+        ),
+        pytest.param(
+            {
+                "name": "my_validation",
+                "data": {
+                    "datasource": {
+                        "name": "my_datasource",
+                        "id": None,
+                    },
+                    "asset": {
+                        "name": "my_asset",
+                        "id": None,
+                    },
+                    "batch_config": {
+                        "name": "my_batch_config",
+                        "id": None,
+                    },
+                },
+                "suite": {
+                    "name": "my_suite",
+                },
+                "id": None,
+            },
+            id="bad_suite_format",
+        ),
+        pytest.param(
+            {
+                "name": "my_validation",
+                "data": {
+                    "datasource": {
+                        "name": "my_datasource",
+                        "id": None,
+                    },
+                    "asset": {
+                        "name": "my_asset",
+                        "id": None,
+                    },
+                    "batch_config": {
+                        "name": "my_batch_config",
+                        "id": None,
+                    },
+                },
+                "suite": {
+                    "name": "i_do_not_exist",
+                    "id": None,
+                },
+                "id": None,
+            },
+            id="non_existant_suite",
+        ),
+        pytest.param(
+            {
+                "name": "my_validation",
+                "data": {
+                    "datasource": {
+                        "name": "i_do_not_exist",
+                        "id": None,
+                    },
+                    "asset": {
+                        "name": "my_asset",
+                        "id": None,
+                    },
+                    "batch_config": {
+                        "name": "my_batch_config",
+                        "id": None,
+                    },
+                },
+                "suite": {
+                    "name": "my_suite",
+                    "id": None,
+                },
+                "id": None,
+            },
+            id="non_existant_datasource",
+        ),
+        pytest.param(
+            {
+                "name": "my_validation",
+                "data": {
+                    "datasource": {
+                        "name": "my_ds",
+                        "id": None,
+                    },
+                    "asset": {
+                        "name": "i_do_not_exist",
+                        "id": None,
+                    },
+                    "batch_config": {
+                        "name": "my_batch_config",
+                        "id": None,
+                    },
+                },
+                "suite": {
+                    "name": "my_suite",
+                    "id": None,
+                },
+                "id": None,
+            },
+            id="non_existant_asset",
+        ),
+        pytest.param(
+            {
+                "name": "my_validation",
+                "data": {
+                    "datasource": {
+                        "name": "my_ds",
+                        "id": None,
+                    },
+                    "asset": {
+                        "name": "my_asset",
+                        "id": None,
+                    },
+                    "batch_config": {
+                        "name": "i_do_not_exist",
+                        "id": None,
+                    },
+                },
+                "suite": {
+                    "name": "my_suite",
+                    "id": None,
+                },
+                "id": None,
+            },
+            id="non_existant_batch_config",
+        ),
+    ],
+)
+def test_validation_config_deserialization_failure(serialized_config: dict):
+    with pytest.raises(ValueError) as e:
+        ValidationConfig.parse_obj(serialized_config)
+
+    print(e)
+    # assert something about e

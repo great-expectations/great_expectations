@@ -110,7 +110,9 @@ class ValidationConfig(BaseModel):
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
         except ValidationError as e:
-            raise e  # TODO: Add context and re-raise
+            raise ValueError(
+                "Serialized suite did not contain expected identifiers"
+            ) from e
 
         name = suite_identifiers.name
         id = suite_identifiers.id
@@ -121,7 +123,9 @@ class ValidationConfig(BaseModel):
         try:
             config = expectation_store.get(key)
         except gx_exceptions.InvalidKeyError as e:
-            raise e  # TODO: Add context and re-raise
+            raise ValueError(
+                f"Could not find suite with name: {name} and id: {id}"
+            ) from e
 
         return ExpectationSuite(**expectationSuiteSchema.load(config))
 
@@ -131,7 +135,9 @@ class ValidationConfig(BaseModel):
         try:
             data_identifiers = _EncodedData.parse_obj(data_dict)
         except ValidationError as e:
-            raise e  # TODO: Add context and re-raise
+            raise ValueError(
+                "Serialized data did not contain expected identifiers"
+            ) from e
 
         ds_name = data_identifiers.datasource.name
         asset_name = data_identifiers.asset.name
@@ -141,17 +147,21 @@ class ValidationConfig(BaseModel):
         try:
             ds = datasource_dict[ds_name]
         except KeyError as e:
-            raise e  # TODO: Add context and re-raise
+            raise ValueError(f"Could not find datasource named '{ds_name}'.") from e
 
         try:
             asset = ds.get_asset(asset_name)
         except LookupError as e:
-            raise e  # TODO: Add context and re-raise
+            raise ValueError(
+                f"Could not find asset named '{asset_name}' within '{ds_name}' datasource."
+            ) from e
 
         try:
             batch_config = asset.get_batch_config(batch_config_name)
         except KeyError as e:
-            raise e  # TODO: Add context and re-raise
+            raise ValueError(
+                f"Could not find batch_config named '{batch_config_name}' within '{asset_name}' asset and '{ds_name}' datasource."
+            ) from e
 
         return batch_config
 
