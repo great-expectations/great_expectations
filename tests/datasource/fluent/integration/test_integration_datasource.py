@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.compatibility import pydantic
@@ -39,6 +40,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     TestConnectionError,
 )
+from great_expectations.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
@@ -444,6 +446,47 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
             )
         )
         assert len(specified_batches) == 1
+
+
+@pytest.mark.parametrize(
+    ["month", "expected"],
+    [
+        (1, 364),
+        (2, 342),
+    ],
+)
+@pytest.mark.sqlite
+def test_success_with_partitioners_from_batch_configs(
+    empty_data_context,
+    month: int,
+    expected: int,
+):
+    """Integration test to ensure partitions from batch configs are used.
+
+    The test is parameterized just to ensure that the partitioner is actually doing something.
+    """
+    context = empty_data_context
+    datasource = sqlite_datasource(
+        context, "yellow_tripdata_sample_2020_all_months_combined.db"
+    )
+    passenger_count_value = 5
+    asset = datasource.add_query_asset(
+        name="query_asset",
+        query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",
+    ).add_sorters(["year"])
+    batch_config = asset.add_batch_config(
+        name="whatevs",
+        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+    )
+    validator = Validator(
+        context,
+        batch_config=batch_config,
+        batch_request_options={"year": 2020, "month": month},
+    )
+    result = validator.validate_expectation(
+        gxe.ExpectTableRowCountToEqual(value=expected)
+    )
+    assert result.success
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.

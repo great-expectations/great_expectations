@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
     DatasourceConfig,
 )
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
@@ -201,7 +202,7 @@ def empty_serialized_configuration_bundle() -> dict:
             },
             "plugins_directory": None,
             "profiler_store_name": None,
-            "stores": {},
+            "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
             "validation_operators": None,
             "validations_store_name": None,
         },
@@ -242,7 +243,7 @@ def serialized_configuration_bundle() -> dict:
                 "globally": False,
             },
             "plugins_directory": None,
-            "stores": {},
+            "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
             "validation_operators": None,
             "validations_store_name": None,
         },
