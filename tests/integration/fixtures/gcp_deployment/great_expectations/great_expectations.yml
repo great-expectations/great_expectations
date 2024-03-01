@@ -22,20 +22,20 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 
 stores:
-# Stores are configurable places to store things like Expectations, Validations
-# Data Docs, and more. These are for advanced users only - most users can simply
-# leave this section alone.
-#
-# Three stores are required: expectations, validations, and
-# evaluation_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, etc.
+  # Stores are configurable places to store things like Expectations, Validations
+  # Data Docs, and more. These are for advanced users only - most users can simply
+  # leave this section alone.
+  #
+  # Three stores are required: expectations, validations, and
+  # evaluation_parameters, and must exist with a valid store entry. Additional
+  # stores can be configured for uses such as data_docs, etc.
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
-# <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store">
+  # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store">
   expectations_GCS_store:
     class_name: ExpectationsStore
     store_backend:
@@ -43,7 +43,7 @@ stores:
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
-# </snippet>
+  # </snippet>
 
   validations_store:
     class_name: ValidationsStore
@@ -51,7 +51,7 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-# <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store">
+  # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store">
   validations_GCS_store:
     class_name: ValidationsStore
     store_backend:
@@ -59,7 +59,7 @@ stores:
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
-# </snippet>
+  # </snippet>
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
@@ -96,7 +96,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-# <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site">
+  # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site">
   gs_site:
     class_name: SiteBuilder
     store_backend:
