@@ -300,9 +300,6 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
     assert (
         len(validations_keys) == 2
     )  # we should have run two suites even though there was only one batch
-    suite_names = [
-        key.expectation_suite_identifier.expectation_suite_name
-        for key in validations_keys
-    ]
+    suite_names = [key.expectation_suite_identifier.name for key in validations_keys]
     assert "f1.warning" in suite_names
     assert "f1.failure" in suite_names
