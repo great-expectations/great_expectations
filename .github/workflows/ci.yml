@@ -311,6 +311,7 @@ jobs:
 
 
   marker-tests:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
     # aws
@@ -344,7 +345,7 @@ jobs:
           - snowflake
           - spark
           - trino
-        python-version: ["3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
