@@ -64,7 +64,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
 
     # first suite to add to db
     default_suite = ExpectationSuite(
-        expectation_suite_name="a.b.c.warning",
+        name="a.b.c.warning",
         meta={"test_meta_key": "test_meta_value"},
         expectations=[],
     )
@@ -75,14 +75,14 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
     ns_1_dict: dict = my_store.get(ns_1)
     ns_1_suite = ExpectationSuite(**ns_1_dict)
     assert ns_1_suite == ExpectationSuite(
-        expectation_suite_name="a.b.c.warning",
+        name="a.b.c.warning",
         meta={"test_meta_key": "test_meta_value"},
         expectations=[],
     )
 
     # update suite and check if new value exists
     updated_suite = ExpectationSuite(
-        expectation_suite_name="a.b.c.warning",
+        name="a.b.c.warning",
         meta={"test_meta_key": "test_new_meta_value"},
         expectations=[],
     )
@@ -90,7 +90,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
     ns_1_dict: dict = my_store.get(ns_1)
     ns_1_suite = ExpectationSuite(**ns_1_dict)
     assert ns_1_suite == ExpectationSuite(
-        expectation_suite_name="a.b.c.warning",
+        name="a.b.c.warning",
         meta={"test_meta_key": "test_new_meta_value"},
         expectations=[],
     )
@@ -103,7 +103,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
     ns_2_dict: dict = my_store.get(ns_2)
     ns_2_suite = ExpectationSuite(**ns_2_dict)
     assert ns_2_suite == ExpectationSuite(
-        expectation_suite_name="a.b.c.failure",
+        name="a.b.c.failure",
     )
 
     assert set(my_store.list_keys()) == {
