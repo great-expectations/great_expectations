@@ -79,7 +79,7 @@ def expectation_suite(
         _ = context.suites.get(name=expectation_suite_name)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def validator(
     context: CloudDataContext,
     batch_request: BatchRequest,
