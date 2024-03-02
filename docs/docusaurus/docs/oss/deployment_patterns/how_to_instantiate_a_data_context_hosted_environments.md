@@ -23,7 +23,7 @@ To add a Data Source and an Expectation Suite, see [How to connect to a PostgreS
 
 To add Expectations to your Suite individually, use the following code:
 
-```
+``` title="Python code"
 validator.expect_column_values_to_not_be_null("my_column")
 validator.save_expectation_suite(discard_failed_expectations=False)
 ```

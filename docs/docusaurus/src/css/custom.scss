@@ -9,6 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
+@import "sass_variables.scss";
 @import "typography.scss";
 @import "left_navigation.scss";
 @import "navbar.scss";
@@ -16,7 +17,9 @@
 @import "searchBar.scss";
 @import "alerts.scss";
 @import "pagination.scss";
-@import "overview_pages";
+@import "breadcrumbs.scss";
+@import "overview_pages.scss";
+@import "code_block.scss";
 
 /* You can override the default Infima variables here. */
 :root {
@@ -50,6 +53,7 @@
      /* Colors */
       --white: #fff;
       --black: #000;
+      --black-15: rgba(0, 0, 0, .15);
       --blue-100: #eefaff;
       --blue-200: #dff5ff;
       --blue-300: #bfeaff;
@@ -99,8 +103,14 @@
       --link-hover-color: #A03E0A;
 }
 
+.markdown a,
 p > a {
+    color: var(--ifm-color-primary);
     text-decoration: underline;
+
+  &:hover {
+    color: var(--link-hover-color);
+  }
 }
 
 h3 {
@@ -133,7 +143,7 @@ h3 {
     padding: 3px 0;
 }
 
-@media (max-width: 996px) {
+@media (max-width: $mobile-breakpoint) {
     .footer__links {
         display: block !important;
     }
@@ -251,7 +261,7 @@ table.borderless tr:nth-child(2n) {
   visibility: visible;
 }
 
-@media (max-width: 996px) {
+@media (max-width: $mobile-breakpoint) {
     .main-wrapper {
         overflow: hidden;
     }

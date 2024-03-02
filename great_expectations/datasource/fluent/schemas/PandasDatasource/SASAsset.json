@@ -122,165 +122,9 @@
                 "key"
             ]
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerYear": {
-            "title": "PartitionerYear",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year",
-                    "enum": [
-                        "partition_on_year"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonth": {
-            "title": "PartitionerYearAndMonth",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year_and_month",
-                    "enum": [
-                        "partition_on_year_and_month"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonthAndDay": {
-            "title": "PartitionerYearAndMonthAndDay",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year_and_month_and_day",
-                    "enum": [
-                        "partition_on_year_and_month_and_day"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerDatetimePart": {
-            "title": "PartitionerDatetimePart",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_date_parts",
-                    "enum": [
-                        "partition_on_date_parts"
-                    ],
-                    "type": "string"
-                },
-                "datetime_parts": {
-                    "title": "Datetime Parts",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "column_name",
-                "datetime_parts"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerDividedInteger": {
-            "title": "PartitionerDividedInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_divided_integer",
-                    "enum": [
-                        "partition_on_divided_integer"
-                    ],
-                    "type": "string"
-                },
-                "divisor": {
-                    "title": "Divisor",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "divisor"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerModInteger": {
-            "title": "PartitionerModInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_mod_integer",
-                    "enum": [
-                        "partition_on_mod_integer"
-                    ],
-                    "type": "string"
-                },
-                "mod": {
-                    "title": "Mod",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "mod"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerColumnValue": {
+        "PartitionerColumnValue": {
             "title": "PartitionerColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -298,12 +142,11 @@
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "great_expectations__datasource__fluent__sql_datasource__PartitionerMultiColumnValue": {
+        "PartitionerMultiColumnValue": {
             "title": "PartitionerMultiColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_names": {
@@ -324,12 +167,65 @@
             },
             "required": [
                 "column_names"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerYear": {
+        "PartitionerDividedInteger": {
+            "title": "PartitionerDividedInteger",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "divisor": {
+                    "title": "Divisor",
+                    "type": "integer"
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_divided_integer",
+                    "enum": [
+                        "partition_on_divided_integer"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "divisor",
+                "column_name"
+            ]
+        },
+        "PartitionerModInteger": {
+            "title": "PartitionerModInteger",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "mod": {
+                    "title": "Mod",
+                    "type": "integer"
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_mod_integer",
+                    "enum": [
+                        "partition_on_mod_integer"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "mod",
+                "column_name"
+            ]
+        },
+        "PartitionerYear": {
             "title": "PartitionerYear",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -347,12 +243,11 @@
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerYearAndMonth": {
+        "PartitionerYearAndMonth": {
             "title": "PartitionerYearAndMonth",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -370,12 +265,11 @@
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerYearAndMonthAndDay": {
+        "PartitionerYearAndMonthAndDay": {
             "title": "PartitionerYearAndMonthAndDay",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -393,14 +287,20 @@
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerDatetimePart": {
+        "PartitionerDatetimePart": {
             "title": "PartitionerDatetimePart",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
+                "datetime_parts": {
+                    "title": "Datetime Parts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
@@ -412,125 +312,39 @@
                         "partition_on_date_parts"
                     ],
                     "type": "string"
-                },
-                "datetime_parts": {
-                    "title": "Datetime Parts",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             },
             "required": [
-                "column_name",
-                "datetime_parts"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerDividedInteger": {
-            "title": "PartitionerDividedInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_divided_integer",
-                    "enum": [
-                        "partition_on_divided_integer"
-                    ],
-                    "type": "string"
-                },
-                "divisor": {
-                    "title": "Divisor",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "divisor"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerModInteger": {
-            "title": "PartitionerModInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_mod_integer",
-                    "enum": [
-                        "partition_on_mod_integer"
-                    ],
-                    "type": "string"
-                },
-                "mod": {
-                    "title": "Mod",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "mod"
-            ],
-            "additionalProperties": false
-        },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerColumnValue": {
-            "title": "PartitionerColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_column_value",
-                    "enum": [
-                        "partition_on_column_value"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
+                "datetime_parts",
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerMultiColumnValue": {
-            "title": "PartitionerMultiColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerConvertedDatetime": {
+            "title": "PartitionerConvertedDatetime",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
-                "column_names": {
-                    "title": "Column Names",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "partition_on_multi_column_values",
+                    "default": "partition_on_converted_datetime",
                     "enum": [
-                        "partition_on_multi_column_values"
+                        "partition_on_converted_datetime"
                     ],
+                    "type": "string"
+                },
+                "date_format_string": {
+                    "title": "Date Format String",
                     "type": "string"
                 }
             },
             "required": [
-                "column_names"
-            ],
-            "additionalProperties": false
+                "column_name",
+                "date_format_string"
+            ]
         },
         "BatchConfig": {
             "title": "BatchConfig",
@@ -549,52 +363,31 @@
                     "title": "Partitioner",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerYear"
+                            "$ref": "#/definitions/PartitionerColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonth"
+                            "$ref": "#/definitions/PartitionerMultiColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerYearAndMonthAndDay"
+                            "$ref": "#/definitions/PartitionerDividedInteger"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerDatetimePart"
+                            "$ref": "#/definitions/PartitionerModInteger"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerDividedInteger"
+                            "$ref": "#/definitions/PartitionerYear"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerModInteger"
+                            "$ref": "#/definitions/PartitionerYearAndMonth"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerColumnValue"
+                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__sql_datasource__PartitionerMultiColumnValue"
+                            "$ref": "#/definitions/PartitionerDatetimePart"
                         },
                         {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerDatetimePart"
-                        },
-                        {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/great_expectations__datasource__fluent__spark_generic_partitioners__PartitionerMultiColumnValue"
+                            "$ref": "#/definitions/PartitionerConvertedDatetime"
                         }
                     ]
                 }

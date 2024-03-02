@@ -25,7 +25,6 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
-    ConcurrencyConfig,
     DataContextConfig,
     GXCloudConfig,
     IncludeRenderedContentConfig,
@@ -50,6 +49,7 @@ def data_context_config_dict() -> dict:
         "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
+        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -70,7 +70,6 @@ def data_context_config_dict() -> dict:
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
-        "concurrency": None,
         "progress_bars": None,
         "include_rendered_content": {
             "expectation_suite": False,
@@ -201,11 +200,6 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
 
 
 @pytest.fixture
-def concurrency() -> ConcurrencyConfig:
-    return ConcurrencyConfig(enabled=True)
-
-
-@pytest.fixture
 def progress_bars() -> ProgressBarsConfig:
     return ProgressBarsConfig(
         globally=True,
@@ -262,10 +256,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.CONCURRENCY,
-            id="concurrency getter",
         ),
         pytest.param(
             DataContextVariableSchema.PROGRESS_BARS,
@@ -378,11 +368,6 @@ def test_data_context_variables_get_with_substitutions(
             id="anonymous_usage_statistics setter",
         ),
         pytest.param(
-            concurrency,
-            DataContextVariableSchema.CONCURRENCY,
-            id="concurrency setter",
-        ),
-        pytest.param(
             progress_bars,
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars setter",
@@ -455,16 +440,35 @@ def test_data_context_variables_save_config(
 
         cloud_data_context_variables.save_config()
 
-        expected_config_dict: dict = {}
-        for attr in (
-            "config_variables_file_path",
-            "config_version",
-            "data_docs_sites",
-            "plugins_directory",
-            "stores",
-            "include_rendered_content",
-        ):
-            expected_config_dict[attr] = data_context_config_dict[attr]
+        expected_config_dict = {
+            "config_variables_file_path": "uncommitted/config_variables.yml",
+            "config_version": 3.0,
+            "data_docs_sites": {},
+            "plugins_directory": "plugins/",
+            "stores": {
+                "expectations_store": {
+                    "class_name": "ExpectationsStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "expectations/",
+                    },
+                },
+                "evaluation_parameter_store": {
+                    "module_name": "great_expectations.data_context.store",
+                    "class_name": "EvaluationParameterStore",
+                },
+                "checkpoint_store": {"class_name": "CheckpointStore"},
+                "profiler_store": {"class_name": "ProfilerStore"},
+                "validations_store": {"class_name": "ValidationsStore"},
+                "validation_config_store": {"class_name": "ValidationConfigStore"},
+            },
+            "include_rendered_content": {
+                "expectation_suite": False,
+                "expectation_validation_result": False,
+                "globally": False,
+            },
+            "profiler_store_name": "profiler_store",
+        }
 
         assert mock_put.call_count == 1
         mock_put.assert_called_with(

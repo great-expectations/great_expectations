@@ -39,7 +39,7 @@ Nunc sed velit dignissim sodales ut eu.
 #### 1. Step1
 #### 2. `Step2`
 #### 3. Run following command
-```python
+```python title="Python"
 import step from steps
 ```
 

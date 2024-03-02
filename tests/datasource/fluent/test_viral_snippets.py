@@ -11,6 +11,7 @@ import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations import get_context
+from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
@@ -64,8 +65,9 @@ def test_serialize_fluent_config(
 def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
     datasource = seeded_file_context.get_datasource("sqlite_taxi")
     assert isinstance(datasource, Datasource)
+    partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
     batch_request = datasource.get_asset("my_asset").build_batch_request(
-        {"year": 2019, "month": 1}
+        options={"year": 2019, "month": 1}, partitioner=partitioner
     )
 
     validator = seeded_file_context.get_validator(batch_request=batch_request)
@@ -241,8 +243,10 @@ def test_checkpoint_with_validator_workflow(
     datasource = context.get_datasource(datasource_name)
     assert isinstance(datasource, Datasource)
 
+    partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+
     batch_request = datasource.get_asset(asset_name).build_batch_request(
-        {"year": year, "month": month}
+        options={"year": year, "month": month}, partitioner=partitioner
     )
 
     validator = context.get_validator(batch_request=batch_request)
@@ -251,7 +255,7 @@ def test_checkpoint_with_validator_workflow(
     checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
 
     actual_validations = [v.to_dict() for v in checkpoint.validations]
-    actual_validations[0].pop("expectation_suite_ge_cloud_id", None)
+    actual_validations[0].pop("expectation_suite_id", None)
 
     assert actual_validations == [
         {
@@ -263,6 +267,10 @@ def test_checkpoint_with_validator_workflow(
                 "options": {
                     "month": month,
                     "year": year,
+                },
+                "partitioner": {
+                    "method_name": "partition_on_year_and_month",
+                    "column_name": "pickup_datetime",
                 },
                 "batch_slice": None,
             },

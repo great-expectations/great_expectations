@@ -58,6 +58,8 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import Self, TypeAlias, TypeGuard
 
+    from great_expectations.core.partitioners import Partitioner
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     from great_expectations.core import (
@@ -79,7 +81,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         BatchRequestOptions,
-        Partitioner,
     )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
@@ -207,39 +208,28 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
-    # Abstract Methods
-    @property
-    def batch_request_options(self) -> tuple[str, ...]:
-        """The potential keys for BatchRequestOptions.
-
-        Example:
-        ```python
-        >>> print(asset.batch_request_options)
-        ("day", "month", "year")
-        >>> options = {"year": "2023"}
-        >>> batch_request = asset.build_batch_request(options=options)
-        ```
-
-        Returns:
-            A tuple of keys that can be used in a BatchRequestOptions dictionary.
-        """
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner] = None
+    ) -> tuple[str, ...]:
         raise NotImplementedError(
-            """One needs to implement "batch_request_options" on a DataAsset subclass."""
+            """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
         )
 
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling batch_request_options.
+                calling get_batch_request_options_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+            partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -294,11 +284,13 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_config = BatchConfig(name=name, partitioner=partitioner)
         batch_config.set_data_asset(self)
         self.batch_configs.append(batch_config)
+        self.update_batch_config_field_set()
         if self.datasource.data_context:
             try:
                 batch_config = self.datasource.add_batch_config(batch_config)
             except Exception:
                 self.batch_configs.remove(batch_config)
+                self.update_batch_config_field_set()
                 raise
         self.update_batch_config_field_set()
         return batch_config
@@ -350,8 +342,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             raise KeyError(f"Multiple keys for {batch_config_name} found")
         return batch_configs[0]
 
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(set(self.batch_request_options))
+    def _batch_request_options_are_valid(
+        self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
+    ) -> bool:
+        valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
+        return set(options.keys()).issubset(set(valid_options))
 
     def _get_batch_metadata_from_batch_request(
         self, batch_request: BatchRequest

@@ -1,6 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
-config_version: 2
+config_version: 3
 # Here's a comment between the config version and the datassources
 datasources:
   # For example, this one.
@@ -25,6 +25,7 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
+checkpoint_store_name: checkpoint_store
 validations_store_name: validations_store
 
 data_docs_sites:
@@ -43,10 +44,14 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: EvaluationParameterStore
-
   validations_store:
     class_name: ValidationsStore
 

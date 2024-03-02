@@ -4,6 +4,7 @@ title: 'Create Expectations'
 hide_title: true
 id: expectations_lp
 description: Create and manage Expectations and Expectation Suites.
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

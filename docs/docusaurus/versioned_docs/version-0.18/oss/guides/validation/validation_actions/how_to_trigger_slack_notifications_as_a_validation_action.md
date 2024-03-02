@@ -53,7 +53,7 @@ Great Expectations is able to use a Slack webhook or Slack app to send notificat
 
 Open `uncommitted/config_variables.yml` file and add `validation_notification_slack_webhook` variable by adding the following line:
 
-```yaml
+```yaml title="YAML"
 validation_notification_slack_webhook: [address to web hook]
 ```
 
@@ -75,7 +75,7 @@ Add the `send_slack_notification_on_validation_result` Action to the `action_lis
 
 #### Webhook config
 
-```yaml
+```yaml title="YAML"
 action_list:
     #--------------------------------
     # here is what you will be adding
@@ -98,7 +98,7 @@ action_list:
 
 #### Slack bot config
 
-```yaml
+```yaml title="YAML"
 action_list:
     #--------------------------------
     # here is what you will be adding
@@ -134,7 +134,7 @@ Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of d
 - If your `great_expectations.yml` contains multiple configurations for <TechnicalTag tag="data_docs" text="Data Docs" /> sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the `notify_with` variable in your Checkpoint configuration.
 - The following example will configure the Slack message to include links Data Docs at `local_site` and `s3_site`.
 
-```yaml
+```yaml title="YAML"
     # Example data_docs_sites configuration
     data_docs_sites:
       local_site:
@@ -155,7 +155,7 @@ Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of d
           show_cta_footer: true
 ```
 
-```yaml
+```yaml title="YAML"
     # Example action_list in Checkpoint configuration   
     action_list:
         - name: send_slack_notification_on_validation_result # name can be set to any value

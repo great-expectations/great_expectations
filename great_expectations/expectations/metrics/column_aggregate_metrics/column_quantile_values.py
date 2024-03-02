@@ -173,8 +173,8 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
 
         if (
             not isinstance(allow_relative_error, float)
-            or allow_relative_error < 0.0  # noqa: PLR2004
-            or allow_relative_error > 1.0  # noqa: PLR2004
+            or allow_relative_error < 0.0
+            or allow_relative_error > 1.0
         ):
             raise ValueError(
                 "SparkDFExecutionEngine requires relative error to be False or to be a float between 0 and 1."

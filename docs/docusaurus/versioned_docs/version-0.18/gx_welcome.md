@@ -5,6 +5,7 @@ hide_table_of_contents: true
 pagination_next: null
 pagination_prev: null
 slug: /home/
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

@@ -21,6 +21,9 @@ from great_expectations.compatibility.pydantic import (
 
 # default_ref_template
 from great_expectations.compatibility.typing_extensions import override
+
+# moving this import into TYPE_CHECKING requires forward refs to be updated.
+from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
@@ -54,7 +57,7 @@ class BatchRequest(pydantic.BaseModel):
         data_asset_name: The name of the Data Asset used to connect to the data.
         options: A dict that can be used to filter the batch groups associated with the Data Asset.
             The dict structure depends on the asset type. The available keys for dict can be obtained by
-            calling DataAsset.batch_request_options.
+            calling DataAsset.get_batch_request_options_keys(...).
         batch_slice: A python slice that can be used to filter the sorted batches by index.
             e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
@@ -80,6 +83,7 @@ class BatchRequest(pydantic.BaseModel):
             "The structure and types depends on the asset type."
         ),
     )
+    partitioner: Optional[Partitioner] = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )

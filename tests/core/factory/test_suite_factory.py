@@ -9,7 +9,7 @@ from great_expectations.analytics.events import (
     ExpectationSuiteDeletedEvent,
 )
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.suite_factory import SuiteFactory
+from great_expectations.core.factory.suite_factory import SuiteFactory
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.exceptions import DataContextError
@@ -22,7 +22,7 @@ def test_suite_factory_get_uses_store_get():
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    suite_dict = {"name": name, "ge_cloud_id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
+    suite_dict = {"name": name, "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
     store.get.return_value = suite_dict
     factory = SuiteFactory(store=store, include_rendered_content=False)
     context = Mock(spec=AbstractDataContext)
@@ -42,7 +42,7 @@ def test_suite_factory_get_raises_error_on_missing_key():
     name = "test-suite"
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = False
-    suite_dict = {"name": name, "ge_cloud_id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
+    suite_dict = {"name": name, "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
     store.get.return_value = suite_dict
     factory = SuiteFactory(store=store, include_rendered_content=False)
     context = Mock(spec=AbstractDataContext)
@@ -217,13 +217,13 @@ class TestSuiteFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations.core.suite_factory.submit_event", autospec=True
+            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
             _ = context.suites.add(suite=suite)
 
         # Assert
         mock_submit.assert_called_once_with(
-            event=ExpectationSuiteCreatedEvent(expectation_suite_id=suite.ge_cloud_id)
+            event=ExpectationSuiteCreatedEvent(expectation_suite_id=suite.id)
         )
 
     @pytest.mark.filesystem
@@ -242,11 +242,11 @@ class TestSuiteFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations.core.suite_factory.submit_event", autospec=True
+            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
             context.suites.delete(suite=suite)
 
         # Assert
         mock_submit.assert_called_once_with(
-            event=ExpectationSuiteDeletedEvent(expectation_suite_id=suite.ge_cloud_id)
+            event=ExpectationSuiteDeletedEvent(expectation_suite_id=suite.id)
         )

@@ -3,7 +3,7 @@
 # root linter settings are defined in the file below
 extend = "../pyproject.toml"
 
-extend-ignore = [
+lint.extend-ignore = [
     # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
     # This is likely to be a high-touch rule that most contribs don't need to care about.
     "TCH001",
@@ -19,6 +19,6 @@ extend-ignore = [
     "NPY002", # these methods are deprecated in numpy 2 but will not be removed
 ]
 
-[isort]
+[lint.isort]
 known-first-party = ["great_expectations", "tests"]
 known-third-party = ["dataprofiler", "capitalone_dataprofiler_expectations"]

@@ -13,7 +13,7 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
-from great_expectations import set_context
+from great_expectations import get_context, set_context
 from great_expectations.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
     ExpectationSuiteExpectationDeletedEvent,
@@ -93,13 +93,12 @@ class TestInit:
         default_meta = {"great_expectations_version": ge_version}
 
         assert suite.expectation_suite_name == fake_expectation_suite_name
-        assert suite._data_context is None
         assert suite.expectations == []
         assert suite.evaluation_parameters == {}
         assert suite.data_asset_type is None
         assert suite.execution_engine_type is None
         assert suite.meta == default_meta
-        assert suite.ge_cloud_id is None
+        assert suite.id is None
 
     @pytest.mark.unit
     def test_expectation_suite_init_overrides(
@@ -107,13 +106,9 @@ class TestInit:
         fake_expectation_suite_name: str,
         expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
     ):
-        class DummyDataContext:
-            pass
-
         class DummyExecutionEngine:
             pass
 
-        dummy_data_context = DummyDataContext()
         test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
         test_data_asset_type = "test_data_asset_type"
         dummy_execution_engine_type = type(DummyExecutionEngine())
@@ -124,16 +119,14 @@ class TestInit:
 
         suite = ExpectationSuite(
             expectation_suite_name=fake_expectation_suite_name,
-            data_context=dummy_data_context,  # type: ignore[arg-type]
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
             evaluation_parameters=test_evaluation_parameters,
             data_asset_type=test_data_asset_type,
             execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
             meta=test_meta,
-            ge_cloud_id=test_id,
+            id=test_id,
         )
         assert suite.expectation_suite_name == fake_expectation_suite_name
-        assert suite._data_context == dummy_data_context
         assert suite.expectation_configurations == [
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
@@ -141,7 +134,7 @@ class TestInit:
         assert suite.data_asset_type == test_data_asset_type
         assert suite.execution_engine_type == dummy_execution_engine_type
         assert suite.meta == test_meta
-        assert suite.ge_cloud_id == test_id
+        assert suite.id == test_id
 
     @pytest.mark.unit
     def test_expectation_suite_init_overrides_expectations_dict_and_obj(
@@ -415,13 +408,11 @@ class TestCRUDMethods:
         suite_name = "test-suite"
         suite = ExpectationSuite(suite_name)
         suite = context.suites.add(suite)
-        uuid_to_test = suite.ge_cloud_id
+        uuid_to_test = suite.id
         try:
             UUID(uuid_to_test)
         except TypeError:
-            pytest.fail(
-                f"Expected UUID in ExpectationSuite.ge_cloud_id, found {uuid_to_test}"
-            )
+            pytest.fail(f"Expected UUID in ExpectationSuite.id, found {uuid_to_test}")
         expectation.id = None
         suite.add_expectation(expectation)
         expectation = copy(expectation)
@@ -434,7 +425,7 @@ class TestCRUDMethods:
                 UUID(uuid_to_test)
             except TypeError:
                 pytest.fail(
-                    f"Expected UUID in ExpectationConfiguration.ge_cloud_id, found {uuid_to_test}"
+                    f"Expected UUID in ExpectationConfiguration.id, found {uuid_to_test}"
                 )
 
     @pytest.mark.unit
@@ -475,7 +466,7 @@ class TestCRUDMethods:
         expectation.column = updated_column_name
         expectation.save()
         assert suite.expectations[0].column == updated_column_name
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.suites.get(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
 
@@ -502,7 +493,7 @@ class TestCRUDMethods:
         expectation.column = updated_column_name
         expectation.save()
         assert suite.expectations[0].column == updated_column_name
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.suites.get(suite_name)
         assert len(suite.expectations) == 1
         assert suite.expectations[0].column == updated_column_name
 
@@ -606,6 +597,130 @@ class TestCRUDMethods:
         assert suite.name == new_name
 
 
+class TestEvaluationParameterOptions:
+    """Tests around the evaluation_parameter_options property of ExpectationSuites.
+
+    Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
+    """
+
+    EVALUATION_PARAMETER_VALUE_SET = "my_value_set"
+    EVALUATION_PARAMETER_MIN = "my_min"
+    EVALUATION_PARAMETER_MAX = "my_max"
+
+    @pytest.fixture
+    def expectation_suite(self) -> ExpectationSuite:
+        get_context(mode="ephemeral")
+        return ExpectationSuite("test-suite")
+
+    @pytest.fixture
+    def expectation_with_evaluation_parameter(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnDistinctValuesToBeInSet(
+            column="a", value_set={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE_SET}
+        )
+
+    @pytest.fixture
+    def expectation_with_duplicate_evaluation_parameter(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnDistinctValuesToContainSet(
+            column="a", value_set={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE_SET}
+        )
+
+    @pytest.fixture
+    def expectation_with_multiple_evaluation_parameters(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnValuesToBeBetween(
+            column="c",
+            min_value={"$PARAMETER": self.EVALUATION_PARAMETER_MIN},
+            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
+        )
+
+    @pytest.fixture
+    def expectation_without_evaluation_parameters(
+        self,
+    ) -> Expectation:
+        return gxe.ExpectColumnDistinctValuesToBeInSet(column="d", value_set=[1, 2])
+
+    @pytest.mark.unit
+    def test_empty_suite(self, expectation_suite: ExpectationSuite):
+        assert expectation_suite.evaluation_parameter_options == tuple()
+
+    @pytest.mark.unit
+    def test_expectations_but_no_evaluation_params(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_without_evaluation_parameters: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_without_evaluation_parameters)
+
+        assert expectation_suite.evaluation_parameter_options == tuple()
+
+    @pytest.mark.unit
+    def test_expectation_with_evaluation_parameter(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_evaluation_parameter: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_VALUE_SET,
+        )
+
+    @pytest.mark.unit
+    def test_duplicate_evaluation_parameters_only_show_once(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_evaluation_parameter: Expectation,
+        expectation_with_duplicate_evaluation_parameter: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+        expectation_suite.add_expectation(
+            expectation_with_duplicate_evaluation_parameter
+        )
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_VALUE_SET,
+        )
+
+    @pytest.mark.unit
+    def test_multiple_evaluation_parameters_on_one_expectation(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_multiple_evaluation_parameters: Expectation,
+    ):
+        expectation_suite.add_expectation(
+            expectation_with_multiple_evaluation_parameters
+        )
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_MAX,
+            self.EVALUATION_PARAMETER_MIN,
+        )
+
+    @pytest.mark.unit
+    def test_multiple_evaluation_parameters_across_multiple_expectation(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_with_evaluation_parameter: Expectation,
+        expectation_with_multiple_evaluation_parameters: Expectation,
+    ):
+        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+        expectation_suite.add_expectation(
+            expectation_with_multiple_evaluation_parameters
+        )
+
+        assert expectation_suite.evaluation_parameter_options == (
+            self.EVALUATION_PARAMETER_MAX,
+            self.EVALUATION_PARAMETER_MIN,
+            self.EVALUATION_PARAMETER_VALUE_SET,
+        )
+
+
+@pytest.mark.unit
 class TestAddCitation:
     @pytest.mark.unit
     def test_empty_suite_with_meta_fixture(
@@ -802,7 +917,7 @@ class TestIsEquivalentTo:
         different_but_equivalent_suite.expectation_suite_name = "different_name"
         different_but_equivalent_suite.meta = {"notes": "Different meta."}
         different_but_equivalent_suite.data_asset_type = "different_data_asset_type"
-        different_but_equivalent_suite.ge_cloud_id = "different_id"
+        different_but_equivalent_suite.id = "different_id"
 
         assert suite_with_single_expectation.isEquivalentTo(
             different_but_equivalent_suite
@@ -907,12 +1022,12 @@ class TestEqDunder:
             ),
             pytest.param("meta", {"notes": "Different meta."}),
             pytest.param(
-                "ge_cloud_id",
+                "id",
                 "different_id",
                 marks=pytest.mark.xfail(
                     strict=True,
                     raises=AssertionError,
-                    reason="Currently ge_cloud_id is not considered in ExpectationSuite equality",
+                    reason="Currently id is not considered in ExpectationSuite equality",
                 ),
             ),
         ],
@@ -1006,13 +1121,11 @@ def table_exp3() -> ExpectationConfiguration:
 
 
 @pytest.fixture
-def empty_suite(empty_data_context) -> ExpectationSuite:
-    context = empty_data_context
+def empty_suite() -> ExpectationSuite:
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
-        data_context=context,
     )
 
 
@@ -1026,9 +1139,7 @@ def suite_with_table_and_column_expectations(
     table_exp1,
     table_exp2,
     table_exp3,
-    empty_data_context,
 ) -> ExpectationSuite:
-    context = empty_data_context
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -1042,21 +1153,18 @@ def suite_with_table_and_column_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
-        data_context=context,
     )
     return suite
 
 
 @pytest.fixture
 def baseline_suite(
-    expect_column_values_to_be_in_set_col_a_with_meta, exp2, empty_data_context
+    expect_column_values_to_be_in_set_col_a_with_meta, exp2
 ) -> ExpectationSuite:
-    context = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp2],
         meta={"notes": "This is an expectation suite."},
-        data_context=context,
     )
 
 

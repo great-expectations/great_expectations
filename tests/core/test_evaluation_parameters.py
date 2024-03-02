@@ -15,12 +15,37 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
+    get_evaluation_parameter_key,
+    is_evaluation_parameter,
     parse_evaluation_parameter,
 )
 from great_expectations.exceptions import EvaluationParameterError
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (None, False),
+        (1, False),
+        ("foo", False),
+        ({}, False),
+        ({"PARAMETER": 123}, False),
+        ({"$PARAMETER": 123}, True),
+        ({"$PARAMETER": 123, "another_field": 234}, True),
+    ],
+)
+@pytest.mark.unit
+def test_is_evaluation_parameter(value: Any, expected: bool):
+    assert is_evaluation_parameter(value) == expected
+
+
+@pytest.mark.unit
+def test_get_evaluation_parameter_key():
+    key = "foo"
+    assert get_evaluation_parameter_key({"$PARAMETER": key}) == key
 
 
 @pytest.mark.unit
@@ -331,7 +356,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
                         "max_value": 5,
                     },
                     meta={"substituted_parameters": {"min_value": 1, "max_value": 5}},
-                    ge_cloud_id=None,
+                    id=None,
                 ),
                 meta={},
                 exception_info={
@@ -379,7 +404,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
                             "max_value": "2022-12-06T00:00:00",
                         }
                     },
-                    ge_cloud_id=None,
+                    id=None,
                 ),
                 meta={},
                 exception_info={

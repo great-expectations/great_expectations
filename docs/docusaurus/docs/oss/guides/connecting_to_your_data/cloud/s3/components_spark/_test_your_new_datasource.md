@@ -19,20 +19,20 @@ Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your
 The path you will want to use is your S3 URI, not the URL.
 :::
 
-```python name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 1"
+```python title="Python" name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 1"
 ```
 
 Then load data into the `Validator`.
 
-```python name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 1"
+```python title="Python" name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 1"
 ```
 </TabItem>
 <TabItem value="batch_request">
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
-```python name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 2"
+```python title="Python" name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py batch request 2"
 ```
 Then load data into the `Validator`.
-```python name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 2"
+```python title="Python" name="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py get validator 2"
 ```
 </TabItem>
 </Tabs>

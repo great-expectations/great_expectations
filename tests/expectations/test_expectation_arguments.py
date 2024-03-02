@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -18,6 +18,38 @@ from great_expectations.expectations.expectation_configuration import (
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
+
+
+def assert_exception_info(
+    result: ExpectationValidationResult, expected_exception_message: Union[str, None]
+):
+    if result.success:
+        if "raised_exception" in result["exception_info"]:
+            assert (
+                "exception_traceback" not in result.exception_info
+            ) or not result.exception_info["exception_traceback"]
+            assert (
+                "exception_message" not in result.exception_info
+            ) or not result.exception_info["exception_message"]
+        else:
+            # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+            #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+            for k, v in result["exception_info"].items():
+                assert ("exception_traceback" not in v) or not v["exception_traceback"]
+                assert ("exception_traceback" not in v) or not v["exception_traceback"]
+    elif "raised_exception" in result["exception_info"]:
+        assert result.exception_info.get("exception_traceback")
+        assert result.exception_info.get("exception_message")
+        if expected_exception_message:
+            assert result["exception_message"] == expected_exception_message
+    else:
+        # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+        #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+        for k, v in result["exception_info"].items():
+            assert v.get("exception_traceback")
+            assert v.get("exception_message")
+            if expected_exception_message:
+                assert v["exception_message"] == expected_exception_message
 
 
 @pytest.fixture
@@ -113,12 +145,7 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
 
     for result in results:
         assert result.success
-        assert (
-            "exception_traceback" not in result.exception_info
-        ) or not result.exception_info["exception_traceback"]
-        assert (
-            "exception_message" not in result.exception_info
-        ) or not result.exception_info["exception_message"]
+        assert_exception_info(result=result, expected_exception_message=None)
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
@@ -350,9 +377,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         == "expect_column_values_to_not_be_null"
     )
     assert not result.success
-    assert "exception_traceback" in result.exception_info
-    assert "exception_message" in result.exception_info
-    assert result.exception_info["exception_message"] == expected_exception_message
+    assert_exception_info(
+        result=result, expected_exception_message=expected_exception_message
+    )
 
     result = results[1]
     assert (
@@ -360,12 +387,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         == "expect_table_row_count_to_equal"
     )
     assert result.success
-    assert (
-        "exception_traceback" not in result.exception_info
-    ) or not result.exception_info["exception_traceback"]
-    assert (
-        "exception_message" not in result.exception_info
-    ) or not result.exception_info["exception_message"]
+    assert_exception_info(result=result, expected_exception_message=None)
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
@@ -379,9 +401,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert not result.success
-    assert "exception_traceback" in result.exception_info
-    assert "exception_message" in result.exception_info
-    assert result.exception_info["exception_message"] == expected_exception_message
+    assert_exception_info(
+        result=result, expected_exception_message=expected_exception_message
+    )
 
     # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
 
@@ -393,12 +415,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     )
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
-    assert (
-        "exception_traceback" not in result.exception_info
-    ) or not result.exception_info["exception_traceback"]
-    assert (
-        "exception_message" not in result.exception_info
-    ) or not result.exception_info["exception_message"]
+    assert_exception_info(result=result, expected_exception_message=None)
 
 
 @pytest.mark.spark

@@ -13,9 +13,11 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -71,10 +73,10 @@ def expectation_suite(
         expectation_suite=expectation_suite
     )
     assert len(expectation_suite.expectations) > 0
-    _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    _ = context.suites.get(name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
-        _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+        _ = context.suites.get(name=expectation_suite_name)
 
 
 @pytest.fixture(scope="module")
@@ -91,8 +93,8 @@ def validator(
     yield validator
     validator.save_expectation_suite()
     expectation_suite = validator.get_expectation_suite()
-    _ = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite.expectation_suite_name,
+    _ = context.suites.get(
+        name=expectation_suite.expectation_suite_name,
     )
 
 
@@ -127,16 +129,15 @@ def checkpoint(
             }
         ],
     )
-    checkpoint = context.get_checkpoint(name=checkpoint_name)
+    checkpoint = context.checkpoints.get(name=checkpoint_name)
     assert (
         len(checkpoint.validations) == 1
     ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
-    context.delete_checkpoint(
-        name=checkpoint_name,
-    )
+    context.checkpoints.delete(checkpoint)
+
     with pytest.raises(gx_exceptions.DataContextError):
-        context.get_checkpoint(name=checkpoint_name)
+        context.checkpoints.get(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
@@ -256,11 +257,6 @@ def spark_session() -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:  # type: ignore[truthy-function]
-        return get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
 
     raise ValueError("spark tests are requested, but pyspark is not installed")

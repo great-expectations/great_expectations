@@ -21,8 +21,8 @@ context.add_expectation_suite(
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_expectation_suite">
-suite: ExpectationSuite = context.get_expectation_suite(
-    expectation_suite_name="insert_your_expectation_suite_name_here"
+suite: ExpectationSuite = context.suites.get(
+    name="insert_your_expectation_suite_name_here"
 )
 # </snippet>
 

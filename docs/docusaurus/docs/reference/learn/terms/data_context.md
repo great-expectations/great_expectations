@@ -53,7 +53,7 @@ After you've created a Data Context, you'll likely start future work by instanti
 ```python title="Import GX" name="docs/docusaurus/docs/snippets/pandas_yaml_example.py import gx"
 ```
 
-```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py get_context"
+```python title="Python" name="docs/docusaurus/docs/snippets/pandas_yaml_example.py get_context"
 ```
 
 Alternatively, you can use the `context_root_dir` parameter if you want to specify a specific directory
@@ -65,18 +65,18 @@ If you’re using GX Cloud, you set up the cloud environment variables before ca
 The code standards for GX strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you run the following code:
 
 
-```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py import BatchRequest"
+```python title="Python" name="docs/docusaurus/docs/snippets/pandas_yaml_example.py import BatchRequest"
 ```
 
-```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with batch request"
+```python title="Python" name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with batch request"
 ```
 
 If you prefer untyped inputs, you run code similar to the following examples:
 
-```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with parameters data_asset_name"
+```python title="Python" name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with parameters data_asset_name"
 ```
 
-```python name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with parameters"
+```python title="Python" name="docs/docusaurus/docs/snippets/pandas_yaml_example.py context.get_batch with parameters"
 ```
 
 In the example code, the `get_batch()` method is responsible for inferring your intended types, and passing it through to the correct internal methods.

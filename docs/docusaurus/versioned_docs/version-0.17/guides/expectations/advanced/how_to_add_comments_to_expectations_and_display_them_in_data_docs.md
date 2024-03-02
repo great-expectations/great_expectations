@@ -26,7 +26,7 @@ great_expectations suite edit <your_suite_name>
 
 For each Expectation you wish to add notes to, add a dictionary to the ``meta`` field with the key ``notes`` and your comment as the value. Here is an example.
 
-```python
+```python title="Python"
 validator.expect_table_row_count_to_be_between(
   max_value=1000000, min_value=1,
   meta={"notes": "Example notes about this expectation."}
@@ -43,7 +43,7 @@ To add styling to your comments, you can add a format tag. Here are a few exampl
 
 A single line of markdown is rendered in red, with any Markdown formatting applied.
 
-```python
+```python title="Python"
 validator.expect_column_values_to_not_be_null(
   column="column_name",
   meta={
@@ -59,7 +59,7 @@ validator.expect_column_values_to_not_be_null(
 
 Multiple lines can be rendered by using a list for ``content``; these lines are rendered in black text with any Markdown formatting applied.
 
-```python
+```python title="Python"
 validator.expect_column_values_to_not_be_null(
   column="column_name",
   meta={
@@ -78,7 +78,7 @@ validator.expect_column_values_to_not_be_null(
 
 You can also change the ``format`` to ``string`` and single or multiple lines will be formatted similar to the above, but the Markdown formatting will not be applied.
 
-```python
+```python title="Python"
 validator.expect_column_values_to_not_be_null(
   column="column_name",
   meta={

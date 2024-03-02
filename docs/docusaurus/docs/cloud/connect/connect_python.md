@@ -14,7 +14,7 @@ In this quickstart, you'll learn how to use GX Cloud from a Python script or int
 ## Prerequisites
 
 - You have internet access and download permissions.
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud).
 
 ## Prepare your environment
 
@@ -74,7 +74,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 - Run the following Python code to create a Data Context object:
 
-    ```python name="tutorials/quickstart/quickstart.py get_context"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py get_context"
     ```
   
     The Data Context will detect the previously set environment variables and connect to your GX Cloud account.
@@ -83,7 +83,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 - Run the following Python code to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a Validator object:
 
-    ```python name="tutorials/quickstart/quickstart.py connect_to_data"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
     The code example uses the default Data Source for Pandas to access the `.csv` data from the file at the specified URL path.
@@ -92,7 +92,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 - Run the following Python code to create two Expectations and save them to the Expectation Suite:
 
-    ```python name="tutorials/quickstart/quickstart.py create_expectation"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py create_expectation"
     ```
 
   The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null).
@@ -103,17 +103,17 @@ Environment variables securely store your GX Cloud access credentials.
 
 1. Run the following Python code to define a Checkpoint and examine the data to determine if it matches the defined Expectations:
 
-    ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
 2. Use the following command to return the Validation Results:
 
-    ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
 3. Run the following Python code to view an HTML representation of the Validation Results in the generated Data Docs:
 
-    ```python name="tutorials/quickstart/quickstart.py view_results"
+    ```python title="Python" name="tutorials/quickstart/quickstart.py view_results"
     ```
 
 ## Related documentation

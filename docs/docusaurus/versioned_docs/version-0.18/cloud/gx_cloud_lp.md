@@ -7,6 +7,7 @@ pagination_next: null
 pagination_prev: null
 slug: '/cloud/'
 displayed_sidebar: gx_cloud
+hide_feedback_survey: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';

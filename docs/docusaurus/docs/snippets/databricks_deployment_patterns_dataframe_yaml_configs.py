@@ -16,9 +16,11 @@ from great_expectations.data_context.types.base import (
 yaml = YAMLHandler()
 # </snippet>
 
-from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.execution_engine.sparkdf_execution_engine import (
+    SparkDFExecutionEngine,
+)
 
-spark = get_or_create_spark_application()
+spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # 1. Install Great Expectations
 # %pip install great-expectations
@@ -154,7 +156,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 # ASSERTIONS vvvvv vvvvv
 assert context.list_expectation_suite_names() == [expectation_suite_name]
-suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+suite = context.suites.get(name=expectation_suite_name)
 assert len(suite.expectations) == 2
 # ASSERTIONS ^^^^^ ^^^^^
 
@@ -175,7 +177,7 @@ context.add_or_update_checkpoint(**yaml.load(my_checkpoint_config))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py run checkpoint">
-checkpoint = context.get_checkpoint(my_checkpoint_name)
+checkpoint = context.checkpoints.get(my_checkpoint_name)
 checkpoint_result = checkpoint.run(
     validations=[
         {

@@ -22,6 +22,7 @@ import pytest
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -43,7 +44,7 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    PartitionerYearAndMonth,
+    SqlPartitionerYearAndMonth,
     TableAsset,
 )
 from tests.datasource.fluent.conftest import FLUENT_DATASOURCE_TEST_DIR
@@ -81,13 +82,18 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "type": "table",
                 },
                 {
-                    "partitioner": {
-                        "column_name": "my_column",
-                        "method_name": "partition_on_year_and_month",
-                    },
                     "table_name": "another_table",
                     "name": "with_partitioner",
                     "type": "table",
+                    "batch_configs": [
+                        {
+                            "name": "with_partitioner",
+                            "partitioner": {
+                                "column_name": "my_column",
+                                "method_name": "partition_on_year_and_month",
+                            },
+                        }
+                    ],
                 },
                 {
                     "order_by": [
@@ -511,16 +517,23 @@ def test_catch_bad_top_level_config(
                 "name": "unknown partitioner",
                 "type": "table",
                 "table_name": "pool",
-                "partitioner": {
-                    "method_name": "not_a_valid_method_name",
-                    "column_name": "foo",
-                },
+                "batch_configs": [
+                    {
+                        "name": "unknown_partitioner_batch_config",
+                        "partitioner": {
+                            "method_name": "not_a_valid_method_name",
+                            "column_name": "foo",
+                        },
+                    }
+                ],
             },
             (
                 _FLUENT_DATASOURCES_KEY,
                 "assets",
                 0,
                 "TableAsset",
+                "batch_configs",
+                0,
                 "partitioner",
                 "method_name",
             ),
@@ -619,7 +632,7 @@ def test_general_partitioner_errors(
     expected_msg: str,
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        PartitionerYearAndMonth(**bad_column_kwargs)
+        SqlPartitionerYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -761,8 +774,9 @@ def test_partitioners_deserialization(
     table_asset: TableAsset = from_all_config.get_datasource(
         datasource_name="my_pg_ds"
     ).get_asset(asset_name="with_partitioner")
-    assert isinstance(table_asset.partitioner, PartitionerYearAndMonth)
-    assert table_asset.partitioner.method_name == "partition_on_year_and_month"
+    partitioner = table_asset.batch_configs[0].partitioner
+    assert isinstance(partitioner, PartitionerYearAndMonth)
+    assert partitioner.method_name == "partition_on_year_and_month"
 
 
 # TDD Tests for future work

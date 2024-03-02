@@ -22,7 +22,6 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
@@ -33,6 +32,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
@@ -104,7 +104,7 @@ def test_basic_checkpoint_config_validation(
     """
 
     assert len(context.list_checkpoints()) == 0
-    context.add_checkpoint(**yaml.load(yaml_config_erroneous))
+    erroneous_checkpoint = context.add_checkpoint(**yaml.load(yaml_config_erroneous))
     assert len(context.list_checkpoints()) == 1
 
     yaml_config: str = """
@@ -170,15 +170,15 @@ def test_basic_checkpoint_config_validation(
     assert len(context.list_checkpoints()) == 2
 
     context.suites.add(ExpectationSuite(name="my_expectation_suite"))
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     with pytest.raises(
         gx_exceptions.DataContextError,
         match=r'Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         checkpoint.run()
 
-    context.delete_checkpoint(name="my_erroneous_checkpoint")
-    context.delete_checkpoint(name="my_checkpoint")
+    context.checkpoints.delete(erroneous_checkpoint)
+    context.checkpoints.delete(checkpoint)
     assert len(context.list_checkpoints()) == 0
 
 
@@ -208,7 +208,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         configuration_key=checkpoint_config.name
     )
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(checkpoint_config.name)
+    checkpoint: Checkpoint = context.checkpoints.get(checkpoint_config.name)
 
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
@@ -252,7 +252,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
         configuration_key=checkpoint_config.name
     )
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(checkpoint_config.name)
+    checkpoint: Checkpoint = context.checkpoints.get(checkpoint_config.name)
 
     assert len(context.validations_store.list_keys()) == 0
 
@@ -1345,7 +1345,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1383,7 +1383,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1397,7 +1397,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = get_or_create_spark_application().createDataFrame(pandas_df)
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
+        pandas_df
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1422,7 +1424,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1462,7 +1464,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": runtime_batch_request}],
     )
@@ -1502,7 +1504,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": runtime_batch_request}],
     )
@@ -1518,7 +1520,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = get_or_create_spark_application().createDataFrame(pandas_df)
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
+        pandas_df
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1543,7 +1547,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": runtime_batch_request}],
     )
@@ -1592,7 +1596,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1639,7 +1643,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1685,7 +1689,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": runtime_batch_request}],
     )
@@ -1734,7 +1738,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": runtime_batch_request}],
     )
@@ -1818,7 +1822,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -1881,7 +1885,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result = checkpoint.run()
     assert not result["success"]
@@ -1952,7 +1956,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result = checkpoint.run()
     assert result["success"] is False
@@ -2038,7 +2042,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
     assert (
@@ -2054,7 +2058,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
     assert result["success"]
@@ -2111,7 +2115,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
@@ -2128,7 +2132,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    checkpoint = context.get_checkpoint("my_checkpoint")
+    checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": runtime_batch_request}],
     )
@@ -2257,7 +2261,7 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
     assert isinstance(pickle.dumps(result), bytes)
@@ -2293,7 +2297,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
     validation_result_identifier: ValidationResultIdentifier = (
@@ -2336,7 +2340,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
     validation_result_identifier: ValidationResultIdentifier = (
@@ -2467,7 +2471,7 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     context.add_checkpoint(**checkpoint_config_dict)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
 
@@ -2558,7 +2562,7 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
 def test_use_validation_url_from_cloud(fake_cloud_context_basic):
     context = fake_cloud_context_basic
     checkpoint_name = "my_checkpoint"
-    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint = context.checkpoints.get(checkpoint_name)
     checkpoint_result = checkpoint.run()
     org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
     assert (
@@ -2571,7 +2575,7 @@ def test_use_validation_url_from_cloud(fake_cloud_context_basic):
 def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
     context, slack_counter = fake_cloud_context_with_slack
     checkpoint_name = "my_checkpoint"
-    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint = context.checkpoints.get(checkpoint_name)
     checkpoint.run()
     assert slack_counter.count == 5
 
@@ -2807,3 +2811,10 @@ def test_checkpoint_run_with_runtime_overrides(
 
     result = checkpoint.run(batch_request=batch_request)
     assert result.success
+
+
+@pytest.mark.unit
+def test_checkpoint_run_raises_error_if_not_associated_with_context():
+    checkpoint = Checkpoint(name="my_checkpoint")
+    with pytest.raises(ValueError):
+        checkpoint.run()

@@ -165,6 +165,7 @@ def basic_data_context_config():
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {},
             "stores": {
@@ -173,6 +174,13 @@ def basic_data_context_config():
                     "store_backend": {
                         "class_name": "TupleFilesystemStoreBackend",
                         "base_directory": "expectations/",
+                    },
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
                     },
                 },
                 "evaluation_parameter_store": {
@@ -226,6 +234,7 @@ def data_context_config_with_datasources(conn_string_password):
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {
                 "Datasource 1: Redshift": {
@@ -325,6 +334,13 @@ def data_context_config_with_datasources(conn_string_password):
                     "store_backend": {
                         "class_name": "TupleFilesystemStoreBackend",
                         "base_directory": "expectations/",
+                    },
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
                     },
                 },
                 "evaluation_parameter_store": {
@@ -643,14 +659,14 @@ def checkpoint_config() -> dict:
                 "name": None,
                 "id": None,
                 "expectation_suite_name": "taxi.demo_pass",
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "batch_request": None,
             },
             {
                 "name": None,
                 "id": None,
                 "expectation_suite_name": None,
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "batch_request": {
                     "datasource_name": "oss_test_datasource",
                     "data_connector_name": "oss_test_data_connector",

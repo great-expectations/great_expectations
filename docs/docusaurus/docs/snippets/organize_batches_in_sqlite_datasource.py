@@ -2,6 +2,7 @@ import pathlib
 import tempfile
 
 import great_expectations as gx
+from great_expectations.core.partitioners import PartitionerYearAndMonth
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -38,10 +39,10 @@ my_table_asset = my_datasource.get_asset(asset_name="my_table_asset")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month">
-my_table_asset.add_partitioner_year_and_month(column_name="pickup_datetime")
+partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
 # </snippet>
 
-my_batch_request = my_table_asset.build_batch_request()
+my_batch_request = my_table_asset.build_batch_request(partitioner=partitioner)
 batches = my_table_asset.get_batch_list_from_batch_request(my_batch_request)
 
 assert len(batches) == 12
@@ -51,11 +52,14 @@ assert len(batches) == 12
 my_asset = my_table_asset.add_sorters(["+year", "-month"])
 # </snippet>
 
-assert my_asset.batch_request_options == ("year", "month")
+assert my_asset.get_batch_request_options_keys(partitioner=partitioner) == (
+    "year",
+    "month",
+)
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_batch_list">
-my_batch_request = my_table_asset.build_batch_request()
+my_batch_request = my_table_asset.build_batch_request(partitioner=partitioner)
 batches = my_table_asset.get_batch_list_from_batch_request(my_batch_request)
 # </snippet>
 

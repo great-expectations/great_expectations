@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
     DatasourceConfig,
 )
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
@@ -147,8 +148,13 @@ class StubBaseDataContext:
     def list_expectation_suite_names(self) -> List[str]:
         return list(self._expectation_suite_names)
 
-    def get_expectation_suite(self, name: str) -> ExpectationSuite:
-        return ExpectationSuite(expectation_suite_name=name)
+    @property
+    def suites(self):
+        class _MockSuites:
+            def get(self, name: str) -> ExpectationSuite:
+                return ExpectationSuite(expectation_suite_name=name)
+
+        return _MockSuites()
 
     def list_checkpoints(self) -> List[str]:
         return list(self._checkpoint_names)
@@ -183,6 +189,7 @@ def empty_serialized_configuration_bundle() -> dict:
         "data_context_id": "27517569-1500-4127-af68-b5bad960a492",
         "checkpoints": [],
         "data_context_variables": {
+            "checkpoint_store_name": None,
             "config_variables_file_path": None,
             "config_version": 3.0,
             "data_docs_sites": None,
@@ -194,7 +201,9 @@ def empty_serialized_configuration_bundle() -> dict:
                 "globally": False,
             },
             "plugins_directory": None,
-            "stores": {},
+            "profiler_store_name": None,
+            "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
+            "validation_operators": None,
             "validations_store_name": None,
         },
         "datasources": [],
@@ -213,9 +222,9 @@ def serialized_configuration_bundle() -> dict:
                 "action_list": [],
                 "batch_request": {},
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": None,
-                "ge_cloud_id": None,
+                "id": None,
                 "runtime_configuration": {},
                 "validations": [],
             }
@@ -226,13 +235,16 @@ def serialized_configuration_bundle() -> dict:
             "data_docs_sites": None,
             "evaluation_parameter_store_name": None,
             "expectations_store_name": None,
+            "checkpoint_store_name": None,
+            "profiler_store_name": None,
             "include_rendered_content": {
                 "expectation_suite": False,
                 "expectation_validation_result": False,
                 "globally": False,
             },
             "plugins_directory": None,
-            "stores": {},
+            "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
+            "validation_operators": None,
             "validations_store_name": None,
         },
         "datasources": [
@@ -252,7 +264,7 @@ def serialized_configuration_bundle() -> dict:
                 "data_asset_type": None,
                 "expectation_suite_name": "my_suite",
                 "expectations": [],
-                "ge_cloud_id": None,
+                "id": None,
             }
         ],
         "validation_results": {

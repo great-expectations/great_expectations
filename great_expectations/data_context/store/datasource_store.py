@@ -164,9 +164,9 @@ class DatasourceStore(Store):
 
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
-        datasource_ge_cloud_id: str = data["id"]
+        datasource_id: str = data["id"]
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
-        datasource_config_dict["id"] = datasource_ge_cloud_id
+        datasource_config_dict["id"] = datasource_id
         return datasource_config_dict
 
     def retrieve_by_name(

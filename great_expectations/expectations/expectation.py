@@ -37,6 +37,10 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (
+    get_evaluation_parameter_key,
+    is_evaluation_parameter,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -129,9 +133,10 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
-            for key, value in kwargs_dict.items():
-                if isinstance(value, dict) and "$PARAMETER" in value.keys():
-                    current_expectation_params.append(value["$PARAMETER"])
+            for value in kwargs_dict.values():
+                if is_evaluation_parameter(value):
+                    key = get_evaluation_parameter_key(value)
+                    current_expectation_params.append(key)
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
@@ -610,7 +615,15 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedStringTemplateContent:
         assert result, "Must provide a result object."
-        if result.exception_info["raised_exception"]:
+        raised_exception: bool = False
+        if "raised_exception" in result.exception_info:
+            raised_exception = result.exception_info["raised_exception"]
+        else:
+            for k, v in result.exception_info.items():
+                # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                raised_exception = v["raised_exception"]
+        if raised_exception:
             return RenderedStringTemplateContent(
                 **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
@@ -690,8 +703,28 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         assert result, "Must provide a result object."
         success: Optional[bool] = result.success
         result_dict: dict = result.result
+        exception = {
+            "raised_exception": False,
+            "exception_message": "",
+            "exception_traceback": "",
+        }
+        if "raised_exception" in result.exception_info:
+            exception["raised_exception"] = result.exception_info["raised_exception"]
+            exception["exception_message"] = result.exception_info["exception_message"]
+            exception["exception_traceback"] = result.exception_info[
+                "exception_traceback"
+            ]
+        else:
+            for k, v in result.exception_info.items():
+                # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                exception["raised_exception"] = v["raised_exception"]
+                exception["exception_message"] = v["exception_message"]
+                exception["exception_traceback"] = v["exception_traceback"]
+                # This only pulls the first exception message and traceback from a list of exceptions to render in the data docs.
+                break
 
-        if result.exception_info["raised_exception"]:
+        if exception["raised_exception"]:
             exception_message_template_str = (
                 "\n\n$expectation_type raised an exception:\n$exception_message"
             )
@@ -708,9 +741,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                         "template": exception_message_template_str,
                         "params": {
                             "expectation_type": expectation_type,
-                            "exception_message": result.exception_info[
-                                "exception_message"
-                            ],
+                            "exception_message": exception["exception_message"],
                         },
                         "tag": "strong",
                         "styling": {
@@ -734,9 +765,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                             **{  # type: ignore[arg-type]
                                 "content_block_type": "string_template",
                                 "string_template": {
-                                    "template": result.exception_info[
-                                        "exception_traceback"
-                                    ],
+                                    "template": exception["exception_traceback"],
                                     "tag": "code",
                                 },
                             }
@@ -1225,6 +1254,20 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return expectation_validation_result_list[0]
 
     @property
+    def evaluation_parameter_options(self) -> tuple[str, ...]:
+        """EvaluationParameter options for this Expectation.
+
+        Returns:
+            tuple[str, ...]: The keys of the evaluation parameters used in this Expectation at runtime.
+        """
+        output: set[str] = set()
+        as_dict = self.dict(exclude_defaults=True)
+        for value in as_dict.values():
+            if is_evaluation_parameter(value):
+                output.add(get_evaluation_parameter_key(value))
+        return tuple(sorted(output))
+
+    @property
     def configuration(self) -> ExpectationConfiguration:
         kwargs = self.dict(exclude_defaults=True)
         meta = kwargs.pop("meta", None)
@@ -1236,7 +1279,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             notes=notes,
-            ge_cloud_id=id,
+            id=id,
             rendered_content=rendered_content,
         )
 
