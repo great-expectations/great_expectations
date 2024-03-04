@@ -25,6 +25,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: get_docs_sites_urls",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: open_data_docs",
     "File: great_expectations/data_context/data_context/context_factory.py Name: get_context",
+    "File: great_expectations/data_context/data_context/context_factory.py Name: get_validator",
     "File: great_expectations/data_context/store/_store_backend.py Name: add",
     "File: great_expectations/data_context/store/_store_backend.py Name: update",
     "File: great_expectations/data_context/store/checkpoint_store.py Name: CheckpointStore",
