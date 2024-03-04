@@ -69,6 +69,7 @@ def sort(  # noqa: PLR0913
     if not isort:
         cmds = [
             "ruff",
+            "check",
             path,
             "--select I",
             "--diff" if check else "--fix",
@@ -137,7 +138,7 @@ def lint(  # noqa: PLR0913
         fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
-    cmds = ["ruff", path]
+    cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
     if watch:
