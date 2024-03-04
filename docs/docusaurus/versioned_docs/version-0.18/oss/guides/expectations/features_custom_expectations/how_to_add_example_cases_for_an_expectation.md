@@ -137,7 +137,7 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publicly displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
+```python title="Python" name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note

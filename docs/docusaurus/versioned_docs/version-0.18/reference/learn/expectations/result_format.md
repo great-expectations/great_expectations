@@ -36,14 +36,14 @@ the configuration is not persisted, and you'll receive a `UserWarning`. GX recom
 
 To apply `result_format` to an Expectation, you pass it into the Expectation configuration on your Validator:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_set"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_set"
 ```
 
 ### Checkpoint-level configuration
 
 Run the following code to apply `result_format` to every Expectation in a Suite:
 
-```python name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example"
 ```
 Your Checkpoint configuration is defined below the `runtime_configuration` key. 
 
@@ -97,7 +97,7 @@ Regardless of how Result Format is configured, `unexpected_list` is never render
 
 The following examples use the data defined in the following Pandas DataFrame:
 
-```python name="docs/docusaurus/docs/snippets/result_format pandas_df_for_result_format"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format pandas_df_for_result_format"
 ```
 
 ### Behavior for `BOOLEAN_ONLY`
@@ -106,12 +106,12 @@ When the `result_format` is `BOOLEAN_ONLY`, no `result` is returned. The result 
 
 For example:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_boolean_example"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_boolean_example"
 ```
 
 Returns the following output:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_boolean_example_output"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_boolean_example_output"
 ```
 
 ### Behavior for `BASIC`
@@ -140,12 +140,12 @@ The basic `result` includes:
 
 For example:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_set"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_set"
 ```
 
 Returns the following output:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_set_output"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_set_output"
 ```
 
 `ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a single 
@@ -164,12 +164,12 @@ The basic `result` includes:
 
 For example:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_agg"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_agg"
 ```
 
 Returns the following output:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_agg_output"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_basic_example_agg_output"
 ```
 
 ### Behavior for `SUMMARY`
@@ -201,12 +201,12 @@ The summary `result` includes:
 
 For example:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_set"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_set"
 ```
 
 Returns the following output:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_set_output"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_set_output"
 ```
 
 `ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` to justify the Expectation result. It also includes additional information regarding observed values and counts, depending on the specific Expectation.
@@ -224,12 +224,12 @@ The summary `result` includes:
 
 For example:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_agg"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_agg"
 ```
 
 Returns the following output:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_agg_output"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_summary_example_agg_output"
 ```
 
 
@@ -262,12 +262,12 @@ The complete `result` includes:
 
 For example:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_set"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_set"
 ```
 
 Returns the following output:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_set_output
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_set_output
 ```
 
 `ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` to justify the Expectation result. It also includes additional information regarding observed values and counts, depending on the specific Expectation.
@@ -286,10 +286,10 @@ The complete `result` includes:
 
 For example:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_agg"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_agg"
 ```
 
 Returns the following output:
 
-```python name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_agg_output"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format result_format_complete_example_agg_output"
 ```
