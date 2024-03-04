@@ -277,7 +277,7 @@ module.exports = {
         {
           type: 'doc',
           id: 'core/installation_and_setup/install_gx',
-          label: 'Install Gx 1.0'
+          label: 'Install GX 1.0'
         },
         {
           type: 'category',
