@@ -152,12 +152,12 @@ class ParameterBuilder(ABC, Builder):
         """
         runtime_configuration = runtime_configuration or {}
 
-        fully_qualified_parameter_names: List[
-            str
-        ] = get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
+        fully_qualified_parameter_names: List[str] = (
+            get_fully_qualified_parameter_names(
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         # recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
@@ -220,9 +220,9 @@ class ParameterBuilder(ABC, Builder):
         "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
         """
         # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
-        evaluation_parameter_builders: List[
-            ParameterBuilder
-        ] = self.evaluation_parameter_builders
+        evaluation_parameter_builders: List[ParameterBuilder] = (
+            self.evaluation_parameter_builders
+        )
 
         if not evaluation_parameter_builders:
             return
@@ -550,9 +550,9 @@ specified (empty "metric_name" value detected)."""
                     batch_id: [resolved_metric_value]
                     for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
                 }
-                attributed_resolved_metrics_map[
-                    metric_attributes_id
-                ] = attributed_resolved_metrics
+                attributed_resolved_metrics_map[metric_attributes_id] = (
+                    attributed_resolved_metrics
+                )
 
         # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
 

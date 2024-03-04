@@ -1,4 +1,5 @@
 """These tests ensure that CloudMigrator works as intended."""
+
 import logging
 from typing import Any, Callable, List
 from unittest import mock

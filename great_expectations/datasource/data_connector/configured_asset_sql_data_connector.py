@@ -209,9 +209,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_asset_partitioner_method: Optional[str] = data_asset.get(
             "partitioner_method"
         )
-        data_asset_partitioner_kwargs: Optional[
-            Dict[str, Union[str, list]]
-        ] = data_asset.get("partitioner_kwargs")
+        data_asset_partitioner_kwargs: Optional[Dict[str, Union[str, list]]] = (
+            data_asset.get("partitioner_kwargs")
+        )
         data_asset_sorters: Optional[dict] = data_asset.get("sorters")
 
         # if sorters have been explicitly passed to the data connector use them for sorting,
@@ -328,16 +328,16 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             an ordered list of sorters required to sort partitioner batches.
         """
-        partitioner_method_to_sorter_method_mapping: Dict[
-            str, Optional[Sorter]
-        ] = self.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING
+        partitioner_method_to_sorter_method_mapping: Dict[str, Optional[Sorter]] = (
+            self.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING
+        )
         partitioner_method_name: str = self._get_partitioner_method_name(
             partitioner_method_name=partitioner_method_name,
         )
         try:
-            sorter_method: Optional[
-                Sorter
-            ] = partitioner_method_to_sorter_method_mapping[partitioner_method_name]
+            sorter_method: Optional[Sorter] = (
+                partitioner_method_to_sorter_method_mapping[partitioner_method_name]
+            )
         except KeyError:
             raise gx_exceptions.SorterError(
                 f"No Sorter is defined in ConfiguredAssetSqlDataConnector.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING for partitioner_method: {partitioner_method_name}"
@@ -562,9 +562,9 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             data_asset_partitioner_method: Optional[str] = data_asset_config.get(
                 "partitioner_method"
             )
-            data_asset_partitioner_kwargs: Optional[
-                Dict[str, Union[str, list]]
-            ] = data_asset_config.get("partitioner_kwargs")
+            data_asset_partitioner_kwargs: Optional[Dict[str, Union[str, list]]] = (
+                data_asset_config.get("partitioner_kwargs")
+            )
             data_asset_sorters: Optional[dict] = data_asset_config.get("sorters")
 
             # if sorters have been explicitly passed to the data connector use them for sorting,

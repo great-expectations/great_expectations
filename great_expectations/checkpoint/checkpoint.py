@@ -89,9 +89,9 @@ class BaseCheckpoint(ConfigPeer):
     instantiated directly (only its descendants, such as "Checkpoint", should be instantiated).
     """
 
-    DEFAULT_ACTION_LIST: ClassVar[
-        Sequence[ActionDict]
-    ] = ActionDicts.DEFAULT_ACTION_LIST
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
+        ActionDicts.DEFAULT_ACTION_LIST
+    )
 
     def __init__(
         self,

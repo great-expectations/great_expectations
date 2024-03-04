@@ -163,9 +163,9 @@ class MicrosoftTeamsRenderer(Renderer):
             )
             validation_result_elements.append(check_details_text_element)
 
-            query["attachments"][0]["content"]["body"][1][
-                "items"
-            ] = validation_result_elements
+            query["attachments"][0]["content"]["body"][1]["items"] = (
+                validation_result_elements
+            )
 
             if data_docs_pages:
                 for docs_link_key in data_docs_pages.keys():

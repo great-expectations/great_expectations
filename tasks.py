@@ -8,6 +8,7 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+
 from __future__ import annotations
 
 import logging

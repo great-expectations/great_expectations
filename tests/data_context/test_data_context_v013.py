@@ -185,9 +185,9 @@ def test_load_config_variables_file(
         "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
-    basic_data_context_v013_config[
-        "config_variables_file_path"
-    ] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    basic_data_context_v013_config["config_variables_file_path"] = (
+        "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    )
 
     try:
         # We should be able to load different files based on an environment variable

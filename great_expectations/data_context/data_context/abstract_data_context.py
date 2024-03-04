@@ -2525,9 +2525,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_operator (ValidationOperator)
         """
 
-        self.config.validation_operators[
-            validation_operator_name
-        ] = validation_operator_config
+        self.config.validation_operators[validation_operator_name] = (
+            validation_operator_config
+        )
         config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
@@ -2710,10 +2710,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                             datasource.get_asset_names()
                         )
                     else:
-                        data_asset_names[
-                            datasource_name
-                        ] = datasource.get_available_data_asset_names(
-                            batch_kwargs_generator_names[idx]
+                        data_asset_names[datasource_name] = (
+                            datasource.get_available_data_asset_names(
+                                batch_kwargs_generator_names[idx]
+                            )
                         )
 
             elif len(batch_kwargs_generator_names) == 1:
@@ -2724,10 +2724,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                     )
 
                 else:
-                    data_asset_names[
-                        datasource_names[0]
-                    ] = datasource.get_available_data_asset_names(
-                        batch_kwargs_generator_names
+                    data_asset_names[datasource_names[0]] = (
+                        datasource.get_available_data_asset_names(
+                            batch_kwargs_generator_names
+                        )
                     )
 
             else:
@@ -2745,9 +2745,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                         )
 
                     else:
-                        data_asset_names[
-                            datasource_name
-                        ] = datasource.get_available_data_asset_names()
+                        data_asset_names[datasource_name] = (
+                            datasource.get_available_data_asset_names()
+                        )
 
                 except ValueError:
                     # handle the edge case of a non-existent datasource
@@ -3088,12 +3088,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise
 
     @overload
-    def _normalize_absolute_or_relative_path(self, path: str) -> str:
-        ...
+    def _normalize_absolute_or_relative_path(self, path: str) -> str: ...
 
     @overload
-    def _normalize_absolute_or_relative_path(self, path: None) -> None:
-        ...
+    def _normalize_absolute_or_relative_path(self, path: None) -> None: ...
 
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
@@ -3148,9 +3146,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 validation_errors.update(data_context_id_errors)
 
         # usage statistics url
-        global_usage_statistics_url: Optional[
-            str
-        ] = self._get_usage_stats_url_override()
+        global_usage_statistics_url: Optional[str] = (
+            self._get_usage_stats_url_override()
+        )
         if global_usage_statistics_url:
             usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
                 {"usage_statistics_url": global_usage_statistics_url}
@@ -4005,18 +4003,18 @@ class AbstractDataContext(ConfigPeer, ABC):
                             class_name=complete_site_config["class_name"],
                         )
                     if dry_run:
-                        index_page_locator_infos[
-                            site_name
-                        ] = site_builder.get_resource_url(only_if_exists=False)
+                        index_page_locator_infos[site_name] = (
+                            site_builder.get_resource_url(only_if_exists=False)
+                        )
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
                             resource_identifiers,
                             build_index=build_index,
                         )
                         if index_page_resource_identifier_tuple:
-                            index_page_locator_infos[
-                                site_name
-                            ] = index_page_resource_identifier_tuple[0]
+                            index_page_locator_infos[site_name] = (
+                                index_page_resource_identifier_tuple[0]
+                            )
 
         else:
             logger.debug("No data_docs_config found. No site(s) built.")

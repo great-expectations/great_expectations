@@ -472,9 +472,9 @@ class AssetConfigSchema(Schema):
                     and pyspark.types
                     and isinstance(schema, pyspark.types.StructType)
                 ):
-                    data["batch_spec_passthrough"]["reader_options"][
-                        "schema"
-                    ] = schema.jsonValue()
+                    data["batch_spec_passthrough"]["reader_options"]["schema"] = (
+                        schema.jsonValue()
+                    )
         return data
 
     # noinspection PyUnusedLocal
@@ -955,9 +955,9 @@ continue.
                     and pyspark.types
                     and isinstance(schema, pyspark.types.StructType)
                 ):
-                    data["batch_spec_passthrough"]["reader_options"][
-                        "schema"
-                    ] = schema.jsonValue()
+                    data["batch_spec_passthrough"]["reader_options"]["schema"] = (
+                        schema.jsonValue()
+                    )
         return data
 
 

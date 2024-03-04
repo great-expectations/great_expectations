@@ -235,14 +235,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain cardinality_limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        cardinality_limit_mode: Optional[
-            Union[str, CardinalityLimitMode, dict]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.cardinality_limit_mode,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = (
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=self.cardinality_limit_mode,
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
+            )
         )
 
         # Obtain max_unique_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -255,14 +255,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain max_proportion_unique from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        max_proportion_unique: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.max_proportion_unique,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        max_proportion_unique: Optional[float] = (
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=self.max_proportion_unique,
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
+            )
         )
 
         validate_input_parameters(
@@ -310,10 +310,10 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             if column_name not in allowed_column_names_passthrough
         ]
 
-        metrics_for_cardinality_check: Dict[
-            str, List[MetricConfiguration]
-        ] = self._generate_metric_configurations_to_check_cardinality(
-            column_names=effective_column_names, batch_ids=batch_ids
+        metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]] = (
+            self._generate_metric_configurations_to_check_cardinality(
+                column_names=effective_column_names, batch_ids=batch_ids
+            )
         )
 
         if validator is None:
@@ -321,12 +321,12 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 message=f"Error: Failed to obtain Validator {self.__class__.__name__} (Validator is required for cardinality checks)."
             )
 
-        candidate_column_names: List[
-            str
-        ] = self._column_names_meeting_cardinality_limit(
-            validator=validator,
-            metrics_for_cardinality_check=metrics_for_cardinality_check,
-            runtime_configuration=runtime_configuration,
+        candidate_column_names: List[str] = (
+            self._column_names_meeting_cardinality_limit(
+                validator=validator,
+                metrics_for_cardinality_check=metrics_for_cardinality_check,
+                runtime_configuration=runtime_configuration,
+            )
         )
         candidate_column_names.extend(allowed_column_names_passthrough)
 

@@ -1870,15 +1870,15 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 elif _engine == "spark" and "spark" in engines_implemented:
                     engines_to_include[_engine] = True
     else:
-        engines_to_include[
-            "pandas"
-        ] = execution_engine_diagnostics.PandasExecutionEngine
-        engines_to_include[
-            "spark"
-        ] = execution_engine_diagnostics.SparkDFExecutionEngine
-        engines_to_include[
-            "sqlalchemy"
-        ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        engines_to_include["pandas"] = (
+            execution_engine_diagnostics.PandasExecutionEngine
+        )
+        engines_to_include["spark"] = (
+            execution_engine_diagnostics.SparkDFExecutionEngine
+        )
+        engines_to_include["sqlalchemy"] = (
+            execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        )
         if (
             engines_to_include.get("sqlalchemy") is True
             and raise_exceptions_for_backends is False

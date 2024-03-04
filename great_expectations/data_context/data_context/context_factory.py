@@ -360,8 +360,7 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
     mode: Literal["ephemeral"] = ...,
-) -> EphemeralDataContext:
-    ...
+) -> EphemeralDataContext: ...
 
 
 @overload
@@ -374,8 +373,7 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
-) -> FileDataContext:
-    ...
+) -> FileDataContext: ...
 
 
 @overload
@@ -389,8 +387,7 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
     mode: Literal["file"] | None = ...,
-) -> FileDataContext:
-    ...
+) -> FileDataContext: ...
 
 
 @overload
@@ -404,8 +401,7 @@ def get_context(
     cloud_organization_id: str | None = ...,
     cloud_mode: Literal[True] = ...,
     mode: Literal["cloud"] | None = ...,
-) -> CloudDataContext:
-    ...
+) -> CloudDataContext: ...
 
 
 @overload
@@ -419,8 +415,7 @@ def get_context(
     cloud_organization_id: str | None = ...,
     cloud_mode: bool | None = ...,
     mode: None = ...,
-) -> EphemeralDataContext | FileDataContext | CloudDataContext:
-    ...
+) -> EphemeralDataContext | FileDataContext | CloudDataContext: ...
 
 
 @public_api

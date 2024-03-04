@@ -255,9 +255,9 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        rendered_content: List[
-            RenderedAtomicContent
-        ] = inline_renderer.get_rendered_content()
+        rendered_content: List[RenderedAtomicContent] = (
+            inline_renderer.get_rendered_content()
+        )
 
         diagnostic_rendered_content: List[RenderedAtomicContent] = [
             content_block

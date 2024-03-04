@@ -9,6 +9,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
  context = gx.get_context()
  context.test_yaml_config(my_config)
 """
+
 from __future__ import annotations
 
 import traceback
@@ -380,9 +381,9 @@ class _YamlConfigValidator:
 
         profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config: Union[
-            RuleBasedProfilerConfig, dict
-        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        profiler_config: Union[RuleBasedProfilerConfig, dict] = (
+            RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        )
         profiler_config = profiler_config.to_json_dict()  # type: ignore[union-attr]
         profiler_config.update({"name": profiler_name})
 

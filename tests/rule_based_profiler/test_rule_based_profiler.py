@@ -68,9 +68,9 @@ def test_reconcile_profiler_variables_no_overrides(
     variables_multi_part_name_parameter_container,
 ):
     variables: Dict[str, Any] = {}
-    effective_variables: Optional[
-        ParameterContainer
-    ] = profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    effective_variables: Optional[ParameterContainer] = (
+        profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    )
     assert effective_variables == variables_multi_part_name_parameter_container
 
 
@@ -83,9 +83,9 @@ def test_reconcile_profiler_variables_with_overrides(
         "estimator": "bootstrap",
         "mostly": 8.0e-1,
     }
-    effective_variables: Optional[
-        ParameterContainer
-    ] = profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    effective_variables: Optional[ParameterContainer] = (
+        profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    )
     assert effective_variables.to_dict()["parameter_nodes"]["variables"][
         "variables"
     ] == {
@@ -101,9 +101,9 @@ def test_reconcile_profiler_rules_no_overrides(
 ):
     rules: Dict[str, Dict[str, Any]] = {}
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    )
     assert effective_rules == profiler_with_placeholder_args.rules
 
 
@@ -268,9 +268,9 @@ def test_reconcile_profiler_rules_new_rule_override(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -340,9 +340,9 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -440,9 +440,9 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -542,9 +542,9 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -682,15 +682,15 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(
-        rules=rules,
-        reconciliation_directives=ReconciliationDirectives(
-            domain_builder=ReconciliationStrategy.UPDATE,
-            parameter_builder=ReconciliationStrategy.UPDATE,
-            expectation_configuration_builder=ReconciliationStrategy.NESTED_UPDATE,
-        ),
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(
+            rules=rules,
+            reconciliation_directives=ReconciliationDirectives(
+                domain_builder=ReconciliationStrategy.UPDATE,
+                parameter_builder=ReconciliationStrategy.UPDATE,
+                expectation_configuration_builder=ReconciliationStrategy.NESTED_UPDATE,
+            ),
+        )
     )
 
     rule: Rule
@@ -783,15 +783,15 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(
-        rules=rules,
-        reconciliation_directives=ReconciliationDirectives(
-            domain_builder=ReconciliationStrategy.UPDATE,
-            parameter_builder=ReconciliationStrategy.REPLACE,
-            expectation_configuration_builder=ReconciliationStrategy.REPLACE,
-        ),
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(
+            rules=rules,
+            reconciliation_directives=ReconciliationDirectives(
+                domain_builder=ReconciliationStrategy.UPDATE,
+                parameter_builder=ReconciliationStrategy.REPLACE,
+                expectation_configuration_builder=ReconciliationStrategy.REPLACE,
+            ),
+        )
     )
 
     rule: Rule
@@ -928,9 +928,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = (
+        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {

@@ -721,10 +721,10 @@ class ExpectationSuite(SerializableDictDot):
                 if existing_expectation_id is not None:
                     expectation_configuration.id = existing_expectation_id
 
-                self.expectations[
-                    found_expectation_indexes[0]
-                ] = self._build_expectation(
-                    expectation_configuration=expectation_configuration
+                self.expectations[found_expectation_indexes[0]] = (
+                    self._build_expectation(
+                        expectation_configuration=expectation_configuration
+                    )
                 )
             else:
                 raise gx_exceptions.DataContextError(
@@ -1102,9 +1102,9 @@ class ExpectationSuite(SerializableDictDot):
             )
             if expectation_configurations is None:
                 expectation_configurations = []
-                expectation_configurations_by_domain[
-                    domain_type
-                ] = expectation_configurations
+                expectation_configurations_by_domain[domain_type] = (
+                    expectation_configurations
+                )
 
             expectation_configurations.append(expectation_configuration)
 
@@ -1120,9 +1120,9 @@ class ExpectationSuite(SerializableDictDot):
         for expectation in self.expectations:
             inline_renderer = InlineRenderer(render_object=expectation.configuration)
 
-            rendered_content: List[
-                RenderedAtomicContent
-            ] = inline_renderer.get_rendered_content()
+            rendered_content: List[RenderedAtomicContent] = (
+                inline_renderer.get_rendered_content()
+            )
 
             expectation.rendered_content = (
                 inline_renderer.replace_or_keep_existing_rendered_content(

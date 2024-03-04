@@ -299,9 +299,9 @@ class RuntimeDataConnector(DataConnector):
             }
             # or replace
         else:
-            self._data_references_cache[data_asset_name][
-                data_reference
-            ] = batch_definition_list
+            self._data_references_cache[data_asset_name][data_reference] = (
+                batch_definition_list
+            )
 
     def _self_check_fetch_batch(
         self,

@@ -100,9 +100,9 @@ def _execute_taxi_partitioning_test_cases(
     connection_string: str,
     table_name: str,
 ) -> None:
-    test_cases: List[
-        TaxiPartitioningTestCase
-    ] = taxi_partitioning_test_cases.test_cases()
+    test_cases: List[TaxiPartitioningTestCase] = (
+        taxi_partitioning_test_cases.test_cases()
+    )
 
     test_case: TaxiPartitioningTestCase
     for test_case in test_cases:
@@ -156,10 +156,10 @@ def _execute_taxi_partitioning_test_cases(
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
         )
-        batch_definition_list: List[
-            BatchDefinition
-        ] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
+        batch_definition_list: List[BatchDefinition] = (
+            data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
         print(len(batch_definition_list), "batch definitions found")
         print(test_case.num_expected_batch_definitions, "expected batch definitions")

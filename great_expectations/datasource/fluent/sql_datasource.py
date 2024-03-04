@@ -246,9 +246,9 @@ class SqlPartitionerYearAndMonth(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
-    method_name: Literal[
+    method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
-    ] = "partition_on_year_and_month_and_day"
+    )
 
     @property
     @override
@@ -316,9 +316,9 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
 class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
-    method_name: Literal[
+    method_name: Literal["partition_on_divided_integer"] = (
         "partition_on_divided_integer"
-    ] = "partition_on_divided_integer"
+    )
 
     @property
     @override
@@ -399,9 +399,9 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
-    method_name: Literal[
+    method_name: Literal["partition_on_multi_column_values"] = (
         "partition_on_multi_column_values"
-    ] = "partition_on_multi_column_values"
+    )
 
     @property
     def columns(self):
@@ -443,9 +443,9 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal[
+    method_name: Literal["partition_on_converted_datetime"] = (
         "partition_on_converted_datetime"
-    ] = "partition_on_converted_datetime"
+    )
 
     @property
     @override
@@ -621,9 +621,9 @@ class _SQLAsset(DataAsset):
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if sql_partitioner:
                 batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
-                batch_spec_kwargs[
-                    "partitioner_kwargs"
-                ] = sql_partitioner.partitioner_method_kwargs()
+                batch_spec_kwargs["partitioner_kwargs"] = (
+                    sql_partitioner.partitioner_method_kwargs()
+                )
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(

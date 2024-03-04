@@ -43,10 +43,8 @@ def validation_operator_result():
         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
         run_results = validation_operator_result["run_results"]
         for k, validation_result in run_results.items():
-            validation_result[
-                "validation_result"
-            ] = ExpectationSuiteValidationResultSchema().load(
-                validation_result["validation_result"]
+            validation_result["validation_result"] = (
+                ExpectationSuiteValidationResultSchema().load(validation_result["validation_result"])
             )
         return validation_operator_result
 

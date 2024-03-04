@@ -596,9 +596,9 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            identifiers: Optional[
-                Union[List[str], List[GXCloudIdentifier]]
-            ] = self.list_expectation_suites()
+            identifiers: Optional[Union[List[str], List[GXCloudIdentifier]]] = (
+                self.list_expectation_suites()
+            )
             if identifiers:
                 for cloud_identifier in identifiers:
                     if isinstance(cloud_identifier, GXCloudIdentifier):
@@ -627,24 +627,21 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: str = ...,
         id: None = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def delete_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def delete_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: None = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @public_api
     @override

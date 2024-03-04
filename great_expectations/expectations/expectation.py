@@ -307,9 +307,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    _save_callback: Union[
-        Callable[[Expectation], Expectation], None
-    ] = pydantic.PrivateAttr(default=None)
+    _save_callback: Union[Callable[[Expectation], Expectation], None] = (
+        pydantic.PrivateAttr(default=None)
+    )
 
     @pydantic.validator("result_format")
     def _validate_result_format(
@@ -1051,9 +1051,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
-        validation_dependencies_metric_configurations: List[
-            MetricConfiguration
-        ] = validation_dependencies.get_metric_configurations()
+        validation_dependencies_metric_configurations: List[MetricConfiguration] = (
+            validation_dependencies.get_metric_configurations()
+        )
 
         _validate_dependencies_against_available_metrics(
             validation_dependencies=validation_dependencies_metric_configurations,
@@ -1067,12 +1067,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
 
-        expectation_validation_result: Union[
-            ExpectationValidationResult, dict
-        ] = self._validate(
-            metrics=provided_metrics,
-            runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine,
+        expectation_validation_result: Union[ExpectationValidationResult, dict] = (
+            self._validate(
+                metrics=provided_metrics,
+                runtime_configuration=runtime_configuration,
+                execution_engine=execution_engine,
+            )
         )
 
         result_format = parse_result_format(
@@ -1245,11 +1245,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
-        expectation_validation_result_list: list[
-            ExpectationValidationResult
-        ] = validator.graph_validate(
-            configurations=[configuration],
-            runtime_configuration=runtime_configuration,
+        expectation_validation_result_list: list[ExpectationValidationResult] = (
+            validator.graph_validate(
+                configurations=[configuration],
+                runtime_configuration=runtime_configuration,
+            )
         )
         return expectation_validation_result_list[0]
 
@@ -1921,9 +1921,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[
-            bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        include_unexpected_rows: Optional[bool] = (
+            validation_dependencies.result_format.get("include_unexpected_rows")
+        )
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -2179,9 +2179,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[
-            bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        include_unexpected_rows: Optional[bool] = (
+            validation_dependencies.result_format.get("include_unexpected_rows")
+        )
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -2253,9 +2253,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[
-            Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self._get_result_format(runtime_configuration=runtime_configuration)
+        result_format: Union[Dict[str, Union[int, str, bool, List[str], None]], str] = (
+            self._get_result_format(runtime_configuration=runtime_configuration)
+        )
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
@@ -2425,9 +2425,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[
-            bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        include_unexpected_rows: Optional[bool] = (
+            validation_dependencies.result_format.get("include_unexpected_rows")
+        )
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -2640,9 +2640,9 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"]["missing_count"] = missing_count
         return_obj["result"]["missing_percent"] = missing_percent
         return_obj["result"]["unexpected_percent_total"] = unexpected_percent_total
-        return_obj["result"][
-            "unexpected_percent_nonmissing"
-        ] = unexpected_percent_nonmissing
+        return_obj["result"]["unexpected_percent_nonmissing"] = (
+            unexpected_percent_nonmissing
+        )
 
     if result_format["include_unexpected_rows"]:
         return_obj["result"].update(

@@ -1,4 +1,5 @@
 """POC for loading config."""
+
 from __future__ import annotations
 
 import logging
@@ -274,8 +275,7 @@ class GxConfig(FluentBaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def yaml(
@@ -291,8 +291,7 @@ class GxConfig(FluentBaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> pathlib.Path:
-        ...
+    ) -> pathlib.Path: ...
 
     @override
     def yaml(  # noqa: PLR0913
