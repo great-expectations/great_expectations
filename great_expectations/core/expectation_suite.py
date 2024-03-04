@@ -1145,7 +1145,7 @@ class ExpectationSuiteSchema(Schema):
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     # noinspection PyMethodMayBeStatic
-    def clean_empty(self, data):
+    def clean_empty(self, data):  # noqa: C901
         if isinstance(data, ExpectationSuite):
             if not hasattr(data, "evaluation_parameters"):
                 pass

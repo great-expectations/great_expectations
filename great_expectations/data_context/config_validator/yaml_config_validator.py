@@ -110,7 +110,7 @@ class _YamlConfigValidator:
     def config_variables(self):
         return self._data_context.config_variables
 
-    def test_yaml_config(  # noqa: PLR0912, PLR0913
+    def test_yaml_config(  # noqa: C901, PLR0912, PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,

@@ -239,7 +239,7 @@ class SlackNotificationAction(ValidationAction):
         self.show_failed_expectations = show_failed_expectations
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[

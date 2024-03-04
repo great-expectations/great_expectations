@@ -110,7 +110,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     """ A Column Aggregate Metric Decorator for the Unique Value Count"""
 
     @classmethod
-    def _prescriptive_template(  # noqa: PLR0912
+    def _prescriptive_template(  # noqa: C901, PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:

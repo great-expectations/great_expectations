@@ -595,7 +595,7 @@ def convert_string_columns_to_datetime(
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
-def load_data_into_test_database(  # noqa: PLR0912, PLR0915
+def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
     table_name: str,
     connection_string: str,
     schema_name: Optional[str] = None,
@@ -999,7 +999,9 @@ def get_connection_string_and_dialect(
     return dialect, connection_string
 
 
-def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
+def find_strings_in_nested_obj(  # noqa: C901 - 14
+    obj: Any, target_strings: List[str]
+) -> bool:
     """Recursively traverse a nested structure to find all strings in an input string.
 
     Args:
@@ -1012,7 +1014,7 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
 
     strings: Set[str] = set(target_strings)
 
-    def _find_string(data: Any) -> bool:
+    def _find_string(data: Any) -> bool:  # noqa: C901
         if isinstance(data, list):
             for val in data:
                 if _find_string(val):
