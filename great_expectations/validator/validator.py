@@ -9,7 +9,6 @@ import logging
 import traceback
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -1510,7 +1509,7 @@ class Validator:
                 data_context=self._data_context,
             )
             if "column" in expectation.kwargs and isinstance(
-                expectation.kwargs["column"], Hashable
+                expectation.kwargs["column"], str
             ):
                 column = expectation.kwargs["column"]
             else:
