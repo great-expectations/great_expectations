@@ -6,6 +6,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
 from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_config_store import (
@@ -29,7 +30,14 @@ class ValidationFactory(Factory[ValidationConfig]):
         Raises:
             DataContextError if ValidationConfig already exists
         """
-        raise NotImplementedError
+        key = self._store.get_key(name=validation.name, id=None)
+        if self._store.has_key(key=key):
+            raise DataContextError(
+                f"Cannot add ValidationConfig with name {validation.name} because it already exists."
+            )
+        self._store.add(key=key, value=validation)
+
+        return validation
 
     @public_api
     @override
@@ -42,7 +50,14 @@ class ValidationFactory(Factory[ValidationConfig]):
         Raises:
             DataContextError if ValidationConfig doesn't exist
         """
-        raise NotImplementedError
+        key = self._store.get_key(name=validation.name, id=validation.id)
+        if not self._store.has_key(key=key):
+            raise DataContextError(
+                f"Cannot delete ValidationConfig with name {validation.name} because it cannot be found."
+            )
+        self._store.remove_key(key=key)
+
+        return validation
 
     @public_api
     @override
@@ -55,4 +70,8 @@ class ValidationFactory(Factory[ValidationConfig]):
         Raises:
             DataContextError when ValidationConfig is not found.
         """
-        raise NotImplementedError
+        key = self._store.get_key(name=name, id=None)
+        if not self._store.has_key(key=key):
+            raise DataContextError(f"ValidationConfig with name {name} was not found.")
+
+        return self._store.get(key=key)
