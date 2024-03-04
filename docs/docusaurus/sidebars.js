@@ -296,11 +296,6 @@ module.exports = {
             },
             {
               type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/databricks',
-              label: '🚧 Databricks'
-            },
-            {
-              type: 'doc',
               id: 'core/installation_and_setup/additional_dependencies/google_cloud_storage',
               label: '🚧 Google Cloud Storage'
             },
