@@ -26,7 +26,7 @@ class TestValidationConfigSerialization:
     validation_config_name = "my_validation"
 
     @pytest.fixture
-    def ds_asset_batch_config_bundle(
+    def validation_config_data(
         self,
         in_memory_runtime_context: EphemeralDataContext,
     ) -> tuple[PandasDatasource, CSVAsset, BatchConfig]:
@@ -39,7 +39,7 @@ class TestValidationConfigSerialization:
         return ds, asset, batch_config
 
     @pytest.fixture
-    def suite(self) -> ExpectationSuite:
+    def validation_config_suite(self) -> ExpectationSuite:
         return ExpectationSuite(self.suite_name)
 
     @pytest.mark.unit
@@ -72,20 +72,20 @@ class TestValidationConfigSerialization:
         batch_config_id: str | None,
         suite_id: str | None,
         validation_id: str | None,
-        ds_asset_batch_config_bundle: tuple[PandasDatasource, CSVAsset, BatchConfig],
-        suite: ExpectationSuite,
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_suite: ExpectationSuite,
     ):
-        pandas_ds, csv_asset, batch_config = ds_asset_batch_config_bundle
+        pandas_ds, csv_asset, batch_config = validation_config_data
 
         pandas_ds.id = ds_id
         csv_asset.id = asset_id
         batch_config.id = batch_config_id
-        suite.id = suite_id
+        validation_config_suite.id = suite_id
 
         validation_config = ValidationConfig(
             name=self.validation_config_name,
             data=batch_config,
-            suite=suite,
+            suite=validation_config_suite,
             id=validation_id,
         )
 
@@ -107,54 +107,57 @@ class TestValidationConfigSerialization:
                 },
             },
             "suite": {
-                "name": suite.name,
+                "name": validation_config_suite.name,
                 "id": suite_id,
             },
-            "id": validation_id,
+            "id": validation_id,  # TODO: Test to ensure ValidationConfigStore adds a top-level id as well
         }
 
         # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one
         if suite_id is None:
             id = actual["suite"].pop("id")
             actual["suite"]["id"] = mock.ANY
-            try:
-                uuid.UUID(id)
-            except ValueError:
-                pytest.fail(f"Expected {id} to be a valid UUID")
+            self._test_is_valid_uuid(id)
 
         assert actual == expected
+
+    def _test_is_valid_uuid(self, id: str):
+        try:
+            uuid.UUID(id)
+        except ValueError:
+            pytest.fail(f"Expected {id} to be a valid UUID")
 
     @pytest.mark.unit
     def test_validation_config_deserialization_success(
         self,
         in_memory_runtime_context: EphemeralDataContext,
-        ds_asset_batch_config_bundle: tuple[PandasDatasource, CSVAsset, BatchConfig],
-        suite: ExpectationSuite,
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_suite: ExpectationSuite,
     ):
         context = in_memory_runtime_context
-        pandas_ds, csv_asset, batch_config = ds_asset_batch_config_bundle
+        _, _, batch_config = validation_config_data
 
-        suite = context.suites.add(suite)
+        validation_config_suite = context.suites.add(validation_config_suite)
 
         serialized_config = {
             "name": self.validation_config_name,
             "data": {
                 "datasource": {
-                    "name": pandas_ds.name,
+                    "name": self.ds_name,
                     "id": None,
                 },
                 "asset": {
-                    "name": csv_asset.name,
+                    "name": self.asset_name,
                     "id": None,
                 },
                 "batch_config": {
-                    "name": batch_config.name,
+                    "name": self.batch_config_name,
                     "id": None,
                 },
             },
             "suite": {
-                "name": suite.name,
-                "id": suite.id,
+                "name": validation_config_suite.name,
+                "id": validation_config_suite.id,
             },
             "id": None,
         }
@@ -162,7 +165,7 @@ class TestValidationConfigSerialization:
         validation_config = ValidationConfig.parse_obj(serialized_config)
         assert validation_config.name == self.validation_config_name
         assert validation_config.data == batch_config
-        assert validation_config.suite == suite
+        assert validation_config.suite == validation_config_suite
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
@@ -170,19 +173,19 @@ class TestValidationConfigSerialization:
         [
             pytest.param(
                 {
-                    "name": "my_validation",
+                    "name": validation_config_name,
                     "data": {
                         "asset": {
-                            "name": "my_asset",
+                            "name": asset_name,
                             "id": None,
                         },
                         "batch_config": {
-                            "name": "my_batch_config",
+                            "name": batch_config_name,
                             "id": None,
                         },
                     },
                     "suite": {
-                        "name": "my_suite",
+                        "name": suite_name,
                         "id": None,
                     },
                     "id": None,
@@ -192,10 +195,10 @@ class TestValidationConfigSerialization:
             ),
             pytest.param(
                 {
-                    "name": "my_validation",
+                    "name": validation_config_name,
                     "data": {},
                     "suite": {
-                        "name": "my_suite",
+                        "name": suite_name,
                         "id": None,
                     },
                     "id": None,
@@ -205,18 +208,18 @@ class TestValidationConfigSerialization:
             ),
             pytest.param(
                 {
-                    "name": "my_validation",
+                    "name": validation_config_name,
                     "data": {
                         "datasource": {
-                            "name": "my_ds",
+                            "name": ds_name,
                             "id": None,
                         },
                         "asset": {
-                            "name": "my_asset",
+                            "name": asset_name,
                             "id": None,
                         },
                         "batch_config": {
-                            "name": "my_batch_config",
+                            "name": batch_config_name,
                             "id": None,
                         },
                     },
@@ -228,18 +231,18 @@ class TestValidationConfigSerialization:
             ),
             pytest.param(
                 {
-                    "name": "my_validation",
+                    "name": validation_config_name,
                     "data": {
                         "datasource": {
-                            "name": "my_datasource",
+                            "name": ds_name,
                             "id": None,
                         },
                         "asset": {
-                            "name": "my_asset",
+                            "name": asset_name,
                             "id": None,
                         },
                         "batch_config": {
-                            "name": "my_batch_config",
+                            "name": batch_config_name,
                             "id": None,
                         },
                     },
@@ -254,23 +257,23 @@ class TestValidationConfigSerialization:
             ),
             pytest.param(
                 {
-                    "name": "my_validation",
+                    "name": validation_config_name,
                     "data": {
                         "datasource": {
                             "name": "i_do_not_exist",
                             "id": None,
                         },
                         "asset": {
-                            "name": "my_asset",
+                            "name": asset_name,
                             "id": None,
                         },
                         "batch_config": {
-                            "name": "my_batch_config",
+                            "name": batch_config_name,
                             "id": None,
                         },
                     },
                     "suite": {
-                        "name": "my_suite",
+                        "name": suite_name,
                         "id": None,
                     },
                     "id": None,
@@ -280,10 +283,10 @@ class TestValidationConfigSerialization:
             ),
             pytest.param(
                 {
-                    "name": "my_validation",
+                    "name": validation_config_name,
                     "data": {
                         "datasource": {
-                            "name": "my_ds",
+                            "name": ds_name,
                             "id": None,
                         },
                         "asset": {
@@ -291,12 +294,12 @@ class TestValidationConfigSerialization:
                             "id": None,
                         },
                         "batch_config": {
-                            "name": "my_batch_config",
+                            "name": batch_config_name,
                             "id": None,
                         },
                     },
                     "suite": {
-                        "name": "my_suite",
+                        "name": suite_name,
                         "id": None,
                     },
                     "id": None,
@@ -306,14 +309,14 @@ class TestValidationConfigSerialization:
             ),
             pytest.param(
                 {
-                    "name": "my_validation",
+                    "name": validation_config_name,
                     "data": {
                         "datasource": {
-                            "name": "my_ds",
+                            "name": ds_name,
                             "id": None,
                         },
                         "asset": {
-                            "name": "my_asset",
+                            "name": asset_name,
                             "id": None,
                         },
                         "batch_config": {
@@ -322,7 +325,7 @@ class TestValidationConfigSerialization:
                         },
                     },
                     "suite": {
-                        "name": "my_suite",
+                        "name": suite_name,
                         "id": None,
                     },
                     "id": None,
@@ -333,7 +336,11 @@ class TestValidationConfigSerialization:
         ],
     )
     def test_validation_config_deserialization_bad_format(
-        self, serialized_config: dict, error_substring: str
+        self,
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_suite: ExpectationSuite,
+        serialized_config: dict,
+        error_substring: str,
     ):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
             ValidationConfig.parse_obj(serialized_config)
