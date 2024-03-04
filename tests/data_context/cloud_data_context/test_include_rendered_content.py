@@ -42,7 +42,7 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
         response_json={},
     )
 
-    empty_expectation_suite = ExpectationSuite(expectation_suite_name="test_suite")
+    empty_expectation_suite = ExpectationSuite(name="test_suite")
     with mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._get"
     ), mock.patch(

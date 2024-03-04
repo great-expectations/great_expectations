@@ -1025,7 +1025,7 @@ def get_or_create_expectation_suite(
     create_expectation_suite: bool
 
     if expectation_suite is not None and expectation_suite_name is not None:
-        if expectation_suite.expectation_suite_name != expectation_suite_name:
+        if expectation_suite.name != expectation_suite_name:
             raise ValueError(
                 'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
             )
@@ -1056,12 +1056,10 @@ def get_or_create_expectation_suite(
                 expectation_suite = data_context.add_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
-                logger.info(
-                    f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
-                )
+                logger.info(f'Created ExpectationSuite "{expectation_suite.name}".')
         else:
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
             )
 
     return expectation_suite

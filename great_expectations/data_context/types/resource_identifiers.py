@@ -18,23 +18,23 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-    def __init__(self, expectation_suite_name: str) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__()
-        if not isinstance(expectation_suite_name, str):
+        if not isinstance(name, str):
             raise gx_exceptions.InvalidDataContextKeyError(
-                f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
+                f"name must be a string, not {type(name).__name__}"
             )
-        self._expectation_suite_name = expectation_suite_name
+        self._name = name
 
     @property
-    def expectation_suite_name(self):
-        return self._expectation_suite_name
+    def name(self):
+        return self._name
 
     def to_tuple(self):
-        return tuple(self.expectation_suite_name.split("."))
+        return tuple(self.name.split("."))
 
     def to_fixed_length_tuple(self):
-        return (self.expectation_suite_name,)
+        return (self.name,)
 
     @classmethod
     def from_tuple(cls, tuple_):
@@ -42,14 +42,14 @@ class ExpectationSuiteIdentifier(DataContextKey):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
-        return cls(expectation_suite_name=tuple_[0])
+        return cls(name=tuple_[0])
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self._expectation_suite_name}"
+        return f"{self.__class__.__name__}::{self._name}"
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
-    expectation_suite_name = fields.Str()
+    name = fields.Str()
 
     # noinspection PyUnusedLocal
     @post_load
@@ -143,7 +143,7 @@ class ValidationResultIdentifier(DataContextKey):
 
     def to_fixed_length_tuple(self):
         return tuple(
-            [self.expectation_suite_identifier.expectation_suite_name]
+            [self.expectation_suite_identifier.name]
             + list(self.run_id.to_tuple())
             + [self.batch_identifier or "__none__"]
         )
@@ -234,7 +234,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         super().__init__(metric_name, metric_kwargs_id)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_identifier
+                name=expectation_suite_identifier
             )
 
         if isinstance(run_id, dict):

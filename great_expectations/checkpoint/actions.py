@@ -1248,7 +1248,7 @@ class SNSNotificationAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         sns_topic_arn: The SNS Arn to publish messages to.
-        sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name.
+        sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
     def __init__(
@@ -1289,7 +1289,7 @@ class SNSNotificationAction(ValidationAction):
                     f"No expectation_suite_identifier was passed. Defaulting to validation run_id: {subject}."
                 )
             else:
-                subject = expectation_suite_identifier.expectation_suite_name
+                subject = expectation_suite_identifier.name
                 logger.info(f"Using expectation_suite_name: {subject}")
         else:
             subject = self.sns_message_subject
