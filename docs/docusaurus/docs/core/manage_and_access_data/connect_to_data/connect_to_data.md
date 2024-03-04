@@ -134,7 +134,7 @@ SQL Data Sources connect GX to data stored in SQL databases, with support for so
     topIcon 
     label="Request data"
     description="Define a Batch Request and retrieve data from a Data Asset."
-    to="/core/manage_and_access_data/connect_to_data/request_data" 
+    to="/core/manage_and_access_data/connect_to_data/request_data.md" 
     icon="/img/expectation_icon.svg" 
   />
 

@@ -8,7 +8,7 @@ Azure Blob Storage allows users to store unstructured data on Microsoft's cloud 
 ## Prerequisites
 
 - <PrereqPythonInstalled/>
-- (Recommended) [A Python virtual environment](./set_up_a_python_environment#optional-create-a-virtual-environment).
+- (Recommended) [A Python virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment).
 - An [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage). A [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal) is required to complete the setup.
 
 ## Installation
@@ -17,7 +17,7 @@ Azure Blob Storage allows users to store unstructured data on Microsoft's cloud 
 
   :::info 
   
-  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment#optional-create-a-virtual-environment) then that environment should be active when installing these dependencies.
+  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment) then that environment should be active when installing these dependencies.
   
   :::
 

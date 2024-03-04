@@ -146,4 +146,4 @@ Select one of the following secret manager applications:
 
 - [(Optional) Configure Stores](./manage_metadata_stores.md)
 - [(Optional) Configure Data Docs](./manage_metadata_stores.md)
-- [Connect to data](../connect_to_data/connect_to_data)
+- [Connect to data](/core/manage_and_access_data/manage_and_access_data.md)

@@ -34,7 +34,7 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](aws.amazon.com).  
 
   :::info 
   
-  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment#optional-create-a-virtual-environment) then that environment should be active when installing these dependencies.
+  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment) then that environment should be active when installing these dependencies.
   
   :::
 
