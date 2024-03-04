@@ -60,8 +60,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/fluent/sql_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/new_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/exceptions/exceptions.py Name: InvalidExpectationConfigurationError",
-    "File: great_expectations/expectations/core/expect_column_values_to_match_like_pattern_list.py Name: validate_configuration",
-    "File: great_expectations/expectations/core/expect_column_values_to_not_match_like_pattern_list.py Name: validate_configuration",
     "File: great_expectations/expectations/expectation.py Name: validate_configuration",
     "File: great_expectations/expectations/expectation_configuration.py Name: to_domain_obj",
     "File: great_expectations/expectations/metrics/map_metric_provider/column_pair_condition_partial.py Name: column_pair_condition_partial",
