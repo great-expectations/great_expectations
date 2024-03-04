@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 class MetricTypes(str, enum.Enum):
     """Represents Metric types in OSS that are used for ColumnDescriptiveMetrics and MetricRepository.
 
-    More Metric types may be added in the future.
+    More Metric types will be added in the future.
     """
 
     # Table metrics
