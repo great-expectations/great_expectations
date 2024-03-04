@@ -69,9 +69,37 @@ class ValidationConfig(BaseModel):
     """
 
     class Config:
-        arbitrary_types_allowed = True
-        # When serialized, the suite and data fields should be encoded as a set of identifiers.
-        # These will be used as foreign keys to retrieve the actual objects from the appropriate stores.
+        arbitrary_types_allowed = (
+            True  # Necessary for compatibility with suite's Marshmallow dep
+        )
+        """
+        When serialized, the suite and data fields should be encoded as a set of identifiers.
+        These will be used as foreign keys to retrieve the actual objects from the appropriate stores.
+
+        Example:
+        {
+            "name": "my_validation",
+            "data": {
+                "datasource": {
+                    "name": "my_datasource",
+                    "id": "a758816-64c8-46cb-8f7e-03c12cea1d67"
+                },
+                "asset": {
+                    "name": "my_asset",
+                    "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67"
+                },
+                "batch_config": {
+                    "name": "my_batch_config",
+                    "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"
+                }
+            },
+            "suite": {
+                "name": "my_suite",
+                "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67"
+            },
+            "id": "20dna816-64c8-46cb-8f7e-03c12cea1d67"
+        }
+        """
         json_encoders = {
             ExpectationSuite: lambda e: _encode_suite(e),
             BatchConfig: lambda b: _encode_data(b),
