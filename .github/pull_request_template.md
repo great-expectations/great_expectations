@@ -3,7 +3,7 @@
 
 - [ ] Description of PR changes above includes a link to [an existing GitHub issue](https://github.com/great-expectations/great_expectations/issues)
 - [ ] PR title is prefixed with one of: [BUGFIX], [FEATURE], [DOCS], [MAINTENANCE], [CONTRIB]
-- [ ] Code is linted - run `invoke lint` (uses `black` + `ruff`)
+- [ ] Code is linted - run `invoke lint` (uses `ruff format` + `ruff check`)
 - [ ] Appropriate tests and docs have been updated
 
 For more information about contributing, see [Contribute](https://docs.greatexpectations.io/docs/contributing/contributing_checklist).
