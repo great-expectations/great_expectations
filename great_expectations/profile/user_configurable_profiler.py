@@ -103,7 +103,7 @@ class UserConfigurableProfiler:
         ValueError: If an invalid `primary_or_compound_key` is provided.
     """
 
-    def __init__(  # noqa: PLR0913, PLR0912, PLR0915
+    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         profile_dataset: Union[Batch, Dataset, Validator],
         excluded_expectations: Optional[List[str]] = None,
@@ -372,7 +372,7 @@ class UserConfigurableProfiler:
 
         return expectation_suite
 
-    def _validate_semantic_types_dict(self):
+    def _validate_semantic_types_dict(self):  # noqa: C901
         """
         Validates a semantic_types dict to ensure correct formatting, that all semantic_types are recognized, and that
         the semantic_types align with the column data types
@@ -682,7 +682,7 @@ class UserConfigurableProfiler:
 
         return expectation_suite
 
-    def _display_suite_by_column(self, suite):  # noqa: PLR0912
+    def _display_suite_by_column(self, suite):  # noqa: C901, PLR0912
         """
         Displays the expectations of a suite by column, along with the column cardinality, and semantic or data type so
         that a user can easily see which expectations were created for which columns

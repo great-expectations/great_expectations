@@ -944,7 +944,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(  # noqa: PLR0912, PLR0913
+    def _format_map_output(  # noqa: C901, PLR0912, PLR0913
         self,
         result_format,
         success,

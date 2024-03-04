@@ -127,7 +127,7 @@ def pytest_parsed_arguments(request):
         for dialect_name in GXSqlDialect.get_all_dialects()
     ],
 )
-def test_sample_using_limit_builds_correct_query_where_clause_none(
+def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C901
     dialect_name: GXSqlDialect,
     dialect_name_to_sql_statement,
     sa,

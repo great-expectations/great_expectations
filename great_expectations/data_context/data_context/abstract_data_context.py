@@ -2665,7 +2665,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     FluentDataAssetNames: TypeAlias = List[str]
 
     @public_api
-    def get_available_data_asset_names(  # noqa: PLR0912
+    def get_available_data_asset_names(  # noqa: C901, PLR0912
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
@@ -2999,7 +2999,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return None
 
     @staticmethod
-    def _get_metric_configuration_tuples(
+    def _get_metric_configuration_tuples(  # noqa: C901
         metric_configuration: Union[str, dict], base_kwargs: Optional[dict] = None
     ) -> List[Tuple[str, Union[dict, Any]]]:
         if base_kwargs is None:
@@ -3696,7 +3696,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._evaluation_parameter_dependencies_compiled = True
 
-    def get_validation_result(  # noqa: PLR0913
+    def get_validation_result(  # noqa: C901, PLR0913
         self,
         expectation_suite_name,
         run_id=None,
