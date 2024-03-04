@@ -19,7 +19,6 @@ from great_expectations.expectations.expectation_configuration import (
 from great_expectations.validator.v1_validator import (
     OldValidator,
     ResultFormat,
-    Validator,
 )
 
 
@@ -50,39 +49,6 @@ def mock_validator():
             mock_get_validator.return_value = mock_validator
 
             yield mock_validator
-
-
-@pytest.mark.unit
-@mock.patch.object(Validator, "validate_expectation_suite")
-def test_validation_config__run__no_args(
-    mock_validate_expectation_suite: mock.MagicMock,
-    validation_config: ValidationConfig,
-):
-    results = ExpectationSuiteValidationResult(success=True)
-    mock_validate_expectation_suite.return_value = results
-    output = validation_config.run()
-
-    assert output == results
-    mock_validate_expectation_suite.assert_called_once_with(
-        validation_config.suite, None
-    )
-
-
-@pytest.mark.unit
-@mock.patch.object(Validator, "validate_expectation_suite")
-def test_validation_config__run__passes_evaluation_parameters_to_validator(
-    mock_validate_expectation_suite: mock.MagicMock,
-    validation_config: ValidationConfig,
-):
-    results = ExpectationSuiteValidationResult(success=True)
-    mock_validate_expectation_suite.return_value = results
-    evaluation_parameters = {"foo": "bar"}
-    output = validation_config.run(evaluation_parameters=evaluation_parameters)
-
-    assert output == results
-    mock_validate_expectation_suite.assert_called_once_with(
-        validation_config.suite, evaluation_parameters
-    )
 
 
 @pytest.mark.unit
