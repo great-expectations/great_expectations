@@ -254,9 +254,6 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         base_public_path=None,
         store_name=None,
     ) -> None:
-        if not filepath_suffix and not filepath_template:
-            filepath_suffix = ".json"
-
         super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
