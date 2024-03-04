@@ -1498,6 +1498,9 @@ class Validator:
         evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationConfiguration]:
         """Substitute evaluation parameters into the provided expectations and sort by column."""
+        NO_COLUMN = (
+            "_nocolumn"  # just used to group expectations that don't specify a column
+        )
         columns: dict[Any, list[ExpectationConfiguration]] = {}
 
         for expectation in expectation_configurations:
@@ -1511,8 +1514,7 @@ class Validator:
             ):
                 column = expectation.kwargs["column"]
             else:
-                # noinspection SpellCheckingInspection
-                column = "_nocolumn"
+                column = NO_COLUMN
             if column not in columns:
                 columns[column] = []
             columns[column].append(expectation)
