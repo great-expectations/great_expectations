@@ -419,7 +419,7 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None) -> None:  # noqa: PLR0912
+    def build(self, resource_identifiers=None) -> None:  # noqa: C901, PLR0912
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(

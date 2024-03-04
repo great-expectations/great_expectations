@@ -34,7 +34,7 @@ maturity_details_keys = [
 ]
 
 
-def parse_feature_annotation(docstring: Union[str, List[str], None]):
+def parse_feature_annotation(docstring: Union[str, List[str], None]):  # noqa: C901
     """Parse a docstring and return a feature annotation."""
     list_of_annotations = []
     id_val = ""

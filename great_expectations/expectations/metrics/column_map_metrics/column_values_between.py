@@ -64,7 +64,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 temp_column, min_value, max_value, strict_min, strict_max
             )
 
-        def is_between(val):  # noqa: PLR0911, PLR0912
+        def is_between(val):  # noqa: C901, PLR0911, PLR0912
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value), val, min_value, max_value

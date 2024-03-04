@@ -190,7 +190,7 @@ class EvaluationParameterParser:
             self._parser = expr
         return self._parser
 
-    def evaluate_stack(self, s):  # noqa: PLR0911, PLR0912
+    def evaluate_stack(self, s):  # noqa: C901, PLR0911, PLR0912
         op, num_args, has_fn_kwargs = s.pop(), 0, False
         if isinstance(op, tuple):
             op, num_args, has_fn_kwargs = op

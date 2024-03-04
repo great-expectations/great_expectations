@@ -134,7 +134,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         return values
 
     @classmethod
-    def _prescriptive_template(  # noqa: PLR0912
+    def _prescriptive_template(  # noqa: C901, PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -193,7 +193,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # noqa: C901
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
